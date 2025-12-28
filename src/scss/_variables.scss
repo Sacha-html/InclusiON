@@ -1,0 +1,25 @@
+// Colores principales del logo
+$beige_claro: rgb(245, 237, 220);
+$verde_salvia: rgb(121, 142, 120);
+$marron_oscuro: rgb(66, 48, 38);
+$naranja_terracota: rgb(204, 132, 82);
+
+// Colores complementarios
+$pure_white: rgb(255, 255, 255);
+$night_black: rgb(0, 8, 15);
+
+// Mezclas
+$gris_marron: mix($pure_white, $marron_oscuro, 43%);
+
+// Colores de estados (usando la paleta del logo)
+$body-bg: $beige_claro;
+
+$primary: $naranja_terracota;
+$secondary: $gris_marron;
+
+$success: $verde_salvia;
+$light: $beige_claro;
+$dark: $marron_oscuro;
+$info: $verde_salvia;
+$warning: $naranja_terracota;
+$danger: rgb(180, 60, 50);

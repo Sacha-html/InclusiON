@@ -1,0 +1,32 @@
+/* You can add global styles to this file, and also import other style files */
+@use "variables" as *;
+
+// Import styles with default layout.
+@use "@coreui/coreui/scss/coreui" as * with (
+  $enable-deprecation-messages: false,
+  $primary: $naranja_terracota,
+  $secondary: $gris_marron,
+  $success: $verde_salvia,
+  $light: $beige_claro,
+  $dark: $marron_oscuro,
+  $info: $verde_salvia,
+  $warning: $naranja_terracota,
+  $danger: rgb(180, 60, 50),
+  $body-bg: $beige_claro
+);
+
+// Import Chart.js custom tooltips styles
+@use "@coreui/chartjs/scss/coreui-chartjs";
+
+// Custom styles for this theme
+@use "theme";
+
+// Some temp fixes
+//@use "fixes";
+
+// If you want to add custom CSS you can put it here.
+@use "custom";
+
+// Examples
+// We use those styles to show code examples, you should remove them in your application.
+@use "examples";

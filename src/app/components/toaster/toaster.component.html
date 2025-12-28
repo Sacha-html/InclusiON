@@ -1,0 +1,17 @@
+<c-toaster class="p-3" placement="top-end" position="fixed">
+  <c-toast
+    *ngFor="let toast of toasts"
+    [color]="toast.color"
+    [autohide]="toast.autohide ?? true"
+    [delay]="toast.delay ?? 3000"
+    [visible]="true"
+    (visibleChange)="onVisibleChange($event, toast)"
+  >
+    <c-toast-header *ngIf="toast.title" [closeButton]="true">
+      <strong class="me-auto">{{ toast.title }}</strong>
+    </c-toast-header>
+    <c-toast-body>
+      {{ toast.message }}
+    </c-toast-body>
+  </c-toast>
+</c-toaster>

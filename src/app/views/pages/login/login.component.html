@@ -1,0 +1,121 @@
+<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center login-layout">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="8">
+        <c-card-group>
+          <!-- Card de Login -->
+          <c-card class="p-4">
+            <c-card-body>
+              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <h1>Iniciar Sesión</h1>
+                <p class="text-body-secondary">Ingresa a tu cuenta</p>
+
+                <!-- Email -->
+                <c-input-group class="mb-3">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilUser"></svg>
+                  </span>
+                  <input
+                    cFormControl
+                    type="email"
+                    formControlName="email"
+                    placeholder="Email"
+                    autocomplete="username"
+                  />
+                </c-input-group>
+
+                <!-- Password -->
+                <c-input-group class="mb-4">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilLockLocked"></svg>
+                  </span>
+                  <input
+                    cFormControl
+                    [type]="showPassword ? 'text' : 'password'"
+                    formControlName="password"
+                    placeholder="Contraseña"
+                    autocomplete="current-password"
+                  />
+                  <span 
+                    cInputGroupText 
+                    class="cursor-pointer"
+                    (click)="togglePasswordVisibility()"
+                    style="min-width: 55px; justify-content: center;"
+                  >
+                    <small>{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                  </span>
+                </c-input-group>
+
+                <!-- Remember Me -->
+                <c-form-check class="mb-3">
+                  <input 
+                    cFormCheckInput 
+                    type="checkbox" 
+                    formControlName="rememberMe" 
+                    id="rememberMe"
+                  />
+                  <label cFormCheckLabel for="rememberMe">
+                    Recordarme
+                  </label>
+                </c-form-check>
+
+                <!-- Botones -->
+                <c-row>
+                  <c-col xs="6">
+                    <button 
+                      cButton 
+                      color="primary" 
+                      class="px-4" 
+                      type="submit"
+                      [disabled]="isLoading || loginForm.invalid"
+                    >
+                      @if (!isLoading) {
+                      <span>Ingresar</span>
+                      } @else {
+                      <span>
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Ingresando...
+                      </span>
+                      }
+                    </button>
+                  </c-col>
+                  <c-col xs="6" class="text-end">
+                    <button 
+                      cButton 
+                      color="link" 
+                      class="px-0" 
+                      type="button"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </c-col>
+                </c-row>
+              </form>
+            </c-card-body>
+          </c-card>
+
+          <!-- Card de Registro -->
+          <c-card class="text-white bg-secondary py-5" style="width: 44%;">
+            <c-card-body class="text-center d-flex flex-column justify-content-center">
+              <div>
+                <h2>Registrarse</h2>
+                <p class="mb-4">
+                  ¿No tienes una cuenta? Crea una ahora y comienza a usar nuestra plataforma.
+                </p>
+                <button 
+                  cButton 
+                  color="light" 
+                  variant="outline" 
+                  class="mt-3" 
+                  routerLink="/register"
+                >
+                  ¡Crear Cuenta!
+                </button>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-card-group>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>
