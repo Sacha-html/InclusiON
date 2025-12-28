@@ -1,0 +1,23 @@
+﻿CREATE VIEW vw_RecipeDetails AS
+SELECT 
+    r.Id AS RecipeId,
+    r.Name AS RecipeName,
+    r.Description AS RecipeDescription,
+    r.PreparationTime,
+    r.BaseServings,
+    r.IsActive AS RecipeIsActive,
+    r.CreatedAt AS RecipeCreatedAt,
+    rd.Id AS DetailId,
+    rd.ProductId,
+    rd.QuantityNeeded,
+    rd.UnitOfMeasure,
+    rd.IsOptional,
+    rd.Observations AS DetailObservations,
+    p.Name AS ProductName,
+    p.CategoryId,           
+    c.Name AS CategoryName  
+FROM Recipes r
+LEFT JOIN RecipeDetails rd ON r.Id = rd.RecipeId
+LEFT JOIN Products p ON rd.ProductId = p.Id
+LEFT JOIN Categories c ON p.CategoryId = c.Id  
+GO
