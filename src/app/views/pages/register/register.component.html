@@ -1,0 +1,194 @@
+<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center register-layout">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="6">
+        <c-card class="mx-4">
+          <c-card-body class="p-4">
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+              <h1>Registrar Usuario</h1>
+              <p class="text-body-secondary">Crea tu cuenta</p>
+
+              <!-- Mensaje de error general -->
+              @if (errorMessage) {
+              <div class="alert alert-danger py-2 mb-3">
+                {{ errorMessage }}
+              </div>
+              }
+
+              <!-- Nombre -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('name', 'required') || hasError('name', 'minlength')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg>
+                </span>
+                <input
+                  cFormControl
+                  type="text"
+                  formControlName="name"
+                  placeholder="Nombre"
+                  autocomplete="name"
+                  [class.is-invalid]="hasError('name', 'required') || hasError('name', 'minlength')"
+                />
+              </c-input-group>
+              @if (getErrorMessage('name')) {
+              <small class="text-danger d-block mt-n2 mb-2">{{ getErrorMessage('name') }}</small>
+              }
+
+              <!-- Apellido -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('surname', 'required') || hasError('surname', 'minlength')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser"></svg>
+                </span>
+                <input
+                  cFormControl
+                  type="text"
+                  formControlName="surname"
+                  placeholder="Apellido"
+                  autocomplete="surname"
+                  [class.is-invalid]="hasError('surname', 'required') || hasError('surname', 'minlength')"
+                />
+              </c-input-group>
+              @if (getErrorMessage('surname')) {
+              <small class="text-danger d-block mt-n2 mb-2">{{ getErrorMessage('surname') }}</small>
+              }
+
+              <!-- Email -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilEnvelopeClosed"></svg>
+                </span>
+                <input
+                  cFormControl
+                  type="email"
+                  formControlName="email"
+                  placeholder="Email"
+                  autocomplete="email"
+                  [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email')"
+                />
+              </c-input-group>
+              @if (getErrorMessage('email')) {
+              <small class="text-danger d-block mt-n2 mb-2">{{ getErrorMessage('email') }}</small>
+              }
+
+              <!-- Password -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked"></svg>
+                </span>
+                <input
+                  cFormControl
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Contraseña (mín. 8 caracteres)"
+                  autocomplete="new-password"
+                  [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength')"
+                />
+                <span 
+                  cInputGroupText 
+                  class="cursor-pointer"
+                  (click)="togglePasswordVisibility()"
+                  style="min-width: 55px; justify-content: center;"
+                >
+                  <small>{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </span>
+              </c-input-group>
+              @if (getErrorMessage('password')) {
+              <small class="text-danger d-block mt-n2 mb-2">{{ getErrorMessage('password') }}</small>
+              }
+              
+              <!-- Indicador de fortaleza de contraseña -->
+              @if (f['password'].value) {
+              <div class="password-strength-indicator mb-3">
+                <div class="progress" style="height: 5px;">
+                  <div 
+                    class="progress-bar"
+                    [class.bg-danger]="passwordStrength <= 2"
+                    [class.bg-warning]="passwordStrength === 3"
+                    [class.bg-success]="passwordStrength >= 4"
+                    [style.width.%]="(passwordStrength / 4) * 100"
+                  ></div>
+                </div>
+                <small [class.text-danger]="passwordStrength <= 2"
+                       [class.text-warning]="passwordStrength === 3"
+                       [class.text-success]="passwordStrength >= 4">
+                  Fortaleza: {{ passwordStrengthText }}
+                </small>
+              </div>
+              }
+
+              <!-- Confirm Password -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('confirmPassword', 'required') || !passwordsMatch">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked"></svg>
+                </span>
+                <input
+                  cFormControl
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="Repetir contraseña"
+                  autocomplete="new-password"
+                  [class.is-invalid]="hasError('confirmPassword', 'required') || (!passwordsMatch && f['confirmPassword'].touched)"
+                />
+                <span 
+                  cInputGroupText 
+                  class="cursor-pointer"
+                  (click)="toggleConfirmPasswordVisibility()"
+                  style="min-width: 55px; justify-content: center;"
+                >
+                  <small>{{ showConfirmPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </span>
+              </c-input-group>
+              @if (registerForm.errors?.['passwordMismatch'] && f['confirmPassword'].touched) {
+              <small class="text-danger d-block mt-n2 mb-3">Las contraseñas no coinciden</small>
+              }
+
+              <!-- Checkbox de Términos y Condiciones -->
+              <c-form-check class="mb-4">
+                <input
+                  cFormCheckInput
+                  type="checkbox"
+                  formControlName="acceptTerms"
+                  id="acceptTerms"
+                  [class.is-invalid]="hasError('acceptTerms', 'requiredTrue')"
+                />
+                <label cFormCheckLabel for="acceptTerms">
+                  Acepto los <a href="#" class="text-primary">términos y condiciones</a>
+                </label>
+              </c-form-check>
+              @if (hasError('acceptTerms', 'requiredTrue')) {
+              <small class="text-danger d-block mt-n3 mb-3">Debes aceptar los términos y condiciones</small>
+              }
+
+              <!-- Botones -->
+              <div class="d-grid gap-2">
+                <button 
+                  cButton 
+                  color="primary" 
+                  type="submit"
+                  [disabled]="isLoading || registerForm.invalid"
+                >
+                  @if (!isLoading) {
+                  <span>Crear Cuenta</span>
+                  } @else {
+                  <span>
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Creando cuenta...
+                  </span>
+                  }
+                </button>
+                <button 
+                  cButton 
+                  color="secondary" 
+                  variant="outline"
+                  type="button"
+                  routerLink="/login"
+                >
+                  Ya tengo cuenta
+                </button>
+              </div>
+            </form>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

@@ -1,0 +1,198 @@
+// Here you can add other styles
+
+// custom .chartjs-tooltip-body-item padding
+@use "charts";
+
+// custom tweaks for scrollbar styling (wip)
+@use "scrollbar";
+
+// custom calendar today cell color
+.calendar-cell.today {
+  --cui-calendar-cell-today-color: var(--cui-info) !important;
+}
+
+// custom select week cursor pointer
+.select-week .calendar-row.current {
+  cursor: pointer;
+}
+
+.login-layout,
+.register-layout {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:svgjs='http://svgjs.dev/svgjs' width='1440' height='560' preserveAspectRatio='none' viewBox='0 0 1440 560'%3e%3cg mask='url(%26quot%3b%23SvgjsMask1000%26quot%3b)' fill='none'%3e%3crect width='1440' height='560' x='0' y='0' fill='rgba(255%2c 242%2c 220%2c 1)'%3e%3c/rect%3e%3cpath d='M397.14 278.97a25.31 25.31 0 1 0-35.51-36.08z' stroke='rgba(196%2c 121%2c 61%2c 1)'%3e%3c/path%3e%3cpath d='M1015.17 324.52a6.71 6.71 0 1 0-13.41-0.25z' fill='rgba(196%2c 121%2c 61%2c 1)'%3e%3c/path%3e%3cpath d='M940.26 50.23a47.15 47.15 0 1 0-72.75-60z' fill='rgba(196%2c 121%2c 61%2c 1)'%3e%3c/path%3e%3cpath d='M528.97 238.17L570.78 238.17L570.78 279.98L528.97 279.98z' fill='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M1004 259.57L1039.54 259.57L1039.54 303.44L1004 303.44z' fill='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M908.85 299.59 a7.4 7.4 0 1 0 14.8 0 a7.4 7.4 0 1 0 -14.8 0z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M1088.72 443.12a33.17 33.17 0 1 0 24.57-61.62z' stroke='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M1295.51 453.72a45.92 45.92 0 1 0 76.16 51.32z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M454.04 58.3a19.97 19.97 0 1 0 19.34-34.95z' stroke='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M119.71 382.03 a43.61 43.61 0 1 0 87.22 0 a43.61 43.61 0 1 0 -87.22 0z' fill='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M1076.17 437.17L1125.75 437.17L1125.75 486.75L1076.17 486.75z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M647 67.58a22.52 22.52 0 1 0-43.9-10.08z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M201.86 415.49 a48.48 48.48 0 1 0 96.96 0 a48.48 48.48 0 1 0 -96.96 0z' stroke='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M247.97 203.49L294 203.49L294 240.03L247.97 240.03z' fill='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M263.96 417.99 a38.88 38.88 0 1 0 77.76 0 a38.88 38.88 0 1 0 -77.76 0z' fill='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M1380.32 47.02 a52.57 52.57 0 1 0 105.14 0 a52.57 52.57 0 1 0 -105.14 0z' fill='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M504.6 396.7L532.9 396.7L532.9 441.13L504.6 441.13z' stroke='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M1211.07 59.08a31.15 31.15 0 1 0-42.91-45.16z' fill='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M77.08 401.61a11.3 11.3 0 1 0 22.52-1.82z' fill='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M1332.21 216.87a4.16 4.16 0 1 0 7.02 4.46z' fill='rgba(196%2c 121%2c 61%2c 1)'%3e%3c/path%3e%3cpath d='M1392.47 425.12a39 39 0 1 0 33.05 70.65z' stroke='rgba(196%2c 121%2c 61%2c 1)'%3e%3c/path%3e%3cpath d='M1058.12 104.35L1081.44 104.35L1081.44 127.67L1058.12 127.67z' stroke='rgba(196%2c 121%2c 61%2c 1)'%3e%3c/path%3e%3cpath d='M475.46 123.57a12.54 12.54 0 1 0-10.09-22.96z' stroke='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M1073.18 206.38L1101.11 206.38L1101.11 208.85L1073.18 208.85z' fill='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M679.04 194.24 a47.93 47.93 0 1 0 95.86 0 a47.93 47.93 0 1 0 -95.86 0z' stroke='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M598.17 6.1a34.89 34.89 0 1 0 13.79 68.4z' fill='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M372.21 536.16 a25.26 25.26 0 1 0 50.52 0 a25.26 25.26 0 1 0 -50.52 0z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M165.4 106.47L181.48 106.47L181.48 122.55L165.4 122.55z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M692.97 323.75a24.98 24.98 0 1 0-14.08 47.93z' fill='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M981.66 539.79L985.16 539.79L985.16 567.7L981.66 567.7z' fill='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M599.09 297.77a9.58 9.58 0 1 0-4.7 18.57z' stroke='rgba(119%2c 140%2c 94%2c 1)'%3e%3c/path%3e%3cpath d='M63.14 281.77 a10.04 10.04 0 1 0 20.08 0 a10.04 10.04 0 1 0 -20.08 0z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3cpath d='M765.5 253.35L790.61 253.35L790.61 278.46L765.5 278.46z' stroke='rgba(76%2c 57%2c 33%2c 1)'%3e%3c/path%3e%3c/g%3e%3cdefs%3e%3cmask id='SvgjsMask1000'%3e%3crect width='1440' height='560' fill='white'%3e%3c/rect%3e%3c/mask%3e%3c/defs%3e%3c/svg%3e");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+// Estilos para las cards de login/register
+.login-layout,
+.register-layout {
+  .card {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+
+    &.bg-secondary {
+      background-color: var(--cui-secondary) !important;
+      border: none;
+    }
+  }
+}
+
+// ========================================
+// INPUT GROUPS - ARREGLO DE BORDES
+// ========================================
+.input-group {
+  display: flex;
+  align-items: stretch;
+
+  // Primer elemento (icono izquierdo)
+  > .input-group-text:first-child {
+    background-color: #fff;
+    border-right: 0;
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--cui-secondary);
+    }
+  }
+
+  // Input en el medio
+  > .form-control {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+
+    &:focus {
+      border-color: var(--cui-primary);
+      box-shadow: none;
+      z-index: 3;
+    }
+  }
+
+  // Último elemento (botón "Mostrar")
+  > .input-group-text:last-child {
+    background-color: #fff;
+    border-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+      background-color: rgba(204, 132, 82, 0.1);
+    }
+
+    &:active {
+      background-color: rgba(204, 132, 82, 0.2);
+    }
+
+    small {
+      font-weight: 500;
+      color: var(--cui-secondary);
+    }
+  }
+
+  // Solo input + icono izquierdo (sin botón derecho)
+  > .form-control:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    border-right: 1px solid var(--cui-border-color);
+  }
+
+  // Cuando el input tiene focus
+  &:focus-within {
+    .input-group-text {
+      border-color: var(--cui-primary);
+    }
+
+    .form-control {
+      border-color: var(--cui-primary);
+    }
+  }
+}
+
+// Validaciones
+.is-invalid {
+  border-color: var(--cui-danger) !important;
+
+  &:focus {
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+  }
+}
+
+// Alertas
+.alert {
+  border-radius: 0.375rem;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+    vertical-align: middle;
+  }
+}
+
+// Botones
+.btn-primary {
+  background-color: var(--cui-primary);
+  border-color: var(--cui-primary);
+
+  &:hover:not(:disabled) {
+    background-color: rgb(184, 112, 62);
+    border-color: rgb(184, 112, 62);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.btn-outline-light {
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+  }
+}
+
+// Form check
+.form-check {
+  .form-check-input:checked {
+    background-color: var(--cui-primary);
+    border-color: var(--cui-primary);
+  }
+}
+
+// Sidebar oscuro con mejor contraste
+.sidebar[colorscheme="dark"] {
+  background: var(--cui-dark);
+
+  .sidebar-brand {
+    color: #fff;
+
+    span {
+      color: #fff;
+    }
+  }
+}
+
+// Header con fondo claro
+.header {
+  background-color: var(--cui-body-bg);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+// Ajustes del logo colapsado
+.sidebar-narrow {
+  .sidebar-brand {
+    padding: 0.75rem 0;
+  }
+}
