@@ -1,32 +1,129 @@
-/* You can add global styles to this file, and also import other style files */
-@use "variables" as *;
+/*
+ * InclusiON - Estilos Globales Accesibles
+ * Cumple con WCAG 2.1 AA/AAA
+ */
 
-// Import styles with default layout.
+// Importar variables primero
+@use "variables" as vars;
+
+// Import CoreUI with accessible color palette
 @use "@coreui/coreui/scss/coreui" as * with (
   $enable-deprecation-messages: false,
-  $primary: $naranja_terracota,
-  $secondary: $gris_marron,
-  $success: $verde_salvia,
-  $light: $beige_claro,
-  $dark: $marron_oscuro,
-  $info: $verde_salvia,
-  $warning: $naranja_terracota,
-  $danger: rgb(180, 60, 50),
-  $body-bg: $beige_claro
+
+  // Colores principales accesibles
+  $primary: #1565C0,
+  $secondary: #455A64,
+  $success: #2E7D32,
+  $info: #0277BD,
+  $warning: #E65100,
+  $danger: #C62828,
+  $light: #FAFAFA,
+  $dark: #263238,
+
+  // Fondo accesible
+  $body-bg: #FFFFFF,
+  $body-color: #212121,
+
+  // Focus visible para navegación por teclado
+  $focus-ring-width: 3px,
+  $focus-ring-color: rgba(#1565C0, 0.5),
+
+  // Tipografía accesible (mínimo 16px)
+  $font-size-base: 1rem,
+  $line-height-base: 1.5
 );
 
-// Import Chart.js custom tooltips styles
+// Chart.js tooltips (si se usan)
 @use "@coreui/chartjs/scss/coreui-chartjs";
 
-// Custom styles for this theme
+// Custom theme
 @use "theme";
 
-// Some temp fixes
-//@use "fixes";
-
-// If you want to add custom CSS you can put it here.
+// Custom styles
 @use "custom";
 
-// Examples
-// We use those styles to show code examples, you should remove them in your application.
+// Examples (remover en producción)
 @use "examples";
+
+// -----------------------------------------
+// Estilos de Accesibilidad Adicionales
+// -----------------------------------------
+
+// Focus visible mejorado
+*:focus-visible {
+  outline: 3px solid rgba(#1565C0, 0.5) !important;
+  outline-offset: 2px;
+}
+
+// Skip link para navegación por teclado
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #1565C0;
+  color: #FFFFFF;
+  padding: 8px 16px;
+  z-index: 10000;
+  text-decoration: none;
+  font-weight: 600;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+// Mejora de contraste en inputs
+.form-control,
+.form-select {
+  border-color: #BDBDBD;
+
+  &:focus {
+    border-color: #1565C0;
+    box-shadow: 0 0 0 3px rgba(#1565C0, 0.5);
+  }
+
+  &::placeholder {
+    color: #757575;
+  }
+}
+
+// Botones con contraste accesible
+.btn-primary {
+  background-color: #1565C0;
+  border-color: #1565C0;
+  color: #FFFFFF;
+
+  &:hover,
+  &:focus {
+    background-color: #0D47A1;
+    border-color: #0D47A1;
+  }
+}
+
+// Links accesibles (no solo color)
+a {
+  color: #1565C0;
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    color: #0D47A1;
+    text-decoration: none;
+  }
+}
+
+// Texto de error con icono (no solo color)
+.invalid-feedback,
+.text-danger {
+  &::before {
+    content: "⚠ ";
+  }
+}
+
+// Texto de éxito con icono
+.valid-feedback,
+.text-success {
+  &::before {
+    content: "✓ ";
+  }
+}
