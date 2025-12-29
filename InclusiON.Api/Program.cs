@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using InclusiON.ApplicationBusiness;
 using InclusiON.Data;
+using InclusiON.Data.Seeders;
 using InclusiON.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -104,6 +105,9 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await context.Database.MigrateAsync();
 }
+
+// Seed inicial de datos
+await DatabaseSeeder.SeedAsync(app.Services);
 
 Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
 Log.Information("Swagger UI: {SwaggerUrl}/swagger", app.Urls.FirstOrDefault());
