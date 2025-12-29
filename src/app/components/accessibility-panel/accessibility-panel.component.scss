@@ -1,0 +1,362 @@
+// ============================================
+// PANEL DE ACCESIBILIDAD - ESTILOS SIMPLIFICADOS
+// Diseño accesible con alto contraste
+// ============================================
+
+$panel-width: 380px;
+$panel-z-index: 9999;
+
+// Colores fijos que funcionan en todos los temas
+$panel-bg: #1a1a2e;
+$panel-text: #ffffff;
+$panel-text-secondary: #b8b8b8;
+$panel-accent: #4cc9f0;
+$panel-accent-hover: #7dd8f5;
+$panel-border: #3d3d5c;
+$panel-active-bg: #4cc9f0;
+$panel-active-text: #000000;
+
+// Botón flotante
+.a11y-trigger-btn {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  z-index: $panel-z-index - 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 50px;
+  border: 3px solid $panel-accent;
+  background: $panel-bg;
+  color: $panel-text;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  font-size: 1rem;
+  font-weight: 600;
+
+  &:hover {
+    background: $panel-accent;
+    color: $panel-active-text;
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 4px solid $panel-accent;
+    outline-offset: 4px;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.a11y-trigger-text {
+  @media (max-width: 500px) {
+    display: none;
+  }
+}
+
+// Overlay
+.a11y-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: $panel-z-index;
+}
+
+// Panel principal
+.a11y-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: $panel-width;
+  max-width: 100vw;
+  height: 100vh;
+  z-index: $panel-z-index + 1;
+  background: $panel-bg;
+  color: $panel-text;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+// Header
+.a11y-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: darken($panel-bg, 5%);
+  border-bottom: 2px solid $panel-border;
+}
+
+.a11y-panel-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $panel-text;
+}
+
+.a11y-panel-close {
+  background: transparent;
+  border: 2px solid $panel-border;
+  border-radius: 8px;
+  color: $panel-text;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: $panel-accent;
+    color: $panel-active-text;
+    border-color: $panel-accent;
+  }
+
+  &:focus-visible {
+    outline: 3px solid $panel-accent;
+    outline-offset: 2px;
+  }
+}
+
+// Contenido
+.a11y-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+// Secciones
+.a11y-section {
+  margin-bottom: 28px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.a11y-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $panel-accent;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Lista de temas
+.a11y-theme-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.a11y-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: 2px solid $panel-border;
+  border-radius: 12px;
+  background: transparent;
+  color: $panel-text;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    border-color: $panel-accent;
+    background: rgba($panel-accent, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 3px solid $panel-accent;
+    outline-offset: 2px;
+  }
+
+  &.active {
+    border-color: $panel-accent;
+    background: $panel-accent;
+    color: $panel-active-text;
+
+    * {
+      color: $panel-active-text !important;
+    }
+  }
+
+  svg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    color: $panel-accent;
+  }
+}
+
+.a11y-theme-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: inherit;
+  }
+
+  small {
+    font-size: 0.85rem;
+    color: inherit;
+    opacity: 0.8;
+  }
+}
+
+.a11y-check {
+  color: inherit !important;
+  flex-shrink: 0;
+}
+
+// Controles de tamaño
+.a11y-size-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.a11y-size-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  border: 3px solid $panel-border;
+  background: transparent;
+  color: $panel-text;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    border-color: $panel-accent;
+    background: $panel-accent;
+    color: $panel-active-text;
+  }
+
+  &:focus-visible {
+    outline: 3px solid $panel-accent;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.a11y-size-icon {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.a11y-size-display {
+  font-size: 1.2rem;
+  font-weight: 600;
+  min-width: 100px;
+  text-align: center;
+  color: $panel-text;
+}
+
+// Botones de opciones
+.a11y-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 10px;
+  border: 2px solid $panel-border;
+  border-radius: 12px;
+  background: transparent;
+  color: $panel-text;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    border-color: $panel-accent;
+    background: rgba($panel-accent, 0.1);
+  }
+
+  &:focus-visible {
+    outline: 3px solid $panel-accent;
+    outline-offset: 2px;
+  }
+
+  &.active {
+    border-color: $panel-accent;
+    background: $panel-accent;
+    color: $panel-active-text;
+
+    * {
+      color: $panel-active-text !important;
+    }
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: $panel-accent;
+  }
+
+  span {
+    flex: 1;
+    font-weight: 500;
+    color: inherit;
+  }
+}
+
+// Footer
+.a11y-panel-footer {
+  padding: 20px 24px;
+  background: darken($panel-bg, 5%);
+  border-top: 2px solid $panel-border;
+}
+
+.a11y-reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #ff6b6b;
+  border-radius: 12px;
+  background: transparent;
+  color: #ff6b6b;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #ff6b6b;
+    color: #000000;
+  }
+
+  &:focus-visible {
+    outline: 3px solid #ff6b6b;
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}

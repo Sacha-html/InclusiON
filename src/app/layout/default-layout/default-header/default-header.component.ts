@@ -20,10 +20,11 @@ import {
   NavItemComponent,
   NavLinkDirective,
   SidebarToggleDirective,
+  TooltipDirective,
 } from '@coreui/angular';
 
 import { IconDirective } from '@coreui/icons-angular';
-import { AuthService } from '../../../services';
+import { AuthService, AccessibilityService } from '../../../services';
 import { User } from '@app/models';
 
 @Component({
@@ -49,7 +50,8 @@ import { User } from '@app/models';
     DropdownItemDirective,
     BadgeComponent,
     DropdownDividerDirective,
-    HeaderComponent
+    HeaderComponent,
+    TooltipDirective,
   ],
 })
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
@@ -57,10 +59,11 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   readonly colorMode = this.#colorModeService.colorMode;
 
   readonly authService = inject(AuthService);
+  readonly accessibilityService = inject(AccessibilityService);
 
   readonly colorModes = [
-    { name: 'light', text: 'Light', icon: 'cilSun' },
-    { name: 'dark', text: 'Dark', icon: 'cilMoon' },
+    { name: 'light', text: 'Claro', icon: 'cilSun' },
+    { name: 'dark', text: 'Oscuro', icon: 'cilMoon' },
     { name: 'auto', text: 'Auto', icon: 'cilContrast' },
   ];
 
@@ -70,6 +73,10 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
       this.colorModes.find((mode) => mode.name === currentMode)?.icon ??
       'cilSun'
     );
+  });
+
+  readonly accessibilityIcon = computed(() => {
+    return this.accessibilityService.getCurrentThemeInfo().icon;
   });
 
   currentUser?: User | null = null;
