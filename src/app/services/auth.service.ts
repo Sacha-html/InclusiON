@@ -1,7 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { ConfigService } from './config.service';
 import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
 import {
   AuthResponse,
@@ -9,6 +8,7 @@ import {
   RegisterUserRequest,
   User,
 } from '../models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +16,6 @@ import {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private configService = inject(ConfigService);
 
   private currentUserSubject = new BehaviorSubject<User | null>(
     this.getUserFromStorage()
@@ -33,7 +32,7 @@ export class AuthService {
   }
 
   private get apiUrl(): string {
-    return this.configService.getApiUrl();
+    return environment.apiUrl;
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
@@ -205,10 +204,8 @@ export class AuthService {
     let errorMessage = 'Ocurrió un error desconocido';
 
     if (error.error instanceof ErrorEvent) {
-      // Error del cliente
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Error del servidor
       if (error.status === 401) {
         errorMessage = 'Credenciales inválidas';
       } else if (error.status === 403) {
@@ -224,7 +221,7 @@ export class AuthService {
       }
     }
 
-    console.error('❌ Error HTTP:', errorMessage, error);
+    console.error('Error HTTP:', errorMessage, error);
     return throwError(() => new Error(errorMessage));
   }
 
