@@ -19,6 +19,7 @@ import {
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { navItems } from './_nav';
 import { ToasterComponent } from '../../components/toaster/toaster.component';
+import { AccessibilityPanelComponent } from '../../components/accessibility-panel/accessibility-panel.component';
 
 function isOverflown(element: HTMLElement) {
   return (
@@ -49,6 +50,7 @@ function isOverflown(element: HTMLElement) {
     ShadowOnScrollDirective,
     AvatarComponent,
     ToasterComponent,
+    AccessibilityPanelComponent,
   ],
 })
 export class DefaultLayoutComponent {

@@ -1,0 +1,180 @@
+import { Component, inject, HostListener, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IconModule } from '@coreui/icons-angular';
+import { ButtonModule, FormModule, TooltipModule } from '@coreui/angular';
+import {
+  AccessibilityService,
+  AccessibilityTheme
+} from '../../services/accessibility.service';
+
+@Component({
+  selector: 'app-accessibility-panel',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    IconModule,
+    ButtonModule,
+    FormModule,
+    TooltipModule
+  ],
+  templateUrl: './accessibility-panel.component.html',
+  styleUrl: './accessibility-panel.component.scss'
+})
+export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
+  readonly a11y = inject(AccessibilityService);
+  private readonly elementRef = inject(ElementRef);
+  private readingGuideElement: HTMLElement | null = null;
+  private mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
+
+  @ViewChild('panelContainer') panelContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('closeButton') closeButton!: ElementRef<HTMLButtonElement>;
+
+  constructor() {
+    // Efecto para manejar la guía de lectura
+    effect(() => {
+      if (this.a11y.readingGuide()) {
+        this.enableReadingGuide();
+      } else {
+        this.disableReadingGuide();
+      }
+    });
+  }
+
+  // Atajo de teclado global: Alt + A para abrir/cerrar panel
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent): void {
+    // Alt + A para toggle del panel
+    if (event.altKey && event.key.toLowerCase() === 'a') {
+      event.preventDefault();
+      this.a11y.togglePanel();
+      if (this.a11y.panelOpen()) {
+        setTimeout(() => this.focusFirstElement(), 100);
+      }
+    }
+
+    // Escape para cerrar el panel
+    if (event.key === 'Escape' && this.a11y.panelOpen()) {
+      this.a11y.closePanel();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Inicializar guía de lectura si está activa
+    if (this.a11y.readingGuide()) {
+      this.enableReadingGuide();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.disableReadingGuide();
+  }
+
+  private enableReadingGuide(): void {
+    if (this.readingGuideElement) return;
+
+    // Crear elemento de guía de lectura
+    this.readingGuideElement = document.createElement('div');
+    this.readingGuideElement.className = 'a11y-reading-guide-bar';
+    this.readingGuideElement.setAttribute('aria-hidden', 'true');
+    this.readingGuideElement.style.cssText = `
+      position: fixed;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(21, 101, 192, 0.12) 20%,
+        rgba(21, 101, 192, 0.12) 80%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 9990;
+      transform: translateY(-50%);
+      border-top: 2px solid rgba(21, 101, 192, 0.3);
+      border-bottom: 2px solid rgba(21, 101, 192, 0.3);
+    `;
+    document.body.appendChild(this.readingGuideElement);
+
+    // Handler para seguir el mouse
+    this.mouseMoveHandler = (e: MouseEvent) => {
+      if (this.readingGuideElement) {
+        this.readingGuideElement.style.top = `${e.clientY}px`;
+      }
+    };
+
+    document.addEventListener('mousemove', this.mouseMoveHandler);
+  }
+
+  private disableReadingGuide(): void {
+    if (this.readingGuideElement) {
+      this.readingGuideElement.remove();
+      this.readingGuideElement = null;
+    }
+
+    if (this.mouseMoveHandler) {
+      document.removeEventListener('mousemove', this.mouseMoveHandler);
+      this.mouseMoveHandler = null;
+    }
+  }
+
+  openPanel(): void {
+    this.a11y.openPanel();
+    setTimeout(() => this.focusFirstElement(), 100);
+  }
+
+  closePanel(): void {
+    this.a11y.closePanel();
+  }
+
+  togglePanel(): void {
+    this.a11y.togglePanel();
+    if (this.a11y.panelOpen()) {
+      setTimeout(() => this.focusFirstElement(), 100);
+    }
+  }
+
+  private focusFirstElement(): void {
+    const panel = this.elementRef.nativeElement.querySelector('.a11y-panel');
+    if (panel) {
+      const firstFocusable = panel.querySelector('button, [tabindex="0"]') as HTMLElement;
+      if (firstFocusable) {
+        firstFocusable.focus();
+      }
+    }
+  }
+
+  // Theme
+  setTheme(theme: AccessibilityTheme): void {
+    this.a11y.setTheme(theme);
+  }
+
+  // Font size
+  increaseFontSize(): void {
+    this.a11y.increaseFontSize();
+  }
+
+  decreaseFontSize(): void {
+    this.a11y.decreaseFontSize();
+  }
+
+  // Toggles
+  toggleHighlightLinks(): void {
+    this.a11y.updateSetting('highlightLinks', !this.a11y.highlightLinks());
+  }
+
+  toggleReducedMotion(): void {
+    this.a11y.updateSetting('reducedMotion', !this.a11y.reducedMotion());
+  }
+
+  toggleReadingGuide(): void {
+    this.a11y.updateSetting('readingGuide', !this.a11y.readingGuide());
+  }
+
+  // Reset
+  resetSettings(): void {
+    this.a11y.resetSettings();
+  }
+}

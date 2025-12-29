@@ -1,0 +1,160 @@
+<!-- Botón flotante para abrir el panel -->
+<button
+  class="a11y-trigger-btn"
+  (click)="togglePanel()"
+  [attr.aria-expanded]="a11y.panelOpen()"
+  aria-controls="accessibility-panel"
+  aria-label="Abrir panel de accesibilidad (Alt + A)"
+>
+  <svg cIcon name="cilContrast" size="xl"></svg>
+  <span class="a11y-trigger-text">Accesibilidad</span>
+</button>
+
+<!-- Panel de accesibilidad -->
+@if (a11y.panelOpen()) {
+<div
+  class="a11y-panel-overlay"
+  (click)="closePanel()"
+  aria-hidden="true"
+></div>
+
+<aside
+  #panelContainer
+  id="accessibility-panel"
+  class="a11y-panel"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="a11y-panel-title"
+>
+  <!-- Header -->
+  <header class="a11y-panel-header">
+    <h2 id="a11y-panel-title" class="a11y-panel-title">
+      Accesibilidad
+    </h2>
+    <button
+      #closeButton
+      class="a11y-panel-close"
+      (click)="closePanel()"
+      aria-label="Cerrar"
+    >
+      <svg cIcon name="cilX" size="xl"></svg>
+    </button>
+  </header>
+
+  <!-- Content -->
+  <div class="a11y-panel-content">
+
+    <!-- Temas visuales - Botones grandes -->
+    <section class="a11y-section">
+      <h3 class="a11y-section-title">Tema Visual</h3>
+      <div class="a11y-theme-list">
+        @for (theme of a11y.themes; track theme.id) {
+        <button
+          class="a11y-theme-btn"
+          [class.active]="a11y.currentTheme() === theme.id"
+          (click)="setTheme(theme.id)"
+          [attr.aria-pressed]="a11y.currentTheme() === theme.id"
+        >
+          <svg cIcon [name]="theme.icon" size="xl"></svg>
+          <span class="a11y-theme-text">
+            <strong>{{ theme.name }}</strong>
+            <small>{{ theme.description }}</small>
+          </span>
+          @if (a11y.currentTheme() === theme.id) {
+            <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+          }
+        </button>
+        }
+      </div>
+    </section>
+
+    <!-- Tamaño de texto - Simplificado -->
+    <section class="a11y-section">
+      <h3 class="a11y-section-title">Tamaño de Texto</h3>
+      <div class="a11y-size-controls">
+        <button
+          class="a11y-size-btn"
+          (click)="decreaseFontSize()"
+          [disabled]="a11y.fontSize() === 'small'"
+          aria-label="Reducir texto"
+        >
+          <span class="a11y-size-icon">A-</span>
+        </button>
+
+        <div class="a11y-size-display" aria-live="polite">
+          @for (size of a11y.fontSizes; track size.id) {
+            @if (size.id === a11y.fontSize()) {
+              {{ size.name }}
+            }
+          }
+        </div>
+
+        <button
+          class="a11y-size-btn"
+          (click)="increaseFontSize()"
+          [disabled]="a11y.fontSize() === 'x-large'"
+          aria-label="Aumentar texto"
+        >
+          <span class="a11y-size-icon">A+</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Opciones simples -->
+    <section class="a11y-section">
+      <h3 class="a11y-section-title">Ayudas Visuales</h3>
+
+      <button
+        class="a11y-option-btn"
+        [class.active]="a11y.highlightLinks()"
+        (click)="toggleHighlightLinks()"
+        [attr.aria-pressed]="a11y.highlightLinks()"
+      >
+        <svg cIcon name="cilLink" size="lg"></svg>
+        <span>Resaltar Enlaces</span>
+        @if (a11y.highlightLinks()) {
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+        }
+      </button>
+
+      <button
+        class="a11y-option-btn"
+        [class.active]="a11y.readingGuide()"
+        (click)="toggleReadingGuide()"
+        [attr.aria-pressed]="a11y.readingGuide()"
+      >
+        <svg cIcon name="cilAlignLeft" size="lg"></svg>
+        <span>Guía de Lectura</span>
+        @if (a11y.readingGuide()) {
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+        }
+      </button>
+
+      <button
+        class="a11y-option-btn"
+        [class.active]="a11y.reducedMotion()"
+        (click)="toggleReducedMotion()"
+        [attr.aria-pressed]="a11y.reducedMotion()"
+      >
+        <svg cIcon name="cilMediaPause" size="lg"></svg>
+        <span>Sin Animaciones</span>
+        @if (a11y.reducedMotion()) {
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+        }
+      </button>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="a11y-panel-footer">
+    <button
+      class="a11y-reset-btn"
+      (click)="resetSettings()"
+    >
+      <svg cIcon name="cilReload" size="lg"></svg>
+      Restablecer Todo
+    </button>
+  </footer>
+</aside>
+}
