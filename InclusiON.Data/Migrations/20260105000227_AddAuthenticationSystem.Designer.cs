@@ -4,6 +4,7 @@ using InclusiON.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InclusiON.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105000227_AddAuthenticationSystem")]
+    partial class AddAuthenticationSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,12 +182,6 @@ namespace InclusiON.Data.Migrations
                     b.Property<Guid>("AssignedByProfessionalId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
@@ -210,12 +207,6 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasDefaultValue("Pendiente");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -340,14 +331,8 @@ namespace InclusiON.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int?>("FrustrationLevel")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Observations")
                         .HasColumnType("NVARCHAR(MAX)");
@@ -371,12 +356,6 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<int?>("TimeSpentSeconds")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -806,22 +785,16 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("RequiresColorShape")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("RequiresEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresEmojiSequence")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresPassword")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("RequiresPin")
+                    b.Property<bool>("RequiresPictogram")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("RequiresProfileSelect")
+                    b.Property<bool>("RequiresPin")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresSupervisor")
@@ -844,12 +817,10 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             MinAutonomyLevel = 1,
                             Name = "Email y Contrasena",
-                            RequiresColorShape = false,
                             RequiresEmail = true,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = true,
+                            RequiresPictogram = false,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
@@ -859,99 +830,57 @@ namespace InclusiON.Data.Migrations
                             Description = "Login con nombre de usuario y PIN de 4-6 digitos",
                             DisplayOrder = 2,
                             IsActive = true,
-                            MinAutonomyLevel = 1,
+                            MinAutonomyLevel = 2,
                             Name = "PIN Numerico",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
+                            RequiresPictogram = false,
                             RequiresPin = true,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
                         {
                             Id = 3,
-                            Code = "EMOJI_SEQUENCE",
-                            Description = "Login seleccionando 4 emojis en orden",
+                            Code = "PICTOGRAM",
+                            Description = "Login seleccionando una secuencia de imagenes",
                             DisplayOrder = 3,
                             IsActive = true,
                             MinAutonomyLevel = 2,
-                            Name = "Secuencia de Emojis",
-                            RequiresColorShape = false,
+                            Name = "Secuencia de Pictogramas",
                             RequiresEmail = false,
-                            RequiresEmojiSequence = true,
                             RequiresPassword = false,
+                            RequiresPictogram = true,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
                         {
                             Id = 4,
-                            Code = "COLOR_SHAPE",
-                            Description = "Login seleccionando 4 colores y formas en orden",
-                            DisplayOrder = 4,
-                            IsActive = true,
-                            MinAutonomyLevel = 2,
-                            Name = "Colores y Formas",
-                            RequiresColorShape = true,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 5,
                             Code = "SUPERVISED",
                             Description = "Login requiere desbloqueo por familiar o profesional",
-                            DisplayOrder = 5,
+                            DisplayOrder = 4,
                             IsActive = true,
                             MinAutonomyLevel = 3,
                             Name = "Supervisado",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
+                            RequiresPictogram = false,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = true
                         },
                         new
                         {
-                            Id = 6,
+                            Id = 5,
                             Code = "TRUSTED_DEVICE",
                             Description = "Login automatico en dispositivos previamente autorizados",
-                            DisplayOrder = 6,
+                            DisplayOrder = 5,
                             IsActive = true,
                             MinAutonomyLevel = 3,
                             Name = "Dispositivo Confiable",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
+                            RequiresPictogram = false,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Code = "PROFILE_SELECT",
-                            Description = "Login seleccionando nombre y avatar del usuario",
-                            DisplayOrder = 7,
-                            IsActive = true,
-                            MinAutonomyLevel = 3,
-                            Name = "Seleccion de Perfil",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = true,
                             RequiresSupervisor = false
                         });
                 });
@@ -1076,15 +1005,8 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("AvatarColor")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("ColorShapeId")
-                        .HasColumnType("int");
 
                     b.Property<int?>("CommunicationLevel")
                         .HasColumnType("int");
@@ -1101,10 +1023,6 @@ namespace InclusiON.Data.Migrations
                     b.Property<string>("DocumentNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("EmojiSequence")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -1136,6 +1054,10 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PhotoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PictogramSequence")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -1545,12 +1467,6 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("DeviceId")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -1581,12 +1497,6 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<DateTime>("RegisteredAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");

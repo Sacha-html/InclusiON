@@ -4,6 +4,7 @@ using InclusiON.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InclusiON.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104222137_AddPhoneToPersonWithDisability")]
+    partial class AddPhoneToPersonWithDisability
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,9 +36,8 @@ namespace InclusiON.Data.Migrations
                     b.Property<Guid?>("AccessedPersonId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ActionType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("ActionType")
+                        .HasColumnType("int");
 
                     b.Property<string>("AffectedRecordId")
                         .HasMaxLength(50)
@@ -179,12 +181,6 @@ namespace InclusiON.Data.Migrations
                     b.Property<Guid>("AssignedByProfessionalId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
@@ -204,18 +200,10 @@ namespace InclusiON.Data.Migrations
                     b.Property<int?>("SequenceOrder")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
+                    b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasDefaultValue("Pendiente");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.HasKey("Id");
 
@@ -340,14 +328,8 @@ namespace InclusiON.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int?>("FrustrationLevel")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Observations")
                         .HasColumnType("NVARCHAR(MAX)");
@@ -360,8 +342,8 @@ namespace InclusiON.Data.Migrations
                     b.Property<string>("ResponsePattern")
                         .HasColumnType("NVARCHAR(MAX)");
 
-                    b.Property<string>("Result")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("Result")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");
@@ -372,82 +354,11 @@ namespace InclusiON.Data.Migrations
                     b.Property<int?>("TimeSpentSeconds")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AssignmentId");
 
                     b.ToTable("ActivityResponses", (string)null);
-                });
-
-            modelBuilder.Entity("InclusiON.Entities.Models.AutonomyLevel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("RequiresSupervision")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("AutonomyLevels", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Puede usar la aplicacion de forma independiente con login estandar",
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            Name = "Alta",
-                            RequiresSupervision = false
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Requiere login simplificado (PIN o pictogramas) pero puede usar la app solo",
-                            DisplayOrder = 2,
-                            IsActive = true,
-                            Name = "Media",
-                            RequiresSupervision = false
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Requiere supervision y login asistido por familiar o profesional",
-                            DisplayOrder = 3,
-                            IsActive = true,
-                            Name = "Baja",
-                            RequiresSupervision = true
-                        });
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.Diagnosis", b =>
@@ -690,272 +601,6 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("FamilyRepresentatives", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Invitation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CreatedByProfessionalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("ForPersonId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsUsed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Relationship")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UsedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("CreatedByProfessionalId");
-
-                    b.HasIndex("Email");
-
-                    b.HasIndex("ForPersonId");
-
-                    b.HasIndex("UsedByUserId");
-
-                    b.ToTable("Invitations", (string)null);
-                });
-
-            modelBuilder.Entity("InclusiON.Entities.Models.LoginMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<int>("MinAutonomyLevel")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("RequiresColorShape")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresEmojiSequence")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresPassword")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresPin")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresProfileSelect")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresSupervisor")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("LoginMethods", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "STANDARD",
-                            Description = "Login tradicional con email y contrasena",
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            MinAutonomyLevel = 1,
-                            Name = "Email y Contrasena",
-                            RequiresColorShape = false,
-                            RequiresEmail = true,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = true,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "PIN",
-                            Description = "Login con nombre de usuario y PIN de 4-6 digitos",
-                            DisplayOrder = 2,
-                            IsActive = true,
-                            MinAutonomyLevel = 1,
-                            Name = "PIN Numerico",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = true,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "EMOJI_SEQUENCE",
-                            Description = "Login seleccionando 4 emojis en orden",
-                            DisplayOrder = 3,
-                            IsActive = true,
-                            MinAutonomyLevel = 2,
-                            Name = "Secuencia de Emojis",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = true,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "COLOR_SHAPE",
-                            Description = "Login seleccionando 4 colores y formas en orden",
-                            DisplayOrder = 4,
-                            IsActive = true,
-                            MinAutonomyLevel = 2,
-                            Name = "Colores y Formas",
-                            RequiresColorShape = true,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "SUPERVISED",
-                            Description = "Login requiere desbloqueo por familiar o profesional",
-                            DisplayOrder = 5,
-                            IsActive = true,
-                            MinAutonomyLevel = 3,
-                            Name = "Supervisado",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = true
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Code = "TRUSTED_DEVICE",
-                            Description = "Login automatico en dispositivos previamente autorizados",
-                            DisplayOrder = 6,
-                            IsActive = true,
-                            MinAutonomyLevel = 3,
-                            Name = "Dispositivo Confiable",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Code = "PROFILE_SELECT",
-                            Description = "Login seleccionando nombre y avatar del usuario",
-                            DisplayOrder = 7,
-                            IsActive = true,
-                            MinAutonomyLevel = 3,
-                            Name = "Seleccion de Perfil",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = true,
-                            RequiresSupervisor = false
-                        });
-                });
-
             modelBuilder.Entity("InclusiON.Entities.Models.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -1015,6 +660,131 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Messages", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonGuiSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AutoAdvance")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("AutoAdvanceDelay")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(5);
+
+                    b.Property<string>("ColorTheme")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("DarkMode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("EasyReadingMode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("FontSize")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(16);
+
+                    b.Property<bool>("HighContrastMode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("LargeButtons")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("ReducedMotion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("ShowImages")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("ShowPictograms")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("ShowVideos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("SimplifiedNavigation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("SoundEffectsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("TextToSpeechEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("TextToSpeechSpeed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(100);
+
+                    b.Property<int>("TouchTargetSize")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(44);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Volume")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(80);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId")
+                        .IsUnique();
+
+                    b.ToTable("PersonGuiSettings", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Entities.Models.PersonRepresentative", b =>
                 {
                     b.Property<Guid>("PersonId")
@@ -1022,11 +792,6 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<Guid>("RepresentativeId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("CanSuperviseLogin")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
 
                     b.Property<DateTime?>("ConsentDate")
                         .HasColumnType("datetime2");
@@ -1069,22 +834,12 @@ namespace InclusiON.Data.Migrations
                     b.Property<int?>("AttentionLevel")
                         .HasColumnType("int");
 
-                    b.Property<int?>("AutonomyLevelId")
-                        .HasColumnType("int");
-
                     b.Property<string>("AvailableResources")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("AvatarColor")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("ColorShapeId")
-                        .HasColumnType("int");
 
                     b.Property<int?>("CommunicationLevel")
                         .HasColumnType("int");
@@ -1101,10 +856,6 @@ namespace InclusiON.Data.Migrations
                     b.Property<string>("DocumentNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("EmojiSequence")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -1125,23 +876,15 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("LearningStyle")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("LoginMethodId")
+                    b.Property<int?>("LearningStyle")
                         .HasColumnType("int");
 
                     b.Property<int?>("MotorSkillLevel")
                         .HasColumnType("int");
 
-                    b.Property<string>("PhotoUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("PinCodeHash")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("RequiresHighContrast")
                         .ValueGeneratedOnAdd()
@@ -1157,9 +900,6 @@ namespace InclusiON.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
-
-                    b.Property<Guid?>("SupervisorUserId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -1187,17 +927,11 @@ namespace InclusiON.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AutonomyLevelId");
-
                     b.HasIndex("DisabilityTypeId");
 
                     b.HasIndex("DocumentNumber")
                         .IsUnique()
                         .HasFilter("[DocumentNumber] IS NOT NULL");
-
-                    b.HasIndex("LoginMethodId");
-
-                    b.HasIndex("SupervisorUserId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -1309,11 +1043,6 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<DateTime>("AssignedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("CanSuperviseLogin")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1530,79 +1259,6 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.TrustedDevice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<Guid?>("AuthorizedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Browser")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DeviceId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("DeviceName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("DeviceType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<DateTime?>("LastUsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("OperatingSystem")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("RegisteredAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorizedByUserId");
-
-                    b.HasIndex("DeviceId");
-
-                    b.HasIndex("UserId", "DeviceId")
-                        .IsUnique();
-
-                    b.ToTable("TrustedDevices", (string)null);
-                });
-
             modelBuilder.Entity("InclusiON.Entities.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1647,11 +1303,6 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("MustChangePassword")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
                         .HasMaxLength(50)
@@ -1963,31 +1614,6 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Invitation", b =>
-                {
-                    b.HasOne("InclusiON.Entities.Models.Professional", "CreatedByProfessional")
-                        .WithMany("CreatedInvitations")
-                        .HasForeignKey("CreatedByProfessionalId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "ForPerson")
-                        .WithMany()
-                        .HasForeignKey("ForPersonId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("InclusiON.Entities.Models.User", "UsedByUser")
-                        .WithMany()
-                        .HasForeignKey("UsedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("CreatedByProfessional");
-
-                    b.Navigation("ForPerson");
-
-                    b.Navigation("UsedByUser");
-                });
-
             modelBuilder.Entity("InclusiON.Entities.Models.Message", b =>
                 {
                     b.HasOne("InclusiON.Entities.Models.Message", "ParentMessage")
@@ -2021,6 +1647,17 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonGuiSettings", b =>
+                {
+                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
+                        .WithOne("GuiSettings")
+                        .HasForeignKey("InclusiON.Entities.Models.PersonGuiSettings", "PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("InclusiON.Entities.Models.PersonRepresentative", b =>
                 {
                     b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
@@ -2042,24 +1679,9 @@ namespace InclusiON.Data.Migrations
 
             modelBuilder.Entity("InclusiON.Entities.Models.PersonWithDisability", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.AutonomyLevel", "AutonomyLevel")
-                        .WithMany("PersonsWithDisability")
-                        .HasForeignKey("AutonomyLevelId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("InclusiON.Entities.Models.DisabilityType", "DisabilityType")
                         .WithMany("PersonsWithDisability")
                         .HasForeignKey("DisabilityTypeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("InclusiON.Entities.Models.LoginMethod", "LoginMethod")
-                        .WithMany("PersonsWithDisability")
-                        .HasForeignKey("LoginMethodId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("InclusiON.Entities.Models.User", "SupervisorUser")
-                        .WithMany()
-                        .HasForeignKey("SupervisorUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("InclusiON.Entities.Models.User", "User")
@@ -2068,13 +1690,7 @@ namespace InclusiON.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("AutonomyLevel");
-
                     b.Navigation("DisabilityType");
-
-                    b.Navigation("LoginMethod");
-
-                    b.Navigation("SupervisorUser");
 
                     b.Navigation("User");
                 });
@@ -2166,24 +1782,6 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("ReportType");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.TrustedDevice", b =>
-                {
-                    b.HasOne("InclusiON.Entities.Models.User", "AuthorizedByUser")
-                        .WithMany()
-                        .HasForeignKey("AuthorizedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("InclusiON.Entities.Models.User", "User")
-                        .WithMany("TrustedDevices")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("AuthorizedByUser");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -2250,11 +1848,6 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Activities");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.AutonomyLevel", b =>
-                {
-                    b.Navigation("PersonsWithDisability");
-                });
-
             modelBuilder.Entity("InclusiON.Entities.Models.DisabilityType", b =>
                 {
                     b.Navigation("PersonsWithDisability");
@@ -2270,11 +1863,6 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("PersonRepresentatives");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.LoginMethod", b =>
-                {
-                    b.Navigation("PersonsWithDisability");
-                });
-
             modelBuilder.Entity("InclusiON.Entities.Models.Message", b =>
                 {
                     b.Navigation("Replies");
@@ -2287,6 +1875,8 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("ActivityAssignments");
 
                     b.Navigation("Diagnoses");
+
+                    b.Navigation("GuiSettings");
 
                     b.Navigation("PersonRepresentatives");
 
@@ -2302,8 +1892,6 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Activities");
 
                     b.Navigation("ActivityAssignments");
-
-                    b.Navigation("CreatedInvitations");
 
                     b.Navigation("Diagnoses");
 
@@ -2334,8 +1922,6 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("SentMessages");
-
-                    b.Navigation("TrustedDevices");
                 });
 #pragma warning restore 612, 618
         }
