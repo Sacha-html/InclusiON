@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
 using InclusiON.DTOs.Responses;
-using InclusiON.Entities.Enums;
 using InclusiON.Entities.Models;
 
 namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
@@ -40,11 +39,11 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     Name = command.Name.Trim(),
                     Surname = command.Surname?.Trim(),
                     Email = command.Email.ToLower().Trim(),
-                    UserName = command.Email.ToLower().Trim(), 
+                    UserName = command.Email.ToLower().Trim(),
                     PhoneNumber = command.PhoneNumber?.Trim(),
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true,
-                    EmailConfirmed = true 
+                    EmailConfirmed = true
                 };
 
                 var result = await _userManager.CreateAsync(user, command.Password);
@@ -52,10 +51,10 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 if (!result.Succeeded)
                 {
                     var errors = result.Errors.Select(p => p.Description).ToList();
-                    return ApiResponse<UserResponse>.ErrorResult("Failed to create a new user" ,errors);
+                    return ApiResponse<UserResponse>.ErrorResult("Failed to create a new user", errors);
                 }
 
-                await _userManager.AddToRoleAsync(user, IdentityRoles.User.ToString());
+                await _userManager.AddToRoleAsync(user, command.Role.ToString());
 
                 return ApiResponse<UserResponse>.SuccessResult(new UserResponse
                 {
@@ -70,7 +69,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             }
             catch (Exception ex)
             {
-                return ApiResponse<UserResponse>.ErrorResult($"An error occurred while registering the user { ex.Message }");
+                return ApiResponse<UserResponse>.ErrorResult($"An error occurred while registering the user {ex.Message}");
             }
         }
     }
