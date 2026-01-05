@@ -5,7 +5,9 @@ import { IconModule } from '@coreui/icons-angular';
 import { ButtonModule, FormModule, TooltipModule } from '@coreui/angular';
 import {
   AccessibilityService,
-  AccessibilityTheme
+  AccessibilityTheme,
+  AccessibilityProfile,
+  ColorMode
 } from '../../services/accessibility.service';
 
 @Component({
@@ -146,7 +148,17 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  // Theme
+  // Color Mode
+  setColorMode(mode: ColorMode): void {
+    this.a11y.setColorMode(mode);
+  }
+
+  // Profile
+  setProfile(profile: AccessibilityProfile): void {
+    this.a11y.setProfile(profile);
+  }
+
+  // Theme (compatibilidad)
   setTheme(theme: AccessibilityTheme): void {
     this.a11y.setTheme(theme);
   }

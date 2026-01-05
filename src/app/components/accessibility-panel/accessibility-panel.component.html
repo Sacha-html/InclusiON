@@ -44,23 +44,42 @@
   <!-- Content -->
   <div class="a11y-panel-content">
 
-    <!-- Temas visuales - Botones grandes -->
+    <!-- Modo de Color (Claro/Oscuro) -->
     <section class="a11y-section">
-      <h3 class="a11y-section-title">Tema Visual</h3>
+      <h3 class="a11y-section-title">Modo de Color</h3>
+      <div class="a11y-color-mode-toggle">
+        @for (mode of a11y.colorModes; track mode.id) {
+        <button
+          class="a11y-mode-btn"
+          [class.active]="a11y.colorMode() === mode.id"
+          (click)="setColorMode(mode.id)"
+          [attr.aria-pressed]="a11y.colorMode() === mode.id"
+          [attr.aria-label]="'Modo ' + mode.name"
+        >
+          <svg cIcon [name]="mode.icon" size="xl"></svg>
+          <span>{{ mode.name }}</span>
+        </button>
+        }
+      </div>
+    </section>
+
+    <!-- Perfiles de Accesibilidad -->
+    <section class="a11y-section">
+      <h3 class="a11y-section-title">Perfil de Accesibilidad</h3>
       <div class="a11y-theme-list">
-        @for (theme of a11y.themes; track theme.id) {
+        @for (profile of a11y.profiles; track profile.id) {
         <button
           class="a11y-theme-btn"
-          [class.active]="a11y.currentTheme() === theme.id"
-          (click)="setTheme(theme.id)"
-          [attr.aria-pressed]="a11y.currentTheme() === theme.id"
+          [class.active]="a11y.profile() === profile.id"
+          (click)="setProfile(profile.id)"
+          [attr.aria-pressed]="a11y.profile() === profile.id"
         >
-          <svg cIcon [name]="theme.icon" size="xl"></svg>
+          <svg cIcon [name]="profile.icon" size="xl"></svg>
           <span class="a11y-theme-text">
-            <strong>{{ theme.name }}</strong>
-            <small>{{ theme.description }}</small>
+            <strong>{{ profile.name }}</strong>
+            <small>{{ profile.description }}</small>
           </span>
-          @if (a11y.currentTheme() === theme.id) {
+          @if (a11y.profile() === profile.id) {
             <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
           }
         </button>
