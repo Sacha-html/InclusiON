@@ -41,7 +41,7 @@ namespace InclusiON.Infrastructure.Authentication
                 new Claim(ClaimTypes.NameIdentifier, userData.Id.ToString()),
                 new Claim(ClaimTypes.Name, userData.Name ?? string.Empty),
                 new Claim(ClaimTypes.Email, userData.Email ?? string.Empty),
-                new Claim(ClaimTypes.Role, userData.Role ?? IdentityRoles.Guest.ToString()),
+                new Claim(ClaimTypes.Role, userData.Role ?? IdentityRoles.PersonWithDisability.ToString()),
                 new Claim("userId", userData.Id.ToString()),
                 new Claim("isActive", userData.IsActive.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

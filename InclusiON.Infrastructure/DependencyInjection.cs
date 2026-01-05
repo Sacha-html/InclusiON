@@ -44,6 +44,7 @@ namespace InclusiON.Infrastructure
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUsersRepository, UsersRepository>();
+            services.AddScoped<IVisualLoginRepository, VisualLoginRepository>();
 
             services.AddAuthentication(options =>
             {
