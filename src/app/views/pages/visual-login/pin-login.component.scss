@@ -1,0 +1,261 @@
+// Host element debe ocupar todo el ancho
+:host {
+  display: block;
+  width: 100vw;
+  max-width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.visual-login-container {
+  background-color: var(--a11y-bg, #f5f7fa);
+  padding: 2rem 0;
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 100%;
+  padding: 0 2rem;
+
+  @media (min-width: 1200px) {
+    padding: 0 4rem;
+  }
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  min-height: 56px;
+  border-radius: 1rem;
+  border: 3px solid var(--a11y-border, #9E9E9E) !important;
+  background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
+  color: var(--a11y-text, #1A1A1A) !important;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: inherit;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-primary, #0D47A1) !important;
+    border-color: var(--a11y-primary, #0D47A1) !important;
+    color: var(--a11y-primary-text, #FFFFFF) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--a11y-focus-color);
+    outline-offset: 2px;
+  }
+}
+
+.pin-card {
+  border-radius: 1.5rem !important;
+  overflow: hidden;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.user-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+}
+
+.pin-display {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.pin-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  border: 2px solid #bdbdbd;
+  transition: all 0.2s ease;
+
+  &.filled {
+    background-color: #667eea;
+    border-color: #667eea;
+    transform: scale(1.1);
+  }
+
+  &.error {
+    border-color: #f44336;
+    animation: shake 0.3s ease;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.pin-pad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 320px;
+  margin: 0 auto;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.pin-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.pin-key {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  background-color: #fff;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background-color: #f5f5f5;
+    border-color: #667eea;
+    transform: scale(1.05);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+    background-color: #667eea;
+    color: white;
+  }
+
+  &:focus {
+    outline: 3px solid #667eea;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &.special {
+    font-size: 1.5rem;
+  }
+
+  &.clear {
+    color: #f44336;
+    border-color: #ffcdd2;
+
+    &:hover:not(:disabled) {
+      background-color: #ffebee;
+      border-color: #f44336;
+    }
+  }
+
+  &.submit {
+    color: #4caf50;
+    border-color: #c8e6c9;
+
+    &:hover:not(:disabled) {
+      background-color: #e8f5e9;
+      border-color: #4caf50;
+    }
+
+    &:active:not(:disabled) {
+      background-color: #4caf50;
+      color: white;
+    }
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .pin-dot,
+  .pin-key {
+    transition: none;
+  }
+
+  .pin-dot.error {
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .pin-card {
+    border: 3px solid #000 !important;
+  }
+
+  .pin-dot {
+    border-width: 3px;
+    border-color: #000;
+
+    &.filled {
+      background-color: #000;
+      border-color: #000;
+    }
+  }
+
+  .pin-key {
+    border-width: 3px;
+    border-color: #000;
+  }
+}
+
+// Large screens
+@media (min-width: 992px) {
+  .pin-card {
+    max-width: 500px;
+  }
+
+  .pin-key {
+    width: 90px;
+    height: 90px;
+    font-size: 2rem;
+  }
+}
+
+// Small screens
+@media (max-width: 767px) {
+  .content-wrapper {
+    padding: 0 1rem;
+  }
+
+  .pin-key {
+    width: 70px;
+    height: 70px;
+    font-size: 1.5rem;
+  }
+
+  .pin-row {
+    gap: 0.5rem;
+  }
+}
