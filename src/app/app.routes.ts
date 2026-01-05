@@ -5,32 +5,33 @@ import { guestGuard } from './guards/guest.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
 
+  // Visual login como pantalla principal de acceso
   {
     path: 'login',
+    loadChildren: () =>
+      import('./views/pages/visual-login/routes').then((m) => m.routes),
+    canActivate: [guestGuard],
+    data: {
+      title: 'Iniciar Sesión',
+      description: 'Acceso accesible a la plataforma',
+    },
+  },
+
+  // Login tradicional para administradores/profesionales
+  {
+    path: 'admin-login',
     loadComponent: () =>
       import('./views/pages/login/login.component').then(
         (m) => m.LoginComponent
       ),
     canActivate: [guestGuard],
     data: {
-      title: 'Iniciar Sesión',
-      description: 'Accede a tu cuenta',
-    },
-  },
-  {
-    path: 'register',
-    loadComponent: () =>
-      import('./views/pages/register/register.component').then(
-        (m) => m.RegisterComponent
-      ),
-    canActivate: [guestGuard],
-    data: {
-      title: 'Crear Cuenta',
-      description: 'Registrate en la plataforma',
+      title: 'Acceso Administrativo',
+      description: 'Acceso para administradores y profesionales',
     },
   },
 
