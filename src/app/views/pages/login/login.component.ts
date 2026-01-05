@@ -7,22 +7,20 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { LoginRequest } from '../../../models';
+import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
 
 // CoreUI imports
 import {
   ContainerComponent,
   RowComponent,
   ColComponent,
-  CardGroupComponent,
   CardComponent,
   CardBodyComponent,
-} from '@coreui/angular';
-import {
+  AlertComponent,
   FormControlDirective,
-  FormLabelDirective,
   FormCheckComponent,
   FormCheckInputDirective,
   FormCheckLabelDirective,
@@ -38,15 +36,13 @@ import { IconDirective } from '@coreui/icons-angular';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     ContainerComponent,
     RowComponent,
     ColComponent,
-    CardGroupComponent,
     CardComponent,
     CardBodyComponent,
+    AlertComponent,
     FormControlDirective,
-    FormLabelDirective,
     FormCheckComponent,
     FormCheckInputDirective,
     FormCheckLabelDirective,
@@ -54,6 +50,7 @@ import { IconDirective } from '@coreui/icons-angular';
     InputGroupComponent,
     InputGroupTextDirective,
     IconDirective,
+    AccessibilityPanelComponent,
   ],
   templateUrl: './login.component.html'
 })
@@ -165,5 +162,9 @@ export class LoginComponent implements OnInit {
     }
 
     return '';
+  }
+
+  goToVisualLogin(): void {
+    this.router.navigate(['/login']);
   }
 }
