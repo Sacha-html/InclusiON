@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using InclusiON.Entities.Models;
 
@@ -11,11 +11,10 @@ namespace InclusiON.Data.Configurations
             builder.ToTable("Users");
 
             builder.Property(p => p.Name)
-                .IsRequired()
                 .HasMaxLength(50);
 
-            builder.HasIndex(p => p.Surname)
-                .IsUnique();
+            builder.Property(p => p.Surname)
+                .HasMaxLength(50);
 
             builder.Property(p => p.Email)
                 .HasMaxLength(100);
@@ -24,7 +23,16 @@ namespace InclusiON.Data.Configurations
                 .IsRequired();
 
             builder.Property(p => p.IsActive)
-                .IsRequired();
+                .HasDefaultValue(true);
+
+            builder.Property(p => p.MustChangePassword)
+                .HasDefaultValue(false);
+
+            builder.Property(p => p.LastLoginIpAddress)
+                .HasMaxLength(45);
+
+            builder.Property(p => p.LastLoginUserAgent)
+                .HasMaxLength(500);
         }
     }
 }
