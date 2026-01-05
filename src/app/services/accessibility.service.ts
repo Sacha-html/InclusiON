@@ -1,16 +1,30 @@
 import { Injectable, signal, effect, computed } from '@angular/core';
 
-export type AccessibilityTheme = 'default' | 'high-contrast' | 'dyslexia' | 'low-vision';
+// Separamos modo de color de perfil de accesibilidad
+export type ColorMode = 'light' | 'dark';
+export type AccessibilityProfile = 'default' | 'high-contrast' | 'dyslexia' | 'low-vision';
 export type FontSize = 'small' | 'medium' | 'large' | 'x-large';
 export type LineSpacing = 'normal' | 'relaxed' | 'loose';
 export type LetterSpacing = 'normal' | 'wide' | 'wider';
 
-export interface ThemeOption {
-  id: AccessibilityTheme;
+// Mantener compatibilidad con código existente
+export type AccessibilityTheme = AccessibilityProfile;
+
+export interface ColorModeOption {
+  id: ColorMode;
+  name: string;
+  icon: string;
+}
+
+export interface ProfileOption {
+  id: AccessibilityProfile;
   name: string;
   description: string;
   icon: string;
 }
+
+// Mantener compatibilidad
+export interface ThemeOption extends ProfileOption {}
 
 export interface FontSizeOption {
   id: FontSize;
@@ -25,7 +39,8 @@ export interface SpacingOption {
 }
 
 export interface AccessibilitySettings {
-  theme: AccessibilityTheme;
+  colorMode: ColorMode;
+  profile: AccessibilityProfile;
   fontSize: FontSize;
   lineSpacing: LineSpacing;
   letterSpacing: LetterSpacing;
@@ -36,7 +51,8 @@ export interface AccessibilitySettings {
 }
 
 const DEFAULT_SETTINGS: AccessibilitySettings = {
-  theme: 'default',
+  colorMode: 'light',
+  profile: 'default',
   fontSize: 'medium',
   lineSpacing: 'normal',
   letterSpacing: 'normal',
@@ -52,32 +68,50 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
 export class AccessibilityService {
   private readonly STORAGE_KEY = 'a11y-settings';
 
-  readonly themes: ThemeOption[] = [
+  // Opciones de modo de color (claro/oscuro)
+  readonly colorModes: ColorModeOption[] = [
+    {
+      id: 'light',
+      name: 'Claro',
+      icon: 'cilSun'
+    },
+    {
+      id: 'dark',
+      name: 'Oscuro',
+      icon: 'cilMoon'
+    }
+  ];
+
+  // Perfiles de accesibilidad (independientes del modo de color)
+  readonly profiles: ProfileOption[] = [
     {
       id: 'default',
       name: 'Estándar',
-      description: 'Tema por defecto con buena legibilidad',
-      icon: 'cilSun'
+      description: 'Sin ajustes especiales',
+      icon: 'cilUser'
     },
     {
       id: 'high-contrast',
       name: 'Alto Contraste',
-      description: 'Máximo contraste para baja visión severa',
+      description: 'Máximo contraste para baja visión',
       icon: 'cilContrast'
     },
     {
       id: 'dyslexia',
       name: 'Dislexia',
-      description: 'Fuente y espaciado optimizados para dislexia',
+      description: 'Fuente y espaciado optimizados',
       icon: 'cilNotes'
     },
     {
       id: 'low-vision',
       name: 'Visión Reducida',
-      description: 'Texto e iconos grandes para baja visión',
+      description: 'Texto e iconos más grandes',
       icon: 'cilZoomIn'
     }
   ];
+
+  // Mantener compatibilidad con código existente
+  readonly themes: ThemeOption[] = this.profiles;
 
   readonly fontSizes: FontSizeOption[] = [
     { id: 'small', name: 'Pequeño', value: '14px' },
@@ -102,7 +136,9 @@ export class AccessibilityService {
   readonly settings = signal<AccessibilitySettings>(this.loadSettings());
 
   // Computed signals para acceso individual
-  readonly currentTheme = computed(() => this.settings().theme);
+  readonly colorMode = computed(() => this.settings().colorMode);
+  readonly profile = computed(() => this.settings().profile);
+  readonly currentTheme = computed(() => this.settings().profile); // Compatibilidad
   readonly fontSize = computed(() => this.settings().fontSize);
   readonly lineSpacing = computed(() => this.settings().lineSpacing);
   readonly letterSpacing = computed(() => this.settings().letterSpacing);
@@ -110,6 +146,9 @@ export class AccessibilityService {
   readonly highlightFocus = computed(() => this.settings().highlightFocus);
   readonly reducedMotion = computed(() => this.settings().reducedMotion);
   readonly readingGuide = computed(() => this.settings().readingGuide);
+
+  // Computed para saber si es modo oscuro
+  readonly isDarkMode = computed(() => this.settings().colorMode === 'dark');
 
   // Signal para el panel abierto/cerrado
   readonly panelOpen = signal(false);
@@ -137,33 +176,68 @@ export class AccessibilityService {
   }
 
   /**
-   * Cambia el tema de accesibilidad
+   * Cambia el modo de color (claro/oscuro)
    */
-  setTheme(theme: AccessibilityTheme): void {
-    this.updateSetting('theme', theme);
+  setColorMode(mode: ColorMode): void {
+    this.updateSetting('colorMode', mode);
   }
 
   /**
-   * Obtiene el tema actual
+   * Alterna entre modo claro y oscuro
+   */
+  toggleColorMode(): void {
+    this.setColorMode(this.colorMode() === 'light' ? 'dark' : 'light');
+  }
+
+  /**
+   * Cambia el perfil de accesibilidad
+   */
+  setProfile(profile: AccessibilityProfile): void {
+    this.updateSetting('profile', profile);
+  }
+
+  /**
+   * Cambia el tema de accesibilidad (compatibilidad)
+   */
+  setTheme(theme: AccessibilityTheme): void {
+    this.updateSetting('profile', theme);
+  }
+
+  /**
+   * Obtiene el tema actual (compatibilidad)
    */
   getTheme(): AccessibilityTheme {
     return this.currentTheme();
   }
 
   /**
-   * Obtiene la información del tema actual
+   * Obtiene la información del perfil actual
    */
-  getCurrentThemeInfo(): ThemeOption {
-    return this.themes.find(t => t.id === this.currentTheme()) || this.themes[0];
+  getCurrentProfileInfo(): ProfileOption {
+    return this.profiles.find(p => p.id === this.profile()) || this.profiles[0];
   }
 
   /**
-   * Cicla al siguiente tema
+   * Obtiene la información del tema actual (compatibilidad)
+   */
+  getCurrentThemeInfo(): ThemeOption {
+    return this.getCurrentProfileInfo();
+  }
+
+  /**
+   * Cicla al siguiente perfil
+   */
+  cycleProfile(): void {
+    const currentIndex = this.profiles.findIndex(p => p.id === this.profile());
+    const nextIndex = (currentIndex + 1) % this.profiles.length;
+    this.setProfile(this.profiles[nextIndex].id);
+  }
+
+  /**
+   * Cicla al siguiente tema (compatibilidad)
    */
   cycleTheme(): void {
-    const currentIndex = this.themes.findIndex(t => t.id === this.currentTheme());
-    const nextIndex = (currentIndex + 1) % this.themes.length;
-    this.setTheme(this.themes[nextIndex].id);
+    this.cycleProfile();
   }
 
   /**
@@ -223,9 +297,26 @@ export class AccessibilityService {
     const root = document.documentElement;
     const body = document.body;
 
-    // Tema
-    root.setAttribute('data-theme', settings.theme);
-    body.setAttribute('data-theme', settings.theme);
+    // Modo de color (claro/oscuro)
+    root.setAttribute('data-color-mode', settings.colorMode);
+    body.setAttribute('data-color-mode', settings.colorMode);
+
+    // Clase para CoreUI dark mode
+    if (settings.colorMode === 'dark') {
+      root.classList.add('dark-theme');
+      body.classList.add('dark-theme');
+    } else {
+      root.classList.remove('dark-theme');
+      body.classList.remove('dark-theme');
+    }
+
+    // Perfil de accesibilidad
+    root.setAttribute('data-profile', settings.profile);
+    body.setAttribute('data-profile', settings.profile);
+
+    // Mantener data-theme para compatibilidad con CSS existente
+    root.setAttribute('data-theme', settings.profile);
+    body.setAttribute('data-theme', settings.profile);
 
     // Tamaño de fuente
     const fontSizeOption = this.fontSizes.find(f => f.id === settings.fontSize);
@@ -275,9 +366,15 @@ export class AccessibilityService {
    */
   private getAnnouncementForSetting(key: string, value: unknown): string {
     switch (key) {
-      case 'theme':
+      case 'colorMode':
+        const modeInfo = this.colorModes.find(m => m.id === value);
+        return `Modo de color: ${modeInfo?.name}`;
+      case 'profile':
+        const profileInfo = this.profiles.find(p => p.id === value);
+        return `Perfil de accesibilidad: ${profileInfo?.name}`;
+      case 'theme': // Compatibilidad
         const themeInfo = this.themes.find(t => t.id === value);
-        return `Tema cambiado a: ${themeInfo?.name}`;
+        return `Perfil cambiado a: ${themeInfo?.name}`;
       case 'fontSize':
         const fontInfo = this.fontSizes.find(f => f.id === value);
         return `Tamaño de fuente: ${fontInfo?.name}`;
