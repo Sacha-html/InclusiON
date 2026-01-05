@@ -7,6 +7,15 @@ import {
   LoginRequest,
   RegisterUserRequest,
   User,
+  IdentifyUserRequest,
+  PinLoginRequest,
+  EmojiLoginRequest,
+  ColorShapeLoginRequest,
+  TrustedDeviceLoginRequest,
+  ProfileSelectLoginRequest,
+  IdentifyUserResponse,
+  VisualLoginResponse,
+  VisualLoginUserInfo,
 } from '../models';
 import { environment } from '../../environments/environment';
 
@@ -252,6 +261,139 @@ export class AuthService {
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
     return user?.role === role;
+  }
+
+  // Visual Login Methods
+
+  identifyUser(request: IdentifyUserRequest): Observable<IdentifyUserResponse> {
+    return this.http
+      .post<IdentifyUserResponse>(`${this.apiUrl}/Auth/identify`, request)
+      .pipe(catchError(this.handleError));
+  }
+
+  loginWithPin(request: PinLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/pin`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  loginWithEmoji(request: EmojiLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/emoji`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  loginWithColorShape(request: ColorShapeLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/color-shape`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  loginWithTrustedDevice(request: TrustedDeviceLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/trusted-device`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  loginWithProfileSelect(request: ProfileSelectLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/profile-select`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  private setVisualLoginSession(response: VisualLoginResponse): void {
+    if (response.data?.accessToken) {
+      this.setToken(response.data.accessToken);
+    }
+    if (response.data?.refreshToken) {
+      this.setRefreshToken(response.data.refreshToken);
+    }
+    if (response.data?.user) {
+      const userInfo = response.data.user;
+      const user: User = {
+        id: userInfo.id,
+        email: '',
+        name: userInfo.displayName,
+        surname: '',
+        role: userInfo.roles[0] || 'Person',
+        isActive: true,
+        createdAt: new Date(),
+      };
+      this.setUser(user);
+
+      // Store accessibility preferences
+      if (userInfo.accessibility) {
+        localStorage.setItem('accessibility_preferences', JSON.stringify(userInfo.accessibility));
+      }
+    }
+    this.isAuthenticatedSubject.next(true);
+  }
+
+  getDeviceId(): string {
+    let deviceId = localStorage.getItem('device_id');
+    if (!deviceId) {
+      deviceId = this.generateDeviceId();
+      localStorage.setItem('device_id', deviceId);
+    }
+    return deviceId;
+  }
+
+  private generateDeviceId(): string {
+    const nav = navigator;
+    const screen = window.screen;
+    const data = [
+      nav.userAgent,
+      nav.language,
+      screen.width,
+      screen.height,
+      screen.colorDepth,
+      new Date().getTimezoneOffset(),
+      Math.random().toString(36).substring(2, 15)
+    ].join('|');
+
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+      const char = data.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return 'dev_' + Math.abs(hash).toString(36) + '_' + Date.now().toString(36);
   }
 
   isTokenExpiringSoon(): boolean {
