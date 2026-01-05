@@ -1,0 +1,231 @@
+// Host element debe ocupar todo el ancho
+:host {
+  display: block;
+  width: 100vw;
+  max-width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.visual-login-container {
+  background-color: var(--a11y-bg, #f5f7fa);
+  padding: 2rem 0;
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 100%;
+  padding: 0 2rem;
+
+  @media (min-width: 1200px) {
+    padding: 0 4rem;
+  }
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  min-height: 56px;
+  border-radius: 1rem;
+  border: 3px solid var(--a11y-border, #9E9E9E) !important;
+  background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
+  color: var(--a11y-text, #1A1A1A) !important;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: inherit;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-primary, #0D47A1) !important;
+    border-color: var(--a11y-primary, #0D47A1) !important;
+    color: var(--a11y-primary-text, #FFFFFF) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:focus-visible {
+    outline: 4px solid var(--a11y-focus-color);
+    outline-offset: 2px;
+  }
+}
+
+.color-shape-card {
+  border-radius: 1.5rem !important;
+  overflow: hidden;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+}
+
+.shape-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.75rem;
+  max-width: 500px;
+  margin: 0 auto;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.shape-button {
+  aspect-ratio: 1;
+  border: 3px solid #e9ecef;
+  border-radius: 1rem;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+
+  &:hover:not(:disabled) {
+    border-color: #667eea;
+    background-color: #f8f9ff;
+    transform: scale(1.05);
+  }
+
+  &:focus {
+    outline: 3px solid #667eea;
+    outline-offset: 2px;
+  }
+
+  &.selected {
+    border-color: #667eea;
+    background-color: #e8edff;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.25);
+  }
+}
+
+.shape-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shape {
+  transition: transform 0.15s ease;
+
+  .shape-button:hover:not(:disabled) & {
+    transform: scale(1.1);
+  }
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.square {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+  border-bottom: 40px solid;
+  background-color: transparent !important;
+}
+
+.star {
+  font-size: 2.5rem;
+  line-height: 1;
+  background: none;
+}
+
+.selection-indicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  background-color: #667eea;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .shape-button,
+  .shape {
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .color-shape-card {
+    border: 3px solid #000 !important;
+  }
+
+  .shape-button {
+    border-color: #000;
+    border-width: 3px;
+  }
+}
+
+// Small screens
+@media (max-width: 767px) {
+  .content-wrapper {
+    padding: 0 1rem;
+  }
+
+  .shape-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+
+  .circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .square {
+    width: 28px;
+    height: 28px;
+  }
+
+  .star {
+    font-size: 2rem;
+  }
+}
