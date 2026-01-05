@@ -9,7 +9,7 @@ export const guestGuard: CanActivateFn = () => {
   if (!authService.isAuthenticated()) {
     return true;
   }
-  router.navigate(['/chat']);
+  router.navigate(['/dashboard']);
 
   return false;
 };

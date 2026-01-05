@@ -28,5 +28,12 @@ export const routes: Routes = [
     data: {
       title: 'Register Page'
     }
+  },
+  {
+    path: 'visual-login',
+    loadChildren: () => import('./visual-login/routes').then(m => m.routes),
+    data: {
+      title: 'Visual Login'
+    }
   }
 ];
