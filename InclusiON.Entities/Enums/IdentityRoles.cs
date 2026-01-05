@@ -1,10 +1,18 @@
 ﻿namespace InclusiON.Entities.Enums
 {
+    /// <summary>
+    /// Roles del sistema
+    /// Traducción para frontend:
+    /// - Admin = Administrador
+    /// - Professional = Profesional
+    /// - FamilyRepresentative = Representante Familiar
+    /// - PersonWithDisability = Persona con Discapacidad
+    /// </summary>
     public enum IdentityRoles
     {
         Admin = 1,
-        User = 2,
-        Manager = 3,
-        Guest = 4
+        Professional = 2,
+        FamilyRepresentative = 3,
+        PersonWithDisability = 4
     }
 }
