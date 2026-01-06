@@ -1511,3 +1511,38 @@ body.a11y-reading-guide {
     animation: none;
   }
 }
+
+// =========================================
+// CURSOR GRANDE
+// =========================================
+body.a11y-large-cursor {
+  // Cursor personalizado grande
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M8 8 L8 40 L18 30 L28 42 L32 38 L22 26 L34 26 Z' fill='%23000000' stroke='%23FFFFFF' stroke-width='2'/%3E%3C/svg%3E") 4 4, auto !important;
+
+  *,
+  *::before,
+  *::after {
+    cursor: inherit !important;
+  }
+
+  a,
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"],
+  .btn {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M18 8 L18 28 L12 28 L24 44 L36 28 L30 28 L30 8 Z' fill='%23000000' stroke='%23FFFFFF' stroke-width='2'/%3E%3C/svg%3E") 24 4, pointer !important;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  [contenteditable="true"] {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect x='22' y='4' width='4' height='40' fill='%23000000' stroke='%23FFFFFF' stroke-width='2'/%3E%3Crect x='16' y='4' width='16' height='4' fill='%23000000' stroke='%23FFFFFF' stroke-width='1'/%3E%3Crect x='16' y='40' width='16' height='4' fill='%23000000' stroke='%23FFFFFF' stroke-width='1'/%3E%3C/svg%3E") 24 24, text !important;
+  }
+}

@@ -48,6 +48,7 @@ export interface AccessibilitySettings {
   highlightFocus: boolean;
   reducedMotion: boolean;
   readingGuide: boolean;
+  largeCursor: boolean;
 }
 
 const DEFAULT_SETTINGS: AccessibilitySettings = {
@@ -59,7 +60,8 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   highlightLinks: false,
   highlightFocus: false,
   reducedMotion: false,
-  readingGuide: false
+  readingGuide: false,
+  largeCursor: false
 };
 
 @Injectable({
@@ -98,7 +100,7 @@ export class AccessibilityService {
     },
     {
       id: 'dyslexia',
-      name: 'Dislexia',
+      name: 'Lectura Fácil',
       description: 'Fuente y espaciado optimizados',
       icon: 'cilNotes'
     },
@@ -146,6 +148,7 @@ export class AccessibilityService {
   readonly highlightFocus = computed(() => this.settings().highlightFocus);
   readonly reducedMotion = computed(() => this.settings().reducedMotion);
   readonly readingGuide = computed(() => this.settings().readingGuide);
+  readonly largeCursor = computed(() => this.settings().largeCursor);
 
   // Computed para saber si es modo oscuro
   readonly isDarkMode = computed(() => this.settings().colorMode === 'dark');
@@ -341,6 +344,7 @@ export class AccessibilityService {
     body.classList.toggle('a11y-highlight-focus', settings.highlightFocus);
     body.classList.toggle('a11y-reduced-motion', settings.reducedMotion);
     body.classList.toggle('a11y-reading-guide', settings.readingGuide);
+    body.classList.toggle('a11y-large-cursor', settings.largeCursor);
   }
 
   /**
@@ -392,6 +396,8 @@ export class AccessibilityService {
         return value ? 'Movimiento reducido activado' : 'Movimiento reducido desactivado';
       case 'readingGuide':
         return value ? 'Guía de lectura activada' : 'Guía de lectura desactivada';
+      case 'largeCursor':
+        return value ? 'Cursor grande activado' : 'Cursor grande desactivado';
       default:
         return 'Configuración actualizada';
     }
