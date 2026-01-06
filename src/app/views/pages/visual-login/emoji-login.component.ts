@@ -54,7 +54,7 @@ export class EmojiLoginComponent implements OnInit {
   avatarColor = '#667eea';
 
   selectedEmojis: string[] = [];
-  maxEmojiCount = 4;
+  maxEmojiCount = 3;
   isLoading = false;
   errorMessage = '';
   remainingAttempts: number | null = null;
@@ -62,14 +62,11 @@ export class EmojiLoginComponent implements OnInit {
   lockoutSeconds = 0;
   rememberDevice = false;
 
-  // Emoji grid - common, recognizable emojis
+  // Emoji grid - 9 simple, recognizable emojis
   availableEmojis: string[] = [
-    '😀', '😍', '🥳', '😎',
-    '🐶', '🐱', '🐻', '🦁',
-    '🌟', '🌈', '🌸', '🍀',
-    '🍎', '🍕', '🎂', '🍦',
-    '⚽', '🎨', '🎵', '🎮',
-    '🚗', '✈️', '🏠', '🎁',
+    '🐶', '🐱', '🐻',
+    '🍎', '🌻', '🏠',
+    '⭐', '❤️', '🚗',
   ];
 
   ngOnInit(): void {
@@ -97,7 +94,7 @@ export class EmojiLoginComponent implements OnInit {
       this.selectedEmojis.push(emoji);
       this.errorMessage = '';
 
-      // Auto-submit when 4 emojis selected
+      // Auto-submit when 3 emojis selected
       if (this.selectedEmojis.length === this.maxEmojiCount) {
         setTimeout(() => this.onSubmit(), 300);
       }
@@ -124,7 +121,7 @@ export class EmojiLoginComponent implements OnInit {
     this.errorMessage = '';
 
     const request: EmojiLoginRequest = {
-      userId: parseInt(this.userId, 10),
+      userId: this.userId,
       emojiSequence: this.selectedEmojis,
       deviceId: this.authService.getDeviceId(),
       rememberDevice: this.rememberDevice,
