@@ -263,6 +263,23 @@ export class AuthService {
     return user?.role === role;
   }
 
+  /**
+   * Verifica si el usuario tiene alguno de los roles especificados
+   */
+  hasAnyRole(roles: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    return roles.includes(user.role);
+  }
+
+  /**
+   * Obtiene el rol del usuario actual
+   */
+  getUserRole(): string | null {
+    const user = this.getCurrentUser();
+    return user?.role || null;
+  }
+
   // Visual Login Methods
 
   identifyUser(request: IdentifyUserRequest): Observable<IdentifyUserResponse> {
