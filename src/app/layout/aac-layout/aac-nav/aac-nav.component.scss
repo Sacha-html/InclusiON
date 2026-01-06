@@ -1,0 +1,141 @@
+.aac-bottom-nav {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: 100%;
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+  border-radius: 16px;
+  transition: all 0.15s ease;
+  padding: 8px 4px;
+  max-width: 100px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  &:focus {
+    outline: 4px solid #FFD700;
+    outline-offset: 2px;
+  }
+
+  &.active {
+    .nav-icon {
+      background: var(--item-color);
+      transform: scale(1.1);
+
+      svg {
+        color: white;
+      }
+    }
+
+    .nav-label {
+      color: var(--item-color);
+      font-weight: 700;
+    }
+  }
+}
+
+.nav-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    color: var(--item-color);
+  }
+}
+
+.nav-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  text-align: center;
+}
+
+// Alto contraste
+:host-context([data-profile="high-contrast"]) {
+  .nav-item {
+    border: 2px solid transparent;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &.active {
+      border-color: var(--item-color);
+
+      .nav-icon {
+        border: 2px solid white;
+      }
+    }
+  }
+
+  .nav-icon {
+    background: transparent;
+    border: 2px solid var(--item-color);
+
+    svg {
+      color: var(--item-color);
+    }
+  }
+
+  .nav-label {
+    color: white;
+  }
+}
+
+// Modo oscuro
+:host-context([data-color-mode="dark"]) {
+  .nav-icon {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-label {
+    color: #aaa;
+  }
+
+  .nav-item {
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.active .nav-label {
+      color: var(--item-color);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 360px) {
+  .nav-label {
+    font-size: 12px;
+  }
+
+  .nav-icon {
+    width: 44px;
+    height: 44px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
