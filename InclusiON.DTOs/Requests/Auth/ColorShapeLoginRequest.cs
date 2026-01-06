@@ -11,7 +11,7 @@ namespace InclusiON.DTOs.Requests.Auth
         /// ID del usuario que intenta autenticarse.
         /// </summary>
         [Required(ErrorMessage = "El ID de usuario es requerido")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         /// <summary>
         /// ID de la combinacion color-forma seleccionada (1-24).
