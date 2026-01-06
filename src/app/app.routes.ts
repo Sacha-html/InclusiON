@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
+import { roleGuard } from './guards/role.guard';
+import { UserRoles } from './shared/constants/roles';
 
 export const routes: Routes = [
   {
@@ -9,16 +11,12 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
 
-  // Visual login como pantalla principal de acceso
+  // Visual login
   {
     path: 'login',
     loadChildren: () =>
       import('./views/pages/visual-login/routes').then((m) => m.routes),
     canActivate: [guestGuard],
-    data: {
-      title: 'Iniciar Sesión',
-      description: 'Acceso accesible a la plataforma',
-    },
   },
 
   // Login tradicional para administradores/profesionales
@@ -29,47 +27,84 @@ export const routes: Routes = [
         (m) => m.LoginComponent
       ),
     canActivate: [guestGuard],
-    data: {
-      title: 'Acceso Administrativo',
-      description: 'Acceso para administradores y profesionales',
-    },
   },
 
+  // Dashboard AAC - Persona con Discapacidad
   {
-    path: '',
+    path: 'app',
+    loadComponent: () =>
+      import('./layout/aac-layout/aac-layout.component').then(
+        (m) => m.AacLayoutComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: [UserRoles.PersonWithDisability] },
+    loadChildren: () =>
+      import('./views/aac/routes').then((m) => m.aacRoutes),
+  },
+
+  // Dashboard Profesional
+  {
+    path: 'pro',
+    loadComponent: () =>
+      import('./layout/professional-layout/professional-layout.component').then(
+        (m) => m.ProfessionalLayoutComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: [UserRoles.Professional, UserRoles.Admin] },
+    loadChildren: () =>
+      import('./views/professional/routes').then((m) => m.professionalRoutes),
+  },
+
+  // Dashboard Familia
+  {
+    path: 'family',
+    loadComponent: () =>
+      import('./layout/family-layout/family-layout.component').then(
+        (m) => m.FamilyLayoutComponent
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: [UserRoles.FamilyRepresentative, UserRoles.Admin] },
+    loadChildren: () =>
+      import('./views/family/routes').then((m) => m.familyRoutes),
+  },
+
+  // Dashboard Admin (layout existente)
+  {
+    path: 'admin',
     loadComponent: () =>
       import('./layout').then((m) => m.DefaultLayoutComponent),
-    canActivate: [authGuard],
-    data: {
-      title: 'Home',
-    },
+    canActivate: [authGuard, roleGuard],
+    data: { roles: [UserRoles.Admin] },
     children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
       {
         path: 'dashboard',
         loadComponent: () =>
           import('./views/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent
           ),
-        data: {
-          title: 'Dashboard',
-          description: 'Panel principal',
-        },
       },
     ],
   },
 
-  // ============================================
-  // RUTAS DE ERROR
-  // ============================================
+  // Ruta legacy
+  {
+    path: 'dashboard',
+    redirectTo: 'admin/dashboard',
+    pathMatch: 'full'
+  },
+
+  // Errores
   {
     path: '404',
     loadComponent: () =>
       import('./views/pages/page404/page404.component').then(
         (m) => m.Page404Component
       ),
-    data: {
-      title: 'Página No Encontrada',
-    },
   },
   {
     path: '500',
@@ -77,9 +112,6 @@ export const routes: Routes = [
       import('./views/pages/page500/page500.component').then(
         (m) => m.Page500Component
       ),
-    data: {
-      title: 'Error del Servidor',
-    },
   },
 
   {
