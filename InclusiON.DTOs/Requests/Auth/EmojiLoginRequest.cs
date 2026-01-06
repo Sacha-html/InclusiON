@@ -4,7 +4,7 @@ namespace InclusiON.DTOs.Requests.Auth
 {
     /// <summary>
     /// Request para login con secuencia de emojis.
-    /// El usuario debe seleccionar 4 emojis en el orden correcto.
+    /// El usuario debe seleccionar 3 emojis en el orden correcto.
     /// </summary>
     public class EmojiLoginRequest
     {
@@ -12,14 +12,14 @@ namespace InclusiON.DTOs.Requests.Auth
         /// ID del usuario que intenta autenticarse.
         /// </summary>
         [Required(ErrorMessage = "El ID de usuario es requerido")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         /// <summary>
-        /// Secuencia de emojis seleccionados (4 emojis).
+        /// Secuencia de emojis seleccionados (3 emojis).
         /// </summary>
         [Required(ErrorMessage = "La secuencia de emojis es requerida")]
-        [MinLength(4, ErrorMessage = "La secuencia debe tener 4 emojis")]
-        [MaxLength(4, ErrorMessage = "La secuencia debe tener 4 emojis")]
+        [MinLength(3, ErrorMessage = "La secuencia debe tener 3 emojis")]
+        [MaxLength(3, ErrorMessage = "La secuencia debe tener 3 emojis")]
         public string[] EmojiSequence { get; set; } = Array.Empty<string>();
 
         /// <summary>

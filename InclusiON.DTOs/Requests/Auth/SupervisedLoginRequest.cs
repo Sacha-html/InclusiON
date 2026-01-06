@@ -12,13 +12,13 @@ namespace InclusiON.DTOs.Requests.Auth
         /// ID del usuario que sera autenticado (persona con discapacidad).
         /// </summary>
         [Required(ErrorMessage = "El ID de usuario es requerido")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         /// <summary>
         /// ID del supervisor que autoriza el acceso.
         /// </summary>
         [Required(ErrorMessage = "El ID del supervisor es requerido")]
-        public int SupervisorId { get; set; }
+        public Guid SupervisorId { get; set; }
 
         /// <summary>
         /// PIN del supervisor para validar la autorizacion.

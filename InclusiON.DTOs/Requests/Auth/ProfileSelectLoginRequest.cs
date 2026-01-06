@@ -12,7 +12,7 @@ namespace InclusiON.DTOs.Requests.Auth
         /// ID del usuario seleccionado.
         /// </summary>
         [Required(ErrorMessage = "El ID de usuario es requerido")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         /// <summary>
         /// ID del dispositivo para validacion de contexto.
