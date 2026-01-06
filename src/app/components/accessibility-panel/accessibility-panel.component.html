@@ -87,9 +87,9 @@
       </div>
     </section>
 
-    <!-- Tamaño de texto - Simplificado -->
+    <!-- Tamaño de texto -->
     <section class="a11y-section">
-      <h3 class="a11y-section-title">Tamaño de Texto</h3>
+      <h3 class="a11y-section-title">Texto</h3>
       <div class="a11y-size-controls">
         <button
           class="a11y-size-btn"
@@ -97,7 +97,7 @@
           [disabled]="a11y.fontSize() === 'small'"
           aria-label="Reducir texto"
         >
-          <span class="a11y-size-icon">A-</span>
+          <svg cIcon name="cilMinus" size="lg"></svg>
         </button>
 
         <div class="a11y-size-display" aria-live="polite">
@@ -114,14 +114,27 @@
           [disabled]="a11y.fontSize() === 'x-large'"
           aria-label="Aumentar texto"
         >
-          <span class="a11y-size-icon">A+</span>
+          <svg cIcon name="cilPlus" size="lg"></svg>
         </button>
       </div>
     </section>
 
-    <!-- Opciones simples -->
+    <!-- Opciones -->
     <section class="a11y-section">
-      <h3 class="a11y-section-title">Ayudas Visuales</h3>
+      <h3 class="a11y-section-title">Opciones</h3>
+
+      <button
+        class="a11y-option-btn"
+        [class.active]="a11y.largeCursor()"
+        (click)="toggleLargeCursor()"
+        [attr.aria-pressed]="a11y.largeCursor()"
+      >
+        <svg cIcon name="cilCursor" size="lg"></svg>
+        <span>Cursor Grande</span>
+        @if (a11y.largeCursor()) {
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+        }
+      </button>
 
       <button
         class="a11y-option-btn"
@@ -138,19 +151,6 @@
 
       <button
         class="a11y-option-btn"
-        [class.active]="a11y.readingGuide()"
-        (click)="toggleReadingGuide()"
-        [attr.aria-pressed]="a11y.readingGuide()"
-      >
-        <svg cIcon name="cilAlignLeft" size="lg"></svg>
-        <span>Guía de Lectura</span>
-        @if (a11y.readingGuide()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
-        }
-      </button>
-
-      <button
-        class="a11y-option-btn"
         [class.active]="a11y.reducedMotion()"
         (click)="toggleReducedMotion()"
         [attr.aria-pressed]="a11y.reducedMotion()"
@@ -161,6 +161,29 @@
           <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
         }
       </button>
+    </section>
+
+    <!-- Atajos -->
+    <section class="a11y-section">
+      <h3 class="a11y-section-title">Atajos</h3>
+      <div class="a11y-shortcuts">
+        <div class="a11y-shortcut">
+          <kbd>Alt+A</kbd>
+          <span>Menú</span>
+        </div>
+        <div class="a11y-shortcut">
+          <kbd>Tab</kbd>
+          <span>Navegar</span>
+        </div>
+        <div class="a11y-shortcut">
+          <kbd>Enter</kbd>
+          <span>Activar</span>
+        </div>
+        <div class="a11y-shortcut">
+          <kbd>Esc</kbd>
+          <span>Cerrar</span>
+        </div>
+      </div>
     </section>
 
   </div>

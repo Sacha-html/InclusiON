@@ -185,6 +185,14 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
     this.a11y.updateSetting('readingGuide', !this.a11y.readingGuide());
   }
 
+  toggleLargeCursor(): void {
+    this.a11y.updateSetting('largeCursor', !this.a11y.largeCursor());
+  }
+
+  toggleHighlightFocus(): void {
+    this.a11y.updateSetting('highlightFocus', !this.a11y.highlightFocus());
+  }
+
   // Reset
   resetSettings(): void {
     this.a11y.resetSettings();
