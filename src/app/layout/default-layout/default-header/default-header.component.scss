@@ -1,0 +1,35 @@
+// ============================================
+// HEADER - ESTILOS ACCESIBLES
+// Solo para el dropdown de accesibilidad
+// ============================================
+
+:host ::ng-deep {
+  // Botones de dropdown más grandes
+  .nav-item [cDropdownToggle] {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+
+    svg {
+      width: 26px !important;
+      height: 26px !important;
+    }
+  }
+
+  // Iconos del header
+  .header-toggler svg,
+  c-header-nav svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  // Links de navegación
+  c-nav-link,
+  [cNavLink] {
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+}
