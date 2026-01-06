@@ -4,7 +4,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Commands
     /// Comando para login con PIN numerico.
     /// </summary>
     public record PinLoginCommand(
-        int UserId,
+        Guid UserId,
         string Pin,
         string? DeviceId = null,
         bool RememberDevice = false

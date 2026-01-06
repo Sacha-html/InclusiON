@@ -5,7 +5,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Commands
     /// El usuario selecciona su avatar de una lista de perfiles.
     /// </summary>
     public record ProfileSelectLoginCommand(
-        int UserId,
+        Guid UserId,
         string DeviceId,
         bool RequiresConfirmation = false,
         string? ConfirmationPin = null

@@ -5,8 +5,8 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Commands
     /// Un profesional o familiar autoriza el acceso del usuario.
     /// </summary>
     public record SupervisedLoginCommand(
-        int UserId,
-        int SupervisorId,
+        Guid UserId,
+        Guid SupervisorId,
         string SupervisorPin,
         string? DeviceId = null,
         string? SessionReason = null
