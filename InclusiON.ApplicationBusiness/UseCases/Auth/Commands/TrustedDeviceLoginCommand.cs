@@ -4,7 +4,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Commands
     /// Comando para login automatico desde dispositivo confiable.
     /// </summary>
     public record TrustedDeviceLoginCommand(
-        int UserId,
+        Guid UserId,
         string DeviceId,
         string? DeviceToken = null
     );

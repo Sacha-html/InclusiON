@@ -51,8 +51,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
             try
             {
-                var userId = Guid.Parse(command.UserId.ToString());
-                var person = await _repository.GetPersonByUserIdAsync(userId, cancellationToken);
+                var person = await _repository.GetPersonByUserIdAsync(command.UserId, cancellationToken);
 
                 if (person == null)
                 {

@@ -4,7 +4,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Commands
     /// Comando para login con seleccion de color y forma.
     /// </summary>
     public record ColorShapeLoginCommand(
-        int UserId,
+        Guid UserId,
         int ColorShapeId,
         string? DeviceId = null,
         bool RememberDevice = false

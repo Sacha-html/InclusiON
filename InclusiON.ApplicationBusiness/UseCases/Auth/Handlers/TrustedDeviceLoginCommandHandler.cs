@@ -48,8 +48,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
             try
             {
-                var userId = Guid.Parse(command.UserId.ToString());
-                var trustedDevice = await _repository.GetTrustedDeviceAsync(userId, command.DeviceId, cancellationToken);
+                var trustedDevice = await _repository.GetTrustedDeviceAsync(command.UserId, command.DeviceId, cancellationToken);
 
                 if (trustedDevice == null)
                 {
