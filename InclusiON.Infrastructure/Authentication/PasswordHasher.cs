@@ -24,7 +24,7 @@ namespace InclusiON.Infrastructure.Authentication
 
             try
             {
-                return BCrypt.Net.BCrypt.Verify(hashedPassword, providedPassword);
+                return BCrypt.Net.BCrypt.Verify(providedPassword, hashedPassword);
             }
             catch
             {
