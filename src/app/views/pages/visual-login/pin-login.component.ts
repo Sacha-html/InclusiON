@@ -113,7 +113,7 @@ export class PinLoginComponent implements OnInit {
     this.errorMessage = '';
 
     const request: PinLoginRequest = {
-      userId: parseInt(this.userId, 10),
+      userId: this.userId,
       pin: this.pin,
       deviceId: this.authService.getDeviceId(),
       rememberDevice: this.rememberDevice,

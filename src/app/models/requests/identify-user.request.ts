@@ -5,34 +5,34 @@ export interface IdentifyUserRequest {
 }
 
 export interface PinLoginRequest {
-  userId: number;
+  userId: string;
   pin: string;
   deviceId?: string;
   rememberDevice?: boolean;
 }
 
 export interface EmojiLoginRequest {
-  userId: number;
+  userId: string;
   emojiSequence: string[];
   deviceId?: string;
   rememberDevice?: boolean;
 }
 
 export interface ColorShapeLoginRequest {
-  userId: number;
+  userId: string;
   colorShapeId: number;
   deviceId?: string;
   rememberDevice?: boolean;
 }
 
 export interface TrustedDeviceLoginRequest {
-  userId: number;
+  userId: string;
   deviceId: string;
   deviceToken?: string;
 }
 
 export interface ProfileSelectLoginRequest {
-  userId: number;
+  userId: string;
   deviceId: string;
   requiresConfirmation?: boolean;
   confirmationPin?: string;

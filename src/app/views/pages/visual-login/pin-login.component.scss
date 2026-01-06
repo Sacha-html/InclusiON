@@ -89,18 +89,18 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: #e0e0e0;
-  border: 2px solid #bdbdbd;
+  background-color: var(--a11y-bg-secondary, #e0e0e0);
+  border: 3px solid var(--a11y-border, #bdbdbd);
   transition: all 0.2s ease;
 
   &.filled {
-    background-color: #667eea;
-    border-color: #667eea;
+    background-color: var(--a11y-primary, #0D47A1);
+    border-color: var(--a11y-primary, #0D47A1);
     transform: scale(1.1);
   }
 
   &.error {
-    border-color: #f44336;
+    border-color: var(--a11y-danger, #B71C1C);
     animation: shake 0.3s ease;
   }
 }
@@ -134,11 +134,11 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  border: 2px solid #e0e0e0;
-  background-color: #fff;
+  border: 3px solid var(--a11y-border, #9E9E9E);
+  background-color: var(--a11y-bg, #FFFFFF);
   font-size: 1.75rem;
   font-weight: 600;
-  color: #333;
+  color: var(--a11y-text, #1A1A1A);
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
@@ -146,19 +146,19 @@
   justify-content: center;
 
   &:hover:not(:disabled) {
-    background-color: #f5f5f5;
-    border-color: #667eea;
+    background-color: var(--a11y-bg-secondary, #F5F5F5);
+    border-color: var(--a11y-primary, #0D47A1);
     transform: scale(1.05);
   }
 
   &:active:not(:disabled) {
     transform: scale(0.95);
-    background-color: #667eea;
-    color: white;
+    background-color: var(--a11y-primary, #0D47A1);
+    color: var(--a11y-primary-text, #FFFFFF);
   }
 
-  &:focus {
-    outline: 3px solid #667eea;
+  &:focus-visible {
+    outline: 4px solid var(--a11y-focus-color, rgba(13, 71, 161, 0.5));
     outline-offset: 2px;
   }
 
@@ -172,27 +172,27 @@
   }
 
   &.clear {
-    color: #f44336;
-    border-color: #ffcdd2;
+    color: var(--a11y-danger, #B71C1C);
+    border-color: var(--a11y-danger, #B71C1C);
 
     &:hover:not(:disabled) {
-      background-color: #ffebee;
-      border-color: #f44336;
+      background-color: var(--a11y-bg-secondary, #FFEBEE);
+      border-color: var(--a11y-danger, #B71C1C);
     }
   }
 
   &.submit {
-    color: #4caf50;
-    border-color: #c8e6c9;
+    color: var(--a11y-success, #1B5E20);
+    border-color: var(--a11y-success, #1B5E20);
 
     &:hover:not(:disabled) {
-      background-color: #e8f5e9;
-      border-color: #4caf50;
+      background-color: var(--a11y-bg-secondary, #E8F5E9);
+      border-color: var(--a11y-success, #1B5E20);
     }
 
     &:active:not(:disabled) {
-      background-color: #4caf50;
-      color: white;
+      background-color: var(--a11y-success, #1B5E20);
+      color: #FFFFFF;
     }
   }
 }

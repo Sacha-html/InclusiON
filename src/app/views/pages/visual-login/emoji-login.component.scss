@@ -80,7 +80,7 @@
 }
 
 .selected-display {
-  background-color: #f8f9fa;
+  background-color: var(--a11y-bg-secondary, #F5F5F5);
   border-radius: 1rem;
   padding: 1rem;
 }
@@ -92,35 +92,35 @@
 }
 
 .emoji-slot {
-  width: 60px;
-  height: 60px;
-  border-radius: 0.75rem;
-  border: 3px dashed #dee2e6;
+  width: 80px;
+  height: 80px;
+  border-radius: 1rem;
+  border: 4px dashed var(--a11y-border, #9E9E9E);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  background-color: white;
+  font-size: 2.5rem;
+  background-color: var(--a11y-bg, #FFFFFF);
   transition: all 0.2s ease;
 
   &.filled {
     border-style: solid;
-    border-color: #667eea;
-    background-color: #f0f4ff;
+    border-color: var(--a11y-primary, #0D47A1);
+    background-color: var(--a11y-bg-secondary, #E3F2FD);
   }
 
   .slot-number {
-    font-size: 1.25rem;
-    color: #adb5bd;
+    font-size: 1.5rem;
+    color: var(--a11y-text-muted, #757575);
     font-weight: 600;
   }
 }
 
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.5rem;
-  max-width: 450px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  max-width: 350px;
   margin: 0 auto;
 
   &.disabled {
@@ -130,10 +130,11 @@
 }
 
 .emoji-button {
-  aspect-ratio: 1;
-  border: 2px solid #e9ecef;
-  border-radius: 0.75rem;
-  background-color: white;
+  width: 100px;
+  height: 100px;
+  border: 4px solid var(--a11y-border, #9E9E9E);
+  border-radius: 1rem;
+  background-color: var(--a11y-bg, #FFFFFF);
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
@@ -143,37 +144,37 @@
   padding: 0;
 
   &:hover:not(:disabled) {
-    border-color: #667eea;
-    background-color: #f8f9ff;
-    transform: scale(1.05);
+    border-color: var(--a11y-primary, #0D47A1);
+    background-color: var(--a11y-bg-secondary, #F5F5F5);
+    transform: scale(1.08);
   }
 
-  &:focus {
-    outline: 3px solid #667eea;
+  &:focus-visible {
+    outline: 4px solid var(--a11y-focus-color, rgba(13, 71, 161, 0.5));
     outline-offset: 2px;
   }
 
   &.selected {
-    border-color: #667eea;
-    background-color: #e8edff;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    border-color: var(--a11y-primary, #0D47A1);
+    background-color: var(--a11y-bg-secondary, #E3F2FD);
+    box-shadow: 0 0 0 4px var(--a11y-focus-color, rgba(13, 71, 161, 0.3));
   }
 
   .emoji-icon {
-    font-size: 1.75rem;
+    font-size: 3rem;
     line-height: 1;
   }
 
   .selection-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
-    background-color: #667eea;
-    color: white;
+    top: -10px;
+    right: -10px;
+    width: 32px;
+    height: 32px;
+    background-color: var(--a11y-primary, #0D47A1);
+    color: var(--a11y-primary-text, #FFFFFF);
     border-radius: 50%;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 700;
     display: flex;
     align-items: center;

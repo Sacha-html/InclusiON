@@ -73,7 +73,7 @@ export class ProfileSelectLoginComponent implements OnInit {
     this.errorMessage = '';
 
     const request: ProfileSelectLoginRequest = {
-      userId: parseInt(this.userId, 10),
+      userId: this.userId,
       deviceId: this.authService.getDeviceId(),
       requiresConfirmation: this.requiresConfirmation,
       confirmationPin: this.confirmationPin || undefined,

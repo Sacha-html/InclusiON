@@ -137,7 +137,7 @@ export class ColorShapeLoginComponent implements OnInit {
     this.errorMessage = '';
 
     const request: ColorShapeLoginRequest = {
-      userId: parseInt(this.userId, 10),
+      userId: this.userId,
       colorShapeId: this.selectedShapeId,
       deviceId: this.authService.getDeviceId(),
       rememberDevice: this.rememberDevice,
