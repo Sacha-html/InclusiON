@@ -18,6 +18,14 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'standard',
+    loadComponent: () =>
+      import('./visual-standard-login.component').then((m) => m.VisualStandardLoginComponent),
+    data: {
+      title: 'Ingresar Contrasena',
+    },
+  },
+  {
     path: 'pin',
     loadComponent: () =>
       import('./pin-login.component').then((m) => m.PinLoginComponent),
@@ -26,27 +34,45 @@ export const routes: Routes = [
     },
   },
   {
-    path: 'emoji',
+    path: 'assisted',
     loadComponent: () =>
-      import('./emoji-login.component').then((m) => m.EmojiLoginComponent),
+      import('./assisted-login.component').then((m) => m.AssistedLoginComponent),
     data: {
-      title: 'Seleccionar Emojis',
+      title: 'Login Asistido',
     },
+  },
+  {
+    path: 'settings/login-method',
+    loadComponent: () =>
+      import('./login-method-selector.component').then((m) => m.LoginMethodSelectorComponent),
+    data: {
+      title: 'Configurar Metodo de Login',
+    },
+  },
+  // Rutas deprecadas - mantenidas para retrocompatibilidad
+  {
+    path: 'emoji',
+    redirectTo: 'identify',
+    pathMatch: 'full',
   },
   {
     path: 'color-shape',
-    loadComponent: () =>
-      import('./color-shape-login.component').then((m) => m.ColorShapeLoginComponent),
-    data: {
-      title: 'Seleccionar Figura',
-    },
+    redirectTo: 'identify',
+    pathMatch: 'full',
   },
   {
     path: 'profile-select',
-    loadComponent: () =>
-      import('./profile-select-login.component').then((m) => m.ProfileSelectLoginComponent),
-    data: {
-      title: 'Confirmar Perfil',
-    },
+    redirectTo: 'identify',
+    pathMatch: 'full',
+  },
+  {
+    path: 'trusted-device',
+    redirectTo: 'identify',
+    pathMatch: 'full',
+  },
+  {
+    path: 'supervised',
+    redirectTo: 'assisted',
+    pathMatch: 'full',
   },
 ];

@@ -1,0 +1,144 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="visual-login-container min-vh-100 d-flex flex-column align-items-center justify-content-center">
+  <div class="content-wrapper">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <button
+        cButton
+        color="light"
+        class="back-button"
+        (click)="goBack()"
+        aria-label="Volver a identificacion de usuario"
+      >
+        <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
+        <span>Volver</span>
+      </button>
+    </div>
+
+    <!-- Main Card -->
+    <div class="login-card card border-0 shadow">
+      <div class="card-body p-4 p-md-5">
+        <!-- User Avatar -->
+        <div class="text-center mb-4">
+          <div
+            class="user-avatar mx-auto mb-3"
+            [style.background-color]="avatarColor"
+          >
+            {{ initial }}
+          </div>
+          <h2 class="h4 fw-bold mb-1">{{ displayName }}</h2>
+          <p class="text-muted mb-0">necesita ayuda para entrar</p>
+        </div>
+
+        <!-- Supervisor Info -->
+        <div class="supervisor-info text-center mb-4">
+          <div class="supervisor-icon mb-2">
+            <svg cIcon name="cilPeople" size="xl"></svg>
+          </div>
+          <p class="fw-semibold mb-0">
+            Un familiar o profesional debe autorizar el acceso
+          </p>
+        </div>
+
+        <!-- Error Alert -->
+        @if (errorMessage) {
+          <div
+            class="alert alert-danger mb-4 text-center"
+            role="alert"
+          >
+            <svg cIcon name="cilWarning" class="me-2"></svg>
+            {{ errorMessage }}
+          </div>
+        }
+
+        <!-- Supervisor Login Form -->
+        <form (ngSubmit)="onSubmit()" class="supervisor-form">
+          <p class="form-section-title text-center mb-3">
+            <svg cIcon name="cilUser" class="me-1"></svg>
+            Credenciales del supervisor
+          </p>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="supervisorEmail" class="form-label visually-hidden">Email del supervisor</label>
+            <c-input-group size="lg">
+              <span cInputGroupText>
+                <svg cIcon name="cilEnvelopeClosed"></svg>
+              </span>
+              <input
+                cFormControl
+                type="email"
+                id="supervisorEmail"
+                [(ngModel)]="supervisorEmail"
+                name="supervisorEmail"
+                placeholder="Email del familiar o profesional"
+                [disabled]="isLoading"
+                autocomplete="email"
+                class="form-input"
+              />
+            </c-input-group>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-4">
+            <label for="supervisorPassword" class="form-label visually-hidden">Contrasena del supervisor</label>
+            <c-input-group size="lg">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked"></svg>
+              </span>
+              <input
+                cFormControl
+                [type]="showPassword ? 'text' : 'password'"
+                id="supervisorPassword"
+                [(ngModel)]="supervisorPassword"
+                name="supervisorPassword"
+                placeholder="Contrasena"
+                [disabled]="isLoading"
+                autocomplete="current-password"
+                class="form-input"
+              />
+              <button
+                type="button"
+                cButton
+                color="secondary"
+                variant="outline"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+              >
+                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilDescription'"></svg>
+              </button>
+            </c-input-group>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            cButton
+            color="success"
+            type="submit"
+            size="lg"
+            class="w-100 submit-button"
+            [disabled]="!supervisorEmail || !supervisorPassword || isLoading"
+          >
+            @if (isLoading) {
+              <c-spinner size="sm" class="me-2"></c-spinner>
+              Autorizando...
+            } @else {
+              <svg cIcon name="cilCheckCircle" class="me-2"></svg>
+              Autorizar Entrada
+            }
+          </button>
+        </form>
+
+        <!-- Help -->
+        <div class="text-center mt-4">
+          <p class="text-muted small mb-0">
+            <svg cIcon name="cilInfo" class="me-1"></svg>
+            Solo familiares y profesionales autorizados pueden dar acceso
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

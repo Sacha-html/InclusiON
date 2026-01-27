@@ -1,0 +1,106 @@
+.login-method-selector {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.method-card {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:focus {
+    outline: 2px solid var(--cui-primary);
+    outline-offset: 2px;
+  }
+
+  &.selected {
+    border-color: var(--cui-primary);
+    background-color: rgba(var(--cui-primary-rgb), 0.05);
+  }
+
+  &.current {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 12px;
+      height: 12px;
+      background-color: var(--cui-info);
+      border-radius: 50%;
+    }
+  }
+}
+
+.method-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cui-light);
+  border-radius: 50%;
+
+  svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.method-name {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.method-description {
+  margin-bottom: 0.5rem;
+  min-height: 40px;
+}
+
+.config-section {
+  background-color: var(--cui-light);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.pin-config input {
+  font-size: 1.25rem;
+  letter-spacing: 0.5rem;
+  text-align: center;
+}
+
+// Accessibility improvements
+@media (prefers-reduced-motion: reduce) {
+  .method-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// Large touch targets for accessibility
+@media (max-width: 767px) {
+  .method-card {
+    min-height: 180px;
+  }
+
+  .method-icon {
+    width: 80px;
+    height: 80px;
+
+    svg {
+      width: 40px;
+      height: 40px;
+    }
+  }
+}
