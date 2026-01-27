@@ -97,6 +97,38 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             var displayName = $"{person.FirstName} {person.LastName}".Trim();
             var loginMethod = person.LoginMethod;
 
+            // Verificar si el metodo de login esta deprecado
+            if (loginMethod != null && !loginMethod.IsActive)
+            {
+                _logger.LogWarning(
+                    "Usuario {UserId} tiene metodo de login deprecado: {LoginMethod}",
+                    person.UserId, loginMethod.Code);
+
+                return ApiResponse<IdentifyUserResponse>.SuccessResult(
+                    new IdentifyUserResponse
+                    {
+                        UserFound = true,
+                        UserId = person.UserId,
+                        DisplayName = displayName,
+                        Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
+                        AvatarColor = person.AvatarColor ?? "#2196F3",
+                        LoginMethodCode = "DEPRECATED",
+                        LoginMethodName = "Metodo no disponible",
+                        IsTrustedDevice = false,
+                        RequiresSupervision = false,
+                        UserType = "Person",
+                        ErrorMessage = "Tu metodo de acceso necesita actualizarse. Por favor, contacta a un administrador o familiar."
+                    },
+                    "Metodo de login deprecado");
+            }
+
+            // Normalizar codigo SUPERVISED a ASSISTED para retrocompatibilidad
+            var loginMethodCode = loginMethod?.Code ?? "STANDARD";
+            if (loginMethodCode == "SUPERVISED")
+            {
+                loginMethodCode = "ASSISTED";
+            }
+
             return ApiResponse<IdentifyUserResponse>.SuccessResult(
                 new IdentifyUserResponse
                 {
@@ -105,7 +137,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     DisplayName = displayName,
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
                     AvatarColor = person.AvatarColor ?? "#2196F3",
-                    LoginMethodCode = loginMethod?.Code ?? "STANDARD",
+                    LoginMethodCode = loginMethodCode,
                     LoginMethodName = loginMethod?.Name ?? "Contrasena",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = loginMethod?.RequiresSupervisor ?? false,

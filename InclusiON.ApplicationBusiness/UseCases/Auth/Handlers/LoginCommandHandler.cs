@@ -134,6 +134,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                         Surname = user.Surname,
                         Email = user.Email!,
                         PhoneNumber = user.PhoneNumber,
+                        Role = roles.FirstOrDefault() ?? "User",
                         CreatedAt = user.CreatedAt,
                         IsActive = user.IsActive,
                         LastLoginDate = user.LastLoginDate

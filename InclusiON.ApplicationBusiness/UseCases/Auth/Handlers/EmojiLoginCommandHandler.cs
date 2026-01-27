@@ -16,6 +16,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
     /// <summary>
     /// Handler para login con secuencia de emojis.
     /// </summary>
+    [Obsolete("Este metodo de login ha sido deprecado. Use PinLoginCommandHandler o AssistedLoginCommandHandler en su lugar.")]
     public class EmojiLoginCommandHandler : ICommandHandler<EmojiLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;

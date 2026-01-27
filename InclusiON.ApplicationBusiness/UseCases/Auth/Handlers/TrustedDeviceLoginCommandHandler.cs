@@ -15,6 +15,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
     /// <summary>
     /// Handler para login automatico desde dispositivo confiable.
     /// </summary>
+    [Obsolete("Este metodo de login ha sido deprecado. Use PinLoginCommandHandler o AssistedLoginCommandHandler en su lugar.")]
     public class TrustedDeviceLoginCommandHandler : ICommandHandler<TrustedDeviceLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;
