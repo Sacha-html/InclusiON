@@ -16,6 +16,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
     /// Handler para login por seleccion de perfil visual.
     /// Solo funciona desde dispositivos registrados como confiables.
     /// </summary>
+    [Obsolete("Este metodo de login ha sido deprecado. Use PinLoginCommandHandler o AssistedLoginCommandHandler en su lugar.")]
     public class ProfileSelectLoginCommandHandler : ICommandHandler<ProfileSelectLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;

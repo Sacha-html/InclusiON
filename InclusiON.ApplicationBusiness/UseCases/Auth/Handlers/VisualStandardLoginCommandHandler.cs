@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -14,30 +13,33 @@ using InclusiON.Entities.Models;
 namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 {
     /// <summary>
-    /// Handler para login con secuencia de emojis.
+    /// Handler para login visual estandar.
+    /// La persona con discapacidad se identifica por nombre y luego ingresa su contrasena.
     /// </summary>
-    [Obsolete("Este metodo de login ha sido deprecado. Use PinLoginCommandHandler o AssistedLoginCommandHandler en su lugar.")]
-    public class EmojiLoginCommandHandler : ICommandHandler<EmojiLoginCommand, ApiResponse<VisualLoginResponse>>
+    public class VisualStandardLoginCommandHandler : ICommandHandler<VisualStandardLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;
         private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger<EmojiLoginCommandHandler> _logger;
+        private readonly ILogger<VisualStandardLoginCommandHandler> _logger;
 
         private const int MaxFailedAttempts = 5;
 
-        public EmojiLoginCommandHandler(
+        public VisualStandardLoginCommandHandler(
             IVisualLoginRepository repository,
             UserManager<User> userManager,
+            SignInManager<User> signInManager,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<EmojiLoginCommandHandler> logger)
+            ILogger<VisualStandardLoginCommandHandler> logger)
         {
             _repository = repository;
             _userManager = userManager;
+            _signInManager = signInManager;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
             _httpContextAccessor = httpContextAccessor;
@@ -45,7 +47,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         }
 
         public async Task<ApiResponse<VisualLoginResponse>> HandleAsync(
-            EmojiLoginCommand command,
+            VisualStandardLoginCommand command,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -61,6 +63,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
                 var user = person.User;
 
+                // Verificar si esta bloqueado
                 if (await _userManager.IsLockedOutAsync(user))
                 {
                     var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
@@ -78,55 +81,51 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                         });
                 }
 
-                if (string.IsNullOrEmpty(person.EmojiSequence))
-                {
-                    return ApiResponse<VisualLoginResponse>.ErrorResult("Secuencia de emojis no configurada");
-                }
+                // Verificar contrasena usando SignInManager
+                var signInResult = await _signInManager.CheckPasswordSignInAsync(
+                    user,
+                    command.Password,
+                    lockoutOnFailure: true);
 
-                string[] storedSequence;
-                try
+                if (!signInResult.Succeeded)
                 {
-                    storedSequence = JsonSerializer.Deserialize<string[]>(person.EmojiSequence) ?? Array.Empty<string>();
-                }
-                catch
-                {
-                    return ApiResponse<VisualLoginResponse>.ErrorResult("Error en configuracion de emojis");
-                }
-
-                if (!SequencesMatch(command.EmojiSequence, storedSequence))
-                {
-                    await _userManager.AccessFailedAsync(user);
                     var failedCount = await _userManager.GetAccessFailedCountAsync(user);
                     var remaining = MaxFailedAttempts - failedCount;
+
+                    if (signInResult.IsLockedOut)
+                    {
+                        var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                        var secondsRemaining = lockoutEnd.HasValue
+                            ? (int)(lockoutEnd.Value - DateTimeOffset.UtcNow).TotalSeconds
+                            : 0;
+
+                        return ApiResponse<VisualLoginResponse>.SuccessResult(
+                            new VisualLoginResponse
+                            {
+                                Success = false,
+                                IsLocked = true,
+                                LockoutSecondsRemaining = secondsRemaining,
+                                ErrorMessage = "Cuenta bloqueada por intentos fallidos"
+                            });
+                    }
 
                     return ApiResponse<VisualLoginResponse>.SuccessResult(
                         new VisualLoginResponse
                         {
                             Success = false,
                             RemainingAttempts = remaining > 0 ? remaining : 0,
-                            ErrorMessage = "Secuencia incorrecta"
+                            ErrorMessage = "Contrasena incorrecta"
                         });
                 }
 
-                await _userManager.ResetAccessFailedCountAsync(user);
+                // Login exitoso
                 return await GenerateLoginResponseAsync(user, person, command.DeviceId, command.RememberDevice, cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en login con emojis para usuario: {UserId}", command.UserId);
+                _logger.LogError(ex, "Error en login visual estandar para usuario: {UserId}", command.UserId);
                 return ApiResponse<VisualLoginResponse>.ErrorResult($"Error al procesar login: {ex.Message}");
             }
-        }
-
-        private static bool SequencesMatch(string[] input, string[] stored)
-        {
-            if (input == null || stored == null) return false;
-            if (input.Length != stored.Length) return false;
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (input[i] != stored[i]) return false;
-            }
-            return true;
         }
 
         private async Task<ApiResponse<VisualLoginResponse>> GenerateLoginResponseAsync(
@@ -140,7 +139,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             var ipAddress = GetClientIpAddress(httpContext);
             var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
 
-            await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login con emojis");
+            await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login visual estandar");
 
             user.LastLoginDate = DateTime.UtcNow;
             user.LastLoginIpAddress = ipAddress;
@@ -152,7 +151,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             var tokenUserData = new TokenUserData
             {
                 Id = user.Id,
-                Email = user.Email!,
+                Email = user.Email ?? string.Empty,
                 Name = $"{person.FirstName} {person.LastName}",
                 Role = roles.FirstOrDefault() ?? "Person",
                 IsActive = user.IsActive
@@ -181,7 +180,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 {
                     UserId = user.Id,
                     DeviceId = deviceId,
-                    DeviceName = "Dispositivo registrado via emojis",
+                    DeviceName = "Dispositivo registrado via login estandar",
                     Browser = ParseBrowserFromUserAgent(userAgent),
                     RegisteredAt = DateTime.UtcNow,
                     ExpiresAt = DateTime.UtcNow.AddDays(90),

@@ -15,6 +15,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
     /// <summary>
     /// Handler para login con seleccion de color y forma.
     /// </summary>
+    [Obsolete("Este metodo de login ha sido deprecado. Use PinLoginCommandHandler o AssistedLoginCommandHandler en su lugar.")]
     public class ColorShapeLoginCommandHandler : ICommandHandler<ColorShapeLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;
