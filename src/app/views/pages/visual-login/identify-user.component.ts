@@ -125,34 +125,29 @@ export class IdentifyUserComponent implements OnInit {
       avatarColor: userData.avatarColor,
     };
 
-    // If trusted device, auto-login
-    if (userData.isTrustedDevice) {
-      this.router.navigate(['/login/trusted-device'], {
-        queryParams: baseParams,
-      });
+    // Si el metodo esta deprecado, mostrar error
+    if (userData.loginMethodCode === 'DEPRECATED') {
+      this.errorMessage = userData.errorMessage || 'Tu metodo de acceso necesita actualizarse. Contacta a un administrador.';
+      this.isLoading = false;
       return;
     }
 
     // Navigate based on login method
     switch (userData.loginMethodCode) {
+      case 'STANDARD':
+        this.router.navigate(['/login/standard'], { queryParams: baseParams });
+        break;
       case 'PIN':
         this.router.navigate(['/login/pin'], { queryParams: baseParams });
         break;
-      case 'EMOJI_SEQUENCE':
-        this.router.navigate(['/login/emoji'], { queryParams: baseParams });
-        break;
-      case 'COLOR_SHAPE':
-        this.router.navigate(['/login/color-shape'], { queryParams: baseParams });
-        break;
-      case 'PROFILE_SELECT':
-        this.router.navigate(['/login/profile-select'], { queryParams: baseParams });
-        break;
       case 'SUPERVISED':
-        this.router.navigate(['/login/supervised'], { queryParams: baseParams });
+      case 'ASSISTED':
+        this.router.navigate(['/login/assisted'], { queryParams: baseParams });
         break;
       default:
-        // Default to profile select for unknown methods
-        this.router.navigate(['/login/profile-select'], { queryParams: baseParams });
+        // Para metodos desconocidos, mostrar error amigable
+        this.errorMessage = 'Tu metodo de acceso no esta disponible. Contacta a un administrador.';
+        this.isLoading = false;
     }
   }
 

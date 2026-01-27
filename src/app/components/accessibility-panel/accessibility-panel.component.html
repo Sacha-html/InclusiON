@@ -161,6 +161,19 @@
           <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
         }
       </button>
+
+      <button
+        class="a11y-option-btn"
+        [class.active]="a11y.readingGuide()"
+        (click)="toggleReadingGuide()"
+        [attr.aria-pressed]="a11y.readingGuide()"
+      >
+        <svg cIcon name="cilAlignCenter" size="lg"></svg>
+        <span>Guía de Lectura</span>
+        @if (a11y.readingGuide()) {
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+        }
+      </button>
     </section>
 
     <!-- Atajos -->

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import { EmojiLoginRequest } from '../../../models';
+import { VisualStandardLoginRequest } from '../../../models';
 import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
 import {
   ContainerComponent,
@@ -12,6 +12,9 @@ import {
   CardComponent,
   CardBodyComponent,
   ButtonDirective,
+  FormControlDirective,
+  InputGroupComponent,
+  InputGroupTextDirective,
   SpinnerComponent,
   AlertComponent,
   FormCheckComponent,
@@ -21,7 +24,7 @@ import {
 import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
-  selector: 'app-emoji-login',
+  selector: 'app-visual-standard-login',
   standalone: true,
   imports: [
     CommonModule,
@@ -32,6 +35,9 @@ import { IconDirective } from '@coreui/icons-angular';
     CardComponent,
     CardBodyComponent,
     ButtonDirective,
+    FormControlDirective,
+    InputGroupComponent,
+    InputGroupTextDirective,
     SpinnerComponent,
     AlertComponent,
     FormCheckComponent,
@@ -40,10 +46,10 @@ import { IconDirective } from '@coreui/icons-angular';
     IconDirective,
     AccessibilityPanelComponent,
   ],
-  templateUrl: './emoji-login.component.html',
-  styleUrl: './emoji-login.component.scss',
+  templateUrl: './visual-standard-login.component.html',
+  styleUrl: './visual-standard-login.component.scss',
 })
-export class EmojiLoginComponent implements OnInit {
+export class VisualStandardLoginComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
@@ -53,21 +59,14 @@ export class EmojiLoginComponent implements OnInit {
   initial = '';
   avatarColor = '#667eea';
 
-  selectedEmojis: string[] = [];
-  maxEmojiCount = 3;
+  password = '';
+  showPassword = false;
   isLoading = false;
   errorMessage = '';
   remainingAttempts: number | null = null;
   isLocked = false;
   lockoutSeconds = 0;
   rememberDevice = false;
-
-  // Emoji grid - 9 simple, recognizable emojis
-  availableEmojis: string[] = [
-    '🐶', '🐱', '🐻',
-    '🍎', '🌻', '🏠',
-    '⭐', '❤️', '🚗',
-  ];
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
@@ -81,53 +80,20 @@ export class EmojiLoginComponent implements OnInit {
     }
   }
 
-  selectEmoji(emoji: string): void {
-    if (this.isLoading || this.isLocked) return;
-
-    // Check if already selected
-    const index = this.selectedEmojis.indexOf(emoji);
-    if (index > -1) {
-      // Remove emoji (toggle off)
-      this.selectedEmojis.splice(index, 1);
-    } else if (this.selectedEmojis.length < this.maxEmojiCount) {
-      // Add emoji
-      this.selectedEmojis.push(emoji);
-      this.errorMessage = '';
-
-      // Auto-submit when 3 emojis selected
-      if (this.selectedEmojis.length === this.maxEmojiCount) {
-        setTimeout(() => this.onSubmit(), 300);
-      }
-    }
-  }
-
-  isSelected(emoji: string): boolean {
-    return this.selectedEmojis.includes(emoji);
-  }
-
-  getSelectionOrder(emoji: string): number {
-    return this.selectedEmojis.indexOf(emoji) + 1;
-  }
-
-  onClear(): void {
-    this.selectedEmojis = [];
-    this.errorMessage = '';
-  }
-
   onSubmit(): void {
-    if (this.selectedEmojis.length !== this.maxEmojiCount || this.isLoading) return;
+    if (!this.password || this.isLoading || this.isLocked) return;
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const request: EmojiLoginRequest = {
+    const request: VisualStandardLoginRequest = {
       userId: this.userId,
-      emojiSequence: this.selectedEmojis,
+      password: this.password,
       deviceId: this.authService.getDeviceId(),
       rememberDevice: this.rememberDevice,
     };
 
-    this.authService.loginWithEmoji(request).subscribe({
+    this.authService.loginVisualStandard(request).subscribe({
       next: (response) => {
         if (response.success && response.data?.success) {
           this.router.navigate(['/dashboard']);
@@ -136,16 +102,16 @@ export class EmojiLoginComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Emoji login error:', error);
-        this.errorMessage = error.message || 'Error al verificar los emojis';
-        this.selectedEmojis = [];
+        console.error('Visual standard login error:', error);
+        this.errorMessage = error.message || 'Error al verificar la contrasena';
+        this.password = '';
         this.isLoading = false;
       },
     });
   }
 
   private handleLoginError(data: any): void {
-    this.selectedEmojis = [];
+    this.password = '';
     this.isLoading = false;
 
     if (data?.isLocked) {
@@ -155,7 +121,7 @@ export class EmojiLoginComponent implements OnInit {
       this.errorMessage = `Cuenta bloqueada. Espera ${this.lockoutSeconds} segundos.`;
     } else {
       this.remainingAttempts = data?.remainingAttempts || null;
-      this.errorMessage = data?.errorMessage || 'Secuencia incorrecta';
+      this.errorMessage = data?.errorMessage || 'Contrasena incorrecta';
 
       if (this.remainingAttempts !== null && this.remainingAttempts <= 2) {
         this.errorMessage += `. Te quedan ${this.remainingAttempts} intentos.`;
@@ -172,6 +138,10 @@ export class EmojiLoginComponent implements OnInit {
         this.errorMessage = '';
       }
     }, 1000);
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   goBack(): void {

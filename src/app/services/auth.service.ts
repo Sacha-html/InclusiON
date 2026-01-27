@@ -13,9 +13,14 @@ import {
   ColorShapeLoginRequest,
   TrustedDeviceLoginRequest,
   ProfileSelectLoginRequest,
+  VisualStandardLoginRequest,
+  AssistedLoginRequest,
+  UpdateLoginMethodRequest,
   IdentifyUserResponse,
   VisualLoginResponse,
   VisualLoginUserInfo,
+  LoginMethodsResponse,
+  LoginMethod,
 } from '../models';
 import { environment } from '../../environments/environment';
 
@@ -301,6 +306,33 @@ export class AuthService {
       );
   }
 
+  loginVisualStandard(request: VisualStandardLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/visual-standard`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  loginAssisted(request: AssistedLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/assisted`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /** @deprecated Use loginWithPin or loginAssisted instead */
   loginWithEmoji(request: EmojiLoginRequest): Observable<VisualLoginResponse> {
     return this.http
       .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/emoji`, request)
@@ -314,6 +346,7 @@ export class AuthService {
       );
   }
 
+  /** @deprecated Use loginWithPin or loginAssisted instead */
   loginWithColorShape(request: ColorShapeLoginRequest): Observable<VisualLoginResponse> {
     return this.http
       .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/color-shape`, request)
@@ -327,6 +360,7 @@ export class AuthService {
       );
   }
 
+  /** @deprecated Use loginWithPin or loginAssisted instead */
   loginWithTrustedDevice(request: TrustedDeviceLoginRequest): Observable<VisualLoginResponse> {
     return this.http
       .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/trusted-device`, request)
@@ -340,6 +374,7 @@ export class AuthService {
       );
   }
 
+  /** @deprecated Use loginWithPin or loginAssisted instead */
   loginWithProfileSelect(request: ProfileSelectLoginRequest): Observable<VisualLoginResponse> {
     return this.http
       .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/profile-select`, request)
@@ -428,4 +463,35 @@ export class AuthService {
       return false;
     }
   }
+
+  // Login Method Management
+
+  getLoginMethods(): Observable<LoginMethodsResponse> {
+    return this.http
+      .get<LoginMethodsResponse>(`${this.apiUrl}/Auth/login-methods`)
+      .pipe(catchError(this.handleError));
+  }
+
+  updateMyLoginMethod(request: UpdateLoginMethodRequest): Observable<UpdateLoginMethodApiResponse> {
+    return this.http
+      .put<UpdateLoginMethodApiResponse>(`${this.apiUrl}/Persons/me/login-method`, request)
+      .pipe(catchError(this.handleError));
+  }
+
+  updateUserLoginMethod(userId: string, request: UpdateLoginMethodRequest): Observable<UpdateLoginMethodApiResponse> {
+    return this.http
+      .put<UpdateLoginMethodApiResponse>(`${this.apiUrl}/Persons/${userId}/login-method`, request)
+      .pipe(catchError(this.handleError));
+  }
+}
+
+export interface UpdateLoginMethodApiResponse {
+  success: boolean;
+  message: string;
+  data: {
+    updated: boolean;
+    loginMethodId: number;
+    loginMethodName: string;
+  } | null;
+  errors: string[];
 }
