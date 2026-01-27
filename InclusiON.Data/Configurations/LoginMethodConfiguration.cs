@@ -32,16 +32,17 @@ namespace InclusiON.Data.Configurations
             builder.HasIndex(m => m.Code)
                 .IsUnique();
 
-            // Seed Data - 7 metodos de login adaptados por nivel de autonomia
+            // Seed Data - 3 metodos de login activos para personas con discapacidad
+            // Metodos deprecados (3, 4, 6, 7) se mantienen para compatibilidad pero con IsActive = false
             builder.HasData(
                 new LoginMethod
                 {
                     Id = 1,
                     Code = "STANDARD",
                     Name = "Email y Contrasena",
-                    Description = "Login tradicional con email y contrasena",
+                    Description = "Login visual con nombre de usuario y contrasena",
                     MinAutonomyLevel = 1,
-                    RequiresEmail = true,
+                    RequiresEmail = false,
                     RequiresPassword = true,
                     RequiresPin = false,
                     RequiresEmojiSequence = false,
@@ -56,7 +57,7 @@ namespace InclusiON.Data.Configurations
                     Id = 2,
                     Code = "PIN",
                     Name = "PIN Numerico",
-                    Description = "Login con nombre de usuario y PIN de 4-6 digitos",
+                    Description = "Login con nombre de usuario y PIN de 4 digitos",
                     MinAutonomyLevel = 1,
                     RequiresEmail = false,
                     RequiresPassword = false,
@@ -68,12 +69,13 @@ namespace InclusiON.Data.Configurations
                     DisplayOrder = 2,
                     IsActive = true
                 },
+                // Metodo deprecado - mantenido para compatibilidad
                 new LoginMethod
                 {
                     Id = 3,
                     Code = "EMOJI_SEQUENCE",
-                    Name = "Secuencia de Emojis",
-                    Description = "Login seleccionando 4 emojis en orden",
+                    Name = "Secuencia de Emojis (Deprecado)",
+                    Description = "Login seleccionando 4 emojis en orden - DEPRECADO",
                     MinAutonomyLevel = 2,
                     RequiresEmail = false,
                     RequiresPassword = false,
@@ -83,14 +85,15 @@ namespace InclusiON.Data.Configurations
                     RequiresProfileSelect = false,
                     RequiresSupervisor = false,
                     DisplayOrder = 3,
-                    IsActive = true
+                    IsActive = false
                 },
+                // Metodo deprecado - mantenido para compatibilidad
                 new LoginMethod
                 {
                     Id = 4,
                     Code = "COLOR_SHAPE",
-                    Name = "Colores y Formas",
-                    Description = "Login seleccionando 4 colores y formas en orden",
+                    Name = "Colores y Formas (Deprecado)",
+                    Description = "Login seleccionando 4 colores y formas en orden - DEPRECADO",
                     MinAutonomyLevel = 2,
                     RequiresEmail = false,
                     RequiresPassword = false,
@@ -100,14 +103,14 @@ namespace InclusiON.Data.Configurations
                     RequiresProfileSelect = false,
                     RequiresSupervisor = false,
                     DisplayOrder = 4,
-                    IsActive = true
+                    IsActive = false
                 },
                 new LoginMethod
                 {
                     Id = 5,
-                    Code = "SUPERVISED",
-                    Name = "Supervisado",
-                    Description = "Login requiere desbloqueo por familiar o profesional",
+                    Code = "ASSISTED",
+                    Name = "Login Asistido",
+                    Description = "Login asistido donde un familiar o profesional autoriza el acceso",
                     MinAutonomyLevel = 3,
                     RequiresEmail = false,
                     RequiresPassword = false,
@@ -116,15 +119,16 @@ namespace InclusiON.Data.Configurations
                     RequiresColorShape = false,
                     RequiresProfileSelect = false,
                     RequiresSupervisor = true,
-                    DisplayOrder = 5,
+                    DisplayOrder = 3,
                     IsActive = true
                 },
+                // Metodo deprecado - mantenido para compatibilidad
                 new LoginMethod
                 {
                     Id = 6,
                     Code = "TRUSTED_DEVICE",
-                    Name = "Dispositivo Confiable",
-                    Description = "Login automatico en dispositivos previamente autorizados",
+                    Name = "Dispositivo Confiable (Deprecado)",
+                    Description = "Login automatico en dispositivos previamente autorizados - DEPRECADO",
                     MinAutonomyLevel = 3,
                     RequiresEmail = false,
                     RequiresPassword = false,
@@ -134,14 +138,15 @@ namespace InclusiON.Data.Configurations
                     RequiresProfileSelect = false,
                     RequiresSupervisor = false,
                     DisplayOrder = 6,
-                    IsActive = true
+                    IsActive = false
                 },
+                // Metodo deprecado - mantenido para compatibilidad
                 new LoginMethod
                 {
                     Id = 7,
                     Code = "PROFILE_SELECT",
-                    Name = "Seleccion de Perfil",
-                    Description = "Login seleccionando nombre y avatar del usuario",
+                    Name = "Seleccion de Perfil (Deprecado)",
+                    Description = "Login seleccionando nombre y avatar del usuario - DEPRECADO",
                     MinAutonomyLevel = 3,
                     RequiresEmail = false,
                     RequiresPassword = false,
@@ -151,7 +156,7 @@ namespace InclusiON.Data.Configurations
                     RequiresProfileSelect = true,
                     RequiresSupervisor = false,
                     DisplayOrder = 7,
-                    IsActive = true
+                    IsActive = false
                 }
             );
         }
