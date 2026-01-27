@@ -239,5 +239,70 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 throw;
             }
         }
+
+        public async Task<IEnumerable<LoginMethod>> GetActiveLoginMethodsAsync(
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await _context.LoginMethods
+                    .Where(lm => lm.IsActive)
+                    .OrderBy(lm => lm.DisplayOrder)
+                    .ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting active login methods");
+                return Enumerable.Empty<LoginMethod>();
+            }
+        }
+
+        public async Task<LoginMethod?> GetLoginMethodByIdAsync(
+            int id,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await _context.LoginMethods
+                    .FirstOrDefaultAsync(lm => lm.Id == id, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting login method by ID: {Id}", id);
+                return null;
+            }
+        }
+
+        public async Task UpdatePersonLoginMethodAsync(
+            Guid userId,
+            int loginMethodId,
+            string? pinHash,
+            Guid? supervisorUserId,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var person = await _context.PersonsWithDisability
+                    .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
+
+                if (person == null)
+                {
+                    throw new InvalidOperationException($"Person with UserId {userId} not found");
+                }
+
+                person.LoginMethodId = loginMethodId;
+                person.PinCodeHash = pinHash;
+                person.SupervisorUserId = supervisorUserId;
+                person.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("Updated login method for user: {UserId} to method: {LoginMethodId}", userId, loginMethodId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating login method for user: {UserId}", userId);
+                throw;
+            }
+        }
     }
 }
