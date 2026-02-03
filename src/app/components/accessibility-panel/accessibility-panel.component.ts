@@ -29,6 +29,7 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
   private readonly elementRef = inject(ElementRef);
   private readingGuideElement: HTMLElement | null = null;
   private mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
+  private focusHandler: ((e: FocusEvent) => void) | null = null;
 
   @ViewChild('panelContainer') panelContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('closeButton') closeButton!: ElementRef<HTMLButtonElement>;
@@ -44,15 +45,31 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  // Atajo de teclado global: Alt + A para abrir/cerrar panel
+  // Atajos de teclado globales
   @HostListener('document:keydown', ['$event'])
   handleKeyboardShortcut(event: KeyboardEvent): void {
-    // Alt + A para toggle del panel
+    // Alt + A para toggle del panel de accesibilidad
     if (event.altKey && event.key.toLowerCase() === 'a') {
       event.preventDefault();
       this.a11y.togglePanel();
       if (this.a11y.panelOpen()) {
         setTimeout(() => this.focusFirstElement(), 100);
+      }
+    }
+
+    // Alt + S para leer texto seleccionado (cuando TTS está habilitado)
+    if (event.altKey && event.key.toLowerCase() === 's') {
+      if (this.a11y.textToSpeechEnabled()) {
+        event.preventDefault();
+        this.a11y.speakSelection();
+      }
+    }
+
+    // Alt + X para detener lectura
+    if (event.altKey && event.key.toLowerCase() === 'x') {
+      if (this.a11y.isSpeaking()) {
+        event.preventDefault();
+        this.a11y.stopSpeaking();
       }
     }
 
@@ -80,34 +97,39 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
     this.readingGuideElement = document.createElement('div');
     this.readingGuideElement.className = 'a11y-reading-guide-bar';
     this.readingGuideElement.setAttribute('aria-hidden', 'true');
-    this.readingGuideElement.style.cssText = `
-      position: fixed;
-      left: 0;
-      right: 0;
-      height: 40px;
-      background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(21, 101, 192, 0.12) 20%,
-        rgba(21, 101, 192, 0.12) 80%,
-        transparent 100%
-      );
-      pointer-events: none;
-      z-index: 9990;
-      transform: translateY(-50%);
-      border-top: 2px solid rgba(21, 101, 192, 0.3);
-      border-bottom: 2px solid rgba(21, 101, 192, 0.3);
-    `;
     document.body.appendChild(this.readingGuideElement);
 
-    // Handler para seguir el mouse
+    // Throttle para mejor rendimiento
+    let ticking = false;
+    let lastY = 0;
+
+    // Handler para seguir el mouse con throttling
     this.mouseMoveHandler = (e: MouseEvent) => {
-      if (this.readingGuideElement) {
-        this.readingGuideElement.style.top = `${e.clientY}px`;
+      lastY = e.clientY;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          if (this.readingGuideElement) {
+            this.readingGuideElement.style.top = `${lastY}px`;
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
     document.addEventListener('mousemove', this.mouseMoveHandler);
+
+    // Soporte para teclado: seguir el elemento enfocado
+    this.focusHandler = (e: FocusEvent) => {
+      if (!this.readingGuideElement) return;
+      const target = e.target as HTMLElement;
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        this.readingGuideElement.style.top = `${centerY}px`;
+      }
+    };
+    document.addEventListener('focusin', this.focusHandler);
   }
 
   private disableReadingGuide(): void {
@@ -119,6 +141,11 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
     if (this.mouseMoveHandler) {
       document.removeEventListener('mousemove', this.mouseMoveHandler);
       this.mouseMoveHandler = null;
+    }
+
+    if (this.focusHandler) {
+      document.removeEventListener('focusin', this.focusHandler);
+      this.focusHandler = null;
     }
   }
 

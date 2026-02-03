@@ -6,9 +6,47 @@
   aria-controls="accessibility-panel"
   aria-label="Abrir panel de accesibilidad (Alt + A)"
 >
-  <svg cIcon name="cilContrast" size="xl"></svg>
+  <svg cIcon name="cilContrast" size="xl" aria-hidden="true"></svg>
   <span class="a11y-trigger-text">Accesibilidad</span>
 </button>
+
+<!-- Botón de salida del modo lectura (visible solo cuando está activo) -->
+@if (a11y.readingMode()) {
+<button
+  class="a11y-exit-reading-btn"
+  (click)="toggleReadingMode()"
+  aria-label="Salir del modo lectura"
+>
+  <svg cIcon name="cilX" size="lg" aria-hidden="true"></svg>
+  <span>Salir del modo lectura</span>
+</button>
+}
+
+<!-- Indicador flotante de lectura activa -->
+@if (a11y.isSpeaking()) {
+<div
+  class="a11y-speaking-indicator"
+  role="status"
+  aria-live="polite"
+  aria-label="Leyendo texto en voz alta"
+>
+  <div class="speaking-waves" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <span class="speaking-text">Leyendo...</span>
+  <button
+    class="speaking-stop-btn"
+    (click)="stopSpeaking()"
+    aria-label="Detener lectura"
+  >
+    <svg cIcon name="cilMediaStop" size="sm" aria-hidden="true"></svg>
+  </button>
+</div>
+}
 
 <!-- Panel de accesibilidad -->
 @if (a11y.panelOpen()) {
@@ -35,9 +73,9 @@
       #closeButton
       class="a11y-panel-close"
       (click)="closePanel()"
-      aria-label="Cerrar"
+      aria-label="Cerrar panel de accesibilidad"
     >
-      <svg cIcon name="cilX" size="xl"></svg>
+      <svg cIcon name="cilX" size="xl" aria-hidden="true"></svg>
     </button>
   </header>
 
@@ -45,9 +83,9 @@
   <div class="a11y-panel-content">
 
     <!-- Modo de Color (Claro/Oscuro) -->
-    <section class="a11y-section">
-      <h3 class="a11y-section-title">Modo de Color</h3>
-      <div class="a11y-color-mode-toggle">
+    <section class="a11y-section" aria-labelledby="color-mode-title">
+      <h3 id="color-mode-title" class="a11y-section-title">Modo de Color</h3>
+      <div class="a11y-color-mode-toggle" role="group" aria-labelledby="color-mode-title">
         @for (mode of a11y.colorModes; track mode.id) {
         <button
           class="a11y-mode-btn"
@@ -56,7 +94,7 @@
           [attr.aria-pressed]="a11y.colorMode() === mode.id"
           [attr.aria-label]="'Modo ' + mode.name"
         >
-          <svg cIcon [name]="mode.icon" size="xl"></svg>
+          <svg cIcon [name]="mode.icon" size="xl" aria-hidden="true"></svg>
           <span>{{ mode.name }}</span>
         </button>
         }
@@ -64,23 +102,24 @@
     </section>
 
     <!-- Perfiles de Accesibilidad -->
-    <section class="a11y-section">
-      <h3 class="a11y-section-title">Perfil de Accesibilidad</h3>
-      <div class="a11y-theme-list">
+    <section class="a11y-section" aria-labelledby="profile-title">
+      <h3 id="profile-title" class="a11y-section-title">Perfil de Accesibilidad</h3>
+      <div class="a11y-theme-list" role="group" aria-labelledby="profile-title">
         @for (profile of a11y.profiles; track profile.id) {
         <button
           class="a11y-theme-btn"
           [class.active]="a11y.profile() === profile.id"
           (click)="setProfile(profile.id)"
           [attr.aria-pressed]="a11y.profile() === profile.id"
+          [attr.aria-label]="profile.name + ': ' + profile.description"
         >
-          <svg cIcon [name]="profile.icon" size="xl"></svg>
+          <svg cIcon [name]="profile.icon" size="xl" aria-hidden="true"></svg>
           <span class="a11y-theme-text">
             <strong>{{ profile.name }}</strong>
             <small>{{ profile.description }}</small>
           </span>
           @if (a11y.profile() === profile.id) {
-            <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+            <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
           }
         </button>
         }
@@ -88,19 +127,19 @@
     </section>
 
     <!-- Tamaño de texto -->
-    <section class="a11y-section">
-      <h3 class="a11y-section-title">Texto</h3>
-      <div class="a11y-size-controls">
+    <section class="a11y-section" aria-labelledby="text-size-title">
+      <h3 id="text-size-title" class="a11y-section-title">Texto</h3>
+      <div class="a11y-size-controls" role="group" aria-labelledby="text-size-title">
         <button
           class="a11y-size-btn"
           (click)="decreaseFontSize()"
           [disabled]="a11y.fontSize() === 'small'"
-          aria-label="Reducir texto"
+          aria-label="Reducir tamaño de texto"
         >
-          <svg cIcon name="cilMinus" size="lg"></svg>
+          <svg cIcon name="cilMinus" size="lg" aria-hidden="true"></svg>
         </button>
 
-        <div class="a11y-size-display" aria-live="polite">
+        <div class="a11y-size-display" aria-live="polite" aria-atomic="true">
           @for (size of a11y.fontSizes; track size.id) {
             @if (size.id === a11y.fontSize()) {
               {{ size.name }}
@@ -112,16 +151,16 @@
           class="a11y-size-btn"
           (click)="increaseFontSize()"
           [disabled]="a11y.fontSize() === 'x-large'"
-          aria-label="Aumentar texto"
+          aria-label="Aumentar tamaño de texto"
         >
-          <svg cIcon name="cilPlus" size="lg"></svg>
+          <svg cIcon name="cilPlus" size="lg" aria-hidden="true"></svg>
         </button>
       </div>
     </section>
 
     <!-- Opciones -->
-    <section class="a11y-section">
-      <h3 class="a11y-section-title">Opciones</h3>
+    <section class="a11y-section" aria-labelledby="options-title">
+      <h3 id="options-title" class="a11y-section-title">Opciones</h3>
 
       <button
         class="a11y-option-btn"
@@ -129,10 +168,10 @@
         (click)="toggleLargeCursor()"
         [attr.aria-pressed]="a11y.largeCursor()"
       >
-        <svg cIcon name="cilCursor" size="lg"></svg>
+        <svg cIcon name="cilCursor" size="lg" aria-hidden="true"></svg>
         <span>Cursor Grande</span>
         @if (a11y.largeCursor()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
         }
       </button>
 
@@ -142,10 +181,10 @@
         (click)="toggleHighlightLinks()"
         [attr.aria-pressed]="a11y.highlightLinks()"
       >
-        <svg cIcon name="cilLink" size="lg"></svg>
+        <svg cIcon name="cilLink" size="lg" aria-hidden="true"></svg>
         <span>Resaltar Enlaces</span>
         @if (a11y.highlightLinks()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
         }
       </button>
 
@@ -155,10 +194,10 @@
         (click)="toggleReducedMotion()"
         [attr.aria-pressed]="a11y.reducedMotion()"
       >
-        <svg cIcon name="cilMediaPause" size="lg"></svg>
+        <svg cIcon name="cilMediaPause" size="lg" aria-hidden="true"></svg>
         <span>Sin Animaciones</span>
         @if (a11y.reducedMotion()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
         }
       </button>
 
@@ -168,10 +207,10 @@
         (click)="toggleReadingGuide()"
         [attr.aria-pressed]="a11y.readingGuide()"
       >
-        <svg cIcon name="cilAlignCenter" size="lg"></svg>
+        <svg cIcon name="cilAlignCenter" size="lg" aria-hidden="true"></svg>
         <span>Guía de Lectura</span>
         @if (a11y.readingGuide()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
         }
       </button>
 
@@ -181,17 +220,17 @@
         (click)="toggleReadingMode()"
         [attr.aria-pressed]="a11y.readingMode()"
       >
-        <svg cIcon name="cilBook" size="lg"></svg>
+        <svg cIcon name="cilBook" size="lg" aria-hidden="true"></svg>
         <span>Modo Lectura</span>
         @if (a11y.readingMode()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
         }
       </button>
     </section>
 
     <!-- Texto a Voz -->
-    <section class="a11y-section">
-      <h3 class="a11y-section-title">Texto a Voz</h3>
+    <section class="a11y-section" aria-labelledby="tts-title">
+      <h3 id="tts-title" class="a11y-section-title">Texto a Voz</h3>
 
       <button
         class="a11y-option-btn"
@@ -200,25 +239,25 @@
         [attr.aria-pressed]="a11y.textToSpeechEnabled()"
         [disabled]="!a11y.isTTSSupported()"
       >
-        <svg cIcon name="cilVolumeHigh" size="lg"></svg>
+        <svg cIcon name="cilVolumeHigh" size="lg" aria-hidden="true"></svg>
         <span>{{ a11y.isTTSSupported() ? 'Activar Lectura' : 'No disponible' }}</span>
         @if (a11y.textToSpeechEnabled()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
         }
       </button>
 
       @if (a11y.textToSpeechEnabled()) {
         <!-- Velocidad de lectura -->
         <div class="a11y-tts-speed">
-          <label>Velocidad: {{ a11y.textToSpeechRate() }}x</label>
-          <div class="a11y-size-controls">
+          <label id="tts-speed-label">Velocidad: {{ a11y.textToSpeechRate() }}x</label>
+          <div class="a11y-size-controls" role="group" aria-labelledby="tts-speed-label">
             <button
               class="a11y-size-btn a11y-size-btn-small"
               (click)="decreaseTTSRate()"
               [disabled]="a11y.textToSpeechRate() <= 0.5"
-              aria-label="Reducir velocidad"
+              aria-label="Reducir velocidad de lectura"
             >
-              <svg cIcon name="cilMinus" size="sm"></svg>
+              <svg cIcon name="cilMinus" size="sm" aria-hidden="true"></svg>
             </button>
             <input
               type="range"
@@ -229,35 +268,39 @@
               (input)="setTTSRate($event)"
               class="a11y-slider"
               aria-label="Velocidad de lectura"
+              aria-valuemin="0.5"
+              aria-valuemax="2"
+              [attr.aria-valuenow]="a11y.textToSpeechRate()"
+              [attr.aria-valuetext]="a11y.textToSpeechRate() + 'x'"
             />
             <button
               class="a11y-size-btn a11y-size-btn-small"
               (click)="increaseTTSRate()"
               [disabled]="a11y.textToSpeechRate() >= 2"
-              aria-label="Aumentar velocidad"
+              aria-label="Aumentar velocidad de lectura"
             >
-              <svg cIcon name="cilPlus" size="sm"></svg>
+              <svg cIcon name="cilPlus" size="sm" aria-hidden="true"></svg>
             </button>
           </div>
         </div>
 
         <!-- Controles de reproducción -->
-        <div class="a11y-tts-controls">
+        <div class="a11y-tts-controls" role="group" aria-label="Controles de lectura">
           <button
             class="a11y-tts-btn"
             (click)="speakSelection()"
             aria-label="Leer texto seleccionado"
           >
-            <svg cIcon name="cilTextSquare" size="lg"></svg>
+            <svg cIcon name="cilTextSquare" size="lg" aria-hidden="true"></svg>
             <span>Leer Selección</span>
           </button>
 
           <button
             class="a11y-tts-btn"
             (click)="speakMainContent()"
-            aria-label="Leer página completa"
+            aria-label="Leer contenido principal de la página"
           >
-            <svg cIcon name="cilDescription" size="lg"></svg>
+            <svg cIcon name="cilDescription" size="lg" aria-hidden="true"></svg>
             <span>Leer Página</span>
           </button>
 
@@ -265,9 +308,9 @@
             <button
               class="a11y-tts-btn a11y-tts-stop"
               (click)="stopSpeaking()"
-              aria-label="Detener lectura"
+              aria-label="Detener lectura en voz alta"
             >
-              <svg cIcon name="cilMediaStop" size="lg"></svg>
+              <svg cIcon name="cilMediaStop" size="lg" aria-hidden="true"></svg>
               <span>Detener</span>
             </button>
           }
@@ -276,24 +319,24 @@
     </section>
 
     <!-- Atajos -->
-    <section class="a11y-section">
-      <h3 class="a11y-section-title">Atajos</h3>
-      <div class="a11y-shortcuts">
-        <div class="a11y-shortcut">
-          <kbd>Alt+A</kbd>
-          <span>Menú</span>
+    <section class="a11y-section" aria-labelledby="shortcuts-title">
+      <h3 id="shortcuts-title" class="a11y-section-title">Atajos de Teclado</h3>
+      <div class="a11y-shortcuts" role="list" aria-label="Lista de atajos de teclado">
+        <div class="a11y-shortcut" role="listitem">
+          <kbd aria-label="Alt más A">Alt+A</kbd>
+          <span>Abrir/Cerrar Menú</span>
         </div>
-        <div class="a11y-shortcut">
-          <kbd>Tab</kbd>
-          <span>Navegar</span>
+        <div class="a11y-shortcut" role="listitem">
+          <kbd aria-label="Alt más S">Alt+S</kbd>
+          <span>Leer selección</span>
         </div>
-        <div class="a11y-shortcut">
-          <kbd>Enter</kbd>
-          <span>Activar</span>
+        <div class="a11y-shortcut" role="listitem">
+          <kbd aria-label="Alt más X">Alt+X</kbd>
+          <span>Detener lectura</span>
         </div>
-        <div class="a11y-shortcut">
+        <div class="a11y-shortcut" role="listitem">
           <kbd>Esc</kbd>
-          <span>Cerrar</span>
+          <span>Cerrar panel</span>
         </div>
       </div>
     </section>
@@ -305,8 +348,9 @@
     <button
       class="a11y-reset-btn"
       (click)="resetSettings()"
+      aria-label="Restablecer todas las configuraciones de accesibilidad"
     >
-      <svg cIcon name="cilReload" size="lg"></svg>
+      <svg cIcon name="cilReload" size="lg" aria-hidden="true"></svg>
       Restablecer Todo
     </button>
   </footer>

@@ -71,6 +71,52 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
 }
 
 // ============================================
+// BOTÓN SALIR MODO LECTURA
+// ============================================
+.a11y-exit-reading-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  min-height: 52px;
+  border-radius: 26px;
+  border: 3px solid #FF6B6B;
+  background: $panel-bg;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  font-family: $font-family;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #FF6B6B;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #FF6B6B;
+    color: #000000;
+    transform: scale(1.03);
+
+    svg {
+      color: #000000 !important;
+    }
+  }
+
+  &:focus-visible {
+    outline: 4px solid #FF6B6B;
+    outline-offset: 3px;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: #FF6B6B;
+  }
+}
+
+// ============================================
 // OVERLAY
 // ============================================
 .a11y-panel-overlay {
@@ -608,3 +654,6 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
     min-width: 100%;
   }
 }
+
+// NOTA: Los estilos de .a11y-reading-guide-bar y .a11y-speaking-indicator
+// están en _accessibility-themes.scss porque los elementos se agregan al document.body
