@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
@@ -12,29 +12,26 @@ using InclusiON.Entities.Models;
 
 namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 {
-    public class LoginCommandHandler : ICommandHandler<LoginCommand, ApiResponse<LoginResponse>>
+    public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, ApiResponse<LoginResponse>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signinManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IPermissionService _permissionService;
         private readonly IHttpContextService _httpContextService;
-        private readonly ILogger<LoginCommandHandler> _logger;
+        private readonly ILogger<RefreshTokenCommandHandler> _logger;
         private readonly DbContext _context;
 
-        public LoginCommandHandler(
+        public RefreshTokenCommandHandler(
             UserManager<User> userManager,
-            SignInManager<User> signinManager,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
             IPermissionService permissionService,
             IHttpContextService httpContextService,
-            ILogger<LoginCommandHandler> logger,
+            ILogger<RefreshTokenCommandHandler> logger,
             DbContext context)
         {
             _userManager = userManager;
-            _signinManager = signinManager;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
             _permissionService = permissionService;
@@ -43,60 +40,64 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             _context = context;
         }
 
-        public async Task<ApiResponse<LoginResponse>> HandleAsync(LoginCommand command, CancellationToken cancellationToken)
+        public async Task<ApiResponse<LoginResponse>> HandleAsync(RefreshTokenCommand command, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             try
             {
-                var user = await _userManager.FindByEmailAsync(command.Email.ToLower().Trim());
+                if (string.IsNullOrWhiteSpace(command.RefreshToken))
+                {
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.RequiredField,
+                        "Refresh token es requerido");
+                }
+
+                var storedToken = await _refreshTokensRepository.GetByTokenAsync(command.RefreshToken, cancellationToken);
+
+                if (storedToken is null)
+                {
+                    _logger.LogWarning("Refresh token not found");
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.TokenInvalid,
+                        "Token invalido");
+                }
+
+                if (!storedToken.IsActive)
+                {
+                    _logger.LogWarning("Attempted to use revoked refresh token for user {UserId}", storedToken.UserId);
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.TokenInvalid,
+                        "Token ha sido revocado");
+                }
+
+                if (storedToken.ExpiresAt < DateTime.UtcNow)
+                {
+                    _logger.LogWarning("Attempted to use expired refresh token for user {UserId}", storedToken.UserId);
+                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Token expired", cancellationToken);
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.TokenExpired,
+                        "Token ha expirado");
+                }
+
+                var user = await _userManager.FindByIdAsync(storedToken.UserId.ToString());
 
                 if (user is null)
                 {
+                    _logger.LogWarning("User not found for refresh token");
+                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User not found", cancellationToken);
                     return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.InvalidCredentials,
-                        "Email o contrasena invalidos");
+                        ErrorCode.UserNotFound,
+                        "Usuario no encontrado");
                 }
 
                 if (!user.IsActive)
                 {
+                    _logger.LogWarning("Inactive user attempted to refresh token: {UserId}", user.Id);
+                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User inactive", cancellationToken);
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.AccountInactive,
-                        "Usuario inactivo. Contacte a soporte.");
-                }
-
-                // Verificar bloqueo antes de intentar login (feedback inmediato al usuario)
-                if (await _userManager.IsLockedOutAsync(user))
-                {
-                    var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
-                    var minutesRemaining = lockoutEnd.HasValue
-                        ? (int)Math.Ceiling((lockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes)
-                        : 0;
-
-                    _logger.LogWarning("Login attempt for locked account: {Email}", command.Email);
-                    return ApiResponse<LoginResponse>.AccountLocked(minutesRemaining);
-                }
-
-                var signInResult = await _signinManager
-                    .CheckPasswordSignInAsync(user, command.Password, lockoutOnFailure: true);
-
-                if (!signInResult.Succeeded)
-                {
-                    if (signInResult.IsLockedOut)
-                    {
-                        return ApiResponse<LoginResponse>.AccountLocked();
-                    }
-
-                    if (signInResult.RequiresTwoFactor)
-                    {
-                        return ApiResponse<LoginResponse>.ErrorResult(
-                            ErrorCode.TwoFactorRequired,
-                            "Se requiere autenticacion de dos factores");
-                    }
-
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.InvalidCredentials,
-                        "Email o contrasena invalidos");
+                        "Usuario inactivo");
                 }
 
                 var ipAddress = _httpContextService.GetClientIpAddress();
@@ -115,16 +116,17 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     Permissions = permissions
                 };
 
-                var accessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
-                var refreshToken = _jwtTokenService.GenerateRefreshToken();
+                var newAccessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
+                var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
 
-                // RememberMe: 30 días (sesión persistente), Sin RememberMe: 7 días (sesión normal)
-                var refreshTokenExpiryDays = command.RememberMe ? 30 : 7;
+                // Calculate remaining days from original token expiry
+                var remainingDays = (storedToken.ExpiresAt - DateTime.UtcNow).TotalDays;
+                var refreshTokenExpiryDays = Math.Max(1, (int)Math.Ceiling(remainingDays));
 
                 var refreshTokenEntity = new RefreshToken
                 {
                     Id = Guid.NewGuid(),
-                    Token = refreshToken,
+                    Token = newRefreshToken,
                     CreatedAt = DateTime.UtcNow,
                     ExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays),
                     UserId = user.Id,
@@ -140,19 +142,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
                     try
                     {
-                        var revokedCount = await _refreshTokensRepository
-                            .RevokeAllUserTokensAsync(user.Id, "New login detectect - previous sessions was invalidated");
-
-                        if (revokedCount > 0)
-                        {
-                            _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
-                        }
-
-                        user.LastLoginDate = DateTime.UtcNow;
-                        user.LastLoginIpAddress = ipAddress;
-                        user.LastLoginUserAgent = userAgent;
-
-                        await _userManager.UpdateAsync(user);
+                        await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Replaced by new token", cancellationToken);
                         await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
 
                         await transaction.CommitAsync(cancellationToken);
@@ -164,11 +154,13 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     }
                 });
 
+                _logger.LogDebug("Successfully refreshed token for user {UserId}", user.Id);
+
                 var response = new LoginResponse
                 {
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken,
-                    ExpiresAt = _jwtTokenService.GetTokenExpiration(accessToken),
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken,
+                    ExpiresAt = _jwtTokenService.GetTokenExpiration(newAccessToken),
                     User = new UserResponse
                     {
                         Id = user.Id,
@@ -183,14 +175,14 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     }
                 };
 
-                return ApiResponse<LoginResponse>.SuccessResult(response, "Login succesfull");
+                return ApiResponse<LoginResponse>.SuccessResult(response, "Token refreshed successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en login para: {Email}", command.Email);
+                _logger.LogError(ex, "Error refreshing token");
                 return ApiResponse<LoginResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al procesar login");
+                    "Error interno al refrescar token");
             }
         }
     }

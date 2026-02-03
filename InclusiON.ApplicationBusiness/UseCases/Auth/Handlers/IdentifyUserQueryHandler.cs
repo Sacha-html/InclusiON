@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Queries;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 
@@ -71,7 +72,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al identificar usuario: {Identifier}", query.Identifier);
-                return ApiResponse<IdentifyUserResponse>.ErrorResult($"Error al identificar usuario: {ex.Message}");
+                return ApiResponse<IdentifyUserResponse>.ErrorResult(
+                    ErrorCode.InternalError,
+                    "Error interno al identificar usuario");
             }
         }
 

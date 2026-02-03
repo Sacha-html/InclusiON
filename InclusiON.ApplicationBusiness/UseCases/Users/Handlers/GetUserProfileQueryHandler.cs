@@ -2,6 +2,7 @@
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.UseCases.Users.Queries;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Entities.Models;
@@ -12,6 +13,59 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
     {
         private readonly UserManager<User> _userManager;
         private readonly IRefreshTokensRepository _refreshTokenRepository;
+
+        /// <summary>
+        /// Diccionario estático de permisos por rol.
+        /// Evita crear nuevas listas en cada request.
+        /// </summary>
+        private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> RolePermissions =
+            new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["admin"] = new[]
+                {
+                    "read:profile", "update:profile", "delete:profile",
+                    "read:users", "create:users", "update:users", "delete:users",
+                    "read:products", "create:products", "update:products", "delete:products",
+                    "read:reports", "create:reports"
+                },
+                ["manager"] = new[]
+                {
+                    "read:profile", "update:profile",
+                    "read:users", "create:users", "update:users",
+                    "read:products", "create:products", "update:products",
+                    "read:reports"
+                },
+                ["professional"] = new[]
+                {
+                    "read:profile", "update:profile",
+                    "read:persons", "update:persons",
+                    "read:activities", "create:activities", "update:activities",
+                    "read:reports", "create:reports"
+                },
+                ["family"] = new[]
+                {
+                    "read:profile", "update:profile",
+                    "read:persons",
+                    "read:activities",
+                    "read:reports"
+                },
+                ["person"] = new[]
+                {
+                    "read:profile",
+                    "read:activities"
+                },
+                ["employee"] = new[]
+                {
+                    "read:profile", "update:profile",
+                    "read:products", "update:products"
+                },
+                ["customer"] = new[]
+                {
+                    "read:profile", "update:profile"
+                }
+            };
+
+        private static readonly IReadOnlyList<string> DefaultPermissions = new[] { "read:profile" };
 
         public GetUserProfileQueryHandler(UserManager<User> userManager, IRefreshTokensRepository refreshTokenRepository)
         {
@@ -27,12 +81,16 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
 
                 if (user is null)
                 {
-                    return ApiResponse<UserProfileResponse>.ErrorResult("User not found");
+                    return ApiResponse<UserProfileResponse>.ErrorResult(
+                        ErrorCode.UserNotFound,
+                        "Usuario no encontrado");
                 }
 
                 if (!user.IsActive)
                 {
-                    return ApiResponse<UserProfileResponse>.ErrorResult("User account is deactivated");
+                    return ApiResponse<UserProfileResponse>.ErrorResult(
+                        ErrorCode.AccountInactive,
+                        "Cuenta de usuario desactivada");
                 }
 
                 var roles = await _userManager.GetRolesAsync(user);
@@ -60,40 +118,18 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
             }
             catch (Exception)
             {
-                return ApiResponse<UserProfileResponse>.ErrorResult("An error occurred while processing the request");
+                return ApiResponse<UserProfileResponse>.ErrorResult(
+                    ErrorCode.InternalError,
+                    "Error interno al obtener perfil de usuario");
             }
-
         }
 
         private static List<string> GetUserPermissions(string role)
         {
-            return role.ToLower() switch
-            {
-                "admin" => new List<string>
-                {
-                    "read:profile", "update:profile", "delete:profile",
-                    "read:users", "create:users", "update:users", "delete:users",
-                    "read:products", "create:products", "update:products", "delete:products",
-                    "read:reports", "create:reports"
-                },
-                "manager" => new List<string>
-                {
-                    "read:profile", "update:profile",
-                    "read:users", "create:users", "update:users",
-                    "read:products", "create:products", "update:products",
-                    "read:reports"
-                },
-                "employee" => new List<string>
-                {
-                    "read:profile", "update:profile",
-                    "read:products", "update:products"
-                },
-                "customer" => new List<string>
-                {
-                    "read:profile", "update:profile"
-                },
-                _ => new List<string> { "read:profile" }
-            };
+            // Búsqueda O(1) en diccionario + retorna copia para evitar mutaciones
+            return RolePermissions.TryGetValue(role, out var permissions)
+                ? permissions.ToList()
+                : DefaultPermissions.ToList();
         }
     }
 }

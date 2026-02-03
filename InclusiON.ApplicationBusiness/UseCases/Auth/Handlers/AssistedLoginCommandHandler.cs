@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
 using InclusiON.DTOs.Auth;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Entities.Models;
@@ -24,8 +25,10 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly SignInManager<User> _signInManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPermissionService _permissionService;
+        private readonly IHttpContextService _httpContextService;
         private readonly ILogger<AssistedLoginCommandHandler> _logger;
+        private readonly DbContext _context;
 
         public AssistedLoginCommandHandler(
             IVisualLoginRepository repository,
@@ -33,16 +36,20 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             SignInManager<User> signInManager,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
-            IHttpContextAccessor httpContextAccessor,
-            ILogger<AssistedLoginCommandHandler> logger)
+            IPermissionService permissionService,
+            IHttpContextService httpContextService,
+            ILogger<AssistedLoginCommandHandler> logger,
+            DbContext context)
         {
             _repository = repository;
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _permissionService = permissionService;
+            _httpContextService = httpContextService;
             _logger = logger;
+            _context = context;
         }
 
         public async Task<ApiResponse<VisualLoginResponse>> HandleAsync(
@@ -58,7 +65,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
                 if (person == null)
                 {
-                    return ApiResponse<VisualLoginResponse>.ErrorResult("Usuario no encontrado");
+                    return ApiResponse<VisualLoginResponse>.ErrorResult(
+                        ErrorCode.UserNotFound,
+                        "Usuario no encontrado");
                 }
 
                 // 2. Buscar al supervisor por email
@@ -129,7 +138,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en login asistido para usuario: {UserId}", command.UserId);
-                return ApiResponse<VisualLoginResponse>.ErrorResult($"Error al procesar login: {ex.Message}");
+                return ApiResponse<VisualLoginResponse>.ErrorResult(
+                    ErrorCode.InternalError,
+                    "Error interno al procesar login");
             }
         }
 
@@ -144,33 +155,32 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 return true;
             }
 
-            // 2. Verificar si es un profesional asignado
-            var professional = await _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
-            if (professional != null)
+            // 2. Obtener el usuario supervisor una sola vez
+            var supervisorUser = await _userManager.FindByIdAsync(supervisorUserId.ToString());
+            if (supervisorUser == null)
             {
-                // Verificar si el profesional esta asignado a esta persona
-                // Nota: Esto requiere que las relaciones esten cargadas o una consulta adicional
-                // Por simplicidad, si el usuario tiene rol Professional, lo consideramos autorizado
-                // En produccion, se deberia verificar la relacion ProfessionalPerson
-                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(supervisorUserId.ToString()) ?? throw new Exception());
-                if (roles.Contains("Professional"))
-                {
-                    return true;
-                }
+                _logger.LogWarning("Supervisor user not found: {SupervisorUserId}", supervisorUserId);
+                return false;
             }
 
-            // 3. Verificar si es un familiar autorizado
-            var family = await _repository.GetFamilyByUserIdAsync(supervisorUserId, cancellationToken);
-            if (family != null)
+            var roles = await _userManager.GetRolesAsync(supervisorUser);
+
+            // 3. Verificar si es un profesional asignado
+            var professional = await _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
+            if (professional != null && roles.Contains("Professional"))
             {
-                // Verificar si el familiar esta asociado a esta persona
-                // Por simplicidad, si el usuario tiene rol Family, lo consideramos autorizado
-                // En produccion, se deberia verificar la relacion PersonRepresentative
-                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(supervisorUserId.ToString()) ?? throw new Exception());
-                if (roles.Contains("Family"))
-                {
-                    return true;
-                }
+                // TODO: En produccion, verificar la relacion ProfessionalPerson
+                // para asegurar que el profesional esta asignado a esta persona especifica
+                return true;
+            }
+
+            // 4. Verificar si es un familiar autorizado
+            var family = await _repository.GetFamilyByUserIdAsync(supervisorUserId, cancellationToken);
+            if (family != null && roles.Contains("Family"))
+            {
+                // TODO: En produccion, verificar la relacion PersonRepresentative
+                // para asegurar que el familiar esta asociado a esta persona especifica
+                return true;
             }
 
             return false;
@@ -183,19 +193,11 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             string? deviceId,
             CancellationToken cancellationToken)
         {
-            var httpContext = _httpContextAccessor.HttpContext;
-            var ipAddress = GetClientIpAddress(httpContext);
-            var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
-
-            // Revocar tokens anteriores de la persona
-            await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login asistido");
-
-            user.LastLoginDate = DateTime.UtcNow;
-            user.LastLoginIpAddress = ipAddress;
-            user.LastLoginUserAgent = userAgent;
-            await _userManager.UpdateAsync(user);
+            var ipAddress = _httpContextService.GetClientIpAddress();
+            var userAgent = _httpContextService.GetUserAgent();
 
             var roles = await _userManager.GetRolesAsync(user);
+            var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
             var tokenUserData = new TokenUserData
             {
@@ -203,7 +205,8 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 Email = user.Email ?? string.Empty,
                 Name = $"{person.FirstName} {person.LastName}",
                 Role = roles.FirstOrDefault() ?? "Person",
-                IsActive = user.IsActive
+                IsActive = user.IsActive,
+                Permissions = permissions
             };
 
             var accessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
@@ -221,7 +224,31 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 UserAgent = userAgent
             };
 
-            await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+            // Execute transactional operations
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    // Revocar tokens anteriores de la persona
+                    await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login asistido");
+
+                    user.LastLoginDate = DateTime.UtcNow;
+                    user.LastLoginIpAddress = ipAddress;
+                    user.LastLoginUserAgent = userAgent;
+                    await _userManager.UpdateAsync(user);
+
+                    await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+
+                    await transaction.CommitAsync(cancellationToken);
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
 
             var displayName = $"{person.FirstName} {person.LastName}".Trim();
 
@@ -254,18 +281,6 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     }
                 },
                 "Login asistido exitoso");
-        }
-
-        private static string? GetClientIpAddress(HttpContext? context)
-        {
-            if (context is null) return null;
-            var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(forwardedFor))
-                return forwardedFor.Split(',').First().Trim();
-            var clientIp = context.Request.Headers["X-Client-IP"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(clientIp))
-                return clientIp;
-            return context.Connection.RemoteIpAddress?.ToString();
         }
     }
 }
