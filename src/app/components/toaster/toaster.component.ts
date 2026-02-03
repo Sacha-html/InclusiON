@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { ToastModule } from '@coreui/angular';
+import { Subscription } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
 import { Toast } from '../../models';
 
@@ -10,17 +11,23 @@ import { Toast } from '../../models';
   templateUrl: './toaster.component.html',
   styleUrl: './toaster.component.scss',
 })
-export class ToasterComponent implements OnInit {
+export class ToasterComponent implements OnInit, OnDestroy {
   private readonly toastSvc = inject(ToastService);
+  private subscription: Subscription | null = null;
+
   toasts: Toast[] = [];
 
   ngOnInit(): void {
-    this.toastSvc.toasts$.subscribe((p) => {
-      this.toasts.push(p);
+    this.subscription = this.toastSvc.toasts$.subscribe((toast) => {
+      this.toasts.push(toast);
     });
   }
 
-  onVisibleChange(visible: boolean, toast: Toast) {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  onVisibleChange(visible: boolean, toast: Toast): void {
     if (!visible) {
       this.toasts = this.toasts.filter((t) => t.id !== toast.id);
     }
