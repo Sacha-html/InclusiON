@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
 using InclusiON.DTOs.Auth;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Entities.Models;
@@ -23,8 +24,10 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly SignInManager<User> _signInManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPermissionService _permissionService;
+        private readonly IHttpContextService _httpContextService;
         private readonly ILogger<VisualStandardLoginCommandHandler> _logger;
+        private readonly DbContext _context;
 
         private const int MaxFailedAttempts = 5;
 
@@ -34,16 +37,20 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             SignInManager<User> signInManager,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
-            IHttpContextAccessor httpContextAccessor,
-            ILogger<VisualStandardLoginCommandHandler> logger)
+            IPermissionService permissionService,
+            IHttpContextService httpContextService,
+            ILogger<VisualStandardLoginCommandHandler> logger,
+            DbContext context)
         {
             _repository = repository;
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _permissionService = permissionService;
+            _httpContextService = httpContextService;
             _logger = logger;
+            _context = context;
         }
 
         public async Task<ApiResponse<VisualLoginResponse>> HandleAsync(
@@ -58,7 +65,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
                 if (person == null)
                 {
-                    return ApiResponse<VisualLoginResponse>.ErrorResult("Usuario no encontrado");
+                    return ApiResponse<VisualLoginResponse>.ErrorResult(
+                        ErrorCode.UserNotFound,
+                        "Usuario no encontrado");
                 }
 
                 var user = person.User;
@@ -124,7 +133,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en login visual estandar para usuario: {UserId}", command.UserId);
-                return ApiResponse<VisualLoginResponse>.ErrorResult($"Error al procesar login: {ex.Message}");
+                return ApiResponse<VisualLoginResponse>.ErrorResult(
+                    ErrorCode.InternalError,
+                    "Error interno al procesar login");
             }
         }
 
@@ -135,18 +146,11 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             bool rememberDevice,
             CancellationToken cancellationToken)
         {
-            var httpContext = _httpContextAccessor.HttpContext;
-            var ipAddress = GetClientIpAddress(httpContext);
-            var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
-
-            await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login visual estandar");
-
-            user.LastLoginDate = DateTime.UtcNow;
-            user.LastLoginIpAddress = ipAddress;
-            user.LastLoginUserAgent = userAgent;
-            await _userManager.UpdateAsync(user);
+            var ipAddress = _httpContextService.GetClientIpAddress();
+            var userAgent = _httpContextService.GetUserAgent();
 
             var roles = await _userManager.GetRolesAsync(user);
+            var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
             var tokenUserData = new TokenUserData
             {
@@ -154,7 +158,8 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 Email = user.Email ?? string.Empty,
                 Name = $"{person.FirstName} {person.LastName}",
                 Role = roles.FirstOrDefault() ?? "Person",
-                IsActive = user.IsActive
+                IsActive = user.IsActive,
+                Permissions = permissions
             };
 
             var accessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
@@ -172,22 +177,45 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 UserAgent = userAgent
             };
 
-            await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
-
-            if (rememberDevice && !string.IsNullOrEmpty(deviceId))
+            // Execute transactional operations
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
-                var device = new TrustedDevice
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
                 {
-                    UserId = user.Id,
-                    DeviceId = deviceId,
-                    DeviceName = "Dispositivo registrado via login estandar",
-                    Browser = ParseBrowserFromUserAgent(userAgent),
-                    RegisteredAt = DateTime.UtcNow,
-                    ExpiresAt = DateTime.UtcNow.AddDays(90),
-                    IsActive = true
-                };
-                await _repository.RegisterTrustedDeviceAsync(device, cancellationToken);
-            }
+                    await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login visual estandar");
+
+                    user.LastLoginDate = DateTime.UtcNow;
+                    user.LastLoginIpAddress = ipAddress;
+                    user.LastLoginUserAgent = userAgent;
+                    await _userManager.UpdateAsync(user);
+
+                    await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+
+                    if (rememberDevice && !string.IsNullOrEmpty(deviceId))
+                    {
+                        var device = new TrustedDevice
+                        {
+                            UserId = user.Id,
+                            DeviceId = deviceId,
+                            DeviceName = "Dispositivo registrado via login estandar",
+                            Browser = _httpContextService.ParseBrowserFromUserAgent(userAgent),
+                            RegisteredAt = DateTime.UtcNow,
+                            ExpiresAt = DateTime.UtcNow.AddDays(90),
+                            IsActive = true
+                        };
+                        await _repository.RegisterTrustedDeviceAsync(device, cancellationToken);
+                    }
+
+                    await transaction.CommitAsync(cancellationToken);
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
 
             var displayName = $"{person.FirstName} {person.LastName}".Trim();
 
@@ -216,28 +244,6 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     }
                 },
                 "Login exitoso");
-        }
-
-        private static string? GetClientIpAddress(HttpContext? context)
-        {
-            if (context is null) return null;
-            var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(forwardedFor))
-                return forwardedFor.Split(',').First().Trim();
-            var clientIp = context.Request.Headers["X-Client-IP"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(clientIp))
-                return clientIp;
-            return context.Connection.RemoteIpAddress?.ToString();
-        }
-
-        private static string? ParseBrowserFromUserAgent(string? userAgent)
-        {
-            if (string.IsNullOrEmpty(userAgent)) return null;
-            if (userAgent.Contains("Chrome")) return "Chrome";
-            if (userAgent.Contains("Firefox")) return "Firefox";
-            if (userAgent.Contains("Safari")) return "Safari";
-            if (userAgent.Contains("Edge")) return "Edge";
-            return "Other";
         }
     }
 }

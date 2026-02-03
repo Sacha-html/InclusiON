@@ -3,6 +3,7 @@ using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.ApplicationBusiness.UseCases.Persons.Commands;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
 
@@ -44,19 +45,25 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
                 var person = await _repository.GetPersonByUserIdAsync(command.UserId, cancellationToken);
                 if (person == null)
                 {
-                    return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Persona no encontrada");
+                    return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                        ErrorCode.PersonNotFound,
+                        "Persona no encontrada");
                 }
 
                 // Verificar que el metodo de login es valido y activo
                 var loginMethod = await _repository.GetLoginMethodByIdAsync(command.LoginMethodId, cancellationToken);
                 if (loginMethod == null)
                 {
-                    return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Metodo de login no encontrado");
+                    return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                        ErrorCode.ResourceNotFound,
+                        "Metodo de login no encontrado");
                 }
 
                 if (!loginMethod.IsActive)
                 {
-                    return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("El metodo de login seleccionado no esta disponible");
+                    return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                        ErrorCode.LoginMethodNotAllowed,
+                        "El metodo de login seleccionado no esta disponible");
                 }
 
                 // Validaciones segun el metodo de login
@@ -68,11 +75,15 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
                     case LoginMethodPin:
                         if (string.IsNullOrEmpty(command.Pin))
                         {
-                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("El PIN es requerido para este metodo de login");
+                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                                ErrorCode.RequiredField,
+                                "El PIN es requerido para este metodo de login");
                         }
                         if (command.Pin.Length < 4 || command.Pin.Length > 6 || !command.Pin.All(char.IsDigit))
                         {
-                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("El PIN debe tener entre 4 y 6 digitos numericos");
+                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                                ErrorCode.InvalidFormat,
+                                "El PIN debe tener entre 4 y 6 digitos numericos");
                         }
                         pinHash = _passwordHasher.HashPassword(command.Pin);
                         break;
@@ -80,7 +91,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
                     case LoginMethodAssisted:
                         if (!command.SupervisorUserId.HasValue)
                         {
-                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Se requiere un supervisor para el login asistido");
+                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                                ErrorCode.RequiredField,
+                                "Se requiere un supervisor para el login asistido");
                         }
                         // Verificar que el supervisor existe y es profesional o familiar
                         var supervisor = await _repository.GetProfessionalByUserIdAsync(command.SupervisorUserId.Value, cancellationToken);
@@ -88,7 +101,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
 
                         if (supervisor == null && family == null)
                         {
-                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("El supervisor debe ser un profesional o familiar registrado");
+                            return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                                ErrorCode.SupervisorNotAuthorized,
+                                "El supervisor debe ser un profesional o familiar registrado");
                         }
                         supervisorUserId = command.SupervisorUserId;
                         break;
@@ -98,7 +113,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
                         break;
 
                     default:
-                        return ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Metodo de login no soportado");
+                        return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                            ErrorCode.LoginMethodNotAllowed,
+                            "Metodo de login no soportado");
                 }
 
                 // Actualizar el metodo de login
@@ -125,7 +142,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating login method for user: {UserId}", command.UserId);
-                return ApiResponse<UpdateLoginMethodResponse>.ErrorResult($"Error al actualizar metodo de login: {ex.Message}");
+                return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                    ErrorCode.InternalError,
+                    "Error interno al actualizar metodo de login");
             }
         }
     }

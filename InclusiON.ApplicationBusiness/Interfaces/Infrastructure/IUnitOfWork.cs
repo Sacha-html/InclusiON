@@ -2,7 +2,7 @@
 
 namespace InclusiON.ApplicationBusiness.Interfaces.Infrastructure
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork : IDisposable, IAsyncDisposable
     {
         Task BeginTransactionAsync(CancellationToken cancellationToken = default);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);

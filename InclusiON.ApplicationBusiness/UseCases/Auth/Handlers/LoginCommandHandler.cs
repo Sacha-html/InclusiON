@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
 using InclusiON.DTOs.Auth;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Entities.Models;
@@ -17,23 +18,29 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly SignInManager<User> _signinManager;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPermissionService _permissionService;
+        private readonly IHttpContextService _httpContextService;
         private readonly ILogger<LoginCommandHandler> _logger;
+        private readonly DbContext _context;
 
         public LoginCommandHandler(
             UserManager<User> userManager,
             SignInManager<User> signinManager,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
-            IHttpContextAccessor httpContextAccessor,
-            ILogger<LoginCommandHandler> logger)
+            IPermissionService permissionService,
+            IHttpContextService httpContextService,
+            ILogger<LoginCommandHandler> logger,
+            DbContext context)
         {
             _userManager = userManager;
             _signinManager = signinManager;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
-            _httpContextAccessor = httpContextAccessor;
+            _permissionService = permissionService;
+            _httpContextService = httpContextService;
             _logger = logger;
+            _context = context;
         }
 
         public async Task<ApiResponse<LoginResponse>> HandleAsync(LoginCommand command, CancellationToken cancellationToken)
@@ -46,15 +53,30 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
                 if (user is null)
                 {
-                    return ApiResponse<LoginResponse>.ErrorResult("Invalid email or password");
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.InvalidCredentials,
+                        "Email o contrasena invalidos");
                 }
 
                 if (!user.IsActive)
                 {
-                    return ApiResponse<LoginResponse>.ErrorResult("User is inactive. Please contact support.");
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.AccountInactive,
+                        "Usuario inactivo. Contacte a soporte.");
                 }
 
-                // TODO: Check if user is locked out
+                // Verificar bloqueo antes de intentar login (feedback inmediato al usuario)
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                    var minutesRemaining = lockoutEnd.HasValue
+                        ? (int)Math.Ceiling((lockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes)
+                        : 0;
+
+                    _logger.LogWarning("Login attempt for locked account: {Email}", command.Email);
+                    return ApiResponse<LoginResponse>.AccountLocked(minutesRemaining);
+                }
+
                 var signInResult = await _signinManager
                     .CheckPasswordSignInAsync(user, command.Password, lockoutOnFailure: true);
 
@@ -62,36 +84,26 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 {
                     if (signInResult.IsLockedOut)
                     {
-                        return ApiResponse<LoginResponse>.ErrorResult("Account was locked");
+                        return ApiResponse<LoginResponse>.AccountLocked();
                     }
 
                     if (signInResult.RequiresTwoFactor)
                     {
-                        return ApiResponse<LoginResponse>.ErrorResult("Two factor auth is required");
+                        return ApiResponse<LoginResponse>.ErrorResult(
+                            ErrorCode.TwoFactorRequired,
+                            "Se requiere autenticacion de dos factores");
                     }
 
-                    return ApiResponse<LoginResponse>.ErrorResult("Invalid email or password");
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.InvalidCredentials,
+                        "Email o contrasena invalidos");
                 }
 
-                var httpContext = _httpContextAccessor.HttpContext;
-                var ipAddress = GetClientIpAddress(httpContext);
-                var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
-
-                var revokedCount = await _refreshTokensRepository
-                    .RevokeAllUserTokensAsync(user.Id, "New login detectect - previous sessions was invalidated");
-
-                if (revokedCount > 0)
-                {
-                    _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
-                }
-
-                user.LastLoginDate = DateTime.UtcNow;
-                user.LastLoginIpAddress = ipAddress;
-                user.LastLoginUserAgent = userAgent;
-
-                await _userManager.UpdateAsync(user);
+                var ipAddress = _httpContextService.GetClientIpAddress();
+                var userAgent = _httpContextService.GetUserAgent();
 
                 var roles = await _userManager.GetRolesAsync(user);
+                var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
                 var tokenUserData = new TokenUserData
                 {
@@ -99,14 +111,15 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     Email = user.Email!,
                     Name = user.Name!,
                     Role = roles.FirstOrDefault() ?? "Customer",
-                    IsActive = user.IsActive
+                    IsActive = user.IsActive,
+                    Permissions = permissions
                 };
 
                 var accessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
                 var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
-                // TODO: change to 30:7 or review
-                var refreshTokenExpiryDays = command.RememberMe ? 7:1;
+                // RememberMe: 30 días (sesión persistente), Sin RememberMe: 7 días (sesión normal)
+                var refreshTokenExpiryDays = command.RememberMe ? 30 : 7;
 
                 var refreshTokenEntity = new RefreshToken
                 {
@@ -120,7 +133,36 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     UserAgent = userAgent
                 };
 
-                await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+                // Execute transactional operations
+                var strategy = _context.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                    try
+                    {
+                        var revokedCount = await _refreshTokensRepository
+                            .RevokeAllUserTokensAsync(user.Id, "New login detectect - previous sessions was invalidated");
+
+                        if (revokedCount > 0)
+                        {
+                            _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
+                        }
+
+                        user.LastLoginDate = DateTime.UtcNow;
+                        user.LastLoginIpAddress = ipAddress;
+                        user.LastLoginUserAgent = userAgent;
+
+                        await _userManager.UpdateAsync(user);
+                        await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
+
+                        await transaction.CommitAsync(cancellationToken);
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync(cancellationToken);
+                        throw;
+                    }
+                });
 
                 var response = new LoginResponse
                 {
@@ -145,31 +187,11 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             }
             catch (Exception ex)
             {
-                return ApiResponse<LoginResponse>.ErrorResult($"An error occurred while login was requested: {ex.Message}");
+                _logger.LogError(ex, "Error en login para: {Email}", command.Email);
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.InternalError,
+                    "Error interno al procesar login");
             }
-        }
-
-        private static string? GetClientIpAddress(HttpContext? context)
-        {
-            if (context is null)
-            {
-                return null;
-            }
-
-            var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(forwardedFor))
-            {
-                return forwardedFor.Split(',').First().Trim();
-            }
-
-            var clientIp = context.Request.Headers["X-Client-IP"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(clientIp))
-            {
-                return clientIp;
-            }
-
-            return context.Connection.RemoteIpAddress?.ToString();
         }
     }
 }
