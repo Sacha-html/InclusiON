@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
-import { RegisterUserRequest } from '../../../models';
+import { ErrorCodeService } from '../../../services/error-code.service';
+import { RegisterUserRequest, ErrorCode } from '../../../models';
 
 // CoreUI imports
 import { ContainerComponent, RowComponent, ColComponent, CardComponent, CardBodyComponent } from '@coreui/angular';
@@ -39,6 +40,7 @@ import { IconDirective } from '@coreui/icons-angular';
 export class RegisterComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private errorCodeService = inject(ErrorCodeService);
   private router = inject(Router);
 
   registerForm!: FormGroup;
@@ -138,16 +140,23 @@ export class RegisterComponent implements OnInit {
 
     // Llamar al servicio de autenticación
     this.authService.register(registerData).subscribe({
-      next: (response) => {
-        console.log('✅ Registro exitoso:', response);
-        
-        // Redirigir al chat o dashboard
-        this.router.navigate(['/chat']);
+      next: () => {
+        this.router.navigate(['/login']);
       },
       error: (error) => {
-        console.error('❌ Error en registro:', error);
-        this.errorMessage = error.message || 'Error al registrar usuario. Por favor, intenta nuevamente.';
         this.isLoading = false;
+
+        if (error.errorCode !== undefined) {
+          // Mensaje específico para email duplicado
+          if (error.errorCode === ErrorCode.EmailAlreadyExists) {
+            this.errorMessage = this.errorCodeService.getFullMessage(error.errorCode);
+          } else {
+            this.errorMessage = this.errorCodeService.getMessage(error.errorCode);
+          }
+        } else {
+          this.errorMessage = error.userMessage
+            || 'Error al registrar usuario. Por favor, intenta nuevamente.';
+        }
       },
       complete: () => {
         this.isLoading = false;

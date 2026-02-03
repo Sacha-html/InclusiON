@@ -1,9 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
 import { PinLoginRequest } from '../../../models';
+import { BaseVisualLoginComponent } from './base-visual-login.component';
 import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
 import {
   ContainerComponent,
@@ -43,24 +42,13 @@ import { IconDirective } from '@coreui/icons-angular';
   templateUrl: './pin-login.component.html',
   styleUrl: './pin-login.component.scss',
 })
-export class PinLoginComponent implements OnInit {
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private authService = inject(AuthService);
-
-  userId = '';
-  displayName = '';
-  initial = '';
-  avatarColor = '#667eea';
-
+export class PinLoginComponent extends BaseVisualLoginComponent {
+  // Estado específico de PIN
   pin = '';
   maxPinLength = 4;
-  isLoading = false;
-  errorMessage = '';
-  remainingAttempts: number | null = null;
-  isLocked = false;
-  lockoutSeconds = 0;
   rememberDevice = false;
+  showKeyboardInput = false;
+  audioFeedbackEnabled = false;
 
   pinPad = [
     ['1', '2', '3'],
@@ -69,24 +57,16 @@ export class PinLoginComponent implements OnInit {
     ['clear', '0', 'submit'],
   ];
 
-  ngOnInit(): void {
-    const params = this.route.snapshot.queryParams;
-    this.userId = params['userId'] || '';
-    this.displayName = params['displayName'] || '';
-    this.initial = params['initial'] || this.displayName.charAt(0).toUpperCase();
-    this.avatarColor = params['avatarColor'] || '#667eea';
-
-    if (!this.userId) {
-      this.router.navigate(['/login']);
-    }
-  }
+  // ============================================
+  // Manejo de PIN
+  // ============================================
 
   onPinDigit(digit: string): void {
     if (this.isLoading || this.isLocked) return;
 
     if (this.pin.length < this.maxPinLength) {
       this.pin += digit;
-      this.errorMessage = '';
+      this.clearError();
 
       // Auto-submit when 4 digits entered
       if (this.pin.length === this.maxPinLength) {
@@ -97,7 +77,7 @@ export class PinLoginComponent implements OnInit {
 
   onClear(): void {
     this.pin = '';
-    this.errorMessage = '';
+    this.clearError();
   }
 
   onBackspace(): void {
@@ -106,11 +86,15 @@ export class PinLoginComponent implements OnInit {
     }
   }
 
+  // ============================================
+  // Submit (implementación requerida)
+  // ============================================
+
   onSubmit(): void {
     if (this.pin.length !== this.maxPinLength || this.isLoading) return;
 
     this.isLoading = true;
-    this.errorMessage = '';
+    this.clearError();
 
     const request: PinLoginRequest = {
       userId: this.userId,
@@ -122,60 +106,33 @@ export class PinLoginComponent implements OnInit {
     this.authService.loginWithPin(request).subscribe({
       next: (response) => {
         if (response.success && response.data?.success) {
-          this.router.navigate(['/dashboard']);
+          this.navigateToDashboard();
         } else {
-          this.handleLoginError(response.data);
+          this.handleLoginResponseError(
+            response.data,
+            'PIN incorrecto',
+            () => this.pin = ''
+          );
         }
       },
       error: (error) => {
-        console.error('PIN login error:', error);
-        this.errorMessage = error.message || 'Error al verificar el PIN';
-        this.pin = '';
-        this.isLoading = false;
+        this.handleHttpError(
+          error,
+          'Error al verificar el PIN',
+          () => this.pin = ''
+        );
       },
     });
   }
 
-  private handleLoginError(data: any): void {
-    this.pin = '';
-    this.isLoading = false;
-
-    if (data?.isLocked) {
-      this.isLocked = true;
-      this.lockoutSeconds = data.lockoutSecondsRemaining || 60;
-      this.startLockoutTimer();
-      this.errorMessage = `Cuenta bloqueada. Espera ${this.lockoutSeconds} segundos.`;
-    } else {
-      this.remainingAttempts = data?.remainingAttempts || null;
-      this.errorMessage = data?.errorMessage || 'PIN incorrecto';
-
-      if (this.remainingAttempts !== null && this.remainingAttempts <= 2) {
-        this.errorMessage += `. Te quedan ${this.remainingAttempts} intentos.`;
-      }
-    }
-  }
-
-  private startLockoutTimer(): void {
-    const interval = setInterval(() => {
-      this.lockoutSeconds--;
-      if (this.lockoutSeconds <= 0) {
-        clearInterval(interval);
-        this.isLocked = false;
-        this.errorMessage = '';
-      }
-    }, 1000);
-  }
+  // ============================================
+  // UI Helpers
+  // ============================================
 
   get pinDots(): boolean[] {
     return Array(this.maxPinLength)
       .fill(false)
       .map((_, i) => i < this.pin.length);
-  }
-
-  goBack(): void {
-    this.router.navigate(['/login/identify'], {
-      queryParams: { userType: 'PERSON' },
-    });
   }
 
   handlePadClick(key: string): void {
@@ -198,5 +155,74 @@ export class PinLoginComponent implements OnInit {
     if (key === 'clear') return 'Borrar último dígito';
     if (key === 'submit') return 'Confirmar PIN';
     return `Dígito ${key}`;
+  }
+
+  // ============================================
+  // Teclado alternativo
+  // ============================================
+
+  toggleKeyboardInput(): void {
+    this.showKeyboardInput = !this.showKeyboardInput;
+    this.pin = '';
+    this.clearError();
+  }
+
+  onPinTextInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    // Solo permitir números
+    const numericValue = input.value.replace(/\D/g, '');
+    this.pin = numericValue.slice(0, this.maxPinLength);
+    input.value = this.pin;
+
+    // Feedback de audio si está habilitado
+    if (this.audioFeedbackEnabled && this.pin.length > 0) {
+      this.playFeedbackSound('digit');
+    }
+
+    // No auto-submit con teclado para dar tiempo a revisar
+  }
+
+  // ============================================
+  // Audio feedback
+  // ============================================
+
+  toggleAudioFeedback(): void {
+    this.audioFeedbackEnabled = !this.audioFeedbackEnabled;
+    if (this.audioFeedbackEnabled) {
+      this.playFeedbackSound('success');
+    }
+  }
+
+  private playFeedbackSound(type: 'digit' | 'success' | 'error'): void {
+    if (!this.audioFeedbackEnabled) return;
+
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      switch (type) {
+        case 'digit':
+          oscillator.frequency.value = 800;
+          gainNode.gain.value = 0.1;
+          break;
+        case 'success':
+          oscillator.frequency.value = 1200;
+          gainNode.gain.value = 0.15;
+          break;
+        case 'error':
+          oscillator.frequency.value = 300;
+          gainNode.gain.value = 0.15;
+          break;
+      }
+
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch {
+      // Audio no disponible, ignorar silenciosamente
+    }
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ErrorCodeService } from '../../../services/error-code.service';
 import { IdentifyUserRequest, IdentifyUserData } from '../../../models';
 import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
 import {
@@ -48,6 +49,7 @@ export class IdentifyUserComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private errorCodeService = inject(ErrorCodeService);
 
   userType: 'PERSON' | 'PROFESSIONAL' | 'FAMILY' = 'PERSON';
   identifier = '';
@@ -110,9 +112,13 @@ export class IdentifyUserComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error identifying user:', error);
-        this.errorMessage = error.message || 'Ocurrió un error. Intenta de nuevo.';
         this.isLoading = false;
+
+        if (error.errorCode !== undefined) {
+          this.errorMessage = this.errorCodeService.getMessage(error.errorCode);
+        } else {
+          this.errorMessage = error.userMessage || 'Ocurrió un error. Intenta de nuevo.';
+        }
       },
     });
   }
