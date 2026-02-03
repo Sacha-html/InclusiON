@@ -174,6 +174,105 @@
           <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
         }
       </button>
+
+      <button
+        class="a11y-option-btn"
+        [class.active]="a11y.readingMode()"
+        (click)="toggleReadingMode()"
+        [attr.aria-pressed]="a11y.readingMode()"
+      >
+        <svg cIcon name="cilBook" size="lg"></svg>
+        <span>Modo Lectura</span>
+        @if (a11y.readingMode()) {
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+        }
+      </button>
+    </section>
+
+    <!-- Texto a Voz -->
+    <section class="a11y-section">
+      <h3 class="a11y-section-title">Texto a Voz</h3>
+
+      <button
+        class="a11y-option-btn"
+        [class.active]="a11y.textToSpeechEnabled()"
+        (click)="toggleTextToSpeech()"
+        [attr.aria-pressed]="a11y.textToSpeechEnabled()"
+        [disabled]="!a11y.isTTSSupported()"
+      >
+        <svg cIcon name="cilVolumeHigh" size="lg"></svg>
+        <span>{{ a11y.isTTSSupported() ? 'Activar Lectura' : 'No disponible' }}</span>
+        @if (a11y.textToSpeechEnabled()) {
+          <svg cIcon name="cilCheck" size="lg" class="a11y-check"></svg>
+        }
+      </button>
+
+      @if (a11y.textToSpeechEnabled()) {
+        <!-- Velocidad de lectura -->
+        <div class="a11y-tts-speed">
+          <label>Velocidad: {{ a11y.textToSpeechRate() }}x</label>
+          <div class="a11y-size-controls">
+            <button
+              class="a11y-size-btn a11y-size-btn-small"
+              (click)="decreaseTTSRate()"
+              [disabled]="a11y.textToSpeechRate() <= 0.5"
+              aria-label="Reducir velocidad"
+            >
+              <svg cIcon name="cilMinus" size="sm"></svg>
+            </button>
+            <input
+              type="range"
+              min="0.5"
+              max="2"
+              step="0.25"
+              [value]="a11y.textToSpeechRate()"
+              (input)="setTTSRate($event)"
+              class="a11y-slider"
+              aria-label="Velocidad de lectura"
+            />
+            <button
+              class="a11y-size-btn a11y-size-btn-small"
+              (click)="increaseTTSRate()"
+              [disabled]="a11y.textToSpeechRate() >= 2"
+              aria-label="Aumentar velocidad"
+            >
+              <svg cIcon name="cilPlus" size="sm"></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controles de reproducción -->
+        <div class="a11y-tts-controls">
+          <button
+            class="a11y-tts-btn"
+            (click)="speakSelection()"
+            aria-label="Leer texto seleccionado"
+          >
+            <svg cIcon name="cilTextSquare" size="lg"></svg>
+            <span>Leer Selección</span>
+          </button>
+
+          <button
+            class="a11y-tts-btn"
+            (click)="speakMainContent()"
+            aria-label="Leer página completa"
+          >
+            <svg cIcon name="cilDescription" size="lg"></svg>
+            <span>Leer Página</span>
+          </button>
+
+          @if (a11y.isSpeaking()) {
+            <button
+              class="a11y-tts-btn a11y-tts-stop"
+              (click)="stopSpeaking()"
+              aria-label="Detener lectura"
+            >
+              <svg cIcon name="cilMediaStop" size="lg"></svg>
+              <span>Detener</span>
+            </button>
+          }
+        </div>
+      }
     </section>
 
     <!-- Atajos -->
