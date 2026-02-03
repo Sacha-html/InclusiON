@@ -1506,42 +1506,113 @@ body.a11y-reduced-motion {
   }
 }
 
-// Guía de lectura (barra que sigue el cursor)
+// Guía de lectura (barra que sigue el cursor/foco)
 body.a11y-reading-guide {
   cursor: crosshair;
-
-  // La guía de lectura se maneja con JavaScript en el componente
 }
 
 // =========================================
-// SOPORTE PARA GUÍA DE LECTURA (JavaScript)
+// GUÍA DE LECTURA - Barra horizontal
+// Sigue el mouse o el elemento enfocado
 // =========================================
-.reading-guide-overlay {
+.a11y-reading-guide-bar {
   position: fixed;
   left: 0;
   right: 0;
-  height: 100vh;
+  height: 44px;
   pointer-events: none;
   z-index: 9990;
+  transform: translateY(-50%);
+  transition: top 0.05s ease-out;
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.5);
-  }
+  // Colores por defecto (modo claro)
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(21, 101, 192, 0.15) 15%,
+    rgba(21, 101, 192, 0.15) 85%,
+    transparent 100%
+  );
+  border-top: 2px solid rgba(21, 101, 192, 0.4);
+  border-bottom: 2px solid rgba(21, 101, 192, 0.4);
+}
 
-  &::before {
-    top: 0;
-    height: var(--guide-top, 0);
-  }
+// Modo oscuro
+[data-color-mode="dark"] .a11y-reading-guide-bar {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(100, 181, 246, 0.2) 15%,
+    rgba(100, 181, 246, 0.2) 85%,
+    transparent 100%
+  );
+  border-color: rgba(100, 181, 246, 0.5);
+}
 
-  &::after {
-    bottom: 0;
-    height: var(--guide-bottom, 0);
-  }
+// Alto contraste
+[data-profile="high-contrast"] .a11y-reading-guide-bar {
+  height: 52px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 0, 0.25) 15%,
+    rgba(255, 255, 0, 0.25) 85%,
+    transparent 100%
+  );
+  border-color: #FFFF00;
+  border-width: 3px;
+}
+
+// Dislexia
+[data-profile="dyslexia"] .a11y-reading-guide-bar {
+  height: 48px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(147, 161, 161, 0.15) 15%,
+    rgba(147, 161, 161, 0.15) 85%,
+    transparent 100%
+  );
+  border-color: rgba(147, 161, 161, 0.4);
+}
+
+// Visión reducida
+[data-profile="low-vision"] .a11y-reading-guide-bar {
+  height: 56px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(21, 101, 192, 0.25) 15%,
+    rgba(21, 101, 192, 0.25) 85%,
+    transparent 100%
+  );
+  border-color: rgba(21, 101, 192, 0.6);
+  border-width: 3px;
+}
+
+// Daltonismo rojo-verde (deuteranopia, protanopia)
+[data-profile="deuteranopia"] .a11y-reading-guide-bar,
+[data-profile="protanopia"] .a11y-reading-guide-bar {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 114, 178, 0.2) 15%,
+    rgba(0, 114, 178, 0.2) 85%,
+    transparent 100%
+  );
+  border-color: rgba(0, 114, 178, 0.5);
+}
+
+// Daltonismo azul-amarillo (tritanopia)
+[data-profile="tritanopia"] .a11y-reading-guide-bar {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(204, 121, 167, 0.2) 15%,
+    rgba(204, 121, 167, 0.2) 85%,
+    transparent 100%
+  );
+  border-color: rgba(204, 121, 167, 0.5);
 }
 
 // =========================================
@@ -1834,29 +1905,20 @@ body.a11y-reading-mode {
     line-height: 1.8 !important;
   }
 
-  // Botón flotante para salir del modo lectura
-  &::after {
-    content: 'Salir del modo lectura (Alt+A)';
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    padding: 0.75rem 1.25rem;
-    background: var(--a11y-primary);
-    color: var(--a11y-primary-text);
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    z-index: 10000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    font-family: var(--a11y-font-family);
-  }
+  // NOTA: El botón de salida ahora es un elemento real en accessibility-panel.component.html
+  // para mejor accesibilidad (clickeable, enfocable, con aria-label)
 
   // Ocultar elementos de navegación secundarios
   .breadcrumb,
   .footer,
   nav:not(.main-nav) {
     display: none !important;
+  }
+
+  // Mantener el botón de accesibilidad visible y accesible
+  .a11y-trigger-btn {
+    bottom: 20px !important;
+    right: 20px !important;
   }
 }
 
@@ -1865,24 +1927,91 @@ body.a11y-reading-mode {
 // Estilos para indicar que TTS está activo
 // =========================================
 body.a11y-tts-enabled {
-  // Indicador visual de que TTS está habilitado
-  &::before {
-    content: '';
-    position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    width: 12px;
-    height: 12px;
-    background: var(--a11y-success);
-    border-radius: 50%;
-    z-index: 10000;
-    box-shadow: 0 0 0 3px rgba(var(--a11y-success), 0.3);
-  }
-
   // Resaltar texto seleccionable
   *::selection {
     background-color: var(--a11y-primary) !important;
     color: var(--a11y-primary-text) !important;
+  }
+}
+
+// Indicador flotante de lectura activa (Angular component)
+.a11y-speaking-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #1E1E2E;
+  border: 2px solid #00D9FF;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+
+  .speaking-waves {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+
+    span {
+      display: block;
+      width: 4px;
+      background: #00D9FF;
+      border-radius: 2px;
+      animation: speaking-wave 0.8s ease-in-out infinite;
+
+      &:nth-child(1) { height: 8px; animation-delay: 0s; }
+      &:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+      &:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+      &:nth-child(4) { height: 16px; animation-delay: 0.3s; }
+      &:nth-child(5) { height: 6px; animation-delay: 0.4s; }
+    }
+  }
+
+  .speaking-text {
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .speaking-stop-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 2px solid #FF6B6B;
+    border-radius: 50%;
+    color: #FF6B6B;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #FF6B6B;
+      color: #000;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+@keyframes speaking-wave {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1); }
+}
+
+// Respeta preferencia de movimiento reducido
+@media (prefers-reduced-motion: reduce) {
+  .a11y-speaking-indicator .speaking-waves span {
+    animation: none;
   }
 }
 

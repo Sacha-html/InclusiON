@@ -485,15 +485,75 @@ export class AccessibilityService {
   }
 
   /**
-   * Lee un texto en voz alta
+   * Lee un texto en voz alta.
+   * Divide textos largos en chunks para evitar el bug de Chrome
+   * donde la síntesis se detiene abruptamente en textos > 200 caracteres.
    */
   speak(text: string): void {
-    if (!this.speechSynthesis || !this.textToSpeechEnabled()) return;
+    if (!this.speechSynthesis) return;
 
     // Cancelar lectura anterior si existe
     this.stopSpeaking();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Dividir texto largo en chunks (Chrome bug workaround)
+    const chunks = this.splitTextIntoChunks(text, 180);
+
+    if (chunks.length === 0) return;
+
+    this.isSpeaking.set(true);
+    this.speakChunks(chunks, 0);
+  }
+
+  /**
+   * Divide el texto en chunks por oraciones o por longitud máxima
+   */
+  private splitTextIntoChunks(text: string, maxLength: number): string[] {
+    const chunks: string[] = [];
+    const sentences = text.split(/(?<=[.!?。])\s+/);
+
+    let currentChunk = '';
+
+    for (const sentence of sentences) {
+      if (sentence.length > maxLength) {
+        // Si la oración es muy larga, dividirla por comas o espacios
+        if (currentChunk) {
+          chunks.push(currentChunk.trim());
+          currentChunk = '';
+        }
+        const words = sentence.split(/\s+/);
+        for (const word of words) {
+          if ((currentChunk + ' ' + word).length > maxLength) {
+            if (currentChunk) chunks.push(currentChunk.trim());
+            currentChunk = word;
+          } else {
+            currentChunk += (currentChunk ? ' ' : '') + word;
+          }
+        }
+      } else if ((currentChunk + ' ' + sentence).length > maxLength) {
+        chunks.push(currentChunk.trim());
+        currentChunk = sentence;
+      } else {
+        currentChunk += (currentChunk ? ' ' : '') + sentence;
+      }
+    }
+
+    if (currentChunk.trim()) {
+      chunks.push(currentChunk.trim());
+    }
+
+    return chunks.filter(c => c.length > 0);
+  }
+
+  /**
+   * Lee los chunks de texto secuencialmente
+   */
+  private speakChunks(chunks: string[], index: number): void {
+    if (!this.speechSynthesis || index >= chunks.length) {
+      this.isSpeaking.set(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(chunks[index]);
     utterance.lang = 'es-ES';
     utterance.rate = this.textToSpeechRate();
     utterance.pitch = 1;
@@ -505,9 +565,16 @@ export class AccessibilityService {
       utterance.voice = spanishVoices[0];
     }
 
-    utterance.onstart = () => this.isSpeaking.set(true);
-    utterance.onend = () => this.isSpeaking.set(false);
-    utterance.onerror = () => this.isSpeaking.set(false);
+    utterance.onend = () => {
+      // Continuar con el siguiente chunk
+      this.speakChunks(chunks, index + 1);
+    };
+
+    utterance.onerror = (event) => {
+      console.warn('TTS Error:', event.error);
+      this.isSpeaking.set(false);
+      this.announce('Error al leer el texto');
+    };
 
     this.currentUtterance = utterance;
     this.speechSynthesis.speak(utterance);

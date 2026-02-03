@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { ToastModule } from '@coreui/angular';
 import { Subscription } from 'rxjs';
-import { ToastService } from '../../services/toast.service';
-import { Toast } from '../../models';
+import { ToastService } from '@services';
+import { Toast } from '@models';
 
 @Component({
   selector: 'app-toaster',

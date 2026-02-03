@@ -1,8 +1,7 @@
 import { inject, OnInit, OnDestroy, Directive } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { ErrorCodeService } from '../../../services/error-code.service';
-import { ErrorCode } from '../../../models';
+import { AuthService, ErrorCodeService } from '@services';
+import { ErrorCode } from '@models';
 
 /**
  * Datos del usuario obtenidos de los query params

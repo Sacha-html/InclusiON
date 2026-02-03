@@ -1,24 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { ErrorCodeService } from '../../../services/error-code.service';
-import { IdentifyUserRequest, IdentifyUserData } from '../../../models';
-import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
-import {
-  ContainerComponent,
-  RowComponent,
-  ColComponent,
-  CardComponent,
-  CardBodyComponent,
-  ButtonDirective,
-  FormControlDirective,
-  InputGroupComponent,
-  InputGroupTextDirective,
-  SpinnerComponent,
-  AlertComponent,
-} from '@coreui/angular';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService, ErrorCodeService } from '@services';
+import { IdentifyUserRequest, IdentifyUserData } from '@models';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
+import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
@@ -27,18 +14,7 @@ import { IconDirective } from '@coreui/icons-angular';
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
-    ContainerComponent,
-    RowComponent,
-    ColComponent,
-    CardComponent,
-    CardBodyComponent,
     ButtonDirective,
-    FormControlDirective,
-    InputGroupComponent,
-    InputGroupTextDirective,
-    SpinnerComponent,
-    AlertComponent,
     IconDirective,
     AccessibilityPanelComponent,
   ],

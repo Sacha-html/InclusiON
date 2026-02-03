@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { VisualStandardLoginRequest } from '../../../models';
+import { VisualStandardLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
-import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 import {
   ButtonDirective,
   FormControlDirective,

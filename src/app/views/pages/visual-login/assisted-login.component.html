@@ -10,7 +10,7 @@
         color="light"
         class="back-button"
         (click)="goBack()"
-        aria-label="Volver a identificacion de usuario"
+        aria-label="Volver a identificación de usuario"
       >
         <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
         <span>Volver</span>
@@ -18,26 +18,28 @@
     </div>
 
     <!-- Main Card -->
-    <div class="login-card card border-0 shadow">
+    <main class="login-card card border-0 shadow" role="main">
       <div class="card-body p-4 p-md-5">
         <!-- User Avatar -->
-        <div class="text-center mb-4">
+        <header class="text-center mb-4">
           <div
             class="user-avatar mx-auto mb-3"
             [style.background-color]="avatarColor"
+            role="img"
+            [attr.aria-label]="'Avatar de ' + displayName"
           >
             {{ initial }}
           </div>
-          <h2 class="h4 fw-bold mb-1">{{ displayName }}</h2>
+          <h1 class="h4 fw-bold mb-1">{{ displayName }}</h1>
           <p class="text-muted mb-0">necesita ayuda para entrar</p>
-        </div>
+        </header>
 
         <!-- Supervisor Info -->
-        <div class="supervisor-info text-center mb-4">
-          <div class="supervisor-icon mb-2">
-            <svg cIcon name="cilPeople" size="xl"></svg>
+        <div class="supervisor-info text-center mb-4" aria-labelledby="supervisor-info-text">
+          <div class="supervisor-icon mb-2" aria-hidden="true">
+            <svg cIcon name="cilPeople" size="xl" aria-hidden="true"></svg>
           </div>
-          <p class="fw-semibold mb-0">
+          <p id="supervisor-info-text" class="fw-semibold mb-0">
             Un familiar o profesional debe autorizar el acceso
           </p>
         </div>
@@ -47,16 +49,17 @@
           <div
             class="alert alert-danger mb-4 text-center"
             role="alert"
+            aria-live="assertive"
           >
-            <svg cIcon name="cilWarning" class="me-2"></svg>
+            <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
             {{ errorMessage }}
           </div>
         }
 
         <!-- Supervisor Login Form -->
-        <form (ngSubmit)="onSubmit()" class="supervisor-form">
-          <p class="form-section-title text-center mb-3">
-            <svg cIcon name="cilUser" class="me-1"></svg>
+        <form (ngSubmit)="onSubmit()" class="supervisor-form" aria-labelledby="form-section-title">
+          <p id="form-section-title" class="form-section-title text-center mb-3">
+            <svg cIcon name="cilUser" class="me-1" aria-hidden="true"></svg>
             Credenciales del supervisor
           </p>
 
@@ -65,7 +68,7 @@
             <label for="supervisorEmail" class="form-label visually-hidden">Email del supervisor</label>
             <c-input-group size="lg">
               <span cInputGroupText>
-                <svg cIcon name="cilEnvelopeClosed"></svg>
+                <svg cIcon name="cilEnvelopeClosed" aria-hidden="true"></svg>
               </span>
               <input
                 cFormControl
@@ -77,16 +80,20 @@
                 [disabled]="isLoading"
                 autocomplete="email"
                 class="form-input"
+                aria-describedby="emailHelp"
               />
             </c-input-group>
+            <small id="emailHelp" class="visually-hidden">
+              Ingresa el correo electrónico del supervisor autorizado
+            </small>
           </div>
 
           <!-- Password -->
           <div class="mb-4">
-            <label for="supervisorPassword" class="form-label visually-hidden">Contrasena del supervisor</label>
+            <label for="supervisorPassword" class="form-label visually-hidden">Contraseña del supervisor</label>
             <c-input-group size="lg">
               <span cInputGroupText>
-                <svg cIcon name="cilLockLocked"></svg>
+                <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
               </span>
               <input
                 cFormControl
@@ -94,10 +101,11 @@
                 id="supervisorPassword"
                 [(ngModel)]="supervisorPassword"
                 name="supervisorPassword"
-                placeholder="Contrasena"
+                placeholder="Contraseña"
                 [disabled]="isLoading"
                 autocomplete="current-password"
                 class="form-input"
+                aria-describedby="passwordHelp"
               />
               <button
                 type="button"
@@ -105,11 +113,15 @@
                 color="secondary"
                 variant="outline"
                 (click)="togglePasswordVisibility()"
-                [attr.aria-label]="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                [attr.aria-pressed]="showPassword"
               >
-                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilDescription'"></svg>
+                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilDescription'" aria-hidden="true"></svg>
               </button>
             </c-input-group>
+            <small id="passwordHelp" class="visually-hidden">
+              Usa el botón a la derecha para mostrar u ocultar la contraseña
+            </small>
           </div>
 
           <!-- Submit Button -->
@@ -122,23 +134,23 @@
             [disabled]="!supervisorEmail || !supervisorPassword || isLoading"
           >
             @if (isLoading) {
-              <c-spinner size="sm" class="me-2"></c-spinner>
-              Autorizando...
+              <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
+              <span>Autorizando...</span>
             } @else {
-              <svg cIcon name="cilCheckCircle" class="me-2"></svg>
-              Autorizar Entrada
+              <svg cIcon name="cilCheckCircle" class="me-2" aria-hidden="true"></svg>
+              <span>Autorizar Entrada</span>
             }
           </button>
         </form>
 
         <!-- Help -->
-        <div class="text-center mt-4">
+        <footer class="text-center mt-4">
           <p class="text-muted small mb-0">
-            <svg cIcon name="cilInfo" class="me-1"></svg>
+            <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
             Solo familiares y profesionales autorizados pueden dar acceso
           </p>
-        </div>
+        </footer>
       </div>
-    </div>
+    </main>
   </div>
 </div>
