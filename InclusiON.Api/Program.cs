@@ -9,6 +9,7 @@ using InclusiON.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
 
 builder.Host.UseSerilog((context, config) =>
 {
