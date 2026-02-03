@@ -1,8 +1,16 @@
-import { Injectable, signal, effect, computed } from '@angular/core';
+import { Injectable, signal, effect, computed, inject } from '@angular/core';
+import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
 
 // Separamos modo de color de perfil de accesibilidad
 export type ColorMode = 'light' | 'dark';
-export type AccessibilityProfile = 'default' | 'high-contrast' | 'dyslexia' | 'low-vision';
+export type AccessibilityProfile =
+  | 'default'
+  | 'high-contrast'
+  | 'dyslexia'
+  | 'low-vision'
+  | 'deuteranopia'
+  | 'protanopia'
+  | 'tritanopia';
 export type FontSize = 'small' | 'medium' | 'large' | 'x-large';
 export type LineSpacing = 'normal' | 'relaxed' | 'loose';
 export type LetterSpacing = 'normal' | 'wide' | 'wider';
@@ -49,6 +57,9 @@ export interface AccessibilitySettings {
   reducedMotion: boolean;
   readingGuide: boolean;
   largeCursor: boolean;
+  readingMode: boolean;
+  textToSpeechEnabled: boolean;
+  textToSpeechRate: number;
 }
 
 const DEFAULT_SETTINGS: AccessibilitySettings = {
@@ -61,14 +72,17 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   highlightFocus: false,
   reducedMotion: false,
   readingGuide: false,
-  largeCursor: false
+  largeCursor: false,
+  readingMode: false,
+  textToSpeechEnabled: false,
+  textToSpeechRate: 1.0
 };
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccessibilityService {
-  private readonly STORAGE_KEY = 'a11y-settings';
+  private readonly storage = inject(LocalStorageService);
 
   // Opciones de modo de color (claro/oscuro)
   readonly colorModes: ColorModeOption[] = [
@@ -109,6 +123,24 @@ export class AccessibilityService {
       name: 'Visión Reducida',
       description: 'Texto e iconos más grandes',
       icon: 'cilZoomIn'
+    },
+    {
+      id: 'deuteranopia',
+      name: 'Deuteranopia',
+      description: 'Daltonismo rojo-verde (más común)',
+      icon: 'cilColorPalette'
+    },
+    {
+      id: 'protanopia',
+      name: 'Protanopia',
+      description: 'Daltonismo rojo-verde',
+      icon: 'cilColorPalette'
+    },
+    {
+      id: 'tritanopia',
+      name: 'Tritanopia',
+      description: 'Daltonismo azul-amarillo',
+      icon: 'cilColorPalette'
     }
   ];
 
@@ -149,14 +181,34 @@ export class AccessibilityService {
   readonly reducedMotion = computed(() => this.settings().reducedMotion);
   readonly readingGuide = computed(() => this.settings().readingGuide);
   readonly largeCursor = computed(() => this.settings().largeCursor);
+  readonly readingMode = computed(() => this.settings().readingMode);
+  readonly textToSpeechEnabled = computed(() => this.settings().textToSpeechEnabled);
+  readonly textToSpeechRate = computed(() => this.settings().textToSpeechRate);
 
   // Computed para saber si es modo oscuro
   readonly isDarkMode = computed(() => this.settings().colorMode === 'dark');
 
+  // Computed para saber si es un perfil de daltonismo
+  readonly isColorBlindProfile = computed(() =>
+    ['deuteranopia', 'protanopia', 'tritanopia'].includes(this.settings().profile)
+  );
+
   // Signal para el panel abierto/cerrado
   readonly panelOpen = signal(false);
 
+  // Signal para texto a voz activo (leyendo)
+  readonly isSpeaking = signal(false);
+
+  // Referencia a la síntesis de voz
+  private speechSynthesis: SpeechSynthesis | null = null;
+  private currentUtterance: SpeechSynthesisUtterance | null = null;
+
   constructor() {
+    // Inicializar síntesis de voz si está disponible
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      this.speechSynthesis = window.speechSynthesis;
+    }
+
     // Efecto que aplica todas las configuraciones cuando cambian
     effect(() => {
       this.applySettings(this.settings());
@@ -345,6 +397,8 @@ export class AccessibilityService {
     body.classList.toggle('a11y-reduced-motion', settings.reducedMotion);
     body.classList.toggle('a11y-reading-guide', settings.readingGuide);
     body.classList.toggle('a11y-large-cursor', settings.largeCursor);
+    body.classList.toggle('a11y-reading-mode', settings.readingMode);
+    body.classList.toggle('a11y-tts-enabled', settings.textToSpeechEnabled);
   }
 
   /**
@@ -398,8 +452,143 @@ export class AccessibilityService {
         return value ? 'Guía de lectura activada' : 'Guía de lectura desactivada';
       case 'largeCursor':
         return value ? 'Cursor grande activado' : 'Cursor grande desactivado';
+      case 'readingMode':
+        return value ? 'Modo lectura activado' : 'Modo lectura desactivado';
+      case 'textToSpeechEnabled':
+        return value ? 'Texto a voz activado' : 'Texto a voz desactivado';
+      case 'textToSpeechRate':
+        return `Velocidad de lectura: ${value}x`;
       default:
         return 'Configuración actualizada';
+    }
+  }
+
+  // =========================================
+  // TEXTO A VOZ (Text-to-Speech)
+  // =========================================
+
+  /**
+   * Verifica si el navegador soporta texto a voz
+   */
+  isTTSSupported(): boolean {
+    return this.speechSynthesis !== null;
+  }
+
+  /**
+   * Obtiene las voces disponibles en español
+   */
+  getSpanishVoices(): SpeechSynthesisVoice[] {
+    if (!this.speechSynthesis) return [];
+    return this.speechSynthesis.getVoices().filter(voice =>
+      voice.lang.startsWith('es')
+    );
+  }
+
+  /**
+   * Lee un texto en voz alta
+   */
+  speak(text: string): void {
+    if (!this.speechSynthesis || !this.textToSpeechEnabled()) return;
+
+    // Cancelar lectura anterior si existe
+    this.stopSpeaking();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = this.textToSpeechRate();
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    // Intentar usar voz en español
+    const spanishVoices = this.getSpanishVoices();
+    if (spanishVoices.length > 0) {
+      utterance.voice = spanishVoices[0];
+    }
+
+    utterance.onstart = () => this.isSpeaking.set(true);
+    utterance.onend = () => this.isSpeaking.set(false);
+    utterance.onerror = () => this.isSpeaking.set(false);
+
+    this.currentUtterance = utterance;
+    this.speechSynthesis.speak(utterance);
+  }
+
+  /**
+   * Lee el texto seleccionado en la página
+   */
+  speakSelection(): void {
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim()) {
+      this.speak(selection.toString());
+    } else {
+      this.announce('No hay texto seleccionado');
+    }
+  }
+
+  /**
+   * Lee el contenido principal de la página
+   */
+  speakMainContent(): void {
+    const mainContent = document.querySelector('main, [role="main"], .main-content, .body');
+    if (mainContent) {
+      const text = mainContent.textContent || '';
+      if (text.trim()) {
+        this.speak(text.trim());
+      }
+    }
+  }
+
+  /**
+   * Pausa la lectura
+   */
+  pauseSpeaking(): void {
+    if (this.speechSynthesis) {
+      this.speechSynthesis.pause();
+    }
+  }
+
+  /**
+   * Reanuda la lectura
+   */
+  resumeSpeaking(): void {
+    if (this.speechSynthesis) {
+      this.speechSynthesis.resume();
+    }
+  }
+
+  /**
+   * Detiene la lectura
+   */
+  stopSpeaking(): void {
+    if (this.speechSynthesis) {
+      this.speechSynthesis.cancel();
+      this.isSpeaking.set(false);
+    }
+  }
+
+  /**
+   * Cambia la velocidad de lectura
+   */
+  setTextToSpeechRate(rate: number): void {
+    const clampedRate = Math.max(0.5, Math.min(2, rate));
+    this.updateSetting('textToSpeechRate', clampedRate);
+  }
+
+  /**
+   * Activa/desactiva el modo lectura
+   */
+  toggleReadingMode(): void {
+    this.updateSetting('readingMode', !this.readingMode());
+  }
+
+  /**
+   * Activa/desactiva texto a voz
+   */
+  toggleTextToSpeech(): void {
+    const newValue = !this.textToSpeechEnabled();
+    this.updateSetting('textToSpeechEnabled', newValue);
+    if (!newValue) {
+      this.stopSpeaking();
     }
   }
 
@@ -407,16 +596,9 @@ export class AccessibilityService {
    * Carga las configuraciones guardadas en localStorage
    */
   private loadSettings(): AccessibilitySettings {
-    if (typeof localStorage !== 'undefined') {
-      const saved = localStorage.getItem(this.STORAGE_KEY);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          return { ...DEFAULT_SETTINGS, ...parsed };
-        } catch {
-          return { ...DEFAULT_SETTINGS };
-        }
-      }
+    const saved = this.storage.getAccessibilitySettings<Partial<AccessibilitySettings>>();
+    if (saved) {
+      return { ...DEFAULT_SETTINGS, ...saved };
     }
     return { ...DEFAULT_SETTINGS };
   }
@@ -425,8 +607,6 @@ export class AccessibilityService {
    * Guarda las configuraciones en localStorage
    */
   private saveSettings(): void {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.settings()));
-    }
+    this.storage.setAccessibilitySettings(this.settings());
   }
 }
