@@ -49,30 +49,4 @@ export const routes: Routes = [
       title: 'Configurar Metodo de Login',
     },
   },
-  // Rutas deprecadas - mantenidas para retrocompatibilidad
-  {
-    path: 'emoji',
-    redirectTo: 'identify',
-    pathMatch: 'full',
-  },
-  {
-    path: 'color-shape',
-    redirectTo: 'identify',
-    pathMatch: 'full',
-  },
-  {
-    path: 'profile-select',
-    redirectTo: 'identify',
-    pathMatch: 'full',
-  },
-  {
-    path: 'trusted-device',
-    redirectTo: 'identify',
-    pathMatch: 'full',
-  },
-  {
-    path: 'supervised',
-    redirectTo: 'assisted',
-    pathMatch: 'full',
-  },
 ];

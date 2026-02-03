@@ -31,6 +31,9 @@
   --a11y-success: #1B5E20;                 // Contraste 8.5:1 (AAA)
   --a11y-warning: #BF360C;                 // Contraste 6.3:1 (AA Large)
   --a11y-danger: #B71C1C;                  // Contraste 6.7:1 (AA Large)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
   --a11y-border: #9E9E9E;
 
   // Sidebar
@@ -79,6 +82,9 @@
     --a11y-success: #A5D6A7;                // Contraste 10.7:1 (AAA)
     --a11y-warning: #FFCC80;                // Contraste 11.5:1 (AAA)
     --a11y-danger: #EF9A9A;                 // Contraste 8.8:1 (AAA)
+    --a11y-success-text: #000000;           // Texto oscuro para fondos claros
+    --a11y-warning-text: #000000;
+    --a11y-danger-text: #000000;
     --a11y-border: #616161;
 
     --a11y-sidebar-bg: #0D0D0D;
@@ -127,6 +133,9 @@
   --a11y-success: #006600;
   --a11y-warning: #CC6600;
   --a11y-danger: #CC0000;
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
   --a11y-border: #000000;
 
   --a11y-sidebar-bg: #000066;
@@ -172,6 +181,9 @@
   --a11y-success: #00FF00;
   --a11y-warning: #FFA500;
   --a11y-danger: #FF4444;
+  --a11y-success-text: #000000;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
   --a11y-border: #FFFFFF;
 
   --a11y-sidebar-bg: #000000;
@@ -220,6 +232,9 @@
   --a11y-success: #859900;
   --a11y-warning: #CB4B16;
   --a11y-danger: #DC322F;
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
   --a11y-border: #93A1A1;
 
   --a11y-sidebar-bg: #002B36;
@@ -265,6 +280,9 @@
   --a11y-success: #859900;
   --a11y-warning: #CB4B16;
   --a11y-danger: #DC322F;
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
   --a11y-border: #586E75;
 
   --a11y-sidebar-bg: #001F27;
@@ -312,6 +330,9 @@
   --a11y-success: #1B5E20;
   --a11y-warning: #E65100;
   --a11y-danger: #B71C1C;
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
   --a11y-border: #616161;
 
   --a11y-sidebar-bg: #1A237E;
@@ -356,6 +377,9 @@
   --a11y-success: #69F0AE;
   --a11y-warning: #FFAB40;
   --a11y-danger: #FF5252;
+  --a11y-success-text: #000000;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
   --a11y-border: #757575;
 
   --a11y-sidebar-bg: #0D1B3E;
@@ -377,6 +401,303 @@
   --a11y-dropdown-header-bg: #121212;
 
   --a11y-focus-color: rgba(130, 177, 255, 0.7);
+}
+
+// =========================================
+// TEMA DEUTERANOPIA - MODO CLARO
+// Daltonismo rojo-verde (más común, ~6% hombres)
+// Usa azul y naranja/amarillo como colores distintivos
+// =========================================
+[data-color-mode="light"][data-theme="deuteranopia"],
+[data-color-mode="light"][data-profile="deuteranopia"],
+:root:not([data-color-mode="dark"])[data-theme="deuteranopia"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 16px;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0.01em;
+  --a11y-word-spacing: 0.05em;
+
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F5F5F5;
+  --a11y-surface: #FAFAFA;
+  --a11y-text: #1A1A1A;
+  --a11y-text-secondary: #3D3D3D;
+  --a11y-text-muted: #595959;
+  --a11y-primary: #0077B6;                 // Azul distintivo
+  --a11y-primary-dark: #005A8C;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-success: #0077B6;                 // Azul en lugar de verde
+  --a11y-warning: #FFA500;                 // Naranja brillante
+  --a11y-danger: #D62828;                  // Rojo con más azul
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #9E9E9E;
+
+  --a11y-sidebar-bg: #023E8A;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #CAF0F8;
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(255, 165, 0, 0.3);
+  --a11y-sidebar-icon: #FFA500;
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #1A1A1A;
+  --a11y-header-border: #E0E0E0;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #1A1A1A;
+  --a11y-dropdown-hover-bg: #F5F5F5;
+  --a11y-dropdown-border: #E0E0E0;
+  --a11y-dropdown-header-bg: #FAFAFA;
+
+  --a11y-focus-color: rgba(0, 119, 182, 0.5);
+  --a11y-focus-width: 3px;
+  --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// TEMA DEUTERANOPIA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="deuteranopia"],
+.dark-theme [data-profile="deuteranopia"],
+[data-color-mode="dark"] [data-theme="deuteranopia"],
+.dark-theme[data-theme="deuteranopia"] {
+  --a11y-bg: #121212;
+  --a11y-bg-secondary: #1E1E1E;
+  --a11y-surface: #1A1A1A;
+  --a11y-text: #F5F5F5;
+  --a11y-text-secondary: #D0D0D0;
+  --a11y-text-muted: #A0A0A0;
+  --a11y-primary: #48CAE4;                 // Cyan claro
+  --a11y-primary-dark: #00B4D8;
+  --a11y-primary-text: #000000;
+  --a11y-success: #48CAE4;                 // Cyan en lugar de verde
+  --a11y-warning: #FFB703;                 // Amarillo/naranja
+  --a11y-danger: #FB8500;                  // Naranja fuerte
+  --a11y-success-text: #000000;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
+  --a11y-border: #616161;
+
+  --a11y-sidebar-bg: #03045E;
+  --a11y-sidebar-text: #F5F5F5;
+  --a11y-sidebar-text-muted: #90E0EF;
+  --a11y-sidebar-nav-link: #CAF0F8;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.12);
+  --a11y-sidebar-nav-link-active-bg: rgba(255, 183, 3, 0.25);
+  --a11y-sidebar-icon: #FFB703;
+
+  --a11y-header-bg: #121212;
+  --a11y-header-text: #F5F5F5;
+  --a11y-header-border: #424242;
+
+  --a11y-dropdown-bg: #1E1E1E;
+  --a11y-dropdown-text: #F5F5F5;
+  --a11y-dropdown-hover-bg: #2D2D2D;
+  --a11y-dropdown-border: #616161;
+  --a11y-dropdown-header-bg: #1A1A1A;
+
+  --a11y-focus-color: rgba(72, 202, 228, 0.6);
+}
+
+// =========================================
+// TEMA PROTANOPIA - MODO CLARO
+// Daltonismo rojo-verde (sensibilidad reducida al rojo)
+// Usa azul y amarillo como colores distintivos
+// =========================================
+[data-color-mode="light"][data-theme="protanopia"],
+[data-color-mode="light"][data-profile="protanopia"],
+:root:not([data-color-mode="dark"])[data-theme="protanopia"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 16px;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0.01em;
+  --a11y-word-spacing: 0.05em;
+
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F5F5F5;
+  --a11y-surface: #FAFAFA;
+  --a11y-text: #1A1A1A;
+  --a11y-text-secondary: #3D3D3D;
+  --a11y-text-muted: #595959;
+  --a11y-primary: #1D3557;                 // Azul oscuro
+  --a11y-primary-dark: #14213D;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-success: #457B9D;                 // Azul medio
+  --a11y-warning: #E9C46A;                 // Amarillo dorado
+  --a11y-danger: #F4A261;                  // Naranja (visible para protanopia)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
+  --a11y-border: #9E9E9E;
+
+  --a11y-sidebar-bg: #1D3557;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #A8DADC;
+  --a11y-sidebar-nav-link: #F1FAEE;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(233, 196, 106, 0.3);
+  --a11y-sidebar-icon: #E9C46A;
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #1A1A1A;
+  --a11y-header-border: #E0E0E0;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #1A1A1A;
+  --a11y-dropdown-hover-bg: #F5F5F5;
+  --a11y-dropdown-border: #E0E0E0;
+  --a11y-dropdown-header-bg: #FAFAFA;
+
+  --a11y-focus-color: rgba(29, 53, 87, 0.5);
+  --a11y-focus-width: 3px;
+  --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// TEMA PROTANOPIA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="protanopia"],
+.dark-theme [data-profile="protanopia"],
+[data-color-mode="dark"] [data-theme="protanopia"],
+.dark-theme[data-theme="protanopia"] {
+  --a11y-bg: #14213D;
+  --a11y-bg-secondary: #1D3557;
+  --a11y-surface: #1D3557;
+  --a11y-text: #F1FAEE;
+  --a11y-text-secondary: #A8DADC;
+  --a11y-text-muted: #8ECAE6;
+  --a11y-primary: #A8DADC;
+  --a11y-primary-dark: #8ECAE6;
+  --a11y-primary-text: #14213D;
+  --a11y-success: #8ECAE6;
+  --a11y-warning: #E9C46A;
+  --a11y-danger: #F4A261;
+  --a11y-success-text: #14213D;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
+  --a11y-border: #457B9D;
+
+  --a11y-sidebar-bg: #0D1B2A;
+  --a11y-sidebar-text: #F1FAEE;
+  --a11y-sidebar-text-muted: #A8DADC;
+  --a11y-sidebar-nav-link: #F1FAEE;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(233, 196, 106, 0.3);
+  --a11y-sidebar-icon: #E9C46A;
+
+  --a11y-header-bg: #14213D;
+  --a11y-header-text: #F1FAEE;
+  --a11y-header-border: #457B9D;
+
+  --a11y-dropdown-bg: #1D3557;
+  --a11y-dropdown-text: #F1FAEE;
+  --a11y-dropdown-hover-bg: #264653;
+  --a11y-dropdown-border: #457B9D;
+  --a11y-dropdown-header-bg: #14213D;
+
+  --a11y-focus-color: rgba(168, 218, 220, 0.6);
+}
+
+// =========================================
+// TEMA TRITANOPIA - MODO CLARO
+// Daltonismo azul-amarillo (muy raro)
+// Usa rojo/magenta y cyan como colores distintivos
+// =========================================
+[data-color-mode="light"][data-theme="tritanopia"],
+[data-color-mode="light"][data-profile="tritanopia"],
+:root:not([data-color-mode="dark"])[data-theme="tritanopia"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 16px;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0.01em;
+  --a11y-word-spacing: 0.05em;
+
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F5F5F5;
+  --a11y-surface: #FAFAFA;
+  --a11y-text: #1A1A1A;
+  --a11y-text-secondary: #3D3D3D;
+  --a11y-text-muted: #595959;
+  --a11y-primary: #9B2335;                 // Rojo/magenta oscuro
+  --a11y-primary-dark: #7B1A29;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-success: #00838F;                 // Cyan/teal
+  --a11y-warning: #E91E63;                 // Magenta/rosa
+  --a11y-danger: #B71C1C;                  // Rojo oscuro
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #9E9E9E;
+
+  --a11y-sidebar-bg: #4A148C;              // Púrpura oscuro
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #E1BEE7;
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(0, 188, 212, 0.3);
+  --a11y-sidebar-icon: #00BCD4;
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #1A1A1A;
+  --a11y-header-border: #E0E0E0;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #1A1A1A;
+  --a11y-dropdown-hover-bg: #F5F5F5;
+  --a11y-dropdown-border: #E0E0E0;
+  --a11y-dropdown-header-bg: #FAFAFA;
+
+  --a11y-focus-color: rgba(155, 35, 53, 0.5);
+  --a11y-focus-width: 3px;
+  --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// TEMA TRITANOPIA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="tritanopia"],
+.dark-theme [data-profile="tritanopia"],
+[data-color-mode="dark"] [data-theme="tritanopia"],
+.dark-theme[data-theme="tritanopia"] {
+  --a11y-bg: #1A1A2E;
+  --a11y-bg-secondary: #16213E;
+  --a11y-surface: #16213E;
+  --a11y-text: #EAEAEA;
+  --a11y-text-secondary: #B8B8B8;
+  --a11y-text-muted: #9A9A9A;
+  --a11y-primary: #E94560;                 // Rosa/rojo
+  --a11y-primary-dark: #C73E54;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-success: #4DD0E1;                 // Cyan claro
+  --a11y-warning: #F48FB1;                 // Rosa claro
+  --a11y-danger: #EF5350;                  // Rojo claro
+  --a11y-success-text: #000000;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #533483;
+
+  --a11y-sidebar-bg: #0F0E17;
+  --a11y-sidebar-text: #EAEAEA;
+  --a11y-sidebar-text-muted: #A7A9BE;
+  --a11y-sidebar-nav-link: #EAEAEA;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(77, 208, 225, 0.3);
+  --a11y-sidebar-icon: #4DD0E1;
+
+  --a11y-header-bg: #1A1A2E;
+  --a11y-header-text: #EAEAEA;
+  --a11y-header-border: #533483;
+
+  --a11y-dropdown-bg: #16213E;
+  --a11y-dropdown-text: #EAEAEA;
+  --a11y-dropdown-hover-bg: #1A1A2E;
+  --a11y-dropdown-border: #533483;
+  --a11y-dropdown-header-bg: #0F0E17;
+
+  --a11y-focus-color: rgba(233, 69, 96, 0.6);
 }
 
 // =========================================
@@ -669,19 +990,19 @@ a {
 .btn-success {
   background-color: var(--a11y-success) !important;
   border-color: var(--a11y-success) !important;
-  color: #FFFFFF !important;
+  color: var(--a11y-success-text) !important;
 }
 
 .btn-danger {
   background-color: var(--a11y-danger) !important;
   border-color: var(--a11y-danger) !important;
-  color: #FFFFFF !important;
+  color: var(--a11y-danger-text) !important;
 }
 
 .btn-warning {
   background-color: var(--a11y-warning) !important;
   border-color: var(--a11y-warning) !important;
-  color: #FFFFFF !important;
+  color: var(--a11y-warning-text) !important;
 }
 
 .btn-outline-primary {
@@ -897,14 +1218,17 @@ a {
 
   &.bg-success {
     background-color: var(--a11y-success) !important;
+    color: var(--a11y-success-text) !important;
   }
 
   &.bg-danger {
     background-color: var(--a11y-danger) !important;
+    color: var(--a11y-danger-text) !important;
   }
 
   &.bg-warning {
     background-color: var(--a11y-warning) !important;
+    color: var(--a11y-warning-text) !important;
   }
 
   &.bg-secondary {
@@ -1255,86 +1579,7 @@ body.a11y-reading-guide {
   margin-bottom: 16px;
 }
 
-// Grilla de emojis/formas
-.visual-login-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 16px;
-  background-color: var(--a11y-surface);
-  border-radius: 12px;
-  border: 2px solid var(--a11y-border);
-}
-
-// Item de emoji
-.emoji-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  font-size: 2rem;
-  background-color: var(--a11y-bg);
-  border: 2px solid var(--a11y-border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: var(--a11y-bg-secondary);
-    transform: scale(1.05);
-  }
-
-  &:focus {
-    outline: 3px solid #FFD700;
-    outline-offset: 2px;
-  }
-
-  &.selected {
-    border-color: var(--a11y-primary);
-    background-color: rgba(21, 101, 192, 0.1);
-    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.3);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-// Secuencia seleccionada
-.visual-login-sequence {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  background-color: var(--a11y-bg-secondary);
-  border-radius: 8px;
-  min-height: 80px;
-}
-
-.sequence-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  font-size: 1.75rem;
-  background-color: var(--a11y-bg);
-  border: 2px dashed var(--a11y-border);
-  border-radius: 8px;
-
-  &.filled {
-    border-style: solid;
-    border-color: var(--a11y-primary);
-  }
-
-  &.empty::after {
-    content: attr(data-index);
-    color: var(--a11y-text-muted);
-    font-size: 1rem;
-  }
-}
-
-// Grilla de perfiles (PROFILE_SELECT)
+// Grilla de perfiles
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -1380,7 +1625,7 @@ body.a11y-reading-guide {
   justify-content: center;
   font-size: 2rem;
   font-weight: 600;
-  color: white;
+  color: var(--a11y-primary-text);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -1500,7 +1745,6 @@ body.a11y-reading-guide {
 
 // Respeta preferencia de movimiento reducido
 @media (prefers-reduced-motion: reduce) {
-  .emoji-item,
   .profile-item,
   .btn-visual-login {
     transition: none;
@@ -1544,5 +1788,208 @@ body.a11y-large-cursor {
   textarea,
   [contenteditable="true"] {
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect x='22' y='4' width='4' height='40' fill='%23000000' stroke='%23FFFFFF' stroke-width='2'/%3E%3Crect x='16' y='4' width='16' height='4' fill='%23000000' stroke='%23FFFFFF' stroke-width='1'/%3E%3Crect x='16' y='40' width='16' height='4' fill='%23000000' stroke='%23FFFFFF' stroke-width='1'/%3E%3C/svg%3E") 24 24, text !important;
+  }
+}
+
+// =========================================
+// MODO LECTURA
+// Oculta sidebar y header para enfocarse en el contenido
+// =========================================
+body.a11y-reading-mode {
+  // Ocultar sidebar
+  .sidebar {
+    transform: translateX(-100%) !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  // Ocultar header
+  .header {
+    transform: translateY(-100%) !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  // Ajustar el contenido principal
+  .wrapper {
+    padding-inline-start: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  // Contenido principal centrado y optimizado para lectura
+  main,
+  .main,
+  [role="main"],
+  .body {
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    padding: 2rem !important;
+    font-size: 1.125rem !important;
+    line-height: 1.8 !important;
+  }
+
+  // Botón flotante para salir del modo lectura
+  &::after {
+    content: 'Salir del modo lectura (Alt+A)';
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--a11y-primary);
+    color: var(--a11y-primary-text);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-family: var(--a11y-font-family);
+  }
+
+  // Ocultar elementos de navegación secundarios
+  .breadcrumb,
+  .footer,
+  nav:not(.main-nav) {
+    display: none !important;
+  }
+}
+
+// =========================================
+// TEXTO A VOZ (TTS)
+// Estilos para indicar que TTS está activo
+// =========================================
+body.a11y-tts-enabled {
+  // Indicador visual de que TTS está habilitado
+  &::before {
+    content: '';
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    width: 12px;
+    height: 12px;
+    background: var(--a11y-success);
+    border-radius: 50%;
+    z-index: 10000;
+    box-shadow: 0 0 0 3px rgba(var(--a11y-success), 0.3);
+  }
+
+  // Resaltar texto seleccionable
+  *::selection {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+}
+
+// Indicador de lectura activa
+.a11y-tts-speaking {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--a11y-primary);
+  color: var(--a11y-primary-text);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 10001;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-family: var(--a11y-font-family);
+
+  // Animación de ondas de sonido
+  .tts-waves {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+
+    span {
+      display: block;
+      width: 4px;
+      background: currentColor;
+      border-radius: 2px;
+      animation: tts-wave 0.8s ease-in-out infinite;
+
+      &:nth-child(1) { animation-delay: 0s; height: 8px; }
+      &:nth-child(2) { animation-delay: 0.1s; height: 16px; }
+      &:nth-child(3) { animation-delay: 0.2s; height: 12px; }
+      &:nth-child(4) { animation-delay: 0.3s; height: 20px; }
+      &:nth-child(5) { animation-delay: 0.4s; height: 8px; }
+    }
+  }
+
+  .tts-controls {
+    display: flex;
+    gap: 0.5rem;
+
+    button {
+      padding: 0.25rem 0.5rem;
+      background: transparent;
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      color: inherit;
+      cursor: pointer;
+      font-size: 0.75rem;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+}
+
+@keyframes tts-wave {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+// Respeta preferencia de movimiento reducido para TTS
+@media (prefers-reduced-motion: reduce) {
+  .a11y-tts-speaking .tts-waves span {
+    animation: none;
+  }
+}
+
+// =========================================
+// INDICADORES DE PERFIL DE DALTONISMO
+// =========================================
+[data-profile="deuteranopia"],
+[data-profile="protanopia"],
+[data-profile="tritanopia"] {
+  // Agregar patrones además de colores para diferenciar estados
+  .badge.bg-success,
+  .alert-success,
+  .btn-success {
+    &::before {
+      content: '\2713 '; // Checkmark
+    }
+  }
+
+  .badge.bg-danger,
+  .alert-danger,
+  .btn-danger {
+    &::before {
+      content: '\2717 '; // X mark
+    }
+  }
+
+  .badge.bg-warning,
+  .alert-warning,
+  .btn-warning {
+    &::before {
+      content: '\26A0 '; // Warning triangle
+    }
   }
 }
