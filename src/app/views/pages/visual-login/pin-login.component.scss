@@ -197,10 +197,90 @@
   }
 }
 
+// =========================================
+// INPUT DE TECLADO ALTERNATIVO
+// Para personas con discapacidad motora
+// =========================================
+.pin-keyboard-input {
+  text-align: center;
+}
+
+.toggle-input-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: 2px solid var(--a11y-border, #9E9E9E);
+  border-radius: 8px;
+  color: var(--a11y-text-secondary, #3D3D3D);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--a11y-primary, #0D47A1);
+    color: var(--a11y-primary, #0D47A1);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--a11y-focus-color);
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.keyboard-input-wrapper {
+  max-width: 280px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: var(--a11y-bg-secondary, #F5F5F5);
+  border-radius: 12px;
+  border: 2px solid var(--a11y-border, #E0E0E0);
+
+  .form-label {
+    font-weight: 600;
+    color: var(--a11y-text, #1A1A1A);
+    margin-bottom: 0.75rem;
+  }
+}
+
+.pin-text-input {
+  text-align: center;
+  font-size: 2rem !important;
+  font-weight: 700;
+  letter-spacing: 0.5rem;
+  padding: 1rem !important;
+  border: 3px solid var(--a11y-border, #9E9E9E) !important;
+  border-radius: 12px !important;
+
+  &:focus {
+    border-color: var(--a11y-primary, #0D47A1) !important;
+    box-shadow: 0 0 0 4px var(--a11y-focus-color) !important;
+  }
+
+  &::placeholder {
+    letter-spacing: 0.3rem;
+    color: var(--a11y-text-muted, #757575);
+  }
+}
+
+.pin-pad.hidden {
+  display: none;
+}
+
+// =========================================
 // Accessibility
+// =========================================
 @media (prefers-reduced-motion: reduce) {
   .pin-dot,
-  .pin-key {
+  .pin-key,
+  .toggle-input-btn {
     transition: none;
   }
 
@@ -257,5 +337,147 @@
 
   .pin-row {
     gap: 0.5rem;
+  }
+}
+
+// =========================================
+// PERFIL LOW-VISION - Botones más grandes
+// =========================================
+[data-profile="low-vision"] {
+  .pin-key {
+    width: 100px;
+    height: 100px;
+    font-size: 2.25rem;
+    border-width: 4px;
+  }
+
+  .pin-dot {
+    width: 32px;
+    height: 32px;
+    border-width: 4px;
+  }
+
+  .pin-display {
+    gap: 1.5rem;
+  }
+
+  .pin-pad {
+    max-width: 400px;
+  }
+
+  .pin-row {
+    gap: 1rem;
+  }
+
+  .pin-text-input {
+    font-size: 2.5rem !important;
+    padding: 1.25rem !important;
+  }
+
+  .toggle-input-btn {
+    font-size: 1.1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  @media (max-width: 767px) {
+    .pin-key {
+      width: 85px;
+      height: 85px;
+      font-size: 2rem;
+    }
+  }
+}
+
+// =========================================
+// PERFIL HIGH-CONTRAST - Mayor visibilidad
+// =========================================
+[data-profile="high-contrast"] {
+  .pin-key {
+    border-width: 4px;
+    border-color: #000000;
+
+    &:hover:not(:disabled) {
+      background-color: #FFFF00;
+      color: #000000;
+      border-color: #000000;
+    }
+
+    &:active:not(:disabled) {
+      background-color: #000000;
+      color: #FFFFFF;
+    }
+
+    &.clear {
+      border-color: #000000;
+      color: #CC0000;
+    }
+
+    &.submit {
+      border-color: #000000;
+      color: #006600;
+    }
+  }
+
+  .pin-dot {
+    border-width: 4px;
+    border-color: #000000;
+
+    &.filled {
+      background-color: #000000;
+      border-color: #000000;
+    }
+  }
+
+  .toggle-input-btn {
+    border-width: 3px;
+    border-color: #000000;
+
+    &:hover {
+      background-color: #FFFF00;
+      color: #000000;
+    }
+  }
+
+  .keyboard-input-wrapper {
+    border-width: 3px;
+    border-color: #000000;
+  }
+
+  .pin-text-input {
+    border-width: 4px !important;
+    border-color: #000000 !important;
+  }
+}
+
+// Modo oscuro high-contrast
+[data-color-mode="dark"][data-profile="high-contrast"] {
+  .pin-key {
+    border-color: #FFFFFF;
+    color: #FFFFFF;
+
+    &:hover:not(:disabled) {
+      background-color: #FFFF00;
+      color: #000000;
+      border-color: #FFFF00;
+    }
+
+    &.clear {
+      color: #FF6666;
+      border-color: #FFFFFF;
+    }
+
+    &.submit {
+      color: #66FF66;
+      border-color: #FFFFFF;
+    }
+  }
+
+  .pin-dot {
+    border-color: #FFFFFF;
+
+    &.filled {
+      background-color: #FFFF00;
+      border-color: #FFFF00;
+    }
   }
 }

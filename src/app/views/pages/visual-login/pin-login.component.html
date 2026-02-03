@@ -60,8 +60,60 @@
           }
         </div>
 
-        <!-- PIN Pad -->
-        <div class="pin-pad" [class.disabled]="isLoading || isLocked">
+        <!-- Opción: Input de teclado para accesibilidad motora -->
+        <div class="pin-keyboard-input mb-3">
+          <button
+            type="button"
+            class="toggle-input-btn"
+            (click)="toggleKeyboardInput()"
+            [attr.aria-expanded]="showKeyboardInput"
+            aria-controls="pin-text-input"
+          >
+            <svg cIcon [name]="showKeyboardInput ? 'cilKeyboard' : 'cilKeyboard'" size="sm"></svg>
+            {{ showKeyboardInput ? 'Usar teclado visual' : 'Escribir con teclado' }}
+          </button>
+
+          @if (showKeyboardInput) {
+            <div class="keyboard-input-wrapper mt-3" id="pin-text-input">
+              <label for="pinTextInput" class="form-label">
+                Escribe tu PIN de {{ maxPinLength }} dígitos:
+              </label>
+              <input
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                id="pinTextInput"
+                class="form-control form-control-lg pin-text-input"
+                [maxlength]="maxPinLength"
+                [(ngModel)]="pin"
+                (input)="onPinTextInput($event)"
+                [disabled]="isLoading || isLocked"
+                placeholder="••••"
+                autocomplete="one-time-code"
+                aria-describedby="pinHelp"
+              />
+              <small id="pinHelp" class="form-text text-muted">
+                Solo números. Presiona Enter para confirmar.
+              </small>
+              <button
+                type="button"
+                cButton
+                color="success"
+                class="w-100 mt-3"
+                [disabled]="pin.length !== maxPinLength || isLoading"
+                (click)="onSubmit()"
+              >
+                @if (isLoading) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                Confirmar PIN
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- PIN Pad (teclado visual) -->
+        <div class="pin-pad" [class.disabled]="isLoading || isLocked" [class.hidden]="showKeyboardInput">
           @for (row of pinPad; track $index) {
             <div class="pin-row">
               @for (key of row; track key) {

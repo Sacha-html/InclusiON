@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
@@ -21,7 +21,6 @@ interface RoleOption {
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     ButtonDirective,
     IconDirective,
     AccessibilityPanelComponent,
