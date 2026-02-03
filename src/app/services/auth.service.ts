@@ -9,19 +9,14 @@ import {
   User,
   IdentifyUserRequest,
   PinLoginRequest,
-  EmojiLoginRequest,
-  ColorShapeLoginRequest,
-  TrustedDeviceLoginRequest,
-  ProfileSelectLoginRequest,
   VisualStandardLoginRequest,
   AssistedLoginRequest,
   UpdateLoginMethodRequest,
   IdentifyUserResponse,
   VisualLoginResponse,
-  VisualLoginUserInfo,
   LoginMethodsResponse,
-  LoginMethod,
 } from '../models';
+import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -30,6 +25,7 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private storage = inject(LocalStorageService);
 
   private currentUserSubject = new BehaviorSubject<User | null>(
     this.getUserFromStorage()
@@ -121,11 +117,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return this.storage.getAccessToken();
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem('refresh_token');
+    return this.storage.getRefreshToken();
   }
 
   private hasValidToken(): boolean {
@@ -176,36 +172,26 @@ export class AuthService {
   }
 
   private clearSession(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('current_user');
+    this.storage.clearSession();
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
   }
 
   private setToken(token: string): void {
-    localStorage.setItem('access_token', token);
+    this.storage.setAccessToken(token);
   }
 
   private setRefreshToken(token: string): void {
-    localStorage.setItem('refresh_token', token);
+    this.storage.setRefreshToken(token);
   }
 
   private setUser(user: User): void {
-    localStorage.setItem('current_user', JSON.stringify(user));
+    this.storage.setCurrentUser(user);
     this.currentUserSubject.next(user);
   }
 
   private getUserFromStorage(): User | null {
-    const userJson = localStorage.getItem('current_user');
-    if (userJson) {
-      try {
-        return JSON.parse(userJson);
-      } catch (error) {
-        return null;
-      }
-    }
-    return null;
+    return this.storage.getCurrentUser<User>();
   }
 
   private checkTokenValidity(): void {
@@ -215,28 +201,9 @@ export class AuthService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Ocurrió un error desconocido';
-
-    if (error.error instanceof ErrorEvent) {
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      if (error.status === 401) {
-        errorMessage = 'Credenciales inválidas';
-      } else if (error.status === 403) {
-        errorMessage = 'No tienes permisos para realizar esta acción';
-      } else if (error.status === 404) {
-        errorMessage = 'Recurso no encontrado';
-      } else if (error.status === 500) {
-        errorMessage = 'Error en el servidor. Por favor, intenta más tarde';
-      } else if (error.error?.message) {
-        errorMessage = error.error.message;
-      } else {
-        errorMessage = `Error ${error.status}: ${error.statusText}`;
-      }
-    }
-
-    console.error('Error HTTP:', errorMessage, error);
-    return throwError(() => new Error(errorMessage));
+    // El interceptor ya maneja el error y lo enriquece con errorCode
+    // Solo re-lanzamos para que los componentes puedan manejarlo
+    return throwError(() => error);
   }
 
   getUserFromToken(): User | null {
@@ -332,62 +299,6 @@ export class AuthService {
       );
   }
 
-  /** @deprecated Use loginWithPin or loginAssisted instead */
-  loginWithEmoji(request: EmojiLoginRequest): Observable<VisualLoginResponse> {
-    return this.http
-      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/emoji`, request)
-      .pipe(
-        tap((response) => {
-          if (response.success && response.data?.success) {
-            this.setVisualLoginSession(response);
-          }
-        }),
-        catchError(this.handleError)
-      );
-  }
-
-  /** @deprecated Use loginWithPin or loginAssisted instead */
-  loginWithColorShape(request: ColorShapeLoginRequest): Observable<VisualLoginResponse> {
-    return this.http
-      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/color-shape`, request)
-      .pipe(
-        tap((response) => {
-          if (response.success && response.data?.success) {
-            this.setVisualLoginSession(response);
-          }
-        }),
-        catchError(this.handleError)
-      );
-  }
-
-  /** @deprecated Use loginWithPin or loginAssisted instead */
-  loginWithTrustedDevice(request: TrustedDeviceLoginRequest): Observable<VisualLoginResponse> {
-    return this.http
-      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/trusted-device`, request)
-      .pipe(
-        tap((response) => {
-          if (response.success && response.data?.success) {
-            this.setVisualLoginSession(response);
-          }
-        }),
-        catchError(this.handleError)
-      );
-  }
-
-  /** @deprecated Use loginWithPin or loginAssisted instead */
-  loginWithProfileSelect(request: ProfileSelectLoginRequest): Observable<VisualLoginResponse> {
-    return this.http
-      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/profile-select`, request)
-      .pipe(
-        tap((response) => {
-          if (response.success && response.data?.success) {
-            this.setVisualLoginSession(response);
-          }
-        }),
-        catchError(this.handleError)
-      );
-  }
-
   private setVisualLoginSession(response: VisualLoginResponse): void {
     if (response.data?.accessToken) {
       this.setToken(response.data.accessToken);
@@ -410,42 +321,14 @@ export class AuthService {
 
       // Store accessibility preferences
       if (userInfo.accessibility) {
-        localStorage.setItem('accessibility_preferences', JSON.stringify(userInfo.accessibility));
+        this.storage.setObject(STORAGE_KEYS.ACCESSIBILITY_PREFERENCES, userInfo.accessibility);
       }
     }
     this.isAuthenticatedSubject.next(true);
   }
 
   getDeviceId(): string {
-    let deviceId = localStorage.getItem('device_id');
-    if (!deviceId) {
-      deviceId = this.generateDeviceId();
-      localStorage.setItem('device_id', deviceId);
-    }
-    return deviceId;
-  }
-
-  private generateDeviceId(): string {
-    const nav = navigator;
-    const screen = window.screen;
-    const data = [
-      nav.userAgent,
-      nav.language,
-      screen.width,
-      screen.height,
-      screen.colorDepth,
-      new Date().getTimezoneOffset(),
-      Math.random().toString(36).substring(2, 15)
-    ].join('|');
-
-    // Simple hash function
-    let hash = 0;
-    for (let i = 0; i < data.length; i++) {
-      const char = data.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return 'dev_' + Math.abs(hash).toString(36) + '_' + Date.now().toString(36);
+    return this.storage.getOrCreateDeviceId();
   }
 
   isTokenExpiringSoon(): boolean {
