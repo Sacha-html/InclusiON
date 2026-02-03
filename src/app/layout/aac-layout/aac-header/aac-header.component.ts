@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { AccessibilityService } from '../../../services/accessibility.service';
 import { IconDirective } from '@coreui/icons-angular';
@@ -7,7 +6,7 @@ import { IconDirective } from '@coreui/icons-angular';
 @Component({
   selector: 'app-aac-header',
   standalone: true,
-  imports: [RouterLink, IconDirective],
+  imports: [IconDirective],
   templateUrl: './aac-header.component.html',
   styleUrl: './aac-header.component.scss'
 })
