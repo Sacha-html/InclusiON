@@ -33,6 +33,12 @@ namespace InclusiON.Data.Configurations
 
             builder.Property(p => p.LastLoginUserAgent)
                 .HasMaxLength(500);
+
+            // Performance indexes
+            builder.HasIndex(u => u.Email)
+                .IsUnique();
+
+            builder.HasIndex(u => u.IsActive);
         }
     }
 }
