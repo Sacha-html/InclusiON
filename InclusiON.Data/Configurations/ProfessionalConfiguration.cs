@@ -48,6 +48,12 @@ namespace InclusiON.Data.Configurations
             builder.HasIndex(p => p.UserId)
                 .IsUnique();
 
+            // Performance indexes for professional searches
+            builder.HasIndex(p => p.FirstName);
+            builder.HasIndex(p => p.LastName);
+            builder.HasIndex(p => p.LicenseNumber);
+            builder.HasIndex(p => new { p.IsActive, p.FirstName });
+
             builder.HasOne(p => p.User)
                 .WithOne(u => u.Professional)
                 .HasForeignKey<Professional>(p => p.UserId)

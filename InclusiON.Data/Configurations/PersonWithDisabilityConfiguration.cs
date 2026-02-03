@@ -86,6 +86,14 @@ namespace InclusiON.Data.Configurations
             builder.HasIndex(p => p.UserId)
                 .IsUnique();
 
+            // Performance indexes for visual login searches
+            builder.HasIndex(p => p.FirstName);
+            builder.HasIndex(p => p.LastName);
+            builder.HasIndex(p => p.SupervisorUserId);
+            builder.HasIndex(p => p.LoginMethodId);
+            builder.HasIndex(p => new { p.IsActive, p.FirstName });
+            builder.HasIndex(p => new { p.IsActive, p.LastName });
+
             // Relationships
             builder.HasOne(p => p.User)
                 .WithOne(u => u.PersonWithDisability)
