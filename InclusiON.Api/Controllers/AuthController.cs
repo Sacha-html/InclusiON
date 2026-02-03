@@ -215,143 +215,38 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        #region Deprecated Visual Login Methods
-
-        /// <summary>
-        /// Login con secuencia de emojis para personas con discapacidad.
-        /// </summary>
-        [Obsolete("Este metodo de login ha sido deprecado. Use PIN o Login Asistido en su lugar.")]
-        [HttpPost("login/emoji")]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginWithEmoji(
-            [FromBody] EmojiLoginRequest request,
-            [FromServices] ICommandHandler<EmojiLoginCommand, ApiResponse<VisualLoginResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
-            }
-
-            var command = new EmojiLoginCommand(request.UserId, request.EmojiSequence, request.DeviceId, request.RememberDevice);
-            var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success || result.Data?.Success == false)
-            {
-                return Unauthorized(result);
-            }
-
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Login con seleccion de color y forma para personas con discapacidad.
-        /// </summary>
-        [Obsolete("Este metodo de login ha sido deprecado. Use PIN o Login Asistido en su lugar.")]
-        [HttpPost("login/color-shape")]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginWithColorShape(
-            [FromBody] ColorShapeLoginRequest request,
-            [FromServices] ICommandHandler<ColorShapeLoginCommand, ApiResponse<VisualLoginResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
-            }
-
-            var command = new ColorShapeLoginCommand(request.UserId, request.ColorShapeId, request.DeviceId, request.RememberDevice);
-            var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success || result.Data?.Success == false)
-            {
-                return Unauthorized(result);
-            }
-
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Login automatico desde dispositivo confiable.
-        /// </summary>
-        [Obsolete("Este metodo de login ha sido deprecado. Use PIN o Login Asistido en su lugar.")]
-        [HttpPost("login/trusted-device")]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginWithTrustedDevice(
-            [FromBody] TrustedDeviceLoginRequest request,
-            [FromServices] ICommandHandler<TrustedDeviceLoginCommand, ApiResponse<VisualLoginResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
-            }
-
-            var command = new TrustedDeviceLoginCommand(request.UserId, request.DeviceId, request.DeviceToken);
-            var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success || result.Data?.Success == false)
-            {
-                return Unauthorized(result);
-            }
-
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Login por seleccion de perfil visual.
-        /// </summary>
-        [Obsolete("Este metodo de login ha sido deprecado. Use PIN o Login Asistido en su lugar.")]
-        [HttpPost("login/profile-select")]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginWithProfileSelect(
-            [FromBody] ProfileSelectLoginRequest request,
-            [FromServices] ICommandHandler<ProfileSelectLoginCommand, ApiResponse<VisualLoginResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
-            }
-
-            var command = new ProfileSelectLoginCommand(
-                request.UserId,
-                request.DeviceId,
-                request.RequiresConfirmation,
-                request.ConfirmationPin);
-            var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success || result.Data?.Success == false)
-            {
-                return Unauthorized(result);
-            }
-
-            return Ok(result);
-        }
-
         #endregion
 
-        #endregion
+        /// <summary>
+        /// Refresca el token de acceso usando un refresh token valido.
+        /// </summary>
+        [HttpPost("refresh")]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken(
+            [FromBody] RefreshTokenRequest request,
+            [FromServices] ICommandHandler<RefreshTokenCommand, ApiResponse<LoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Validation failed", errors));
+            }
+
+            var command = new RefreshTokenCommand(request.RefreshToken);
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+            {
+                return Unauthorized(result);
+            }
+
+            return Ok(result);
+        }
 
         [HttpGet("profile")]
         [Authorize] // ✅ Requiere autenticación JWT
