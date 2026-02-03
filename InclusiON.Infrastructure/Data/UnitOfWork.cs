@@ -139,7 +139,20 @@ namespace InclusiON.Infrastructure.Data
         {
             if (!_disposed)
             {
-                DisposeResourcesAsync().GetAwaiter().GetResult();
+                // Dispose sincrónico para compatibilidad con código legacy
+                _transaction?.Dispose();
+                _transaction = null;
+                _connection?.Dispose();
+                _connection = null;
+                _disposed = true;
+            }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (!_disposed)
+            {
+                await DisposeResourcesAsync();
                 _disposed = true;
             }
         }

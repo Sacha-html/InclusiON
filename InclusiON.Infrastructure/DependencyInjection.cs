@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -6,9 +7,11 @@ using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.Infrastructure.Authentication;
 using InclusiON.Infrastructure.Configuration;
+using InclusiON.Infrastructure.Authorization;
 using InclusiON.Infrastructure.Data;
 using InclusiON.Infrastructure.Data.Factories;
 using InclusiON.Infrastructure.Data.Repositories;
+using InclusiON.Infrastructure.Services;
 using System.Security.Claims;
 using System.Text;
 using IConnectionFactory = InclusiON.ApplicationBusiness.Interfaces.Infrastructure.IConnectionFactory;
@@ -45,6 +48,20 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped<IVisualLoginRepository, VisualLoginRepository>();
+            services.AddScoped<IPersonsRepository, PersonsRepository>();
+
+            // Servicio de contexto HTTP (IP, User-Agent, Browser)
+            services.AddScoped<IHttpContextService, HttpContextService>();
+
+            // Servicio de roles con cache por request (evita N+1)
+            services.AddScoped<IUserRoleService, UserRoleService>();
+
+            // Servicio de permisos (obtiene permisos de AspNetRoleClaims)
+            services.AddScoped<IPermissionService, PermissionService>();
+
+            // Autorización basada en permisos
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             services.AddAuthentication(options =>
             {
@@ -72,57 +89,47 @@ namespace InclusiON.Infrastructure
 
                 });
 
-            //TODO: review nested policies 
+            // Politicas de autorizacion consolidadas
+            // Todas las politicas requieren autenticacion + userId valido para seguridad consistente
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("RequiereValidUser", policy =>
+                // Base: cualquier usuario autenticado con userId valido
+                options.AddPolicy("ValidUser", policy =>
                 {
                     policy.RequireAuthenticatedUser();
                     policy.RequireClaim("userId");
                 });
 
+                // Solo administradores
                 options.AddPolicy("AdminOnly", policy =>
                 {
                     policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("userId");
                     policy.RequireClaim(ClaimTypes.Role, "Admin");
                 });
 
-                options.AddPolicy("AdminOrManager", policy =>
+                // Administradores o managers
+                options.AddPolicy("ManagerOrAbove", policy =>
                 {
                     policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("userId");
                     policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager");
                 });
 
-                options.AddPolicy("NotCustomer", policy =>
+                // Staff (Admin, Manager, Employee) - excluye Person/Family
+                options.AddPolicy("StaffOnly", policy =>
                 {
                     policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("userId");
                     policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager", "Employee");
                 });
 
-                options.AddPolicy("CanManageCategories", policy =>
+                // Profesionales o superiores (para gestion de personas)
+                options.AddPolicy("ProfessionalOrAbove", policy =>
                 {
                     policy.RequireAuthenticatedUser();
-                    policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager");
-                });
-
-                options.AddPolicy("CanViewCategories", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId"); // Cualquier usuario con userId
-                });
-
-                options.AddPolicy("ValidAdminUser", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId");                    // ✅ Usuario válido
-                    policy.RequireClaim(ClaimTypes.Role, "Admin");    // ✅ + Role Admin
-                });
-
-                options.AddPolicy("ValidManagerOrAbove", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId");                                // ✅ Usuario válido
-                    policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager");     // ✅ + Admin o Manager
+                    policy.RequireClaim("userId");
+                    policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager", "Professional");
                 });
             });
 
