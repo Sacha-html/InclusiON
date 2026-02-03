@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { AuthService } from '../../../services/auth.service';
-import { AccessibilityService } from '../../../services/accessibility.service';
+import { AuthService, AccessibilityService } from '@services';
 import { IconDirective } from '@coreui/icons-angular';
 
 @Component({

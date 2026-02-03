@@ -1,21 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AssistedLoginRequest, ErrorCode } from '../../../models';
+import { AssistedLoginRequest, ErrorCode } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
-import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 import {
-  ContainerComponent,
-  RowComponent,
-  ColComponent,
-  CardComponent,
-  CardBodyComponent,
   ButtonDirective,
   FormControlDirective,
   InputGroupComponent,
   InputGroupTextDirective,
   SpinnerComponent,
-  AlertComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
@@ -25,17 +19,11 @@ import { IconDirective } from '@coreui/icons-angular';
   imports: [
     CommonModule,
     FormsModule,
-    ContainerComponent,
-    RowComponent,
-    ColComponent,
-    CardComponent,
-    CardBodyComponent,
     ButtonDirective,
     FormControlDirective,
     InputGroupComponent,
     InputGroupTextDirective,
     SpinnerComponent,
-    AlertComponent,
     IconDirective,
     AccessibilityPanelComponent,
   ],

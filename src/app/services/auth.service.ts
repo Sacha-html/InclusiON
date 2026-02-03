@@ -15,9 +15,9 @@ import {
   IdentifyUserResponse,
   VisualLoginResponse,
   LoginMethodsResponse,
-} from '../models';
+} from '@models';
 import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
-import { environment } from '../../environments/environment';
+import { environment } from '@env';
 
 @Injectable({
   providedIn: 'root',

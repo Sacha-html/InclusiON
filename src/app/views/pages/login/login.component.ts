@@ -1,4 +1,3 @@
-// src/app/views/login/login.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -8,10 +7,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { ErrorCodeService } from '../../../services/error-code.service';
-import { LoginRequest } from '../../../models';
-import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
+import { AuthService, ErrorCodeService } from '@services';
+import { LoginRequest } from '@models';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 // CoreUI imports
 import {

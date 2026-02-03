@@ -1,22 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PinLoginRequest } from '../../../models';
+import { PinLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
-import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
-import {
-  ContainerComponent,
-  RowComponent,
-  ColComponent,
-  CardComponent,
-  CardBodyComponent,
-  ButtonDirective,
-  SpinnerComponent,
-  AlertComponent,
-  FormCheckComponent,
-  FormCheckInputDirective,
-  FormCheckLabelDirective,
-} from '@coreui/angular';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
+import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
@@ -25,17 +13,7 @@ import { IconDirective } from '@coreui/icons-angular';
   imports: [
     CommonModule,
     FormsModule,
-    ContainerComponent,
-    RowComponent,
-    ColComponent,
-    CardComponent,
-    CardBodyComponent,
     ButtonDirective,
-    SpinnerComponent,
-    AlertComponent,
-    FormCheckComponent,
-    FormCheckInputDirective,
-    FormCheckLabelDirective,
     IconDirective,
     AccessibilityPanelComponent,
   ],

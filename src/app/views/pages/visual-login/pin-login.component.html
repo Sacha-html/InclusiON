@@ -18,19 +18,21 @@
     </div>
 
     <!-- Main Card -->
-    <div class="pin-card card border-0 shadow">
+    <main class="pin-card card border-0 shadow" role="main">
       <div class="card-body p-4 p-md-5">
         <!-- User Avatar -->
-        <div class="text-center mb-4">
+        <header class="text-center mb-4">
           <div
             class="user-avatar mx-auto mb-3"
             [style.background-color]="avatarColor"
+            role="img"
+            [attr.aria-label]="'Avatar de ' + displayName"
           >
             {{ initial }}
           </div>
-          <h2 class="h4 fw-bold mb-1">Hola, {{ displayName }}</h2>
-          <p class="text-muted">Toca los números de tu PIN</p>
-        </div>
+          <h1 class="h4 fw-bold mb-1">Hola, {{ displayName }}</h1>
+          <p class="text-muted" id="pin-instructions">Toca los números de tu PIN</p>
+        </header>
 
         <!-- Error Alert -->
         @if (errorMessage) {
@@ -39,23 +41,30 @@
             [class.alert-warning]="isLocked"
             [class.alert-danger]="!isLocked"
             role="alert"
+            aria-live="assertive"
           >
             @if (isLocked) {
-              <svg cIcon name="cilLockLocked" class="me-2"></svg>
+              <svg cIcon name="cilLockLocked" class="me-2" aria-hidden="true"></svg>
             } @else {
-              <svg cIcon name="cilWarning" class="me-2"></svg>
+              <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
             }
             {{ errorMessage }}
           </div>
         }
 
         <!-- PIN Dots -->
-        <div class="pin-display mb-4" role="status" [attr.aria-label]="'PIN ingresado: ' + pin.length + ' de ' + maxPinLength + ' dígitos'">
+        <div
+          class="pin-display mb-4"
+          role="status"
+          aria-live="polite"
+          [attr.aria-label]="'PIN ingresado: ' + pin.length + ' de ' + maxPinLength + ' dígitos'"
+        >
           @for (filled of pinDots; track $index) {
             <div
               class="pin-dot"
               [class.filled]="filled"
               [class.error]="errorMessage && pin.length === 0"
+              aria-hidden="true"
             ></div>
           }
         </div>
@@ -69,8 +78,8 @@
             [attr.aria-expanded]="showKeyboardInput"
             aria-controls="pin-text-input"
           >
-            <svg cIcon [name]="showKeyboardInput ? 'cilKeyboard' : 'cilKeyboard'" size="sm"></svg>
-            {{ showKeyboardInput ? 'Usar teclado visual' : 'Escribir con teclado' }}
+            <svg cIcon name="cilKeyboard" size="sm" aria-hidden="true"></svg>
+            {{ showKeyboardInput ? 'Usar teclado visual' : 'Escribir con teclado físico' }}
           </button>
 
           @if (showKeyboardInput) {
@@ -87,6 +96,7 @@
                 [maxlength]="maxPinLength"
                 [(ngModel)]="pin"
                 (input)="onPinTextInput($event)"
+                (keydown.enter)="onSubmit()"
                 [disabled]="isLoading || isLocked"
                 placeholder="••••"
                 autocomplete="one-time-code"
@@ -104,7 +114,8 @@
                 (click)="onSubmit()"
               >
                 @if (isLoading) {
-                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  <span class="visually-hidden">Cargando...</span>
                 }
                 Confirmar PIN
               </button>
@@ -113,9 +124,16 @@
         </div>
 
         <!-- PIN Pad (teclado visual) -->
-        <div class="pin-pad" [class.disabled]="isLoading || isLocked" [class.hidden]="showKeyboardInput">
+        <div
+          class="pin-pad"
+          [class.disabled]="isLoading || isLocked"
+          [class.hidden]="showKeyboardInput"
+          role="group"
+          aria-label="Teclado numérico para PIN"
+          aria-describedby="pin-instructions"
+        >
           @for (row of pinPad; track $index) {
-            <div class="pin-row">
+            <div class="pin-row" role="group">
               @for (key of row; track key) {
                 <button
                   class="pin-key"
@@ -128,9 +146,10 @@
                   type="button"
                 >
                   @if (key === 'submit' && isLoading) {
-                    <span class="spinner-border spinner-border-sm"></span>
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span class="visually-hidden">Verificando PIN...</span>
                   } @else {
-                    {{ getPadKeyLabel(key) }}
+                    <span aria-hidden="true">{{ getPadKeyLabel(key) }}</span>
                   }
                 </button>
               }
@@ -155,13 +174,13 @@
         </div>
 
         <!-- Help -->
-        <div class="text-center mt-4">
+        <footer class="text-center mt-4">
           <p class="text-muted small mb-0">
-            <svg cIcon name="cilInfo" class="me-1"></svg>
-            ¿Lo olvidaste? Pide ayuda
+            <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
+            ¿Lo olvidaste? Pide ayuda a un familiar o profesional
           </p>
-        </div>
+        </footer>
       </div>
-    </div>
+    </main>
   </div>
 </div>

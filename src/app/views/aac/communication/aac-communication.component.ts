@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { BigButtonComponent } from '../../../shared/components/big-button/big-button.component';
+import { AccessibilityService } from '../../../services/accessibility.service';
 
 @Component({
   selector: 'app-aac-communication',
@@ -158,15 +159,17 @@ import { BigButtonComponent } from '../../../shared/components/big-button/big-bu
   `]
 })
 export class AacCommunicationComponent {
+  private readonly a11y = inject(AccessibilityService);
+
   phrases = [
-    { id: 1, text: 'Si', icon: 'cilCheckAlt', color: '#4CAF50' },
+    { id: 1, text: 'Sí', icon: 'cilCheckAlt', color: '#4CAF50' },
     { id: 2, text: 'No', icon: 'cilX', color: '#F44336' },
     { id: 3, text: 'Ayuda', icon: 'cilBell', color: '#FF9800' },
-    { id: 4, text: 'Bano', icon: 'cilDoor', color: '#2196F3' },
+    { id: 4, text: 'Baño', icon: 'cilDoor', color: '#2196F3' },
     { id: 5, text: 'Agua', icon: 'cilDrop', color: '#00BCD4' },
     { id: 6, text: 'Comida', icon: 'cilFastfood', color: '#8BC34A' },
     { id: 7, text: 'Descanso', icon: 'cilBed', color: '#9C27B0' },
-    { id: 8, text: 'Mas', icon: 'cilPlus', color: '#607D8B' }
+    { id: 8, text: 'Más', icon: 'cilPlus', color: '#607D8B' }
   ];
 
   feelings = [
@@ -178,11 +181,42 @@ export class AacCommunicationComponent {
     { id: 6, emoji: '🤒', label: 'Enfermo', color: '#795548' }
   ];
 
+  /**
+   * Habla el texto usando el servicio de accesibilidad centralizado.
+   * Esto respeta la configuración del usuario (velocidad, voz, etc.)
+   */
   speak(text: string): void {
+    // Usar el servicio de accesibilidad que respeta la configuración del usuario
+    // Si TTS no está habilitado en el panel, usar el método directo para AAC
+    if (this.a11y.textToSpeechEnabled()) {
+      this.a11y.speak(text);
+    } else {
+      // AAC siempre debe poder hablar, incluso si TTS global está desactivado
+      this.speakDirect(text);
+    }
+  }
+
+  /**
+   * Método directo de TTS para AAC (siempre funciona)
+   */
+  private speakDirect(text: string): void {
     if ('speechSynthesis' in window) {
+      // Cancelar cualquier lectura anterior
+      speechSynthesis.cancel();
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'es-ES';
-      utterance.rate = 0.9;
+      utterance.rate = this.a11y.textToSpeechRate(); // Respetar velocidad configurada
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      // Intentar usar voz en español
+      const voices = speechSynthesis.getVoices();
+      const spanishVoice = voices.find(v => v.lang.startsWith('es'));
+      if (spanishVoice) {
+        utterance.voice = spanishVoice;
+      }
+
       speechSynthesis.speak(utterance);
     }
   }

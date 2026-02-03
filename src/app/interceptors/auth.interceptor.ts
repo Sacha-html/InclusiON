@@ -2,10 +2,8 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-import { ErrorCodeService } from '../services/error-code.service';
-import { ToastService } from '../services/toast.service';
-import { LocalStorageService } from '../services/local-storage.service';
-import { ErrorCode } from '../models/error-code.enum';
+import { ErrorCodeService, ToastService, LocalStorageService } from '@services';
+import { ErrorCode } from '@models';
 
 /** URLs públicas que no requieren autenticación */
 const PUBLIC_URLS = ['/login', '/register', '/visual-login'];

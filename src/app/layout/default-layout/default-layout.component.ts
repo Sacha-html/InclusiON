@@ -2,9 +2,7 @@ import { Component } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgScrollbar } from 'ngx-scrollbar';
 
-import { IconDirective } from '@coreui/icons-angular';
 import {
-  AvatarComponent,
   ContainerComponent,
   ShadowOnScrollDirective,
   SidebarBrandComponent,
@@ -18,15 +16,8 @@ import {
 
 import { DefaultFooterComponent, DefaultHeaderComponent } from './';
 import { navItems } from './_nav';
-import { ToasterComponent } from '../../components/toaster/toaster.component';
-import { AccessibilityPanelComponent } from '../../components/accessibility-panel/accessibility-panel.component';
-
-function isOverflown(element: HTMLElement) {
-  return (
-    element.scrollHeight > element.clientHeight ||
-    element.scrollWidth > element.clientWidth
-  );
-}
+import { ToasterComponent } from '@components/toaster/toaster.component';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -43,12 +34,10 @@ function isOverflown(element: HTMLElement) {
     ContainerComponent,
     DefaultFooterComponent,
     DefaultHeaderComponent,
-    IconDirective,
     NgScrollbar,
     RouterOutlet,
     RouterLink,
     ShadowOnScrollDirective,
-    AvatarComponent,
     ToasterComponent,
     AccessibilityPanelComponent,
   ],

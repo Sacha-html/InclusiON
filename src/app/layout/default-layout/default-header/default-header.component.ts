@@ -4,12 +4,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import {
   AvatarComponent,
-  BadgeComponent,
   BreadcrumbRouterComponent,
   ColorModeService,
   ContainerComponent,
   DropdownComponent,
-  DropdownDividerDirective,
   DropdownHeaderDirective,
   DropdownItemDirective,
   DropdownMenuDirective,
@@ -24,8 +22,8 @@ import {
 } from '@coreui/angular';
 
 import { IconDirective } from '@coreui/icons-angular';
-import { AuthService, AccessibilityService } from '../../../services';
-import { User } from '@app/models';
+import { AuthService, AccessibilityService } from '@services';
+import { User } from '@models';
 
 @Component({
   selector: 'app-default-header',
@@ -48,9 +46,6 @@ import { User } from '@app/models';
     DropdownMenuDirective,
     DropdownHeaderDirective,
     DropdownItemDirective,
-    BadgeComponent,
-    DropdownDividerDirective,
-    HeaderComponent,
     TooltipDirective,
   ],
 })

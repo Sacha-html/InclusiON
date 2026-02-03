@@ -129,7 +129,13 @@ import {
   cilTruck,
   cilSwapHorizontal,
   cilWarning,
-  cilLockUnlocked
+  cilLockUnlocked,
+  cilVolumeHigh,
+  cilTextSquare,
+  cilMediaStop,
+  cilColorPalette,
+  cilLowVision,
+  cilKeyboard
 } from '@coreui/icons';
 
 import { signet } from './signet';
@@ -265,7 +271,13 @@ export const iconSubset = {
   cilTruck,
   cilSwapHorizontal,
   cilWarning,
-  cilLockUnlocked
+  cilLockUnlocked,
+  cilVolumeHigh,
+  cilTextSquare,
+  cilMediaStop,
+  cilColorPalette,
+  cilLowVision,
+  cilKeyboard
 };
 
 export enum IconSubset {
@@ -399,4 +411,10 @@ export enum IconSubset {
   cilSwapHorizontal = 'cilSwapHorizontal',
   cilWarning = 'cilWarning',
   cilLockUnlocked = 'cilLockUnlocked',
+  cilVolumeHigh = 'cilVolumeHigh',
+  cilTextSquare = 'cilTextSquare',
+  cilMediaStop = 'cilMediaStop',
+  cilColorPalette = 'cilColorPalette',
+  cilLowVision = 'cilLowVision',
+  cilKeyboard = 'cilKeyboard',
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { AccessibilityPanelComponent } from '../../../components/accessibility-panel/accessibility-panel.component';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 export type UserRole = 'PERSON' | 'PROFESSIONAL' | 'FAMILY';
 

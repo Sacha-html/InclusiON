@@ -18,40 +18,46 @@
     </div>
 
     <!-- Main Card -->
-    <div class="identify-card card border-0 shadow">
+    <main class="identify-card card border-0 shadow" role="main">
       <div class="card-body p-4 p-md-5">
         <!-- Header -->
-        <div class="text-center mb-5">
-          <div class="user-type-badge mb-3">
+        <header class="text-center mb-5">
+          <div class="user-type-badge mb-3" aria-label="Tipo de usuario seleccionado">
             {{ userTypeLabel }}
           </div>
           <h1 class="h2 fw-bold mb-3">Escribe tu nombre</h1>
-          <p class="text-muted fs-5">Así te encontramos</p>
-        </div>
+          <p class="text-muted fs-5" id="identify-instructions">Así te encontramos</p>
+        </header>
 
         <!-- Error Alert -->
         @if (errorMessage) {
-          <div class="alert alert-danger mb-4" role="alert">
-            <svg cIcon name="cilWarning" class="me-2"></svg>
+          <div
+            class="alert alert-danger mb-4"
+            role="alert"
+            aria-live="assertive"
+          >
+            <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
             {{ errorMessage }}
           </div>
         }
 
         <!-- Input -->
         <div class="mb-4">
-          <div class="input-group input-group-lg">
-            <span class="input-group-text bg-light">
-              <svg cIcon name="cilUser" class="text-primary"></svg>
+          <label for="identifierInput" class="visually-hidden">Tu nombre</label>
+          <div class="input-group input-group-lg" role="group">
+            <span class="input-group-text bg-light" aria-hidden="true">
+              <svg cIcon name="cilUser" class="text-primary" aria-hidden="true"></svg>
             </span>
             <input
               type="text"
+              id="identifierInput"
               class="form-control form-control-lg"
               [(ngModel)]="identifier"
               [placeholder]="placeholderText"
               autocomplete="name"
               [disabled]="isLoading"
               (keydown.enter)="onIdentify()"
-              aria-label="Tu nombre"
+              aria-describedby="identify-instructions inputHelp"
               autofocus
             />
             @if (identifier) {
@@ -60,13 +66,16 @@
                 color="light"
                 class="border"
                 (click)="clearInput()"
-                aria-label="Limpiar"
+                aria-label="Limpiar campo de búsqueda"
                 type="button"
               >
-                <svg cIcon name="cilX"></svg>
+                <svg cIcon name="cilX" aria-hidden="true"></svg>
               </button>
             }
           </div>
+          <small id="inputHelp" class="visually-hidden">
+            Escribe tu nombre y presiona Enter o el botón Buscar
+          </small>
         </div>
 
         <!-- Submit Button -->
@@ -78,26 +87,25 @@
             class="py-3 fs-4"
             (click)="onIdentify()"
             [disabled]="isLoading || !identifier.trim()"
-            aria-label="Buscar mi cuenta"
           >
             @if (isLoading) {
-              <span class="spinner-border spinner-border-sm me-2"></span>
-              Buscando...
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              <span>Buscando...</span>
             } @else {
-              <svg cIcon name="cilSearch" class="me-2"></svg>
-              Buscar mi cuenta
+              <svg cIcon name="cilSearch" class="me-2" aria-hidden="true"></svg>
+              <span>Buscar mi cuenta</span>
             }
           </button>
         </div>
 
         <!-- Help Text -->
-        <div class="text-center mt-4">
+        <footer class="text-center mt-4">
           <p class="text-muted mb-0">
-            <svg cIcon name="cilInfo" class="me-1"></svg>
+            <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
             ¿No lo recuerdas? Pide ayuda
           </p>
-        </div>
+        </footer>
       </div>
-    </div>
+    </main>
   </div>
 </div>

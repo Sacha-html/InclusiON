@@ -1,11 +1,9 @@
-// src/app/views/register/register.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { ErrorCodeService } from '../../../services/error-code.service';
-import { RegisterUserRequest, ErrorCode } from '../../../models';
+import { AuthService, ErrorCodeService } from '@services';
+import { RegisterUserRequest, ErrorCode } from '@models';
 
 // CoreUI imports
 import { ContainerComponent, RowComponent, ColComponent, CardComponent, CardBodyComponent } from '@coreui/angular';
