@@ -193,8 +193,46 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
     this.a11y.updateSetting('highlightFocus', !this.a11y.highlightFocus());
   }
 
+  // Reading Mode
+  toggleReadingMode(): void {
+    this.a11y.toggleReadingMode();
+  }
+
+  // Text to Speech
+  toggleTextToSpeech(): void {
+    this.a11y.toggleTextToSpeech();
+  }
+
+  speakSelection(): void {
+    this.a11y.speakSelection();
+  }
+
+  speakMainContent(): void {
+    this.a11y.speakMainContent();
+  }
+
+  stopSpeaking(): void {
+    this.a11y.stopSpeaking();
+  }
+
+  setTTSRate(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.a11y.setTextToSpeechRate(parseFloat(target.value));
+  }
+
+  increaseTTSRate(): void {
+    const currentRate = this.a11y.textToSpeechRate();
+    this.a11y.setTextToSpeechRate(Math.min(2, currentRate + 0.25));
+  }
+
+  decreaseTTSRate(): void {
+    const currentRate = this.a11y.textToSpeechRate();
+    this.a11y.setTextToSpeechRate(Math.max(0.5, currentRate - 0.25));
+  }
+
   // Reset
   resetSettings(): void {
+    this.a11y.stopSpeaking();
     this.a11y.resetSettings();
   }
 }
