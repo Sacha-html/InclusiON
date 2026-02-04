@@ -73,9 +73,14 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    // Escape para cerrar el panel
-    if (event.key === 'Escape' && this.a11y.panelOpen()) {
-      this.a11y.closePanel();
+    // Escape: primero cierra el panel, luego sale del modo lectura
+    if (event.key === 'Escape') {
+      if (this.a11y.panelOpen()) {
+        this.a11y.closePanel();
+      } else if (this.a11y.readingMode()) {
+        event.preventDefault();
+        this.a11y.updateSetting('readingMode', false);
+      }
     }
   }
 
