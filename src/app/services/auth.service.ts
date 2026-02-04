@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
 import {
+  ApiResponse,
   AuthResponse,
   LoginRequest,
   RegisterUserRequest,
@@ -15,6 +16,7 @@ import {
   IdentifyUserResponse,
   VisualLoginResponse,
   LoginMethodsResponse,
+  UserProfileResponse,
 } from '@models';
 import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
 import { environment } from '@env';
@@ -106,6 +108,16 @@ export class AuthService {
           return throwError(() => err);
         })
       );
+  }
+
+  /**
+   * Obtiene el perfil del usuario autenticado desde el servidor.
+   * Requiere autenticación.
+   */
+  getProfile(): Observable<ApiResponse<UserProfileResponse>> {
+    return this.http
+      .get<ApiResponse<UserProfileResponse>>(`${this.apiUrl}/Auth/profile`)
+      .pipe(catchError(this.handleError));
   }
 
   isAuthenticated(): boolean {
