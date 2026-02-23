@@ -1,4 +1,3 @@
-// src/app/views/login/login.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -7,22 +6,20 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { LoginRequest } from '../../../models';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService, ErrorCodeService } from '@services';
+import { LoginRequest } from '@models';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 // CoreUI imports
 import {
   ContainerComponent,
   RowComponent,
   ColComponent,
-  CardGroupComponent,
   CardComponent,
   CardBodyComponent,
-} from '@coreui/angular';
-import {
+  AlertComponent,
   FormControlDirective,
-  FormLabelDirective,
   FormCheckComponent,
   FormCheckInputDirective,
   FormCheckLabelDirective,
@@ -38,15 +35,13 @@ import { IconDirective } from '@coreui/icons-angular';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     ContainerComponent,
     RowComponent,
     ColComponent,
-    CardGroupComponent,
     CardComponent,
     CardBodyComponent,
+    AlertComponent,
     FormControlDirective,
-    FormLabelDirective,
     FormCheckComponent,
     FormCheckInputDirective,
     FormCheckLabelDirective,
@@ -54,12 +49,14 @@ import { IconDirective } from '@coreui/icons-angular';
     InputGroupComponent,
     InputGroupTextDirective,
     IconDirective,
+    AccessibilityPanelComponent,
   ],
   templateUrl: './login.component.html'
 })
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private errorCodeService = inject(ErrorCodeService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -106,21 +103,20 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(loginData).subscribe({
       next: (response) => {
-        console.log(response);
-        if (response && response.data) {
-          localStorage.setItem('access_token', response.data.accessToken);
-          localStorage.setItem('refresh_token', response.data.refreshToken);
+        if (response?.success) {
+          // AuthService.login() ya guarda los tokens en setSession()
+          this.router.navigate(['/dashboard']);
         }
-
-        // this.router.navigate([this.returnUrl]);
-        this.router.navigate(['/dashboard']);
       },
       error: (error) => {
-        console.error('❌ Error en login:', error);
-        this.errorMessage =
-          error.message ||
-          'Error al iniciar sesión. Por favor, verifica tus credenciales.';
         this.isLoading = false;
+
+        if (error.errorCode !== undefined) {
+          this.errorMessage = this.errorCodeService.getFullMessage(error.errorCode);
+        } else {
+          this.errorMessage = error.userMessage
+            || 'Error al iniciar sesión. Por favor, verifica tus credenciales.';
+        }
       },
       complete: () => {
         this.isLoading = false;
@@ -165,5 +161,9 @@ export class LoginComponent implements OnInit {
     }
 
     return '';
+  }
+
+  goToVisualLogin(): void {
+    this.router.navigate(['/login']);
   }
 }

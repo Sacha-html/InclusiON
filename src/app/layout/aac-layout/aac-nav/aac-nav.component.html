@@ -1,0 +1,17 @@
+<nav class="aac-bottom-nav" role="navigation" aria-label="Menu principal">
+  @for (item of navItems; track item.path) {
+    <a
+      class="nav-item"
+      [routerLink]="item.path"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.path === '/app' }"
+      [attr.aria-label]="item.label"
+      [style.--item-color]="item.color"
+    >
+      <div class="nav-icon">
+        <svg cIcon [name]="item.icon" size="xl"></svg>
+      </div>
+      <span class="nav-label">{{ item.label }}</span>
+    </a>
+  }
+</nav>

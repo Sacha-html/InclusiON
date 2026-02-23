@@ -7,23 +7,22 @@
   visible
 >
   <c-sidebar-header class="border-bottom">
-    <c-sidebar-brand [routerLink]="[]">
-      <c-avatar
-        shape="rounded-0"
-        size="md"
-        src="./assets/images/logo/logo.jpeg"
-        alt="Ecosweet"
+    <c-sidebar-brand [routerLink]="[]" class="d-flex align-items-center">
+      <!-- Logo completo para sidebar expandido -->
+      <img
+        src="./assets/images/logo/inclusion-logo.svg"
+        alt="InclusiON - Plataforma Accesible"
         class="sidebar-brand-full"
+        height="36"
       />
 
-      <span class="ms-2 fw-semibold sidebar-brand-full">Ecosweet</span>
-
-      <c-avatar
-        shape="rounded-0"
-        size="sm"
-        src="./assets/images/logo/logo.jpeg"
-        alt="Ecosweet"
+      <!-- Icono para sidebar colapsado -->
+      <img
+        src="./assets/images/logo/inclusion-icon.svg"
+        alt="InclusiON"
         class="sidebar-brand-narrow"
+        width="32"
+        height="32"
       />
     </c-sidebar-brand>
   </c-sidebar-header>
@@ -54,13 +53,14 @@
     sidebarId="sidebar1"
   />
   <!--app-body-->
-  <div class="body flex-grow-1">
+  <main id="main-content" class="body flex-grow-1" tabindex="-1">
     <c-container breakpoint="lg" class="h-auto px-4">
       <router-outlet />
     </c-container>
-  </div>
+  </main>
   <!--app footer-->
   <app-default-footer />
 </div>
 
 <app-toaster></app-toaster>
+<app-accessibility-panel></app-accessibility-panel>

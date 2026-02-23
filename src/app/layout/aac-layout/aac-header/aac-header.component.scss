@@ -1,0 +1,113 @@
+.aac-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 20px;
+}
+
+.aac-user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.aac-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.aac-user-name {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--aac-text, #1a1a1a);
+}
+
+.aac-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.aac-btn-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  border: 2px solid #e0e0e0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    color: var(--aac-text, #1a1a1a);
+  }
+
+  &:hover {
+    background: #f5f5f5;
+    border-color: #2196F3;
+  }
+
+  &:focus {
+    outline: 4px solid #FFD700;
+    outline-offset: 2px;
+  }
+}
+
+.aac-btn-logout {
+  &:hover {
+    background: #FFEBEE;
+    border-color: #F44336;
+
+    svg {
+      color: #F44336;
+    }
+  }
+}
+
+// Alto contraste
+:host-context([data-profile="high-contrast"]) {
+  .aac-avatar {
+    border: 3px solid white;
+  }
+
+  .aac-user-name {
+    color: white;
+  }
+
+  .aac-btn-icon {
+    border-color: white;
+    svg {
+      color: white;
+    }
+  }
+}
+
+// Modo oscuro
+:host-context([data-color-mode="dark"]) {
+  .aac-user-name {
+    color: #f5f5f5;
+  }
+
+  .aac-btn-icon {
+    border-color: #4a4a6a;
+    svg {
+      color: #f5f5f5;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
