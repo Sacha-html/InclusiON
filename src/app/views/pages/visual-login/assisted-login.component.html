@@ -1,0 +1,156 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="visual-login-container min-vh-100 d-flex flex-column align-items-center justify-content-center">
+  <div class="content-wrapper">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <button
+        cButton
+        color="light"
+        class="back-button"
+        (click)="goBack()"
+        aria-label="Volver a identificación de usuario"
+      >
+        <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
+        <span>Volver</span>
+      </button>
+    </div>
+
+    <!-- Main Card -->
+    <main class="login-card card border-0 shadow" role="main">
+      <div class="card-body p-4 p-md-5">
+        <!-- User Avatar -->
+        <header class="text-center mb-4">
+          <div
+            class="user-avatar mx-auto mb-3"
+            [style.background-color]="avatarColor"
+            role="img"
+            [attr.aria-label]="'Avatar de ' + displayName"
+          >
+            {{ initial }}
+          </div>
+          <h1 class="h4 fw-bold mb-1">{{ displayName }}</h1>
+          <p class="text-muted mb-0">necesita ayuda para entrar</p>
+        </header>
+
+        <!-- Supervisor Info -->
+        <div class="supervisor-info text-center mb-4" aria-labelledby="supervisor-info-text">
+          <div class="supervisor-icon mb-2" aria-hidden="true">
+            <svg cIcon name="cilPeople" size="xl" aria-hidden="true"></svg>
+          </div>
+          <p id="supervisor-info-text" class="fw-semibold mb-0">
+            Un familiar o profesional debe autorizar el acceso
+          </p>
+        </div>
+
+        <!-- Error Alert -->
+        @if (errorMessage) {
+          <div
+            class="alert alert-danger mb-4 text-center"
+            role="alert"
+            aria-live="assertive"
+          >
+            <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
+            {{ errorMessage }}
+          </div>
+        }
+
+        <!-- Supervisor Login Form -->
+        <form (ngSubmit)="onSubmit()" class="supervisor-form" aria-labelledby="form-section-title">
+          <p id="form-section-title" class="form-section-title text-center mb-3">
+            <svg cIcon name="cilUser" class="me-1" aria-hidden="true"></svg>
+            Credenciales del supervisor
+          </p>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label for="supervisorEmail" class="form-label visually-hidden">Email del supervisor</label>
+            <c-input-group size="lg">
+              <span cInputGroupText>
+                <svg cIcon name="cilEnvelopeClosed" aria-hidden="true"></svg>
+              </span>
+              <input
+                cFormControl
+                type="email"
+                id="supervisorEmail"
+                [(ngModel)]="supervisorEmail"
+                name="supervisorEmail"
+                placeholder="Email del familiar o profesional"
+                [disabled]="isLoading"
+                autocomplete="email"
+                class="form-input"
+                aria-describedby="emailHelp"
+              />
+            </c-input-group>
+            <small id="emailHelp" class="visually-hidden">
+              Ingresa el correo electrónico del supervisor autorizado
+            </small>
+          </div>
+
+          <!-- Password -->
+          <div class="mb-4">
+            <label for="supervisorPassword" class="form-label visually-hidden">Contraseña del supervisor</label>
+            <c-input-group size="lg">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
+              </span>
+              <input
+                cFormControl
+                [type]="showPassword ? 'text' : 'password'"
+                id="supervisorPassword"
+                [(ngModel)]="supervisorPassword"
+                name="supervisorPassword"
+                placeholder="Contraseña"
+                [disabled]="isLoading"
+                autocomplete="current-password"
+                class="form-input"
+                aria-describedby="passwordHelp"
+              />
+              <button
+                type="button"
+                cButton
+                color="secondary"
+                variant="outline"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                [attr.aria-pressed]="showPassword"
+              >
+                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilDescription'" aria-hidden="true"></svg>
+              </button>
+            </c-input-group>
+            <small id="passwordHelp" class="visually-hidden">
+              Usa el botón a la derecha para mostrar u ocultar la contraseña
+            </small>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            cButton
+            color="success"
+            type="submit"
+            size="lg"
+            class="w-100 submit-button"
+            [disabled]="!supervisorEmail || !supervisorPassword || isLoading"
+          >
+            @if (isLoading) {
+              <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
+              <span>Autorizando...</span>
+            } @else {
+              <svg cIcon name="cilCheckCircle" class="me-2" aria-hidden="true"></svg>
+              <span>Autorizar Entrada</span>
+            }
+          </button>
+        </form>
+
+        <!-- Help -->
+        <footer class="text-center mt-4">
+          <p class="text-muted small mb-0">
+            <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
+            Solo familiares y profesionales autorizados pueden dar acceso
+          </p>
+        </footer>
+      </div>
+    </main>
+  </div>
+</div>

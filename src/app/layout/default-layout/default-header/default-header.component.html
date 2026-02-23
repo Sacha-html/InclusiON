@@ -28,6 +28,10 @@
       <div class="nav-item py-1">
         <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
       </div>
+      <ng-container *ngTemplateOutlet="accessibilityDropdown" />
+      <div class="nav-item py-1">
+        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
+      </div>
       <ng-container *ngTemplateOutlet="themeDropdown" />
       <div class="nav-item py-1">
         <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
@@ -57,7 +61,7 @@
       <c-avatar
         shape="rounded-1"
         size="md"
-        src="./assets/images/logo/logo.jpeg"
+        src="./assets/images/logo/inclusion-icon.svg"
         status="success"
         textColor="primary"
         alt="User avatar"
@@ -105,6 +109,38 @@
         </a>
       </li>
     </ul>
+  </c-dropdown>
+</ng-template>
+
+<ng-template #accessibilityDropdown>
+  <c-dropdown alignment="end" variant="nav-item">
+    <button
+      [caret]="false"
+      cDropdownToggle
+      aria-label="Seleccionar tema de accesibilidad"
+      cTooltip="Accesibilidad"
+    >
+      <svg cIcon [name]="accessibilityIcon()" size="lg"></svg>
+    </button>
+    <div cDropdownMenu>
+      <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
+        Tema de Accesibilidad
+      </h6>
+      @for (theme of accessibilityService.themes; track theme.id) {
+      <button
+        (click)="accessibilityService.setTheme(theme.id)"
+        [active]="accessibilityService.currentTheme() === theme.id"
+        cDropdownItem
+        class="d-flex align-items-center"
+      >
+        <svg cIcon class="me-2" [name]="theme.icon" size="lg"></svg>
+        <div class="d-flex flex-column">
+          <span>{{ theme.name }}</span>
+          <small class="text-body-secondary">{{ theme.description }}</small>
+        </div>
+      </button>
+      }
+    </div>
   </c-dropdown>
 </ng-template>
 
