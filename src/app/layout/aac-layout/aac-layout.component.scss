@@ -1,0 +1,77 @@
+.aac-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+
+  --aac-primary: #2196F3;
+  --aac-success: #4CAF50;
+  --aac-warning: #FF9800;
+  --aac-danger: #F44336;
+  --aac-bg: #FFFFFF;
+  --aac-text: #1a1a1a;
+  --aac-radius: 24px;
+  --aac-spacing: 16px;
+}
+
+.aac-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  z-index: 100;
+  background: var(--aac-bg);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.aac-main {
+  flex: 1;
+  padding: 88px var(--aac-spacing) 100px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.aac-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 88px;
+  z-index: 100;
+  background: var(--aac-bg);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+// Alto contraste
+:host-context([data-profile="high-contrast"]) {
+  .aac-container {
+    --aac-bg: #000000;
+    --aac-text: #FFFFFF;
+    background: #000000;
+  }
+
+  .aac-header,
+  .aac-nav {
+    border: 2px solid #FFFFFF;
+  }
+}
+
+// Modo oscuro
+:host-context([data-color-mode="dark"]) {
+  .aac-container {
+    --aac-bg: #1e1e2e;
+    --aac-text: #f5f5f5;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+}
+
+// Reducir movimiento
+:host-context(.a11y-reduced-motion) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

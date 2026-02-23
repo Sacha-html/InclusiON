@@ -1,0 +1,186 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="visual-login-container min-vh-100 d-flex flex-column align-items-center justify-content-center">
+  <div class="content-wrapper">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <button
+        cButton
+        color="light"
+        class="back-button"
+        (click)="goBack()"
+        aria-label="Volver a identificación de usuario"
+      >
+        <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
+        <span>Volver</span>
+      </button>
+    </div>
+
+    <!-- Main Card -->
+    <main class="pin-card card border-0 shadow" role="main">
+      <div class="card-body p-4 p-md-5">
+        <!-- User Avatar -->
+        <header class="text-center mb-4">
+          <div
+            class="user-avatar mx-auto mb-3"
+            [style.background-color]="avatarColor"
+            role="img"
+            [attr.aria-label]="'Avatar de ' + displayName"
+          >
+            {{ initial }}
+          </div>
+          <h1 class="h4 fw-bold mb-1">Hola, {{ displayName }}</h1>
+          <p class="text-muted" id="pin-instructions">Toca los números de tu PIN</p>
+        </header>
+
+        <!-- Error Alert -->
+        @if (errorMessage) {
+          <div
+            class="alert mb-4 text-center"
+            [class.alert-warning]="isLocked"
+            [class.alert-danger]="!isLocked"
+            role="alert"
+            aria-live="assertive"
+          >
+            @if (isLocked) {
+              <svg cIcon name="cilLockLocked" class="me-2" aria-hidden="true"></svg>
+            } @else {
+              <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
+            }
+            {{ errorMessage }}
+          </div>
+        }
+
+        <!-- PIN Dots -->
+        <div
+          class="pin-display mb-4"
+          role="status"
+          aria-live="polite"
+          [attr.aria-label]="'PIN ingresado: ' + pin.length + ' de ' + maxPinLength + ' dígitos'"
+        >
+          @for (filled of pinDots; track $index) {
+            <div
+              class="pin-dot"
+              [class.filled]="filled"
+              [class.error]="errorMessage && pin.length === 0"
+              aria-hidden="true"
+            ></div>
+          }
+        </div>
+
+        <!-- Opción: Input de teclado para accesibilidad motora -->
+        <div class="pin-keyboard-input mb-3">
+          <button
+            type="button"
+            class="toggle-input-btn"
+            (click)="toggleKeyboardInput()"
+            [attr.aria-expanded]="showKeyboardInput"
+            aria-controls="pin-text-input"
+          >
+            <svg cIcon name="cilKeyboard" size="sm" aria-hidden="true"></svg>
+            {{ showKeyboardInput ? 'Usar teclado visual' : 'Escribir con teclado físico' }}
+          </button>
+
+          @if (showKeyboardInput) {
+            <div class="keyboard-input-wrapper mt-3" id="pin-text-input">
+              <label for="pinTextInput" class="form-label">
+                Escribe tu PIN de {{ maxPinLength }} dígitos:
+              </label>
+              <input
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                id="pinTextInput"
+                class="form-control form-control-lg pin-text-input"
+                [maxlength]="maxPinLength"
+                [(ngModel)]="pin"
+                (input)="onPinTextInput($event)"
+                (keydown.enter)="onSubmit()"
+                [disabled]="isLoading || isLocked"
+                placeholder="••••"
+                autocomplete="one-time-code"
+                aria-describedby="pinHelp"
+              />
+              <small id="pinHelp" class="form-text text-muted">
+                Solo números. Presiona Enter para confirmar.
+              </small>
+              <button
+                type="button"
+                cButton
+                color="success"
+                class="w-100 mt-3"
+                [disabled]="pin.length !== maxPinLength || isLoading"
+                (click)="onSubmit()"
+              >
+                @if (isLoading) {
+                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  <span class="visually-hidden">Cargando...</span>
+                }
+                Confirmar PIN
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- PIN Pad (teclado visual) -->
+        <div
+          class="pin-pad"
+          [class.disabled]="isLoading || isLocked"
+          [class.hidden]="showKeyboardInput"
+          role="group"
+          aria-label="Teclado numérico para PIN"
+          aria-describedby="pin-instructions"
+        >
+          @for (row of pinPad; track $index) {
+            <div class="pin-row" role="group">
+              @for (key of row; track key) {
+                <button
+                  class="pin-key"
+                  [class.special]="key === 'clear' || key === 'submit'"
+                  [class.clear]="key === 'clear'"
+                  [class.submit]="key === 'submit'"
+                  [disabled]="isLoading || isLocked || (key === 'submit' && pin.length !== maxPinLength)"
+                  (click)="handlePadClick(key)"
+                  [attr.aria-label]="getPadKeyAriaLabel(key)"
+                  type="button"
+                >
+                  @if (key === 'submit' && isLoading) {
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span class="visually-hidden">Verificando PIN...</span>
+                  } @else {
+                    <span aria-hidden="true">{{ getPadKeyLabel(key) }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Remember Device -->
+        <div class="mt-4 text-center">
+          <div class="form-check d-inline-block">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="rememberDevice"
+              [(ngModel)]="rememberDevice"
+              [disabled]="isLoading"
+            />
+            <label class="form-check-label" for="rememberDevice">
+              Recordar este dispositivo
+            </label>
+          </div>
+        </div>
+
+        <!-- Help -->
+        <footer class="text-center mt-4">
+          <p class="text-muted small mb-0">
+            <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
+            ¿Lo olvidaste? Pide ayuda a un familiar o profesional
+          </p>
+        </footer>
+      </div>
+    </main>
+  </div>
+</div>

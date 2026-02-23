@@ -8,10 +8,17 @@
       "@angular/localize"
     ],
     "paths": {
-      "@docs-components/*": [
-        "./src/components/*"
-      ],
-      "@app/*": ["./src/app/*"]
+      "@docs-components/*": ["./src/components/*"],
+      "@app/*": ["./src/app/*"],
+      "@services/*": ["./src/app/services/*"],
+      "@services": ["./src/app/services/index.ts"],
+      "@models/*": ["./src/app/models/*"],
+      "@models": ["./src/app/models/index.ts"],
+      "@components/*": ["./src/app/components/*"],
+      "@guards/*": ["./src/app/guards/*"],
+      "@interceptors/*": ["./src/app/interceptors/*"],
+      "@shared/*": ["./src/app/shared/*"],
+      "@env": ["./src/environments/environment.ts"]
     }
   },
   "files": [
