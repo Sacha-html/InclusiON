@@ -40,6 +40,7 @@ namespace InclusiON.Infrastructure
 
             services.AddScoped<IConnectionFactory>(provider => new SqlConnectionFactory(connectionString));
 
+            services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<InclusiON.ApplicationBusiness.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
             services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
