@@ -1,7 +1,7 @@
-﻿using InclusiON.DTOs.Responses.Auth;
+using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Entities.Models;
 
-namespace InclusiON.ApplicationBusiness.Interfaces.Infrastructure
+namespace InclusiON.ApplicationBusiness.Interfaces.Repositories
 {
 
     public interface IRefreshTokensRepository
@@ -22,4 +22,3 @@ namespace InclusiON.ApplicationBusiness.Interfaces.Infrastructure
         Task<int> GetActiveTokensCountAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }
-

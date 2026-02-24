@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
@@ -20,8 +19,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
     public class AssistedLoginCommandHandler : ICommandHandler<AssistedLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly IIdentityService _identityService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IPermissionService _permissionService;
@@ -31,8 +29,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
         public AssistedLoginCommandHandler(
             IVisualLoginRepository repository,
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
+            IIdentityService identityService,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
             IPermissionService permissionService,
@@ -41,8 +38,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             IUnitOfWork unitOfWork)
         {
             _repository = repository;
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _identityService = identityService;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
             _permissionService = permissionService;
@@ -70,7 +66,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 }
 
                 // 2. Buscar al supervisor por email
-                var supervisor = await _userManager.FindByEmailAsync(command.SupervisorEmail.ToLower().Trim());
+                var supervisor = await _identityService.FindByEmailAsync(command.SupervisorEmail.ToLower().Trim());
 
                 if (supervisor == null)
                 {
@@ -100,14 +96,14 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 }
 
                 // 4. Verificar credenciales del supervisor
-                var signInResult = await _signInManager.CheckPasswordSignInAsync(
+                var signInStatus = await _identityService.CheckPasswordAsync(
                     supervisor,
                     command.SupervisorPassword,
                     lockoutOnFailure: true);
 
-                if (!signInResult.Succeeded)
+                if (signInStatus != SignInStatus.Success)
                 {
-                    if (signInResult.IsLockedOut)
+                    if (signInStatus == SignInStatus.LockedOut)
                     {
                         return ApiResponse<VisualLoginResponse>.SuccessResult(
                             new VisualLoginResponse
@@ -155,14 +151,14 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             }
 
             // 2. Obtener el usuario supervisor una sola vez
-            var supervisorUser = await _userManager.FindByIdAsync(supervisorUserId.ToString());
+            var supervisorUser = await _identityService.FindByIdAsync(supervisorUserId);
             if (supervisorUser == null)
             {
                 _logger.LogWarning("Supervisor user not found: {SupervisorUserId}", supervisorUserId);
                 return false;
             }
 
-            var roles = await _userManager.GetRolesAsync(supervisorUser);
+            var roles = await _identityService.GetRolesAsync(supervisorUser);
 
             // 3. Verificar si es un profesional asignado
             var professional = await _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
@@ -195,7 +191,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             var ipAddress = _httpContextService.GetClientIpAddress();
             var userAgent = _httpContextService.GetUserAgent();
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _identityService.GetRolesAsync(user);
             var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
             var tokenUserData = new TokenUserData
@@ -232,7 +228,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 user.LastLoginDate = DateTime.UtcNow;
                 user.LastLoginIpAddress = ipAddress;
                 user.LastLoginUserAgent = userAgent;
-                await _userManager.UpdateAsync(user);
+                await _identityService.UpdateUserAsync(user);
 
                 await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
             }, cancellationToken);

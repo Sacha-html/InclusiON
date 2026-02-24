@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
@@ -10,14 +9,14 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 {
     public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, ApiResponse<UserResponse>>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
 
         public RegisterUserCommandHandler(
-            UserManager<User> userManager,
+            IIdentityService identityService,
             IUnitOfWork unitOfWork)
         {
-            _userManager = userManager;
+            _identityService = identityService;
             _unitOfWork = unitOfWork;
         }
 
@@ -34,7 +33,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                         "Las contrasenas no coinciden");
                 }
 
-                var existingUser = await _userManager.FindByEmailAsync(command.Email);
+                var existingUser = await _identityService.FindByEmailAsync(command.Email);
 
                 if (existingUser != null)
                 {
@@ -59,15 +58,14 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 // Execute transactional operations
                 await _unitOfWork.ExecuteInTransactionAsync(async _ =>
                 {
-                    var result = await _userManager.CreateAsync(user, command.Password);
+                    var (succeeded, errors) = await _identityService.CreateUserAsync(user, command.Password);
 
-                    if (!result.Succeeded)
+                    if (!succeeded)
                     {
-                        var errors = result.Errors.Select(p => p.Description).ToList();
                         throw new InvalidOperationException(string.Join(", ", errors));
                     }
 
-                    await _userManager.AddToRoleAsync(user, command.Role.ToString());
+                    await _identityService.AddToRoleAsync(user, command.Role.ToString());
                 }, cancellationToken);
 
                 return ApiResponse<UserResponse>.SuccessResult(new UserResponse

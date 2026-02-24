@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
@@ -18,7 +17,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
     public class PinLoginCommandHandler : ICommandHandler<PinLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;
-        private readonly UserManager<User> _userManager;
+        private readonly IIdentityService _identityService;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
@@ -31,7 +30,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
         public PinLoginCommandHandler(
             IVisualLoginRepository repository,
-            UserManager<User> userManager,
+            IIdentityService identityService,
             IPasswordHasher passwordHasher,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
@@ -41,7 +40,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             IUnitOfWork unitOfWork)
         {
             _repository = repository;
-            _userManager = userManager;
+            _identityService = identityService;
             _passwordHasher = passwordHasher;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
@@ -71,9 +70,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 var user = person.User;
 
                 // Verificar si esta bloqueado
-                if (await _userManager.IsLockedOutAsync(user))
+                if (await _identityService.IsLockedOutAsync(user))
                 {
-                    var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                    var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
                     var secondsRemaining = lockoutEnd.HasValue
                         ? (int)(lockoutEnd.Value - DateTimeOffset.UtcNow).TotalSeconds
                         : 0;
@@ -99,8 +98,8 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 var pinValid = _passwordHasher.VerifyPassword(person.PinCodeHash, command.Pin);
                 if (!pinValid)
                 {
-                    await _userManager.AccessFailedAsync(user);
-                    var failedCount = await _userManager.GetAccessFailedCountAsync(user);
+                    await _identityService.AccessFailedAsync(user);
+                    var failedCount = await _identityService.GetAccessFailedCountAsync(user);
                     var remaining = MaxFailedAttempts - failedCount;
 
                     return ApiResponse<VisualLoginResponse>.SuccessResult(
@@ -113,7 +112,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 }
 
                 // Login exitoso
-                await _userManager.ResetAccessFailedCountAsync(user);
+                await _identityService.ResetAccessFailedCountAsync(user);
                 return await GenerateLoginResponseAsync(user, person, command.DeviceId, command.RememberDevice, cancellationToken);
             }
             catch (Exception ex)
@@ -135,7 +134,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             var ipAddress = _httpContextService.GetClientIpAddress();
             var userAgent = _httpContextService.GetUserAgent();
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _identityService.GetRolesAsync(user);
             var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
             var tokenUserData = new TokenUserData
@@ -171,7 +170,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 user.LastLoginDate = DateTime.UtcNow;
                 user.LastLoginIpAddress = ipAddress;
                 user.LastLoginUserAgent = userAgent;
-                await _userManager.UpdateAsync(user);
+                await _identityService.UpdateUserAsync(user);
 
                 await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
 

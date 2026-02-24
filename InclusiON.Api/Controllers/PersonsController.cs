@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
+using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.UseCases.Persons.Commands;
 using InclusiON.ApplicationBusiness.UseCases.Persons.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
-using System.Security.Claims;
 
 namespace InclusiON.Api.Controllers
 {
@@ -20,6 +20,13 @@ namespace InclusiON.Api.Controllers
     [Produces("application/json")]
     public class PersonsController : ControllerBase
     {
+        private readonly IHttpContextService _httpContextService;
+
+        public PersonsController(IHttpContextService httpContextService)
+        {
+            _httpContextService = httpContextService;
+        }
+
         #region Queries
 
         /// <summary>
@@ -254,7 +261,7 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateLoginMethodCommand, ApiResponse<UpdateLoginMethodResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var userId = GetCurrentUserId();
+            var userId = _httpContextService.GetCurrentUserId();
             if (userId == null)
             {
                 return Unauthorized(ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Token invalido"));
@@ -291,23 +298,5 @@ namespace InclusiON.Api.Controllers
 
         #endregion
 
-        #region Helpers
-
-        private Guid? GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst("sub") ??
-                User.FindFirst("userId") ??
-                User.FindFirst(ClaimTypes.NameIdentifier) ??
-                User.FindFirst("id");
-
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
-            {
-                return null;
-            }
-
-            return userId;
-        }
-
-        #endregion
     }
 }

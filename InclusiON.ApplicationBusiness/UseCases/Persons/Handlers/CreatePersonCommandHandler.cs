@@ -13,16 +13,22 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
     public class CreatePersonCommandHandler : ICommandHandler<CreatePersonCommand, ApiResponse<PersonResponse>>
     {
         private readonly IPersonsRepository _repository;
+        private readonly IIdentityService _identityService;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreatePersonCommandHandler> _logger;
 
         public CreatePersonCommandHandler(
             IPersonsRepository repository,
+            IIdentityService identityService,
             IPasswordHasher passwordHasher,
+            IUnitOfWork unitOfWork,
             ILogger<CreatePersonCommandHandler> logger)
         {
             _repository = repository;
+            _identityService = identityService;
             _passwordHasher = passwordHasher;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -98,12 +104,24 @@ namespace InclusiON.ApplicationBusiness.UseCases.Persons.Handlers
                     person.PinCodeHash = _passwordHasher.HashPassword(command.Pin);
                 }
 
-                // Crear en base de datos
-                var createdPerson = await _repository.CreateAsync(person, user, password, cancellationToken);
+                // Crear usuario, asignar rol y persona en transaccion
+                await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+                {
+                    var (succeeded, errors) = await _identityService.CreateUserAsync(user, password);
+                    if (!succeeded)
+                    {
+                        throw new InvalidOperationException($"Error al crear usuario: {string.Join(", ", errors)}");
+                    }
 
-                _logger.LogInformation("Persona creada: {PersonId}, Usuario: {UserId}", createdPerson.Id, user.Id);
+                    await _identityService.AddToRoleAsync(user, "Person");
 
-                var response = MapToResponse(createdPerson);
+                    person.UserId = user.Id;
+                    await _repository.CreateAsync(person, ct);
+                }, cancellationToken);
+
+                _logger.LogInformation("Persona creada: {PersonId}, Usuario: {UserId}", person.Id, user.Id);
+
+                var response = MapToResponse(person);
                 return ApiResponse<PersonResponse>.SuccessResult(response, "Persona creada exitosamente");
             }
             catch (InvalidOperationException ex) when (ex.Message.Contains("Error al crear usuario"))
