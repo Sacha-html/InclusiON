@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.Data;
 using System.Data;
 
 namespace InclusiON.Infrastructure.Data
@@ -7,15 +9,17 @@ namespace InclusiON.Infrastructure.Data
     public class UnitOfWork : IUnitOfWork
     {
         private readonly IConnectionFactory _connectionFactory;
+        private readonly AppDbContext _context;
         private readonly ILogger<UnitOfWork> _logger;
 
         private IDbConnection? _connection;
         private IDbTransaction? _transaction;
         private bool _disposed;
 
-        public UnitOfWork(IConnectionFactory connectionFactory, ILogger<UnitOfWork> logger)
+        public UnitOfWork(IConnectionFactory connectionFactory, AppDbContext context, ILogger<UnitOfWork> logger)
         {
             _connectionFactory = connectionFactory;
+            _context = context;
             _logger = logger;
         }
 
@@ -133,6 +137,25 @@ namespace InclusiON.Infrastructure.Data
                 _connection.Dispose();
                 _connection = null;
             }
+        }
+
+        public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> operation, CancellationToken cancellationToken = default)
+        {
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    await operation(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
 
         public void Dispose()

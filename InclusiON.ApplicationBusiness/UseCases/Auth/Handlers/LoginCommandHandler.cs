@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
@@ -21,7 +20,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly IPermissionService _permissionService;
         private readonly IHttpContextService _httpContextService;
         private readonly ILogger<LoginCommandHandler> _logger;
-        private readonly DbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
         public LoginCommandHandler(
             UserManager<User> userManager,
@@ -31,7 +30,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             IPermissionService permissionService,
             IHttpContextService httpContextService,
             ILogger<LoginCommandHandler> logger,
-            DbContext context)
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signinManager = signinManager;
@@ -40,7 +39,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             _permissionService = permissionService;
             _httpContextService = httpContextService;
             _logger = logger;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<LoginResponse>> HandleAsync(LoginCommand command, CancellationToken cancellationToken)
@@ -134,35 +133,23 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 };
 
                 // Execute transactional operations
-                var strategy = _context.Database.CreateExecutionStrategy();
-                await strategy.ExecuteAsync(async () =>
+                await _unitOfWork.ExecuteInTransactionAsync(async ct =>
                 {
-                    using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-                    try
+                    var revokedCount = await _refreshTokensRepository
+                        .RevokeAllUserTokensAsync(user.Id, "New login detectect - previous sessions was invalidated");
+
+                    if (revokedCount > 0)
                     {
-                        var revokedCount = await _refreshTokensRepository
-                            .RevokeAllUserTokensAsync(user.Id, "New login detectect - previous sessions was invalidated");
-
-                        if (revokedCount > 0)
-                        {
-                            _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
-                        }
-
-                        user.LastLoginDate = DateTime.UtcNow;
-                        user.LastLoginIpAddress = ipAddress;
-                        user.LastLoginUserAgent = userAgent;
-
-                        await _userManager.UpdateAsync(user);
-                        await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
-
-                        await transaction.CommitAsync(cancellationToken);
+                        _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
                     }
-                    catch
-                    {
-                        await transaction.RollbackAsync(cancellationToken);
-                        throw;
-                    }
-                });
+
+                    user.LastLoginDate = DateTime.UtcNow;
+                    user.LastLoginIpAddress = ipAddress;
+                    user.LastLoginUserAgent = userAgent;
+
+                    await _userManager.UpdateAsync(user);
+                    await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+                }, cancellationToken);
 
                 var response = new LoginResponse
                 {

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
@@ -26,7 +25,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly IPermissionService _permissionService;
         private readonly IHttpContextService _httpContextService;
         private readonly ILogger<PinLoginCommandHandler> _logger;
-        private readonly DbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
         private const int MaxFailedAttempts = 5;
 
@@ -39,7 +38,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             IPermissionService permissionService,
             IHttpContextService httpContextService,
             ILogger<PinLoginCommandHandler> logger,
-            DbContext context)
+            IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _userManager = userManager;
@@ -49,7 +48,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             _permissionService = permissionService;
             _httpContextService = httpContextService;
             _logger = logger;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<VisualLoginResponse>> HandleAsync(
@@ -165,44 +164,32 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             };
 
             // Execute transactional operations
-            var strategy = _context.Database.CreateExecutionStrategy();
-            await strategy.ExecuteAsync(async () =>
+            await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-                try
+                await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login con PIN");
+
+                user.LastLoginDate = DateTime.UtcNow;
+                user.LastLoginIpAddress = ipAddress;
+                user.LastLoginUserAgent = userAgent;
+                await _userManager.UpdateAsync(user);
+
+                await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+
+                if (rememberDevice && !string.IsNullOrEmpty(deviceId))
                 {
-                    await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login con PIN");
-
-                    user.LastLoginDate = DateTime.UtcNow;
-                    user.LastLoginIpAddress = ipAddress;
-                    user.LastLoginUserAgent = userAgent;
-                    await _userManager.UpdateAsync(user);
-
-                    await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
-
-                    if (rememberDevice && !string.IsNullOrEmpty(deviceId))
+                    var device = new TrustedDevice
                     {
-                        var device = new TrustedDevice
-                        {
-                            UserId = user.Id,
-                            DeviceId = deviceId,
-                            DeviceName = "Dispositivo registrado via PIN",
-                            Browser = _httpContextService.ParseBrowserFromUserAgent(userAgent),
-                            RegisteredAt = DateTime.UtcNow,
-                            ExpiresAt = DateTime.UtcNow.AddDays(90),
-                            IsActive = true
-                        };
-                        await _repository.RegisterTrustedDeviceAsync(device, cancellationToken);
-                    }
-
-                    await transaction.CommitAsync(cancellationToken);
+                        UserId = user.Id,
+                        DeviceId = deviceId,
+                        DeviceName = "Dispositivo registrado via PIN",
+                        Browser = _httpContextService.ParseBrowserFromUserAgent(userAgent),
+                        RegisteredAt = DateTime.UtcNow,
+                        ExpiresAt = DateTime.UtcNow.AddDays(90),
+                        IsActive = true
+                    };
+                    await _repository.RegisterTrustedDeviceAsync(device, ct);
                 }
-                catch
-                {
-                    await transaction.RollbackAsync(cancellationToken);
-                    throw;
-                }
-            });
+            }, cancellationToken);
 
             var displayName = $"{person.FirstName} {person.LastName}".Trim();
 
