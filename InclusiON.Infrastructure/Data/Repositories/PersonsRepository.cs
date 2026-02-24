@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.Data;
@@ -9,12 +8,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
     public class PersonsRepository : IPersonsRepository
     {
         private readonly AppDbContext _context;
-        private readonly UserManager<User> _userManager;
 
-        public PersonsRepository(AppDbContext context, UserManager<User> userManager)
+        public PersonsRepository(AppDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
         public async Task<PersonWithDisability?> GetByIdAsync(Guid personId, CancellationToken cancellationToken = default)
@@ -52,23 +49,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await query.AnyAsync(cancellationToken);
         }
 
-        public async Task<PersonWithDisability> CreateAsync(PersonWithDisability person, User user, string password, CancellationToken cancellationToken = default)
+        public async Task<PersonWithDisability> CreateAsync(PersonWithDisability person, CancellationToken cancellationToken = default)
         {
-            // Crear usuario con Identity
-            var result = await _userManager.CreateAsync(user, password);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Error al crear usuario: {errors}");
-            }
-
-            // Asignar rol Person
-            await _userManager.AddToRoleAsync(user, "Person");
-
-            // Asignar UserId a la persona
-            person.UserId = user.Id;
-
-            // Crear persona
             await _context.PersonsWithDisability.AddAsync(person, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 

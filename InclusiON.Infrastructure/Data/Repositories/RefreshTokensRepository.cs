@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Entities.Models;
