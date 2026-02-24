@@ -64,6 +64,13 @@ namespace InclusiON.Data.Configurations
                 .WithMany(c => c.Activities)
                 .HasForeignKey(a => a.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(a => a.SkillAreaId);
+
+            builder.HasOne(a => a.SkillArea)
+                .WithMany(s => s.Activities)
+                .HasForeignKey(a => a.SkillAreaId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
