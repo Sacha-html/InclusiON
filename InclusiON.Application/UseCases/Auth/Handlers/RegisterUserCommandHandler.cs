@@ -4,6 +4,7 @@ using InclusiON.Application.UseCases.Auth.Commands;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -30,7 +31,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<UserResponse>.ErrorResult(
                         ErrorCode.ValidationFailed,
-                        "Las contrasenas no coinciden");
+                        ErrorMessages.PasswordsMismatch);
                 }
 
                 var existingUser = await _identityService.FindByEmailAsync(command.Email);
@@ -39,7 +40,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<UserResponse>.Conflict(
                         ErrorCode.EmailAlreadyExists,
-                        "El email ya esta registrado");
+                        ErrorMessages.EmailAlreadyRegistered);
                 }
 
                 var user = new User
@@ -77,7 +78,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     PhoneNumber = user.PhoneNumber,
                     CreatedAt = user.CreatedAt,
                     IsActive = user.IsActive
-                }, "User registered successfully");
+                }, SuccessMessages.UserRegistered);
             }
             catch (InvalidOperationException ex)
             {
@@ -89,7 +90,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             {
                 return ApiResponse<UserResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al registrar usuario");
+                    ErrorMessages.InternalErrorRegister);
             }
         }
     }

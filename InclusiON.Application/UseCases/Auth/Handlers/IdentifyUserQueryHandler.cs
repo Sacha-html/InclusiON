@@ -5,6 +5,7 @@ using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -65,7 +66,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                             new IdentifyUserResponse
                             {
                                 UserFound = false,
-                                ErrorMessage = "Usuario no encontrado"
+                                ErrorMessage = ErrorMessages.UserNotFound
                             });
                 }
             }
@@ -74,7 +75,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 _logger.LogError(ex, "Error al identificar usuario: {Identifier}", query.Identifier);
                 return ApiResponse<IdentifyUserResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al identificar usuario");
+                    ErrorMessages.InternalErrorIdentifyUser);
             }
         }
 
@@ -116,13 +117,13 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
                         AvatarColor = person.AvatarColor ?? "#2196F3",
                         LoginMethodCode = "DEPRECATED",
-                        LoginMethodName = "Metodo no disponible",
+                        LoginMethodName = ErrorMessages.MethodNotAvailable,
                         IsTrustedDevice = false,
                         RequiresSupervision = false,
                         UserType = "Person",
-                        ErrorMessage = "Tu metodo de acceso necesita actualizarse. Por favor, contacta a un administrador o familiar."
+                        ErrorMessage = ErrorMessages.LoginMethodDeprecated
                     },
-                    "Metodo de login deprecado");
+                    ErrorMessages.LoginMethodNotAvailable);
             }
 
             // Normalizar codigo SUPERVISED a ASSISTED para retrocompatibilidad
@@ -146,7 +147,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     RequiresSupervision = loginMethod?.RequiresSupervisor ?? false,
                     UserType = "Person"
                 },
-                "Usuario identificado correctamente");
+                SuccessMessages.UserIdentified);
         }
 
         private async Task<ApiResponse<IdentifyUserResponse>> FindProfessionalAsync(
@@ -184,7 +185,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     RequiresSupervision = false,
                     UserType = "Professional"
                 },
-                "Usuario identificado correctamente");
+                SuccessMessages.UserIdentified);
         }
 
         private async Task<ApiResponse<IdentifyUserResponse>> FindFamilyAsync(
@@ -222,7 +223,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     RequiresSupervision = false,
                     UserType = "Family"
                 },
-                "Usuario identificado correctamente");
+                SuccessMessages.UserIdentified);
         }
     }
 }

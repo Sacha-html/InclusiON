@@ -6,6 +6,7 @@ using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -46,7 +47,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     _logger.LogDebug("LoginMethods obtenidos desde cache");
                     return ApiResponse<List<LoginMethodResponse>>.SuccessResult(
                         cachedResponse,
-                        "Metodos de login obtenidos correctamente");
+                        SuccessMessages.LoginMethodsRetrieved);
                 }
 
                 // Si no está en cache, consultar BD
@@ -74,14 +75,14 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
 
                 return ApiResponse<List<LoginMethodResponse>>.SuccessResult(
                     response,
-                    "Metodos de login obtenidos correctamente");
+                    SuccessMessages.LoginMethodsRetrieved);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener metodos de login");
                 return ApiResponse<List<LoginMethodResponse>>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al obtener metodos de login");
+                    ErrorMessages.InternalErrorGetLoginMethods);
             }
         }
     }

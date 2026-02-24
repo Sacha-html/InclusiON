@@ -6,6 +6,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {
@@ -32,7 +33,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 {
                     return ApiResponse<PersonResponse>.ErrorResult(
                         ErrorCode.PersonNotFound,
-                        "Persona no encontrada");
+                        ErrorMessages.PersonNotFound);
                 }
 
                 var response = MapToResponse(person);
@@ -43,7 +44,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 _logger.LogError(ex, "Error al obtener persona: {PersonId}", query.PersonId);
                 return ApiResponse<PersonResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al obtener persona");
+                    ErrorMessages.InternalErrorGetPerson);
             }
         }
 

@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -49,7 +50,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.RequiredField,
-                        "Refresh token es requerido");
+                        ErrorMessages.RefreshTokenRequired);
                 }
 
                 var storedToken = await _refreshTokensRepository.GetByTokenAsync(command.RefreshToken, cancellationToken);
@@ -59,7 +60,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     _logger.LogWarning("Refresh token not found");
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.TokenInvalid,
-                        "Token invalido");
+                        ErrorMessages.TokenInvalid);
                 }
 
                 if (!storedToken.IsActive)
@@ -67,7 +68,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     _logger.LogWarning("Attempted to use revoked refresh token for user {UserId}", storedToken.UserId);
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.TokenInvalid,
-                        "Token ha sido revocado");
+                        ErrorMessages.TokenRevoked);
                 }
 
                 if (storedToken.ExpiresAt < DateTime.UtcNow)
@@ -76,7 +77,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Token expired", cancellationToken);
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.TokenExpired,
-                        "Token ha expirado");
+                        ErrorMessages.TokenExpired);
                 }
 
                 var user = await _identityService.FindByIdAsync(storedToken.UserId);
@@ -87,7 +88,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User not found", cancellationToken);
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.UserNotFound,
-                        "Usuario no encontrado");
+                        ErrorMessages.UserNotFound);
                 }
 
                 if (!user.IsActive)
@@ -96,7 +97,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User inactive", cancellationToken);
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.AccountInactive,
-                        "Usuario inactivo");
+                        ErrorMessages.UserInactive);
                 }
 
                 var ipAddress = _httpContextService.GetClientIpAddress();
@@ -162,14 +163,14 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     }
                 };
 
-                return ApiResponse<LoginResponse>.SuccessResult(response, "Token refreshed successfully");
+                return ApiResponse<LoginResponse>.SuccessResult(response, SuccessMessages.TokenRefreshed);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error refreshing token");
                 return ApiResponse<LoginResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al refrescar token");
+                    ErrorMessages.InternalErrorRefreshToken);
             }
         }
     }

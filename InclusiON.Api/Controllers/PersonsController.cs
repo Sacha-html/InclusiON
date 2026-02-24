@@ -9,6 +9,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
 {
@@ -101,7 +102,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<PersonResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new CreatePersonCommand(
@@ -165,7 +166,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<PersonResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new UpdatePersonCommand(
@@ -224,7 +225,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new UpdateLoginMethodCommand(
@@ -264,7 +265,7 @@ namespace InclusiON.Api.Controllers
             var userId = _httpContextService.GetCurrentUserId();
             if (userId == null)
             {
-                return Unauthorized(ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Token invalido"));
+                return Unauthorized(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.TokenInvalid));
             }
 
             if (!ModelState.IsValid)
@@ -273,7 +274,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new UpdateLoginMethodCommand(

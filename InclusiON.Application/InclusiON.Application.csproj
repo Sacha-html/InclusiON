@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\InclusiON.DTOs\InclusiON.DTOs.csproj" />
     <ProjectReference Include="..\InclusiON.Domain\InclusiON.Domain.csproj" />
+    <ProjectReference Include="..\InclusiON.Models\InclusiON.Shared.csproj" />
   </ItemGroup>
 
 </Project>

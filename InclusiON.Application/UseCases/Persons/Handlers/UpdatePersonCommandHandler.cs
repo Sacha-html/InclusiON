@@ -5,6 +5,7 @@ using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {
@@ -31,7 +32,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 {
                     return ApiResponse<PersonResponse>.ErrorResult(
                         ErrorCode.PersonNotFound,
-                        "Persona no encontrada");
+                        ErrorMessages.PersonNotFound);
                 }
 
                 // Validar documento unico si cambio
@@ -42,7 +43,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     {
                         return ApiResponse<PersonResponse>.Conflict(
                             ErrorCode.DocumentAlreadyExists,
-                            "Ya existe una persona con este numero de documento");
+                            ErrorMessages.DocumentAlreadyExists);
                     }
                 }
 
@@ -124,14 +125,14 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     UpdatedAt = person.UpdatedAt
                 };
 
-                return ApiResponse<PersonResponse>.SuccessResult(response, "Persona actualizada exitosamente");
+                return ApiResponse<PersonResponse>.SuccessResult(response, SuccessMessages.PersonUpdated);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al actualizar persona: {PersonId}", command.PersonId);
                 return ApiResponse<PersonResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al actualizar persona");
+                    ErrorMessages.InternalErrorUpdatePerson);
             }
         }
     }

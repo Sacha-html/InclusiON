@@ -6,6 +6,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Users.Queries;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
 {
@@ -44,7 +45,7 @@ namespace InclusiON.Api.Controllers
             var userId = _httpContextService.GetCurrentUserId();
             if (userId == null)
             {
-                return Unauthorized(ApiResponse<UserProfileResponse>.ErrorResult("Token invalido"));
+                return Unauthorized(ApiResponse<UserProfileResponse>.ErrorResult(ErrorMessages.TokenInvalid));
             }
 
             var query = new GetUserProfileQuery(userId.Value);

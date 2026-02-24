@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -64,7 +65,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<VisualLoginResponse>.ErrorResult(
                         ErrorCode.UserNotFound,
-                        "Usuario no encontrado");
+                        ErrorMessages.UserNotFound);
                 }
 
                 var user = person.User;
@@ -83,7 +84,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                             Success = false,
                             IsLocked = true,
                             LockoutSecondsRemaining = secondsRemaining,
-                            ErrorMessage = "Cuenta bloqueada por intentos fallidos"
+                            ErrorMessage = ErrorMessages.AccountLocked
                         });
                 }
 
@@ -92,7 +93,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<VisualLoginResponse>.ErrorResult(
                         ErrorCode.PinNotConfigured,
-                        "PIN no configurado para este usuario");
+                        ErrorMessages.PinNotConfigured);
                 }
 
                 var pinValid = _passwordHasher.VerifyPassword(person.PinCodeHash, command.Pin);
@@ -107,7 +108,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         {
                             Success = false,
                             RemainingAttempts = remaining > 0 ? remaining : 0,
-                            ErrorMessage = "PIN incorrecto"
+                            ErrorMessage = ErrorMessages.PinIncorrect
                         });
                 }
 
@@ -120,7 +121,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 _logger.LogError(ex, "Error en login con PIN para usuario: {UserId}", command.UserId);
                 return ApiResponse<VisualLoginResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al procesar login");
+                    ErrorMessages.InternalErrorLogin);
             }
         }
 
@@ -216,7 +217,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         }
                     }
                 },
-                "Login exitoso");
+                SuccessMessages.VisualLoginSuccessful);
         }
     }
 }

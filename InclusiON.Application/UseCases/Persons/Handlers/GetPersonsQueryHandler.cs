@@ -5,6 +5,7 @@ using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {
@@ -76,7 +77,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 _logger.LogError(ex, "Error al listar personas");
                 return ApiResponse<PagedResponse<PersonListItemResponse>>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al listar personas");
+                    ErrorMessages.InternalErrorListPersons);
             }
         }
     }
