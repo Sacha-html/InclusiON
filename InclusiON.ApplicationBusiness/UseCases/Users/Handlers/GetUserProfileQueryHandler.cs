@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
 using InclusiON.ApplicationBusiness.UseCases.Users.Queries;
@@ -13,64 +13,16 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
     {
         private readonly UserManager<User> _userManager;
         private readonly IRefreshTokensRepository _refreshTokenRepository;
+        private readonly IPermissionService _permissionService;
 
-        /// <summary>
-        /// Diccionario estático de permisos por rol.
-        /// Evita crear nuevas listas en cada request.
-        /// </summary>
-        private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> RolePermissions =
-            new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
-            {
-                ["admin"] = new[]
-                {
-                    "read:profile", "update:profile", "delete:profile",
-                    "read:users", "create:users", "update:users", "delete:users",
-                    "read:products", "create:products", "update:products", "delete:products",
-                    "read:reports", "create:reports"
-                },
-                ["manager"] = new[]
-                {
-                    "read:profile", "update:profile",
-                    "read:users", "create:users", "update:users",
-                    "read:products", "create:products", "update:products",
-                    "read:reports"
-                },
-                ["professional"] = new[]
-                {
-                    "read:profile", "update:profile",
-                    "read:persons", "update:persons",
-                    "read:activities", "create:activities", "update:activities",
-                    "read:reports", "create:reports"
-                },
-                ["family"] = new[]
-                {
-                    "read:profile", "update:profile",
-                    "read:persons",
-                    "read:activities",
-                    "read:reports"
-                },
-                ["person"] = new[]
-                {
-                    "read:profile",
-                    "read:activities"
-                },
-                ["employee"] = new[]
-                {
-                    "read:profile", "update:profile",
-                    "read:products", "update:products"
-                },
-                ["customer"] = new[]
-                {
-                    "read:profile", "update:profile"
-                }
-            };
-
-        private static readonly IReadOnlyList<string> DefaultPermissions = new[] { "read:profile" };
-
-        public GetUserProfileQueryHandler(UserManager<User> userManager, IRefreshTokensRepository refreshTokenRepository)
+        public GetUserProfileQueryHandler(
+            UserManager<User> userManager,
+            IRefreshTokensRepository refreshTokenRepository,
+            IPermissionService permissionService)
         {
             _userManager = userManager;
             _refreshTokenRepository = refreshTokenRepository;
+            _permissionService = permissionService;
         }
 
         public async Task<ApiResponse<UserProfileResponse>> HandleAsync(GetUserProfileQuery query, CancellationToken cancellationToken)
@@ -96,6 +48,8 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
                 var roles = await _userManager.GetRolesAsync(user);
                 var primaryRole = roles.FirstOrDefault() ?? "User";
 
+                var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
+
                 var activeSessionsCount = await _refreshTokenRepository
                     .GetActiveTokensCountAsync(user.Id, cancellationToken);
 
@@ -111,7 +65,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
                     ActiveSessionsCount = activeSessionsCount,
                     EmailConfirmed = user.EmailConfirmed,
                     PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                    Permissions = GetUserPermissions(primaryRole)
+                    Permissions = permissions
                 };
 
                 return ApiResponse<UserProfileResponse>.SuccessResult(response);
@@ -122,14 +76,6 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
                     ErrorCode.InternalError,
                     "Error interno al obtener perfil de usuario");
             }
-        }
-
-        private static List<string> GetUserPermissions(string role)
-        {
-            // Búsqueda O(1) en diccionario + retorna copia para evitar mutaciones
-            return RolePermissions.TryGetValue(role, out var permissions)
-                ? permissions.ToList()
-                : DefaultPermissions.ToList();
         }
     }
 }

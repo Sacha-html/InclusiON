@@ -12,7 +12,6 @@ using InclusiON.Infrastructure.Data;
 using InclusiON.Infrastructure.Data.Factories;
 using InclusiON.Infrastructure.Data.Repositories;
 using InclusiON.Infrastructure.Services;
-using System.Security.Claims;
 using System.Text;
 using IConnectionFactory = InclusiON.ApplicationBusiness.Interfaces.Infrastructure.IConnectionFactory;
 
@@ -89,49 +88,10 @@ namespace InclusiON.Infrastructure
 
                 });
 
-            // Politicas de autorizacion consolidadas
-            // Todas las politicas requieren autenticacion + userId valido para seguridad consistente
-            services.AddAuthorization(options =>
-            {
-                // Base: cualquier usuario autenticado con userId valido
-                options.AddPolicy("ValidUser", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId");
-                });
-
-                // Solo administradores
-                options.AddPolicy("AdminOnly", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId");
-                    policy.RequireClaim(ClaimTypes.Role, "Admin");
-                });
-
-                // Administradores o managers
-                options.AddPolicy("ManagerOrAbove", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId");
-                    policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager");
-                });
-
-                // Staff (Admin, Manager, Employee) - excluye Person/Family
-                options.AddPolicy("StaffOnly", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId");
-                    policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager", "Employee");
-                });
-
-                // Profesionales o superiores (para gestion de personas)
-                options.AddPolicy("ProfessionalOrAbove", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("userId");
-                    policy.RequireClaim(ClaimTypes.Role, "Admin", "Manager", "Professional");
-                });
-            });
+            // La autorizacion se resuelve dinamicamente via PermissionPolicyProvider.
+            // Cualquier [Authorize(Policy = "modulo:accion")] se evalua contra los claims
+            // de tipo "permission" del JWT, sin necesidad de registrar politicas manuales.
+            services.AddAuthorization();
 
 
             return services;

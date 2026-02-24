@@ -26,9 +26,10 @@ namespace InclusiON.Api.Controllers
         /// Obtiene una lista paginada de personas con discapacidad.
         /// </summary>
         [HttpGet]
-        [Authorize(Policy = "ProfessionalOrAbove")]
+        [Authorize(Policy = "persons:read")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<PersonListItemResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<PersonListItemResponse>>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<PersonListItemResponse>>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PagedResponse<PersonListItemResponse>>>> GetPersons(
             [FromQuery] GetPersonsRequest request,
             [FromServices] IQueryHandler<GetPersonsQuery, ApiResponse<PagedResponse<PersonListItemResponse>>> handler,
@@ -54,10 +55,11 @@ namespace InclusiON.Api.Controllers
         /// Obtiene una persona por su ID.
         /// </summary>
         [HttpGet("{personId:guid}")]
-        [Authorize(Policy = "ValidUser")]
+        [Authorize(Policy = "persons:read")]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PersonResponse>>> GetPersonById(
             Guid personId,
             [FromServices] IQueryHandler<GetPersonByIdQuery, ApiResponse<PersonResponse>> handler,
@@ -68,38 +70,6 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        /// <summary>
-        /// Obtiene el perfil de la persona autenticada.
-        /// </summary>
-        [HttpGet("me")]
-        [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<PersonResponse>>> GetMyProfile(
-            [FromServices] IQueryHandler<GetPersonByIdQuery, ApiResponse<PersonResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            var userIdClaim = GetCurrentUserId();
-            if (userIdClaim == null)
-            {
-                return Unauthorized(ApiResponse<PersonResponse>.ErrorResult("Token invalido"));
-            }
-
-            // Nota: GetPersonByIdQuery espera PersonId, no UserId
-            // Para este endpoint necesitariamos un GetPersonByUserIdQuery
-            // Por ahora retornamos error si no existe
-            var query = new GetPersonByIdQuery(userIdClaim.Value);
-            var result = await handler.HandleAsync(query, cancellationToken);
-
-            if (!result.Success)
-            {
-                return NotFound(result);
-            }
-
-            return Ok(result);
-        }
-
         #endregion
 
         #region Commands
@@ -108,10 +78,11 @@ namespace InclusiON.Api.Controllers
         /// Crea una nueva persona con discapacidad.
         /// </summary>
         [HttpPost]
-        [Authorize(Policy = "ProfessionalOrAbove")]
+        [Authorize(Policy = "persons:create")]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PersonResponse>>> CreatePerson(
             [FromBody] CreatePersonRequest request,
             [FromServices] ICommandHandler<CreatePersonCommand, ApiResponse<PersonResponse>> handler,
@@ -169,11 +140,12 @@ namespace InclusiON.Api.Controllers
         /// Actualiza una persona existente.
         /// </summary>
         [HttpPut("{personId:guid}")]
-        [Authorize(Policy = "ProfessionalOrAbove")]
+        [Authorize(Policy = "persons:update")]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PersonResponse>>> UpdatePerson(
             Guid personId,
             [FromBody] UpdatePersonRequest request,
@@ -218,76 +190,6 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        /// <summary>
-        /// Actualiza el perfil de la persona autenticada.
-        /// </summary>
-        [HttpPut("me")]
-        [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<PersonResponse>>> UpdateMyProfile(
-            [FromBody] UpdatePersonRequest request,
-            [FromServices] ICommandHandler<UpdatePersonCommand, ApiResponse<PersonResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            var userId = GetCurrentUserId();
-            if (userId == null)
-            {
-                return Unauthorized(ApiResponse<PersonResponse>.ErrorResult("Token invalido"));
-            }
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult("Validacion fallida", errors));
-            }
-
-            // Nota: UpdatePersonCommand espera PersonId, no UserId
-            // Esto funcionara si PersonId == UserId, de lo contrario necesitamos ajustar
-            var command = new UpdatePersonCommand(
-                userId.Value,
-                request.FirstName,
-                request.LastName,
-                request.DocumentNumber,
-                request.BirthDate,
-                request.DisabilityTypeId,
-                request.PhotoUrl,
-                request.AttentionLevel,
-                request.CommunicationLevel,
-                request.UsesAAC,
-                request.UsesSignLanguage,
-                request.MotorSkillLevel,
-                request.InterestsAndMotivators,
-                request.LearningStyle,
-                request.AvailableResources,
-                request.AdditionalTherapies,
-                request.RequiresLargeFont,
-                request.RequiresHighContrast,
-                request.VisualNoiseSensitivity,
-                request.SoundSensitivity,
-                request.AutonomyLevelId,
-                request.SupervisorUserId,
-                request.AvatarColor);
-
-            var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-            {
-                if (result.Message.Contains("no encontrad", StringComparison.OrdinalIgnoreCase))
-                {
-                    return NotFound(result);
-                }
-                return BadRequest(result);
-            }
-
-            return Ok(result);
-        }
-
         #endregion
 
         #region Login Method
@@ -297,7 +199,7 @@ namespace InclusiON.Api.Controllers
         /// Solo el propio usuario o un supervisor autorizado puede realizar esta accion.
         /// </summary>
         [HttpPut("{userId:guid}/login-method")]
-        [Authorize]
+        [Authorize(Policy = "persons:update")]
         [ProducesResponseType(typeof(ApiResponse<UpdateLoginMethodResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<UpdateLoginMethodResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<UpdateLoginMethodResponse>), StatusCodes.Status401Unauthorized)]
