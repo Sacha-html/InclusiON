@@ -81,14 +81,11 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
                 await _repository.UpdateAsync(person, cancellationToken);
 
-                // Recargar con relaciones
-                person = await _repository.GetByIdAsync(command.PersonId, cancellationToken);
-
                 _logger.LogInformation("Persona actualizada: {PersonId}", command.PersonId);
 
                 var response = new PersonResponse
                 {
-                    Id = person!.Id,
+                    Id = person.Id,
                     UserId = person.UserId,
                     FirstName = person.FirstName,
                     LastName = person.LastName,

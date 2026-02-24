@@ -11,14 +11,10 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
     public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, ApiResponse<UserResponse>>
     {
         private readonly IIdentityService _identityService;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public RegisterUserCommandHandler(
-            IIdentityService identityService,
-            IUnitOfWork unitOfWork)
+        public RegisterUserCommandHandler(IIdentityService identityService)
         {
             _identityService = identityService;
-            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<UserResponse>> HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken)
@@ -56,18 +52,16 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     EmailConfirmed = true
                 };
 
-                // Execute transactional operations
-                await _unitOfWork.ExecuteInTransactionAsync(async _ =>
+                var (succeeded, errors) = await _identityService.CreateUserAsync(user, command.Password);
+
+                if (!succeeded)
                 {
-                    var (succeeded, errors) = await _identityService.CreateUserAsync(user, command.Password);
+                    return ApiResponse<UserResponse>.ErrorResult(
+                        ErrorCode.ValidationFailed,
+                        string.Join(", ", errors));
+                }
 
-                    if (!succeeded)
-                    {
-                        throw new InvalidOperationException(string.Join(", ", errors));
-                    }
-
-                    await _identityService.AddToRoleAsync(user, command.Role.ToString());
-                }, cancellationToken);
+                await _identityService.AddToRoleAsync(user, command.Role.ToString());
 
                 return ApiResponse<UserResponse>.SuccessResult(new UserResponse
                 {
@@ -79,12 +73,6 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     CreatedAt = user.CreatedAt,
                     IsActive = user.IsActive
                 }, SuccessMessages.UserRegistered);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return ApiResponse<UserResponse>.ErrorResult(
-                    ErrorCode.ValidationFailed,
-                    ex.Message);
             }
             catch (Exception)
             {
