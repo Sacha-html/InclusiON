@@ -66,6 +66,9 @@ namespace InclusiON.Entities.Models
         public string? ResourcesUrl { get; set; }
         #endregion
 
+        public int? SkillAreaId { get; set; }
+        public virtual SkillArea? SkillArea { get; set; }
+
         #region Control de Estimulacion
         /// <summary>
         /// Duracion estimada en minutos.
@@ -103,9 +106,14 @@ namespace InclusiON.Entities.Models
         /// </summary>
         public virtual ICollection<ActivityAssignment> ActivityAssignments { get; set; }
 
+        public virtual ActivityContent? Content { get; set; }
+
+        public virtual ICollection<PersonRoadmapActivity> RoadmapActivities { get; set; }
+
         public Activity()
         {
             ActivityAssignments = new HashSet<ActivityAssignment>();
+            RoadmapActivities = new HashSet<PersonRoadmapActivity>();
         }
     }
 }
