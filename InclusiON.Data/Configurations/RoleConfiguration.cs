@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using InclusiON.Entities.Enums;
+using InclusiON.Domain.Enums;
 
 namespace InclusiON.Data.Configurations
 {

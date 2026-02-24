@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using InclusiON.ApplicationBusiness;
+using InclusiON.Application;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
 using InclusiON.Infrastructure;

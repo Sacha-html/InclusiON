@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Data.Configurations
 {

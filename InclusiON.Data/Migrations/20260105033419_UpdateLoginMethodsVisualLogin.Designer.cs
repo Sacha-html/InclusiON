@@ -25,7 +25,7 @@ namespace InclusiON.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("InclusiON.Entities.Models.AccessAudit", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.AccessAudit", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,7 +74,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("AccessAudits", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Activity", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Activity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -165,7 +165,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Activities", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ActivityAssignment", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -233,7 +233,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("ActivityAssignments", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ActivityCategory", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -321,7 +321,7 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ActivityResponse", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityResponse", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -388,7 +388,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("ActivityResponses", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.AutonomyLevel", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -453,7 +453,7 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Diagnosis", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -519,7 +519,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Diagnoses", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.DisabilityType", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.DisabilityType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -586,7 +586,7 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.EducationalInstitution", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.EducationalInstitution", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -633,7 +633,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("EducationalInstitutions", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.FamilyRepresentative", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.FamilyRepresentative", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -693,7 +693,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("FamilyRepresentatives", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Invitation", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Invitation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -776,7 +776,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Invitations", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.LoginMethod", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.LoginMethod", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -959,7 +959,7 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Message", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Message", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1018,7 +1018,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Messages", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.PersonRepresentative", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonRepresentative", b =>
                 {
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
@@ -1059,7 +1059,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("PersonRepresentatives", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.PersonWithDisability", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonWithDisability", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1201,7 +1201,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("PersonsWithDisability", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Professional", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Professional", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1272,7 +1272,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Professionals", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ProfessionalInstitution", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ProfessionalInstitution", b =>
                 {
                     b.Property<Guid>("ProfessionalId")
                         .HasColumnType("uniqueidentifier");
@@ -1295,7 +1295,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("ProfessionalInstitutions", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ProfessionalPerson", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ProfessionalPerson", b =>
                 {
                     b.Property<Guid>("ProfessionalId")
                         .HasColumnType("uniqueidentifier");
@@ -1328,7 +1328,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("ProfessionalPersons", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.RefreshToken", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1384,7 +1384,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Report", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Report", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1459,7 +1459,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Reports", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ReportType", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ReportType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1526,7 +1526,7 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.TrustedDevice", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.TrustedDevice", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1599,7 +1599,7 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("TrustedDevices", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.User", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1854,14 +1854,14 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.AccessAudit", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.AccessAudit", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "AccessedPerson")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "AccessedPerson")
                         .WithMany("AccessAudits")
                         .HasForeignKey("AccessedPersonId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.User", "User")
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithMany("AccessAudits")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1872,15 +1872,15 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Activity", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Activity", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.ActivityCategory", "Category")
+                    b.HasOne("InclusiON.Domain.Models.ActivityCategory", "Category")
                         .WithMany("Activities")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.Professional", "Professional")
+                    b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
                         .WithMany("Activities")
                         .HasForeignKey("ProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1891,21 +1891,21 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Professional");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ActivityAssignment", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignment", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.Activity", "Activity")
+                    b.HasOne("InclusiON.Domain.Models.Activity", "Activity")
                         .WithMany("ActivityAssignments")
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.Professional", "AssignedByProfessional")
+                    b.HasOne("InclusiON.Domain.Models.Professional", "AssignedByProfessional")
                         .WithMany("ActivityAssignments")
                         .HasForeignKey("AssignedByProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
                         .WithMany("ActivityAssignments")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1918,9 +1918,9 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Person");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ActivityResponse", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityResponse", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.ActivityAssignment", "Assignment")
+                    b.HasOne("InclusiON.Domain.Models.ActivityAssignment", "Assignment")
                         .WithMany("Responses")
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1929,15 +1929,15 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Assignment");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Diagnosis", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
                         .WithMany("Diagnoses")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.Professional", "Professional")
+                    b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
                         .WithMany("Diagnoses")
                         .HasForeignKey("ProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1948,31 +1948,31 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Professional");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.FamilyRepresentative", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.FamilyRepresentative", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.User", "User")
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithOne("FamilyRepresentative")
-                        .HasForeignKey("InclusiON.Entities.Models.FamilyRepresentative", "UserId")
+                        .HasForeignKey("InclusiON.Domain.Models.FamilyRepresentative", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Invitation", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Invitation", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.Professional", "CreatedByProfessional")
+                    b.HasOne("InclusiON.Domain.Models.Professional", "CreatedByProfessional")
                         .WithMany("CreatedInvitations")
                         .HasForeignKey("CreatedByProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "ForPerson")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "ForPerson")
                         .WithMany()
                         .HasForeignKey("ForPersonId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.User", "UsedByUser")
+                    b.HasOne("InclusiON.Domain.Models.User", "UsedByUser")
                         .WithMany()
                         .HasForeignKey("UsedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -1984,25 +1984,25 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("UsedByUser");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Message", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Message", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.Message", "ParentMessage")
+                    b.HasOne("InclusiON.Domain.Models.Message", "ParentMessage")
                         .WithMany("Replies")
                         .HasForeignKey("ParentMessageId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.User", "Receiver")
+                    b.HasOne("InclusiON.Domain.Models.User", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "RelatedPerson")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "RelatedPerson")
                         .WithMany("RelatedMessages")
                         .HasForeignKey("RelatedPersonId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.User", "Sender")
+                    b.HasOne("InclusiON.Domain.Models.User", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2017,15 +2017,15 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.PersonRepresentative", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonRepresentative", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
                         .WithMany("PersonRepresentatives")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.FamilyRepresentative", "Representative")
+                    b.HasOne("InclusiON.Domain.Models.FamilyRepresentative", "Representative")
                         .WithMany("PersonRepresentatives")
                         .HasForeignKey("RepresentativeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2036,31 +2036,31 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Representative");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.PersonWithDisability", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonWithDisability", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.AutonomyLevel", "AutonomyLevel")
+                    b.HasOne("InclusiON.Domain.Models.AutonomyLevel", "AutonomyLevel")
                         .WithMany("PersonsWithDisability")
                         .HasForeignKey("AutonomyLevelId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.DisabilityType", "DisabilityType")
+                    b.HasOne("InclusiON.Domain.Models.DisabilityType", "DisabilityType")
                         .WithMany("PersonsWithDisability")
                         .HasForeignKey("DisabilityTypeId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.LoginMethod", "LoginMethod")
+                    b.HasOne("InclusiON.Domain.Models.LoginMethod", "LoginMethod")
                         .WithMany("PersonsWithDisability")
                         .HasForeignKey("LoginMethodId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.User", "SupervisorUser")
+                    b.HasOne("InclusiON.Domain.Models.User", "SupervisorUser")
                         .WithMany()
                         .HasForeignKey("SupervisorUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.User", "User")
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithOne("PersonWithDisability")
-                        .HasForeignKey("InclusiON.Entities.Models.PersonWithDisability", "UserId")
+                        .HasForeignKey("InclusiON.Domain.Models.PersonWithDisability", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -2075,26 +2075,26 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Professional", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Professional", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.User", "User")
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithOne("Professional")
-                        .HasForeignKey("InclusiON.Entities.Models.Professional", "UserId")
+                        .HasForeignKey("InclusiON.Domain.Models.Professional", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ProfessionalInstitution", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ProfessionalInstitution", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.EducationalInstitution", "Institution")
+                    b.HasOne("InclusiON.Domain.Models.EducationalInstitution", "Institution")
                         .WithMany("ProfessionalInstitutions")
                         .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.Professional", "Professional")
+                    b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
                         .WithMany("ProfessionalInstitutions")
                         .HasForeignKey("ProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2105,15 +2105,15 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Professional");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ProfessionalPerson", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ProfessionalPerson", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
                         .WithMany("ProfessionalPersons")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.Professional", "Professional")
+                    b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
                         .WithMany("ProfessionalPersons")
                         .HasForeignKey("ProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2124,9 +2124,9 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Professional");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.RefreshToken", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.RefreshToken", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.User", "User")
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2135,21 +2135,21 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Report", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Report", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
                         .WithMany("Reports")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.Professional", "Professional")
+                    b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
                         .WithMany("Reports")
                         .HasForeignKey("ProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.ReportType", "ReportType")
+                    b.HasOne("InclusiON.Domain.Models.ReportType", "ReportType")
                         .WithMany("Reports")
                         .HasForeignKey("ReportTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2162,14 +2162,14 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("ReportType");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.TrustedDevice", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.TrustedDevice", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.User", "AuthorizedByUser")
+                    b.HasOne("InclusiON.Domain.Models.User", "AuthorizedByUser")
                         .WithMany()
                         .HasForeignKey("AuthorizedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("InclusiON.Entities.Models.User", "User")
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithMany("TrustedDevices")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2191,7 +2191,7 @@ namespace InclusiON.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.User", null)
+                    b.HasOne("InclusiON.Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2200,7 +2200,7 @@ namespace InclusiON.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.User", null)
+                    b.HasOne("InclusiON.Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2215,7 +2215,7 @@ namespace InclusiON.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Entities.Models.User", null)
+                    b.HasOne("InclusiON.Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2224,59 +2224,59 @@ namespace InclusiON.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("InclusiON.Entities.Models.User", null)
+                    b.HasOne("InclusiON.Domain.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Activity", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Activity", b =>
                 {
                     b.Navigation("ActivityAssignments");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ActivityAssignment", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignment", b =>
                 {
                     b.Navigation("Responses");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ActivityCategory", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityCategory", b =>
                 {
                     b.Navigation("Activities");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.AutonomyLevel", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
                 {
                     b.Navigation("PersonsWithDisability");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.DisabilityType", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.DisabilityType", b =>
                 {
                     b.Navigation("PersonsWithDisability");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.EducationalInstitution", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.EducationalInstitution", b =>
                 {
                     b.Navigation("ProfessionalInstitutions");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.FamilyRepresentative", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.FamilyRepresentative", b =>
                 {
                     b.Navigation("PersonRepresentatives");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.LoginMethod", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.LoginMethod", b =>
                 {
                     b.Navigation("PersonsWithDisability");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Message", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Message", b =>
                 {
                     b.Navigation("Replies");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.PersonWithDisability", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonWithDisability", b =>
                 {
                     b.Navigation("AccessAudits");
 
@@ -2293,7 +2293,7 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Reports");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.Professional", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.Professional", b =>
                 {
                     b.Navigation("Activities");
 
@@ -2310,12 +2310,12 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Reports");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.ReportType", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.ReportType", b =>
                 {
                     b.Navigation("Reports");
                 });
 
-            modelBuilder.Entity("InclusiON.Entities.Models.User", b =>
+            modelBuilder.Entity("InclusiON.Domain.Models.User", b =>
                 {
                     b.Navigation("AccessAudits");
 

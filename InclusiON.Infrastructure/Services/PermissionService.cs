@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using InclusiON.ApplicationBusiness.Constants;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.Application.Constants;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Data;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Infrastructure.Services
 {

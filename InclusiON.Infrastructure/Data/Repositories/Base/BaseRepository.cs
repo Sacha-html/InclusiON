@@ -1,4 +1,4 @@
-﻿using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+﻿using InclusiON.Application.Interfaces.Infrastructure;
 using Microsoft.Data.SqlClient;
 using System.Data;
 

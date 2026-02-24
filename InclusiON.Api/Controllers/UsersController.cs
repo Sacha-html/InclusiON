@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
-using InclusiON.ApplicationBusiness.Interfaces.Common;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
-using InclusiON.ApplicationBusiness.UseCases.Users.Queries;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.UseCases.Users.Queries;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 

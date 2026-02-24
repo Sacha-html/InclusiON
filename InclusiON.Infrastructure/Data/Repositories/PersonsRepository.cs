@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using InclusiON.ApplicationBusiness.Interfaces.Repositories;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {

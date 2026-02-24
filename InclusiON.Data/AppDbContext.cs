@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Entities.Models;
-using InclusiON.Entities.Models.BaseEntities;
+using InclusiON.Domain.Models;
+using InclusiON.Domain.Models.BaseEntities;
 using System.Security.Claims;
 
 namespace InclusiON.Data
