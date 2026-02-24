@@ -32,6 +32,8 @@ namespace InclusiON.Data
         public DbSet<EducationalInstitution> EducationalInstitutions { get; set; }
         public DbSet<AutonomyLevel> AutonomyLevels { get; set; }
         public DbSet<LoginMethod> LoginMethods { get; set; }
+        public DbSet<SkillArea> SkillAreas { get; set; }
+        public DbSet<ActivityTemplateType> ActivityTemplateTypes { get; set; }
 
         // DbSets - Nivel 2 (Perfiles)
         public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -47,6 +49,10 @@ namespace InclusiON.Data
         public DbSet<PersonRepresentative> PersonRepresentatives { get; set; }
         public DbSet<Diagnosis> Diagnoses { get; set; }
         public DbSet<Activity> Activities { get; set; }
+        public DbSet<ActivityContent> ActivityContents { get; set; }
+        public DbSet<PersonRoadmap> PersonRoadmaps { get; set; }
+        public DbSet<PersonRoadmapArea> PersonRoadmapAreas { get; set; }
+        public DbSet<PersonRoadmapActivity> PersonRoadmapActivities { get; set; }
 
         // DbSets - Nivel 4 (Asignaciones)
         public DbSet<ActivityAssignment> ActivityAssignments { get; set; }

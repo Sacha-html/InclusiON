@@ -132,6 +132,9 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int?>("SkillAreaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -158,6 +161,8 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("ProfessionalId");
+
+                    b.HasIndex("SkillAreaId");
 
                     b.ToTable("Activities", (string)null);
                 });
@@ -318,6 +323,51 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("InclusiON.Entities.Models.ActivityContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContentJson")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(MAX)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("TemplateTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId")
+                        .IsUnique();
+
+                    b.HasIndex("TemplateTypeId");
+
+                    b.ToTable("ActivityContents", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Entities.Models.ActivityResponse", b =>
                 {
                     b.Property<int>("Id")
@@ -383,6 +433,80 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("AssignmentId");
 
                     b.ToTable("ActivityResponses", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.ActivityTemplateType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ComponentName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ContentSchema")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(MAX)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("HasAudio")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("SkillAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("UsesPictograms")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("SkillAreaId");
+
+                    b.ToTable("ActivityTemplateTypes", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.AutonomyLevel", b =>
@@ -1062,6 +1186,173 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("PersonRepresentatives", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmap", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedByProfessionalId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByProfessionalId");
+
+                    b.HasIndex("PersonId")
+                        .IsUnique();
+
+                    b.ToTable("PersonRoadmaps", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmapActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DifficultyLevel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsUnlocked")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("MaxAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonRoadmapAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SequenceOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ShowHints")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int?>("TimeLimitSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnlockThresholdPercent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(60);
+
+                    b.Property<DateTime?>("UnlockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("PersonRoadmapAreaId", "ActivityId")
+                        .IsUnique();
+
+                    b.HasIndex("PersonRoadmapAreaId", "IsUnlocked");
+
+                    b.HasIndex("PersonRoadmapAreaId", "SequenceOrder")
+                        .IsUnique();
+
+                    b.ToTable("PersonRoadmapActivities", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmapArea", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("PersonRoadmapId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkillAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SkillAreaId");
+
+                    b.HasIndex("PersonRoadmapId", "SkillAreaId")
+                        .IsUnique();
+
+                    b.ToTable("PersonRoadmapAreas", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Entities.Models.PersonWithDisability", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1550,6 +1841,61 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             Name = "Informe Anual"
                         });
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.SkillArea", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("SkillAreas", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.TrustedDevice", b =>
@@ -2221,9 +2567,16 @@ namespace InclusiON.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("InclusiON.Entities.Models.SkillArea", "SkillArea")
+                        .WithMany("Activities")
+                        .HasForeignKey("SkillAreaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Category");
 
                     b.Navigation("Professional");
+
+                    b.Navigation("SkillArea");
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.ActivityAssignment", b =>
@@ -2253,6 +2606,25 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("InclusiON.Entities.Models.ActivityContent", b =>
+                {
+                    b.HasOne("InclusiON.Entities.Models.Activity", "Activity")
+                        .WithOne("Content")
+                        .HasForeignKey("InclusiON.Entities.Models.ActivityContent", "ActivityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Entities.Models.ActivityTemplateType", "TemplateType")
+                        .WithMany("ActivityContents")
+                        .HasForeignKey("TemplateTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("TemplateType");
+                });
+
             modelBuilder.Entity("InclusiON.Entities.Models.ActivityResponse", b =>
                 {
                     b.HasOne("InclusiON.Entities.Models.ActivityAssignment", "Assignment")
@@ -2262,6 +2634,17 @@ namespace InclusiON.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.ActivityTemplateType", b =>
+                {
+                    b.HasOne("InclusiON.Entities.Models.SkillArea", "SkillArea")
+                        .WithMany("TemplateTypes")
+                        .HasForeignKey("SkillAreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SkillArea");
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.Diagnosis", b =>
@@ -2369,6 +2752,63 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Person");
 
                     b.Navigation("Representative");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmap", b =>
+                {
+                    b.HasOne("InclusiON.Entities.Models.Professional", "CreatedByProfessional")
+                        .WithMany()
+                        .HasForeignKey("CreatedByProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Entities.Models.PersonWithDisability", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByProfessional");
+
+                    b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmapActivity", b =>
+                {
+                    b.HasOne("InclusiON.Entities.Models.Activity", "Activity")
+                        .WithMany("RoadmapActivities")
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Entities.Models.PersonRoadmapArea", "PersonRoadmapArea")
+                        .WithMany("Activities")
+                        .HasForeignKey("PersonRoadmapAreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("PersonRoadmapArea");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmapArea", b =>
+                {
+                    b.HasOne("InclusiON.Entities.Models.PersonRoadmap", "PersonRoadmap")
+                        .WithMany("Areas")
+                        .HasForeignKey("PersonRoadmapId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Entities.Models.SkillArea", "SkillArea")
+                        .WithMany("RoadmapAreas")
+                        .HasForeignKey("SkillAreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PersonRoadmap");
+
+                    b.Navigation("SkillArea");
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.PersonWithDisability", b =>
@@ -2569,6 +3009,10 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Entities.Models.Activity", b =>
                 {
                     b.Navigation("ActivityAssignments");
+
+                    b.Navigation("Content");
+
+                    b.Navigation("RoadmapActivities");
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.ActivityAssignment", b =>
@@ -2579,6 +3023,11 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Entities.Models.ActivityCategory", b =>
                 {
                     b.Navigation("Activities");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.ActivityTemplateType", b =>
+                {
+                    b.Navigation("ActivityContents");
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.AutonomyLevel", b =>
@@ -2609,6 +3058,16 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Entities.Models.Message", b =>
                 {
                     b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmap", b =>
+                {
+                    b.Navigation("Areas");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.PersonRoadmapArea", b =>
+                {
+                    b.Navigation("Activities");
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.PersonWithDisability", b =>
@@ -2648,6 +3107,15 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Entities.Models.ReportType", b =>
                 {
                     b.Navigation("Reports");
+                });
+
+            modelBuilder.Entity("InclusiON.Entities.Models.SkillArea", b =>
+                {
+                    b.Navigation("Activities");
+
+                    b.Navigation("RoadmapAreas");
+
+                    b.Navigation("TemplateTypes");
                 });
 
             modelBuilder.Entity("InclusiON.Entities.Models.User", b =>
