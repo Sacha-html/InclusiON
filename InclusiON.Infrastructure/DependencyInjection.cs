@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
-using InclusiON.ApplicationBusiness.Interfaces.Repositories;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Infrastructure.Authentication;
 using InclusiON.Infrastructure.Configuration;
 using InclusiON.Infrastructure.Authorization;
@@ -13,7 +13,7 @@ using InclusiON.Infrastructure.Data.Factories;
 using InclusiON.Infrastructure.Data.Repositories;
 using InclusiON.Infrastructure.Services;
 using System.Text;
-using IConnectionFactory = InclusiON.ApplicationBusiness.Interfaces.Infrastructure.IConnectionFactory;
+using IConnectionFactory = InclusiON.Application.Interfaces.Infrastructure.IConnectionFactory;
 
 namespace InclusiON.Infrastructure
 {
@@ -42,7 +42,7 @@ namespace InclusiON.Infrastructure
 
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
-            services.AddScoped<InclusiON.ApplicationBusiness.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
+            services.AddScoped<InclusiON.Application.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
             services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();

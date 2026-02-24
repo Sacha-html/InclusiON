@@ -1,5 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Infrastructure;
 using System.Data;
 using System.Net;
 

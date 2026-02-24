@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InclusiON.ApplicationBusiness\InclusiON.ApplicationBusiness.csproj" />
+    <ProjectReference Include="..\InclusiON.Application\InclusiON.Application.csproj" />
     <ProjectReference Include="..\InclusiON.Data\InclusiON.Data.csproj" />
     <ProjectReference Include="..\InclusiON.Infrastructure\InclusiON.Infrastructure.csproj" />
   </ItemGroup>

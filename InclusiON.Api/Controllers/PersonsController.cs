@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
-using InclusiON.ApplicationBusiness.Interfaces.Common;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
-using InclusiON.ApplicationBusiness.UseCases.Persons.Commands;
-using InclusiON.ApplicationBusiness.UseCases.Persons.Queries;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.UseCases.Persons.Commands;
+using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;

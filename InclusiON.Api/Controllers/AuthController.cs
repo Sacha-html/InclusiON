@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using InclusiON.ApplicationBusiness.Interfaces.Common;
-using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
-using InclusiON.ApplicationBusiness.UseCases.Auth.Queries;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.UseCases.Auth.Commands;
+using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Requests.Auth;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;

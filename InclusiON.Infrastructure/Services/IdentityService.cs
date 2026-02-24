@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
-using InclusiON.Entities.Models;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Infrastructure.Services
 {

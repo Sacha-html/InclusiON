@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InclusiON.DTOs\InclusiON.DTOs.csproj" />
-    <ProjectReference Include="..\InclusiON.Entities\InclusiON.Entities.csproj" />
+    <ProjectReference Include="..\InclusiON.Domain\InclusiON.Domain.csproj" />
   </ItemGroup>
 
 </Project>

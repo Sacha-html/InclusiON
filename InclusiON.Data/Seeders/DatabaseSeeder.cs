@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Entities.Enums;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using System.Text.Json;
 
 namespace InclusiON.Data.Seeders

@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using InclusiON.ApplicationBusiness.Exceptions;
-using InclusiON.ApplicationBusiness.Interfaces.Repositories;
+using InclusiON.Application.Exceptions;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
