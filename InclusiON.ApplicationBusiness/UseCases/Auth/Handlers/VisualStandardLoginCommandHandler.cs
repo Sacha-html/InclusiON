@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
@@ -19,8 +18,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
     public class VisualStandardLoginCommandHandler : ICommandHandler<VisualStandardLoginCommand, ApiResponse<VisualLoginResponse>>
     {
         private readonly IVisualLoginRepository _repository;
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly IIdentityService _identityService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IPermissionService _permissionService;
@@ -32,8 +30,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
         public VisualStandardLoginCommandHandler(
             IVisualLoginRepository repository,
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
+            IIdentityService identityService,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
             IPermissionService permissionService,
@@ -42,8 +39,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             IUnitOfWork unitOfWork)
         {
             _repository = repository;
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _identityService = identityService;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
             _permissionService = permissionService;
@@ -72,9 +68,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 var user = person.User;
 
                 // Verificar si esta bloqueado
-                if (await _userManager.IsLockedOutAsync(user))
+                if (await _identityService.IsLockedOutAsync(user))
                 {
-                    var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                    var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
                     var secondsRemaining = lockoutEnd.HasValue
                         ? (int)(lockoutEnd.Value - DateTimeOffset.UtcNow).TotalSeconds
                         : 0;
@@ -89,20 +85,20 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                         });
                 }
 
-                // Verificar contrasena usando SignInManager
-                var signInResult = await _signInManager.CheckPasswordSignInAsync(
+                // Verificar contrasena
+                var signInStatus = await _identityService.CheckPasswordAsync(
                     user,
                     command.Password,
                     lockoutOnFailure: true);
 
-                if (!signInResult.Succeeded)
+                if (signInStatus != SignInStatus.Success)
                 {
-                    var failedCount = await _userManager.GetAccessFailedCountAsync(user);
+                    var failedCount = await _identityService.GetAccessFailedCountAsync(user);
                     var remaining = MaxFailedAttempts - failedCount;
 
-                    if (signInResult.IsLockedOut)
+                    if (signInStatus == SignInStatus.LockedOut)
                     {
-                        var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                        var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
                         var secondsRemaining = lockoutEnd.HasValue
                             ? (int)(lockoutEnd.Value - DateTimeOffset.UtcNow).TotalSeconds
                             : 0;
@@ -148,7 +144,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             var ipAddress = _httpContextService.GetClientIpAddress();
             var userAgent = _httpContextService.GetUserAgent();
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _identityService.GetRolesAsync(user);
             var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
             var tokenUserData = new TokenUserData
@@ -184,7 +180,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 user.LastLoginDate = DateTime.UtcNow;
                 user.LastLoginIpAddress = ipAddress;
                 user.LastLoginUserAgent = userAgent;
-                await _userManager.UpdateAsync(user);
+                await _identityService.UpdateUserAsync(user);
 
                 await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
 

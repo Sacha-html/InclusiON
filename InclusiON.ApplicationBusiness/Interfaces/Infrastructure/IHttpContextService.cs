@@ -19,5 +19,10 @@ namespace InclusiON.ApplicationBusiness.Interfaces.Infrastructure
         /// Extrae el nombre del navegador del User-Agent.
         /// </summary>
         string? ParseBrowserFromUserAgent(string? userAgent);
+
+        /// <summary>
+        /// Obtiene el ID del usuario autenticado a partir de los claims del token JWT.
+        /// </summary>
+        Guid? GetCurrentUserId();
     }
 }

@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
 using InclusiON.DTOs.Auth;
 using InclusiON.DTOs.Common;
@@ -13,8 +13,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 {
     public class LoginCommandHandler : ICommandHandler<LoginCommand, ApiResponse<LoginResponse>>
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signinManager;
+        private readonly IIdentityService _identityService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IPermissionService _permissionService;
@@ -23,8 +22,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly IUnitOfWork _unitOfWork;
 
         public LoginCommandHandler(
-            UserManager<User> userManager,
-            SignInManager<User> signinManager,
+            IIdentityService identityService,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
             IPermissionService permissionService,
@@ -32,8 +30,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             ILogger<LoginCommandHandler> logger,
             IUnitOfWork unitOfWork)
         {
-            _userManager = userManager;
-            _signinManager = signinManager;
+            _identityService = identityService;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
             _permissionService = permissionService;
@@ -48,7 +45,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 
             try
             {
-                var user = await _userManager.FindByEmailAsync(command.Email.ToLower().Trim());
+                var user = await _identityService.FindByEmailAsync(command.Email.ToLower().Trim());
 
                 if (user is null)
                 {
@@ -65,9 +62,9 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 }
 
                 // Verificar bloqueo antes de intentar login (feedback inmediato al usuario)
-                if (await _userManager.IsLockedOutAsync(user))
+                if (await _identityService.IsLockedOutAsync(user))
                 {
-                    var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                    var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
                     var minutesRemaining = lockoutEnd.HasValue
                         ? (int)Math.Ceiling((lockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes)
                         : 0;
@@ -76,17 +73,17 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     return ApiResponse<LoginResponse>.AccountLocked(minutesRemaining);
                 }
 
-                var signInResult = await _signinManager
-                    .CheckPasswordSignInAsync(user, command.Password, lockoutOnFailure: true);
+                var signInStatus = await _identityService
+                    .CheckPasswordAsync(user, command.Password, lockoutOnFailure: true);
 
-                if (!signInResult.Succeeded)
+                if (signInStatus != SignInStatus.Success)
                 {
-                    if (signInResult.IsLockedOut)
+                    if (signInStatus == SignInStatus.LockedOut)
                     {
                         return ApiResponse<LoginResponse>.AccountLocked();
                     }
 
-                    if (signInResult.RequiresTwoFactor)
+                    if (signInStatus == SignInStatus.RequiresTwoFactor)
                     {
                         return ApiResponse<LoginResponse>.ErrorResult(
                             ErrorCode.TwoFactorRequired,
@@ -101,7 +98,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 var ipAddress = _httpContextService.GetClientIpAddress();
                 var userAgent = _httpContextService.GetUserAgent();
 
-                var roles = await _userManager.GetRolesAsync(user);
+                var roles = await _identityService.GetRolesAsync(user);
                 var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
                 var tokenUserData = new TokenUserData
@@ -147,7 +144,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                     user.LastLoginIpAddress = ipAddress;
                     user.LastLoginUserAgent = userAgent;
 
-                    await _userManager.UpdateAsync(user);
+                    await _identityService.UpdateUserAsync(user);
                     await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
                 }, cancellationToken);
 

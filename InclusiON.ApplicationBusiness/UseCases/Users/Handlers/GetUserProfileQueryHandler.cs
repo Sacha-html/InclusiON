@@ -1,26 +1,25 @@
-using Microsoft.AspNetCore.Identity;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.ApplicationBusiness.UseCases.Users.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
-using InclusiON.Entities.Models;
 
 namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
 {
     public class GetUserProfileQueryHandler : IQueryHandler<GetUserProfileQuery, ApiResponse<UserProfileResponse>>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IIdentityService _identityService;
         private readonly IRefreshTokensRepository _refreshTokenRepository;
         private readonly IPermissionService _permissionService;
 
         public GetUserProfileQueryHandler(
-            UserManager<User> userManager,
+            IIdentityService identityService,
             IRefreshTokensRepository refreshTokenRepository,
             IPermissionService permissionService)
         {
-            _userManager = userManager;
+            _identityService = identityService;
             _refreshTokenRepository = refreshTokenRepository;
             _permissionService = permissionService;
         }
@@ -29,7 +28,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
         {
             try
             {
-                var user = await _userManager.FindByIdAsync(query.UserId.ToString());
+                var user = await _identityService.FindByIdAsync(query.UserId);
 
                 if (user is null)
                 {
@@ -45,7 +44,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Users.Handlers
                         "Cuenta de usuario desactivada");
                 }
 
-                var roles = await _userManager.GetRolesAsync(user);
+                var roles = await _identityService.GetRolesAsync(user);
                 var primaryRole = roles.FirstOrDefault() ?? "User";
 
                 var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);

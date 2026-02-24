@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.ApplicationBusiness.Interfaces.Repositories;
 using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
 using InclusiON.DTOs.Auth;
 using InclusiON.DTOs.Common;
@@ -13,7 +13,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
 {
     public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, ApiResponse<LoginResponse>>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IIdentityService _identityService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IPermissionService _permissionService;
@@ -22,7 +22,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly IUnitOfWork _unitOfWork;
 
         public RefreshTokenCommandHandler(
-            UserManager<User> userManager,
+            IIdentityService identityService,
             IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
             IPermissionService permissionService,
@@ -30,7 +30,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             ILogger<RefreshTokenCommandHandler> logger,
             IUnitOfWork unitOfWork)
         {
-            _userManager = userManager;
+            _identityService = identityService;
             _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
             _permissionService = permissionService;
@@ -79,7 +79,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                         "Token ha expirado");
                 }
 
-                var user = await _userManager.FindByIdAsync(storedToken.UserId.ToString());
+                var user = await _identityService.FindByIdAsync(storedToken.UserId);
 
                 if (user is null)
                 {
@@ -102,7 +102,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 var ipAddress = _httpContextService.GetClientIpAddress();
                 var userAgent = _httpContextService.GetUserAgent();
 
-                var roles = await _userManager.GetRolesAsync(user);
+                var roles = await _identityService.GetRolesAsync(user);
                 var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
                 var tokenUserData = new TokenUserData

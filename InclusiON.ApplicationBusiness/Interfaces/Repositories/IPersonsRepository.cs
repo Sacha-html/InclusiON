@@ -23,9 +23,9 @@ namespace InclusiON.ApplicationBusiness.Interfaces.Repositories
         Task<bool> ExistsDocumentAsync(string documentNumber, Guid? excludePersonId = null, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Crea una nueva persona con su usuario asociado.
+        /// Crea una nueva persona en la base de datos.
         /// </summary>
-        Task<PersonWithDisability> CreateAsync(PersonWithDisability person, User user, string password, CancellationToken cancellationToken = default);
+        Task<PersonWithDisability> CreateAsync(PersonWithDisability person, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Actualiza una persona existente.
