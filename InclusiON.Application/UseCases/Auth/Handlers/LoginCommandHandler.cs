@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -51,14 +52,14 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.InvalidCredentials,
-                        "Email o contrasena invalidos");
+                        ErrorMessages.InvalidCredentials);
                 }
 
                 if (!user.IsActive)
                 {
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.AccountInactive,
-                        "Usuario inactivo. Contacte a soporte.");
+                        ErrorMessages.AccountInactive);
                 }
 
                 // Verificar bloqueo antes de intentar login (feedback inmediato al usuario)
@@ -87,12 +88,12 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     {
                         return ApiResponse<LoginResponse>.ErrorResult(
                             ErrorCode.TwoFactorRequired,
-                            "Se requiere autenticacion de dos factores");
+                            ErrorMessages.TwoFactorRequired);
                     }
 
                     return ApiResponse<LoginResponse>.ErrorResult(
                         ErrorCode.InvalidCredentials,
-                        "Email o contrasena invalidos");
+                        ErrorMessages.InvalidCredentials);
                 }
 
                 var ipAddress = _httpContextService.GetClientIpAddress();
@@ -167,14 +168,14 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     }
                 };
 
-                return ApiResponse<LoginResponse>.SuccessResult(response, "Login succesfull");
+                return ApiResponse<LoginResponse>.SuccessResult(response, SuccessMessages.LoginSuccessful);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en login para: {Email}", command.Email);
                 return ApiResponse<LoginResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al procesar login");
+                    ErrorMessages.InternalErrorLogin);
             }
         }
     }

@@ -6,6 +6,7 @@ using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Requests.Auth;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
 {
@@ -28,7 +29,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<UserResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<UserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new RegisterUserCommand(
@@ -64,7 +65,7 @@ namespace InclusiON.Api.Controllers
                     .Select(e => e.ErrorMessage)
                     .ToList();
 
-                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new LoginCommand(request.Email, request.Password);
@@ -111,7 +112,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<IdentifyUserResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<IdentifyUserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var query = new IdentifyUserQuery(request.Identifier, request.DeviceId, request.UserType);
@@ -137,7 +138,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new VisualStandardLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
@@ -168,7 +169,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new PinLoginCommand(request.UserId, request.Pin, request.DeviceId, request.RememberDevice);
@@ -199,7 +200,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new AssistedLoginCommand(request.UserId, request.SupervisorEmail, request.SupervisorPassword, request.DeviceId);
@@ -232,7 +233,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new RefreshTokenCommand(request.RefreshToken);

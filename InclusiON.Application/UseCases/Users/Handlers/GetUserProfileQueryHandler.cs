@@ -5,6 +5,7 @@ using InclusiON.Application.UseCases.Users.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Users.Handlers
 {
@@ -34,14 +35,14 @@ namespace InclusiON.Application.UseCases.Users.Handlers
                 {
                     return ApiResponse<UserProfileResponse>.ErrorResult(
                         ErrorCode.UserNotFound,
-                        "Usuario no encontrado");
+                        ErrorMessages.UserNotFound);
                 }
 
                 if (!user.IsActive)
                 {
                     return ApiResponse<UserProfileResponse>.ErrorResult(
                         ErrorCode.AccountInactive,
-                        "Cuenta de usuario desactivada");
+                        ErrorMessages.AccountDeactivated);
                 }
 
                 var roles = await _identityService.GetRolesAsync(user);
@@ -73,7 +74,7 @@ namespace InclusiON.Application.UseCases.Users.Handlers
             {
                 return ApiResponse<UserProfileResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al obtener perfil de usuario");
+                    ErrorMessages.InternalErrorGetProfile);
             }
         }
     }

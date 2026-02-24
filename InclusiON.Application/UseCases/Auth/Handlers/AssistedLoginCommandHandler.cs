@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -62,7 +63,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<VisualLoginResponse>.ErrorResult(
                         ErrorCode.UserNotFound,
-                        "Usuario no encontrado");
+                        ErrorMessages.UserNotFound);
                 }
 
                 // 2. Buscar al supervisor por email
@@ -74,7 +75,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         new VisualLoginResponse
                         {
                             Success = false,
-                            ErrorMessage = "Credenciales del supervisor invalidas"
+                            ErrorMessage = ErrorMessages.SupervisorInvalidCredentials
                         });
                 }
 
@@ -91,7 +92,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         new VisualLoginResponse
                         {
                             Success = false,
-                            ErrorMessage = "No tienes autorizacion para asistir a este usuario"
+                            ErrorMessage = ErrorMessages.SupervisorNotAuthorized
                         });
                 }
 
@@ -110,7 +111,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                             {
                                 Success = false,
                                 IsLocked = true,
-                                ErrorMessage = "Cuenta del supervisor bloqueada por intentos fallidos"
+                                ErrorMessage = ErrorMessages.SupervisorAccountLocked
                             });
                     }
 
@@ -118,7 +119,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         new VisualLoginResponse
                         {
                             Success = false,
-                            ErrorMessage = "Credenciales del supervisor invalidas"
+                            ErrorMessage = ErrorMessages.SupervisorInvalidCredentials
                         });
                 }
 
@@ -135,7 +136,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 _logger.LogError(ex, "Error en login asistido para usuario: {UserId}", command.UserId);
                 return ApiResponse<VisualLoginResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al procesar login");
+                    ErrorMessages.InternalErrorLogin);
             }
         }
 
@@ -263,7 +264,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         }
                     }
                 },
-                "Login asistido exitoso");
+                SuccessMessages.AssistedLoginSuccessful);
         }
     }
 }

@@ -7,6 +7,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {
@@ -44,7 +45,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     {
                         return ApiResponse<PersonResponse>.Conflict(
                             ErrorCode.DocumentAlreadyExists,
-                            "Ya existe una persona con este numero de documento");
+                            ErrorMessages.DocumentAlreadyExists);
                     }
                 }
 
@@ -110,7 +111,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     var (succeeded, errors) = await _identityService.CreateUserAsync(user, password);
                     if (!succeeded)
                     {
-                        throw new InvalidOperationException($"Error al crear usuario: {string.Join(", ", errors)}");
+                        throw new InvalidOperationException(string.Format(ErrorMessages.UserCreationError, string.Join(", ", errors)));
                     }
 
                     await _identityService.AddToRoleAsync(user, "Person");
@@ -122,9 +123,9 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 _logger.LogInformation("Persona creada: {PersonId}, Usuario: {UserId}", person.Id, user.Id);
 
                 var response = MapToResponse(person);
-                return ApiResponse<PersonResponse>.SuccessResult(response, "Persona creada exitosamente");
+                return ApiResponse<PersonResponse>.SuccessResult(response, SuccessMessages.PersonCreated);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("Error al crear usuario"))
+            catch (InvalidOperationException ex) when (ex.Message.Contains(ErrorMessages.UserCreationError.Split('{')[0]))
             {
                 _logger.LogWarning(ex, "Error de validacion al crear persona");
                 return ApiResponse<PersonResponse>.ErrorResult(
@@ -136,7 +137,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 _logger.LogError(ex, "Error al crear persona: {FirstName} {LastName}", command.FirstName, command.LastName);
                 return ApiResponse<PersonResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al crear persona");
+                    ErrorMessages.InternalErrorCreatePerson);
             }
         }
 

@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
 {
@@ -62,7 +63,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     return ApiResponse<VisualLoginResponse>.ErrorResult(
                         ErrorCode.UserNotFound,
-                        "Usuario no encontrado");
+                        ErrorMessages.UserNotFound);
                 }
 
                 var user = person.User;
@@ -81,7 +82,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                             Success = false,
                             IsLocked = true,
                             LockoutSecondsRemaining = secondsRemaining,
-                            ErrorMessage = "Cuenta bloqueada por intentos fallidos"
+                            ErrorMessage = ErrorMessages.AccountLocked
                         });
                 }
 
@@ -109,7 +110,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                                 Success = false,
                                 IsLocked = true,
                                 LockoutSecondsRemaining = secondsRemaining,
-                                ErrorMessage = "Cuenta bloqueada por intentos fallidos"
+                                ErrorMessage = ErrorMessages.AccountLocked
                             });
                     }
 
@@ -118,7 +119,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         {
                             Success = false,
                             RemainingAttempts = remaining > 0 ? remaining : 0,
-                            ErrorMessage = "Contrasena incorrecta"
+                            ErrorMessage = ErrorMessages.PasswordIncorrect
                         });
                 }
 
@@ -130,7 +131,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 _logger.LogError(ex, "Error en login visual estandar para usuario: {UserId}", command.UserId);
                 return ApiResponse<VisualLoginResponse>.ErrorResult(
                     ErrorCode.InternalError,
-                    "Error interno al procesar login");
+                    ErrorMessages.InternalErrorLogin);
             }
         }
 
@@ -226,7 +227,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         }
                     }
                 },
-                "Login exitoso");
+                SuccessMessages.VisualLoginSuccessful);
         }
     }
 }
