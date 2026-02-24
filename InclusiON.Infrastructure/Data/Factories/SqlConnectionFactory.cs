@@ -1,7 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using InclusiON.Application.Interfaces.Infrastructure;
 using System.Data;
-using System.Net;
 
 namespace InclusiON.Infrastructure.Data.Factories
 {

@@ -13,7 +13,6 @@ using InclusiON.Infrastructure.Data.Factories;
 using InclusiON.Infrastructure.Data.Repositories;
 using InclusiON.Infrastructure.Services;
 using System.Text;
-using IConnectionFactory = InclusiON.Application.Interfaces.Infrastructure.IConnectionFactory;
 
 namespace InclusiON.Infrastructure
 {
@@ -38,7 +37,7 @@ namespace InclusiON.Infrastructure
                 throw new InvalidOperationException("Connection string is missing");
             }
 
-            services.AddScoped<IConnectionFactory>(provider => new SqlConnectionFactory(connectionString));
+            services.AddScoped<IConnectionFactory>(_ => new SqlConnectionFactory(connectionString));
 
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -46,12 +45,16 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IRawDbExecutor, RawDbExecutor>();
             services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped<IVisualLoginRepository, VisualLoginRepository>();
             services.AddScoped<IPersonsRepository, PersonsRepository>();
 
             // Servicio de contexto HTTP (IP, User-Agent, Browser)
             services.AddScoped<IHttpContextService, HttpContextService>();
+
+            // Servicio de sesion de login (genera tokens, revoca sesiones, actualiza metadata)
+            services.AddScoped<ILoginSessionService, LoginSessionService>();
 
             // Servicio de roles con cache por request (evita N+1)
             services.AddScoped<IUserRoleService, UserRoleService>();
