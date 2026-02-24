@@ -125,7 +125,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 var response = MapToResponse(person);
                 return ApiResponse<PersonResponse>.SuccessResult(response, SuccessMessages.PersonCreated);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains(ErrorMessages.UserCreationError.Split('{')[0]))
+            catch (InvalidOperationException ex) when (ex.Message.StartsWith(ErrorMessages.UserCreationError.Replace("{0}", "")))
             {
                 _logger.LogWarning(ex, "Error de validacion al crear persona");
                 return ApiResponse<PersonResponse>.ErrorResult(
