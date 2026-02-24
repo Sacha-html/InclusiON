@@ -3,11 +3,9 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Auth.Commands;
-using InclusiON.DTOs.Auth;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
-using InclusiON.Domain.Models;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
@@ -15,29 +13,20 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
     public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, ApiResponse<LoginResponse>>
     {
         private readonly IIdentityService _identityService;
-        private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
-        private readonly IPermissionService _permissionService;
-        private readonly IHttpContextService _httpContextService;
+        private readonly ILoginSessionService _loginSessionService;
         private readonly ILogger<RefreshTokenCommandHandler> _logger;
-        private readonly IUnitOfWork _unitOfWork;
 
         public RefreshTokenCommandHandler(
             IIdentityService identityService,
-            IJwtTokenService jwtTokenService,
             IRefreshTokensRepository refreshTokensRepository,
-            IPermissionService permissionService,
-            IHttpContextService httpContextService,
-            ILogger<RefreshTokenCommandHandler> logger,
-            IUnitOfWork unitOfWork)
+            ILoginSessionService loginSessionService,
+            ILogger<RefreshTokenCommandHandler> logger)
         {
             _identityService = identityService;
-            _jwtTokenService = jwtTokenService;
             _refreshTokensRepository = refreshTokensRepository;
-            _permissionService = permissionService;
-            _httpContextService = httpContextService;
+            _loginSessionService = loginSessionService;
             _logger = logger;
-            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<LoginResponse>> HandleAsync(RefreshTokenCommand command, CancellationToken cancellationToken)
@@ -100,70 +89,17 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         ErrorMessages.UserInactive);
                 }
 
-                var ipAddress = _httpContextService.GetClientIpAddress();
-                var userAgent = _httpContextService.GetUserAgent();
-
-                var roles = await _identityService.GetRolesAsync(user);
-                var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
-
-                var tokenUserData = new TokenUserData
-                {
-                    Id = user.Id,
-                    Email = user.Email!,
-                    Name = user.Name!,
-                    Role = roles.FirstOrDefault() ?? "Customer",
-                    IsActive = user.IsActive,
-                    Permissions = permissions
-                };
-
-                var newAccessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
-                var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
-
-                // Calculate remaining days from original token expiry
                 var remainingDays = (storedToken.ExpiresAt - DateTime.UtcNow).TotalDays;
                 var refreshTokenExpiryDays = Math.Max(1, (int)Math.Ceiling(remainingDays));
 
-                var refreshTokenEntity = new RefreshToken
-                {
-                    Id = Guid.NewGuid(),
-                    Token = newRefreshToken,
-                    CreatedAt = DateTime.UtcNow,
-                    ExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays),
-                    UserId = user.Id,
-                    IsActive = true,
-                    CreatedByIp = ipAddress,
-                    UserAgent = userAgent
-                };
-
-                // Execute transactional operations
-                await _unitOfWork.ExecuteInTransactionAsync(async ct =>
-                {
-                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Replaced by new token", ct);
-                    await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
-                }, cancellationToken);
-
                 _logger.LogDebug("Successfully refreshed token for user {UserId}", user.Id);
 
-                var response = new LoginResponse
-                {
-                    AccessToken = newAccessToken,
-                    RefreshToken = newRefreshToken,
-                    ExpiresAt = _jwtTokenService.GetTokenExpiration(newAccessToken),
-                    User = new UserResponse
-                    {
-                        Id = user.Id,
-                        Name = user.Name!,
-                        Surname = user.Surname,
-                        Email = user.Email!,
-                        PhoneNumber = user.PhoneNumber,
-                        Role = roles.FirstOrDefault() ?? "User",
-                        CreatedAt = user.CreatedAt,
-                        IsActive = user.IsActive,
-                        LastLoginDate = user.LastLoginDate
-                    }
-                };
-
-                return ApiResponse<LoginResponse>.SuccessResult(response, SuccessMessages.TokenRefreshed);
+                return await _loginSessionService.CreateLoginSessionAsync(
+                    user,
+                    refreshTokenExpiryDays,
+                    "Replaced by new token",
+                    SuccessMessages.TokenRefreshed,
+                    cancellationToken);
             }
             catch (Exception ex)
             {
