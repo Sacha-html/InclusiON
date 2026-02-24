@@ -41,9 +41,6 @@ namespace InclusiON.Data
             services.AddScoped<SignInManager<User>>();
             services.AddScoped<IUserClaimsPrincipalFactory<User>, UserClaimsPrincipalFactory<User>>();
 
-            // Register DbContext as DbContext for transaction support in handlers
-            services.AddScoped<DbContext>(sp => sp.GetRequiredService<AppDbContext>());
-
             return services;
         }
     }

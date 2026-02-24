@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
@@ -28,7 +27,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly IPermissionService _permissionService;
         private readonly IHttpContextService _httpContextService;
         private readonly ILogger<AssistedLoginCommandHandler> _logger;
-        private readonly DbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
         public AssistedLoginCommandHandler(
             IVisualLoginRepository repository,
@@ -39,7 +38,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             IPermissionService permissionService,
             IHttpContextService httpContextService,
             ILogger<AssistedLoginCommandHandler> logger,
-            DbContext context)
+            IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _userManager = userManager;
@@ -49,7 +48,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             _permissionService = permissionService;
             _httpContextService = httpContextService;
             _logger = logger;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<VisualLoginResponse>> HandleAsync(
@@ -225,30 +224,18 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             };
 
             // Execute transactional operations
-            var strategy = _context.Database.CreateExecutionStrategy();
-            await strategy.ExecuteAsync(async () =>
+            await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-                try
-                {
-                    // Revocar tokens anteriores de la persona
-                    await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login asistido");
+                // Revocar tokens anteriores de la persona
+                await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, "Nuevo login asistido");
 
-                    user.LastLoginDate = DateTime.UtcNow;
-                    user.LastLoginIpAddress = ipAddress;
-                    user.LastLoginUserAgent = userAgent;
-                    await _userManager.UpdateAsync(user);
+                user.LastLoginDate = DateTime.UtcNow;
+                user.LastLoginIpAddress = ipAddress;
+                user.LastLoginUserAgent = userAgent;
+                await _userManager.UpdateAsync(user);
 
-                    await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
-
-                    await transaction.CommitAsync(cancellationToken);
-                }
-                catch
-                {
-                    await transaction.RollbackAsync(cancellationToken);
-                    throw;
-                }
-            });
+                await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+            }, cancellationToken);
 
             var displayName = $"{person.FirstName} {person.LastName}".Trim();
 

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.ApplicationBusiness.Interfaces.Common;
 using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
@@ -20,7 +19,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
         private readonly IPermissionService _permissionService;
         private readonly IHttpContextService _httpContextService;
         private readonly ILogger<RefreshTokenCommandHandler> _logger;
-        private readonly DbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
         public RefreshTokenCommandHandler(
             UserManager<User> userManager,
@@ -29,7 +28,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             IPermissionService permissionService,
             IHttpContextService httpContextService,
             ILogger<RefreshTokenCommandHandler> logger,
-            DbContext context)
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
@@ -37,7 +36,7 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
             _permissionService = permissionService;
             _httpContextService = httpContextService;
             _logger = logger;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<LoginResponse>> HandleAsync(RefreshTokenCommand command, CancellationToken cancellationToken)
@@ -136,23 +135,11 @@ namespace InclusiON.ApplicationBusiness.UseCases.Auth.Handlers
                 };
 
                 // Execute transactional operations
-                var strategy = _context.Database.CreateExecutionStrategy();
-                await strategy.ExecuteAsync(async () =>
+                await _unitOfWork.ExecuteInTransactionAsync(async ct =>
                 {
-                    using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-                    try
-                    {
-                        await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Replaced by new token", cancellationToken);
-                        await _refreshTokensRepository.CreateAsync(refreshTokenEntity, cancellationToken);
-
-                        await transaction.CommitAsync(cancellationToken);
-                    }
-                    catch
-                    {
-                        await transaction.RollbackAsync(cancellationToken);
-                        throw;
-                    }
-                });
+                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Replaced by new token", ct);
+                    await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+                }, cancellationToken);
 
                 _logger.LogDebug("Successfully refreshed token for user {UserId}", user.Id);
 

@@ -13,5 +13,6 @@ namespace InclusiON.ApplicationBusiness.Interfaces.Infrastructure
         IDbTransaction? GetCurrentTransaction();
         bool HasActiveTransaction { get; }
         Task<TransactionScope> BeginTransactionScopeAsync(CancellationToken cancellationToken = default);
+        Task ExecuteInTransactionAsync(Func<CancellationToken, Task> operation, CancellationToken cancellationToken = default);
     }
 }
