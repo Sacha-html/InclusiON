@@ -12,8 +12,7 @@ namespace InclusiON.Infrastructure.Services
     public class LoginSessionService : ILoginSessionService
     {
         private readonly IIdentityService _identityService;
-        private readonly IJwtTokenService _jwtTokenService;
-        private readonly IRefreshTokensRepository _refreshTokensRepository;
+        private readonly TokenServices _tokenServices;
         private readonly IPermissionService _permissionService;
         private readonly IHttpContextService _httpContextService;
         private readonly IVisualLoginRepository _visualLoginRepository;
@@ -22,8 +21,7 @@ namespace InclusiON.Infrastructure.Services
 
         public LoginSessionService(
             IIdentityService identityService,
-            IJwtTokenService jwtTokenService,
-            IRefreshTokensRepository refreshTokensRepository,
+            TokenServices tokenServices,
             IPermissionService permissionService,
             IHttpContextService httpContextService,
             IVisualLoginRepository visualLoginRepository,
@@ -31,8 +29,7 @@ namespace InclusiON.Infrastructure.Services
             ILogger<LoginSessionService> logger)
         {
             _identityService = identityService;
-            _jwtTokenService = jwtTokenService;
-            _refreshTokensRepository = refreshTokensRepository;
+            _tokenServices = tokenServices;
             _permissionService = permissionService;
             _httpContextService = httpContextService;
             _visualLoginRepository = visualLoginRepository;
@@ -63,8 +60,8 @@ namespace InclusiON.Infrastructure.Services
                 Permissions = permissions
             };
 
-            var accessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
-            var refreshToken = _jwtTokenService.GenerateRefreshToken();
+            var accessToken = _tokenServices.JwtTokenService.GenerateAccessToken(tokenUserData);
+            var refreshToken = _tokenServices.JwtTokenService.GenerateRefreshToken();
 
             var refreshTokenEntity = new RefreshToken
             {
@@ -80,7 +77,7 @@ namespace InclusiON.Infrastructure.Services
 
             await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                var revokedCount = await _refreshTokensRepository
+                var revokedCount = await _tokenServices.RefreshTokensRepository
                     .RevokeAllUserTokensAsync(user.Id, revokeReason);
 
                 if (revokedCount > 0)
@@ -93,14 +90,14 @@ namespace InclusiON.Infrastructure.Services
                 user.LastLoginUserAgent = userAgent;
 
                 await _identityService.UpdateUserAsync(user);
-                await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+                await _tokenServices.RefreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
             }, cancellationToken);
 
             var response = new LoginResponse
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = _jwtTokenService.GetTokenExpiration(accessToken),
+                ExpiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken),
                 User = new UserResponse
                 {
                     Id = user.Id,
@@ -144,8 +141,8 @@ namespace InclusiON.Infrastructure.Services
                 Permissions = permissions
             };
 
-            var accessToken = _jwtTokenService.GenerateAccessToken(tokenUserData);
-            var refreshToken = _jwtTokenService.GenerateRefreshToken();
+            var accessToken = _tokenServices.JwtTokenService.GenerateAccessToken(tokenUserData);
+            var refreshToken = _tokenServices.JwtTokenService.GenerateRefreshToken();
 
             var refreshTokenEntity = new RefreshToken
             {
@@ -161,14 +158,14 @@ namespace InclusiON.Infrastructure.Services
 
             await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
-                await _refreshTokensRepository.RevokeAllUserTokensAsync(user.Id, revokeReason);
+                await _tokenServices.RefreshTokensRepository.RevokeAllUserTokensAsync(user.Id, revokeReason);
 
                 user.LastLoginDate = DateTime.UtcNow;
                 user.LastLoginIpAddress = ipAddress;
                 user.LastLoginUserAgent = userAgent;
                 await _identityService.UpdateUserAsync(user);
 
-                await _refreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+                await _tokenServices.RefreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
 
                 if (rememberDevice && !string.IsNullOrEmpty(deviceId))
                 {
@@ -194,7 +191,7 @@ namespace InclusiON.Infrastructure.Services
                     Success = true,
                     AccessToken = accessToken,
                     RefreshToken = refreshToken,
-                    ExpiresAt = _jwtTokenService.GetTokenExpiration(accessToken),
+                    ExpiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken),
                     User = new VisualLoginUserInfo
                     {
                         Id = user.Id,
