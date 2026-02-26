@@ -43,6 +43,7 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<InclusiON.Application.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
             services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
+            services.AddScoped<TokenServices>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRawDbExecutor, RawDbExecutor>();
