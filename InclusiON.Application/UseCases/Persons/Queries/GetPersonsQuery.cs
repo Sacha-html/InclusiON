@@ -1,3 +1,5 @@
+using InclusiON.DTOs.Common;
+
 namespace InclusiON.Application.UseCases.Persons.Queries
 {
     public record GetPersonsQuery(
@@ -7,7 +9,7 @@ namespace InclusiON.Application.UseCases.Persons.Queries
         int? DisabilityTypeId,
         int? AutonomyLevelId,
         bool? IsActive,
-        string? SortBy,
+        SortField? SortBy,
         string SortDirection
     );
 }
