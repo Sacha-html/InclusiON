@@ -91,6 +91,7 @@ namespace InclusiON.Infrastructure.Services
 
                 await _identityService.UpdateUserAsync(user);
                 await _tokenServices.RefreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+                await _unitOfWork.SaveChangesAsync(ct);
             }, cancellationToken);
 
             var response = new LoginResponse
@@ -181,6 +182,8 @@ namespace InclusiON.Infrastructure.Services
                     };
                     await _visualLoginRepository.RegisterTrustedDeviceAsync(device, ct);
                 }
+
+                await _unitOfWork.SaveChangesAsync(ct);
             }, cancellationToken);
 
             var displayName = $"{person.FirstName} {person.LastName}".Trim();
