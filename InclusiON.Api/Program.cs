@@ -67,6 +67,10 @@ builder.Services.AddSwaggerGen(p =>
             Array.Empty<string>()
         }
     });
+
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    p.IncludeXmlComments(xmlPath);
 });
 
 builder.Services.AddCors(options =>

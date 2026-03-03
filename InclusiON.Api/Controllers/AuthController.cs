@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.UseCases.Auth.Commands;
@@ -10,11 +10,17 @@ using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
 {
+    /// <summary>
+    /// Controlador de autenticacion y registro de usuarios.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
     public class AuthController : ControllerBase
     {
+        /// <summary>
+        /// Registra un nuevo usuario en el sistema.
+        /// </summary>
         [HttpPost("register")]
         [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status400BadRequest)]
@@ -48,9 +54,12 @@ namespace InclusiON.Api.Controllers
             return Created($"api/auth/profile", result);
         }
 
-
+        /// <summary>
+        /// Inicia sesion con email y contrasena.
+        /// </summary>
         [HttpPost("login")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<LoginResponse>>> Login(
             [FromBody] LoginRequest request,
@@ -126,6 +135,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("login/visual-standard")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginVisualStandard(
             [FromBody] VisualStandardLoginRequest request,
@@ -157,6 +167,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("login/pin")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginWithPin(
             [FromBody] PinLoginRequest request,
@@ -188,6 +199,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("login/assisted")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginAssisted(
             [FromBody] AssistedLoginRequest request,
@@ -221,6 +233,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("refresh")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken(
             [FromBody] RefreshTokenRequest request,
