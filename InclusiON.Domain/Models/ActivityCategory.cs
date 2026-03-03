@@ -6,7 +6,7 @@ namespace InclusiON.Domain.Models
     /// Catalogo de categorias de actividades.
     /// Agrupa las actividades por area de desarrollo o habilidad.
     /// </summary>
-    public class ActivityCategory : NameableEntity
+    public class ActivityCategory : NameableEntity, IActivatable
     {
         /// <summary>
         /// Descripcion de la categoria y su objetivo.
