@@ -29,73 +29,63 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
+            var user = await _identityService.FindByEmailAsync(command.Email.ToLower().Trim());
+
+            if (user is null)
             {
-                var user = await _identityService.FindByEmailAsync(command.Email.ToLower().Trim());
-
-                if (user is null)
-                {
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.InvalidCredentials,
-                        ErrorMessages.InvalidCredentials);
-                }
-
-                if (!user.IsActive)
-                {
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.AccountInactive,
-                        ErrorMessages.AccountInactive);
-                }
-
-                if (await _identityService.IsLockedOutAsync(user))
-                {
-                    var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
-                    var minutesRemaining = lockoutEnd.HasValue
-                        ? (int)Math.Ceiling((lockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes)
-                        : 0;
-
-                    _logger.LogWarning("Login attempt for locked account: {Email}", command.Email);
-                    return ApiResponse<LoginResponse>.AccountLocked(minutesRemaining);
-                }
-
-                var signInStatus = await _identityService
-                    .CheckPasswordAsync(user, command.Password, lockoutOnFailure: true);
-
-                if (signInStatus != SignInStatus.Success)
-                {
-                    if (signInStatus == SignInStatus.LockedOut)
-                    {
-                        return ApiResponse<LoginResponse>.AccountLocked();
-                    }
-
-                    if (signInStatus == SignInStatus.RequiresTwoFactor)
-                    {
-                        return ApiResponse<LoginResponse>.ErrorResult(
-                            ErrorCode.TwoFactorRequired,
-                            ErrorMessages.TwoFactorRequired);
-                    }
-
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.InvalidCredentials,
-                        ErrorMessages.InvalidCredentials);
-                }
-
-                var refreshTokenExpiryDays = command.RememberMe ? 30 : 7;
-
-                return await _loginSessionService.CreateLoginSessionAsync(
-                    user,
-                    refreshTokenExpiryDays,
-                    "New login detected - previous sessions invalidated",
-                    SuccessMessages.LoginSuccessful,
-                    cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error en login para: {Email}", command.Email);
                 return ApiResponse<LoginResponse>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorLogin);
+                    ErrorCode.InvalidCredentials,
+                    ErrorMessages.InvalidCredentials);
             }
+
+            if (!user.IsActive)
+            {
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.AccountInactive,
+                    ErrorMessages.AccountInactive);
+            }
+
+            if (await _identityService.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
+                var minutesRemaining = lockoutEnd.HasValue
+                    ? (int)Math.Ceiling((lockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes)
+                    : 0;
+
+                _logger.LogWarning("Login attempt for locked account: {Email}", command.Email);
+                return ApiResponse<LoginResponse>.AccountLocked(minutesRemaining);
+            }
+
+            var signInStatus = await _identityService
+                .CheckPasswordAsync(user, command.Password, lockoutOnFailure: true);
+
+            if (signInStatus != SignInStatus.Success)
+            {
+                if (signInStatus == SignInStatus.LockedOut)
+                {
+                    return ApiResponse<LoginResponse>.AccountLocked();
+                }
+
+                if (signInStatus == SignInStatus.RequiresTwoFactor)
+                {
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.TwoFactorRequired,
+                        ErrorMessages.TwoFactorRequired);
+                }
+
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.InvalidCredentials,
+                    ErrorMessages.InvalidCredentials);
+            }
+
+            var refreshTokenExpiryDays = command.RememberMe ? 30 : 7;
+
+            return await _loginSessionService.CreateLoginSessionAsync(
+                user,
+                refreshTokenExpiryDays,
+                "New login detected - previous sessions invalidated",
+                SuccessMessages.LoginSuccessful,
+                cancellationToken);
         }
     }
 }
