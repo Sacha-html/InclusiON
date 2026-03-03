@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Queries;
@@ -13,39 +12,25 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
     public class GetPersonByIdQueryHandler : IQueryHandler<GetPersonByIdQuery, ApiResponse<PersonResponse>>
     {
         private readonly IPersonsRepository _repository;
-        private readonly ILogger<GetPersonByIdQueryHandler> _logger;
 
-        public GetPersonByIdQueryHandler(
-            IPersonsRepository repository,
-            ILogger<GetPersonByIdQueryHandler> logger)
+        public GetPersonByIdQueryHandler(IPersonsRepository repository)
         {
             _repository = repository;
-            _logger = logger;
         }
 
         public async Task<ApiResponse<PersonResponse>> HandleAsync(GetPersonByIdQuery query, CancellationToken cancellationToken)
         {
-            try
-            {
-                var person = await _repository.GetByIdAsync(query.PersonId, cancellationToken);
+            var person = await _repository.GetByIdAsync(query.PersonId, cancellationToken);
 
-                if (person == null)
-                {
-                    return ApiResponse<PersonResponse>.ErrorResult(
-                        ErrorCode.PersonNotFound,
-                        ErrorMessages.PersonNotFound);
-                }
-
-                var response = MapToResponse(person);
-                return ApiResponse<PersonResponse>.SuccessResult(response);
-            }
-            catch (Exception ex)
+            if (person == null)
             {
-                _logger.LogError(ex, "Error al obtener persona: {PersonId}", query.PersonId);
                 return ApiResponse<PersonResponse>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorGetPerson);
+                    ErrorCode.PersonNotFound,
+                    ErrorMessages.PersonNotFound);
             }
+
+            var response = MapToResponse(person);
+            return ApiResponse<PersonResponse>.SuccessResult(response);
         }
 
         private static PersonResponse MapToResponse(PersonWithDisability person)

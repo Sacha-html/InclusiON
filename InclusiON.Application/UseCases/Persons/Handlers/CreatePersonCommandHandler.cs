@@ -118,6 +118,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
                     person.UserId = user.Id;
                     await _repository.CreateAsync(person, ct);
+                    await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
                 _logger.LogInformation("Persona creada: {PersonId}, Usuario: {UserId}", person.Id, user.Id);
@@ -131,13 +132,6 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 return ApiResponse<PersonResponse>.ErrorResult(
                     ErrorCode.ValidationFailed,
                     ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al crear persona: {FirstName} {LastName}", command.FirstName, command.LastName);
-                return ApiResponse<PersonResponse>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorCreatePerson);
             }
         }
 
