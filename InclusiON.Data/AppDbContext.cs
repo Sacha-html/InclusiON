@@ -25,7 +25,7 @@ namespace InclusiON.Data
             _httpContextAccessor = httpContextAccessor;
         }
 
-        // DbSets - Nivel 1 (Base)
+        // Nivel 1: Catalogos base del sistema (tipos, categorias, metodos)
         public DbSet<DisabilityType> DisabilityTypes { get; set; }
         public DbSet<ActivityCategory> ActivityCategories { get; set; }
         public DbSet<ReportType> ReportTypes { get; set; }
@@ -35,14 +35,14 @@ namespace InclusiON.Data
         public DbSet<SkillArea> SkillAreas { get; set; }
         public DbSet<ActivityTemplateType> ActivityTemplateTypes { get; set; }
 
-        // DbSets - Nivel 2 (Perfiles)
+        // Nivel 2: Perfiles de usuario y autenticacion
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Professional> Professionals { get; set; }
         public DbSet<PersonWithDisability> PersonsWithDisability { get; set; }
         public DbSet<FamilyRepresentative> FamilyRepresentatives { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
 
-        // DbSets - Nivel 3 (Relaciones)
+        // Nivel 3: Relaciones entre perfiles, actividades y rutas de aprendizaje
         public DbSet<TrustedDevice> TrustedDevices { get; set; }
         public DbSet<ProfessionalInstitution> ProfessionalInstitutions { get; set; }
         public DbSet<ProfessionalPerson> ProfessionalPersons { get; set; }
@@ -54,14 +54,16 @@ namespace InclusiON.Data
         public DbSet<PersonRoadmapArea> PersonRoadmapAreas { get; set; }
         public DbSet<PersonRoadmapActivity> PersonRoadmapActivities { get; set; }
 
-        // DbSets - Nivel 4 (Asignaciones)
+        // Nivel 4: Asignaciones, reportes, mensajeria y auditoria
         public DbSet<ActivityAssignment> ActivityAssignments { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<AccessAudit> AccessAudits { get; set; }
 
-        // DbSets - Nivel 5 (Respuestas)
+        // Nivel 5: Respuestas, resultados y embeddings de actividades
         public DbSet<ActivityResponse> ActivityResponses { get; set; }
+        public DbSet<ActivityResult> ActivityResults { get; set; }
+        public DbSet<ActivityEmbedding> ActivityEmbeddings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

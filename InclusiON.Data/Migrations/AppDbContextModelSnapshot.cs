@@ -368,6 +368,43 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("ActivityContents", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityEmbedding", b =>
+                {
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Dimensions")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmbeddingJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ActivityId");
+
+                    b.ToTable("ActivityEmbeddings", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityResponse", b =>
                 {
                     b.Property<int>("Id")
@@ -433,6 +470,54 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("AssignmentId");
 
                     b.ToTable("ActivityResponses", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JsonResponse")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PersonRoadmapActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("ScorePercent")
+                        .HasColumnType("real");
+
+                    b.Property<int>("TimeSpentSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonRoadmapActivityId");
+
+                    b.ToTable("ActivityResults", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityTemplateType", b =>
@@ -2625,6 +2710,17 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("TemplateType");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityEmbedding", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.Activity", "Activity")
+                        .WithOne("Embedding")
+                        .HasForeignKey("InclusiON.Domain.Models.ActivityEmbedding", "ActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityResponse", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.ActivityAssignment", "Assignment")
@@ -2634,6 +2730,17 @@ namespace InclusiON.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityResult", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonRoadmapActivity", "PersonRoadmapActivity")
+                        .WithMany("ActivityResults")
+                        .HasForeignKey("PersonRoadmapActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PersonRoadmapActivity");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityTemplateType", b =>
@@ -3012,6 +3119,8 @@ namespace InclusiON.Data.Migrations
 
                     b.Navigation("Content");
 
+                    b.Navigation("Embedding");
+
                     b.Navigation("RoadmapActivities");
                 });
 
@@ -3063,6 +3172,11 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmap", b =>
                 {
                     b.Navigation("Areas");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmapActivity", b =>
+                {
+                    b.Navigation("ActivityResults");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmapArea", b =>

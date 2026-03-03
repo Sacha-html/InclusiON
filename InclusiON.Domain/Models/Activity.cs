@@ -110,6 +110,8 @@ namespace InclusiON.Domain.Models
 
         public virtual ICollection<PersonRoadmapActivity> RoadmapActivities { get; set; }
 
+        public virtual ActivityEmbedding? Embedding { get; set; }
+
         public Activity()
         {
             ActivityAssignments = new HashSet<ActivityAssignment>();

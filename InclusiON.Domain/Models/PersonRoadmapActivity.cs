@@ -86,5 +86,7 @@ namespace InclusiON.Domain.Models
         public virtual Activity Activity { get; set; } = null!;
 
         #endregion
+
+        public virtual ICollection<ActivityResult> ActivityResults { get; set; } = new List<ActivityResult>();
     }
 }
