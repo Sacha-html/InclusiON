@@ -1,4 +1,5 @@
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Application.Interfaces.Repositories
 {
@@ -35,14 +36,14 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// <summary>
         /// Obtiene lista paginada de personas con filtros.
         /// </summary>
-        Task<(List<PersonWithDisability> Items, int TotalCount)> GetPagedAsync(
-            int skip,
-            int take,
+        Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
+            int page,
+            int pageSize,
             string? search,
             int? disabilityTypeId,
             int? autonomyLevelId,
             bool? isActive,
-            string? sortBy,
+            SortField? sortBy,
             string sortDirection,
             CancellationToken cancellationToken = default);
     }
