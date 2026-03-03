@@ -27,55 +27,46 @@ namespace InclusiON.Application.UseCases.Users.Handlers
 
         public async Task<ApiResponse<UserProfileResponse>> HandleAsync(GetUserProfileQuery query, CancellationToken cancellationToken)
         {
-            try
-            {
-                var user = await _identityService.FindByIdAsync(query.UserId);
+            var user = await _identityService.FindByIdAsync(query.UserId);
 
-                if (user is null)
-                {
-                    return ApiResponse<UserProfileResponse>.ErrorResult(
-                        ErrorCode.UserNotFound,
-                        ErrorMessages.UserNotFound);
-                }
-
-                if (!user.IsActive)
-                {
-                    return ApiResponse<UserProfileResponse>.ErrorResult(
-                        ErrorCode.AccountInactive,
-                        ErrorMessages.AccountDeactivated);
-                }
-
-                var roles = await _identityService.GetRolesAsync(user);
-                var primaryRole = roles.FirstOrDefault() ?? "User";
-
-                var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
-
-                var activeSessionsCount = await _refreshTokenRepository
-                    .GetActiveTokensCountAsync(user.Id, cancellationToken);
-
-                var response = new UserProfileResponse
-                {
-                    Id = user.Id,
-                    Name = user.Name ?? "Unknown",
-                    Surname = user.Surname!,
-                    Email = user.Email ?? string.Empty,
-                    Phone = user.PhoneNumber,
-                    Role = primaryRole,
-                    IsActive = user.IsActive,
-                    ActiveSessionsCount = activeSessionsCount,
-                    EmailConfirmed = user.EmailConfirmed,
-                    PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                    Permissions = permissions
-                };
-
-                return ApiResponse<UserProfileResponse>.SuccessResult(response);
-            }
-            catch (Exception)
+            if (user is null)
             {
                 return ApiResponse<UserProfileResponse>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorGetProfile);
+                    ErrorCode.UserNotFound,
+                    ErrorMessages.UserNotFound);
             }
+
+            if (!user.IsActive)
+            {
+                return ApiResponse<UserProfileResponse>.ErrorResult(
+                    ErrorCode.AccountInactive,
+                    ErrorMessages.AccountDeactivated);
+            }
+
+            var roles = await _identityService.GetRolesAsync(user);
+            var primaryRole = roles.FirstOrDefault() ?? "User";
+
+            var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
+
+            var activeSessionsCount = await _refreshTokenRepository
+                .GetActiveTokensCountAsync(user.Id, cancellationToken);
+
+            var response = new UserProfileResponse
+            {
+                Id = user.Id,
+                Name = user.Name ?? "Unknown",
+                Surname = user.Surname!,
+                Email = user.Email ?? string.Empty,
+                Phone = user.PhoneNumber,
+                Role = primaryRole,
+                IsActive = user.IsActive,
+                ActiveSessionsCount = activeSessionsCount,
+                EmailConfirmed = user.EmailConfirmed,
+                PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                Permissions = permissions
+            };
+
+            return ApiResponse<UserProfileResponse>.SuccessResult(response);
         }
     }
 }

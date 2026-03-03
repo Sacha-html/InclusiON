@@ -11,13 +11,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.19" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\InclusiON.DTOs\InclusiON.DTOs.csproj" />
     <ProjectReference Include="..\InclusiON.Domain\InclusiON.Domain.csproj" />
-    <ProjectReference Include="..\InclusiON.Models\InclusiON.Shared.csproj" />
+    <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
+    <ProjectReference Include="..\InclusiON.SemanticSearch\InclusiON.SemanticSearch.csproj" />
   </ItemGroup>
 
 </Project>
