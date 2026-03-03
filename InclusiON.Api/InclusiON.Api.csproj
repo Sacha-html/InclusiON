@@ -21,7 +21,8 @@
     <ProjectReference Include="..\InclusiON.Application\InclusiON.Application.csproj" />
     <ProjectReference Include="..\InclusiON.Data\InclusiON.Data.csproj" />
     <ProjectReference Include="..\InclusiON.Infrastructure\InclusiON.Infrastructure.csproj" />
-    <ProjectReference Include="..\InclusiON.Models\InclusiON.Shared.csproj" />
+    <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
+    <ProjectReference Include="..\InclusiON.SemanticSearch\InclusiON.SemanticSearch.csproj" />
   </ItemGroup>
 
 </Project>
