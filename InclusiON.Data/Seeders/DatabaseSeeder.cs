@@ -16,6 +16,7 @@ namespace InclusiON.Data.Seeders
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             await SeedAdminUserAsync(userManager);
+            await SeedSkillAreasAsync(context);
             await SeedProfessionalsAsync(userManager, context);
             await SeedFamilyAsync(userManager, context);
             await SeedVisualLoginTestUsersAsync(userManager, context);
@@ -177,6 +178,194 @@ namespace InclusiON.Data.Seeders
                 }
             }
 
+            await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedSkillAreasAsync(AppDbContext context)
+        {
+            if (await context.Set<SkillArea>().AnyAsync())
+                return;
+
+            var adminId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var now = DateTime.UtcNow;
+
+            var comunicacion = new SkillArea
+            {
+                Name = "Comunicación",
+                Description = "Actividades orientadas al desarrollo de habilidades comunicativas mediante pictogramas, selección de opciones y expresión.",
+                Icon = "chat",
+                Color = "#2E5FA3",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = now,
+                CreatedBy = adminId
+            };
+
+            var alfabetizacion = new SkillArea
+            {
+                Name = "Alfabetización",
+                Description = "Actividades de lectura global, reconocimiento de sonidos y construcción de palabras para el desarrollo de la lectoescritura.",
+                Icon = "menu_book",
+                Color = "#4CAF50",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = now,
+                CreatedBy = adminId
+            };
+
+            var logicoMatematico = new SkillArea
+            {
+                Name = "Lógico-matemático",
+                Description = "Actividades de clasificación, ordenamiento y numeración para el desarrollo del pensamiento lógico-matemático.",
+                Icon = "calculate",
+                Color = "#FF9800",
+                DisplayOrder = 3,
+                IsActive = true,
+                CreatedAt = now,
+                CreatedBy = adminId
+            };
+
+            context.Set<SkillArea>().AddRange(comunicacion, alfabetizacion, logicoMatematico);
+            await context.SaveChangesAsync();
+
+            // ActivityTemplateTypes para Comunicación
+            var templatesComunicacion = new[]
+            {
+                new ActivityTemplateType
+                {
+                    SkillAreaId = comunicacion.Id,
+                    Name = "Seleccionar pictograma",
+                    Code = "PICTOGRAM_SELECT",
+                    Description = "El usuario debe seleccionar el pictograma correcto entre varias opciones.",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = true,
+                    HasAudio = true,
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                },
+                new ActivityTemplateType
+                {
+                    SkillAreaId = comunicacion.Id,
+                    Name = "Selección de opciones",
+                    Code = "OPTION_SELECT",
+                    Description = "El usuario elige la respuesta correcta entre opciones de texto o imagen.",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = false,
+                    HasAudio = true,
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                }
+            };
+
+            // ActivityTemplateTypes para Alfabetización
+            var templatesAlfabetizacion = new[]
+            {
+                new ActivityTemplateType
+                {
+                    SkillAreaId = alfabetizacion.Id,
+                    Name = "Lectura global",
+                    Code = "GLOBAL_READING",
+                    Description = "El usuario asocia una palabra completa con su imagen o significado.",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = false,
+                    HasAudio = true,
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                },
+                new ActivityTemplateType
+                {
+                    SkillAreaId = alfabetizacion.Id,
+                    Name = "Reconocer sonidos",
+                    Code = "SOUND_RECOGNITION",
+                    Description = "El usuario identifica el sonido de una letra o sílaba y lo asocia con su representación.",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = false,
+                    HasAudio = true,
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                },
+                new ActivityTemplateType
+                {
+                    SkillAreaId = alfabetizacion.Id,
+                    Name = "Armar palabras",
+                    Code = "BUILD_WORD",
+                    Description = "El usuario construye una palabra ordenando letras o sílabas.",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = false,
+                    HasAudio = false,
+                    DisplayOrder = 3,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                }
+            };
+
+            // ActivityTemplateTypes para Lógico-matemático
+            var templatesLogicoMatematico = new[]
+            {
+                new ActivityTemplateType
+                {
+                    SkillAreaId = logicoMatematico.Id,
+                    Name = "Clasificación",
+                    Code = "CLASSIFY",
+                    Description = "El usuario agrupa elementos según un criterio dado (color, forma, categoría).",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = false,
+                    HasAudio = false,
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                },
+                new ActivityTemplateType
+                {
+                    SkillAreaId = logicoMatematico.Id,
+                    Name = "Ordenamiento",
+                    Code = "ORDER_SEQUENCE",
+                    Description = "El usuario ordena elementos en una secuencia lógica (mayor a menor, cronológico).",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = false,
+                    HasAudio = false,
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                },
+                new ActivityTemplateType
+                {
+                    SkillAreaId = logicoMatematico.Id,
+                    Name = "Numeración",
+                    Code = "NUMERATION",
+                    Description = "El usuario practica conteo, reconocimiento de números y asociación cantidad-número.",
+                    ContentSchema = "",
+                    ComponentName = "",
+                    UsesPictograms = false,
+                    HasAudio = false,
+                    DisplayOrder = 3,
+                    IsActive = true,
+                    CreatedAt = now,
+                    CreatedBy = adminId
+                }
+            };
+
+            context.Set<ActivityTemplateType>().AddRange(templatesComunicacion);
+            context.Set<ActivityTemplateType>().AddRange(templatesAlfabetizacion);
+            context.Set<ActivityTemplateType>().AddRange(templatesLogicoMatematico);
             await context.SaveChangesAsync();
         }
 
