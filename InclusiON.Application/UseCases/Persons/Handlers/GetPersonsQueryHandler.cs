@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Queries;
@@ -12,73 +11,55 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
     public class GetPersonsQueryHandler : IQueryHandler<GetPersonsQuery, ApiResponse<PagedResponse<PersonListItemResponse>>>
     {
         private readonly IPersonsRepository _repository;
-        private readonly ILogger<GetPersonsQueryHandler> _logger;
 
-        public GetPersonsQueryHandler(
-            IPersonsRepository repository,
-            ILogger<GetPersonsQueryHandler> logger)
+        public GetPersonsQueryHandler(IPersonsRepository repository)
         {
             _repository = repository;
-            _logger = logger;
         }
 
         public async Task<ApiResponse<PagedResponse<PersonListItemResponse>>> HandleAsync(
             GetPersonsQuery query,
             CancellationToken cancellationToken)
         {
-            try
+            var pagedResult = await _repository.GetPagedAsync(
+                query.Page,
+                query.PageSize,
+                query.Search,
+                query.DisabilityTypeId,
+                query.AutonomyLevelId,
+                query.IsActive,
+                query.SortBy,
+                query.SortDirection,
+                cancellationToken);
+
+            var response = new PagedResponse<PersonListItemResponse>
             {
-                var skip = (query.Page - 1) * query.PageSize;
-
-                var (items, totalCount) = await _repository.GetPagedAsync(
-                    skip,
-                    query.PageSize,
-                    query.Search,
-                    query.DisabilityTypeId,
-                    query.AutonomyLevelId,
-                    query.IsActive,
-                    query.SortBy,
-                    query.SortDirection,
-                    cancellationToken);
-
-                var totalPages = (int)Math.Ceiling(totalCount / (double)query.PageSize);
-
-                var response = new PagedResponse<PersonListItemResponse>
+                Data = pagedResult.Data.Select(p => new PersonListItemResponse
                 {
-                    Data = items.Select(p => new PersonListItemResponse
-                    {
-                        Id = p.Id,
-                        UserId = p.UserId,
-                        FirstName = p.FirstName,
-                        LastName = p.LastName,
-                        DocumentNumber = p.DocumentNumber,
-                        BirthDate = p.BirthDate,
-                        PhotoUrl = p.PhotoUrl,
-                        AvatarColor = p.AvatarColor,
-                        DisabilityTypeId = p.DisabilityTypeId,
-                        DisabilityTypeName = p.DisabilityType?.Name,
-                        AutonomyLevelId = p.AutonomyLevelId,
-                        AutonomyLevelName = p.AutonomyLevel?.Name,
-                        LoginMethodName = p.LoginMethod?.Name,
-                        IsActive = p.User?.IsActive ?? false
-                    }).ToList(),
-                    TotalRecords = totalCount,
-                    TotalPages = totalPages,
-                    CurrentPage = query.Page,
-                    PageSize = query.PageSize,
-                    HasNextPage = query.Page < totalPages,
-                    HasPreviousPage = query.Page > 1
-                };
+                    Id = p.Id,
+                    UserId = p.UserId,
+                    FirstName = p.FirstName,
+                    LastName = p.LastName,
+                    DocumentNumber = p.DocumentNumber,
+                    BirthDate = p.BirthDate,
+                    PhotoUrl = p.PhotoUrl,
+                    AvatarColor = p.AvatarColor,
+                    DisabilityTypeId = p.DisabilityTypeId,
+                    DisabilityTypeName = p.DisabilityType?.Name,
+                    AutonomyLevelId = p.AutonomyLevelId,
+                    AutonomyLevelName = p.AutonomyLevel?.Name,
+                    LoginMethodName = p.LoginMethod?.Name,
+                    IsActive = p.User?.IsActive ?? false
+                }).ToList(),
+                TotalRecords = pagedResult.TotalRecords,
+                TotalPages = pagedResult.TotalPages,
+                CurrentPage = pagedResult.CurrentPage,
+                PageSize = pagedResult.PageSize,
+                HasNextPage = pagedResult.HasNextPage,
+                HasPreviousPage = pagedResult.HasPreviousPage
+            };
 
-                return ApiResponse<PagedResponse<PersonListItemResponse>>.SuccessResult(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al listar personas");
-                return ApiResponse<PagedResponse<PersonListItemResponse>>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorListPersons);
-            }
+            return ApiResponse<PagedResponse<PersonListItemResponse>>.SuccessResult(response);
         }
     }
 }
