@@ -36,92 +36,82 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
+            var person = await _repository.GetPersonByUserIdAsync(command.UserId, cancellationToken);
+
+            if (person == null)
             {
-                var person = await _repository.GetPersonByUserIdAsync(command.UserId, cancellationToken);
-
-                if (person == null)
-                {
-                    return ApiResponse<VisualLoginResponse>.ErrorResult(
-                        ErrorCode.UserNotFound,
-                        ErrorMessages.UserNotFound);
-                }
-
-                var supervisor = await _identityService.FindByEmailAsync(command.SupervisorEmail.ToLower().Trim());
-
-                if (supervisor == null)
-                {
-                    return ApiResponse<VisualLoginResponse>.SuccessResult(
-                        new VisualLoginResponse
-                        {
-                            Success = false,
-                            ErrorMessage = ErrorMessages.SupervisorInvalidCredentials
-                        });
-                }
-
-                var isAuthorized = await IsAuthorizedSupervisorAsync(person, supervisor.Id, cancellationToken);
-
-                if (!isAuthorized)
-                {
-                    _logger.LogWarning(
-                        "Intento de login asistido no autorizado. Persona: {PersonId}, Supervisor: {SupervisorId}",
-                        command.UserId, supervisor.Id);
-
-                    return ApiResponse<VisualLoginResponse>.SuccessResult(
-                        new VisualLoginResponse
-                        {
-                            Success = false,
-                            ErrorMessage = ErrorMessages.SupervisorNotAuthorized
-                        });
-                }
-
-                var signInStatus = await _identityService.CheckPasswordAsync(
-                    supervisor,
-                    command.SupervisorPassword,
-                    lockoutOnFailure: true);
-
-                if (signInStatus != SignInStatus.Success)
-                {
-                    if (signInStatus == SignInStatus.LockedOut)
-                    {
-                        return ApiResponse<VisualLoginResponse>.SuccessResult(
-                            new VisualLoginResponse
-                            {
-                                Success = false,
-                                IsLocked = true,
-                                ErrorMessage = ErrorMessages.SupervisorAccountLocked
-                            });
-                    }
-
-                    return ApiResponse<VisualLoginResponse>.SuccessResult(
-                        new VisualLoginResponse
-                        {
-                            Success = false,
-                            ErrorMessage = ErrorMessages.SupervisorInvalidCredentials
-                        });
-                }
-
-                _logger.LogInformation(
-                    "Login asistido exitoso. Persona: {PersonId}, Supervisor: {SupervisorId}",
-                    person.User.Id, supervisor.Id);
-
-                return await _loginSessionService.CreateVisualLoginSessionAsync(
-                    person.User,
-                    person,
-                    1, // Sesion asistida de 1 dia
-                    command.DeviceId,
-                    false, // No recordar dispositivo en login asistido
-                    "Nuevo login asistido",
-                    SuccessMessages.AssistedLoginSuccessful,
-                    cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error en login asistido para usuario: {UserId}", command.UserId);
                 return ApiResponse<VisualLoginResponse>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorLogin);
+                    ErrorCode.UserNotFound,
+                    ErrorMessages.UserNotFound);
             }
+
+            var supervisor = await _identityService.FindByEmailAsync(command.SupervisorEmail.ToLower().Trim());
+
+            if (supervisor == null)
+            {
+                return ApiResponse<VisualLoginResponse>.SuccessResult(
+                    new VisualLoginResponse
+                    {
+                        Success = false,
+                        ErrorMessage = ErrorMessages.SupervisorInvalidCredentials
+                    });
+            }
+
+            var isAuthorized = await IsAuthorizedSupervisorAsync(person, supervisor.Id, cancellationToken);
+
+            if (!isAuthorized)
+            {
+                _logger.LogWarning(
+                    "Intento de login asistido no autorizado. Persona: {PersonId}, Supervisor: {SupervisorId}",
+                    command.UserId, supervisor.Id);
+
+                return ApiResponse<VisualLoginResponse>.SuccessResult(
+                    new VisualLoginResponse
+                    {
+                        Success = false,
+                        ErrorMessage = ErrorMessages.SupervisorNotAuthorized
+                    });
+            }
+
+            var signInStatus = await _identityService.CheckPasswordAsync(
+                supervisor,
+                command.SupervisorPassword,
+                lockoutOnFailure: true);
+
+            if (signInStatus != SignInStatus.Success)
+            {
+                if (signInStatus == SignInStatus.LockedOut)
+                {
+                    return ApiResponse<VisualLoginResponse>.SuccessResult(
+                        new VisualLoginResponse
+                        {
+                            Success = false,
+                            IsLocked = true,
+                            ErrorMessage = ErrorMessages.SupervisorAccountLocked
+                        });
+                }
+
+                return ApiResponse<VisualLoginResponse>.SuccessResult(
+                    new VisualLoginResponse
+                    {
+                        Success = false,
+                        ErrorMessage = ErrorMessages.SupervisorInvalidCredentials
+                    });
+            }
+
+            _logger.LogInformation(
+                "Login asistido exitoso. Persona: {PersonId}, Supervisor: {SupervisorId}",
+                person.User.Id, supervisor.Id);
+
+            return await _loginSessionService.CreateVisualLoginSessionAsync(
+                person.User,
+                person,
+                1, // Sesion asistida de 1 dia
+                command.DeviceId,
+                false, // No recordar dispositivo en login asistido
+                "Nuevo login asistido",
+                SuccessMessages.AssistedLoginSuccessful,
+                cancellationToken);
         }
 
         private async Task<bool> IsAuthorizedSupervisorAsync(

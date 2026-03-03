@@ -32,50 +32,40 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
+            var identifier = query.Identifier.Trim();
+
+            // Buscar segun tipo de usuario
+            switch (query.UserType?.ToUpper())
             {
-                var identifier = query.Identifier.Trim();
+                case "PERSON":
+                    return await FindPersonAsync(identifier, query.DeviceId, cancellationToken);
 
-                // Buscar segun tipo de usuario
-                switch (query.UserType?.ToUpper())
-                {
-                    case "PERSON":
-                        return await FindPersonAsync(identifier, query.DeviceId, cancellationToken);
+                case "PROFESSIONAL":
+                    return await FindProfessionalAsync(identifier, query.DeviceId, cancellationToken);
 
-                    case "PROFESSIONAL":
-                        return await FindProfessionalAsync(identifier, query.DeviceId, cancellationToken);
+                case "FAMILY":
+                    return await FindFamilyAsync(identifier, query.DeviceId, cancellationToken);
 
-                    case "FAMILY":
-                        return await FindFamilyAsync(identifier, query.DeviceId, cancellationToken);
+                default:
+                    // Si no se especifica tipo, buscar en todos
+                    var personResult = await FindPersonAsync(identifier, query.DeviceId, cancellationToken);
+                    if (personResult.Data?.UserFound == true)
+                        return personResult;
 
-                    default:
-                        // Si no se especifica tipo, buscar en todos
-                        var personResult = await FindPersonAsync(identifier, query.DeviceId, cancellationToken);
-                        if (personResult.Data?.UserFound == true)
-                            return personResult;
+                    var professionalResult = await FindProfessionalAsync(identifier, query.DeviceId, cancellationToken);
+                    if (professionalResult.Data?.UserFound == true)
+                        return professionalResult;
 
-                        var professionalResult = await FindProfessionalAsync(identifier, query.DeviceId, cancellationToken);
-                        if (professionalResult.Data?.UserFound == true)
-                            return professionalResult;
+                    var familyResult = await FindFamilyAsync(identifier, query.DeviceId, cancellationToken);
+                    if (familyResult.Data?.UserFound == true)
+                        return familyResult;
 
-                        var familyResult = await FindFamilyAsync(identifier, query.DeviceId, cancellationToken);
-                        if (familyResult.Data?.UserFound == true)
-                            return familyResult;
-
-                        return ApiResponse<IdentifyUserResponse>.SuccessResult(
-                            new IdentifyUserResponse
-                            {
-                                UserFound = false,
-                                ErrorMessage = ErrorMessages.UserNotFound
-                            });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al identificar usuario: {Identifier}", query.Identifier);
-                return ApiResponse<IdentifyUserResponse>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorIdentifyUser);
+                    return ApiResponse<IdentifyUserResponse>.SuccessResult(
+                        new IdentifyUserResponse
+                        {
+                            UserFound = false,
+                            ErrorMessage = ErrorMessages.UserNotFound
+                        });
             }
         }
 

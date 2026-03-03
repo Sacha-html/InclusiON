@@ -33,81 +33,71 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
+            if (string.IsNullOrWhiteSpace(command.RefreshToken))
             {
-                if (string.IsNullOrWhiteSpace(command.RefreshToken))
-                {
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.RequiredField,
-                        ErrorMessages.RefreshTokenRequired);
-                }
-
-                var storedToken = await _refreshTokensRepository.GetByTokenAsync(command.RefreshToken, cancellationToken);
-
-                if (storedToken is null)
-                {
-                    _logger.LogWarning("Refresh token not found");
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.TokenInvalid,
-                        ErrorMessages.TokenInvalid);
-                }
-
-                if (!storedToken.IsActive)
-                {
-                    _logger.LogWarning("Attempted to use revoked refresh token for user {UserId}", storedToken.UserId);
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.TokenInvalid,
-                        ErrorMessages.TokenRevoked);
-                }
-
-                if (storedToken.ExpiresAt < DateTime.UtcNow)
-                {
-                    _logger.LogWarning("Attempted to use expired refresh token for user {UserId}", storedToken.UserId);
-                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Token expired", cancellationToken);
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.TokenExpired,
-                        ErrorMessages.TokenExpired);
-                }
-
-                var user = await _identityService.FindByIdAsync(storedToken.UserId);
-
-                if (user is null)
-                {
-                    _logger.LogWarning("User not found for refresh token");
-                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User not found", cancellationToken);
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.UserNotFound,
-                        ErrorMessages.UserNotFound);
-                }
-
-                if (!user.IsActive)
-                {
-                    _logger.LogWarning("Inactive user attempted to refresh token: {UserId}", user.Id);
-                    await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User inactive", cancellationToken);
-                    return ApiResponse<LoginResponse>.ErrorResult(
-                        ErrorCode.AccountInactive,
-                        ErrorMessages.UserInactive);
-                }
-
-                var remainingDays = (storedToken.ExpiresAt - DateTime.UtcNow).TotalDays;
-                var refreshTokenExpiryDays = Math.Max(1, (int)Math.Ceiling(remainingDays));
-
-                _logger.LogDebug("Successfully refreshed token for user {UserId}", user.Id);
-
-                return await _loginSessionService.CreateLoginSessionAsync(
-                    user,
-                    refreshTokenExpiryDays,
-                    "Replaced by new token",
-                    SuccessMessages.TokenRefreshed,
-                    cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error refreshing token");
                 return ApiResponse<LoginResponse>.ErrorResult(
-                    ErrorCode.InternalError,
-                    ErrorMessages.InternalErrorRefreshToken);
+                    ErrorCode.RequiredField,
+                    ErrorMessages.RefreshTokenRequired);
             }
+
+            var storedToken = await _refreshTokensRepository.GetByTokenAsync(command.RefreshToken, cancellationToken);
+
+            if (storedToken is null)
+            {
+                _logger.LogWarning("Refresh token not found");
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.TokenInvalid,
+                    ErrorMessages.TokenInvalid);
+            }
+
+            if (!storedToken.IsActive)
+            {
+                _logger.LogWarning("Attempted to use revoked refresh token for user {UserId}", storedToken.UserId);
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.TokenInvalid,
+                    ErrorMessages.TokenRevoked);
+            }
+
+            if (storedToken.ExpiresAt < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Attempted to use expired refresh token for user {UserId}", storedToken.UserId);
+                await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Token expired", cancellationToken);
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.TokenExpired,
+                    ErrorMessages.TokenExpired);
+            }
+
+            var user = await _identityService.FindByIdAsync(storedToken.UserId);
+
+            if (user is null)
+            {
+                _logger.LogWarning("User not found for refresh token");
+                await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User not found", cancellationToken);
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.UserNotFound,
+                    ErrorMessages.UserNotFound);
+            }
+
+            if (!user.IsActive)
+            {
+                _logger.LogWarning("Inactive user attempted to refresh token: {UserId}", user.Id);
+                await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "User inactive", cancellationToken);
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.AccountInactive,
+                    ErrorMessages.UserInactive);
+            }
+
+            var remainingDays = (storedToken.ExpiresAt - DateTime.UtcNow).TotalDays;
+            var refreshTokenExpiryDays = Math.Max(1, (int)Math.Ceiling(remainingDays));
+
+            _logger.LogDebug("Successfully refreshed token for user {UserId}", user.Id);
+
+            return await _loginSessionService.CreateLoginSessionAsync(
+                user,
+                refreshTokenExpiryDays,
+                "Replaced by new token",
+                SuccessMessages.TokenRefreshed,
+                cancellationToken);
         }
     }
 }
