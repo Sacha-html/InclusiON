@@ -75,7 +75,7 @@ namespace InclusiON.Data.Seeders
                     Password = "Juan123!",
                     Pin = (string?)null,
                     LoginMethodId = 1, // STANDARD (password)
-                    AvatarColor = "#2196F3",
+                    AvatarColor = "#2196F3", 
                     SupervisorUserId = (Guid?)null
                 },
                 new {
