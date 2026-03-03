@@ -13,12 +13,6 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<int> RevokeAllUserTokensAsync(Guid userId, string? reason = null, CancellationToken cancellationToken = default);
         Task<RefreshTokenStatsResponse> GetUserTokenStatsAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<int> CleanupExpiredTokensAsync(CancellationToken cancellationToken = default);
-        Task<(List<RefreshToken> Tokens, int TotalCount)> GetTokensPaginatedAsync(
-            int page = 1,
-            int pageSize = 50,
-            Guid? userId = null,
-            bool? isActive = null,
-            CancellationToken cancellationToken = default);
         Task<int> GetActiveTokensCountAsync(Guid userId, CancellationToken cancellationToken = default);
     }
 }
