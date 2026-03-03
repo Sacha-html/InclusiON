@@ -33,6 +33,9 @@ namespace InclusiON.Infrastructure.Data
             });
         }
 
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+            => await _context.SaveChangesAsync(cancellationToken);
+
         public void Dispose()
         {
             if (!_disposed)
