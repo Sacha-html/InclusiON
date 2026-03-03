@@ -4,6 +4,7 @@ using Serilog;
 using InclusiON.Application;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
+using InclusiON.Api.Middleware;
 using InclusiON.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -88,10 +89,7 @@ app.UseSwaggerUI(p =>
     p.RoutePrefix = string.Empty;
 });
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontendClient");
