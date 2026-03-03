@@ -6,7 +6,7 @@ namespace InclusiON.Domain.Models
     /// Catalogo de tipos de discapacidad.
     /// Clasificacion segun CIF (Clasificacion Internacional del Funcionamiento).
     /// </summary>
-    public class DisabilityType : NameableEntity
+    public class DisabilityType : NameableEntity, IActivatable
     {
         /// <summary>
         /// Descripcion detallada del tipo de discapacidad.

@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models.BaseEntities;
+
 namespace InclusiON.Domain.Models
 {
     /// <summary>
@@ -5,7 +7,7 @@ namespace InclusiON.Domain.Models
     /// Cada metodo esta adaptado a diferentes niveles de autonomia.
     /// Valores: STANDARD, PIN, EMOJI_SEQUENCE, COLOR_SHAPE, SUPERVISED, TRUSTED_DEVICE, PROFILE_SELECT.
     /// </summary>
-    public class LoginMethod
+    public class LoginMethod : IActivatable
     {
         /// <summary>
         /// Identificador unico del metodo de login.

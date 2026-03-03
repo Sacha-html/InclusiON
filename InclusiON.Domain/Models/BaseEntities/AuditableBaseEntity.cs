@@ -1,6 +1,6 @@
 ﻿namespace InclusiON.Domain.Models.BaseEntities
 {
-    public abstract class AuditableBaseEntity
+    public abstract class AuditableBaseEntity : IActivatable
     {
         public DateTime CreatedAt { get; set; }
         public Guid CreatedBy { get; set; }

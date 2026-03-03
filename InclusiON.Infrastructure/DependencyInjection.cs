@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Interfaces.Repositories.Base;
+using InclusiON.Domain.Models;
 using InclusiON.Infrastructure.Authentication;
 using InclusiON.Infrastructure.Configuration;
 using InclusiON.Infrastructure.Authorization;
@@ -50,6 +52,14 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped<IVisualLoginRepository, VisualLoginRepository>();
             services.AddScoped<IPersonsRepository, PersonsRepository>();
+
+            // Repositorios read-only para catalogos
+            services.AddScoped<IReadOnlyRepository<DisabilityType>, ReadOnlyRepository<DisabilityType>>();
+            services.AddScoped<IReadOnlyRepository<ActivityCategory>, ReadOnlyRepository<ActivityCategory>>();
+            services.AddScoped<IReadOnlyRepository<AutonomyLevel>, ReadOnlyRepository<AutonomyLevel>>();
+            services.AddScoped<IReadOnlyRepository<LoginMethod>, ReadOnlyRepository<LoginMethod>>();
+            services.AddScoped<IReadOnlyRepository<SkillArea>, ReadOnlyRepository<SkillArea>>();
+            services.AddScoped<IReadOnlyRepository<ActivityTemplateType>, ReadOnlyRepository<ActivityTemplateType>>();
 
             // Servicio de contexto HTTP (IP, User-Agent, Browser)
             services.AddScoped<IHttpContextService, HttpContextService>();

@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models.BaseEntities;
+
 namespace InclusiON.Domain.Models
 {
     /// <summary>
@@ -5,7 +7,7 @@ namespace InclusiON.Domain.Models
     /// Determina el tipo de login y supervision requerida para una persona con discapacidad.
     /// Valores: Alta (independiente), Media (login simplificado), Baja (requiere supervision).
     /// </summary>
-    public class AutonomyLevel
+    public class AutonomyLevel : IActivatable
     {
         /// <summary>
         /// Identificador unico del nivel de autonomia.
