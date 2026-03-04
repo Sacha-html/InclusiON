@@ -7,7 +7,7 @@ import { RegisterUserRequest, ErrorCode } from '@models';
 
 // CoreUI imports
 import { ContainerComponent, RowComponent, ColComponent, CardComponent, CardBodyComponent } from '@coreui/angular';
-import { FormControlDirective, FormLabelDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, ButtonDirective, InputGroupComponent, InputGroupTextDirective } from '@coreui/angular';
+import { FormControlDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, ButtonDirective, InputGroupComponent, InputGroupTextDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
@@ -23,7 +23,6 @@ import { IconDirective } from '@coreui/icons-angular';
     CardComponent,
     CardBodyComponent,
     FormControlDirective,
-    FormLabelDirective,
     FormCheckComponent,
     FormCheckInputDirective,
     FormCheckLabelDirective,
