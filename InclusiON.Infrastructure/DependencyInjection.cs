@@ -52,6 +52,7 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IUsersRepository, UsersRepository>();
             services.AddScoped<IVisualLoginRepository, VisualLoginRepository>();
             services.AddScoped<IPersonsRepository, PersonsRepository>();
+            services.AddScoped<IProfessionalsRepository, ProfessionalsRepository>();
 
             // Repositorios read-only para catalogos
             services.AddScoped<IReadOnlyRepository<DisabilityType>, ReadOnlyRepository<DisabilityType>>();

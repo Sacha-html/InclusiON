@@ -17,6 +17,7 @@ namespace InclusiON.Api.Controllers
     [ApiController]
     [Authorize]
     [Produces("application/json")]
+    [ResponseCache(Duration = 300)]
     public class CatalogsController : ControllerBase
     {
         /// <summary>

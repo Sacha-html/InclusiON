@@ -195,6 +195,38 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Login para familiares/tutores con contrasena.
+        /// </summary>
+        [HttpPost("login/family")]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginFamily(
+            [FromBody] FamilyLoginRequest request,
+            [FromServices] ICommandHandler<FamilyLoginCommand, ApiResponse<VisualLoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
+            }
+
+            var command = new FamilyLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success || result.Data?.Success == false)
+            {
+                return Unauthorized(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Login asistido donde un familiar o profesional autoriza el acceso.
         /// </summary>
         [HttpPost("login/assisted")]

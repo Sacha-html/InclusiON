@@ -99,6 +99,24 @@ namespace InclusiON.Shared.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Persona creada exitosamente.
         /// </summary>
+        public static string ProfessionalCreated {
+            get {
+                return ResourceManager.GetString("ProfessionalCreated", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalUpdated {
+            get {
+                return ResourceManager.GetString("ProfessionalUpdated", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalDeactivated {
+            get {
+                return ResourceManager.GetString("ProfessionalDeactivated", resourceCulture);
+            }
+        }
+
         public static string PersonCreated {
             get {
                 return ResourceManager.GetString("PersonCreated", resourceCulture);
@@ -141,6 +159,15 @@ namespace InclusiON.Shared.Resources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Login familiar exitoso.
+        /// </summary>
+        public static string FamilyLoginSuccessful {
+            get {
+                return ResourceManager.GetString("FamilyLoginSuccessful", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Login exitoso.
         /// </summary>

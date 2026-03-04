@@ -54,7 +54,8 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.NotFound or
                 ErrorCode.UserNotFound or
                 ErrorCode.PersonNotFound or
-                ErrorCode.ResourceNotFound
+                ErrorCode.ResourceNotFound or
+                ErrorCode.ProfessionalNotFound
                     => new NotFoundObjectResult(response),
 
                 // 409 Conflict - Conflictos de datos

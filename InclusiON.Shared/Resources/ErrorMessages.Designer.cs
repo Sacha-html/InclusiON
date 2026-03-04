@@ -152,6 +152,12 @@ namespace InclusiON.Shared.Resources {
             }
         }
 
+        public static string ProfessionalNotFound {
+            get {
+                return ResourceManager.GetString("ProfessionalNotFound", resourceCulture);
+            }
+        }
+
         public static string PinNotConfigured {
             get {
                 return ResourceManager.GetString("PinNotConfigured", resourceCulture);
