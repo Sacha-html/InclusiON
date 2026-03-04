@@ -34,6 +34,14 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'family',
+    loadComponent: () =>
+      import('./family-login.component').then((m) => m.FamilyLoginComponent),
+    data: {
+      title: 'Login Familiar',
+    },
+  },
+  {
     path: 'assisted',
     loadComponent: () =>
       import('./assisted-login.component').then((m) => m.AssistedLoginComponent),

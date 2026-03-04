@@ -1,78 +1,51 @@
-// ============================================
-// PANEL DE ACCESIBILIDAD
-// Inspirado en UserWay - Máxima legibilidad
-// ============================================
-
+// Panel de Accesibilidad
 $panel-width: 380px;
-$panel-z-index: 9999;
+$panel-z: 9999;
+$bg: #1E1E2E;
+$text: #FFFFFF;
+$muted: #E0E0E0;
+$accent: #00D9FF;
+$border: #4A4A6A;
+$active-text: #000000;
+$section-bg: rgba(255, 255, 255, 0.08);
+$danger: #FF6B6B;
+$ff: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 
-// Colores BRILLANTES para máxima legibilidad
-$panel-bg: #1E1E2E;
-$panel-text: #FFFFFF;
-$panel-text-muted: #E0E0E0;
-$panel-accent: #00D9FF;
-$panel-border: #4A4A6A;
-$panel-active-bg: #00D9FF;
-$panel-active-text: #000000;
-$panel-section-bg: rgba(255, 255, 255, 0.08);
-
-$font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-
-// ============================================
-// BOTÓN FLOTANTE
-// ============================================
+// Botón flotante
 .a11y-trigger-btn {
   position: fixed;
   bottom: 90px;
   right: 20px;
-  z-index: $panel-z-index - 1;
+  z-index: $panel-z - 1;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 16px 24px;
   min-height: 56px;
   border-radius: 28px;
-  border: 3px solid $panel-accent;
-  background: $panel-bg;
+  border: 3px solid $accent;
+  background: $bg;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  font-family: $font-family;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font: 600 1.1rem $ff;
 
   &:hover {
-    background: $panel-accent;
+    background: $accent;
     transform: scale(1.03);
-
-    svg, .a11y-trigger-text {
-      color: $panel-active-text !important;
-    }
+    svg, .a11y-trigger-text { color: $active-text !important; }
   }
 
-  &:focus-visible {
-    outline: 4px solid $panel-accent;
-    outline-offset: 3px;
-  }
-
-  svg {
-    width: 28px;
-    height: 28px;
-    color: $panel-accent;
-  }
+  &:focus-visible { outline: 4px solid $accent; outline-offset: 3px; }
+  svg { width: 28px; height: 28px; color: $accent; }
 }
 
 .a11y-trigger-text {
-  color: $panel-text !important;
+  color: $text !important;
   font-weight: 600;
-
-  @media (max-width: 500px) {
-    display: none;
-  }
+  @media (max-width: 500px) { display: none; }
 }
 
-// ============================================
-// BOTÓN SALIR MODO LECTURA
-// ============================================
+// Botón salir modo lectura
 .a11y-exit-reading-btn {
   position: fixed;
   top: 16px;
@@ -84,51 +57,33 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
   padding: 14px 24px;
   min-height: 52px;
   border-radius: 26px;
-  border: 3px solid #FF6B6B;
-  background: $panel-bg;
+  border: 3px solid $danger;
+  background: $bg;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  font-family: $font-family;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #FF6B6B;
-  transition: all 0.2s ease;
+  font: 600 1rem $ff;
+  color: $danger;
 
   &:hover {
-    background: #FF6B6B;
-    color: #000000;
+    background: $danger;
+    color: $active-text;
     transform: scale(1.03);
-
-    svg {
-      color: #000000 !important;
-    }
+    svg { color: $active-text !important; }
   }
 
-  &:focus-visible {
-    outline: 4px solid #FF6B6B;
-    outline-offset: 3px;
-  }
-
-  svg {
-    width: 24px;
-    height: 24px;
-    color: #FF6B6B;
-  }
+  &:focus-visible { outline: 4px solid $danger; outline-offset: 3px; }
+  svg { width: 24px; height: 24px; color: $danger; }
 }
 
-// ============================================
-// OVERLAY
-// ============================================
+// Overlay
 .a11y-panel-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: $panel-z-index;
+  z-index: $panel-z;
 }
 
-// ============================================
-// PANEL PRINCIPAL
-// ============================================
+// Panel principal
 .a11y-panel {
   position: fixed;
   top: 0;
@@ -136,98 +91,72 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
   width: $panel-width;
   max-width: 100vw;
   height: 100vh;
-  z-index: $panel-z-index + 1;
-  background: $panel-bg;
-  color: $panel-text;
+  z-index: $panel-z + 1;
+  background: $bg;
+  color: $text;
   display: flex;
   flex-direction: column;
   box-shadow: -4px 0 30px rgba(0, 0, 0, 0.5);
-  font-family: $font-family;
+  font-family: $ff;
 }
 
-// ============================================
-// HEADER - Título grande y visible
-// ============================================
+// Header
 .a11y-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #2A2A4A 0%, $panel-bg 100%);
-  border-bottom: 2px solid $panel-accent;
+  background: linear-gradient(135deg, #2A2A4A 0%, $bg 100%);
+  border-bottom: 2px solid $accent;
 }
 
 .a11y-panel-title {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: $panel-accent !important;
+  color: $accent !important;
   letter-spacing: 0.02em;
 }
 
 .a11y-panel-close {
   background: transparent;
-  border: 2px solid $panel-border;
+  border: 2px solid $border;
   border-radius: 10px;
-  color: $panel-text;
+  color: $text;
   padding: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &:hover {
-    background: $panel-accent;
-    color: $panel-active-text;
-    border-color: $panel-accent;
-  }
-
-  svg {
-    width: 24px;
-    height: 24px;
-  }
+  &:hover { background: $accent; color: $active-text; border-color: $accent; }
+  svg { width: 24px; height: 24px; }
 }
 
-// ============================================
-// CONTENIDO
-// ============================================
-.a11y-panel-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px 20px;
-}
+// Contenido
+.a11y-panel-content { flex: 1; overflow-y: auto; padding: 16px 20px; }
 
-// ============================================
-// SECCIONES - Títulos claros y visibles
-// ============================================
+// Secciones
 .a11y-section {
   margin-bottom: 20px;
   padding: 16px;
-  background: $panel-section-bg;
+  background: $section-bg;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  &:last-child { margin-bottom: 0; }
 }
 
 .a11y-section-title {
   font-size: 0.85rem;
   font-weight: 700;
-  color: $panel-accent !important;
-  margin: 0 0 12px 0;
+  color: $accent !important;
+  margin: 0 0 12px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
-// ============================================
-// TOGGLE MODO CLARO/OSCURO
-// ============================================
-.a11y-color-mode-toggle {
-  display: flex;
-  gap: 10px;
-}
+// Toggle modo claro/oscuro
+.a11y-color-mode-toggle { display: flex; gap: 10px; }
 
 .a11y-mode-btn {
   flex: 1;
@@ -236,79 +165,68 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
   align-items: center;
   gap: 8px;
   padding: 14px 10px;
-  border: 2px solid $panel-border;
+  border: 2px solid $border;
   border-radius: 10px;
   background: transparent;
-  color: $panel-text;
+  color: $text;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
 
-  &:hover {
-    border-color: $panel-accent;
-    background: rgba($panel-accent, 0.1);
-  }
+  &:hover { border-color: $accent; background: rgba($accent, 0.1); }
 
   &.active {
-    border-color: $panel-accent;
-    background: $panel-accent;
-    color: $panel-active-text;
-
-    svg {
-      color: $panel-active-text;
-    }
+    border-color: $accent;
+    background: $accent;
+    color: $active-text;
+    svg { color: $active-text; }
   }
 
-  svg {
-    width: 32px;
-    height: 32px;
-    color: $panel-accent;
-  }
+  svg { width: 32px; height: 32px; color: $accent; }
 }
 
-// ============================================
-// PERFILES DE ACCESIBILIDAD
-// ============================================
-.a11y-theme-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+// Perfiles y opciones (estilos compartidos)
+.a11y-theme-list { display: flex; flex-direction: column; gap: 8px; }
 
-.a11y-theme-btn {
+// Mixin para botones del panel
+%a11y-btn-base {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 12px 14px;
-  border: 2px solid $panel-border;
+  border: 2px solid $border;
   border-radius: 10px;
   background: transparent;
-  color: $panel-text;
+  color: $text;
   cursor: pointer;
   text-align: left;
 
-  &:hover {
-    border-color: $panel-accent;
-    background: rgba($panel-accent, 0.1);
-  }
+  &:hover { border-color: $accent; background: rgba($accent, 0.1); }
 
   &.active {
-    border-color: $panel-accent;
-    background: $panel-accent;
-    color: $panel-active-text;
-
-    svg, .a11y-theme-text strong, .a11y-theme-text small {
-      color: $panel-active-text !important;
-    }
+    border-color: $accent;
+    background: $accent;
+    color: $active-text;
+    svg, strong, small, span { color: $active-text !important; }
   }
 
-  svg {
-    width: 28px;
-    height: 28px;
-    color: $panel-accent;
-    flex-shrink: 0;
-  }
+  svg { color: $accent; flex-shrink: 0; }
+}
+
+.a11y-theme-btn {
+  @extend %a11y-btn-base;
+  padding: 12px 14px;
+  svg { width: 28px; height: 28px; }
+}
+
+.a11y-option-btn {
+  @extend %a11y-btn-base;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  &:last-child { margin-bottom: 0; }
+  svg { width: 24px; height: 24px; }
+  span { flex: 1; font-weight: 500; color: $text; }
 }
 
 .a11y-theme-text {
@@ -316,67 +234,36 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
   display: flex;
   flex-direction: column;
   gap: 2px;
-
-  strong {
-    font-size: 1rem;
-    font-weight: 600;
-    color: $panel-text;
-  }
-
-  small {
-    font-size: 0.8rem;
-    color: $panel-text-muted;
-  }
+  strong { font-size: 1rem; font-weight: 600; color: $text; }
+  small { font-size: 0.8rem; color: $muted; }
 }
 
-.a11y-check {
-  width: 20px;
-  height: 20px;
-  color: $panel-active-text;
-}
+.a11y-check { width: 20px; height: 20px; color: $active-text; }
 
-// ============================================
-// TAMAÑO DE TEXTO - Con iconos
-// ============================================
-.a11y-size-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
+// Tamaño de texto
+.a11y-size-controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
 
 .a11y-size-btn {
   width: 56px;
   height: 56px;
   border-radius: 12px;
-  border: 2px solid $panel-border;
+  border: 2px solid $border;
   background: transparent;
-  color: $panel-text;
+  color: $text;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &:hover:not(:disabled) {
-    border-color: $panel-accent;
-    background: $panel-accent;
-    color: $panel-active-text;
-
-    svg {
-      color: $panel-active-text;
-    }
+    border-color: $accent;
+    background: $accent;
+    color: $active-text;
+    svg { color: $active-text; }
   }
 
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  svg {
-    width: 28px;
-    height: 28px;
-    color: $panel-accent;
-  }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+  svg { width: 28px; height: 28px; color: $accent; }
 }
 
 .a11y-size-display {
@@ -384,66 +271,13 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
   font-weight: 600;
   min-width: 80px;
   text-align: center;
-  color: $panel-text;
+  color: $text;
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
 }
 
-// ============================================
-// BOTONES DE OPCIONES
-// ============================================
-.a11y-option-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  border: 2px solid $panel-border;
-  border-radius: 10px;
-  background: transparent;
-  color: $panel-text;
-  cursor: pointer;
-  text-align: left;
-  font-size: 0.95rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &:hover {
-    border-color: $panel-accent;
-    background: rgba($panel-accent, 0.1);
-  }
-
-  &.active {
-    border-color: $panel-accent;
-    background: $panel-accent;
-    color: $panel-active-text;
-
-    svg, span {
-      color: $panel-active-text !important;
-    }
-  }
-
-  svg {
-    width: 24px;
-    height: 24px;
-    color: $panel-accent;
-    flex-shrink: 0;
-  }
-
-  span {
-    flex: 1;
-    font-weight: 500;
-    color: $panel-text;
-  }
-}
-
-// ============================================
-// ATAJOS DE TECLADO
-// ============================================
+// Atajos de teclado
 .a11y-shortcuts {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -466,27 +300,20 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
     min-width: 28px;
     height: 24px;
     padding: 0 6px;
-    background: $panel-accent;
-    color: $panel-active-text;
+    background: $accent;
+    color: $active-text;
     border-radius: 4px;
-    font-family: $font-family;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font: 700 0.75rem $ff;
   }
 
-  span {
-    color: $panel-text-muted;
-    font-size: 0.75rem;
-  }
+  span { color: $muted; font-size: 0.75rem; }
 }
 
-// ============================================
-// FOOTER
-// ============================================
+// Footer
 .a11y-panel-footer {
   padding: 16px 20px;
   background: rgba(0, 0, 0, 0.2);
-  border-top: 1px solid $panel-border;
+  border-top: 1px solid $border;
 }
 
 .a11y-reset-btn {
@@ -496,101 +323,51 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
   gap: 10px;
   width: 100%;
   padding: 12px;
-  border: 2px solid #FF6B6B;
+  border: 2px solid $danger;
   border-radius: 10px;
   background: transparent;
-  color: #FF6B6B;
+  color: $danger;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
 
-  &:hover {
-    background: #FF6B6B;
-    color: #000000;
-
-    svg {
-      color: #000000;
-    }
-  }
-
-  svg {
-    width: 20px;
-    height: 20px;
-    color: #FF6B6B;
-  }
+  &:hover { background: $danger; color: $active-text; svg { color: $active-text; } }
+  svg { width: 20px; height: 20px; color: $danger; }
 }
 
-// ============================================
-// TEXTO A VOZ (TTS) CONTROLES
-// ============================================
+// Texto a voz
 .a11y-tts-speed {
   margin-top: 12px;
   padding: 12px;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
 
-  label {
-    display: block;
-    font-size: 0.85rem;
-    color: $panel-text-muted;
-    margin-bottom: 8px;
-  }
-
-  .a11y-size-controls {
-    gap: 8px;
-  }
+  label { display: block; font-size: 0.85rem; color: $muted; margin-bottom: 8px; }
+  .a11y-size-controls { gap: 8px; }
 }
 
 .a11y-slider {
   flex: 1;
   height: 6px;
-  background: $panel-border;
+  background: $border;
   border-radius: 3px;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
 
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    background: $panel-accent;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  &::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: $panel-accent;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-  }
-
-  &:focus {
-    outline: 2px solid $panel-accent;
-    outline-offset: 2px;
-  }
+  &::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: $accent; border-radius: 50%; cursor: pointer; }
+  &::-moz-range-thumb { width: 18px; height: 18px; background: $accent; border-radius: 50%; cursor: pointer; border: none; }
+  &:focus { outline: 2px solid $accent; outline-offset: 2px; }
 }
 
 .a11y-size-btn-small {
   width: 36px !important;
   height: 36px !important;
   min-width: 36px;
-
-  svg {
-    width: 16px !important;
-    height: 16px !important;
-  }
+  svg { width: 16px !important; height: 16px !important; }
 }
 
-.a11y-tts-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
+.a11y-tts-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
 .a11y-tts-btn {
   display: flex;
@@ -599,61 +376,29 @@ $font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans
   flex: 1;
   min-width: calc(50% - 4px);
   padding: 10px 12px;
-  border: 2px solid $panel-border;
+  border: 2px solid $border;
   border-radius: 8px;
   background: transparent;
-  color: $panel-text;
+  color: $text;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 500;
 
-  &:hover {
-    border-color: $panel-accent;
-    background: rgba($panel-accent, 0.1);
-  }
-
-  svg {
-    width: 20px;
-    height: 20px;
-    color: $panel-accent;
-  }
+  &:hover { border-color: $accent; background: rgba($accent, 0.1); }
+  svg { width: 20px; height: 20px; color: $accent; }
 
   &.a11y-tts-stop {
-    border-color: #FF6B6B;
-    color: #FF6B6B;
+    border-color: $danger;
+    color: $danger;
     flex: 1 1 100%;
-
-    svg {
-      color: #FF6B6B;
-    }
-
-    &:hover {
-      background: #FF6B6B;
-      color: #000;
-
-      svg {
-        color: #000;
-      }
-    }
+    svg { color: $danger; }
+    &:hover { background: $danger; color: $active-text; svg { color: $active-text; } }
   }
 }
 
-// ============================================
-// RESPONSIVE
-// ============================================
+// Responsive
 @media (max-width: 400px) {
-  .a11y-panel {
-    width: 100vw;
-  }
-
-  .a11y-shortcuts {
-    grid-template-columns: 1fr;
-  }
-
-  .a11y-tts-btn {
-    min-width: 100%;
-  }
+  .a11y-panel { width: 100vw; }
+  .a11y-shortcuts { grid-template-columns: 1fr; }
+  .a11y-tts-btn { min-width: 100%; }
 }
-
-// NOTA: Los estilos de .a11y-reading-guide-bar y .a11y-speaking-indicator
-// están en _accessibility-themes.scss porque los elementos se agregan al document.body
