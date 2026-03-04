@@ -5,7 +5,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   AvatarComponent,
   BreadcrumbRouterComponent,
-  ColorModeService,
   ContainerComponent,
   DropdownComponent,
   DropdownHeaderDirective,
@@ -50,24 +49,12 @@ import { User } from '@models';
   ],
 })
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
-  readonly #colorModeService = inject(ColorModeService);
-  readonly colorMode = this.#colorModeService.colorMode;
-
   readonly authService = inject(AuthService);
   readonly accessibilityService = inject(AccessibilityService);
 
-  readonly colorModes = [
-    { name: 'light', text: 'Claro', icon: 'cilSun' },
-    { name: 'dark', text: 'Oscuro', icon: 'cilMoon' },
-    { name: 'auto', text: 'Auto', icon: 'cilContrast' },
-  ];
-
-  readonly icons = computed(() => {
-    const currentMode = this.colorMode();
-    return (
-      this.colorModes.find((mode) => mode.name === currentMode)?.icon ??
-      'cilSun'
-    );
+  readonly colorModeIcon = computed(() => {
+    const mode = this.accessibilityService.colorMode();
+    return mode === 'dark' ? 'cilMoon' : 'cilSun';
   });
 
   readonly accessibilityIcon = computed(() => {

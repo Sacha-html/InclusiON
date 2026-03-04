@@ -1,4 +1,3 @@
-// Host element debe ocupar todo el ancho
 :host {
   display: block;
   width: 100vw;
@@ -20,10 +19,6 @@
   width: 100%;
   max-width: 100%;
   padding: 0 2rem;
-
-  @media (min-width: 1200px) {
-    padding: 0 4rem;
-  }
 }
 
 .back-button {
@@ -39,14 +34,9 @@
   background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
   color: var(--a11y-text, #1A1A1A) !important;
 
-  svg {
-    width: 24px;
-    height: 24px;
-    color: inherit;
-  }
+  svg { width: 24px; height: 24px; color: inherit; }
 
-  &:hover,
-  &:focus {
+  &:hover, &:focus {
     background-color: var(--a11y-primary, #0D47A1) !important;
     border-color: var(--a11y-primary, #0D47A1) !important;
     color: var(--a11y-primary-text, #FFFFFF) !important;
@@ -79,11 +69,7 @@
   text-transform: uppercase;
 }
 
-.pin-display {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
+.pin-display { display: flex; justify-content: center; gap: 1rem; }
 
 .pin-dot {
   width: 24px;
@@ -117,18 +103,11 @@
   gap: 0.75rem;
   max-width: 320px;
   margin: 0 auto;
-
-  &.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
+  &.disabled { opacity: 0.5; pointer-events: none; }
+  &.hidden { display: none; }
 }
 
-.pin-row {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-}
+.pin-row { display: flex; justify-content: center; gap: 0.75rem; }
 
 .pin-key {
   width: 80px;
@@ -162,48 +141,25 @@
     outline-offset: 2px;
   }
 
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  &.special {
-    font-size: 1.5rem;
-  }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+  &.special { font-size: 1.5rem; }
 
   &.clear {
     color: var(--a11y-danger, #B71C1C);
     border-color: var(--a11y-danger, #B71C1C);
-
-    &:hover:not(:disabled) {
-      background-color: var(--a11y-bg-secondary, #FFEBEE);
-      border-color: var(--a11y-danger, #B71C1C);
-    }
+    &:hover:not(:disabled) { background-color: var(--a11y-bg-secondary, #FFEBEE); }
   }
 
   &.submit {
     color: var(--a11y-success, #1B5E20);
     border-color: var(--a11y-success, #1B5E20);
-
-    &:hover:not(:disabled) {
-      background-color: var(--a11y-bg-secondary, #E8F5E9);
-      border-color: var(--a11y-success, #1B5E20);
-    }
-
-    &:active:not(:disabled) {
-      background-color: var(--a11y-success, #1B5E20);
-      color: #FFFFFF;
-    }
+    &:hover:not(:disabled) { background-color: var(--a11y-bg-secondary, #E8F5E9); }
+    &:active:not(:disabled) { background-color: var(--a11y-success, #1B5E20); color: #FFFFFF; }
   }
 }
 
-// =========================================
-// INPUT DE TECLADO ALTERNATIVO
-// Para personas con discapacidad motora
-// =========================================
-.pin-keyboard-input {
-  text-align: center;
-}
+// Input de teclado alternativo (accesibilidad motora)
+.pin-keyboard-input { text-align: center; }
 
 .toggle-input-btn {
   display: inline-flex;
@@ -217,22 +173,10 @@
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
 
-  &:hover {
-    border-color: var(--a11y-primary, #0D47A1);
-    color: var(--a11y-primary, #0D47A1);
-  }
-
-  &:focus-visible {
-    outline: 3px solid var(--a11y-focus-color);
-    outline-offset: 2px;
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
+  &:hover { border-color: var(--a11y-primary, #0D47A1); color: var(--a11y-primary, #0D47A1); }
+  &:focus-visible { outline: 3px solid var(--a11y-focus-color); outline-offset: 2px; }
+  svg { width: 18px; height: 18px; }
 }
 
 .keyboard-input-wrapper {
@@ -243,11 +187,7 @@
   border-radius: 12px;
   border: 2px solid var(--a11y-border, #E0E0E0);
 
-  .form-label {
-    font-weight: 600;
-    color: var(--a11y-text, #1A1A1A);
-    margin-bottom: 0.75rem;
-  }
+  .form-label { font-weight: 600; color: var(--a11y-text, #1A1A1A); margin-bottom: 0.75rem; }
 }
 
 .pin-text-input {
@@ -264,220 +204,77 @@
     box-shadow: 0 0 0 4px var(--a11y-focus-color) !important;
   }
 
-  &::placeholder {
-    letter-spacing: 0.3rem;
-    color: var(--a11y-text-muted, #757575);
-  }
+  &::placeholder { letter-spacing: 0.3rem; color: var(--a11y-text-muted, #757575); }
 }
 
-.pin-pad.hidden {
-  display: none;
-}
-
-// =========================================
-// Accessibility
-// =========================================
+// Accessibility media queries
 @media (prefers-reduced-motion: reduce) {
-  .pin-dot,
-  .pin-key,
-  .toggle-input-btn {
-    transition: none;
-  }
-
-  .pin-dot.error {
-    animation: none;
-  }
+  .pin-dot, .pin-key, .toggle-input-btn { transition: none; }
+  .pin-dot.error { animation: none; }
 }
 
-@media (prefers-contrast: more) {
-  .pin-card {
-    border: 3px solid #000 !important;
-  }
-
-  .pin-dot {
-    border-width: 3px;
-    border-color: #000;
-
-    &.filled {
-      background-color: #000;
-      border-color: #000;
-    }
-  }
-
-  .pin-key {
-    border-width: 3px;
-    border-color: #000;
-  }
-}
-
-// Large screens
+// Responsive
 @media (min-width: 992px) {
-  .pin-card {
-    max-width: 500px;
-  }
-
-  .pin-key {
-    width: 90px;
-    height: 90px;
-    font-size: 2rem;
-  }
+  .pin-card { max-width: 500px; }
+  .pin-key { width: 90px; height: 90px; font-size: 2rem; }
 }
 
-// Small screens
 @media (max-width: 767px) {
-  .content-wrapper {
-    padding: 0 1rem;
-  }
-
-  .pin-key {
-    width: 70px;
-    height: 70px;
-    font-size: 1.5rem;
-  }
-
-  .pin-row {
-    gap: 0.5rem;
-  }
+  .content-wrapper { padding: 0 1rem; }
+  .pin-key { width: 70px; height: 70px; font-size: 1.5rem; }
+  .pin-row { gap: 0.5rem; }
 }
 
-// =========================================
-// PERFIL LOW-VISION - Botones más grandes
-// =========================================
+// Perfil low-vision
 [data-profile="low-vision"] {
-  .pin-key {
-    width: 100px;
-    height: 100px;
-    font-size: 2.25rem;
-    border-width: 4px;
-  }
-
-  .pin-dot {
-    width: 32px;
-    height: 32px;
-    border-width: 4px;
-  }
-
-  .pin-display {
-    gap: 1.5rem;
-  }
-
-  .pin-pad {
-    max-width: 400px;
-  }
-
-  .pin-row {
-    gap: 1rem;
-  }
-
-  .pin-text-input {
-    font-size: 2.5rem !important;
-    padding: 1.25rem !important;
-  }
-
-  .toggle-input-btn {
-    font-size: 1.1rem;
-    padding: 1rem 1.5rem;
-  }
+  .pin-key { width: 100px; height: 100px; font-size: 2.25rem; border-width: 4px; }
+  .pin-dot { width: 32px; height: 32px; border-width: 4px; }
+  .pin-display { gap: 1.5rem; }
+  .pin-pad { max-width: 400px; }
+  .pin-row { gap: 1rem; }
+  .pin-text-input { font-size: 2.5rem !important; padding: 1.25rem !important; }
+  .toggle-input-btn { font-size: 1.1rem; padding: 1rem 1.5rem; }
 
   @media (max-width: 767px) {
-    .pin-key {
-      width: 85px;
-      height: 85px;
-      font-size: 2rem;
-    }
+    .pin-key { width: 85px; height: 85px; font-size: 2rem; }
   }
 }
 
-// =========================================
-// PERFIL HIGH-CONTRAST - Mayor visibilidad
-// =========================================
+// Perfil high-contrast
 [data-profile="high-contrast"] {
   .pin-key {
     border-width: 4px;
     border-color: #000000;
-
-    &:hover:not(:disabled) {
-      background-color: #FFFF00;
-      color: #000000;
-      border-color: #000000;
-    }
-
-    &:active:not(:disabled) {
-      background-color: #000000;
-      color: #FFFFFF;
-    }
-
-    &.clear {
-      border-color: #000000;
-      color: #CC0000;
-    }
-
-    &.submit {
-      border-color: #000000;
-      color: #006600;
-    }
+    &:hover:not(:disabled) { background-color: #FFFF00; color: #000000; border-color: #000000; }
+    &:active:not(:disabled) { background-color: #000000; color: #FFFFFF; }
+    &.clear { border-color: #000000; color: #CC0000; }
+    &.submit { border-color: #000000; color: #006600; }
   }
-
   .pin-dot {
     border-width: 4px;
     border-color: #000000;
-
-    &.filled {
-      background-color: #000000;
-      border-color: #000000;
-    }
+    &.filled { background-color: #000000; border-color: #000000; }
   }
-
   .toggle-input-btn {
     border-width: 3px;
     border-color: #000000;
-
-    &:hover {
-      background-color: #FFFF00;
-      color: #000000;
-    }
+    &:hover { background-color: #FFFF00; color: #000000; }
   }
-
-  .keyboard-input-wrapper {
-    border-width: 3px;
-    border-color: #000000;
-  }
-
-  .pin-text-input {
-    border-width: 4px !important;
-    border-color: #000000 !important;
-  }
+  .keyboard-input-wrapper { border-width: 3px; border-color: #000000; }
+  .pin-text-input { border-width: 4px !important; border-color: #000000 !important; }
 }
 
-// Modo oscuro high-contrast
+// Dark + high-contrast
 [data-color-mode="dark"][data-profile="high-contrast"] {
   .pin-key {
     border-color: #FFFFFF;
     color: #FFFFFF;
-
-    &:hover:not(:disabled) {
-      background-color: #FFFF00;
-      color: #000000;
-      border-color: #FFFF00;
-    }
-
-    &.clear {
-      color: #FF6666;
-      border-color: #FFFFFF;
-    }
-
-    &.submit {
-      color: #66FF66;
-      border-color: #FFFFFF;
-    }
+    &:hover:not(:disabled) { background-color: #FFFF00; color: #000000; border-color: #FFFF00; }
+    &.clear { color: #FF6666; border-color: #FFFFFF; }
+    &.submit { color: #66FF66; border-color: #FFFFFF; }
   }
-
   .pin-dot {
     border-color: #FFFFFF;
-
-    &.filled {
-      background-color: #FFFF00;
-      border-color: #FFFF00;
-    }
+    &.filled { background-color: #FFFF00; border-color: #FFFF00; }
   }
 }

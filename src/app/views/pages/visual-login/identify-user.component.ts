@@ -114,6 +114,18 @@ export class IdentifyUserComponent implements OnInit {
       return;
     }
 
+    // Familiares siempre van a /login/family
+    if (userData.userType === 'Family') {
+      this.router.navigate(['/login/family'], { queryParams: baseParams });
+      return;
+    }
+
+    // Profesionales van al login clasico de email+password
+    if (userData.userType === 'Professional') {
+      this.router.navigate(['/admin-login']);
+      return;
+    }
+
     // Navigate based on login method
     switch (userData.loginMethodCode) {
       case 'STANDARD':

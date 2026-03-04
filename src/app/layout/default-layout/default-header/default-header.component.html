@@ -146,19 +146,27 @@
 
 <ng-template #themeDropdown>
   <c-dropdown alignment="end" variant="nav-item">
-    <button [caret]="false" cDropdownToggle aria-label="Open theme picker">
-      <svg cIcon [name]="icons()" size="lg"></svg>
+    <button
+      [caret]="false"
+      cDropdownToggle
+      aria-label="Cambiar modo de color"
+      cTooltip="Modo de color"
+    >
+      <svg cIcon [name]="colorModeIcon()" size="lg"></svg>
     </button>
     <div cDropdownMenu>
-      @for (mode of colorModes; track mode.name) {
+      <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
+        Modo de Color
+      </h6>
+      @for (mode of accessibilityService.colorModes; track mode.id) {
       <button
-        (click)="colorMode.set(mode.name)"
-        [active]="colorMode() === mode.name"
+        (click)="accessibilityService.setColorMode(mode.id)"
+        [active]="accessibilityService.colorMode() === mode.id"
         cDropdownItem
         class="d-flex align-items-center"
       >
         <svg cIcon class="me-2" [name]="mode.icon" size="lg"></svg>
-        {{ mode.text }}
+        {{ mode.name }}
       </button>
       }
     </div>

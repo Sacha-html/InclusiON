@@ -33,17 +33,11 @@
   $line-height-base: 1.5
 );
 
-// Chart.js tooltips (si se usan)
-@use "@coreui/chartjs/scss/coreui-chartjs";
-
 // Custom theme
 @use "theme";
 
 // Custom styles
 @use "custom";
-
-// Examples (remover en producción)
-@use "examples";
 
 // Temas de accesibilidad
 @use "accessibility-themes";

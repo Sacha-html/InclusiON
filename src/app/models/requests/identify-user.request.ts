@@ -25,6 +25,13 @@ export interface AssistedLoginRequest {
   deviceId?: string;
 }
 
+export interface FamilyLoginRequest {
+  userId: string;
+  password: string;
+  deviceId?: string;
+  rememberDevice?: boolean;
+}
+
 export interface UpdateLoginMethodRequest {
   loginMethodId: number;
   pin?: string;
