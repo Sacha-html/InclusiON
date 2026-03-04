@@ -1,4 +1,4 @@
-﻿using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+﻿using InclusiON.Application.Interfaces.Infrastructure;
 using BCrypt.Net;
 
 namespace InclusiON.Infrastructure.Authentication
@@ -24,7 +24,7 @@ namespace InclusiON.Infrastructure.Authentication
 
             try
             {
-                return BCrypt.Net.BCrypt.Verify(hashedPassword, providedPassword);
+                return BCrypt.Net.BCrypt.Verify(providedPassword, hashedPassword);
             }
             catch
             {
