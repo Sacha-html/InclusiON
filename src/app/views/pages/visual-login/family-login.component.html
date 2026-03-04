@@ -1,0 +1,138 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="visual-login-container min-vh-100 d-flex flex-column align-items-center justify-content-center">
+  <div class="content-wrapper">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <button
+        cButton
+        color="light"
+        class="back-button"
+        (click)="goBack()"
+        aria-label="Volver a identificacion de usuario"
+      >
+        <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
+        <span>Volver</span>
+      </button>
+    </div>
+
+    <!-- Main Card -->
+    <main class="login-card card border-0 shadow" role="main">
+      <div class="card-body p-4 p-md-5">
+        <!-- User Avatar -->
+        <header class="text-center mb-4">
+          <div
+            class="user-avatar mx-auto mb-3"
+            [style.background-color]="avatarColor"
+            role="img"
+            [attr.aria-label]="'Avatar de ' + displayName"
+          >
+            {{ initial }}
+          </div>
+          <h1 class="h4 fw-bold mb-1">Hola, {{ displayName }}</h1>
+          <p class="text-muted">Ingresa tu contrasena como familiar o tutor</p>
+        </header>
+
+        <!-- Error Alert -->
+        @if (errorMessage) {
+          <div
+            class="alert mb-4 text-center"
+            [class.alert-warning]="isLocked"
+            [class.alert-danger]="!isLocked"
+            role="alert"
+            aria-live="assertive"
+          >
+            @if (isLocked) {
+              <svg cIcon name="cilLockLocked" class="me-2" aria-hidden="true"></svg>
+            } @else {
+              <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
+            }
+            {{ errorMessage }}
+          </div>
+        }
+
+        <!-- Password Form -->
+        <form (ngSubmit)="onSubmit()" class="password-form">
+          <div class="mb-4">
+            <label for="password" class="form-label visually-hidden">Contrasena</label>
+            <c-input-group size="lg">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
+              </span>
+              <input
+                cFormControl
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Tu contrasena"
+                [disabled]="isLoading || isLocked"
+                autocomplete="current-password"
+                class="password-input"
+                aria-describedby="passwordHelp"
+              />
+              <button
+                type="button"
+                cButton
+                color="secondary"
+                variant="outline"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+                [attr.aria-pressed]="showPassword"
+              >
+                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilDescription'" aria-hidden="true"></svg>
+              </button>
+            </c-input-group>
+            <small id="passwordHelp" class="visually-hidden">
+              Usa el boton a la derecha para mostrar u ocultar la contrasena
+            </small>
+          </div>
+
+          <!-- Remember Device -->
+          <div class="mb-4">
+            <c-form-check>
+              <input
+                cFormCheckInput
+                type="checkbox"
+                id="rememberDevice"
+                [(ngModel)]="rememberDevice"
+                name="rememberDevice"
+                [disabled]="isLoading"
+              />
+              <label cFormCheckLabel for="rememberDevice">
+                Recordar este dispositivo
+              </label>
+            </c-form-check>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            cButton
+            color="primary"
+            type="submit"
+            size="lg"
+            class="w-100 submit-button"
+            [disabled]="!password || isLoading || isLocked"
+          >
+            @if (isLoading) {
+              <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
+              <span>Verificando...</span>
+            } @else {
+              <svg cIcon name="cilLockUnlocked" class="me-2" aria-hidden="true"></svg>
+              <span>Entrar</span>
+            }
+          </button>
+        </form>
+
+        <!-- Help -->
+        <footer class="text-center mt-4">
+          <p class="text-muted small mb-0">
+            <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
+            Si olvidaste tu contrasena, contacta al administrador
+          </p>
+        </footer>
+      </div>
+    </main>
+  </div>
+</div>
