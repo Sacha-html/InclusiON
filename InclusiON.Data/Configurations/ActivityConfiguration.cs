@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Data.Configurations
 {
@@ -63,6 +63,13 @@ namespace InclusiON.Data.Configurations
             builder.HasOne(a => a.Category)
                 .WithMany(c => c.Activities)
                 .HasForeignKey(a => a.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(a => a.SkillAreaId);
+
+            builder.HasOne(a => a.SkillArea)
+                .WithMany(s => s.Activities)
+                .HasForeignKey(a => a.SkillAreaId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

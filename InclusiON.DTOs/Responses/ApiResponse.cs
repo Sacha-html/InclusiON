@@ -1,4 +1,5 @@
 using InclusiON.DTOs.Common;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.DTOs.Responses
 {
@@ -94,7 +95,7 @@ namespace InclusiON.DTOs.Responses
             return new ApiResponse<T>
             {
                 Success = false,
-                Message = "Validacion fallida",
+                Message = ErrorMessages.ValidationFailed,
                 Data = default,
                 ErrorCode = ErrorCode.ValidationFailed,
                 Errors = validationErrors,
@@ -107,7 +108,7 @@ namespace InclusiON.DTOs.Responses
             return new ApiResponse<T>
             {
                 Success = false,
-                Message = "Validacion fallida",
+                Message = ErrorMessages.ValidationFailed,
                 Data = default,
                 ErrorCode = ErrorCode.ValidationFailed,
                 Errors = new List<string>(),
@@ -121,7 +122,7 @@ namespace InclusiON.DTOs.Responses
             return new ApiResponse<T>
             {
                 Success = false,
-                Message = $"{resourceName} no encontrado",
+                Message = string.Format(ErrorMessages.ResourceNotFound, resourceName),
                 Data = default,
                 ErrorCode = ErrorCode.NotFound,
                 Errors = new List<string>(),
@@ -129,12 +130,12 @@ namespace InclusiON.DTOs.Responses
             };
         }
 
-        public static ApiResponse<T> Unauthorized(string message = "No autorizado")
+        public static ApiResponse<T> Unauthorized(string? message = null)
         {
             return new ApiResponse<T>
             {
                 Success = false,
-                Message = message,
+                Message = message ?? ErrorMessages.NotAuthorized,
                 Data = default,
                 ErrorCode = ErrorCode.Unauthorized,
                 Errors = new List<string>(),
@@ -142,12 +143,12 @@ namespace InclusiON.DTOs.Responses
             };
         }
 
-        public static ApiResponse<T> Forbidden(string message = "Acceso denegado")
+        public static ApiResponse<T> Forbidden(string? message = null)
         {
             return new ApiResponse<T>
             {
                 Success = false,
-                Message = message,
+                Message = message ?? ErrorMessages.AccessDenied,
                 Data = default,
                 ErrorCode = ErrorCode.Forbidden,
                 Errors = new List<string>(),
@@ -161,8 +162,8 @@ namespace InclusiON.DTOs.Responses
             {
                 Success = false,
                 Message = minutesRemaining.HasValue
-                    ? $"Cuenta bloqueada. Intente en {minutesRemaining} minuto(s)"
-                    : "Cuenta bloqueada por intentos fallidos",
+                    ? string.Format(ErrorMessages.AccountLockedMinutes, minutesRemaining)
+                    : ErrorMessages.AccountLocked,
                 Data = default,
                 ErrorCode = ErrorCode.AccountLocked,
                 Errors = new List<string>(),

@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.DTOs.Responses.Auth;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
@@ -23,7 +23,6 @@ namespace InclusiON.Infrastructure.Data.Repositories
             try
             {
                 await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
 
                 _logger.LogDebug("Refresh token created for user: {UserId}", refreshToken.UserId);
                 return refreshToken.Id;
@@ -215,46 +214,6 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 _logger.LogError(ex, "Error cleaning up expired tokens");
                 return 0;
-            }
-        }
-
-        public async Task<(List<RefreshToken> Tokens, int TotalCount)> GetTokensPaginatedAsync(
-            int page = 1,
-            int pageSize = 50,
-            Guid? userId = null,
-            bool? isActive = null,
-            CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var query = GetBaseQuery();
-
-                if (userId.HasValue)
-                    query = query.Where(rt => rt.UserId == userId.Value);
-
-                if (isActive.HasValue)
-                    query = query.Where(rt => rt.IsActive == isActive.Value);
-
-                var totalCount = await query.CountAsync(cancellationToken);
-
-                var tokens = await query
-                    .OrderByDescending(rt => rt.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken);
-
-                return (tokens, totalCount);
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogWarning("Get paginated tokens operation was cancelled");
-                return (new List<RefreshToken>(), 0);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting paginated tokens");
-                return (new List<RefreshToken>(), 0);
             }
         }
 
