@@ -72,5 +72,6 @@ namespace InclusiON.Domain.Models
         /// Asignacion a la que pertenece esta respuesta.
         /// </summary>
         public virtual ActivityAssignment Assignment { get; set; } = null!;
+        public virtual ICollection<AdaptiveAdjustmentLog> AdaptiveAdjustmentLogs { get; set; } = new List<AdaptiveAdjustmentLog>();
     }
 }

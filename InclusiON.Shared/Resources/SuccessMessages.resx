@@ -60,6 +60,15 @@
 	<data name="PersonUpdated" xml:space="preserve">
 		<value>Persona actualizada exitosamente</value>
 	</data>
+	<data name="ProfessionalCreated" xml:space="preserve">
+		<value>Profesional creado exitosamente</value>
+	</data>
+	<data name="ProfessionalUpdated" xml:space="preserve">
+		<value>Profesional actualizado exitosamente</value>
+	</data>
+	<data name="ProfessionalDeactivated" xml:space="preserve">
+		<value>Profesional desactivado exitosamente</value>
+	</data>
 	<data name="LoginMethodUpdated" xml:space="preserve">
 		<value>Metodo de login actualizado correctamente</value>
 	</data>
@@ -68,5 +77,8 @@
 	</data>
 	<data name="LoginMethodsRetrieved" xml:space="preserve">
 		<value>Metodos de login obtenidos correctamente</value>
+	</data>
+	<data name="FamilyLoginSuccessful" xml:space="preserve">
+		<value>Login familiar exitoso</value>
 	</data>
 </root>

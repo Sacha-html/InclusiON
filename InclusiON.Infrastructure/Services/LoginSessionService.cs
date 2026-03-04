@@ -214,5 +214,98 @@ namespace InclusiON.Infrastructure.Services
                 },
                 successMessage);
         }
+
+        public async Task<ApiResponse<VisualLoginResponse>> CreateFamilyLoginSessionAsync(
+            User user,
+            FamilyRepresentative family,
+            int refreshTokenExpiryDays,
+            string? deviceId,
+            bool rememberDevice,
+            string revokeReason,
+            string successMessage,
+            CancellationToken cancellationToken)
+        {
+            var ipAddress = _httpContextService.GetClientIpAddress();
+            var userAgent = _httpContextService.GetUserAgent();
+
+            var roles = await _identityService.GetRolesAsync(user);
+            var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
+
+            var tokenUserData = new TokenUserData
+            {
+                Id = user.Id,
+                Email = user.Email ?? string.Empty,
+                Name = $"{family.FirstName} {family.LastName}",
+                Role = roles.FirstOrDefault() ?? "Family",
+                IsActive = user.IsActive,
+                Permissions = permissions
+            };
+
+            var accessToken = _tokenServices.JwtTokenService.GenerateAccessToken(tokenUserData);
+            var refreshToken = _tokenServices.JwtTokenService.GenerateRefreshToken();
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                Token = refreshToken,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays),
+                UserId = user.Id,
+                IsActive = true,
+                CreatedByIp = ipAddress,
+                UserAgent = userAgent
+            };
+
+            await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+            {
+                await _tokenServices.RefreshTokensRepository.RevokeAllUserTokensAsync(user.Id, revokeReason);
+
+                user.LastLoginDate = DateTime.UtcNow;
+                user.LastLoginIpAddress = ipAddress;
+                user.LastLoginUserAgent = userAgent;
+                await _identityService.UpdateUserAsync(user);
+
+                await _tokenServices.RefreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
+
+                if (rememberDevice && !string.IsNullOrEmpty(deviceId))
+                {
+                    var device = new TrustedDevice
+                    {
+                        UserId = user.Id,
+                        DeviceId = deviceId,
+                        DeviceName = "Dispositivo registrado",
+                        Browser = _httpContextService.ParseBrowserFromUserAgent(userAgent),
+                        RegisteredAt = DateTime.UtcNow,
+                        ExpiresAt = DateTime.UtcNow.AddDays(90),
+                        IsActive = true
+                    };
+                    await _visualLoginRepository.RegisterTrustedDeviceAsync(device, ct);
+                }
+
+                await _unitOfWork.SaveChangesAsync(ct);
+            }, cancellationToken);
+
+            var displayName = $"{family.FirstName} {family.LastName}".Trim();
+
+            return ApiResponse<VisualLoginResponse>.SuccessResult(
+                new VisualLoginResponse
+                {
+                    Success = true,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    ExpiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken),
+                    User = new VisualLoginUserInfo
+                    {
+                        Id = user.Id,
+                        DisplayName = displayName,
+                        Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
+                        AvatarColor = "#9C27B0",
+                        UserType = "Family",
+                        Roles = roles.ToList(),
+                        Accessibility = null
+                    }
+                },
+                successMessage);
+        }
     }
 }

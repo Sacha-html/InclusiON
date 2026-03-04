@@ -65,6 +65,10 @@ namespace InclusiON.Data
         public DbSet<ActivityResult> ActivityResults { get; set; }
         public DbSet<ActivityEmbedding> ActivityEmbeddings { get; set; }
 
+        // Nivel 6: Motor de dificultad adaptativa
+        public DbSet<AdaptiveEngineConfig> AdaptiveEngineConfigs { get; set; }
+        public DbSet<AdaptiveAdjustmentLog> AdaptiveAdjustmentLogs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

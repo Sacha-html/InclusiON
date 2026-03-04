@@ -34,5 +34,19 @@ namespace InclusiON.Application.Interfaces.Infrastructure
             string revokeReason,
             string successMessage,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Crea una sesion de login para familiares/tutores.
+        /// Genera tokens, revoca sesiones anteriores, actualiza metadata y registra dispositivo opcional.
+        /// </summary>
+        Task<ApiResponse<VisualLoginResponse>> CreateFamilyLoginSessionAsync(
+            User user,
+            FamilyRepresentative family,
+            int refreshTokenExpiryDays,
+            string? deviceId,
+            bool rememberDevice,
+            string revokeReason,
+            string successMessage,
+            CancellationToken cancellationToken);
     }
 }

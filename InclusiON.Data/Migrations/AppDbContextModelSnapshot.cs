@@ -594,6 +594,146 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("ActivityTemplateTypes", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveAdjustmentLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityResponseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AdjustedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("AdjustmentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("NewValue")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(MAX)");
+
+                    b.Property<int>("PersonRoadmapActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PreviousValue")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(MAX)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityResponseId");
+
+                    b.HasIndex("AdjustedAt");
+
+                    b.HasIndex("PersonRoadmapActivityId");
+
+                    b.ToTable("AdaptiveAdjustmentLogs", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveEngineConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ConsecutiveFailuresToDowngrade")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(2);
+
+                    b.Property<int>("ConsecutiveSuccessToUpgrade")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(3);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("FrustrationThreshold")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(3);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("MaxDifficultyLevel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(5);
+
+                    b.Property<int?>("MaxTimeLimitSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinDifficultyLevel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<int?>("MinTimeLimitSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonRoadmapActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SuccessThresholdPercent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(70);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonRoadmapActivityId")
+                        .IsUnique();
+
+                    b.ToTable("AdaptiveEngineConfigs", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
                 {
                     b.Property<int>("Id")
@@ -2754,6 +2894,36 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("SkillArea");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveAdjustmentLog", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.ActivityResponse", "ActivityResponse")
+                        .WithMany("AdaptiveAdjustmentLogs")
+                        .HasForeignKey("ActivityResponseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.PersonRoadmapActivity", "PersonRoadmapActivity")
+                        .WithMany("AdaptiveAdjustmentLogs")
+                        .HasForeignKey("PersonRoadmapActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ActivityResponse");
+
+                    b.Navigation("PersonRoadmapActivity");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveEngineConfig", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonRoadmapActivity", "PersonRoadmapActivity")
+                        .WithOne("AdaptiveConfig")
+                        .HasForeignKey("InclusiON.Domain.Models.AdaptiveEngineConfig", "PersonRoadmapActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PersonRoadmapActivity");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -3134,6 +3304,11 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Activities");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityResponse", b =>
+                {
+                    b.Navigation("AdaptiveAdjustmentLogs");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityTemplateType", b =>
                 {
                     b.Navigation("ActivityContents");
@@ -3177,6 +3352,10 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmapActivity", b =>
                 {
                     b.Navigation("ActivityResults");
+
+                    b.Navigation("AdaptiveAdjustmentLogs");
+
+                    b.Navigation("AdaptiveConfig");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmapArea", b =>

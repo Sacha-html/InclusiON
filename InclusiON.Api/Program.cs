@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Swashbuckle.AspNetCore.Filters;
 using InclusiON.Application;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
@@ -71,7 +72,11 @@ builder.Services.AddSwaggerGen(p =>
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     p.IncludeXmlComments(xmlPath);
+
+    p.ExampleFilters();
 });
+
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
 builder.Services.AddCors(options =>
 {

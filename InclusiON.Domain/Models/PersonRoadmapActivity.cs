@@ -85,8 +85,14 @@ namespace InclusiON.Domain.Models
         /// </summary>
         public virtual Activity Activity { get; set; } = null!;
 
+        /// <summary>
+        /// Configuracion del motor de dificultad adaptativa. Null si la actividad opera sin motor.
+        /// </summary>
+        public virtual AdaptiveEngineConfig? AdaptiveConfig { get; set; }
+
         #endregion
 
         public virtual ICollection<ActivityResult> ActivityResults { get; set; } = new List<ActivityResult>();
+        public virtual ICollection<AdaptiveAdjustmentLog> AdaptiveAdjustmentLogs { get; set; } = new List<AdaptiveAdjustmentLog>();
     }
 }

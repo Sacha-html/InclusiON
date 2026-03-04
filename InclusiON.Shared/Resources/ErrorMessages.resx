@@ -90,6 +90,10 @@
 	<data name="DocumentAlreadyExists" xml:space="preserve">
 		<value>Ya existe una persona con este numero de documento</value>
 	</data>
+	<!-- Profesional -->
+	<data name="ProfessionalNotFound" xml:space="preserve">
+		<value>Profesional no encontrado</value>
+	</data>
 	<!-- Login Visual -->
 	<data name="PinNotConfigured" xml:space="preserve">
 		<value>PIN no configurado para este usuario</value>
