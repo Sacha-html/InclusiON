@@ -1,21 +1,26 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using InclusiON.ApplicationBusiness.Interfaces.Common;
-using InclusiON.ApplicationBusiness.UseCases.Auth.Commands;
-using InclusiON.ApplicationBusiness.UseCases.Auth.Queries;
-using InclusiON.ApplicationBusiness.UseCases.Users.Queries;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.UseCases.Auth.Commands;
+using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Requests.Auth;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
-using System.Security.Claims;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
 {
+    /// <summary>
+    /// Controlador de autenticacion y registro de usuarios.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
     public class AuthController : ControllerBase
     {
+        /// <summary>
+        /// Registra un nuevo usuario en el sistema.
+        /// </summary>
         [HttpPost("register")]
         [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status400BadRequest)]
@@ -30,7 +35,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<UserResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<UserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new RegisterUserCommand(
@@ -49,9 +54,12 @@ namespace InclusiON.Api.Controllers
             return Created($"api/auth/profile", result);
         }
 
-
+        /// <summary>
+        /// Inicia sesion con email y contrasena.
+        /// </summary>
         [HttpPost("login")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<LoginResponse>>> Login(
             [FromBody] LoginRequest request,
@@ -66,7 +74,7 @@ namespace InclusiON.Api.Controllers
                     .Select(e => e.ErrorMessage)
                     .ToList();
 
-                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new LoginCommand(request.Email, request.Password);
@@ -113,7 +121,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<IdentifyUserResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<IdentifyUserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var query = new IdentifyUserQuery(request.Identifier, request.DeviceId, request.UserType);
@@ -127,6 +135,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("login/visual-standard")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginVisualStandard(
             [FromBody] VisualStandardLoginRequest request,
@@ -139,7 +148,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new VisualStandardLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
@@ -158,6 +167,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("login/pin")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginWithPin(
             [FromBody] PinLoginRequest request,
@@ -170,10 +180,42 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new PinLoginCommand(request.UserId, request.Pin, request.DeviceId, request.RememberDevice);
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success || result.Data?.Success == false)
+            {
+                return Unauthorized(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Login para familiares/tutores con contrasena.
+        /// </summary>
+        [HttpPost("login/family")]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginFamily(
+            [FromBody] FamilyLoginRequest request,
+            [FromServices] ICommandHandler<FamilyLoginCommand, ApiResponse<VisualLoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
+            }
+
+            var command = new FamilyLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
             var result = await handler.HandleAsync(command, cancellationToken);
 
             if (!result.Success || result.Data?.Success == false)
@@ -189,6 +231,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("login/assisted")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginAssisted(
             [FromBody] AssistedLoginRequest request,
@@ -201,7 +244,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new AssistedLoginCommand(request.UserId, request.SupervisorEmail, request.SupervisorPassword, request.DeviceId);
@@ -222,6 +265,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("refresh")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken(
             [FromBody] RefreshTokenRequest request,
@@ -234,7 +278,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<LoginResponse>.ErrorResult("Validation failed", errors));
+                return BadRequest(ApiResponse<LoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new RefreshTokenCommand(request.RefreshToken);
@@ -248,63 +292,5 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("profile")]
-        [Authorize] // ✅ Requiere autenticación JWT
-        [ProducesResponseType(typeof(ApiResponse<UserProfileResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<UserProfileResponse>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiResponse<UserProfileResponse>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<UserProfileResponse>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse<UserProfileResponse>>> GetProfile(
-            [FromServices] IQueryHandler<GetUserProfileQuery, ApiResponse<UserProfileResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var userIdCaim = User.FindFirst("sub") ??
-                    User.FindFirst("userId") ??
-                    User.FindFirst(ClaimTypes.NameIdentifier) ??
-                    User.FindFirst("id");
-
-                if (userIdCaim is null)
-                {
-                    return Unauthorized(ApiResponse<UserProfileResponse>.ErrorResult("Invalid Token"));
-                }
-
-                if (!Guid.TryParse(userIdCaim.Value, out Guid userId))
-                {
-                    return Unauthorized(ApiResponse<UserProfileResponse>.ErrorResult(
-                        "Invalid token - user ID format is invalid"));
-                }
-
-                var query = new GetUserProfileQuery(userId);
-                var result = await handler.HandleAsync(query, cancellationToken);
-
-                if (!result.Success)
-                {
-                    if(result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return NotFound(result);
-                    }
-
-                    if (result.Message.Contains("deactivated", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return Unauthorized(result);
-                    }
-
-                    return BadRequest(result);
-                }
-
-                return Ok(result);
-            }
-            catch (OperationCanceledException)
-            {
-                return BadRequest(ApiResponse<UserProfileResponse>.ErrorResult("Operation was cancelled"));
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    ApiResponse<UserProfileResponse>.ErrorResult("Internal server error occurred"));
-            }
-        }
     }
 }

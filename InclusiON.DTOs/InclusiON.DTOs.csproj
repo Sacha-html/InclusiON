@@ -10,4 +10,8 @@
     <Folder Include="Mappers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

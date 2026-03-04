@@ -1,14 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
-using InclusiON.ApplicationBusiness.Interfaces.Common;
-using InclusiON.ApplicationBusiness.UseCases.Persons.Commands;
-using InclusiON.ApplicationBusiness.UseCases.Persons.Queries;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.UseCases.Persons.Commands;
+using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
-using System.Security.Claims;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
 {
@@ -20,15 +21,23 @@ namespace InclusiON.Api.Controllers
     [Produces("application/json")]
     public class PersonsController : ControllerBase
     {
+        private readonly IHttpContextService _httpContextService;
+
+        public PersonsController(IHttpContextService httpContextService)
+        {
+            _httpContextService = httpContextService;
+        }
+
         #region Queries
 
         /// <summary>
         /// Obtiene una lista paginada de personas con discapacidad.
         /// </summary>
         [HttpGet]
-        [Authorize(Policy = "ProfessionalOrAbove")]
+        [Authorize(Policy = "persons:read")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<PersonListItemResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<PersonListItemResponse>>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<PersonListItemResponse>>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PagedResponse<PersonListItemResponse>>>> GetPersons(
             [FromQuery] GetPersonsRequest request,
             [FromServices] IQueryHandler<GetPersonsQuery, ApiResponse<PagedResponse<PersonListItemResponse>>> handler,
@@ -54,10 +63,11 @@ namespace InclusiON.Api.Controllers
         /// Obtiene una persona por su ID.
         /// </summary>
         [HttpGet("{personId:guid}")]
-        [Authorize(Policy = "ValidUser")]
+        [Authorize(Policy = "persons:read")]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PersonResponse>>> GetPersonById(
             Guid personId,
             [FromServices] IQueryHandler<GetPersonByIdQuery, ApiResponse<PersonResponse>> handler,
@@ -68,38 +78,6 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        /// <summary>
-        /// Obtiene el perfil de la persona autenticada.
-        /// </summary>
-        [HttpGet("me")]
-        [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<PersonResponse>>> GetMyProfile(
-            [FromServices] IQueryHandler<GetPersonByIdQuery, ApiResponse<PersonResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            var userIdClaim = GetCurrentUserId();
-            if (userIdClaim == null)
-            {
-                return Unauthorized(ApiResponse<PersonResponse>.ErrorResult("Token invalido"));
-            }
-
-            // Nota: GetPersonByIdQuery espera PersonId, no UserId
-            // Para este endpoint necesitariamos un GetPersonByUserIdQuery
-            // Por ahora retornamos error si no existe
-            var query = new GetPersonByIdQuery(userIdClaim.Value);
-            var result = await handler.HandleAsync(query, cancellationToken);
-
-            if (!result.Success)
-            {
-                return NotFound(result);
-            }
-
-            return Ok(result);
-        }
-
         #endregion
 
         #region Commands
@@ -108,10 +86,11 @@ namespace InclusiON.Api.Controllers
         /// Crea una nueva persona con discapacidad.
         /// </summary>
         [HttpPost]
-        [Authorize(Policy = "ProfessionalOrAbove")]
+        [Authorize(Policy = "persons:create")]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PersonResponse>>> CreatePerson(
             [FromBody] CreatePersonRequest request,
             [FromServices] ICommandHandler<CreatePersonCommand, ApiResponse<PersonResponse>> handler,
@@ -123,7 +102,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<PersonResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new CreatePersonCommand(
@@ -169,11 +148,12 @@ namespace InclusiON.Api.Controllers
         /// Actualiza una persona existente.
         /// </summary>
         [HttpPut("{personId:guid}")]
-        [Authorize(Policy = "ProfessionalOrAbove")]
+        [Authorize(Policy = "persons:update")]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PersonResponse>>> UpdatePerson(
             Guid personId,
             [FromBody] UpdatePersonRequest request,
@@ -186,7 +166,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<PersonResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new UpdatePersonCommand(
@@ -218,76 +198,6 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        /// <summary>
-        /// Actualiza el perfil de la persona autenticada.
-        /// </summary>
-        [HttpPut("me")]
-        [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<PersonResponse>>> UpdateMyProfile(
-            [FromBody] UpdatePersonRequest request,
-            [FromServices] ICommandHandler<UpdatePersonCommand, ApiResponse<PersonResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            var userId = GetCurrentUserId();
-            if (userId == null)
-            {
-                return Unauthorized(ApiResponse<PersonResponse>.ErrorResult("Token invalido"));
-            }
-
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult("Validacion fallida", errors));
-            }
-
-            // Nota: UpdatePersonCommand espera PersonId, no UserId
-            // Esto funcionara si PersonId == UserId, de lo contrario necesitamos ajustar
-            var command = new UpdatePersonCommand(
-                userId.Value,
-                request.FirstName,
-                request.LastName,
-                request.DocumentNumber,
-                request.BirthDate,
-                request.DisabilityTypeId,
-                request.PhotoUrl,
-                request.AttentionLevel,
-                request.CommunicationLevel,
-                request.UsesAAC,
-                request.UsesSignLanguage,
-                request.MotorSkillLevel,
-                request.InterestsAndMotivators,
-                request.LearningStyle,
-                request.AvailableResources,
-                request.AdditionalTherapies,
-                request.RequiresLargeFont,
-                request.RequiresHighContrast,
-                request.VisualNoiseSensitivity,
-                request.SoundSensitivity,
-                request.AutonomyLevelId,
-                request.SupervisorUserId,
-                request.AvatarColor);
-
-            var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-            {
-                if (result.Message.Contains("no encontrad", StringComparison.OrdinalIgnoreCase))
-                {
-                    return NotFound(result);
-                }
-                return BadRequest(result);
-            }
-
-            return Ok(result);
-        }
-
         #endregion
 
         #region Login Method
@@ -297,7 +207,7 @@ namespace InclusiON.Api.Controllers
         /// Solo el propio usuario o un supervisor autorizado puede realizar esta accion.
         /// </summary>
         [HttpPut("{userId:guid}/login-method")]
-        [Authorize]
+        [Authorize(Policy = "persons:update")]
         [ProducesResponseType(typeof(ApiResponse<UpdateLoginMethodResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<UpdateLoginMethodResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<UpdateLoginMethodResponse>), StatusCodes.Status401Unauthorized)]
@@ -315,7 +225,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new UpdateLoginMethodCommand(
@@ -352,10 +262,10 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateLoginMethodCommand, ApiResponse<UpdateLoginMethodResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var userId = GetCurrentUserId();
+            var userId = _httpContextService.GetCurrentUserId();
             if (userId == null)
             {
-                return Unauthorized(ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Token invalido"));
+                return Unauthorized(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.TokenInvalid));
             }
 
             if (!ModelState.IsValid)
@@ -364,7 +274,7 @@ namespace InclusiON.Api.Controllers
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
                     .ToList();
-                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult("Validacion fallida", errors));
+                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
             }
 
             var command = new UpdateLoginMethodCommand(
@@ -389,23 +299,5 @@ namespace InclusiON.Api.Controllers
 
         #endregion
 
-        #region Helpers
-
-        private Guid? GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst("sub") ??
-                User.FindFirst("userId") ??
-                User.FindFirst(ClaimTypes.NameIdentifier) ??
-                User.FindFirst("id");
-
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
-            {
-                return null;
-            }
-
-            return userId;
-        }
-
-        #endregion
     }
 }

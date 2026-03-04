@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Data
 {
@@ -40,9 +40,6 @@ namespace InclusiON.Data
 
             services.AddScoped<SignInManager<User>>();
             services.AddScoped<IUserClaimsPrincipalFactory<User>, UserClaimsPrincipalFactory<User>>();
-
-            // Register DbContext as DbContext for transaction support in handlers
-            services.AddScoped<DbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
             return services;
         }

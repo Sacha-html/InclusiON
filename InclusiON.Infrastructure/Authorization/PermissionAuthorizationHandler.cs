@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using InclusiON.ApplicationBusiness.Constants;
+using InclusiON.Application.Constants;
 
 namespace InclusiON.Infrastructure.Authorization
 {

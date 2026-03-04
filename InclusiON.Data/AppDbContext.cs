@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Entities.Models;
-using InclusiON.Entities.Models.BaseEntities;
+using InclusiON.Domain.Models;
+using InclusiON.Domain.Models.BaseEntities;
 using System.Security.Claims;
 
 namespace InclusiON.Data
@@ -25,37 +25,49 @@ namespace InclusiON.Data
             _httpContextAccessor = httpContextAccessor;
         }
 
-        // DbSets - Nivel 1 (Base)
+        // Nivel 1: Catalogos base del sistema (tipos, categorias, metodos)
         public DbSet<DisabilityType> DisabilityTypes { get; set; }
         public DbSet<ActivityCategory> ActivityCategories { get; set; }
         public DbSet<ReportType> ReportTypes { get; set; }
         public DbSet<EducationalInstitution> EducationalInstitutions { get; set; }
         public DbSet<AutonomyLevel> AutonomyLevels { get; set; }
         public DbSet<LoginMethod> LoginMethods { get; set; }
+        public DbSet<SkillArea> SkillAreas { get; set; }
+        public DbSet<ActivityTemplateType> ActivityTemplateTypes { get; set; }
 
-        // DbSets - Nivel 2 (Perfiles)
+        // Nivel 2: Perfiles de usuario y autenticacion
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Professional> Professionals { get; set; }
         public DbSet<PersonWithDisability> PersonsWithDisability { get; set; }
         public DbSet<FamilyRepresentative> FamilyRepresentatives { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
 
-        // DbSets - Nivel 3 (Relaciones)
+        // Nivel 3: Relaciones entre perfiles, actividades y rutas de aprendizaje
         public DbSet<TrustedDevice> TrustedDevices { get; set; }
         public DbSet<ProfessionalInstitution> ProfessionalInstitutions { get; set; }
         public DbSet<ProfessionalPerson> ProfessionalPersons { get; set; }
         public DbSet<PersonRepresentative> PersonRepresentatives { get; set; }
         public DbSet<Diagnosis> Diagnoses { get; set; }
         public DbSet<Activity> Activities { get; set; }
+        public DbSet<ActivityContent> ActivityContents { get; set; }
+        public DbSet<PersonRoadmap> PersonRoadmaps { get; set; }
+        public DbSet<PersonRoadmapArea> PersonRoadmapAreas { get; set; }
+        public DbSet<PersonRoadmapActivity> PersonRoadmapActivities { get; set; }
 
-        // DbSets - Nivel 4 (Asignaciones)
+        // Nivel 4: Asignaciones, reportes, mensajeria y auditoria
         public DbSet<ActivityAssignment> ActivityAssignments { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<AccessAudit> AccessAudits { get; set; }
 
-        // DbSets - Nivel 5 (Respuestas)
+        // Nivel 5: Respuestas, resultados y embeddings de actividades
         public DbSet<ActivityResponse> ActivityResponses { get; set; }
+        public DbSet<ActivityResult> ActivityResults { get; set; }
+        public DbSet<ActivityEmbedding> ActivityEmbeddings { get; set; }
+
+        // Nivel 6: Motor de dificultad adaptativa
+        public DbSet<AdaptiveEngineConfig> AdaptiveEngineConfigs { get; set; }
+        public DbSet<AdaptiveAdjustmentLog> AdaptiveAdjustmentLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

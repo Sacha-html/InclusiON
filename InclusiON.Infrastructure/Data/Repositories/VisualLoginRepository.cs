@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using InclusiON.ApplicationBusiness.Exceptions;
-using InclusiON.ApplicationBusiness.Interfaces.Repositories;
+using InclusiON.Application.Exceptions;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
@@ -226,7 +226,6 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     await _context.TrustedDevices.AddAsync(device, cancellationToken).ConfigureAwait(false);
                 }
 
-                await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 _logger.LogDebug("Trusted device registered for user: {UserId}", device.UserId);
             }
             catch (Exception ex)
@@ -314,7 +313,6 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 person.SupervisorUserId = supervisorUserId;
                 person.UpdatedAt = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 _logger.LogInformation("Updated login method for user: {UserId} to method: {LoginMethodId}", userId, loginMethodId);
             }
             catch (EntityNotFoundException)

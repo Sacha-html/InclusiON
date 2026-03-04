@@ -1,20 +1,20 @@
-using Microsoft.AspNetCore.Identity;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.ApplicationBusiness.Interfaces.Repositories;
+using InclusiON.Application.Extensions;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
-using InclusiON.Entities.Models;
+using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
     public class PersonsRepository : IPersonsRepository
     {
         private readonly AppDbContext _context;
-        private readonly UserManager<User> _userManager;
 
-        public PersonsRepository(AppDbContext context, UserManager<User> userManager)
+        public PersonsRepository(AppDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
         public async Task<PersonWithDisability?> GetByIdAsync(Guid personId, CancellationToken cancellationToken = default)
@@ -52,25 +52,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await query.AnyAsync(cancellationToken);
         }
 
-        public async Task<PersonWithDisability> CreateAsync(PersonWithDisability person, User user, string password, CancellationToken cancellationToken = default)
+        public async Task<PersonWithDisability> CreateAsync(PersonWithDisability person, CancellationToken cancellationToken = default)
         {
-            // Crear usuario con Identity
-            var result = await _userManager.CreateAsync(user, password);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Error al crear usuario: {errors}");
-            }
-
-            // Asignar rol Person
-            await _userManager.AddToRoleAsync(user, "Person");
-
-            // Asignar UserId a la persona
-            person.UserId = user.Id;
-
-            // Crear persona
             await _context.PersonsWithDisability.AddAsync(person, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
 
             return person;
         }
@@ -78,17 +62,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task UpdateAsync(PersonWithDisability person, CancellationToken cancellationToken = default)
         {
             _context.PersonsWithDisability.Update(person);
-            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<(List<PersonWithDisability> Items, int TotalCount)> GetPagedAsync(
-            int skip,
-            int take,
+        public async Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
+            int page,
+            int pageSize,
             string? search,
             int? disabilityTypeId,
             int? autonomyLevelId,
             bool? isActive,
-            string? sortBy,
+            SortField? sortBy,
             string sortDirection,
             CancellationToken cancellationToken = default)
         {
@@ -124,34 +107,20 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(p => p.User.IsActive == isActive.Value);
             }
 
-            // Contar total
-            var totalCount = await query.CountAsync(cancellationToken);
-
-            // Ordenamiento
-            query = sortBy?.ToLower() switch
+            var sortMappings = new Dictionary<SortField, Expression<Func<PersonWithDisability, object>>>
             {
-                "firstname" => sortDirection == "ASC"
-                    ? query.OrderBy(p => p.FirstName)
-                    : query.OrderByDescending(p => p.FirstName),
-                "lastname" => sortDirection == "ASC"
-                    ? query.OrderBy(p => p.LastName)
-                    : query.OrderByDescending(p => p.LastName),
-                "birthdate" => sortDirection == "ASC"
-                    ? query.OrderBy(p => p.BirthDate)
-                    : query.OrderByDescending(p => p.BirthDate),
-                "createdat" => sortDirection == "ASC"
-                    ? query.OrderBy(p => p.CreatedAt)
-                    : query.OrderByDescending(p => p.CreatedAt),
-                _ => query.OrderByDescending(p => p.CreatedAt)
+                [SortField.Id] = p => p.Id,
+                [SortField.FirstName] = p => p.FirstName,
+                [SortField.LastName] = p => p.LastName,
+                [SortField.BirthDate] = p => p.BirthDate,
+                [SortField.CreatedAt] = p => p.CreatedAt
             };
 
-            // Paginacion
-            var items = await query
-                .Skip(skip)
-                .Take(take)
-                .ToListAsync(cancellationToken);
-
-            return (items, totalCount);
+            return await query.ToPagedAsync(
+                page, pageSize,
+                sortBy, sortDirection,
+                sortMappings,
+                cancellationToken);
         }
     }
 }

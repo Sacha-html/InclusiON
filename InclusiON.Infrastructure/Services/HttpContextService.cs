@@ -1,5 +1,6 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Infrastructure;
 
 namespace InclusiON.Infrastructure.Services
 {
@@ -84,6 +85,28 @@ namespace InclusiON.Infrastructure.Services
             }
 
             return "Other";
+        }
+
+        /// <inheritdoc />
+        public Guid? GetCurrentUserId()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user is null)
+            {
+                return null;
+            }
+
+            var userIdClaim = user.FindFirst("sub") ??
+                user.FindFirst("userId") ??
+                user.FindFirst(ClaimTypes.NameIdentifier) ??
+                user.FindFirst("id");
+
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                return null;
+            }
+
+            return userId;
         }
     }
 }
