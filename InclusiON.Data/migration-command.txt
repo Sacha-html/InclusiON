@@ -1,3 +1,3 @@
-﻿Add-Migration DESCRIBE_YOUR_MIGRATION -Project SupplyCore.Data -StartupProject SupplyCore.Api
+Add-Migration DESCRIBE_YOUR_MIGRATION -Project InclusiON.Data -StartupProject InclusiON.Api
 
-# change Default Projecto to: SupplyCore.Api before run command
+# change Default Project to: InclusiON.Api before run command

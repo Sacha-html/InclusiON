@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using InclusiON.ApplicationBusiness.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.DTOs.Auth;
-using InclusiON.Entities.Enums;
+using InclusiON.Domain.Enums;
 using InclusiON.Infrastructure.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -41,7 +41,7 @@ namespace InclusiON.Infrastructure.Authentication
                 new Claim(ClaimTypes.NameIdentifier, userData.Id.ToString()),
                 new Claim(ClaimTypes.Name, userData.Name ?? string.Empty),
                 new Claim(ClaimTypes.Email, userData.Email ?? string.Empty),
-                new Claim(ClaimTypes.Role, userData.Role ?? IdentityRoles.Guest.ToString()),
+                new Claim(ClaimTypes.Role, userData.Role ?? IdentityRoles.PersonWithDisability.ToString()),
                 new Claim("userId", userData.Id.ToString()),
                 new Claim("isActive", userData.IsActive.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

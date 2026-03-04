@@ -1,13 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using InclusiON.ApplicationBusiness;
+using Swashbuckle.AspNetCore.Filters;
+using InclusiON.Application;
 using InclusiON.Data;
+using InclusiON.Data.Seeders;
+using InclusiON.Api.Middleware;
 using InclusiON.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
 
 builder.Host.UseSerilog((context, config) =>
 {
@@ -64,7 +68,15 @@ builder.Services.AddSwaggerGen(p =>
             Array.Empty<string>()
         }
     });
+
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    p.IncludeXmlComments(xmlPath);
+
+    p.ExampleFilters();
 });
+
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
 builder.Services.AddCors(options =>
 {
@@ -86,10 +98,7 @@ app.UseSwaggerUI(p =>
     p.RoutePrefix = string.Empty;
 });
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontendClient");
@@ -104,6 +113,9 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await context.Database.MigrateAsync();
 }
+
+// Seed inicial de datos
+await DatabaseSeeder.SeedAsync(app.Services);
 
 Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
 Log.Information("Swagger UI: {SwaggerUrl}/swagger", app.Urls.FirstOrDefault());
