@@ -11,6 +11,7 @@ import {
   IdentifyUserRequest,
   PinLoginRequest,
   VisualStandardLoginRequest,
+  FamilyLoginRequest,
   AssistedLoginRequest,
   UpdateLoginMethodRequest,
   IdentifyUserResponse,
@@ -288,6 +289,19 @@ export class AuthService {
   loginVisualStandard(request: VisualStandardLoginRequest): Observable<VisualLoginResponse> {
     return this.http
       .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/visual-standard`, request)
+      .pipe(
+        tap((response) => {
+          if (response.success && response.data?.success) {
+            this.setVisualLoginSession(response);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  loginFamily(request: FamilyLoginRequest): Observable<VisualLoginResponse> {
+    return this.http
+      .post<VisualLoginResponse>(`${this.apiUrl}/Auth/login/family`, request)
       .pipe(
         tap((response) => {
           if (response.success && response.data?.success) {
