@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Auth.Commands;
 using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Requests.Auth;
@@ -259,6 +260,51 @@ namespace InclusiON.Api.Controllers
         }
 
         #endregion
+
+        /// <summary>
+        /// Cambia la contrasena del usuario autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpPut("change-password")]
+        [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<ChangePasswordResponse>>> ChangePassword(
+            [FromBody] ChangePasswordRequest request,
+            [FromServices] ICommandHandler<ChangePasswordCommand, ApiResponse<ChangePasswordResponse>> handler,
+            [FromServices] IHttpContextService httpContextService,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(ApiResponse<ChangePasswordResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
+            }
+
+            var userId = httpContextService.GetCurrentUserId();
+            if (!userId.HasValue)
+            {
+                return Unauthorized(ApiResponse<ChangePasswordResponse>.Unauthorized());
+            }
+
+            var command = new ChangePasswordCommand(
+                userId.Value,
+                request.CurrentPassword,
+                request.NewPassword,
+                request.ConfirmNewPassword);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
 
         /// <summary>
         /// Refresca el token de acceso usando un refresh token valido.

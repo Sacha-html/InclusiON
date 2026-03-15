@@ -99,6 +99,7 @@ namespace InclusiON.Infrastructure.Services
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 ExpiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken),
+                MustChangePassword = user.MustChangePassword,
                 User = new UserResponse
                 {
                     Id = user.Id,
@@ -195,6 +196,7 @@ namespace InclusiON.Infrastructure.Services
                     AccessToken = accessToken,
                     RefreshToken = refreshToken,
                     ExpiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken),
+                    MustChangePassword = user.MustChangePassword,
                     User = new VisualLoginUserInfo
                     {
                         Id = user.Id,
@@ -294,6 +296,7 @@ namespace InclusiON.Infrastructure.Services
                     AccessToken = accessToken,
                     RefreshToken = refreshToken,
                     ExpiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken),
+                    MustChangePassword = user.MustChangePassword,
                     User = new VisualLoginUserInfo
                     {
                         Id = user.Id,
