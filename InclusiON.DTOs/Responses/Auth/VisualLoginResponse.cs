@@ -31,6 +31,11 @@ namespace InclusiON.DTOs.Responses.Auth
         public VisualLoginUserInfo? User { get; set; }
 
         /// <summary>
+        /// Indica si el usuario debe cambiar su contrasena en el proximo inicio de sesion.
+        /// </summary>
+        public bool MustChangePassword { get; set; }
+
+        /// <summary>
         /// Mensaje de error si el login fallo.
         /// </summary>
         public string? ErrorMessage { get; set; }

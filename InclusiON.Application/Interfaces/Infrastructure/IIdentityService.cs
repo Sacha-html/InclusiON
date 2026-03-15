@@ -20,6 +20,7 @@ namespace InclusiON.Application.Interfaces.Infrastructure
 
         // Autenticacion
         Task<SignInStatus> CheckPasswordAsync(User user, string password, bool lockoutOnFailure);
+        Task<(bool Succeeded, IEnumerable<string> Errors)> ChangePasswordAsync(User user, string currentPassword, string newPassword);
 
         // Lockout
         Task<bool> IsLockedOutAsync(User user);

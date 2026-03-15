@@ -343,5 +343,23 @@ namespace InclusiON.Shared.Resources {
                 return ResourceManager.GetString("UserCreationError", resourceCulture);
             }
         }
+
+        public static string CurrentPasswordIncorrect {
+            get {
+                return ResourceManager.GetString("CurrentPasswordIncorrect", resourceCulture);
+            }
+        }
+
+        public static string NewPasswordsMismatch {
+            get {
+                return ResourceManager.GetString("NewPasswordsMismatch", resourceCulture);
+            }
+        }
+
+        public static string ChangePasswordFailed {
+            get {
+                return ResourceManager.GetString("ChangePasswordFailed", resourceCulture);
+            }
+        }
     }
 }
