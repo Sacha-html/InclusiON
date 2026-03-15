@@ -5,4 +5,5 @@ export interface AuthData {
   refreshToken: string;
   expiresAt: string;
   user: User;
+  mustChangePassword?: boolean;
 }
