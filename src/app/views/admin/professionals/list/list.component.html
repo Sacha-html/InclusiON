@@ -1,0 +1,12 @@
+<h3>Profesionales:</h3>
+
+<app-data-table
+  [columns]="cols"
+  [items]="professionals"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>
