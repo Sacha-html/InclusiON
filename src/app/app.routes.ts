@@ -24,7 +24,7 @@ export const routes: Routes = [
     path: 'admin-login',
     loadComponent: () =>
       import('./views/pages/login/login.component').then(
-        (m) => m.LoginComponent
+        (m) => m.LoginComponent,
       ),
     canActivate: [guestGuard],
   },
@@ -34,12 +34,11 @@ export const routes: Routes = [
     path: 'app',
     loadComponent: () =>
       import('./layout/aac-layout/aac-layout.component').then(
-        (m) => m.AacLayoutComponent
+        (m) => m.AacLayoutComponent,
       ),
     canActivate: [authGuard, roleGuard],
     data: { roles: [UserRoles.PersonWithDisability] },
-    loadChildren: () =>
-      import('./views/aac/routes').then((m) => m.aacRoutes),
+    loadChildren: () => import('./views/aac/routes').then((m) => m.aacRoutes),
   },
 
   // Dashboard Profesional
@@ -47,7 +46,7 @@ export const routes: Routes = [
     path: 'pro',
     loadComponent: () =>
       import('./layout/professional-layout/professional-layout.component').then(
-        (m) => m.ProfessionalLayoutComponent
+        (m) => m.ProfessionalLayoutComponent,
       ),
     canActivate: [authGuard, roleGuard],
     data: { roles: [UserRoles.Professional, UserRoles.Admin] },
@@ -60,7 +59,7 @@ export const routes: Routes = [
     path: 'family',
     loadComponent: () =>
       import('./layout/family-layout/family-layout.component').then(
-        (m) => m.FamilyLayoutComponent
+        (m) => m.FamilyLayoutComponent,
       ),
     canActivate: [authGuard, roleGuard],
     data: { roles: [UserRoles.FamilyRepresentative, UserRoles.Admin] },
@@ -79,13 +78,20 @@ export const routes: Routes = [
       {
         path: '',
         redirectTo: 'dashboard',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./views/dashboard/dashboard.component').then(
-            (m) => m.DashboardComponent
+          import('./views/admin/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent,
+          ),
+      },
+      {
+        path: 'professionals',
+        loadChildren: () =>
+          import('./views/admin/professionals/routes').then(
+            (m) => m.professionalRoutes,
           ),
       },
     ],
@@ -95,7 +101,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     redirectTo: 'admin/dashboard',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   // Errores
@@ -103,14 +109,14 @@ export const routes: Routes = [
     path: '404',
     loadComponent: () =>
       import('./views/pages/page404/page404.component').then(
-        (m) => m.Page404Component
+        (m) => m.Page404Component,
       ),
   },
   {
     path: '500',
     loadComponent: () =>
       import('./views/pages/page500/page500.component').then(
-        (m) => m.Page500Component
+        (m) => m.Page500Component,
       ),
   },
 
