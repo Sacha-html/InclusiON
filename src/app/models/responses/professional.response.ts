@@ -28,4 +28,3 @@ export interface ProfessionalResponse {
   updatedAt?: string;
   temporaryPassword?: string;
 }
-¬
