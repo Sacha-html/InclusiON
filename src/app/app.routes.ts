@@ -29,6 +29,16 @@ export const routes: Routes = [
     canActivate: [guestGuard],
   },
 
+  // Cambio de contraseña obligatorio
+  {
+    path: 'change-password',
+    loadComponent: () =>
+      import('./views/pages/change-password/change-password.component').then(
+        (m) => m.ChangePasswordComponent,
+      ),
+    canActivate: [authGuard],
+  },
+
   // Dashboard AAC - Persona con Discapacidad
   {
     path: 'app',

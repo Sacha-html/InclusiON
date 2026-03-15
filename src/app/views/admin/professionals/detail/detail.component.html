@@ -22,6 +22,13 @@
 
       <c-row class="mb-3">
         <c-col sm="6">
+          <label cLabel>Documento</label>
+          <input cFormControl [value]="professional.documentNumber ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
           <label cLabel>Especialidad</label>
           <input cFormControl [value]="professional.specialty ?? 'Sin especificar'" readonly />
         </c-col>
@@ -33,21 +40,17 @@
 
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel>Documento</label>
-          <input cFormControl [value]="professional.documentNumber ?? 'Sin especificar'" readonly />
-        </c-col>
-        <c-col sm="6">
           <label cLabel>Teléfono</label>
           <input cFormControl [value]="professional.phone ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Fecha de nacimiento</label>
+          <input cFormControl [value]="formatDate(professional.birthDate)" readonly />
         </c-col>
       </c-row>
 
       <c-row class="mb-3">
-        <c-col sm="6">
-          <label cLabel>Fecha de nacimiento</label>
-          <input cFormControl [value]="professional.birthDate ?? 'Sin especificar'" readonly />
-        </c-col>
-        <c-col sm="6">
+        <c-col sm="12">
           <label cLabel>Dirección</label>
           <input cFormControl [value]="professional.address ?? 'Sin especificar'" readonly />
         </c-col>
@@ -56,11 +59,11 @@
       <c-row class="mb-3">
         <c-col sm="6">
           <label cLabel>Fecha de alta</label>
-          <input cFormControl [value]="professional.createdAt" readonly />
+          <input cFormControl [value]="formatDateTime(professional.createdAt)" readonly />
         </c-col>
         <c-col sm="6">
           <label cLabel>Última actualización</label>
-          <input cFormControl [value]="professional.updatedAt ?? 'Sin actualizar'" readonly />
+          <input cFormControl [value]="professional.updatedAt ? formatDateTime(professional.updatedAt) : 'Sin actualizar'" readonly />
         </c-col>
       </c-row>
 

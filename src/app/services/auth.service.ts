@@ -14,6 +14,7 @@ import {
   FamilyLoginRequest,
   AssistedLoginRequest,
   UpdateLoginMethodRequest,
+  ChangePasswordRequest,
   IdentifyUserResponse,
   VisualLoginResponse,
   LoginMethodsResponse,
@@ -247,6 +248,21 @@ export class AuthService {
     const user = this.getCurrentUser();
     return user?.role === role;
   }
+ 
+  hasPermission(permission: string): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const payload = this.decodeToken(token);
+      const permissions: string[] = payload.permission || [];
+      return Array.isArray(permissions)
+        ? permissions.includes(permission)
+        : permissions === permission;
+    } catch {
+      return false;
+    }
+  }
 
   /**
    * Verifica si el usuario tiene alguno de los roles especificados
@@ -371,6 +387,14 @@ export class AuthService {
     } catch (error) {
       return false;
     }
+  }
+
+  // Password Management
+
+  changePassword(request: ChangePasswordRequest): Observable<ApiResponse<{ success: boolean }>> {
+    return this.http
+      .put<ApiResponse<{ success: boolean }>>(`${this.apiUrl}/Auth/change-password`, request)
+      .pipe(catchError(this.handleError));
   }
 
   // Login Method Management

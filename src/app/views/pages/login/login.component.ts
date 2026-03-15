@@ -104,8 +104,11 @@ export class LoginComponent implements OnInit {
     this.authService.login(loginData).subscribe({
       next: (response) => {
         if (response?.success) {
-          // AuthService.login() ya guarda los tokens en setSession()
-          this.router.navigate(['/dashboard']);
+          if (response.data?.mustChangePassword) {
+            this.router.navigate(['/change-password']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         }
       },
       error: (error) => {

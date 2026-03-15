@@ -4,7 +4,7 @@ export interface CreateProfessionalRequest {
   email: string;
   documentNumber?: string;
   phone?: string;
-  speciality?: string;
+  specialty?: string;
   licenseNumber?: string;
   birthDate?: string;
   address?: string;

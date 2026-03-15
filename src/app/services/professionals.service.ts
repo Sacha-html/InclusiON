@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import {
   ApiResponse,
+  CreateProfessionalRequest,
   GetProfessionalsRequest,
   PagedResponse,
   ProfessionalListItemResponse,
@@ -42,6 +43,15 @@ export class ProfessionalsService {
   getProfessionalById(id: string): Observable<ProfessionalResponse> {
     return this.http
       .get<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/${id}`)
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError),
+      );
+  }
+
+  createProfessional(request: CreateProfessionalRequest): Observable<ProfessionalResponse> {
+    return this.http
+      .post<ApiResponse<ProfessionalResponse>>(this.apiUrl, request)
       .pipe(
         map((response) => response.data),
         catchError(this.handleError),

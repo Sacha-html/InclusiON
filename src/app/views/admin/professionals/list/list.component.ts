@@ -1,19 +1,23 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { ProfessionalsService } from '@services';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService, ProfessionalsService } from '@services';
 import { ProfessionalListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { ButtonDirective } from '@coreui/angular';
 
 @Component({
   selector: 'app-list',
-  imports: [DataTableComponent],
+  imports: [DataTableComponent, ButtonDirective, RouterLink],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
 export class ListComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  canCreate = this.authService.hasPermission('professionals:create');
 
   professionals: ProfessionalListItemResponse[] = [];
   totalItems = 0;
