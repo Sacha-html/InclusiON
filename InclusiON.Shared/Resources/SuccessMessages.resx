@@ -81,4 +81,7 @@
 	<data name="FamilyLoginSuccessful" xml:space="preserve">
 		<value>Login familiar exitoso</value>
 	</data>
+	<data name="PasswordChanged" xml:space="preserve">
+		<value>Contrasena cambiada exitosamente</value>
+	</data>
 </root>

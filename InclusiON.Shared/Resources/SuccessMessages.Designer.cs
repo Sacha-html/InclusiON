@@ -176,5 +176,11 @@ namespace InclusiON.Shared.Resources {
                 return ResourceManager.GetString("VisualLoginSuccessful", resourceCulture);
             }
         }
+
+        public static string PasswordChanged {
+            get {
+                return ResourceManager.GetString("PasswordChanged", resourceCulture);
+            }
+        }
     }
 }

@@ -26,5 +26,6 @@ namespace InclusiON.DTOs.Responses.Professionals
         /// Contrasena temporal generada al crear el profesional. Solo se muestra una vez.
         /// </summary>
         public string? TemporaryPassword { get; set; }
+        public string? Email { get; set; }
     }
 }
