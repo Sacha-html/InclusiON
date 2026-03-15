@@ -1,0 +1,68 @@
+<c-card class="mb-3">
+  <c-card-body>
+    <c-row class="align-items-center">
+      <c-col sm="12">
+        <c-input-group>
+          <span cInputGroupText>Buscar: </span>
+          <input
+            cFormControl
+            placeholder="Buscar..."
+            #searchInput
+            (input)="searchAction.emit(searchInput.value)"
+          />
+        </c-input-group>
+      </c-col>
+    </c-row>
+    <table cTable hover striped class="mt-3">
+      <thead>
+        <tr>
+          @for (col of columns; track col.key) {
+            <th>{{ col.label }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.id) {
+          <tr>
+            @for (col of columns; track col.key) {
+              <td>
+                @switch (col.type) {
+                  @case ('badge') {
+                    <span class="badge" [class.badge-success]="item[col.key]" [class.badge-danger]="!item[col.key]">
+                      {{ item[col.key] ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  }
+                  @case ('actions') {
+                    <button cButton color="info" size="sm"
+                            (click)="rowAction.emit({ action: 'view', item: item })">
+                      Ver
+                    </button>
+                  }
+                  @default {
+                    {{ item[col.key] }}
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages > 1) {
+      <c-pagination align="end" class="mt-3">
+        <c-page-item [disabled]="currentPage === 1">
+          <a cPageLink (click)="pageChange.emit(currentPage - 1)">Anterior</a>
+        </c-page-item>
+        @for (page of pages; track page) {
+          <c-page-item [active]="page === currentPage">
+            <a cPageLink (click)="pageChange.emit(page)">{{ page }}</a>
+          </c-page-item>
+        }
+        <c-page-item [disabled]="currentPage === totalPages">
+          <a cPageLink (click)="pageChange.emit(currentPage + 1)">Siguiente</a>
+        </c-page-item>
+      </c-pagination>
+    }
+  </c-card-body>
+</c-card>
