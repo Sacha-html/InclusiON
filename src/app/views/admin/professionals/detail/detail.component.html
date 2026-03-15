@@ -1,0 +1,72 @@
+@if (professional) {
+  <c-card>
+    <c-card-header>
+      <strong>Detalle del Profesional</strong>
+      <span class="badge ms-2"
+            [class.badge-success]="professional.isActive"
+            [class.badge-danger]="!professional.isActive">
+        {{ professional.isActive ? 'Activo' : 'Inactivo' }}
+      </span>
+    </c-card-header>
+    <c-card-body>
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Nombre</label>
+          <input cFormControl [value]="professional.firstName" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Apellido</label>
+          <input cFormControl [value]="professional.lastName" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Especialidad</label>
+          <input cFormControl [value]="professional.specialty ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Matrícula</label>
+          <input cFormControl [value]="professional.licenseNumber ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Documento</label>
+          <input cFormControl [value]="professional.documentNumber ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Teléfono</label>
+          <input cFormControl [value]="professional.phone ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Fecha de nacimiento</label>
+          <input cFormControl [value]="professional.birthDate ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Dirección</label>
+          <input cFormControl [value]="professional.address ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Fecha de alta</label>
+          <input cFormControl [value]="professional.createdAt" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Última actualización</label>
+          <input cFormControl [value]="professional.updatedAt ?? 'Sin actualizar'" readonly />
+        </c-col>
+      </c-row>
+
+      <div class="mt-3">
+        <button cButton color="secondary" (click)="goBack()">Volver</button>
+      </div>
+    </c-card-body>
+  </c-card>
+}
