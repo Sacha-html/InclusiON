@@ -369,6 +369,75 @@
 }
 
 // ========================================
+// TABLAS - ACCESIBLES
+// ========================================
+.table {
+  --cui-table-bg: var(--a11y-bg, #FFFFFF);
+  --cui-table-color: var(--a11y-text, #212121);
+  --cui-table-border-color: var(--a11y-border, #BDBDBD);
+  --cui-table-striped-bg: var(--a11y-bg-secondary, #F5F5F5);
+  --cui-table-striped-color: var(--a11y-text, #212121);
+  --cui-table-hover-bg: var(--a11y-surface, #FAFAFA);
+  --cui-table-hover-color: var(--a11y-text, #212121);
+
+  thead {
+    background-color: var(--a11y-bg-secondary, #F5F5F5);
+    color: var(--a11y-text, #212121);
+  }
+
+  th, td {
+    color: var(--a11y-text, #212121);
+    border-color: var(--a11y-border, #BDBDBD);
+    vertical-align: middle;
+  }
+
+  // Badge y botón con tamaño consistente dentro de tablas
+  td .badge,
+  td .btn-sm {
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+    line-height: 1.5;
+  }
+
+  // Badges accesibles
+  td .badge-success {
+    background-color: var(--a11y-success);
+    color: var(--a11y-success-text);
+  }
+
+  td .badge-danger {
+    background-color: var(--a11y-danger);
+    color: var(--a11y-danger-text);
+  }
+
+  // Botón accesible en tablas
+  td .btn {
+    background-color: var(--a11y-primary);
+    color: var(--a11y-primary-text);
+    border-color: var(--a11y-primary);
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-primary-dark);
+      border-color: var(--a11y-primary-dark);
+      color: var(--a11y-primary-text);
+    }
+  }
+}
+
+// Visión reducida - tablas
+[data-theme="low-vision"] {
+  .table {
+    td .badge,
+    td .btn-sm,
+    td .btn {
+      font-size: 1rem;
+      padding: 0.5em 0.75em;
+    }
+  }
+}
+
+// ========================================
 // AJUSTES GENERALES
 // ========================================
 
