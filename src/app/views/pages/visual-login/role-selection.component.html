@@ -14,7 +14,7 @@
       @for (role of roles; track role.type) {
         <div class="col-12 col-md-6 col-lg-4">
           <div
-            class="role-card card h-100 border-0 shadow-sm"
+            class="role-card card h-100 shadow-sm"
             [style.--role-color]="role.color"
             [style.--role-bg]="role.bgColor"
             (click)="selectRole(role.type)"

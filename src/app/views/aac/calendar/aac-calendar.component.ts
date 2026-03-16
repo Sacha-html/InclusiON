@@ -48,9 +48,10 @@ import { VisualCardComponent } from '../../../shared/components/visual-card/visu
       flex-direction: column;
       align-items: center;
       padding: 24px;
-      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      background: linear-gradient(135deg, var(--a11y-success, #4CAF50), var(--a11y-success, #2E7D32));
+      border: 2px solid var(--a11y-border, #E0E0E0);
       border-radius: 24px;
-      color: white;
+      color: var(--a11y-success-text, white);
       margin-bottom: 24px;
     }
 
@@ -81,18 +82,18 @@ import { VisualCardComponent } from '../../../shared/components/visual-card/visu
     :host-context([data-profile="high-contrast"]) {
       .page-title,
       .section-title {
-        color: #fff;
+        color: var(--a11y-text, #fff);
       }
 
       .today-banner {
-        border: 3px solid #fff;
+        border: 3px solid var(--a11y-border, #fff);
       }
     }
 
     :host-context([data-color-mode="dark"]) {
       .page-title,
       .section-title {
-        color: #f5f5f5;
+        color: var(--a11y-text, #f5f5f5);
       }
     }
   `]
@@ -112,21 +113,21 @@ export class AacCalendarComponent {
       title: 'Sesion con terapeuta',
       date: 'Manana, 10:00 AM',
       icon: 'cilMedicalCross',
-      color: '#2196F3'
+      color: 'var(--a11y-primary, #2196F3)'
     },
     {
       id: 2,
       title: 'Actividad grupal',
       date: 'Miercoles, 3:00 PM',
       icon: 'cilPeople',
-      color: '#9C27B0'
+      color: 'var(--a11y-nav-talk, #9C27B0)'
     },
     {
       id: 3,
       title: 'Evaluacion mensual',
       date: 'Viernes, 11:00 AM',
       icon: 'cilClipboard',
-      color: '#FF9800'
+      color: 'var(--a11y-warning, #FF9800)'
     }
   ];
 }

@@ -55,13 +55,13 @@ import { CommonModule } from '@angular/common';
     }
 
     .avatar-button:focus {
-      outline: 3px solid #FFD700;
+      outline: 3px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 2px;
     }
 
     .avatar-button.selected {
-      border-color: #0066CC;
-      background-color: rgba(0, 102, 204, 0.1);
+      border-color: var(--a11y-primary, #0066CC);
+      background-color: color-mix(in srgb, var(--a11y-primary, #0066CC) 10%, transparent);
     }
 
     .avatar-button:active {
@@ -73,7 +73,8 @@ import { CommonModule } from '@angular/common';
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      color: white;
+      border: 2px solid var(--a11y-border, #E0E0E0);
+      color: var(--a11y-primary-text, white);
       font-weight: 600;
       text-transform: uppercase;
       user-select: none;
@@ -83,7 +84,7 @@ import { CommonModule } from '@angular/common';
     .avatar-name {
       font-size: 16px;
       font-weight: 500;
-      color: #212121;
+      color: var(--a11y-text, #212121);
       max-width: 100px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -97,7 +98,7 @@ export class AvatarComponent {
   @Input() initial: string = '';
 
   /** Color de fondo del avatar en formato hexadecimal */
-  @Input() color: string = '#2196F3';
+  @Input() color: string = 'var(--a11y-primary, #2196F3)';
 
   /** Tamanio del avatar en pixeles */
   @Input() size: number = 80;

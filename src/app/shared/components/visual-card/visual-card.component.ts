@@ -43,11 +43,11 @@ import { IconDirective } from '@coreui/icons-angular';
   `,
   styles: [`
     .visual-card {
-      position: relative;
       display: flex;
       flex-direction: column;
       padding: 24px;
-      background: white;
+      background: var(--a11y-surface, white);
+      border: 2px solid var(--a11y-border, #E0E0E0);
       border-radius: 24px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -63,7 +63,7 @@ import { IconDirective } from '@coreui/icons-angular';
     }
 
     .visual-card:focus {
-      outline: 4px solid #FFD700;
+      outline: 4px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 4px;
     }
 
@@ -87,7 +87,7 @@ import { IconDirective } from '@coreui/icons-angular';
       width: 80px;
       height: 80px;
       border-radius: 20px;
-      color: white;
+      color: var(--a11y-primary-text, white);
 
       svg {
         width: 44px;
@@ -103,46 +103,45 @@ import { IconDirective } from '@coreui/icons-angular';
       margin: 0 0 8px;
       font-size: 22px;
       font-weight: 600;
-      color: #1a1a1a;
+      color: var(--a11y-text, #1a1a1a);
     }
 
     .card-subtitle {
       margin: 0;
       font-size: 16px;
-      color: #666;
+      color: var(--a11y-text-muted, #666);
     }
 
     .card-badge {
-      position: absolute;
-      top: 16px;
-      right: 16px;
+      align-self: center;
+      margin-top: 12px;
       padding: 6px 14px;
       border-radius: 14px;
       font-size: 14px;
       font-weight: 700;
-      color: white;
+      color: var(--a11y-primary-text, white);
     }
 
     :host-context([data-profile="high-contrast"]) .visual-card {
       border: 3px solid var(--card-accent);
-      background: #000;
+      background: var(--a11y-bg, #000);
     }
 
     :host-context([data-profile="high-contrast"]) .card-title,
     :host-context([data-profile="high-contrast"]) .card-subtitle {
-      color: #FFF;
+      color: var(--a11y-text, #FFF);
     }
 
     :host-context([data-color-mode="dark"]) .visual-card {
-      background: #2a2a3e;
+      background: var(--a11y-surface, #2a2a3e);
     }
 
     :host-context([data-color-mode="dark"]) .card-title {
-      color: #f5f5f5;
+      color: var(--a11y-text, #f5f5f5);
     }
 
     :host-context([data-color-mode="dark"]) .card-subtitle {
-      color: #aaa;
+      color: var(--a11y-text-muted, #aaa);
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -152,9 +151,9 @@ export class VisualCardComponent {
   @Input() subtitle?: string;
   @Input() icon?: string;
   @Input() image?: string;
-  @Input() accentColor = '#2196F3';
+  @Input() accentColor = 'var(--a11y-primary, #2196F3)';
   @Input() badge?: string;
-  @Input() badgeColor = '#F44336';
+  @Input() badgeColor = 'var(--a11y-danger, #F44336)';
   @Input() interactive = true;
   @Input() ariaLabel?: string;
 
