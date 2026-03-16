@@ -16,4 +16,9 @@ export const professionalRoutes: Routes = [
     loadComponent: () =>
       import('./detail/detail.component').then((m) => m.DetailComponent),
   },
+  {
+    path: ':id/edit',
+    loadComponent: () =>
+      import('./edit/edit.component').then((m) => m.EditComponent),
+  },
 ];

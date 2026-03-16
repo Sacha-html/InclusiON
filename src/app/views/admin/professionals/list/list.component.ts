@@ -25,11 +25,11 @@ export class ListComponent implements OnInit {
   currentPage = 1;
 
   public cols: TableColumn[] = [
+    { key: 'actions', label: 'Acciones', type: 'actions' },
     { key: 'fullName', label: 'Nombre' },
     { key: 'specialty', label: 'Especialidad' },
     { key: 'licenseNumber', label: 'Matrícula' },
     { key: 'isActive', label: 'Estado', type: 'badge' },
-    { key: 'actions', label: 'Acciones', type: 'actions' },
   ];
 
   ngOnInit(): void {
