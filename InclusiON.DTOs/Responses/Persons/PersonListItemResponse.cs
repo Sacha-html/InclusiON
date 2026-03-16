@@ -9,7 +9,7 @@ namespace InclusiON.DTOs.Responses.Persons
         public Guid UserId { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-        public string FullName => $"{FirstName} {LastName}".Trim();
+        public string FullName => $"{LastName}, {FirstName}".Trim();
         public string? DocumentNumber { get; set; }
         public DateTime BirthDate { get; set; }
         public int Age => CalculateAge(BirthDate);

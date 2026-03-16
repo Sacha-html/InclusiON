@@ -19,5 +19,11 @@ namespace InclusiON.DTOs.Responses.Persons
         /// Nombre del metodo de login asignado.
         /// </summary>
         public string LoginMethodName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Contrasena temporal generada al cambiar a metodo STANDARD.
+        /// Solo se devuelve una vez.
+        /// </summary>
+        public string? TemporaryPassword { get; set; }
     }
 }

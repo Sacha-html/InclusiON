@@ -114,7 +114,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                         throw new InvalidOperationException(string.Format(ErrorMessages.UserCreationError, string.Join(", ", errors)));
                     }
 
-                    await _identityService.AddToRoleAsync(user, "Person");
+                    await _identityService.AddToRoleAsync(user, "PersonWithDisability");
 
                     person.UserId = user.Id;
                     await _repository.CreateAsync(person, ct);
