@@ -425,6 +425,7 @@ export interface UpdateLoginMethodApiResponse {
     updated: boolean;
     loginMethodId: number;
     loginMethodName: string;
+    temporaryPassword?: string;
   } | null;
   errors: string[];
 }

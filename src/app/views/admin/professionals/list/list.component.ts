@@ -25,7 +25,13 @@ export class ListComponent implements OnInit {
   currentPage = 1;
 
   public cols: TableColumn[] = [
-    { key: 'actions', label: 'Acciones', type: 'actions' },
+    {
+      key: 'actions', label: 'Acciones', type: 'actions',
+      actions: [
+        { action: 'view', label: 'Ver detalle' },
+        { action: 'edit', label: 'Editar', visible: (item) => item.isActive },
+      ],
+    },
     { key: 'fullName', label: 'Nombre' },
     { key: 'specialty', label: 'Especialidad' },
     { key: 'licenseNumber', label: 'Matrícula' },
@@ -47,8 +53,13 @@ export class ListComponent implements OnInit {
   }
 
   onRowAction(event: { action: string; item: any }): void {
-    if (event.action === 'view') {
-      this.router.navigate(['/admin/professionals', event.item.id]);
+    switch (event.action) {
+      case 'view':
+        this.router.navigate(['/admin/professionals', event.item.id]);
+        break;
+      case 'edit':
+        this.router.navigate(['/admin/professionals', event.item.id, 'edit']);
+        break;
     }
   }
 

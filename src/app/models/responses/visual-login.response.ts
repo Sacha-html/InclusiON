@@ -37,6 +37,7 @@ export interface VisualLoginData {
   refreshToken?: string;
   expiresAt?: Date;
   user?: VisualLoginUserInfo;
+  mustChangePassword?: boolean;
   errorMessage?: string;
   remainingAttempts?: number;
   isLocked: boolean;

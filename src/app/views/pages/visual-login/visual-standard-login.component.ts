@@ -62,7 +62,7 @@ export class VisualStandardLoginComponent extends BaseVisualLoginComponent {
     this.authService.loginVisualStandard(request).subscribe({
       next: (response) => {
         if (response.success && response.data?.success) {
-          this.navigateToDashboard();
+          this.navigateToDashboard(response.data.mustChangePassword);
         } else {
           this.handleLoginResponseError(
             response.data,

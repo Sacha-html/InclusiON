@@ -104,6 +104,13 @@ export const routes: Routes = [
             (m) => m.professionalRoutes,
           ),
       },
+      {
+        path: 'persons',
+        loadChildren: () =>
+          import('./views/admin/persons/routes').then(
+            (m) => m.personRoutes,
+          ),
+      },
     ],
   },
 

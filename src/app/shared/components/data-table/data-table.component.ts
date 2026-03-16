@@ -1,11 +1,14 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { TableColumn } from './data-table.models';
+import { ActionItem, TableColumn } from './data-table.models';
 import {
-  BadgeComponent,
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
   ColComponent,
+  DropdownComponent,
+  DropdownItemDirective,
+  DropdownMenuDirective,
+  DropdownToggleDirective,
   FormControlDirective,
   InputGroupComponent,
   InputGroupTextDirective,
@@ -25,13 +28,16 @@ import {
     CardBodyComponent,
     PageItemComponent,
     PageLinkDirective,
-    BadgeComponent,
     ButtonDirective,
     InputGroupComponent,
     InputGroupTextDirective,
     FormControlDirective,
     RowComponent,
     ColComponent,
+    DropdownComponent,
+    DropdownToggleDirective,
+    DropdownMenuDirective,
+    DropdownItemDirective,
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
@@ -53,5 +59,10 @@ export class DataTableComponent {
 
   get pages(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  getVisibleActions(col: TableColumn, item: any): ActionItem[] {
+    if (!col.actions) return [];
+    return col.actions.filter(a => !a.visible || a.visible(item));
   }
 }

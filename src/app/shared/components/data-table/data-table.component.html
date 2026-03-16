@@ -33,10 +33,29 @@
                     </span>
                   }
                   @case ('actions') {
-                    <button cButton color="info" size="sm"
-                            (click)="rowAction.emit({ action: 'view', item: item })">
-                      Ver
-                    </button>
+                    @if (col.actions && col.actions.length > 0) {
+                      <c-dropdown>
+                        <button cButton color="secondary" size="sm" cDropdownToggle
+                                aria-label="Acciones">
+                          &#9776;
+                        </button>
+                        <ul cDropdownMenu>
+                          @for (action of getVisibleActions(col, item); track action.action) {
+                            <li>
+                              <button cDropdownItem
+                                      (click)="rowAction.emit({ action: action.action, item: item })">
+                                {{ action.label }}
+                              </button>
+                            </li>
+                          }
+                        </ul>
+                      </c-dropdown>
+                    } @else {
+                      <button cButton color="info" size="sm"
+                              (click)="rowAction.emit({ action: 'view', item: item })">
+                        Ver
+                      </button>
+                    }
                   }
                   @default {
                     {{ item[col.key] }}
