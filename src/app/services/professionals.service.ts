@@ -8,6 +8,7 @@ import {
   PagedResponse,
   ProfessionalListItemResponse,
   ProfessionalResponse,
+  UpdateProfessionalRequest,
 } from '../models';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
@@ -24,7 +25,9 @@ export class ProfessionalsService {
   getProfessionals(
     request?: GetProfessionalsRequest,
   ): Observable<PagedResponse<ProfessionalListItemResponse>> {
-    let params = new HttpParams();
+    let params = new HttpParams()
+      .set('sortBy', request?.sortBy ?? 'lastName')
+      .set('sortDirection', request?.sortDirection ?? 'ASC');
 
     if (request) {
       if (request.page) params = params.set('page', request.page.toString());
@@ -56,6 +59,21 @@ export class ProfessionalsService {
         map((response) => response.data),
         catchError(this.handleError),
       );
+  }
+
+  updateProfessional(id: string, request: UpdateProfessionalRequest): Observable<ProfessionalResponse> {
+    return this.http
+      .put<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/${id}`, request)
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError),
+      );
+  }
+
+  deactivateProfessional(id: string): Observable<void> {
+    return this.http
+      .put<void>(`${this.apiUrl}/${id}/deactivate`, {})
+      .pipe(catchError(this.handleError));
   }
 
   private handleError(error: unknown): Observable<never> {
