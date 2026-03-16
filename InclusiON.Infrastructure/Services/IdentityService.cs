@@ -57,6 +57,13 @@ namespace InclusiON.Infrastructure.Services
             return MapIdentityResult(result);
         }
 
+        public async Task<(bool Succeeded, IEnumerable<string> Errors)> ResetPasswordAsync(User user, string newPassword)
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            return MapIdentityResult(result);
+        }
+
         public async Task<SignInStatus> CheckPasswordAsync(User user, string password, bool lockoutOnFailure)
         {
             var result = await _signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure);
