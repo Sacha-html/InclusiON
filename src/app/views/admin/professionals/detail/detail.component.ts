@@ -45,6 +45,25 @@ export class DetailComponent implements OnInit {
     }
   }
 
+  goToEdit(): void {
+    if (this.professional) {
+      this.router.navigate(['/admin/professionals', this.professional.id, 'edit']);
+    }
+  }
+
+  deactivate(): void {
+    if (!this.professional || !confirm('¿Está seguro de que desea desactivar este profesional?')) return;
+
+    this.professionalsService.deactivateProfessional(this.professional.id).subscribe({
+      next: () => {
+        this.professional!.isActive = false;
+      },
+      error: () => {
+        alert('Error al desactivar el profesional.');
+      },
+    });
+  }
+
   formatDate(date: string | null | undefined): string {
     if (!date) return 'Sin especificar';
     const d = new Date(date);
