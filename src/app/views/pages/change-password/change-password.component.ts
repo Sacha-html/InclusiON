@@ -14,8 +14,11 @@ import {
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
+  InputGroupComponent,
+  InputGroupTextDirective,
   RowComponent,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
   selector: 'app-change-password',
@@ -30,8 +33,10 @@ import {
     FormControlDirective,
     FormLabelDirective,
     FormFeedbackComponent,
+    InputGroupComponent,
     ButtonDirective,
     AlertComponent,
+    IconDirective,
   ],
   templateUrl: './change-password.component.html',
 })
@@ -44,6 +49,9 @@ export class ChangePasswordComponent {
   submitted = false;
   isLoading = false;
   serverError = '';
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
 
   form: FormGroup = this.fb.group({
     currentPassword: ['', [Validators.required]],
