@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h3 class="mb-0">Personas con Discapacidad</h3>
   @if (canCreate) {
-    <button cButton color="primary" routerLink="new">Nueva Persona</button>
+    <button cButton color="primary" routerLink="new" aria-label="Crear nueva persona con discapacidad">Nueva Persona</button>
   }
 </div>
 
@@ -17,9 +17,10 @@
 </app-data-table>
 
 <!-- Modal Cambiar Método de Login -->
-<c-modal [visible]="showLoginMethodModal" (visibleChange)="!$event && closeLoginMethodModal()">
+<c-modal [visible]="showLoginMethodModal" (visibleChange)="!$event && closeLoginMethodModal()"
+         aria-labelledby="login-method-modal-title">
   <c-modal-header>
-    <strong>Cambiar método de login</strong>
+    <strong id="login-method-modal-title">Cambiar método de login</strong>
   </c-modal-header>
   <c-modal-body>
     @if (selectedPerson) {

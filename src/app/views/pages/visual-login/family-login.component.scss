@@ -137,12 +137,12 @@
 
 @media (prefers-contrast: more) {
   .login-card {
-    border: 3px solid #000 !important;
+    border: 3px solid var(--a11y-border, #000) !important;
   }
 
   .password-input {
     border-width: 3px !important;
-    border-color: #000 !important;
+    border-color: var(--a11y-border, #000) !important;
   }
 }
 

@@ -59,7 +59,27 @@
 
   // Focus
   --a11y-focus-color: rgba(21, 101, 192, 0.5);
+  --a11y-focus-accent: #0D47A1;
   --a11y-focus-width: 3px;
+
+  // Scrollbar
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // AAC nav colors (color-blind safe defaults)
+  --a11y-nav-home: #2E7D32;
+  --a11y-nav-activities: #1565C0;
+  --a11y-nav-calendar: #E65100;
+  --a11y-nav-talk: #7B1FA2;
+
+  // Role colors
+  --a11y-role-person: #2E7D32;
+  --a11y-role-person-bg: #E8F5E9;
+  --a11y-role-professional: #1565C0;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #7B1FA2;
+  --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1rem;
 }
@@ -106,6 +126,27 @@
     --a11y-dropdown-header-bg: #1A1A1A;
 
     --a11y-focus-color: rgba(144, 202, 249, 0.6);
+    --a11y-focus-accent: #90CAF9;
+    --a11y-focus-width: 3px;
+
+    // Scrollbar
+    --a11y-scrollbar-thumb: #616161;
+    --a11y-scrollbar-track: transparent;
+    --a11y-scrollbar-thumb-hover: #9E9E9E;
+
+    // AAC nav colors
+    --a11y-nav-home: #66BB6A;
+    --a11y-nav-activities: #64B5F6;
+    --a11y-nav-calendar: #FFB74D;
+    --a11y-nav-talk: #CE93D8;
+
+    // Role colors
+    --a11y-role-person: #66BB6A;
+    --a11y-role-person-bg: rgba(102, 187, 106, 0.15);
+    --a11y-role-professional: #64B5F6;
+    --a11y-role-professional-bg: rgba(100, 181, 246, 0.15);
+    --a11y-role-family: #CE93D8;
+    --a11y-role-family-bg: rgba(206, 147, 216, 0.15);
 }
 
 // =========================================
@@ -157,7 +198,25 @@
   --a11y-dropdown-header-bg: #F0F0F0;
 
   --a11y-focus-color: #0000FF;
+  --a11y-focus-accent: #0000FF;
   --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #333333;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #000000;
+
+  --a11y-nav-home: #006600;
+  --a11y-nav-activities: #0000CC;
+  --a11y-nav-calendar: #CC6600;
+  --a11y-nav-talk: #660099;
+
+  --a11y-role-person: #006600;
+  --a11y-role-person-bg: #E8F5E9;
+  --a11y-role-professional: #0000CC;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #660099;
+  --a11y-role-family-bg: #F3E5F5;
+
   --a11y-spacing-base: 1.25rem;
 }
 
@@ -205,6 +264,24 @@
   --a11y-dropdown-header-bg: #1A1A1A;
 
   --a11y-focus-color: #FFFF00;
+  --a11y-focus-accent: #FFFF00;
+  --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #FFFFFF;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #FFFF00;
+
+  --a11y-nav-home: #00FF00;
+  --a11y-nav-activities: #FFFF00;
+  --a11y-nav-calendar: #FFA500;
+  --a11y-nav-talk: #FF44FF;
+
+  --a11y-role-person: #00FF00;
+  --a11y-role-person-bg: rgba(0, 255, 0, 0.15);
+  --a11y-role-professional: #FFFF00;
+  --a11y-role-professional-bg: rgba(255, 255, 0, 0.15);
+  --a11y-role-family: #FF44FF;
+  --a11y-role-family-bg: rgba(255, 68, 255, 0.15);
 }
 
 // =========================================
@@ -256,7 +333,25 @@
   --a11y-dropdown-header-bg: #EEE8D5;
 
   --a11y-focus-color: rgba(38, 139, 210, 0.5);
+  --a11y-focus-accent: #268BD2;
   --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #93A1A1;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #657B83;
+
+  --a11y-nav-home: #859900;
+  --a11y-nav-activities: #268BD2;
+  --a11y-nav-calendar: #CB4B16;
+  --a11y-nav-talk: #6C71C4;
+
+  --a11y-role-person: #859900;
+  --a11y-role-person-bg: rgba(133, 153, 0, 0.1);
+  --a11y-role-professional: #268BD2;
+  --a11y-role-professional-bg: rgba(38, 139, 210, 0.1);
+  --a11y-role-family: #6C71C4;
+  --a11y-role-family-bg: rgba(108, 113, 196, 0.1);
+
   --a11y-spacing-base: 1.5rem;
 }
 
@@ -304,6 +399,24 @@
   --a11y-dropdown-header-bg: #002B36;
 
   --a11y-focus-color: rgba(42, 161, 152, 0.5);
+  --a11y-focus-accent: #2AA198;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #586E75;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #93A1A1;
+
+  --a11y-nav-home: #859900;
+  --a11y-nav-activities: #2AA198;
+  --a11y-nav-calendar: #CB4B16;
+  --a11y-nav-talk: #6C71C4;
+
+  --a11y-role-person: #859900;
+  --a11y-role-person-bg: rgba(133, 153, 0, 0.15);
+  --a11y-role-professional: #2AA198;
+  --a11y-role-professional-bg: rgba(42, 161, 152, 0.15);
+  --a11y-role-family: #6C71C4;
+  --a11y-role-family-bg: rgba(108, 113, 196, 0.15);
 }
 
 // =========================================
@@ -354,7 +467,25 @@
   --a11y-dropdown-header-bg: #F5F5F5;
 
   --a11y-focus-color: rgba(13, 71, 161, 0.7);
+  --a11y-focus-accent: #0D47A1;
   --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #616161;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #424242;
+
+  --a11y-nav-home: #1B5E20;
+  --a11y-nav-activities: #0D47A1;
+  --a11y-nav-calendar: #E65100;
+  --a11y-nav-talk: #6A1B9A;
+
+  --a11y-role-person: #1B5E20;
+  --a11y-role-person-bg: #E8F5E9;
+  --a11y-role-professional: #0D47A1;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #6A1B9A;
+  --a11y-role-family-bg: #F3E5F5;
+
   --a11y-spacing-base: 1.5rem;
 }
 
@@ -401,6 +532,24 @@
   --a11y-dropdown-header-bg: #121212;
 
   --a11y-focus-color: rgba(130, 177, 255, 0.7);
+  --a11y-focus-accent: #82B1FF;
+  --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #757575;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #9E9E9E;
+
+  --a11y-nav-home: #69F0AE;
+  --a11y-nav-activities: #82B1FF;
+  --a11y-nav-calendar: #FFAB40;
+  --a11y-nav-talk: #EA80FC;
+
+  --a11y-role-person: #69F0AE;
+  --a11y-role-person-bg: rgba(105, 240, 174, 0.15);
+  --a11y-role-professional: #82B1FF;
+  --a11y-role-professional-bg: rgba(130, 177, 255, 0.15);
+  --a11y-role-family: #EA80FC;
+  --a11y-role-family-bg: rgba(234, 128, 252, 0.15);
 }
 
 // =========================================
@@ -453,7 +602,26 @@
   --a11y-dropdown-header-bg: #FAFAFA;
 
   --a11y-focus-color: rgba(0, 119, 182, 0.5);
+  --a11y-focus-accent: #0077B6;
   --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // Deuteranopia: avoid green, use blue + orange/yellow
+  --a11y-nav-home: #0077B6;
+  --a11y-nav-activities: #023E8A;
+  --a11y-nav-calendar: #FFA500;
+  --a11y-nav-talk: #9B2335;
+
+  --a11y-role-person: #0077B6;
+  --a11y-role-person-bg: #E0F7FA;
+  --a11y-role-professional: #023E8A;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #9B2335;
+  --a11y-role-family-bg: #FCE4EC;
+
   --a11y-spacing-base: 1rem;
 }
 
@@ -500,6 +668,24 @@
   --a11y-dropdown-header-bg: #1A1A1A;
 
   --a11y-focus-color: rgba(72, 202, 228, 0.6);
+  --a11y-focus-accent: #48CAE4;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #616161;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #9E9E9E;
+
+  --a11y-nav-home: #48CAE4;
+  --a11y-nav-activities: #0077B6;
+  --a11y-nav-calendar: #FFB703;
+  --a11y-nav-talk: #FB8500;
+
+  --a11y-role-person: #48CAE4;
+  --a11y-role-person-bg: rgba(72, 202, 228, 0.15);
+  --a11y-role-professional: #0077B6;
+  --a11y-role-professional-bg: rgba(0, 119, 182, 0.15);
+  --a11y-role-family: #FB8500;
+  --a11y-role-family-bg: rgba(251, 133, 0, 0.15);
 }
 
 // =========================================
@@ -552,7 +738,26 @@
   --a11y-dropdown-header-bg: #FAFAFA;
 
   --a11y-focus-color: rgba(29, 53, 87, 0.5);
+  --a11y-focus-accent: #1D3557;
   --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // Protanopia: avoid red, use blue + yellow
+  --a11y-nav-home: #457B9D;
+  --a11y-nav-activities: #1D3557;
+  --a11y-nav-calendar: #E9C46A;
+  --a11y-nav-talk: #F4A261;
+
+  --a11y-role-person: #457B9D;
+  --a11y-role-person-bg: rgba(69, 123, 157, 0.1);
+  --a11y-role-professional: #1D3557;
+  --a11y-role-professional-bg: rgba(29, 53, 87, 0.1);
+  --a11y-role-family: #F4A261;
+  --a11y-role-family-bg: rgba(244, 162, 97, 0.1);
+
   --a11y-spacing-base: 1rem;
 }
 
@@ -599,6 +804,24 @@
   --a11y-dropdown-header-bg: #14213D;
 
   --a11y-focus-color: rgba(168, 218, 220, 0.6);
+  --a11y-focus-accent: #A8DADC;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #457B9D;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #A8DADC;
+
+  --a11y-nav-home: #8ECAE6;
+  --a11y-nav-activities: #A8DADC;
+  --a11y-nav-calendar: #E9C46A;
+  --a11y-nav-talk: #F4A261;
+
+  --a11y-role-person: #8ECAE6;
+  --a11y-role-person-bg: rgba(142, 202, 230, 0.15);
+  --a11y-role-professional: #A8DADC;
+  --a11y-role-professional-bg: rgba(168, 218, 220, 0.15);
+  --a11y-role-family: #F4A261;
+  --a11y-role-family-bg: rgba(244, 162, 97, 0.15);
 }
 
 // =========================================
@@ -651,7 +874,26 @@
   --a11y-dropdown-header-bg: #FAFAFA;
 
   --a11y-focus-color: rgba(155, 35, 53, 0.5);
+  --a11y-focus-accent: #9B2335;
   --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // Tritanopia: avoid blue-yellow, use red/magenta + cyan
+  --a11y-nav-home: #00838F;
+  --a11y-nav-activities: #9B2335;
+  --a11y-nav-calendar: #E91E63;
+  --a11y-nav-talk: #4A148C;
+
+  --a11y-role-person: #00838F;
+  --a11y-role-person-bg: rgba(0, 131, 143, 0.1);
+  --a11y-role-professional: #9B2335;
+  --a11y-role-professional-bg: rgba(155, 35, 53, 0.1);
+  --a11y-role-family: #4A148C;
+  --a11y-role-family-bg: rgba(74, 20, 140, 0.1);
+
   --a11y-spacing-base: 1rem;
 }
 
@@ -698,6 +940,24 @@
   --a11y-dropdown-header-bg: #0F0E17;
 
   --a11y-focus-color: rgba(233, 69, 96, 0.6);
+  --a11y-focus-accent: #E94560;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #533483;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #E94560;
+
+  --a11y-nav-home: #4DD0E1;
+  --a11y-nav-activities: #E94560;
+  --a11y-nav-calendar: #F48FB1;
+  --a11y-nav-talk: #7C4DFF;
+
+  --a11y-role-person: #4DD0E1;
+  --a11y-role-person-bg: rgba(77, 208, 225, 0.15);
+  --a11y-role-professional: #E94560;
+  --a11y-role-professional-bg: rgba(233, 69, 96, 0.15);
+  --a11y-role-family: #7C4DFF;
+  --a11y-role-family-bg: rgba(124, 77, 255, 0.15);
 }
 
 // =========================================
@@ -1894,13 +2154,22 @@ body.a11y-reading-mode {
   }
 
   // Contenido principal centrado y optimizado para lectura
-  main,
+  // 1000px permite que cards con badges/estados no se aplaste
+  main:not(.aac-main),
   .main,
   [role="main"],
   .body {
-    max-width: 800px !important;
+    max-width: 1000px !important;
     margin: 0 auto !important;
     padding: 2rem !important;
+    font-size: 1.125rem !important;
+    line-height: 1.8 !important;
+  }
+
+  // En layout AAC, mantener paddings del header/nav fijos pero centrar contenido
+  .aac-main {
+    max-width: 1000px !important;
+    margin: 0 auto !important;
     font-size: 1.125rem !important;
     line-height: 1.8 !important;
   }
@@ -1909,10 +2178,30 @@ body.a11y-reading-mode {
   // para mejor accesibilidad (clickeable, enfocable, con aria-label)
 
   // Ocultar elementos de navegación secundarios
+  // Excluir la barra AAC (.aac-bottom-nav) para que personas puedan navegar
   .breadcrumb,
-  .footer,
-  nav:not(.main-nav) {
+  .footer {
     display: none !important;
+  }
+
+  // Ocultar navs genéricas pero mantener la nav AAC y el panel de accesibilidad
+  nav:not(.main-nav):not(.aac-bottom-nav) {
+    display: none !important;
+  }
+
+  // En layout AAC, mantener header y barra inferior visibles
+  .aac-header {
+    display: block !important;
+    visibility: visible !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .aac-nav {
+    display: block !important;
+    visibility: visible !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 
   // Mantener el botón de accesibilidad visible y accesible

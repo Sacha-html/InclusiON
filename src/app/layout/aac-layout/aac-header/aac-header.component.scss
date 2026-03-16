@@ -16,8 +16,8 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4CAF50, #2E7D32);
-  color: white;
+  background: linear-gradient(135deg, var(--a11y-success, #4CAF50), var(--a11y-success, #2E7D32));
+  color: var(--a11y-success-text, white);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,7 +28,7 @@
 .aac-user-name {
   font-size: 22px;
   font-weight: 600;
-  color: var(--aac-text, #1a1a1a);
+  color: var(--a11y-text, #1a1a1a);
 }
 
 .aac-header-actions {
@@ -40,7 +40,7 @@
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--a11y-border, #e0e0e0);
   background: transparent;
   cursor: pointer;
   display: flex;
@@ -51,27 +51,61 @@
   svg {
     width: 28px;
     height: 28px;
-    color: var(--aac-text, #1a1a1a);
+    color: var(--a11y-text, #1a1a1a);
   }
 
   &:hover {
-    background: #f5f5f5;
-    border-color: #2196F3;
+    background: var(--a11y-bg-secondary, #f5f5f5);
+    border-color: var(--a11y-primary, #2196F3);
   }
 
   &:focus {
-    outline: 4px solid #FFD700;
+    outline: 4px solid var(--a11y-focus-accent, #0D47A1);
+    outline-offset: 2px;
+  }
+}
+
+.aac-btn-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 20px;
+  border-radius: 16px;
+  border: 2px solid var(--a11y-primary, #2196F3);
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--a11y-primary, #2196F3);
+  transition: all 0.15s ease;
+  min-width: 44px;
+
+  svg {
+    width: 28px;
+    height: 28px;
+    color: var(--a11y-primary, #2196F3);
+  }
+
+  &:hover {
+    background: var(--a11y-primary, #2196F3);
+    color: var(--a11y-primary-text, white);
+    svg { color: var(--a11y-primary-text, white); }
+  }
+
+  &:focus {
+    outline: 4px solid var(--a11y-focus-accent, #0D47A1);
     outline-offset: 2px;
   }
 }
 
 .aac-btn-logout {
   &:hover {
-    background: #FFEBEE;
-    border-color: #F44336;
+    background: color-mix(in srgb, var(--a11y-danger, #F44336) 10%, transparent);
+    border-color: var(--a11y-danger, #F44336);
 
     svg {
-      color: #F44336;
+      color: var(--a11y-danger, #F44336);
     }
   }
 }
@@ -79,17 +113,17 @@
 // Alto contraste
 :host-context([data-profile="high-contrast"]) {
   .aac-avatar {
-    border: 3px solid white;
+    border: 3px solid var(--a11y-text, white);
   }
 
   .aac-user-name {
-    color: white;
+    color: var(--a11y-text, white);
   }
 
   .aac-btn-icon {
-    border-color: white;
+    border-color: var(--a11y-border, white);
     svg {
-      color: white;
+      color: var(--a11y-text, white);
     }
   }
 }
@@ -97,17 +131,25 @@
 // Modo oscuro
 :host-context([data-color-mode="dark"]) {
   .aac-user-name {
-    color: #f5f5f5;
+    color: var(--a11y-text, #f5f5f5);
   }
 
   .aac-btn-icon {
-    border-color: #4a4a6a;
+    border-color: var(--a11y-border, #4a4a6a);
     svg {
-      color: #f5f5f5;
+      color: var(--a11y-text, #f5f5f5);
     }
 
     &:hover {
       background: rgba(255, 255, 255, 0.1);
     }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .aac-btn-icon,
+  .aac-btn-back {
+    transition: none;
   }
 }
