@@ -101,14 +101,14 @@ import { AuthService } from '../../../services';
     :host-context([data-profile="high-contrast"]) {
       .home-greeting,
       .section-title {
-        color: #fff;
+        color: var(--a11y-text, #fff);
       }
     }
 
     :host-context([data-color-mode="dark"]) {
       .home-greeting,
       .section-title {
-        color: #f5f5f5;
+        color: var(--a11y-text, #f5f5f5);
       }
     }
 

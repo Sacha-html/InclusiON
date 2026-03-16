@@ -3,7 +3,7 @@
 @supports (scrollbar-width: thin) {
   * {
     scrollbar-width: thin;
-    scrollbar-color: #444 transparent;
+    scrollbar-color: var(--a11y-scrollbar-thumb, #444) var(--a11y-scrollbar-track, transparent);
   }
 }
 
@@ -19,12 +19,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #999;
+  background: var(--a11y-scrollbar-thumb, #999);
   border: .15em solid var(--cui-body-bg, #fff);
   border-radius: 100vw;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: var(--a11y-scrollbar-thumb-hover, #444);
 }
-

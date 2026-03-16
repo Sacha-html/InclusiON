@@ -438,6 +438,18 @@
 }
 
 // ========================================
+// READING MODE - TABLES & MODALS
+// ========================================
+[data-reading-mode="true"] {
+  .table-responsive,
+  table {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+}
+
+// ========================================
 // AJUSTES GENERALES
 // ========================================
 

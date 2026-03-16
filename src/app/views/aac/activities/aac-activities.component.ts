@@ -51,24 +51,25 @@ import { VisualCardComponent } from '../../../shared/components/visual-card/visu
     .empty-state {
       text-align: center;
       padding: 48px 24px;
-      background: white;
+      background: var(--a11y-surface, white);
+      border: 2px solid var(--a11y-border, #E0E0E0);
       border-radius: 24px;
-      color: #666;
+      color: var(--a11y-text-muted, #666);
       font-size: 20px;
     }
 
     :host-context([data-profile="high-contrast"]) .page-title {
-      color: #fff;
+      color: var(--a11y-text, #fff);
     }
 
     :host-context([data-color-mode="dark"]) {
       .page-title {
-        color: #f5f5f5;
+        color: var(--a11y-text, #f5f5f5);
       }
 
       .empty-state {
-        background: #2a2a3e;
-        color: #aaa;
+        background: var(--a11y-surface, #2a2a3e);
+        color: var(--a11y-text-muted, #aaa);
       }
     }
   `]
@@ -80,27 +81,27 @@ export class AacActivitiesComponent {
       title: 'Ejercicios de motricidad',
       time: '09:00 AM',
       icon: 'cilPuzzle',
-      color: '#4CAF50',
+      color: 'var(--a11y-success, #4CAF50)',
       status: 'Completado',
-      statusColor: '#4CAF50'
+      statusColor: 'var(--a11y-success, #4CAF50)'
     },
     {
       id: 2,
       title: 'Lectura interactiva',
       time: '10:30 AM',
       icon: 'cilBook',
-      color: '#2196F3',
+      color: 'var(--a11y-primary, #2196F3)',
       status: 'En progreso',
-      statusColor: '#FF9800'
+      statusColor: 'var(--a11y-warning, #FF9800)'
     },
     {
       id: 3,
       title: 'Juego de memoria',
       time: '02:00 PM',
       icon: 'cilLightbulb',
-      color: '#9C27B0',
+      color: 'var(--a11y-nav-talk, #9C27B0)',
       status: 'Pendiente',
-      statusColor: '#9E9E9E'
+      statusColor: 'var(--a11y-text-muted, #9E9E9E)'
     }
   ];
 }
