@@ -34,7 +34,7 @@ import { ShapeType } from '../../constants/login-color-shape-set';
               [attr.cy]="size / 2"
               [attr.r]="size / 2 - strokeWidth"
               [attr.fill]="color"
-              [attr.stroke]="selected ? '#000' : 'none'"
+              [attr.stroke]="selected ? strokeColor : 'none'"
               [attr.stroke-width]="selected ? strokeWidth : 0" />
           }
           @case ('square') {
@@ -44,21 +44,21 @@ import { ShapeType } from '../../constants/login-color-shape-set';
               [attr.width]="size - strokeWidth * 2"
               [attr.height]="size - strokeWidth * 2"
               [attr.fill]="color"
-              [attr.stroke]="selected ? '#000' : 'none'"
+              [attr.stroke]="selected ? strokeColor : 'none'"
               [attr.stroke-width]="selected ? strokeWidth : 0" />
           }
           @case ('triangle') {
             <polygon
               [attr.points]="trianglePoints"
               [attr.fill]="color"
-              [attr.stroke]="selected ? '#000' : 'none'"
+              [attr.stroke]="selected ? strokeColor : 'none'"
               [attr.stroke-width]="selected ? strokeWidth : 0" />
           }
           @case ('star') {
             <polygon
               [attr.points]="starPoints"
               [attr.fill]="color"
-              [attr.stroke]="selected ? '#000' : 'none'"
+              [attr.stroke]="selected ? strokeColor : 'none'"
               [attr.stroke-width]="selected ? strokeWidth : 0" />
           }
         }
@@ -86,13 +86,13 @@ import { ShapeType } from '../../constants/login-color-shape-set';
     }
 
     .shape-button:focus {
-      outline: 3px solid #FFD700;
+      outline: 3px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 2px;
     }
 
     .shape-button.selected {
-      border-color: #0066CC;
-      background-color: rgba(0, 102, 204, 0.1);
+      border-color: var(--a11y-primary, #0066CC);
+      background-color: color-mix(in srgb, var(--a11y-primary, #0066CC) 10%, transparent);
     }
 
     .shape-button:active {
@@ -106,7 +106,7 @@ export class ShapeComponent {
   @Input() type: ShapeType = 'circle';
 
   /** Color de la forma en formato hexadecimal */
-  @Input() color: string = '#F44336';
+  @Input() color: string = 'var(--a11y-danger, #F44336)';
 
   /** Tamanio en pixeles */
   @Input() size: number = 64;
@@ -122,6 +122,11 @@ export class ShapeComponent {
 
   /** Ancho del borde de seleccion */
   readonly strokeWidth = 4;
+
+  /** Color del borde de seleccion, resuelto desde CSS variable */
+  get strokeColor(): string {
+    return getComputedStyle(document.documentElement).getPropertyValue('--a11y-text').trim() || '#000';
+  }
 
   /** Puntos del triangulo */
   get trianglePoints(): string {

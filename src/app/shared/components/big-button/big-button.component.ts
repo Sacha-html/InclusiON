@@ -35,10 +35,10 @@ import { IconDirective } from '@coreui/icons-angular';
       padding: 24px;
       min-width: 140px;
       min-height: 140px;
-      border: none;
+      border: 2px solid var(--a11y-border, #E0E0E0);
       border-radius: 24px;
-      background: var(--btn-bg, #FFFFFF);
-      color: var(--btn-color, #212121);
+      background: var(--btn-bg, var(--a11y-surface, #FFFFFF));
+      color: var(--btn-color, var(--a11y-text, #212121));
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -54,7 +54,7 @@ import { IconDirective } from '@coreui/icons-angular';
     }
 
     .big-button:focus {
-      outline: 4px solid #FFD700;
+      outline: 4px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 4px;
     }
 
@@ -71,7 +71,7 @@ import { IconDirective } from '@coreui/icons-angular';
       height: 72px;
       border-radius: 20px;
       background: var(--btn-color, #2196F3);
-      color: white;
+      color: var(--a11y-primary-text, white);
 
       svg {
         width: 40px;
@@ -94,20 +94,20 @@ import { IconDirective } from '@coreui/icons-angular';
 
     :host-context([data-profile="high-contrast"]) .big-button {
       border: 3px solid var(--btn-color);
-      background: #000;
-      color: #fff;
+      background: var(--a11y-bg, #000);
+      color: var(--a11y-text, #fff);
 
       .btn-label {
-        color: #fff;
+        color: var(--a11y-text, #fff);
       }
     }
 
     :host-context([data-color-mode="dark"]) .big-button {
-      background: #2a2a3e;
+      background: var(--a11y-surface, #2a2a3e);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 
       .btn-label {
-        color: #f5f5f5;
+        color: var(--a11y-text, #f5f5f5);
       }
     }
   `],

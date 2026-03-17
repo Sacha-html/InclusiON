@@ -3,14 +3,14 @@
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
-  background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+  background: var(--a11y-bg, #f0f4f8);
 
-  --aac-primary: #2196F3;
-  --aac-success: #4CAF50;
-  --aac-warning: #FF9800;
-  --aac-danger: #F44336;
-  --aac-bg: #FFFFFF;
-  --aac-text: #1a1a1a;
+  --aac-primary: var(--a11y-primary, #2196F3);
+  --aac-success: var(--a11y-success, #4CAF50);
+  --aac-warning: var(--a11y-warning, #FF9800);
+  --aac-danger: var(--a11y-danger, #F44336);
+  --aac-bg: var(--a11y-surface, #FFFFFF);
+  --aac-text: var(--a11y-text, #1a1a1a);
   --aac-radius: 24px;
   --aac-spacing: 16px;
 }
@@ -48,23 +48,19 @@
 // Alto contraste
 :host-context([data-profile="high-contrast"]) {
   .aac-container {
-    --aac-bg: #000000;
-    --aac-text: #FFFFFF;
-    background: #000000;
+    background: var(--a11y-bg, #000000);
   }
 
   .aac-header,
   .aac-nav {
-    border: 2px solid #FFFFFF;
+    border: 2px solid var(--a11y-border, #FFFFFF);
   }
 }
 
 // Modo oscuro
 :host-context([data-color-mode="dark"]) {
   .aac-container {
-    --aac-bg: #1e1e2e;
-    --aac-text: #f5f5f5;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--a11y-bg, #1e1e2e);
   }
 }
 

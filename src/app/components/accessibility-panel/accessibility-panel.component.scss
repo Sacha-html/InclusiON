@@ -58,21 +58,22 @@ $ff: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   min-height: 52px;
   border-radius: 26px;
   border: 3px solid $danger;
-  background: $bg;
+  background: $danger;
   cursor: pointer;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   font: 600 1rem $ff;
-  color: $danger;
+  color: #FFFFFF;
 
   &:hover {
-    background: $danger;
-    color: $active-text;
+    background: color-mix(in srgb, $danger 85%, black);
+    border-color: color-mix(in srgb, $danger 85%, black);
+    color: #FFFFFF;
     transform: scale(1.03);
-    svg { color: $active-text !important; }
+    svg { color: #FFFFFF !important; }
   }
 
   &:focus-visible { outline: 4px solid $danger; outline-offset: 3px; }
-  svg { width: 24px; height: 24px; color: $danger; }
+  svg { width: 24px; height: 24px; color: #FFFFFF; }
 }
 
 // Overlay
@@ -393,6 +394,87 @@ $ff: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     flex: 1 1 100%;
     svg { color: $danger; }
     &:hover { background: $danger; color: $active-text; svg { color: $active-text; } }
+  }
+}
+
+// High contrast profile overrides
+:host-context([data-profile="high-contrast"]) {
+  .a11y-panel {
+    border-left: 3px solid #FFFFFF;
+  }
+
+  .a11y-trigger-btn {
+    border: 3px solid #FFFF00;
+  }
+
+  .a11y-section {
+    border: 2px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .a11y-theme-btn,
+  .a11y-option-btn,
+  .a11y-mode-btn {
+    border-width: 3px;
+  }
+}
+
+// Color-blind profile overrides
+:host-context([data-profile="deuteranopia"]),
+:host-context([data-profile="protanopia"]) {
+  .a11y-reset-btn,
+  .a11y-tts-btn.a11y-tts-stop,
+  .a11y-exit-reading-btn {
+    // Use orange instead of red for danger
+    border-color: #FFA500;
+    color: #FFA500;
+
+    svg { color: #FFA500; }
+
+    &:hover {
+      background: #FFA500;
+      color: $active-text;
+      svg { color: $active-text; }
+    }
+  }
+}
+
+:host-context([data-profile="tritanopia"]) {
+  .a11y-panel-title,
+  .a11y-section-title {
+    // Use magenta instead of cyan for accent
+    color: #E91E63 !important;
+  }
+
+  .a11y-trigger-btn {
+    border-color: #E91E63;
+    svg { color: #E91E63; }
+    &:hover { background: #E91E63; }
+  }
+}
+
+// Minimum touch target sizes
+.a11y-shortcut kbd {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .a11y-trigger-btn,
+  .a11y-exit-reading-btn,
+  .a11y-mode-btn,
+  .a11y-theme-btn,
+  .a11y-option-btn,
+  .a11y-size-btn,
+  .a11y-tts-btn,
+  .a11y-reset-btn,
+  .a11y-panel-close {
+    transition: none !important;
+
+    &:hover {
+      transform: none !important;
+    }
   }
 }
 
