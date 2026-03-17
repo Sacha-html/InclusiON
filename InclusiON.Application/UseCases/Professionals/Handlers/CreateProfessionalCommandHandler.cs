@@ -68,7 +68,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow,
                     EmailConfirmed = true,
-                    LockoutEnabled = true
+                    LockoutEnabled = true,
+                    MustChangePassword = true,
                 };
 
                 // Crear profesional
