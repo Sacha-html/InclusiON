@@ -192,4 +192,14 @@
 	<data name="UserCreationError" xml:space="preserve">
 		<value>Error al crear usuario: {0}</value>
 	</data>
+	<!-- Cambio de contrasena -->
+	<data name="CurrentPasswordIncorrect" xml:space="preserve">
+		<value>La contrasena actual es incorrecta</value>
+	</data>
+	<data name="NewPasswordsMismatch" xml:space="preserve">
+		<value>La nueva contrasena y la confirmacion no coinciden</value>
+	</data>
+	<data name="ChangePasswordFailed" xml:space="preserve">
+		<value>Error al cambiar la contrasena: {0}</value>
+	</data>
 </root>
