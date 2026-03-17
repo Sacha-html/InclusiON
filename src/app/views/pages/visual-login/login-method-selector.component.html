@@ -32,7 +32,9 @@
             (click)="selectMethod(method)"
             role="button"
             tabindex="0"
-            (keypress)="selectMethod(method)">
+            [attr.aria-label]="'Seleccionar metodo de acceso: ' + method.name"
+            (keydown.enter)="selectMethod(method)"
+            (keydown.space)="selectMethod(method); $event.preventDefault()">
             <c-card-body class="text-center">
               <div class="method-icon mb-3">
                 <svg [cIcon]="getMethodIcon(method)" size="xl" [class]="'text-' + getMethodColor(method)"></svg>

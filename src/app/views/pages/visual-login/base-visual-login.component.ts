@@ -255,9 +255,14 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
 
   /**
    * Navega al dashboard después de login exitoso.
+   * Si mustChangePassword es true, redirige a cambio de contraseña.
    */
-  protected navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+  protected navigateToDashboard(mustChangePassword?: boolean): void {
+    if (mustChangePassword) {
+      this.router.navigate(['/change-password']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   // ============================================
