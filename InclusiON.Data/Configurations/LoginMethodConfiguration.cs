@@ -32,7 +32,6 @@ namespace InclusiON.Data.Configurations
             builder.HasIndex(m => m.Code)
                 .IsUnique();
 
-            // Seed Data - 3 metodos de login para personas con discapacidad
             builder.HasData(
                 new LoginMethod
                 {
@@ -44,9 +43,6 @@ namespace InclusiON.Data.Configurations
                     RequiresEmail = false,
                     RequiresPassword = true,
                     RequiresPin = false,
-                    RequiresEmojiSequence = false,
-                    RequiresColorShape = false,
-                    RequiresProfileSelect = false,
                     RequiresSupervisor = false,
                     DisplayOrder = 1,
                     IsActive = true
@@ -61,9 +57,6 @@ namespace InclusiON.Data.Configurations
                     RequiresEmail = false,
                     RequiresPassword = false,
                     RequiresPin = true,
-                    RequiresEmojiSequence = false,
-                    RequiresColorShape = false,
-                    RequiresProfileSelect = false,
                     RequiresSupervisor = false,
                     DisplayOrder = 2,
                     IsActive = true
@@ -78,9 +71,6 @@ namespace InclusiON.Data.Configurations
                     RequiresEmail = false,
                     RequiresPassword = false,
                     RequiresPin = false,
-                    RequiresEmojiSequence = false,
-                    RequiresColorShape = false,
-                    RequiresProfileSelect = false,
                     RequiresSupervisor = true,
                     DisplayOrder = 3,
                     IsActive = true
