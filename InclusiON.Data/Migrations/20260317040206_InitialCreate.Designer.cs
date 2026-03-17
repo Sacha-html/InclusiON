@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InclusiON.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260226011503_Add-Embedding")]
-    partial class AddEmbedding
+    [Migration("20260317040206_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -597,6 +597,146 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("ActivityTemplateTypes", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveAdjustmentLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityResponseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AdjustedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("AdjustmentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("NewValue")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(MAX)");
+
+                    b.Property<int>("PersonRoadmapActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PreviousValue")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(MAX)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityResponseId");
+
+                    b.HasIndex("AdjustedAt");
+
+                    b.HasIndex("PersonRoadmapActivityId");
+
+                    b.ToTable("AdaptiveAdjustmentLogs", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveEngineConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ConsecutiveFailuresToDowngrade")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(2);
+
+                    b.Property<int>("ConsecutiveSuccessToUpgrade")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(3);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("FrustrationThreshold")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(3);
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("MaxDifficultyLevel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(5);
+
+                    b.Property<int?>("MaxTimeLimitSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinDifficultyLevel")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<int?>("MinTimeLimitSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonRoadmapActivityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SuccessThresholdPercent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(70);
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonRoadmapActivityId")
+                        .IsUnique();
+
+                    b.ToTable("AdaptiveEngineConfigs", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
                 {
                     b.Property<int>("Id")
@@ -1024,22 +1164,13 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("RequiresColorShape")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("RequiresEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresEmojiSequence")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresPassword")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresPin")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresProfileSelect")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresSupervisor")
@@ -1062,12 +1193,9 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             MinAutonomyLevel = 1,
                             Name = "Email y Contrasena",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = true,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
@@ -1079,98 +1207,24 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             MinAutonomyLevel = 1,
                             Name = "PIN Numerico",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
                             RequiresPin = true,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
                         {
                             Id = 3,
-                            Code = "EMOJI_SEQUENCE",
-                            Description = "Login seleccionando 4 emojis en orden - DEPRECADO",
-                            DisplayOrder = 3,
-                            IsActive = false,
-                            MinAutonomyLevel = 2,
-                            Name = "Secuencia de Emojis (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = true,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "COLOR_SHAPE",
-                            Description = "Login seleccionando 4 colores y formas en orden - DEPRECADO",
-                            DisplayOrder = 4,
-                            IsActive = false,
-                            MinAutonomyLevel = 2,
-                            Name = "Colores y Formas (Deprecado)",
-                            RequiresColorShape = true,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 5,
                             Code = "ASSISTED",
                             Description = "Login asistido donde un familiar o profesional autoriza el acceso",
                             DisplayOrder = 3,
                             IsActive = true,
                             MinAutonomyLevel = 3,
                             Name = "Login Asistido",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = true
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Code = "TRUSTED_DEVICE",
-                            Description = "Login automatico en dispositivos previamente autorizados - DEPRECADO",
-                            DisplayOrder = 6,
-                            IsActive = false,
-                            MinAutonomyLevel = 3,
-                            Name = "Dispositivo Confiable (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Code = "PROFILE_SELECT",
-                            Description = "Login seleccionando nombre y avatar del usuario - DEPRECADO",
-                            DisplayOrder = 7,
-                            IsActive = false,
-                            MinAutonomyLevel = 3,
-                            Name = "Seleccion de Perfil (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = true,
-                            RequiresSupervisor = false
                         });
                 });
 
@@ -2757,6 +2811,36 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("SkillArea");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveAdjustmentLog", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.ActivityResponse", "ActivityResponse")
+                        .WithMany("AdaptiveAdjustmentLogs")
+                        .HasForeignKey("ActivityResponseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.PersonRoadmapActivity", "PersonRoadmapActivity")
+                        .WithMany("AdaptiveAdjustmentLogs")
+                        .HasForeignKey("PersonRoadmapActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ActivityResponse");
+
+                    b.Navigation("PersonRoadmapActivity");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.AdaptiveEngineConfig", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonRoadmapActivity", "PersonRoadmapActivity")
+                        .WithOne("AdaptiveConfig")
+                        .HasForeignKey("InclusiON.Domain.Models.AdaptiveEngineConfig", "PersonRoadmapActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PersonRoadmapActivity");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -3137,6 +3221,11 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Activities");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityResponse", b =>
+                {
+                    b.Navigation("AdaptiveAdjustmentLogs");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityTemplateType", b =>
                 {
                     b.Navigation("ActivityContents");
@@ -3180,6 +3269,10 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmapActivity", b =>
                 {
                     b.Navigation("ActivityResults");
+
+                    b.Navigation("AdaptiveAdjustmentLogs");
+
+                    b.Navigation("AdaptiveConfig");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmapArea", b =>

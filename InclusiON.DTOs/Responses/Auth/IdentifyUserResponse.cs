@@ -32,7 +32,7 @@ namespace InclusiON.DTOs.Responses.Auth
         public string? AvatarColor { get; set; }
 
         /// <summary>
-        /// Codigo del metodo de login configurado (STANDARD, PIN, EMOJI_SEQUENCE, etc.).
+        /// Codigo del metodo de login configurado (STANDARD, PIN, ASSISTED).
         /// </summary>
         public string? LoginMethodCode { get; set; }
 
