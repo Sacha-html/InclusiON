@@ -54,7 +54,7 @@ namespace InclusiON.Data.Seeders
 
         private static async Task SeedVisualLoginTestUsersAsync(UserManager<User> userManager, AppDbContext context)
         {
-            // Usuarios de prueba para visual login - solo metodos activos (STANDARD=1, PIN=2, ASSISTED=5)
+            // Usuarios de prueba para visual login - solo metodos activos (STANDARD=1, PIN=2, ASSISTED=3)
             var testUsers = new[]
             {
                 new {
@@ -86,7 +86,7 @@ namespace InclusiON.Data.Seeders
                     Email = "ana@test.com",
                     Password = (string?)null,
                     Pin = (string?)null,
-                    LoginMethodId = 5, // ASSISTED (requiere supervisor)
+                    LoginMethodId = 3, // ASSISTED (requiere supervisor)
                     AvatarColor = "#9C27B0",
                     SupervisorUserId = (Guid?)Guid.Parse("00000000-0000-0000-0000-000000000020") // Supervisor
                 },

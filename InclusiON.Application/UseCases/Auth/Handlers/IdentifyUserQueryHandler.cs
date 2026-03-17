@@ -116,12 +116,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.LoginMethodNotAvailable);
             }
 
-            // Normalizar codigo SUPERVISED a ASSISTED para retrocompatibilidad
             var loginMethodCode = loginMethod?.Code ?? "STANDARD";
-            if (loginMethodCode == "SUPERVISED")
-            {
-                loginMethodCode = "ASSISTED";
-            }
 
             return ApiResponse<IdentifyUserResponse>.SuccessResult(
                 new IdentifyUserResponse
