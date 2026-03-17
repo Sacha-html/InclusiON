@@ -1161,22 +1161,13 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("RequiresColorShape")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("RequiresEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresEmojiSequence")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresPassword")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresPin")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresProfileSelect")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresSupervisor")
@@ -1199,12 +1190,9 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             MinAutonomyLevel = 1,
                             Name = "Email y Contrasena",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = true,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
@@ -1216,98 +1204,24 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             MinAutonomyLevel = 1,
                             Name = "PIN Numerico",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
                             RequiresPin = true,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
                         {
                             Id = 3,
-                            Code = "EMOJI_SEQUENCE",
-                            Description = "Login seleccionando 4 emojis en orden - DEPRECADO",
-                            DisplayOrder = 3,
-                            IsActive = false,
-                            MinAutonomyLevel = 2,
-                            Name = "Secuencia de Emojis (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = true,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "COLOR_SHAPE",
-                            Description = "Login seleccionando 4 colores y formas en orden - DEPRECADO",
-                            DisplayOrder = 4,
-                            IsActive = false,
-                            MinAutonomyLevel = 2,
-                            Name = "Colores y Formas (Deprecado)",
-                            RequiresColorShape = true,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 5,
                             Code = "ASSISTED",
                             Description = "Login asistido donde un familiar o profesional autoriza el acceso",
                             DisplayOrder = 3,
                             IsActive = true,
                             MinAutonomyLevel = 3,
                             Name = "Login Asistido",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = true
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Code = "TRUSTED_DEVICE",
-                            Description = "Login automatico en dispositivos previamente autorizados - DEPRECADO",
-                            DisplayOrder = 6,
-                            IsActive = false,
-                            MinAutonomyLevel = 3,
-                            Name = "Dispositivo Confiable (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Code = "PROFILE_SELECT",
-                            Description = "Login seleccionando nombre y avatar del usuario - DEPRECADO",
-                            DisplayOrder = 7,
-                            IsActive = false,
-                            MinAutonomyLevel = 3,
-                            Name = "Seleccion de Perfil (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = true,
-                            RequiresSupervisor = false
                         });
                 });
 
