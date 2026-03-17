@@ -24,7 +24,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         // Constantes para IDs de metodos de login
         private const int LoginMethodStandard = 1;
         private const int LoginMethodPin = 2;
-        private const int LoginMethodAssisted = 5;
+        private const int LoginMethodAssisted = 3;
 
         public UpdateLoginMethodCommandHandler(
             IVisualLoginRepository repository,

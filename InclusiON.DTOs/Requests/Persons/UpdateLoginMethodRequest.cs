@@ -8,10 +8,10 @@ namespace InclusiON.DTOs.Requests.Persons
     public class UpdateLoginMethodRequest
     {
         /// <summary>
-        /// ID del metodo de login a asignar (1=STANDARD, 2=PIN, 5=ASSISTED).
+        /// ID del metodo de login a asignar (1=STANDARD, 2=PIN, 3=ASSISTED).
         /// </summary>
         [Required(ErrorMessage = "El metodo de login es requerido")]
-        [Range(1, 7, ErrorMessage = "Metodo de login invalido")]
+        [Range(1, 3, ErrorMessage = "Metodo de login invalido")]
         public int LoginMethodId { get; set; }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace InclusiON.DTOs.Requests.Persons
         public string? Pin { get; set; }
 
         /// <summary>
-        /// ID del usuario supervisor (requerido si LoginMethodId = 5).
+        /// ID del usuario supervisor (requerido si LoginMethodId = 3).
         /// </summary>
         public Guid? SupervisorUserId { get; set; }
     }
