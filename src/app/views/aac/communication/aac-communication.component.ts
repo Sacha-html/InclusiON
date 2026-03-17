@@ -87,7 +87,7 @@ import { AccessibilityService } from '../../../services/accessibility.service';
       align-items: center;
       gap: 8px;
       padding: 20px 12px;
-      background: white;
+      background: var(--a11y-surface, white);
       border: 3px solid var(--feeling-color);
       border-radius: 20px;
       cursor: pointer;
@@ -99,12 +99,12 @@ import { AccessibilityService } from '../../../services/accessibility.service';
       background: var(--feeling-color);
 
       .feeling-label {
-        color: white;
+        color: var(--a11y-primary-text, white);
       }
     }
 
     .feeling-btn:focus {
-      outline: 4px solid #FFD700;
+      outline: 4px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 4px;
     }
 
@@ -116,19 +116,19 @@ import { AccessibilityService } from '../../../services/accessibility.service';
     .feeling-label {
       font-size: 16px;
       font-weight: 600;
-      color: var(--aac-text, #1a1a1a);
+      color: var(--a11y-text, #1a1a1a);
     }
 
     :host-context([data-profile="high-contrast"]) {
       .page-title,
       .section-title {
-        color: #fff;
+        color: var(--a11y-text, #fff);
       }
 
       .feeling-btn {
-        background: #000;
+        background: var(--a11y-bg, #000);
         .feeling-label {
-          color: #fff;
+          color: var(--a11y-text, #fff);
         }
       }
     }
@@ -136,13 +136,13 @@ import { AccessibilityService } from '../../../services/accessibility.service';
     :host-context([data-color-mode="dark"]) {
       .page-title,
       .section-title {
-        color: #f5f5f5;
+        color: var(--a11y-text, #f5f5f5);
       }
 
       .feeling-btn {
-        background: #2a2a3e;
+        background: var(--a11y-surface, #2a2a3e);
         .feeling-label {
-          color: #f5f5f5;
+          color: var(--a11y-text, #f5f5f5);
         }
       }
     }
