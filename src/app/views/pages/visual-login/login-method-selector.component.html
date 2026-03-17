@@ -62,19 +62,20 @@
         <div *ngIf="selectedMethod.id === LOGIN_PIN" class="pin-config">
           <c-row>
             <c-col xs="12" md="6" class="mb-3">
-              <label cLabel for="pin">PIN (4-6 digitos)</label>
+              <label cLabel for="pin">PIN (4 dígitos)</label>
               <input
                 cFormControl
                 type="password"
                 id="pin"
                 formControlName="pin"
                 placeholder="Ingresa tu PIN"
-                maxlength="6"
+                maxlength="4"
+                autofocus
                 inputmode="numeric"
                 pattern="[0-9]*"
               />
               <div *ngIf="configForm.get('pin')?.invalid && configForm.get('pin')?.touched" class="text-danger small mt-1">
-                El PIN debe tener entre 4 y 6 digitos numericos
+                El PIN debe tener 4 dígitos numéricos
               </div>
             </c-col>
             <c-col xs="12" md="6" class="mb-3">
@@ -85,7 +86,7 @@
                 id="confirmPin"
                 formControlName="confirmPin"
                 placeholder="Confirma tu PIN"
-                maxlength="6"
+                maxlength="4"
                 inputmode="numeric"
                 pattern="[0-9]*"
               />
