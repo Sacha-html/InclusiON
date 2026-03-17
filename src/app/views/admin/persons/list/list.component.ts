@@ -56,7 +56,7 @@ export class ListComponent implements OnInit {
   loginMethods: LoginMethodItem[] = [];
   loginMethodForm: FormGroup = this.fb.group({
     loginMethodId: [null, Validators.required],
-    pin: ['', [Validators.pattern(/^\d{4,6}$/)]],
+    pin: ['', [Validators.pattern(/^\d{4}$/)]],
   });
   loginMethodSubmitted = false;
   loginMethodError = '';

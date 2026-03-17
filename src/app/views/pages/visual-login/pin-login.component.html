@@ -93,6 +93,7 @@
                 pattern="[0-9]*"
                 id="pinTextInput"
                 class="form-control form-control-lg pin-text-input"
+                autofocus
                 [maxlength]="maxPinLength"
                 [(ngModel)]="pin"
                 (input)="onPinTextInput($event)"

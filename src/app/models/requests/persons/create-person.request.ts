@@ -29,7 +29,7 @@ export interface CreatePersonRequest {
   // Configuracion de Acceso
   autonomyLevelId?: number;
   loginMethodId?: number;
-  pin?: string; // 4-6 digits
+  pin?: string; // 4 digits
   supervisorUserId?: string;
   avatarColor?: string;
 }

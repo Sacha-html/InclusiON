@@ -213,12 +213,13 @@
       @if (selectedLoginMethod?.requiresPin) {
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="pin">PIN (4-6 dígitos) *</label>
-            <input cFormControl id="pin" formControlName="pin" type="password" maxlength="6"
+            <label cLabel for="pin">PIN (4 dígitos) *</label>
+            <input cFormControl id="pin" formControlName="pin" type="password" maxlength="4"
+                   autofocus inputmode="numeric"
                    [valid]="submitted ? f['pin'].valid : undefined" />
             @if (submitted && f['pin'].errors) {
               <c-form-feedback [valid]="false">
-                El PIN debe tener entre 4 y 6 dígitos numéricos.
+                El PIN debe tener 4 dígitos numéricos.
               </c-form-feedback>
             }
           </c-col>
