@@ -42,7 +42,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     Phone = p.Phone,
                     Specialty = p.Specialty,
                     LicenseNumber = p.LicenseNumber,
-                    IsActive = p.User?.IsActive ?? false
+                    IsActive = p.User?.IsActive ?? false,
+                    Email = p.User?.Email
                 }).ToList(),
                 TotalRecords = pagedResult.TotalRecords,
                 TotalPages = pagedResult.TotalPages,
