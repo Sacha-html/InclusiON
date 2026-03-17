@@ -49,11 +49,6 @@ namespace InclusiON.Infrastructure.Authentication
                     DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
                 };
 
-                if (!string.IsNullOrEmpty(userData.Role))
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, userData.Role));
-                }
-
                 if (userData.Permissions is not null && userData.Permissions.Any())
                 {
                     foreach (var permission in userData.Permissions)
