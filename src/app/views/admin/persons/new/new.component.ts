@@ -80,7 +80,7 @@ export class NewComponent implements OnInit {
     // Configuración de acceso
     autonomyLevelId: [null],
     loginMethodId: [null],
-    pin: ['', [Validators.pattern(/^\d{4,6}$/)]],
+    pin: ['', [Validators.pattern(/^\d{4}$/)]],
     avatarColor: ['#2196F3'],
   });
 
