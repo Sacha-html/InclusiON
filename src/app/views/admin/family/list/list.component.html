@@ -1,3 +1,14 @@
+@if (!isGlobalAdmin && adminInstitutions.length > 1) {
+  <div class="mb-3">
+    <label for="institutionFilter" class="form-label">Filtrar por institucion</label>
+    <select cSelect id="institutionFilter" [(ngModel)]="selectedInstitutionId" (ngModelChange)="onInstitutionFilterChange()">
+      @for (inst of adminInstitutions; track inst.institutionId) {
+        <option [ngValue]="inst.institutionId">{{ inst.institutionName }}</option>
+      }
+    </select>
+  </div>
+}
+
 <app-data-table
   title="Familiares"
   [columns]="cols"

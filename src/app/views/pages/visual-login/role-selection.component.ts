@@ -61,7 +61,7 @@ export class RoleSelectionComponent {
   selectRole(role: UserRole): void {
     // Profesionales van directo al login con email+password
     if (role === 'PROFESSIONAL') {
-      this.router.navigate(['/admin-login']);
+      this.router.navigate(['/admin-login'], { queryParams: { role: 'professional' } });
       return;
     }
 

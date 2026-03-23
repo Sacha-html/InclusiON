@@ -265,6 +265,48 @@ export class AuthService {
   }
 
   /**
+   * Verifica si el usuario autenticado es un administrador global.
+   * Retorna true solo si el rol es Admin y el claim isGlobalAdmin es "true".
+   */
+  isGlobalAdmin(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const payload = this.decodeToken(token);
+      const isAdmin = payload.role === 'Admin';
+      const isGlobal = payload.isGlobalAdmin === 'true' || payload.isGlobalAdmin === true;
+      return isAdmin && isGlobal;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Obtiene los IDs de instituciones asignadas al usuario desde el JWT.
+   * El claim institutionId puede ser un solo valor o un array.
+   */
+  getInstitutionIds(): number[] {
+    const token = this.getToken();
+    if (!token) return [];
+
+    try {
+      const payload = this.decodeToken(token);
+      const raw = payload.institutionId;
+      if (!raw) return [];
+
+      if (Array.isArray(raw)) {
+        return raw.map((id: string | number) => Number(id)).filter((id: number) => !isNaN(id));
+      }
+
+      const parsed = Number(raw);
+      return isNaN(parsed) ? [] : [parsed];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
    * Verifica si el usuario tiene alguno de los roles especificados
    */
   hasAnyRole(roles: string[]): boolean {

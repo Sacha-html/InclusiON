@@ -49,6 +49,8 @@ export class ListComponent implements OnInit {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver detalle' },
+        { action: 'persons', label: 'Personas a cargo' },
+        { action: 'institutions', label: 'Instituciones' },
         { action: 'edit', label: 'Editar', visible: (item) => item.isActive },
         { action: 'deactivate', label: 'Desactivar', visible: (item) => item.isActive },
       ],
@@ -101,6 +103,12 @@ export class ListComponent implements OnInit {
     switch (event.action) {
       case 'view':
         this.router.navigate(['/admin/professionals', event.item.id]);
+        break;
+      case 'persons':
+        this.router.navigate(['/admin/professionals', event.item.id], { queryParams: { tab: 'personas' } });
+        break;
+      case 'institutions':
+        this.router.navigate(['/admin/professionals', event.item.id], { queryParams: { tab: 'instituciones' } });
         break;
       case 'edit':
         this.router.navigate(['/admin/professionals', event.item.id, 'edit']);

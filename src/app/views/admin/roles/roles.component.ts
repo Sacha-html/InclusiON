@@ -128,6 +128,7 @@ export class RolesComponent implements OnInit {
       invitations: 'Invitaciones',
       settings: 'Configuracion',
       audit: 'Auditoria',
+      institutions: 'Instituciones',
     };
     return labels[module] || module;
   }
