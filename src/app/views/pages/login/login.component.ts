@@ -9,6 +9,7 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { LoginRequest } from '@models';
+import { RoleRoutes } from '../../../shared/constants/roles';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 // CoreUI imports
@@ -107,7 +108,9 @@ export class LoginComponent implements OnInit {
           if (response.data?.mustChangePassword) {
             this.router.navigate(['/change-password']);
           } else {
-            this.router.navigate(['/dashboard']);
+            const role = this.authService.getUserRole();
+            const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
+            this.router.navigate([target]);
           }
         }
       },

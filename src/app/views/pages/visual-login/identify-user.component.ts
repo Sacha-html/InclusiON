@@ -120,7 +120,7 @@ export class IdentifyUserComponent implements OnInit {
       return;
     }
 
-    // Profesionales van al login clasico de email+password
+    // Profesionales usan login con email+password
     if (userData.userType === 'Professional') {
       this.router.navigate(['/admin-login']);
       return;

@@ -1,0 +1,196 @@
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { InvitationsService, ToastService, PersonsService } from '@services';
+import {
+  InvitationResponse,
+  CreateInvitationRequest,
+  PersonListItemResponse,
+} from '@models';
+
+import {
+  CardComponent,
+  CardBodyComponent,
+  CardHeaderComponent,
+  TableDirective,
+  ButtonDirective,
+  BadgeComponent,
+  ModalComponent,
+  ModalHeaderComponent,
+  ModalBodyComponent,
+  ModalFooterComponent,
+  FormControlDirective,
+  FormSelectDirective,
+  AlertComponent,
+  SpinnerComponent,
+} from '@coreui/angular';
+
+@Component({
+  selector: 'app-invitation-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CardComponent,
+    CardBodyComponent,
+    CardHeaderComponent,
+    TableDirective,
+    ButtonDirective,
+    BadgeComponent,
+    ModalComponent,
+    ModalHeaderComponent,
+    ModalBodyComponent,
+    ModalFooterComponent,
+    FormControlDirective,
+    FormSelectDirective,
+    AlertComponent,
+    SpinnerComponent,
+  ],
+  templateUrl: './invitation-list.component.html',
+  styleUrl: './invitation-list.component.scss',
+})
+export class InvitationListComponent implements OnInit {
+  private readonly invitationsService = inject(InvitationsService);
+  private readonly personsService = inject(PersonsService);
+  private readonly toastService = inject(ToastService);
+  private readonly fb = inject(FormBuilder);
+
+  invitations: InvitationResponse[] = [];
+  persons: PersonListItemResponse[] = [];
+  isLoading = true;
+  isSubmitting = false;
+  showModal = false;
+  errorMessage = '';
+  invitationForm!: FormGroup;
+  createdInvitationCode = '';
+
+  readonly relationships = [
+    'Madre',
+    'Padre',
+    'Tutor/a',
+    'Abuelo/a',
+    'Hermano/a',
+    'Tio/a',
+    'Otro',
+  ];
+
+  ngOnInit(): void {
+    this.initForm();
+    this.loadInvitations();
+    this.loadPersons();
+  }
+
+  private initForm(): void {
+    this.invitationForm = this.fb.group({
+      personId: [''],
+      email: ['', [Validators.required, Validators.email]],
+      firstName: ['', [Validators.maxLength(100)]],
+      lastName: ['', [Validators.maxLength(100)]],
+      relationship: [''],
+    });
+  }
+
+  private loadInvitations(): void {
+    this.isLoading = true;
+    this.invitationsService.getAll().subscribe({
+      next: (data) => {
+        this.invitations = data;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.toastService.error('Error al cargar invitaciones');
+      },
+    });
+  }
+
+  private loadPersons(): void {
+    this.personsService.getPersons({ pageSize: 100 }).subscribe({
+      next: (response) => {
+        this.persons = response.data?.data ?? [];
+      },
+      error: () => {
+        // Non-critical, persons dropdown will be empty
+      },
+    });
+  }
+
+  openModal(): void {
+    this.invitationForm.reset();
+    this.errorMessage = '';
+    this.createdInvitationCode = '';
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+  }
+
+  onSubmit(): void {
+    this.errorMessage = '';
+
+    if (this.invitationForm.invalid) {
+      Object.keys(this.invitationForm.controls).forEach((key) => {
+        this.invitationForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+    const values = this.invitationForm.value;
+
+    const request: CreateInvitationRequest = {
+      email: values.email.trim(),
+      firstName: values.firstName?.trim() || undefined,
+      lastName: values.lastName?.trim() || undefined,
+      relationship: values.relationship || undefined,
+      personId: values.personId || undefined,
+    };
+
+    this.invitationsService.create(request).subscribe({
+      next: (invitation) => {
+        this.isSubmitting = false;
+        this.createdInvitationCode = invitation.code;
+        this.toastService.success('Invitacion creada exitosamente');
+        this.loadInvitations();
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.errorMessage = error.userMessage || 'Error al crear la invitacion';
+      },
+    });
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'Enviada': return 'info';
+      case 'Aceptada': return 'success';
+      case 'Expirada': return 'danger';
+      default: return 'secondary';
+    }
+  }
+
+  getInviteUrl(code: string): string {
+    return `${window.location.origin}/#/invite/${code}`;
+  }
+
+  copyToClipboard(code: string): void {
+    navigator.clipboard.writeText(this.getInviteUrl(code)).then(() => {
+      this.toastService.success('Link copiado al portapapeles');
+    });
+  }
+
+  get f() {
+    return this.invitationForm.controls;
+  }
+
+  hasError(fieldName: string, errorType: string): boolean {
+    const field = this.invitationForm.get(fieldName);
+    return !!(field?.hasError(errorType) && field?.touched);
+  }
+}

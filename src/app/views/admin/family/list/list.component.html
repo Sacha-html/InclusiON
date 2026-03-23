@@ -1,0 +1,30 @@
+<app-data-table
+  title="Familiares"
+  [columns]="cols"
+  [items]="families"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [headerButtons]="canCreate ? [{action: 'new', label: 'Nuevo Familiar'}] : []"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
+</app-data-table>
+
+<!-- Modal de confirmacion -->
+<c-modal [visible]="showConfirmModal" (visibleChange)="showConfirmModal = $event" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Confirmar desactivacion</h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (itemToDeactivate) {
+      <p>¿Esta seguro de que desea desactivar al familiar <strong>{{ itemToDeactivate.fullName }}</strong>?</p>
+      <p class="text-body-secondary mb-0">Esta accion deshabilitara su acceso al sistema.</p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelDeactivate()">Cancelar</button>
+    <button cButton color="danger" (click)="confirmDeactivate()">Desactivar</button>
+  </c-modal-footer>
+</c-modal>

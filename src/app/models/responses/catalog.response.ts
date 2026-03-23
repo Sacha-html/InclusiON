@@ -12,6 +12,32 @@ export interface AutonomyLevelItem {
   displayOrder: number;
 }
 
+export interface ActivityCategoryItem {
+  id: number;
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
+
+export interface SkillAreaItem {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  displayOrder: number;
+}
+
+export interface ActivityTemplateTypeItem {
+  id: number;
+  name: string;
+  code: string;
+  skillAreaId?: number;
+  skillAreaName?: string;
+  supportsPictograms: boolean;
+  supportsAudio: boolean;
+}
+
 export interface LoginMethodItem {
   id: number;
   code: string;
