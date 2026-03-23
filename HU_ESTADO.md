@@ -1,6 +1,6 @@
 # InclusiON — Estado de Historias de Usuario
 
-**Última actualización:** 2026-03-08
+**Última actualización:** 2026-03-23
 
 Leyenda de estados:
 - ✅ **HECHO** — Implementado y funcionando
@@ -13,8 +13,8 @@ Leyenda de estados:
 
 | Track | Hechas | Parciales | Pendientes | Total |
 |-------|--------|-----------|------------|-------|
-| Backend | 4 | 2 | 11 | 17 |
-| Frontend | 3 | 0 | 15 | 18 |
+| Backend | 7 | 2 | 8 | 17 |
+| Frontend | 6 | 0 | 12 | 18 |
 
 ---
 
@@ -26,7 +26,7 @@ Leyenda de estados:
 |----|----------|--------|-------|
 | BE-01 | Catálogos de Referencia (lectura) | ✅ HECHO | `CatalogsController` + queries + handlers para disability-types, autonomy-levels, activity-categories, skill-areas, activity-template-types |
 | BE-02 | CRUD Profesionales | ✅ HECHO | `ProfessionalsController` + Create/Update/Deactivate commands + GetAll/GetById queries |
-| BE-03 | Asignaciones Profesional-Institución-Persona | ⏳ PENDIENTE | Entidades `ProfessionalInstitution`, `ProfessionalPerson` existen en Domain pero no hay handlers ni endpoints |
+| BE-03 | Asignaciones Profesional-Institución-Persona | ✅ HECHO | `AssignmentsController` + `InstitutionsController` + handlers + repos para asignaciones profesional-persona-institución |
 
 ### Sprint 2 — Actividades y Roadmap
 
@@ -35,8 +35,8 @@ Leyenda de estados:
 | BE-04 | Áreas de Habilidad (SkillAreas) | ✅ HECHO | Incluido en catálogos (BE-01) como `GET /api/catalogs/skill-areas` |
 | BE-05 | Tipos de Template de Actividad | ✅ HECHO | Incluido en catálogos (BE-01) como `GET /api/catalogs/activity-template-types` |
 | BE-06 | CRUD Actividades con Contenido Dinámico | ⏳ PENDIENTE | Entidades `Activity`, `ActivityContent` existen. Falta: controller, commands, queries, handlers |
-| BE-07 | Perfil de Habilidades de la Persona | ⏳ PENDIENTE | Sin implementación |
-| BE-08 | Sistema de Invitaciones Familiares | ⏳ PENDIENTE | Entidad `Invitation` existe. Falta todo el flujo |
+| BE-07 | Perfil de Habilidades de la Persona | ✅ HECHO | `PersonSkillProfile` entity + endpoints GET/POST/PUT en PersonsController |
+| BE-08 | Sistema de Invitaciones Familiares | ✅ HECHO | `InvitationsController` con 4 endpoints + email SMTP con MailKit + templates HTML |
 | BE-09 | Roadmap de la Persona | ⏳ PENDIENTE | Entidades `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity` existen. Falta: controller, handlers |
 
 ### Sprint 3 — Ejecución y Métricas
@@ -67,7 +67,7 @@ Leyenda de estados:
 |----|----------|-----------------|--------|-------|
 | FE-01 | CatalogsService y Conexión con Form de Persona | BE-01 | ✅ HECHO | `persons.service.ts` conectado, formularios funcionando |
 | FE-02 | Listado y Formulario de Profesionales | BE-02 | ✅ HECHO | Vistas en `views/professional/` |
-| FE-03 | Asignaciones Institución/Persona en Detalle Profesional | BE-03 | ⏳ PENDIENTE | Depende de BE-03 |
+| FE-03 | Asignaciones Institución/Persona en Detalle Profesional | BE-03 | ✅ HECHO | Sección personas a cargo e instituciones en detalle profesional con tabs |
 
 ### Sprint 2 — Actividades y Roadmap
 
@@ -75,9 +75,9 @@ Leyenda de estados:
 |----|----------|-----------------|--------|-------|
 | FE-04 | Formulario de Actividad con Template Dinámico | BE-06 | ⏳ PENDIENTE | Depende de BE-06 |
 | FE-05 | Catálogo de Actividades del Profesional | BE-06 | ⏳ PENDIENTE | Depende de BE-06 |
-| FE-06 | Sección Perfil de Habilidades en Perfil Persona | BE-07 | ⏳ PENDIENTE | Depende de BE-07 |
+| FE-06 | Sección Perfil de Habilidades en Perfil Persona | BE-07 | ✅ HECHO | Sección perfil de habilidades con chips coloreados en detalle persona |
 | FE-07 | Gestor de Roadmap (vista Profesional) | BE-09 | ⏳ PENDIENTE | Depende de BE-09 |
-| FE-08 | Registro por Invitación (página pública Familia) | BE-08 | ⏳ PENDIENTE | Depende de BE-08 |
+| FE-08 | Registro por Invitación (página pública Familia) | BE-08 | ✅ HECHO | Registro por invitación (página pública /invite/:code) |
 
 ### Sprint 3 — Experiencia del Estudiante
 
@@ -87,7 +87,7 @@ Leyenda de estados:
 | FE-10 | ActivityPlayerShell (cargador dinámico) | BE-11 | ⏳ PENDIENTE | Shell que carga el player correcto según template |
 | FE-11 | Activity Players (5 componentes) | BE-11 | ⏳ PENDIENTE | Selección, emparejamiento, secuencia, completar, respuesta libre |
 | FE-12 | Radar Chart de Habilidades | BE-12 | ⏳ PENDIENTE | Gráfica radar por persona |
-| FE-13 | Dashboards con Datos Reales | BE-12 | ✅ HECHO | Dashboards base existen (pro, family, admin) — falta conectar datos reales |
+| FE-13 | Dashboards con Datos Reales | BE-12 | ✅ HECHO | Dashboard profesional con datos reales (personas, invitaciones, saludo personalizado) |
 
 ### Sprint 4 — Avanzados
 
@@ -121,23 +121,45 @@ Estos componentes no son HUs específicas pero están funcionando:
 
 ---
 
+## Features extras (no incluidas en HUs originales)
+
+Funcionalidades implementadas que no estaban planificadas en las historias de usuario:
+
+| Feature | Estado | Descripción |
+|---------|--------|-------------|
+| CRUD Familiares | ✅ | `FamilyController` + admin UI completa (list/new/edit/detail) |
+| CRUD Instituciones Educativas | ✅ | `InstitutionsController` + admin UI completa |
+| ABM Catálogos (6 tipos) | ✅ | `CatalogAdminController` + UI con submenú por tipo |
+| Panel de Roles y Permisos | ✅ | `RolesController` + UI con checkboxes agrupados por módulo |
+| CRUD Admins Institucionales | ✅ | Crear admins vinculados a instituciones desde admin global |
+| Admin Global vs Institucional | ✅ | Claim JWT `isGlobalAdmin`, policy `global-admin`, filtrado por institución en profesionales/personas/familiares/invitaciones |
+| Email SMTP + Templates | ✅ | MailKit + `EmailTemplateService` con templates HTML para invitaciones (Ethereal para dev) |
+| Mi Aula (Portal Profesional) | ✅ | Cards visuales con avatar coloreado de personas asignadas |
+| Dashboard Profesional Real | ✅ | Contadores reales (personas, invitaciones) + tablas resumen |
+| DataTableComponent Mejorado | ✅ | Título, botones header, debounce 400ms en búsqueda, fila vacía |
+| Directivas de Permisos | ✅ | `*appHasPermission`, `*appIfGlobalAdmin`, `*appIfInstitutionalAdmin` |
+| Guards de Rutas | ✅ | `globalAdminGuard`, `permissionGuard` en rutas admin |
+| Toasts con Colores e Iconos | ✅ | Success (verde), error (rojo), warning (naranja), info (celeste) |
+| Accesibilidad CoreUI | ✅ | Variables `--cui-*` sobreescritas por perfil en 14 combinaciones |
+| Fix Login Profesional | ✅ | Flujo directo a email+password sin pasar por identificación visual |
+| Sidebar Dinámico por Rol | ✅ | Admin global ve todo, institucional ve solo su scope |
+| Edición Perfil Funcional (Pro) | ✅ | Profesional edita datos y perfil funcional de sus personas |
+| Migraciones | ✅ | AddAdminInstitution, AddPersonSkillProfile |
+
+---
+
 ## Orden de Implementación Recomendado
 
-Para avanzar con las HU pendientes, este es el orden óptimo respetando dependencias:
-
-### Próximo bloque (Sprint 2 BE)
+### Próximo bloque
 1. **BE-06** — CRUD Actividades (desbloquea FE-04, FE-05, y es prerequisito de todo lo que viene)
-2. **BE-03** — Asignaciones Profesional-Institución-Persona (desbloquea FE-03)
-3. **BE-07** — Perfil de Habilidades (desbloquea FE-06)
-4. **BE-08** — Invitaciones (desbloquea FE-08)
-5. **BE-09** — Roadmap (desbloquea FE-07, FE-09)
+2. **BE-09** — Roadmap (desbloquea FE-07, FE-09)
 
-### Segundo bloque (Sprint 3 BE)
-6. **BE-10** — Asignaciones de actividades
-7. **BE-11** — Respuestas y ciclo de vida (desbloquea FE-10, FE-11)
-8. **BE-12** — Radar y Dashboard (desbloquea FE-12)
+### Segundo bloque
+3. **BE-10** — Asignaciones de actividades
+4. **BE-11** — Respuestas y ciclo de vida (desbloquea FE-10, FE-11)
+5. **BE-12** — Radar y Dashboard (desbloquea FE-12)
 
-### Tercer bloque (Sprint 4 BE)
-9. **BE-13** a **BE-15** — Diagnósticos, Reportes, Mensajería
-10. **BE-16** — Búsqueda Semántica
-11. **BE-17** — Motor Adaptativo (depende de BE-11)
+### Tercer bloque
+6. **BE-13** a **BE-15** — Diagnósticos, Reportes, Mensajería
+7. **BE-16** — Búsqueda Semántica
+8. **BE-17** — Motor Adaptativo (depende de BE-11)
