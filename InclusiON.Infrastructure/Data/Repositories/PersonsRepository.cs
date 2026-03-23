@@ -73,6 +73,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             bool? isActive,
             SortField? sortBy,
             string sortDirection,
+            int? institutionId = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.PersonsWithDisability
@@ -105,6 +106,18 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (isActive.HasValue)
             {
                 query = query.Where(p => p.User.IsActive == isActive.Value);
+            }
+
+            if (institutionId.HasValue)
+            {
+                query = query.Where(p =>
+                    _context.ProfessionalPersons.Any(pp =>
+                        pp.PersonId == p.Id &&
+                        pp.IsActive &&
+                        _context.ProfessionalInstitutions.Any(pi =>
+                            pi.ProfessionalId == pp.ProfessionalId &&
+                            pi.InstitutionId == institutionId.Value &&
+                            pi.IsActive)));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<PersonWithDisability, object>>>

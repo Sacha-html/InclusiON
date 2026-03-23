@@ -28,7 +28,9 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             {
                 var invitations = query.ProfessionalId.HasValue
                     ? await _repository.GetByProfessionalIdAsync(query.ProfessionalId.Value, cancellationToken)
-                    : await _repository.GetAllAsync(cancellationToken);
+                    : query.InstitutionIds != null && query.InstitutionIds.Any()
+                        ? await _repository.GetByInstitutionIdsAsync(query.InstitutionIds, cancellationToken)
+                        : await _repository.GetAllAsync(cancellationToken);
 
                 var response = invitations
                     .Select(CreateInvitationCommandHandler.MapToResponse)

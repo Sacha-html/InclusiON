@@ -21,7 +21,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         {
             var pagedResult = await _repository.GetPagedAsync(
                 query.Page, query.PageSize, query.Search, query.IsActive,
-                query.SortBy, query.SortDirection, cancellationToken);
+                query.SortBy, query.SortDirection, query.InstitutionId,
+                cancellationToken);
 
             var response = new PagedResponse<FamilyListItemResponse>
             {

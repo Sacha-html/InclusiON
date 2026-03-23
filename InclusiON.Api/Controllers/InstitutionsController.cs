@@ -45,6 +45,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(Policy = "institutions:create")]
+        [Authorize(Policy = "global-admin")]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status409Conflict)]
@@ -77,6 +78,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPut("{id:int}")]
         [Authorize(Policy = "institutions:update")]
+        [Authorize(Policy = "global-admin")]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status404NotFound)]

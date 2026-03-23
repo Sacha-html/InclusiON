@@ -17,6 +17,7 @@ namespace InclusiON.Api.Controllers
     [Route("api/admin/catalogs")]
     [ApiController]
     [Authorize(Policy = "settings:update")]
+    [Authorize(Policy = "global-admin")]
     [Produces("application/json")]
     public class CatalogAdminController : ControllerBase
     {

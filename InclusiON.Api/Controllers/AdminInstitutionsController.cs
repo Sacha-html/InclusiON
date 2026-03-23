@@ -4,7 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
+using InclusiON.DTOs.Requests.Admin;
 using InclusiON.DTOs.Responses;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
 {
@@ -16,13 +19,61 @@ namespace InclusiON.Api.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IHttpContextService _httpContextService;
+        private readonly IIdentityService _identityService;
 
         public AdminInstitutionsController(
             AppDbContext context,
-            IHttpContextService httpContextService)
+            IHttpContextService httpContextService,
+            IIdentityService identityService)
         {
             _context = context;
             _httpContextService = httpContextService;
+            _identityService = identityService;
+        }
+
+        /// <summary>
+        /// Obtiene la lista de todos los usuarios administradores con sus instituciones asignadas.
+        /// </summary>
+        [HttpGet("admins")]
+        [Authorize(Policy = "global-admin")]
+        [ProducesResponseType(typeof(ApiResponse<List<AdminUserResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<AdminUserResponse>>>> GetAllAdmins(
+            CancellationToken cancellationToken)
+        {
+            var adminRoleId = await _context.Roles
+                .Where(r => r.NormalizedName == "ADMIN")
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var admins = await _context.UserRoles
+                .Where(ur => ur.RoleId == adminRoleId)
+                .Join(_context.Users, ur => ur.UserId, u => u.Id, (ur, u) => u)
+                .Select(u => new AdminUserResponse
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Surname = u.Surname,
+                    Email = u.Email!,
+                    IsActive = u.IsActive,
+                    CreatedAt = u.CreatedAt,
+                    Institutions = _context.AdminInstitutions
+                        .Where(ai => ai.AdminUserId == u.Id && ai.IsActive)
+                        .Select(ai => new AdminInstitutionInfo
+                        {
+                            InstitutionId = ai.InstitutionId,
+                            InstitutionName = ai.Institution.Name
+                        })
+                        .ToList()
+                })
+                .ToListAsync(cancellationToken);
+
+            // Mark admins with no institutions as global admins
+            foreach (var admin in admins)
+            {
+                admin.IsGlobalAdmin = admin.Institutions.Count == 0;
+            }
+
+            return Ok(ApiResponse<List<AdminUserResponse>>.SuccessResult(admins));
         }
 
         /// <summary>
@@ -192,6 +243,139 @@ namespace InclusiON.Api.Controllers
             };
 
             return Ok(ApiResponse<AdminInstitutionResponse>.SuccessResult(response, "Asignacion eliminada exitosamente"));
+        }
+
+        /// <summary>
+        /// Crea un nuevo usuario administrador y lo asigna a una institucion.
+        /// </summary>
+        [HttpPost("users")]
+        [Authorize(Policy = "global-admin")]
+        [ProducesResponseType(typeof(ApiResponse<CreateAdminUserResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<CreateAdminUserResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<CreateAdminUserResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<CreateAdminUserResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<CreateAdminUserResponse>>> CreateAdminUser(
+            [FromBody] CreateAdminUserRequest request,
+            CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(ApiResponse<CreateAdminUserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
+            }
+
+            // Verificar que la institucion existe
+            var institution = await _context.EducationalInstitutions
+                .FirstOrDefaultAsync(i => i.Id == request.InstitutionId, cancellationToken);
+            if (institution == null)
+            {
+                return NotFound(ApiResponse<CreateAdminUserResponse>.NotFound("Institucion"));
+            }
+
+            // Verificar que no exista un usuario con ese email
+            var existingUser = await _identityService.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                return Conflict(ApiResponse<CreateAdminUserResponse>.Conflict(
+                    ErrorCode.EmailAlreadyExists,
+                    "Ya existe un usuario con ese email."));
+            }
+
+            // Generar contrasena temporal
+            var temporaryPassword = GenerateTemporaryPassword();
+
+            // Crear usuario
+            var user = new User
+            {
+                Name = request.FirstName,
+                Surname = request.LastName,
+                Email = request.Email.ToLower(),
+                UserName = request.Email.ToLower(),
+                NormalizedEmail = request.Email.ToUpper(),
+                NormalizedUserName = request.Email.ToUpper(),
+                EmailConfirmed = true,
+                IsActive = true,
+                MustChangePassword = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var createResult = await _identityService.CreateUserAsync(user, temporaryPassword);
+            if (!createResult.Succeeded)
+            {
+                return BadRequest(ApiResponse<CreateAdminUserResponse>.ErrorResult(
+                    "Error al crear el usuario.",
+                    createResult.Errors.ToList()));
+            }
+
+            // Asignar rol Admin
+            var roleResult = await _identityService.AddToRoleAsync(user, "Admin");
+            if (!roleResult.Succeeded)
+            {
+                return BadRequest(ApiResponse<CreateAdminUserResponse>.ErrorResult(
+                    "Error al asignar el rol.",
+                    roleResult.Errors.ToList()));
+            }
+
+            // Crear asignacion de institucion
+            var adminInstitution = new AdminInstitution
+            {
+                AdminUserId = user.Id,
+                InstitutionId = request.InstitutionId,
+                AssignedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            _context.AdminInstitutions.Add(adminInstitution);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var response = new CreateAdminUserResponse
+            {
+                UserId = user.Id,
+                Email = user.Email!,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                InstitutionId = request.InstitutionId,
+                InstitutionName = institution.Name,
+                TemporaryPassword = temporaryPassword
+            };
+
+            return StatusCode(StatusCodes.Status201Created,
+                ApiResponse<CreateAdminUserResponse>.SuccessResult(response, "Usuario administrador creado exitosamente."));
+        }
+
+        private static string GenerateTemporaryPassword()
+        {
+            const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string lower = "abcdefghijklmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string special = "!@#$%^&*";
+
+            var random = new Random();
+            var password = new char[12];
+
+            // Ensure at least one of each required type
+            password[0] = upper[random.Next(upper.Length)];
+            password[1] = lower[random.Next(lower.Length)];
+            password[2] = digits[random.Next(digits.Length)];
+            password[3] = special[random.Next(special.Length)];
+
+            var all = upper + lower + digits + special;
+            for (int i = 4; i < password.Length; i++)
+            {
+                password[i] = all[random.Next(all.Length)];
+            }
+
+            // Shuffle
+            for (int i = password.Length - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (password[i], password[j]) = (password[j], password[i]);
+            }
+
+            return new string(password);
         }
     }
 
