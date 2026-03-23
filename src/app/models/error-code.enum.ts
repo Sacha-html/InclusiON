@@ -47,7 +47,12 @@ export enum ErrorCode {
   InvalidOperation = 701,
   PinNotConfigured = 702,
   SupervisorNotAuthorized = 703,
-  LoginMethodNotAllowed = 704
+  LoginMethodNotAllowed = 704,
+
+  // Invitaciones (8xx)
+  InvitationNotFound = 800,
+  InvitationExpired = 801,
+  InvitationAlreadyUsed = 802
 }
 
 /** Severidad del error para UI */

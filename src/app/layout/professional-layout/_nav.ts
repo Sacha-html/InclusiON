@@ -56,5 +56,10 @@ export const professionalNavItems: INavData[] = [
     name: 'Calendario',
     url: '/pro/calendar',
     iconComponent: { name: 'cil-calendar' }
+  },
+  {
+    name: 'Invitaciones',
+    url: '/pro/invitations',
+    iconComponent: { name: 'cil-link' }
   }
 ];

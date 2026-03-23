@@ -4,3 +4,7 @@ export * from './identify-user.request';
 export * from './change-password.request';
 export * from './persons';
 export * from './professionals';
+export * from './invitations';
+export * from './family';
+export * from './assignments';
+export * from './institutions';

@@ -1,17 +1,41 @@
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="mb-0">Profesionales</h3>
-  @if (canCreate) {
-    <button cButton color="primary" routerLink="new" aria-label="Crear nuevo profesional">Nuevo Profesional</button>
-  }
-</div>
+@if (!isGlobalAdmin && adminInstitutions.length > 1) {
+  <div class="mb-3">
+    <label for="institutionFilter" class="form-label">Filtrar por institucion</label>
+    <select cSelect id="institutionFilter" [(ngModel)]="selectedInstitutionId" (ngModelChange)="onInstitutionFilterChange()">
+      @for (inst of adminInstitutions; track inst.institutionId) {
+        <option [ngValue]="inst.institutionId">{{ inst.institutionName }}</option>
+      }
+    </select>
+  </div>
+}
 
 <app-data-table
+  title="Profesionales"
   [columns]="cols"
   [items]="professionals"
   [totalItems]="totalItems"
   [pageSize]="pageSize"
   [currentPage]="currentPage"
+  [headerButtons]="canCreate ? [{action: 'new', label: 'Nuevo Profesional'}] : []"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
-  (rowAction)="onRowAction($event)">
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
 </app-data-table>
+
+<!-- Modal de confirmacion -->
+<c-modal [visible]="showConfirmModal" (visibleChange)="showConfirmModal = $event" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Confirmar desactivacion</h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (itemToDeactivate) {
+      <p>¿Esta seguro de que desea desactivar al profesional <strong>{{ itemToDeactivate.fullName }}</strong>?</p>
+      <p class="text-body-secondary mb-0">Esta accion deshabilitara su acceso al sistema.</p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelDeactivate()">Cancelar</button>
+    <button cButton color="danger" (click)="confirmDeactivate()">Desactivar</button>
+  </c-modal-footer>
+</c-modal>
