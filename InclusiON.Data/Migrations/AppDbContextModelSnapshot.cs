@@ -734,6 +734,27 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("AdaptiveEngineConfigs", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdminInstitution", b =>
+                {
+                    b.Property<Guid>("AdminUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InstitutionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AdminUserId", "InstitutionId");
+
+                    b.HasIndex("InstitutionId");
+
+                    b.ToTable("AdminInstitutions");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
                 {
                     b.Property<int>("Id")
@@ -2838,6 +2859,25 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("PersonRoadmapActivity");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdminInstitution", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.User", "AdminUser")
+                        .WithMany("AdminInstitutions")
+                        .HasForeignKey("AdminUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.EducationalInstitution", "Institution")
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AdminUser");
+
+                    b.Navigation("Institution");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -3328,6 +3368,8 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.User", b =>
                 {
                     b.Navigation("AccessAudits");
+
+                    b.Navigation("AdminInstitutions");
 
                     b.Navigation("FamilyRepresentative");
 

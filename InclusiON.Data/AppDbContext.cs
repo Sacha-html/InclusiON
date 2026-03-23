@@ -43,6 +43,7 @@ namespace InclusiON.Data
         public DbSet<Invitation> Invitations { get; set; }
 
         // Nivel 3: Relaciones entre perfiles, actividades y rutas de aprendizaje
+        public DbSet<AdminInstitution> AdminInstitutions { get; set; }
         public DbSet<TrustedDevice> TrustedDevices { get; set; }
         public DbSet<ProfessionalInstitution> ProfessionalInstitutions { get; set; }
         public DbSet<ProfessionalPerson> ProfessionalPersons { get; set; }
