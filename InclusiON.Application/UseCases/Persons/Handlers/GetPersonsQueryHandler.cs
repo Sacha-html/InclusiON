@@ -30,6 +30,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 query.IsActive,
                 query.SortBy,
                 query.SortDirection,
+                query.InstitutionId,
                 cancellationToken);
 
             var response = new PagedResponse<PersonListItemResponse>

@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.Application.UseCases.Persons.Queries;
+using InclusiON.Data;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
@@ -22,10 +25,14 @@ namespace InclusiON.Api.Controllers
     public class PersonsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
+        private readonly AppDbContext _context;
 
-        public PersonsController(IHttpContextService httpContextService)
+        public PersonsController(
+            IHttpContextService httpContextService,
+            AppDbContext context)
         {
             _httpContextService = httpContextService;
+            _context = context;
         }
 
         #region Queries
@@ -53,7 +60,8 @@ namespace InclusiON.Api.Controllers
                 request.AutonomyLevelId,
                 request.IsActive,
                 request.SortBy,
-                request.SortDirection);
+                request.SortDirection,
+                request.InstitutionId);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
@@ -295,6 +303,175 @@ namespace InclusiON.Api.Controllers
             }
 
             return Ok(result);
+        }
+
+        #endregion
+
+        #region Skill Profile
+
+        /// <summary>
+        /// Obtiene el perfil de habilidades (areas asignadas) de una persona.
+        /// </summary>
+        [HttpGet("{personId:guid}/skill-profile")]
+        [Authorize(Policy = "persons:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonSkillProfileResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonSkillProfileResponse>>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<List<PersonSkillProfileResponse>>>> GetSkillProfile(
+            Guid personId,
+            [FromQuery] bool all = false,
+            CancellationToken cancellationToken = default)
+        {
+            var personExists = await _context.PersonsWithDisability
+                .AnyAsync(p => p.Id == personId, cancellationToken);
+
+            if (!personExists)
+            {
+                return NotFound(ApiResponse<List<PersonSkillProfileResponse>>.NotFound("Persona"));
+            }
+
+            var query = _context.PersonSkillProfiles
+                .Where(psp => psp.PersonId == personId);
+
+            if (!all)
+            {
+                query = query.Where(psp => psp.IsActive);
+            }
+
+            var profiles = await query
+                .Include(psp => psp.SkillArea)
+                .OrderBy(psp => psp.SkillArea.DisplayOrder)
+                .Select(psp => new PersonSkillProfileResponse
+                {
+                    SkillAreaId = psp.SkillAreaId,
+                    SkillAreaName = psp.SkillArea.Name,
+                    Color = psp.SkillArea.Color,
+                    Icon = psp.SkillArea.Icon,
+                    IsActive = psp.IsActive,
+                    AssignedAt = psp.AssignedAt
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(ApiResponse<List<PersonSkillProfileResponse>>.SuccessResult(profiles));
+        }
+
+        /// <summary>
+        /// Asigna un area de habilidad a una persona.
+        /// </summary>
+        [HttpPost("{personId:guid}/skill-profile")]
+        [Authorize(Policy = "persons:update")]
+        [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<PersonSkillProfileResponse>>> AddSkillArea(
+            Guid personId,
+            [FromBody] AddSkillAreaRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            var personExists = await _context.PersonsWithDisability
+                .AnyAsync(p => p.Id == personId, cancellationToken);
+
+            if (!personExists)
+            {
+                return NotFound(ApiResponse<PersonSkillProfileResponse>.NotFound("Persona"));
+            }
+
+            var skillArea = await _context.SkillAreas
+                .FirstOrDefaultAsync(sa => sa.Id == request.SkillAreaId, cancellationToken);
+
+            if (skillArea == null)
+            {
+                return NotFound(ApiResponse<PersonSkillProfileResponse>.NotFound("Area de habilidad"));
+            }
+
+            var existing = await _context.PersonSkillProfiles
+                .FirstOrDefaultAsync(psp => psp.PersonId == personId && psp.SkillAreaId == request.SkillAreaId, cancellationToken);
+
+            if (existing != null)
+            {
+                if (existing.IsActive)
+                {
+                    return Conflict(ApiResponse<PersonSkillProfileResponse>.Conflict(
+                        ErrorCode.Conflict,
+                        "El area de habilidad ya esta asignada y activa para esta persona."));
+                }
+
+                // Reactivar
+                existing.IsActive = true;
+                existing.AssignedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(cancellationToken);
+
+                var reactivatedResponse = new PersonSkillProfileResponse
+                {
+                    SkillAreaId = existing.SkillAreaId,
+                    SkillAreaName = skillArea.Name,
+                    Color = skillArea.Color,
+                    Icon = skillArea.Icon,
+                    IsActive = existing.IsActive,
+                    AssignedAt = existing.AssignedAt
+                };
+
+                return Ok(ApiResponse<PersonSkillProfileResponse>.SuccessResult(reactivatedResponse, "Area de habilidad reactivada exitosamente."));
+            }
+
+            var profile = new PersonSkillProfile
+            {
+                PersonId = personId,
+                SkillAreaId = request.SkillAreaId,
+                AssignedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            _context.PersonSkillProfiles.Add(profile);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var response = new PersonSkillProfileResponse
+            {
+                SkillAreaId = profile.SkillAreaId,
+                SkillAreaName = skillArea.Name,
+                Color = skillArea.Color,
+                Icon = skillArea.Icon,
+                IsActive = profile.IsActive,
+                AssignedAt = profile.AssignedAt
+            };
+
+            return Ok(ApiResponse<PersonSkillProfileResponse>.SuccessResult(response, "Area de habilidad asignada exitosamente."));
+        }
+
+        /// <summary>
+        /// Desactiva un area de habilidad de una persona (no la elimina).
+        /// </summary>
+        [HttpPut("{personId:guid}/skill-profile/{areaId:int}")]
+        [Authorize(Policy = "persons:update")]
+        [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PersonSkillProfileResponse>>> DeactivateSkillArea(
+            Guid personId,
+            int areaId,
+            CancellationToken cancellationToken = default)
+        {
+            var profile = await _context.PersonSkillProfiles
+                .Include(psp => psp.SkillArea)
+                .FirstOrDefaultAsync(psp => psp.PersonId == personId && psp.SkillAreaId == areaId, cancellationToken);
+
+            if (profile == null)
+            {
+                return NotFound(ApiResponse<PersonSkillProfileResponse>.NotFound("Perfil de habilidad"));
+            }
+
+            profile.IsActive = false;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var response = new PersonSkillProfileResponse
+            {
+                SkillAreaId = profile.SkillAreaId,
+                SkillAreaName = profile.SkillArea.Name,
+                Color = profile.SkillArea.Color,
+                Icon = profile.SkillArea.Icon,
+                IsActive = profile.IsActive,
+                AssignedAt = profile.AssignedAt
+            };
+
+            return Ok(ApiResponse<PersonSkillProfileResponse>.SuccessResult(response, "Area de habilidad desactivada exitosamente."));
         }
 
         #endregion

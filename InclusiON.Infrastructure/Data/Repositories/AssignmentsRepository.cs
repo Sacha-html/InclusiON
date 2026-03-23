@@ -20,6 +20,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.ProfessionalPersons
                 .Include(pp => pp.Person)
+                    .ThenInclude(p => p.DisabilityType)
                 .Where(pp => pp.ProfessionalId == professionalId)
                 .OrderByDescending(pp => pp.AssignedAt)
                 .ToListAsync(ct);

@@ -57,6 +57,19 @@ namespace InclusiON.Infrastructure.Authentication
                     }
                 }
 
+                if (userData.Role == "Admin")
+                {
+                    claims.Add(new Claim("isGlobalAdmin", userData.IsGlobalAdmin.ToString().ToLower()));
+
+                    if (!userData.IsGlobalAdmin && userData.InstitutionIds is not null)
+                    {
+                        foreach (var instId in userData.InstitutionIds)
+                        {
+                            claims.Add(new Claim("institutionId", instId.ToString()));
+                        }
+                    }
+                }
+
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(claims),

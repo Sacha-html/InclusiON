@@ -1513,6 +1513,29 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("PersonRoadmapAreas", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonSkillProfile", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SkillAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.HasKey("PersonId", "SkillAreaId");
+
+                    b.HasIndex("SkillAreaId");
+
+                    b.ToTable("PersonSkillProfiles", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.PersonWithDisability", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3038,6 +3061,25 @@ namespace InclusiON.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("PersonRoadmap");
+
+                    b.Navigation("SkillArea");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonSkillProfile", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.SkillArea", "SkillArea")
+                        .WithMany()
+                        .HasForeignKey("SkillAreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
 
                     b.Navigation("SkillArea");
                 });

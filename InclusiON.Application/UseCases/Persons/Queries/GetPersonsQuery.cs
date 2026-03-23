@@ -10,6 +10,7 @@ namespace InclusiON.Application.UseCases.Persons.Queries
         int? AutonomyLevelId,
         bool? IsActive,
         SortField? SortBy,
-        string SortDirection
+        string SortDirection,
+        int? InstitutionId = null
     );
 }

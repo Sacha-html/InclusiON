@@ -58,6 +58,7 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IFamilyRepository, FamilyRepository>();
             services.AddScoped<IAssignmentsRepository, AssignmentsRepository>();
             services.AddScoped<IInstitutionsRepository, InstitutionsRepository>();
+            services.AddScoped<IAdminInstitutionRepository, AdminInstitutionRepository>();
 
             // Email
             services.AddScoped<IEmailService, EmailService>();
@@ -85,6 +86,7 @@ namespace InclusiON.Infrastructure
             // Autorización basada en permisos
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, GlobalAdminAuthorizationHandler>();
 
             services.AddAuthentication(options =>
             {

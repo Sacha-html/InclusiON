@@ -28,12 +28,24 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
 
         internal static ProfessionalPersonResponse MapToResponse(ProfessionalPerson assignment)
         {
+            var person = assignment.Person;
+            int? age = null;
+            if (person != null && person.BirthDate != default)
+            {
+                var today = DateTime.UtcNow;
+                age = today.Year - person.BirthDate.Year;
+                if (person.BirthDate.Date > today.AddYears(-age.Value)) age--;
+            }
+
             return new ProfessionalPersonResponse
             {
                 ProfessionalId = assignment.ProfessionalId,
                 PersonId = assignment.PersonId,
-                PersonFirstName = assignment.Person?.FirstName ?? string.Empty,
-                PersonLastName = assignment.Person?.LastName ?? string.Empty,
+                PersonFirstName = person?.FirstName ?? string.Empty,
+                PersonLastName = person?.LastName ?? string.Empty,
+                AvatarColor = person?.AvatarColor,
+                DisabilityTypeName = person?.DisabilityType?.Name,
+                Age = age,
                 AssignedAt = assignment.AssignedAt,
                 IsPrimaryProfessional = assignment.IsPrimaryProfessional,
                 CanSuperviseLogin = assignment.CanSuperviseLogin,

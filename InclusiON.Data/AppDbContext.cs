@@ -48,6 +48,7 @@ namespace InclusiON.Data
         public DbSet<ProfessionalInstitution> ProfessionalInstitutions { get; set; }
         public DbSet<ProfessionalPerson> ProfessionalPersons { get; set; }
         public DbSet<PersonRepresentative> PersonRepresentatives { get; set; }
+        public DbSet<PersonSkillProfile> PersonSkillProfiles { get; set; }
         public DbSet<Diagnosis> Diagnoses { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<ActivityContent> ActivityContents { get; set; }

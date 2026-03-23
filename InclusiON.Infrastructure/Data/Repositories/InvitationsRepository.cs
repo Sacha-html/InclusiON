@@ -40,6 +40,19 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<Invitation>> GetByInstitutionIdsAsync(List<int> institutionIds, CancellationToken cancellationToken = default)
+        {
+            return await _context.Invitations
+                .Include(i => i.ForPerson)
+                .Include(i => i.CreatedByProfessional)
+                .Where(i => _context.ProfessionalInstitutions.Any(pi =>
+                    pi.ProfessionalId == i.CreatedByProfessionalId &&
+                    institutionIds.Contains(pi.InstitutionId) &&
+                    pi.IsActive))
+                .OrderByDescending(i => i.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Invitation> CreateAsync(Invitation invitation, CancellationToken cancellationToken = default)
         {
             await _context.Invitations.AddAsync(invitation, cancellationToken);
