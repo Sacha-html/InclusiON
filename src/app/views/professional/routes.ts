@@ -12,10 +12,18 @@ export const professionalRoutes: Routes = [
   {
     path: 'persons',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./classroom/classroom.component').then(
+        (m) => m.ClassroomComponent
       ),
-    data: { title: 'Personas a Cargo' }
+    data: { title: 'Mi Aula' }
+  },
+  {
+    path: 'persons/:id',
+    loadComponent: () =>
+      import('./person-detail/person-detail.component').then(
+        (m) => m.PersonDetailComponent
+      ),
+    data: { title: 'Detalle de Persona' }
   },
   {
     path: 'activities',

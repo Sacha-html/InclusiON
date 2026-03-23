@@ -10,3 +10,29 @@
     transform: translateY(-2px);
   }
 }
+
+.counter-card-primary {
+  background-color: var(--a11y-primary) !important;
+  --cui-card-bg: var(--a11y-primary);
+  --cui-card-color: var(--a11y-primary-text);
+  color: var(--a11y-primary-text) !important;
+
+  * {
+    color: var(--a11y-primary-text) !important;
+  }
+}
+
+.counter-card-success {
+  background-color: var(--a11y-success) !important;
+  --cui-card-bg: var(--a11y-success);
+  --cui-card-color: var(--a11y-success-text);
+  color: var(--a11y-success-text) !important;
+
+  * {
+    color: var(--a11y-success-text) !important;
+  }
+}
+
+.counter-card-muted {
+  opacity: 0.7;
+}

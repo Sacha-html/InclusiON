@@ -19,35 +19,35 @@
   <!-- Contadores -->
   <c-row class="mb-4">
     <c-col md="4">
-      <c-card class="mb-4 text-white bg-primary cursor-pointer" (click)="navigateTo('/pro/persons')">
+      <c-card class="mb-4 cursor-pointer counter-card-primary" (click)="navigateTo('/pro/persons')">
         <c-card-body class="d-flex justify-content-between align-items-center">
           <div>
             <div class="fs-4 fw-semibold">{{ personCount }}</div>
-            <div class="text-white-50">Personas a cargo</div>
+            <div class="counter-card-muted">Personas a cargo</div>
           </div>
-          <svg cIcon name="cil-people" size="3xl" class="text-white-50"></svg>
+          <svg cIcon name="cil-people" size="3xl" class="counter-card-muted"></svg>
         </c-card-body>
       </c-card>
     </c-col>
     <c-col md="4">
-      <c-card class="mb-4 text-white bg-info cursor-pointer" (click)="navigateTo('/pro/invitations')">
+      <c-card class="mb-4 cursor-pointer counter-card-primary" (click)="navigateTo('/pro/invitations')">
         <c-card-body class="d-flex justify-content-between align-items-center">
           <div>
             <div class="fs-4 fw-semibold">{{ pendingInvitations }}</div>
-            <div class="text-white-50">Invitaciones pendientes</div>
+            <div class="counter-card-muted">Invitaciones pendientes</div>
           </div>
-          <svg cIcon name="cil-link" size="3xl" class="text-white-50"></svg>
+          <svg cIcon name="cil-link" size="3xl" class="counter-card-muted"></svg>
         </c-card-body>
       </c-card>
     </c-col>
     <c-col md="4">
-      <c-card class="mb-4 text-white bg-success cursor-pointer" (click)="navigateTo('/pro/invitations')">
+      <c-card class="mb-4 cursor-pointer counter-card-success" (click)="navigateTo('/pro/invitations')">
         <c-card-body class="d-flex justify-content-between align-items-center">
           <div>
             <div class="fs-4 fw-semibold">{{ acceptedInvitations }}</div>
-            <div class="text-white-50">Familias registradas</div>
+            <div class="counter-card-muted">Familias registradas</div>
           </div>
-          <svg cIcon name="cil-check-circle" size="3xl" class="text-white-50"></svg>
+          <svg cIcon name="cil-check-circle" size="3xl" class="counter-card-muted"></svg>
         </c-card-body>
       </c-card>
     </c-col>
@@ -60,9 +60,9 @@
       <c-card class="mb-4">
         <c-card-body>
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Personas a cargo</h5>
+            <h5 class="mb-0">Mi Aula</h5>
             <button cButton color="primary" size="sm" (click)="navigateTo('/pro/persons')">
-              Ver todas
+              Ver aula
             </button>
           </div>
           @if (recentPersons.length === 0) {

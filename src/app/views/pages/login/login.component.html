@@ -10,8 +10,8 @@
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
               <div class="text-center mb-4">
                 <svg cIcon name="cilLockLocked" size="3xl" class="text-primary mb-3"></svg>
-                <h1 class="h3">Acceso Administrativo</h1>
-                <p class="text-body-secondary">Ingresa con tu cuenta de administrador o profesional</p>
+                <h1 class="h3">{{ pageTitle }}</h1>
+                <p class="text-body-secondary">{{ pageSubtitle }}</p>
               </div>
 
               <!-- Error Alert -->

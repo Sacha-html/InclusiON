@@ -10,6 +10,7 @@ import {
   AlertComponent, ButtonDirective, FormSelectDirective,
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
 } from '@coreui/angular';
+import { IfGlobalAdminDirective } from '@shared/directives/if-global-admin.directive';
 
 @Component({
   selector: 'app-admin-institutions',
@@ -21,6 +22,7 @@ import {
     TableDirective, BadgeComponent, SpinnerComponent,
     AlertComponent, ButtonDirective, FormSelectDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
+    IfGlobalAdminDirective,
   ],
   templateUrl: './admin-institutions.component.html',
   styleUrl: './admin-institutions.component.scss',
@@ -35,6 +37,7 @@ export class AdminInstitutionsComponent implements OnInit {
   allInstitutions: InstitutionResponse[] = [];
   isLoading = true;
   isSaving = false;
+  isGlobalAdmin = false;
 
   showAssignModal = false;
   selectedInstitutionId: number | null = null;
@@ -52,6 +55,7 @@ export class AdminInstitutionsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isGlobalAdmin = this.authService.isGlobalAdmin();
     this.loadData();
   }
 

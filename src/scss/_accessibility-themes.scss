@@ -218,6 +218,23 @@
   --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1.25rem;
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 0, 0, 204;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 0, 102, 0;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 204, 0, 0;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 204, 102, 0;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 0, 0, 204;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -282,6 +299,23 @@
   --a11y-role-professional-bg: rgba(255, 255, 0, 0.15);
   --a11y-role-family: #FF44FF;
   --a11y-role-family-bg: rgba(255, 68, 255, 0.15);
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 255, 255, 0;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 0, 255, 0;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 255, 68, 68;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 255, 165, 0;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 255, 255, 0;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -353,6 +387,23 @@
   --a11y-role-family-bg: rgba(108, 113, 196, 0.1);
 
   --a11y-spacing-base: 1.5rem;
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 38, 139, 210;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 133, 153, 0;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 220, 50, 47;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 203, 75, 22;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 38, 139, 210;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -417,6 +468,23 @@
   --a11y-role-professional-bg: rgba(42, 161, 152, 0.15);
   --a11y-role-family: #6C71C4;
   --a11y-role-family-bg: rgba(108, 113, 196, 0.15);
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 42, 161, 152;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 133, 153, 0;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 220, 50, 47;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 203, 75, 22;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 42, 161, 152;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -487,6 +555,23 @@
   --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1.5rem;
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 13, 71, 161;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 27, 94, 32;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 183, 28, 28;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 230, 81, 0;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 13, 71, 161;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -550,6 +635,23 @@
   --a11y-role-professional-bg: rgba(130, 177, 255, 0.15);
   --a11y-role-family: #EA80FC;
   --a11y-role-family-bg: rgba(234, 128, 252, 0.15);
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 130, 177, 255;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 105, 240, 174;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 255, 82, 82;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 255, 171, 64;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 130, 177, 255;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -623,6 +725,23 @@
   --a11y-role-family-bg: #FCE4EC;
 
   --a11y-spacing-base: 1rem;
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 0, 119, 182;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 0, 119, 182;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 214, 40, 40;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 255, 165, 0;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 0, 119, 182;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -686,6 +805,23 @@
   --a11y-role-professional-bg: rgba(0, 119, 182, 0.15);
   --a11y-role-family: #FB8500;
   --a11y-role-family-bg: rgba(251, 133, 0, 0.15);
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 72, 202, 228;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 72, 202, 228;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 251, 133, 0;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 255, 183, 3;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 72, 202, 228;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -759,6 +895,23 @@
   --a11y-role-family-bg: rgba(244, 162, 97, 0.1);
 
   --a11y-spacing-base: 1rem;
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 29, 53, 87;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 69, 123, 157;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 244, 162, 97;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 233, 196, 106;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 29, 53, 87;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -822,6 +975,23 @@
   --a11y-role-professional-bg: rgba(168, 218, 220, 0.15);
   --a11y-role-family: #F4A261;
   --a11y-role-family-bg: rgba(244, 162, 97, 0.15);
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 168, 218, 220;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 142, 202, 230;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 244, 162, 97;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 233, 196, 106;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 168, 218, 220;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -895,6 +1065,23 @@
   --a11y-role-family-bg: rgba(74, 20, 140, 0.1);
 
   --a11y-spacing-base: 1rem;
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 155, 35, 53;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 0, 131, 143;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 183, 28, 28;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 233, 30, 99;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 155, 35, 53;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -958,6 +1145,23 @@
   --a11y-role-professional-bg: rgba(233, 69, 96, 0.15);
   --a11y-role-family: #7C4DFF;
   --a11y-role-family-bg: rgba(124, 77, 255, 0.15);
+
+  // CoreUI variable overrides
+  --cui-primary: var(--a11y-primary);
+  --cui-primary-rgb: 233, 69, 96;
+  --cui-success: var(--a11y-success);
+  --cui-success-rgb: 77, 208, 225;
+  --cui-danger: var(--a11y-danger);
+  --cui-danger-rgb: 239, 83, 80;
+  --cui-warning: var(--a11y-warning);
+  --cui-warning-rgb: 244, 143, 177;
+  --cui-info: var(--a11y-primary);
+  --cui-info-rgb: 233, 69, 96;
+  --cui-body-bg: var(--a11y-bg);
+  --cui-body-color: var(--a11y-text);
+  --cui-card-bg: var(--a11y-surface);
+  --cui-card-color: var(--a11y-text);
+  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================

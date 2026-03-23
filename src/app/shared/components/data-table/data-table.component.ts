@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ViewChild, E
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ActionItem, HeaderButton, TableColumn } from './data-table.models';
 import {
+  BadgeComponent,
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
@@ -24,6 +25,7 @@ import {
 @Component({
   selector: 'app-data-table',
   imports: [
+    BadgeComponent,
     TableDirective,
     CardComponent,
     CardHeaderComponent,

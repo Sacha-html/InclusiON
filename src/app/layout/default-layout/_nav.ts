@@ -7,6 +7,10 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-speedometer' },
   },
   {
+    title: true,
+    name: 'Gestion',
+  },
+  {
     name: 'Profesionales',
     url: '/admin/professionals',
     iconComponent: { name: 'cil-user' },
@@ -32,6 +36,10 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-link' },
   },
   {
+    title: true,
+    name: 'Configuracion',
+  },
+  {
     name: 'Catalogos',
     url: '/admin/catalogs',
     iconComponent: { name: 'cil-notes' },
@@ -48,6 +56,15 @@ export const navItems: INavData[] = [
     name: 'Mis Instituciones',
     url: '/admin/my-institutions',
     iconComponent: { name: 'cil-book' },
+  },
+  {
+    title: true,
+    name: 'Sistema',
+  },
+  {
+    name: 'Administradores',
+    url: '/admin/admins',
+    iconComponent: { name: 'cil-settings' },
   },
   {
     name: 'Roles y Permisos',

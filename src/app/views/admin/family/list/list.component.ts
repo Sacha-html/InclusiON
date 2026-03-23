@@ -1,10 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, FamilyService, ToastService } from '@services';
-import { FamilyListItemResponse } from '../../../../models';
+import { AdminInstitutionsService, AuthService, FamilyService, ToastService } from '@services';
+import { AdminInstitutionResponse, FamilyListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import {
+  FormSelectDirective,
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
 } from '@coreui/angular';
 
@@ -12,6 +14,8 @@ import {
   selector: 'app-family-list',
   imports: [
     DataTableComponent,
+    FormsModule,
+    FormSelectDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
   ],
   templateUrl: './list.component.html',
@@ -19,11 +23,16 @@ import {
 })
 export class ListComponent implements OnInit {
   private readonly familyService = inject(FamilyService);
+  private readonly adminInstitutionsService = inject(AdminInstitutionsService);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   canCreate = this.authService.hasPermission('family:create');
+
+  adminInstitutions: AdminInstitutionResponse[] = [];
+  selectedInstitutionId: number | undefined;
+  isGlobalAdmin = true;
 
   families: FamilyListItemResponse[] = [];
   totalItems = 0;
@@ -49,6 +58,23 @@ export class ListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.adminInstitutionsService.getMyInstitutions().subscribe({
+      next: (institutions) => {
+        this.adminInstitutions = institutions;
+        if (institutions.length > 0) {
+          this.isGlobalAdmin = false;
+          this.selectedInstitutionId = institutions[0].institutionId;
+        }
+        this.loadFamily();
+      },
+      error: () => {
+        this.loadFamily();
+      },
+    });
+  }
+
+  onInstitutionFilterChange(): void {
+    this.currentPage = 1;
     this.loadFamily();
   }
 
@@ -107,7 +133,7 @@ export class ListComponent implements OnInit {
 
   private loadFamily(search?: string): void {
     this.familyService
-      .getFamily({ page: this.currentPage, pageSize: this.pageSize, search })
+      .getFamily({ page: this.currentPage, pageSize: this.pageSize, search, institutionId: this.selectedInstitutionId })
       .subscribe({
         next: (response) => {
           this.families = response.data.data;

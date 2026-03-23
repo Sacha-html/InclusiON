@@ -66,6 +66,17 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   showPassword = false;
   returnUrl = '/';
+  isProfessional = false;
+
+  get pageTitle(): string {
+    return this.isProfessional ? 'Acceso Profesional' : 'Acceso Administrativo';
+  }
+
+  get pageSubtitle(): string {
+    return this.isProfessional
+      ? 'Ingresa con tu cuenta de profesional'
+      : 'Ingresa con tu cuenta de administrador';
+  }
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -74,8 +85,8 @@ export class LoginComponent implements OnInit {
       rememberMe: [false],
     });
 
-    // Obtener la URL de retorno si existe
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.isProfessional = this.route.snapshot.queryParams['role'] === 'professional';
   }
 
   get f() {

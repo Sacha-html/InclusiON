@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 import { roleGuard } from './guards/role.guard';
+import { globalAdminGuard } from './guards/global-admin.guard';
+import { permissionGuard } from './guards/permission.guard';
 import { UserRoles } from './shared/constants/roles';
 
 export const routes: Routes = [
@@ -139,6 +141,7 @@ export const routes: Routes = [
       {
         path: 'institutions',
         data: { title: 'Instituciones' },
+        canActivate: [globalAdminGuard],
         loadChildren: () =>
           import('./views/admin/institutions/routes').then(
             (m) => m.institutionRoutes,
@@ -154,7 +157,8 @@ export const routes: Routes = [
       },
       {
         path: 'invitations',
-        data: { title: 'Invitaciones' },
+        data: { title: 'Invitaciones', permission: 'invitations:read' },
+        canActivate: [permissionGuard],
         loadComponent: () =>
           import('./views/admin/invitations/invitations.component').then(
             (m) => m.InvitationsComponent,
@@ -169,8 +173,30 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'admins',
+        data: { title: 'Administradores' },
+        canActivate: [globalAdminGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./views/admin/admin-users/admin-users.component').then(
+                (m) => m.AdminUsersComponent,
+              ),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./views/admin/admin-users/new/new.component').then(
+                (m) => m.NewComponent,
+              ),
+          },
+        ],
+      },
+      {
         path: 'roles',
         data: { title: 'Roles y Permisos' },
+        canActivate: [globalAdminGuard],
         loadComponent: () =>
           import('./views/admin/roles/roles.component').then(
             (m) => m.RolesComponent,

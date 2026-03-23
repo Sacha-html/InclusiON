@@ -31,6 +31,7 @@ export class FamilyService {
       if (request.page) params = params.set('page', request.page.toString());
       if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
       if (request.search) params = params.set('search', request.search);
+      if (request.institutionId) params = params.set('institutionId', request.institutionId.toString());
     }
 
     return this.http

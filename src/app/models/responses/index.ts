@@ -12,3 +12,5 @@ export * from './family.response';
 export * from './institution.response';
 export * from './admin-institution.response';
 export * from './assignment.response';
+export * from './admin-user.response';
+export * from './skill-profile.response';
