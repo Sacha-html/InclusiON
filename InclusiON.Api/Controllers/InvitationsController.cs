@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Invitations.Commands;
 using InclusiON.Application.UseCases.Invitations.Queries;
+using InclusiON.Data;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Invitations;
 using InclusiON.DTOs.Responses;
@@ -20,10 +22,14 @@ namespace InclusiON.Api.Controllers
     public class InvitationsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
+        private readonly AppDbContext _context;
 
-        public InvitationsController(IHttpContextService httpContextService)
+        public InvitationsController(
+            IHttpContextService httpContextService,
+            AppDbContext context)
         {
             _httpContextService = httpContextService;
+            _context = context;
         }
 
         #region Queries
@@ -40,9 +46,38 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<GetInvitationsQuery, ApiResponse<List<InvitationResponse>>> handler,
             CancellationToken cancellationToken = default)
         {
-            // Si es profesional, filtrar por sus invitaciones. Si no (admin), devolver todas.
+            // Si es profesional, filtrar por sus invitaciones.
             var professionalId = await GetCurrentProfessionalId(cancellationToken);
-            var query = new GetInvitationsQuery(professionalId);
+
+            GetInvitationsQuery query;
+            if (professionalId != null)
+            {
+                // Professional: only their invitations
+                query = new GetInvitationsQuery(professionalId);
+            }
+            else
+            {
+                // Admin: check if institutional
+                var userId = _httpContextService.GetCurrentUserId();
+                var adminInstitutions = userId.HasValue
+                    ? await _context.AdminInstitutions
+                        .Where(ai => ai.AdminUserId == userId.Value && ai.IsActive)
+                        .Select(ai => ai.InstitutionId)
+                        .ToListAsync(cancellationToken)
+                    : new List<int>();
+
+                if (adminInstitutions.Any())
+                {
+                    // Institutional admin: filter by their institutions
+                    query = new GetInvitationsQuery(null, adminInstitutions);
+                }
+                else
+                {
+                    // Global admin: all invitations
+                    query = new GetInvitationsQuery(null);
+                }
+            }
+
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }

@@ -17,6 +17,7 @@ namespace InclusiON.Infrastructure.Services
         private readonly IHttpContextService _httpContextService;
         private readonly IVisualLoginRepository _visualLoginRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly ILogger<LoginSessionService> _logger;
 
         public LoginSessionService(
@@ -26,6 +27,7 @@ namespace InclusiON.Infrastructure.Services
             IHttpContextService httpContextService,
             IVisualLoginRepository visualLoginRepository,
             IUnitOfWork unitOfWork,
+            IAdminInstitutionRepository adminInstitutionRepository,
             ILogger<LoginSessionService> logger)
         {
             _identityService = identityService;
@@ -34,6 +36,7 @@ namespace InclusiON.Infrastructure.Services
             _httpContextService = httpContextService;
             _visualLoginRepository = visualLoginRepository;
             _unitOfWork = unitOfWork;
+            _adminInstitutionRepository = adminInstitutionRepository;
             _logger = logger;
         }
 
@@ -50,14 +53,29 @@ namespace InclusiON.Infrastructure.Services
             var roles = await _identityService.GetRolesAsync(user);
             var permissions = await _permissionService.GetRolesPermissionsAsync(roles, cancellationToken);
 
+            var primaryRole = roles.FirstOrDefault() ?? "Customer";
+
+            var isGlobalAdmin = false;
+            var institutionIds = new List<int>();
+
+            if (primaryRole == "Admin")
+            {
+                institutionIds = await _adminInstitutionRepository
+                    .GetActiveInstitutionIdsByAdminAsync(user.Id, cancellationToken);
+
+                isGlobalAdmin = institutionIds.Count == 0;
+            }
+
             var tokenUserData = new TokenUserData
             {
                 Id = user.Id,
                 Email = user.Email!,
                 Name = user.Name!,
-                Role = roles.FirstOrDefault() ?? "Customer",
+                Role = primaryRole,
                 IsActive = user.IsActive,
-                Permissions = permissions
+                Permissions = permissions,
+                IsGlobalAdmin = isGlobalAdmin,
+                InstitutionIds = institutionIds
             };
 
             var accessToken = _tokenServices.JwtTokenService.GenerateAccessToken(tokenUserData);

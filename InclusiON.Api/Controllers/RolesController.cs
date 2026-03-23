@@ -138,6 +138,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPut("{roleId:guid}/permissions")]
         [Authorize(Policy = "settings:update")]
+        [Authorize(Policy = "global-admin")]
         [ProducesResponseType(typeof(ApiResponse<RoleResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<RoleResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<RoleResponse>>> UpdateRolePermissions(

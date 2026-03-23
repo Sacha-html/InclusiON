@@ -58,6 +58,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<PagedResponse<FamilyRepresentative>> GetPagedAsync(
             int page, int pageSize, string? search, bool? isActive,
             SortField? sortBy, string sortDirection,
+            int? institutionId = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.FamilyRepresentatives
@@ -77,6 +78,21 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (isActive.HasValue)
             {
                 query = query.Where(f => f.User.IsActive == isActive.Value);
+            }
+
+            if (institutionId.HasValue)
+            {
+                query = query.Where(f =>
+                    _context.PersonRepresentatives.Any(pr =>
+                        pr.RepresentativeId == f.Id &&
+                        pr.IsActive &&
+                        _context.ProfessionalPersons.Any(pp =>
+                            pp.PersonId == pr.PersonId &&
+                            pp.IsActive &&
+                            _context.ProfessionalInstitutions.Any(pi =>
+                                pi.ProfessionalId == pp.ProfessionalId &&
+                                pi.InstitutionId == institutionId.Value &&
+                                pi.IsActive))));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<FamilyRepresentative, object>>>
