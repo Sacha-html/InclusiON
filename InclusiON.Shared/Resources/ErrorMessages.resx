@@ -202,4 +202,26 @@
 	<data name="ChangePasswordFailed" xml:space="preserve">
 		<value>Error al cambiar la contrasena: {0}</value>
 	</data>
+	<!-- Invitaciones -->
+	<data name="InvitationNotFound" xml:space="preserve">
+		<value>Invitacion no encontrada</value>
+	</data>
+	<data name="InvitationExpired" xml:space="preserve">
+		<value>La invitacion ha expirado</value>
+	</data>
+	<data name="InvitationAlreadyUsed" xml:space="preserve">
+		<value>La invitacion ya fue utilizada</value>
+	</data>
+	<data name="InternalErrorCreateInvitation" xml:space="preserve">
+		<value>Error interno al crear invitacion</value>
+	</data>
+	<data name="InternalErrorListInvitations" xml:space="preserve">
+		<value>Error interno al listar invitaciones</value>
+	</data>
+	<data name="InternalErrorValidateInvitation" xml:space="preserve">
+		<value>Error interno al validar invitacion</value>
+	</data>
+	<data name="InternalErrorAcceptInvitation" xml:space="preserve">
+		<value>Error interno al aceptar invitacion</value>
+	</data>
 </root>
