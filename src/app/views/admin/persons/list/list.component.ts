@@ -1,8 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, CatalogsService, PersonsService } from '@services';
-import { LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
+import { AdminInstitutionsService, AuthService, CatalogsService, PersonsService } from '@services';
+import { AdminInstitutionResponse, LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import {
@@ -21,6 +21,7 @@ import {
   imports: [
     DataTableComponent,
     ReactiveFormsModule,
+    FormsModule,
     FormControlDirective,
     FormFeedbackComponent,
     FormLabelDirective,
@@ -35,12 +36,17 @@ import {
 })
 export class ListComponent implements OnInit {
   private readonly personsService = inject(PersonsService);
+  private readonly adminInstitutionsService = inject(AdminInstitutionsService);
   private readonly authService = inject(AuthService);
   private readonly catalogsService = inject(CatalogsService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
   canCreate = this.authService.hasPermission('persons:create');
+
+  adminInstitutions: AdminInstitutionResponse[] = [];
+  selectedInstitutionId: number | undefined;
+  isGlobalAdmin = true;
 
   persons: PersonListItemResponse[] = [];
   totalItems = 0;
@@ -82,10 +88,27 @@ export class ListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.loadPersons();
     this.catalogsService.getLoginMethods().subscribe({
       next: (data) => this.loginMethods = data,
     });
+    this.adminInstitutionsService.getMyInstitutions().subscribe({
+      next: (institutions) => {
+        this.adminInstitutions = institutions;
+        if (institutions.length > 0) {
+          this.isGlobalAdmin = false;
+          this.selectedInstitutionId = institutions[0].institutionId;
+        }
+        this.loadPersons();
+      },
+      error: () => {
+        this.loadPersons();
+      },
+    });
+  }
+
+  onInstitutionFilterChange(): void {
+    this.currentPage = 1;
+    this.loadPersons();
   }
 
   onPageChange(page: number): void {
@@ -160,7 +183,7 @@ export class ListComponent implements OnInit {
 
   private loadPersons(search?: string): void {
     this.personsService
-      .getPersons({ page: this.currentPage, pageSize: this.pageSize, search, sortBy: 'lastName', sortDirection: 'ASC' })
+      .getPersons({ page: this.currentPage, pageSize: this.pageSize, search, sortBy: 'lastName', sortDirection: 'ASC', institutionId: this.selectedInstitutionId })
       .subscribe({
         next: (response) => {
           this.persons = response.data.data;

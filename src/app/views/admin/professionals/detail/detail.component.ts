@@ -27,6 +27,7 @@ import {
   ModalHeaderComponent,
   RowComponent,
   TableDirective,
+  BadgeComponent,
 } from '@coreui/angular';
 
 @Component({
@@ -50,6 +51,7 @@ import {
     ModalFooterComponent,
     ReactiveFormsModule,
     TableDirective,
+    BadgeComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
@@ -63,6 +65,8 @@ export class DetailComponent implements OnInit {
   private readonly personsService = inject(PersonsService);
   private readonly institutionsService = inject(InstitutionsService);
   private readonly toastService = inject(ToastService);
+
+  activeTab: 'datos' | 'personas' | 'instituciones' = 'datos';
 
   professional: ProfessionalResponse | null = null;
   showConfirmModal = false;
@@ -92,6 +96,11 @@ export class DetailComponent implements OnInit {
   institutionToRemove: ProfessionalInstitutionResponse | null = null;
 
   ngOnInit(): void {
+    const tab = this.route.snapshot.queryParams['tab'];
+    if (tab && ['datos', 'personas', 'instituciones'].includes(tab)) {
+      this.activeTab = tab;
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.professionalsService.getProfessionalById(id).subscribe({

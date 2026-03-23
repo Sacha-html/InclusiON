@@ -5,4 +5,5 @@ export interface GetFamilyRequest {
   isActive?: boolean;
   sortBy?: string;
   sortDirection?: string;
+  institutionId?: number;
 }

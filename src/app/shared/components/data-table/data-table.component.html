@@ -56,11 +56,11 @@
               <td>
                 @switch (col.type) {
                   @case ('badge') {
-                    <span class="badge" [class.badge-success]="item[col.key]" [class.badge-danger]="!item[col.key]"
+                    <c-badge [color]="item[col.key] ? 'success' : 'danger'"
                           role="status"
                           [attr.aria-label]="item[col.key] ? 'Estado: Activo' : 'Estado: Inactivo'">
                       {{ item[col.key] ? 'Activo' : 'Inactivo' }}
-                    </span>
+                    </c-badge>
                   }
                   @case ('actions') {
                     @if (col.actions && col.actions.length > 0) {

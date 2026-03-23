@@ -2,11 +2,9 @@
   <c-card>
     <c-card-header>
       <strong>Detalle del Familiar</strong>
-      <span class="badge ms-2"
-            [class.badge-success]="family.isActive"
-            [class.badge-danger]="!family.isActive">
+      <c-badge class="ms-2" [color]="family.isActive ? 'success' : 'danger'">
         {{ family.isActive ? 'Activo' : 'Inactivo' }}
-      </span>
+      </c-badge>
     </c-card-header>
     <c-card-body>
       <c-row class="mb-3">

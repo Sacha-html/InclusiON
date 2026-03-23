@@ -6,6 +6,7 @@ import {
   PagedResponse,
   PersonResponse,
   PersonListItemResponse,
+  PersonSkillProfileResponse,
   CreatePersonRequest,
   UpdatePersonRequest,
   GetPersonsRequest,
@@ -61,6 +62,9 @@ export class PersonsService {
       }
       if (request.isActive !== undefined) {
         params = params.set('isActive', request.isActive.toString());
+      }
+      if (request.institutionId) {
+        params = params.set('institutionId', request.institutionId.toString());
       }
     }
 
@@ -125,6 +129,55 @@ export class PersonsService {
   ): Observable<ApiResponse<PersonResponse>> {
     return this.http
       .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/me`, request)
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Obtiene el perfil de habilidades de una persona.
+   */
+  getSkillProfile(
+    personId: string,
+    all?: boolean
+  ): Observable<ApiResponse<PersonSkillProfileResponse[]>> {
+    let params = new HttpParams();
+    if (all) {
+      params = params.set('all', 'true');
+    }
+    return this.http
+      .get<ApiResponse<PersonSkillProfileResponse[]>>(
+        `${this.apiUrl}/${personId}/skill-profile`,
+        { params }
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Asigna un area de habilidad a una persona.
+   */
+  addSkillArea(
+    personId: string,
+    skillAreaId: number
+  ): Observable<ApiResponse<PersonSkillProfileResponse>> {
+    return this.http
+      .post<ApiResponse<PersonSkillProfileResponse>>(
+        `${this.apiUrl}/${personId}/skill-profile`,
+        { skillAreaId }
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Desactiva un area de habilidad de una persona.
+   */
+  deactivateSkillArea(
+    personId: string,
+    areaId: number
+  ): Observable<ApiResponse<PersonSkillProfileResponse>> {
+    return this.http
+      .put<ApiResponse<PersonSkillProfileResponse>>(
+        `${this.apiUrl}/${personId}/skill-profile/${areaId}`,
+        {}
+      )
       .pipe(catchError(this.handleError));
   }
 

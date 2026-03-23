@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FamilyService, ToastService } from '@services';
 import { FamilyResponse } from '../../../../models';
 import {
-  ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
+  BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormLabelDirective, RowComponent,
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
 } from '@coreui/angular';
@@ -11,7 +11,7 @@ import {
 @Component({
   selector: 'app-family-detail',
   imports: [
-    CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent,
+    BadgeComponent, CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent,
     ColComponent, FormControlDirective, FormLabelDirective, ButtonDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
   ],

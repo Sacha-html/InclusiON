@@ -4,6 +4,9 @@ export interface ProfessionalPersonResponse {
   personFirstName: string;
   personLastName: string;
   personFullName: string;
+  avatarColor?: string;
+  disabilityTypeName?: string;
+  age?: number;
   isPrimaryProfessional: boolean;
   canSuperviseLogin: boolean;
   isActive: boolean;
