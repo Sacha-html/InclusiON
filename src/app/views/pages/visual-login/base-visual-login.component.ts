@@ -2,6 +2,7 @@ import { inject, OnInit, OnDestroy, Directive } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { ErrorCode } from '@models';
+import { RoleRoutes } from '../../../shared/constants/roles';
 
 /**
  * Datos del usuario obtenidos de los query params
@@ -261,7 +262,9 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
     if (mustChangePassword) {
       this.router.navigate(['/change-password']);
     } else {
-      this.router.navigate(['/dashboard']);
+      const role = this.authService.getUserRole();
+      const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
+      this.router.navigate([target]);
     }
   }
 

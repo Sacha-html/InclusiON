@@ -1,12 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService, CatalogsService, PersonsService } from '@services';
 import { LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import {
-  ButtonDirective,
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
@@ -21,8 +20,6 @@ import {
   selector: 'app-list',
   imports: [
     DataTableComponent,
-    ButtonDirective,
-    RouterLink,
     ReactiveFormsModule,
     FormControlDirective,
     FormFeedbackComponent,
@@ -99,6 +96,12 @@ export class ListComponent implements OnInit {
   onSearch(term: string): void {
     this.currentPage = 1;
     this.loadPersons(term);
+  }
+
+  onHeaderAction(action: string): void {
+    if (action === 'new') {
+      this.router.navigate(['/admin/persons/new']);
+    }
   }
 
   onRowAction(event: { action: string; item: any }): void {

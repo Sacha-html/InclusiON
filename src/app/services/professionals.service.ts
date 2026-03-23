@@ -33,6 +33,7 @@ export class ProfessionalsService {
       if (request.page) params = params.set('page', request.page.toString());
       if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
       if (request.search) params = params.set('search', request.search);
+      if (request.institutionId) params = params.set('institutionId', request.institutionId.toString());
     }
 
     return this.http
@@ -64,6 +65,15 @@ export class ProfessionalsService {
   updateProfessional(id: string, request: UpdateProfessionalRequest): Observable<ProfessionalResponse> {
     return this.http
       .put<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/${id}`, request)
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError),
+      );
+  }
+
+  getMyProfile(): Observable<ProfessionalResponse> {
+    return this.http
+      .get<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/me`)
       .pipe(
         map((response) => response.data),
         catchError(this.handleError),

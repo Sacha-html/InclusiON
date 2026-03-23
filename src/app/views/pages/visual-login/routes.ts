@@ -22,7 +22,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./visual-standard-login.component').then((m) => m.VisualStandardLoginComponent),
     data: {
-      title: 'Ingresar Contrasena',
+      title: 'Ingresar Contraseña',
     },
   },
   {

@@ -1,0 +1,185 @@
+<c-card class="mb-4">
+  <c-card-header class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Invitaciones Familiares</h5>
+    <button cButton color="primary" size="sm" (click)="openModal()">
+      Nueva Invitacion
+    </button>
+  </c-card-header>
+  <c-card-body>
+
+    @if (isLoading) {
+      <div class="text-center p-4">
+        <c-spinner color="primary"></c-spinner>
+      </div>
+    }
+
+    @if (!isLoading && invitations.length === 0) {
+      <div class="text-center text-body-secondary p-4">
+        <p>No hay invitaciones creadas aun.</p>
+        <button cButton color="primary" (click)="openModal()">
+          Crear primera invitacion
+        </button>
+      </div>
+    }
+
+    @if (!isLoading && invitations.length > 0) {
+      <table cTable hover responsive>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Nombre</th>
+            <th>Parentesco</th>
+            <th>Persona</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inv of invitations; track inv.id) {
+            <tr>
+              <td>{{ inv.email }}</td>
+              <td>{{ inv.firstName }} {{ inv.lastName }}</td>
+              <td>{{ inv.relationship || '-' }}</td>
+              <td>{{ inv.personName || '-' }}</td>
+              <td>
+                <c-badge [color]="getStatusColor(inv.status)">
+                  {{ inv.status }}
+                </c-badge>
+              </td>
+              <td>{{ inv.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td>
+                @if (inv.status === 'Enviada') {
+                  <button
+                    cButton
+                    color="light"
+                    size="sm"
+                    title="Copiar link"
+                    (click)="copyToClipboard(inv.code)"
+                  >
+                    Copiar link
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </c-card-body>
+</c-card>
+
+<!-- Modal: Nueva Invitacion -->
+<c-modal [visible]="showModal" (visibleChange)="showModal = $event" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>
+      @if (createdInvitationCode) {
+        Invitacion Creada
+      } @else {
+        Nueva Invitacion
+      }
+    </h5>
+  </c-modal-header>
+  <c-modal-body>
+
+    @if (createdInvitationCode) {
+      <!-- Success state -->
+      <c-alert color="success">
+        Invitacion creada exitosamente. Comparte el siguiente link con el familiar:
+      </c-alert>
+      <div class="input-group mb-3">
+        <input
+          class="form-control"
+          readonly
+          [value]="getInviteUrl(createdInvitationCode)"
+        />
+        <button
+          cButton
+          color="primary"
+          (click)="copyToClipboard(createdInvitationCode)"
+        >
+          Copiar
+        </button>
+      </div>
+    } @else {
+      <!-- Form state -->
+      @if (errorMessage) {
+        <c-alert color="danger" [dismissible]="true" (visibleChange)="errorMessage = ''">
+          {{ errorMessage }}
+        </c-alert>
+      }
+
+      <form [formGroup]="invitationForm" (ngSubmit)="onSubmit()">
+
+        <div class="mb-3">
+          <label cFormLabel>Persona vinculada</label>
+          <select cSelect formControlName="personId">
+            <option value="">-- Seleccionar (opcional) --</option>
+            @for (person of persons; track person.id) {
+              <option [value]="person.id">
+                {{ person.firstName }} {{ person.lastName }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label cFormLabel>Email del familiar *</label>
+          <input
+            cFormControl
+            formControlName="email"
+            type="email"
+            placeholder="email@ejemplo.com"
+          />
+          @if (hasError('email', 'required')) {
+            <div class="text-danger small mt-1">El email es requerido</div>
+          }
+          @if (hasError('email', 'email')) {
+            <div class="text-danger small mt-1">Ingresa un email valido</div>
+          }
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label cFormLabel>Nombre</label>
+            <input cFormControl formControlName="firstName" placeholder="Nombre" />
+          </div>
+          <div class="col-md-6">
+            <label cFormLabel>Apellido</label>
+            <input cFormControl formControlName="lastName" placeholder="Apellido" />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label cFormLabel>Parentesco</label>
+          <select cSelect formControlName="relationship">
+            <option value="">-- Seleccionar --</option>
+            @for (rel of relationships; track rel) {
+              <option [value]="rel">{{ rel }}</option>
+            }
+          </select>
+        </div>
+
+      </form>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    @if (createdInvitationCode) {
+      <button cButton color="primary" (click)="closeModal()">Cerrar</button>
+    } @else {
+      <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
+      <button
+        cButton
+        color="primary"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting"
+      >
+        @if (isSubmitting) {
+          <c-spinner size="sm" class="me-1"></c-spinner>
+        }
+        Crear Invitacion
+      </button>
+    }
+  </c-modal-footer>
+</c-modal>

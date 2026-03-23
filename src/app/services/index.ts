@@ -1,3 +1,4 @@
+export { AdminInstitutionsService } from './admin-institutions.service';
 export { AuthService } from './auth.service';
 export { ToastService } from './toast.service';
 export { AccessibilityService } from './accessibility.service';
@@ -7,6 +8,12 @@ export { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
 export { PersonsService } from './persons.service';
 export { ProfessionalsService } from './professionals.service';
 export { CatalogsService } from './catalogs.service';
+export { CatalogAdminService } from './catalog-admin.service';
+export { InvitationsService } from './invitations.service';
+export { RolesService } from './roles.service';
+export { FamilyService } from './family.service';
+export { InstitutionsService } from './institutions.service';
+export { AssignmentsService } from './assignments.service';
 
 export type { StorageKey } from './local-storage.service';
 export type {

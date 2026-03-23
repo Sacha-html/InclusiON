@@ -1,0 +1,169 @@
+<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="8" lg="6" xl="5">
+
+        <!-- Loading -->
+        @if (isLoading) {
+          <c-card class="text-center p-5">
+            <c-card-body>
+              <c-spinner color="primary"></c-spinner>
+              <p class="mt-3">Validando invitacion...</p>
+            </c-card-body>
+          </c-card>
+        }
+
+        <!-- Error -->
+        @if (!isLoading && errorMessage && !invitationData) {
+          <c-card>
+            <c-card-body class="text-center p-5">
+              <div class="mb-4">
+                <i class="cil-warning text-danger" style="font-size: 3rem;"></i>
+              </div>
+              <h4 class="text-danger mb-3">Invitacion no valida</h4>
+              <c-alert color="danger">{{ errorMessage }}</c-alert>
+              <button cButton color="primary" class="mt-3" (click)="router.navigate(['/login'])">
+                Ir al inicio
+              </button>
+            </c-card-body>
+          </c-card>
+        }
+
+        <!-- Registration Complete -->
+        @if (registrationComplete) {
+          <c-card>
+            <c-card-body class="text-center p-5">
+              <svg cIcon name="cil-check-circle" size="3xl" class="text-success mb-3"></svg>
+              <h4 class="text-success mb-3">Registro completado</h4>
+              <p>El familiar fue registrado exitosamente y ya puede iniciar sesion en la plataforma.</p>
+              <button cButton color="primary" class="mt-3" (click)="router.navigate(['/pro/invitations'])">
+                Volver a invitaciones
+              </button>
+            </c-card-body>
+          </c-card>
+        }
+
+        <!-- Registration Form -->
+        @if (!isLoading && invitationData && !registrationComplete) {
+          <c-card>
+            <c-card-header>
+              <h4 class="mb-0">Registro Familiar</h4>
+              @if (invitationData.personName) {
+                <small class="text-body-secondary">
+                  Vinculacion con: <strong>{{ invitationData.personName }}</strong>
+                </small>
+              }
+            </c-card-header>
+            <c-card-body>
+
+              @if (errorMessage) {
+                <c-alert color="danger" [dismissible]="true" (visibleChange)="errorMessage = ''">
+                  {{ errorMessage }}
+                </c-alert>
+              }
+
+              <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+                <!-- Readonly fields -->
+                <div class="mb-3">
+                  <label cFormLabel>Nombre</label>
+                  <input cFormControl formControlName="firstName" />
+                </div>
+
+                <div class="mb-3">
+                  <label cFormLabel>Apellido</label>
+                  <input cFormControl formControlName="lastName" />
+                </div>
+
+                <div class="mb-3">
+                  <label cFormLabel>Parentesco</label>
+                  <input cFormControl formControlName="relationship" />
+                </div>
+
+                <hr />
+
+                <!-- Editable fields -->
+                <div class="mb-3">
+                  <label cFormLabel>Email</label>
+                  <input
+                    cFormControl
+                    formControlName="email"
+                    type="email"
+                    [valid]="f['email'].touched ? f['email'].valid : undefined"
+                  />
+                  @if (hasError('email', 'required') || hasError('email', 'email')) {
+                    <div class="text-danger small mt-1">{{ getErrorMessage('email') }}</div>
+                  }
+                </div>
+
+                <div class="mb-3">
+                  <label cFormLabel>Contraseña</label>
+                  <c-input-group>
+                    <input
+                      cFormControl
+                      formControlName="password"
+                      [type]="showPassword ? 'text' : 'password'"
+                      placeholder="Minimo 8 caracteres"
+                      [valid]="f['password'].touched ? f['password'].valid : undefined"
+                    />
+                    <button
+                      type="button"
+                      cInputGroupText
+                      (click)="togglePasswordVisibility()"
+                      style="cursor: pointer;"
+                    >
+                      <svg cIcon [name]="showPassword ? 'cil-low-vision' : 'cil-magnifying-glass'"></svg>
+                    </button>
+                  </c-input-group>
+                  @if (f['password'].touched && f['password'].invalid) {
+                    <div class="text-danger small mt-1">{{ getErrorMessage('password') }}</div>
+                  }
+                </div>
+
+                <div class="mb-4">
+                  <label cFormLabel>Confirmar contraseña</label>
+                  <c-input-group>
+                    <input
+                      cFormControl
+                      formControlName="confirmPassword"
+                      [type]="showConfirmPassword ? 'text' : 'password'"
+                      placeholder="Repite la contraseña"
+                      [valid]="f['confirmPassword'].touched ? f['confirmPassword'].valid : undefined"
+                    />
+                    <button
+                      type="button"
+                      cInputGroupText
+                      (click)="toggleConfirmPasswordVisibility()"
+                      style="cursor: pointer;"
+                    >
+                      <svg cIcon [name]="showConfirmPassword ? 'cil-low-vision' : 'cil-magnifying-glass'"></svg>
+                    </button>
+                  </c-input-group>
+                  @if (hasError('confirmPassword', 'required')) {
+                    <div class="text-danger small mt-1">Este campo es requerido</div>
+                  }
+                </div>
+
+                <div class="d-grid">
+                  <button
+                    cButton
+                    color="primary"
+                    type="submit"
+                    [disabled]="isSubmitting"
+                  >
+                    @if (isSubmitting) {
+                      <c-spinner size="sm" class="me-2"></c-spinner>
+                    }
+                    Completar registro
+                  </button>
+                </div>
+
+              </form>
+            </c-card-body>
+          </c-card>
+        }
+
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

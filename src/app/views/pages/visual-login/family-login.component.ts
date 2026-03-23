@@ -61,7 +61,7 @@ export class FamilyLoginComponent extends BaseVisualLoginComponent {
         } else {
           this.handleLoginResponseError(
             response.data,
-            'Contrasena incorrecta',
+            'Contraseña incorrecta',
             () => this.password = ''
           );
         }
@@ -69,7 +69,7 @@ export class FamilyLoginComponent extends BaseVisualLoginComponent {
       error: (error) => {
         this.handleHttpError(
           error,
-          'Error al verificar la contrasena',
+          'Error al verificar la contraseña',
           () => this.password = ''
         );
       },

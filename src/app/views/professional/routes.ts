@@ -64,5 +64,13 @@ export const professionalRoutes: Routes = [
         (m) => m.ProDashboardComponent
       ),
     data: { title: 'Calendario' }
+  },
+  {
+    path: 'invitations',
+    loadComponent: () =>
+      import('./invitations/invitation-list.component').then(
+        (m) => m.InvitationListComponent
+      ),
+    data: { title: 'Invitaciones' }
   }
 ];

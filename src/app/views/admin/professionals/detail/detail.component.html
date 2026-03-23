@@ -35,14 +35,14 @@
           <input cFormControl id="detail-specialty" [value]="professional.specialty ?? 'Sin especificar'" readonly />
         </c-col>
         <c-col sm="6">
-          <label cLabel for="detail-licenseNumber">Matrícula</label>
+          <label cLabel for="detail-licenseNumber">Matricula</label>
           <input cFormControl id="detail-licenseNumber" [value]="professional.licenseNumber ?? 'Sin especificar'" readonly />
         </c-col>
       </c-row>
 
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel for="detail-phone">Teléfono</label>
+          <label cLabel for="detail-phone">Telefono</label>
           <input cFormControl id="detail-phone" [value]="professional.phone ?? 'Sin especificar'" readonly />
         </c-col>
         <c-col sm="6">
@@ -53,7 +53,7 @@
 
       <c-row class="mb-3">
         <c-col sm="12">
-          <label cLabel for="detail-address">Dirección</label>
+          <label cLabel for="detail-address">Direccion</label>
           <input cFormControl id="detail-address" [value]="professional.address ?? 'Sin especificar'" readonly />
         </c-col>
       </c-row>
@@ -64,7 +64,7 @@
           <input cFormControl id="detail-createdAt" [value]="formatDateTime(professional.createdAt)" readonly />
         </c-col>
         <c-col sm="6">
-          <label cLabel for="detail-updatedAt">Última actualización</label>
+          <label cLabel for="detail-updatedAt">Ultima actualizacion</label>
           <input cFormControl id="detail-updatedAt" [value]="professional.updatedAt ? formatDateTime(professional.updatedAt) : 'Sin actualizar'" readonly />
         </c-col>
       </c-row>
@@ -91,4 +91,205 @@
       </div>
     </c-card-body>
   </c-card>
+
+  <!-- Personas a cargo -->
+  <c-card class="mt-4">
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <strong>Personas a cargo</strong>
+      <button cButton color="primary" size="sm" (click)="openAssignPersonModal()">
+        Asignar persona
+      </button>
+    </c-card-header>
+    <c-card-body>
+      @if (assignedPersons.length === 0) {
+        <p class="text-body-secondary mb-0">No hay personas asignadas.</p>
+      } @else {
+        <table cTable [striped]="true" [hover]="true">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Principal</th>
+              <th>Supervisa login</th>
+              <th>Estado</th>
+              <th>Fecha asignacion</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (person of assignedPersons; track person.personId) {
+              <tr>
+                <td>{{ person.personFullName }}</td>
+                <td>
+                  @if (person.isPrimaryProfessional) {
+                    <span class="badge badge-success">Si</span>
+                  } @else {
+                    <span class="badge badge-secondary">No</span>
+                  }
+                </td>
+                <td>
+                  @if (person.canSuperviseLogin) {
+                    <span class="badge badge-success">Si</span>
+                  } @else {
+                    <span class="badge badge-secondary">No</span>
+                  }
+                </td>
+                <td>
+                  <span class="badge" [class.badge-success]="person.isActive" [class.badge-danger]="!person.isActive">
+                    {{ person.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>{{ formatDateTime(person.assignedAt) }}</td>
+                <td>
+                  @if (person.isActive) {
+                    <button cButton color="danger" size="sm" (click)="openDeactivatePersonModal(person)">
+                      Desactivar
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </c-card-body>
+  </c-card>
+
+  <!-- Instituciones -->
+  <c-card class="mt-4">
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <strong>Instituciones</strong>
+      <button cButton color="primary" size="sm" (click)="openAssignInstitutionModal()">
+        Agregar institucion
+      </button>
+    </c-card-header>
+    <c-card-body>
+      @if (assignedInstitutions.length === 0) {
+        <p class="text-body-secondary mb-0">No hay instituciones asignadas.</p>
+      } @else {
+        <table cTable [striped]="true" [hover]="true">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha asignacion</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inst of assignedInstitutions; track inst.institutionId) {
+              <tr>
+                <td>{{ inst.institutionName }}</td>
+                <td>{{ formatDateTime(inst.assignedAt) }}</td>
+                <td>
+                  <button cButton color="danger" size="sm" (click)="openRemoveInstitutionModal(inst)">
+                    Remover
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </c-card-body>
+  </c-card>
+
+  <!-- Modal de confirmacion desactivar profesional -->
+  <c-modal [visible]="showConfirmModal" (visibleChange)="showConfirmModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Confirmar desactivacion</h5>
+    </c-modal-header>
+    <c-modal-body>
+      <p>¿Esta seguro de que desea desactivar al profesional <strong>{{ professional.fullName }}</strong>?</p>
+      <p class="text-body-secondary mb-0">Esta accion deshabilitara su acceso al sistema.</p>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelDeactivate()">Cancelar</button>
+      <button cButton color="danger" (click)="confirmDeactivate()">Desactivar</button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Modal asignar persona -->
+  <c-modal [visible]="showAssignPersonModal" (visibleChange)="showAssignPersonModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Asignar persona</h5>
+    </c-modal-header>
+    <c-modal-body>
+      <form [formGroup]="assignPersonForm">
+        <div class="mb-3">
+          <label cLabel for="personSelect">Persona</label>
+          <select cSelect id="personSelect" formControlName="personId">
+            <option value="">Seleccione una persona...</option>
+            @for (person of availablePersons; track person.id) {
+              <option [value]="person.id">{{ person.fullName }}</option>
+            }
+          </select>
+        </div>
+        <c-form-check>
+          <input cFormCheckInput type="checkbox" id="isPrimaryProfessional" formControlName="isPrimaryProfessional" />
+          <label cFormCheckLabel for="isPrimaryProfessional">Profesional principal</label>
+        </c-form-check>
+        <c-form-check class="mt-2">
+          <input cFormCheckInput type="checkbox" id="canSuperviseLogin" formControlName="canSuperviseLogin" />
+          <label cFormCheckLabel for="canSuperviseLogin">Puede supervisar login</label>
+        </c-form-check>
+      </form>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelAssignPerson()">Cancelar</button>
+      <button cButton color="primary" (click)="confirmAssignPerson()" [disabled]="!assignPersonForm.value.personId">Asignar</button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Modal confirmar desactivar persona -->
+  <c-modal [visible]="showDeactivatePersonModal" (visibleChange)="showDeactivatePersonModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Confirmar desactivacion</h5>
+    </c-modal-header>
+    <c-modal-body>
+      @if (personToDeactivate) {
+        <p>¿Esta seguro de que desea desactivar la asignacion de <strong>{{ personToDeactivate.personFullName }}</strong>?</p>
+      }
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelDeactivatePerson()">Cancelar</button>
+      <button cButton color="danger" (click)="confirmDeactivatePerson()">Desactivar</button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Modal asignar institucion -->
+  <c-modal [visible]="showAssignInstitutionModal" (visibleChange)="showAssignInstitutionModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Agregar institucion</h5>
+    </c-modal-header>
+    <c-modal-body>
+      <div class="mb-3">
+        <label cLabel for="institutionSelect">Institucion</label>
+        <select cSelect id="institutionSelect" (change)="selectedInstitutionId = $any($event.target).value ? +$any($event.target).value : null">
+          <option value="">Seleccione una institucion...</option>
+          @for (inst of availableInstitutions; track inst.id) {
+            <option [value]="inst.id">{{ inst.name }}</option>
+          }
+        </select>
+      </div>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelAssignInstitution()">Cancelar</button>
+      <button cButton color="primary" (click)="confirmAssignInstitution()" [disabled]="!selectedInstitutionId">Agregar</button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Modal confirmar remover institucion -->
+  <c-modal [visible]="showRemoveInstitutionModal" (visibleChange)="showRemoveInstitutionModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Confirmar remocion</h5>
+    </c-modal-header>
+    <c-modal-body>
+      @if (institutionToRemove) {
+        <p>¿Esta seguro de que desea remover la institucion <strong>{{ institutionToRemove.institutionName }}</strong>?</p>
+      }
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelRemoveInstitution()">Cancelar</button>
+      <button cButton color="danger" (click)="confirmRemoveInstitution()">Remover</button>
+    </c-modal-footer>
+  </c-modal>
 }

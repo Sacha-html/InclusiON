@@ -1,0 +1,218 @@
+<c-card class="mb-4">
+  <c-card-header class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ pageTitle }}</h5>
+    @if (canCreate) {
+      <button cButton color="primary" size="sm" (click)="openNew()">Nuevo</button>
+    }
+  </c-card-header>
+  <c-card-body>
+
+    @if (isLoading) {
+      <div class="text-center p-4"><c-spinner color="primary"></c-spinner></div>
+    }
+
+    <!-- Disability Types -->
+    @if (!isLoading && catalogType === 'disability-types') {
+      <table cTable hover responsive>
+        <thead><tr><th>Nombre</th><th>Descripcion</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @for (item of disabilityTypes; track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.description || '-' }}</td>
+              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+            </tr>
+          }
+          @if (disabilityTypes.length === 0) {
+            <tr><td colspan="3" class="text-center text-body-secondary">Sin registros</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <!-- Autonomy Levels -->
+    @if (!isLoading && catalogType === 'autonomy-levels') {
+      <table cTable hover responsive>
+        <thead><tr><th>Nombre</th><th>Descripcion</th><th>Requiere Supervision</th><th>Orden</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @for (item of autonomyLevels; track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.description || '-' }}</td>
+              <td><c-badge [color]="item.requiresSupervision ? 'warning' : 'success'">{{ item.requiresSupervision ? 'Si' : 'No' }}</c-badge></td>
+              <td>{{ item.displayOrder }}</td>
+              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+            </tr>
+          }
+          @if (autonomyLevels.length === 0) {
+            <tr><td colspan="5" class="text-center text-body-secondary">Sin registros</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <!-- Activity Categories -->
+    @if (!isLoading && catalogType === 'activity-categories') {
+      <table cTable hover responsive>
+        <thead><tr><th>Nombre</th><th>Descripcion</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @for (item of activityCategories; track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.description || '-' }}</td>
+              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+            </tr>
+          }
+          @if (activityCategories.length === 0) {
+            <tr><td colspan="3" class="text-center text-body-secondary">Sin registros</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <!-- Skill Areas -->
+    @if (!isLoading && catalogType === 'skill-areas') {
+      <table cTable hover responsive>
+        <thead><tr><th>Nombre</th><th>Icono</th><th>Color</th><th>Orden</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @for (item of skillAreas; track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.icon || '-' }}</td>
+              <td>
+                @if (item.color) {
+                  <span class="d-inline-block rounded" [style.background-color]="item.color" style="width: 20px; height: 20px; vertical-align: middle;"></span>
+                  <small class="ms-1">{{ item.color }}</small>
+                } @else { - }
+              </td>
+              <td>{{ item.displayOrder }}</td>
+              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+            </tr>
+          }
+          @if (skillAreas.length === 0) {
+            <tr><td colspan="5" class="text-center text-body-secondary">Sin registros</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <!-- Template Types -->
+    @if (!isLoading && catalogType === 'template-types') {
+      <table cTable hover responsive>
+        <thead><tr><th>Nombre</th><th>Codigo</th><th>Area</th><th>Pictogramas</th><th>Audio</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @for (item of templateTypes; track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              <td><code>{{ item.code }}</code></td>
+              <td>{{ item.skillAreaName || '-' }}</td>
+              <td><c-badge [color]="item.supportsPictograms ? 'success' : 'secondary'">{{ item.supportsPictograms ? 'Si' : 'No' }}</c-badge></td>
+              <td><c-badge [color]="item.supportsAudio ? 'success' : 'secondary'">{{ item.supportsAudio ? 'Si' : 'No' }}</c-badge></td>
+              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+            </tr>
+          }
+          @if (templateTypes.length === 0) {
+            <tr><td colspan="6" class="text-center text-body-secondary">Sin registros</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <!-- Login Methods -->
+    @if (!isLoading && catalogType === 'login-methods') {
+      <table cTable hover responsive>
+        <thead><tr><th>Nombre</th><th>Codigo</th><th>Descripcion</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @for (item of loginMethods; track item.id) {
+            <tr>
+              <td>{{ item.name }}</td>
+              <td><code>{{ item.code }}</code></td>
+              <td>{{ item.description || '-' }}</td>
+              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+            </tr>
+          }
+          @if (loginMethods.length === 0) {
+            <tr><td colspan="4" class="text-center text-body-secondary">Sin registros</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </c-card-body>
+</c-card>
+
+<!-- Modal -->
+<c-modal [visible]="showModal" (visibleChange)="showModal = $event" alignment="center">
+  <c-modal-header><h5 cModalTitle>{{ modalTitle }}</h5></c-modal-header>
+  <c-modal-body>
+
+    @if (catalogType === 'disability-types') {
+      <form [formGroup]="disabilityForm">
+        <div class="mb-3"><label cLabel>Nombre *</label><input cFormControl formControlName="name" /></div>
+        <div class="mb-3"><label cLabel>Descripcion</label><input cFormControl formControlName="description" /></div>
+        @if (editingId) { <c-form-check><input cFormCheckInput type="checkbox" formControlName="isActive" /><label cFormCheckLabel>Activo</label></c-form-check> }
+      </form>
+    }
+
+    @if (catalogType === 'autonomy-levels') {
+      <form [formGroup]="autonomyForm">
+        <div class="mb-3"><label cLabel>Nombre *</label><input cFormControl formControlName="name" /></div>
+        <div class="mb-3"><label cLabel>Descripcion</label><input cFormControl formControlName="description" /></div>
+        <div class="mb-3"><c-form-check><input cFormCheckInput type="checkbox" formControlName="requiresSupervision" /><label cFormCheckLabel>Requiere Supervision</label></c-form-check></div>
+        <div class="mb-3"><label cLabel>Orden</label><input cFormControl type="number" formControlName="displayOrder" /></div>
+      </form>
+    }
+
+    @if (catalogType === 'activity-categories') {
+      <form [formGroup]="categoryForm">
+        <div class="mb-3"><label cLabel>Nombre *</label><input cFormControl formControlName="name" /></div>
+        <div class="mb-3"><label cLabel>Descripcion</label><input cFormControl formControlName="description" /></div>
+        @if (editingId) { <c-form-check><input cFormCheckInput type="checkbox" formControlName="isActive" /><label cFormCheckLabel>Activo</label></c-form-check> }
+      </form>
+    }
+
+    @if (catalogType === 'skill-areas') {
+      <form [formGroup]="skillAreaForm">
+        <div class="mb-3"><label cLabel>Nombre *</label><input cFormControl formControlName="name" /></div>
+        <div class="mb-3"><label cLabel>Descripcion</label><input cFormControl formControlName="description" /></div>
+        <c-row>
+          <c-col sm="6"><div class="mb-3"><label cLabel>Icono</label><input cFormControl formControlName="icon" /></div></c-col>
+          <c-col sm="6"><div class="mb-3"><label cLabel>Color</label><input type="color" class="form-control form-control-color" formControlName="color" /></div></c-col>
+        </c-row>
+        <div class="mb-3"><label cLabel>Orden</label><input cFormControl type="number" formControlName="displayOrder" /></div>
+      </form>
+    }
+
+    @if (catalogType === 'template-types') {
+      <form [formGroup]="templateTypeForm">
+        <div class="mb-3"><label cLabel>Nombre *</label><input cFormControl formControlName="name" /></div>
+        <div class="mb-3"><label cLabel>Codigo *</label><input cFormControl formControlName="code" /></div>
+        <div class="mb-3">
+          <label cLabel>Area de Habilidad</label>
+          <select cSelect formControlName="skillAreaId">
+            <option [ngValue]="null">-- Ninguna --</option>
+            @for (sa of skillAreas; track sa.id) { <option [ngValue]="sa.id">{{ sa.name }}</option> }
+          </select>
+        </div>
+        <div class="mb-3"><c-form-check><input cFormCheckInput type="checkbox" formControlName="supportsPictograms" /><label cFormCheckLabel>Soporta Pictogramas</label></c-form-check></div>
+        <div class="mb-3"><c-form-check><input cFormCheckInput type="checkbox" formControlName="supportsAudio" /><label cFormCheckLabel>Soporta Audio</label></c-form-check></div>
+      </form>
+    }
+
+    @if (catalogType === 'login-methods') {
+      <form [formGroup]="loginMethodForm">
+        <div class="mb-3"><label cLabel>Nombre</label><input cFormControl formControlName="name" /></div>
+        <div class="mb-3"><label cLabel>Descripcion</label><input cFormControl formControlName="description" /></div>
+        <div class="mb-3"><label cLabel>Orden</label><input cFormControl type="number" formControlName="displayOrder" /></div>
+      </form>
+    }
+
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
+    <button cButton color="primary" (click)="save()" [disabled]="isSaving || getActiveForm().invalid">
+      @if (isSaving) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      Guardar
+    </button>
+  </c-modal-footer>
+</c-modal>
