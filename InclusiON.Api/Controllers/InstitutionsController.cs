@@ -1,0 +1,112 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using InclusiON.Api.Extensions;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.UseCases.Institutions.Commands;
+using InclusiON.Application.UseCases.Institutions.Queries;
+using InclusiON.DTOs.Requests.Institutions;
+using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Institutions;
+using InclusiON.Shared.Resources;
+
+namespace InclusiON.Api.Controllers
+{
+    /// <summary>
+    /// Controlador para la gestion de instituciones educativas.
+    /// </summary>
+    [Route("api/[controller]")]
+    [ApiController]
+    [Produces("application/json")]
+    public class InstitutionsController : ControllerBase
+    {
+        #region Queries
+
+        /// <summary>
+        /// Obtiene todas las instituciones educativas.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Policy = "institutions:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<InstitutionResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<InstitutionResponse>>>> GetInstitutions(
+            [FromServices] IQueryHandler<GetInstitutionsQuery, ApiResponse<List<InstitutionResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetInstitutionsQuery();
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        #endregion
+
+        #region Commands
+
+        /// <summary>
+        /// Crea una nueva institucion educativa.
+        /// </summary>
+        [HttpPost]
+        [Authorize(Policy = "institutions:create")]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<InstitutionResponse>>> CreateInstitution(
+            [FromBody] CreateInstitutionRequest request,
+            [FromServices] ICommandHandler<CreateInstitutionCommand, ApiResponse<InstitutionResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(ApiResponse<InstitutionResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
+            }
+
+            var command = new CreateInstitutionCommand(
+                request.Name,
+                request.Address,
+                request.Phone,
+                request.Email);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Actualiza una institucion educativa existente.
+        /// </summary>
+        [HttpPut("{id:int}")]
+        [Authorize(Policy = "institutions:update")]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<InstitutionResponse>>> UpdateInstitution(
+            int id,
+            [FromBody] UpdateInstitutionRequest request,
+            [FromServices] ICommandHandler<UpdateInstitutionCommand, ApiResponse<InstitutionResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                return BadRequest(ApiResponse<InstitutionResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
+            }
+
+            var command = new UpdateInstitutionCommand(
+                id,
+                request.Name,
+                request.Address,
+                request.Phone,
+                request.Email);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        #endregion
+    }
+}

@@ -84,4 +84,10 @@
 	<data name="PasswordChanged" xml:space="preserve">
 		<value>Contrasena cambiada exitosamente</value>
 	</data>
+	<data name="InvitationCreated" xml:space="preserve">
+		<value>Invitacion creada exitosamente</value>
+	</data>
+	<data name="InvitationAccepted" xml:space="preserve">
+		<value>Registro completado exitosamente</value>
+	</data>
 </root>

@@ -361,5 +361,47 @@ namespace InclusiON.Shared.Resources {
                 return ResourceManager.GetString("ChangePasswordFailed", resourceCulture);
             }
         }
+
+        public static string InvitationNotFound {
+            get {
+                return ResourceManager.GetString("InvitationNotFound", resourceCulture);
+            }
+        }
+
+        public static string InvitationExpired {
+            get {
+                return ResourceManager.GetString("InvitationExpired", resourceCulture);
+            }
+        }
+
+        public static string InvitationAlreadyUsed {
+            get {
+                return ResourceManager.GetString("InvitationAlreadyUsed", resourceCulture);
+            }
+        }
+
+        public static string InternalErrorCreateInvitation {
+            get {
+                return ResourceManager.GetString("InternalErrorCreateInvitation", resourceCulture);
+            }
+        }
+
+        public static string InternalErrorListInvitations {
+            get {
+                return ResourceManager.GetString("InternalErrorListInvitations", resourceCulture);
+            }
+        }
+
+        public static string InternalErrorValidateInvitation {
+            get {
+                return ResourceManager.GetString("InternalErrorValidateInvitation", resourceCulture);
+            }
+        }
+
+        public static string InternalErrorAcceptInvitation {
+            get {
+                return ResourceManager.GetString("InternalErrorAcceptInvitation", resourceCulture);
+            }
+        }
     }
 }

@@ -182,5 +182,17 @@ namespace InclusiON.Shared.Resources {
                 return ResourceManager.GetString("PasswordChanged", resourceCulture);
             }
         }
+
+        public static string InvitationCreated {
+            get {
+                return ResourceManager.GetString("InvitationCreated", resourceCulture);
+            }
+        }
+
+        public static string InvitationAccepted {
+            get {
+                return ResourceManager.GetString("InvitationAccepted", resourceCulture);
+            }
+        }
     }
 }

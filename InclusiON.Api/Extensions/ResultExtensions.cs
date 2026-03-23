@@ -30,7 +30,9 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.BusinessRuleViolation or
                 ErrorCode.InvalidOperation or
                 ErrorCode.PinNotConfigured or
-                ErrorCode.LoginMethodNotAllowed
+                ErrorCode.LoginMethodNotAllowed or
+                ErrorCode.InvitationExpired or
+                ErrorCode.InvitationAlreadyUsed
                     => new BadRequestObjectResult(response),
 
                 // 401 Unauthorized - Errores de autenticacion
@@ -55,7 +57,8 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.UserNotFound or
                 ErrorCode.PersonNotFound or
                 ErrorCode.ResourceNotFound or
-                ErrorCode.ProfessionalNotFound
+                ErrorCode.ProfessionalNotFound or
+                ErrorCode.InvitationNotFound
                     => new NotFoundObjectResult(response),
 
                 // 409 Conflict - Conflictos de datos

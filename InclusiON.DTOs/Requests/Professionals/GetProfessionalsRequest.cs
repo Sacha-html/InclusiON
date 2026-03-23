@@ -21,5 +21,10 @@ namespace InclusiON.DTOs.Requests.Professionals
         /// Filtro por estado activo (basado en User.IsActive).
         /// </summary>
         public bool? IsActive { get; set; }
+
+        /// <summary>
+        /// Filtro por institucion educativa.
+        /// </summary>
+        public int? InstitutionId { get; set; }
     }
 }

@@ -52,7 +52,8 @@ namespace InclusiON.Api.Controllers
                 request.Specialty,
                 request.IsActive,
                 request.SortBy,
-                request.SortDirection);
+                request.SortDirection,
+                request.InstitutionId);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
