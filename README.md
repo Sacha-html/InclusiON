@@ -24,6 +24,7 @@ Plataforma web de inclusión educativa para personas con discapacidad. Permite a
 | [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) | Especificación del Motor de Dificultad Adaptativa | Todo el equipo |
 | [Features/integracion-semantic-search.md](./Features/integracion-semantic-search.md) | Plan de integración de búsqueda semántica ONNX | Backend devs |
 | [ARQUITECTURA.md](./ARQUITECTURA.md) | Visión general de la arquitectura y decisiones técnicas | Todo el equipo |
+| [Process/](./Process/) | Documentación de procesos del sistema con diagramas Mermaid | Todo el equipo |
 
 ---
 
