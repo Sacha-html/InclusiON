@@ -88,3 +88,16 @@ Definición de términos utilizados en la documentación y en la plataforma.
 | **Filtrado por institución** | Mecanismo que limita la visibilidad de datos para los administradores institucionales. Solo ven profesionales, personas, familiares e invitaciones de sus instituciones asignadas. |
 | **Soft-delete** | Desactivación lógica de un registro (se marca como inactivo) sin eliminar los datos históricos. Todas las relaciones del sistema usan soft-delete. |
 | **Consentimiento informado** | Autorización formal del representante familiar para el tratamiento de los datos de la persona con discapacidad en la plataforma. |
+
+---
+
+## Gestión de usuarios y soporte
+
+| Término | Definición |
+|---------|-----------|
+| **Gestión de usuarios (centralizada)** | Administración transversal de cuentas de usuario desde un panel unificado del admin. Incluye reseteo de contraseña, desactivación, reactivación y consulta de actividad. Complementa los CRUDs de dominio (profesionales, familiares, personas). |
+| **Onboarding** | Proceso de incorporación de un usuario nuevo al sistema. Incluye el cambio obligatorio de contraseña temporal, el completado de perfil (para profesionales) y un tour guiado del portal. Varía según el rol del usuario. |
+| **Centro de ayuda (FAQ)** | Sección de preguntas frecuentes organizadas por categoría (Cuenta y Acceso, Actividades, Reportes, Comunicación, Accesibilidad, General). Gestionadas por el admin, visibles para todos los usuarios autenticados. |
+| **Ticket de soporte** | Reporte de problema técnico o consulta creado por un usuario desde la plataforma. Captura automáticamente el contexto (sección, navegador). Tiene estados: Abierto, En Revisión, Respondido, Resuelto, Cerrado. |
+| **Guía contextual** | Tooltip o ayuda inline que aparece junto a una funcionalidad específica del portal para explicar su uso. Se implementa como componente frontend sin endpoint. El usuario puede marcar "No volver a mostrar". |
+| **Contraseña temporal** | Contraseña generada automáticamente por el sistema al crear o reactivar una cuenta. Se muestra una sola vez al admin y obliga al usuario a cambiarla en el próximo login (`MustChangePassword = true`). |

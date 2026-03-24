@@ -187,8 +187,40 @@
 
 ---
 
+## Administración de Cuentas
+
+### 17 — Gestión de Usuarios
+- [ ] Listado centralizado de usuarios con filtros (rol, estado, institución)
+- [ ] Detalle de usuario con entidad asociada
+- [ ] Reseteo de contraseña (genera temporal + revoca sesiones)
+- [ ] Desactivación de cuenta (soft-delete + revocación de tokens)
+- [ ] Reactivación de cuenta (genera temporal)
+- [ ] Consulta de actividad reciente del usuario
+
+### 18 — Onboarding
+- [x] Cambio obligatorio de contraseña en primer login
+- [ ] Wizard de completado de perfil (profesional)
+- [ ] Tour guiado del portal (profesional)
+- [ ] Pantalla de bienvenida (familiar)
+- [ ] Pantalla de bienvenida (persona con discapacidad)
+
+---
+
+## Soporte
+
+### 19 — Soporte y Ayuda
+- [ ] Centro de ayuda (FAQ) con categorías y búsqueda
+- [ ] ABM de FAQ por admin
+- [ ] Botón flotante para reportar problema
+- [ ] Creación de ticket con captura automática de contexto
+- [ ] Consulta de mis tickets por usuario
+- [ ] Gestión de tickets por admin (listar, responder, cambiar estado)
+- [ ] Cierre automático de tickets inactivos (30 días)
+
+---
+
 ## Resumen
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| Items checkeados | 47 | 35 |
+| Items checkeados | 48 | 51 |
