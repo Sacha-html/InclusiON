@@ -44,7 +44,7 @@ InclusiON.Documents/
 ├── Estado/                      ← Checklist de avance del proyecto
 │   └── checklist-procesos.md        Qué está hecho y qué falta, por proceso
 │
-├── Process/                     ← Procesos del sistema de información (16 procesos)
+├── Process/                     ← Procesos del sistema de información (19 procesos)
 │   ├── 00-mapa-global-procesos.md    Mapa global con fases y relaciones
 │   ├── 01-gestion-instituciones.md   Alta y edición de instituciones
 │   ├── 02-gestion-roles-permisos.md  Roles, permisos y admins institucionales
@@ -167,7 +167,7 @@ Persona ve su roadmap visual (estilo Duolingo) y elige una actividad desbloquead
 
 ---
 
-## Los 16 procesos del sistema
+## Los 19 procesos del sistema
 
 Cada proceso describe **qué hace el sistema, quién lo usa y cómo funciona**. Todos incluyen diagramas de flujo y estado de implementación.
 
@@ -217,6 +217,17 @@ Cada proceso describe **qué hace el sistema, quién lo usa y cómo funciona**. 
 |---|---------|--------------|
 | 16 | [Comunicación](./Process/16-comunicacion-actores.md) | Que profesionales y familias se comuniquen dentro de la plataforma |
 
+### Administración de Cuentas
+| # | Proceso | Qué resuelve |
+|---|---------|--------------|
+| 17 | [Gestión de Usuarios](./Process/17-gestion-usuarios.md) | Que el admin gestione cuentas de forma centralizada: resetear contraseñas, desactivar, reactivar |
+| 18 | [Onboarding](./Process/18-onboarding.md) | Que cada usuario nuevo sea guiado en su primer ingreso al sistema |
+
+### Soporte
+| # | Proceso | Qué resuelve |
+|---|---------|--------------|
+| 19 | [Soporte y Ayuda](./Process/19-soporte.md) | Que los usuarios consulten ayuda y reporten problemas desde la plataforma |
+
 El avance de implementación de cada proceso se puede consultar en el [checklist de procesos](./Estado/checklist-procesos.md).
 
 ---
@@ -237,6 +248,9 @@ Las funcionalidades del sistema están documentadas como **historias de usuario*
 | [HU-08](./HU/HU-08-diagnosticos-reportes.md) | Diagnósticos funcionales y reportes de progreso |
 | [HU-09](./HU/HU-09-mensajeria.md) | Mensajería interna entre actores |
 | [HU-10](./HU/HU-10-motor-adaptativo.md) | Motor de dificultad adaptativa |
+| [HU-11](./HU/HU-11-gestion-usuarios.md) | Gestión centralizada de usuarios |
+| [HU-12](./HU/HU-12-onboarding.md) | Onboarding de usuarios |
+| [HU-13](./HU/HU-13-soporte.md) | Soporte y ayuda |
 
 ---
 

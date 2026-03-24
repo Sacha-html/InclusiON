@@ -22,7 +22,7 @@ Estas son las HUs donde el frontend necesita que el backend este listo para cone
 
 ## TRACK BACKEND (BE)
 
-**17 Historias de Usuario** - Endpoints - Handlers CQRS - Logica de negocio - Ordenadas por dependencia
+**20 Historias de Usuario** - Endpoints - Handlers CQRS - Logica de negocio - Ordenadas por dependencia
 
 ---
 
@@ -509,9 +509,118 @@ Entidades ya existentes (migracion `Add-AdaptiveEngine`):
 
 ---
 
+### Sprint 5 — Gestion de Usuarios, Onboarding y Soporte (3 Historias)
+
+---
+
+#### BE-18 — Gestion Centralizada de Usuarios — ALTA
+
+**Como** administrador del sistema
+**Quiero** gestionar de forma centralizada las cuentas de usuario (listar, resetear contrasena, desactivar, reactivar, consultar actividad)
+**Para** mantener el control sobre el acceso al sistema sin depender de los CRUDs individuales de cada tipo de actor
+
+**Que construye el Backend:**
+AdminUsersController:
+- `GET  /api/admin/users` -> lista paginada con filtros: role, isActive, institutionId, search (nombre/email)
+  Response: `{ data: [{ userId, email, fullName, role, isActive, lastLogin, createdAt, mustChangePassword }], total, page, pageSize }`
+- `GET  /api/admin/users/{id}` -> detalle con entidad asociada (profesional/familiar/persona) + actividad
+- `POST /api/admin/users/{id}/reset-password` -> genera nueva contrasena temporal + MustChangePassword=true + revoca RefreshTokens
+- `PUT  /api/admin/users/{id}/deactivate` -> IsActive=false + revoca RefreshTokens + desactiva entidad asociada
+- `PUT  /api/admin/users/{id}/reactivate` -> IsActive=true + genera contrasena temporal + MustChangePassword=true
+- `GET  /api/admin/users/{id}/activity` -> `{ lastLogin, loginCount, recentActions: AccessAudit[] }`
+
+Handlers: ResetPasswordCommand, DeactivateUserCommand, ReactivateUserCommand, GetUsersQuery, GetUserByIdQuery, GetUserActivityQuery
+
+**Criterios de aceptacion:**
+- Admin institucional solo ve usuarios de sus instituciones asignadas (mismo filtro que en profesionales/personas/familiares).
+- POST reset-password devuelve contrasena temporal en response (una sola vez, no se guarda en texto plano).
+- PUT deactivate valida que el admin no se desactive a si mismo (400 con mensaje explicativo).
+- PUT reactivate genera contrasena temporal nueva y devuelve en response.
+- Toda operacion se registra en AccessAudit con quien la ejecuto.
+- GET activity devuelve ultimas 10 entradas del audit log del usuario.
+
+**Al completar esta HU se desbloquea:** FE-19 (panel de gestion de usuarios admin)
+
+---
+
+#### BE-19 — Onboarding de Usuarios — MEDIA
+
+**Como** usuario nuevo del sistema
+**Quiero** ser guiado en mi primer ingreso para completar mi perfil y conocer las herramientas
+**Para** poder empezar a trabajar rapidamente sin asistencia externa
+
+**Que construye el Backend:**
+Profesional:
+- `PUT  /api/professionals/me/profile` -> actualiza campos de perfil (specialty, phone, license)
+  Valida campos obligatorios, devuelve isProfileComplete
+- `PUT  /api/professionals/me/onboarding-complete` -> marca hasCompletedOnboarding=true
+- `GET  /api/professionals/me` -> (ya existe) agregar campos: isProfileComplete, hasCompletedOnboarding
+
+Familiar:
+- `PUT  /api/family/me/onboarding-complete` -> marca hasCompletedOnboarding=true
+- `GET  /api/family/me` -> (nuevo) detalle del familiar autenticado con persona vinculada + hasCompletedOnboarding
+
+Campos nuevos en entidades:
+- Professional: `HasCompletedOnboarding` (bool, default false)
+- FamilyRepresentative: `HasCompletedOnboarding` (bool, default false)
+
+Migracion: `Add-OnboardingFlags` (agrega columnas a Professional y FamilyRepresentative)
+
+**Criterios de aceptacion:**
+- GET /professionals/me devuelve isProfileComplete (calculado: specialty, phone no vacios) y hasCompletedOnboarding.
+- PUT /professionals/me/profile solo actualiza los campos de perfil, no los datos de identidad (nombre, DNI).
+- PUT onboarding-complete es idempotente: si ya es true, devuelve 200 sin cambios.
+- GET /family/me devuelve datos del familiar + persona vinculada + hasCompletedOnboarding.
+- El frontend usa estos flags para decidir si muestra el wizard o el portal directamente.
+
+**Dependencias:** BE-02 (profesionales), CRUD familiares
+**Al completar esta HU se desbloquea:** FE-20 (wizard de onboarding)
+
+---
+
+#### BE-20 — Soporte y Ayuda — MEDIA
+
+**Como** usuario de la plataforma
+**Quiero** consultar preguntas frecuentes y reportar problemas tecnicos
+**Para** resolver dudas de forma autonoma o recibir asistencia del administrador
+
+**Que construye el Backend:**
+SupportController (FAQ):
+- `GET  /api/support/faq` -> lista activas, filtros: category, search. Sin paginacion (pocas entradas)
+- `POST /api/support/faq` -> crear (AdminOnly). Body: `{ question, answer, category, displayOrder }`
+- `PUT  /api/support/faq/{id}` -> editar (AdminOnly)
+- `PUT  /api/support/faq/{id}/deactivate` -> soft delete (AdminOnly)
+
+SupportTicketsController (Tickets):
+- `POST /api/support/tickets` -> crear ticket. Body: `{ subject, description, category, priority, currentUrl, userAgent }`
+- `GET  /api/support/tickets` -> lista para admin (paginada, filtros: status, category, priority)
+- `GET  /api/support/tickets/mine` -> lista del usuario autenticado
+- `GET  /api/support/tickets/{id}` -> detalle con historial de respuestas
+- `POST /api/support/tickets/{id}/respond` -> admin responde. Body: `{ content }`
+- `PUT  /api/support/tickets/{id}/status` -> admin cambia estado. Body: `{ status }`
+
+Entidades nuevas:
+- `FaqEntry`: Id, Question, Answer, Category (enum), DisplayOrder, IsActive, CreatedAt
+- `SupportTicket`: Id, UserId, Subject, Description, Category (enum: Bug/Consulta/Sugerencia), Priority (enum: Baja/Media/Alta), Status (enum: Abierto/EnRevision/Respondido/Resuelto/Cerrado), CurrentUrl, UserAgent, CreatedAt, UpdatedAt
+- `TicketResponse`: Id, TicketId, UserId, Content, CreatedAt
+
+Migracion: `Add-SupportEntities`
+
+**Criterios de aceptacion:**
+- GET /faq no requiere paginacion (max ~50 entradas, cache 5 min).
+- POST /tickets captura automaticamente userId del JWT.
+- Un usuario solo puede ver sus propios tickets via /mine.
+- Admin institucional ve tickets de usuarios de sus instituciones.
+- POST /respond crea TicketResponse y cambia status a "Respondido" automaticamente.
+- Tickets sin actividad 30 dias: job o query que los marca como "Cerrado" (puede ser un scheduled task o evaluado en GET).
+
+**Al completar esta HU se desbloquea:** FE-21 (centro de ayuda y tickets)
+
+---
+
 ## TRACK FRONTEND (FE)
 
-**18 Historias de Usuario** - Componentes Angular - Services - Mocks de desarrollo - Ordenadas por dependencia
+**21 Historias de Usuario** - Componentes Angular - Services - Mocks de desarrollo - Ordenadas por dependencia
 
 ---
 
@@ -1007,6 +1116,121 @@ AdaptiveLogService: getLog(personId, filters)
 
 ---
 
+### Sprint 5 — Gestion de Usuarios, Onboarding y Soporte (3 Historias)
+
+---
+
+#### FE-19 — Panel de Gestion de Usuarios (Admin) — ALTA
+
+**Como** administrador del sistema
+**Quiero** ver un panel centralizado de todas las cuentas de usuario con acciones de gestion
+**Para** administrar el acceso al sistema desde un solo lugar
+
+**Que construye el Frontend:**
+AdminUsersService: getAll(filters), getById(id), resetPassword(id), deactivate(id), reactivate(id), getActivity(id)
+
+AdminUsersListComponent (/admin/users):
+- DataTable con columnas: nombre, email, rol, estado (badge verde/rojo), ultimo login, acciones
+- Filtros: dropdown rol, toggle activo/inactivo, dropdown institucion (si admin global), buscador por nombre/email
+- Acciones por fila: Ver detalle, Resetear contrasena, Desactivar/Reactivar
+
+AdminUserDetailComponent (/admin/users/{id}):
+- Datos del usuario + entidad asociada (profesional/familiar/persona con link al detalle)
+- Seccion "Estado de cuenta": activo/inactivo, tiene contrasena temporal pendiente, ultimo login
+- Seccion "Actividad reciente": ultimas 10 acciones del audit log
+- Botones de accion: Resetear contrasena (modal confirmacion -> muestra temp password con copy), Desactivar (modal con motivo), Reactivar (modal -> muestra temp password)
+
+**Criterios de aceptacion:**
+- Al resetear contrasena se muestra toast con la contrasena temporal y boton copiar (igual que al crear profesional).
+- El boton "Desactivar" no aparece para el usuario logueado (no puede desactivarse a si mismo).
+- El boton "Reactivar" solo aparece para usuarios inactivos.
+- Filtro de institucion solo visible para admin global.
+- Con mock: 5 usuarios hardcodeados con distintos roles y estados.
+
+**Dependencias:** BE-18 (todos los endpoints de admin/users)
+
+---
+
+#### FE-20 — Onboarding Wizard (Profesional y Familiar) — MEDIA
+
+**Como** usuario nuevo
+**Quiero** completar mi perfil y conocer el portal en mi primer ingreso
+**Para** estar listo para trabajar sin necesitar ayuda externa
+
+**Que construye el Frontend:**
+OnboardingGuard: Guard de ruta que evalua los flags del usuario autenticado y redirige al paso de onboarding correspondiente.
+
+ProfessionalOnboardingComponent (/pro/onboarding/profile):
+- Wizard de 2 pasos: Paso 1 (completar datos: especialidad, telefono, matricula), Paso 2 (resumen + confirmar)
+- Al completar: PUT /professionals/me/profile -> redirige al tour
+- Solo se muestra si isProfileComplete = false
+
+OnboardingTourComponent:
+- Overlay con tooltips que senala las secciones principales del portal profesional: Mi Aula, Personas, Actividades, Comunicacion
+- Boton "Siguiente" / "Finalizar"
+- Al finalizar: PUT /professionals/me/onboarding-complete
+- Solo se muestra si hasCompletedOnboarding = false
+- Accesible desde menu Configuracion para relanzar
+
+FamilyWelcomeComponent (/family/onboarding/welcome):
+- Pantalla de bienvenida con: nombre del familiar, persona vinculada (nombre + avatar), que puede hacer en el portal (ver progreso, reportes, mensajes)
+- Boton "Comenzar" -> PUT /family/me/onboarding-complete -> redirige al portal
+
+**Criterios de aceptacion:**
+- El guard evalua: mustChangePassword (ya existente) > isProfileComplete (profesional) > hasCompletedOnboarding.
+- Si todos los flags estan OK: acceso directo al portal sin pasar por onboarding.
+- El wizard de perfil no permite avanzar sin completar los campos obligatorios.
+- El tour se puede saltar con boton "Omitir" (marca onboarding como completo igualmente).
+- Con mock: flags hardcodeados en el servicio de autenticacion.
+
+**Dependencias:** BE-19 (endpoints de perfil y flags de onboarding)
+
+---
+
+#### FE-21 — Centro de Ayuda y Tickets de Soporte — MEDIA
+
+**Como** usuario de la plataforma
+**Quiero** consultar preguntas frecuentes y reportar problemas desde la aplicacion
+**Para** resolver mis dudas o recibir asistencia sin salir de la plataforma
+
+**Que construye el Frontend:**
+SupportService: getFaq(filters), createFaq(dto), updateFaq(id, dto), deactivateFaq(id)
+TicketsService: create(dto), getMine(), getAll(filters), getById(id), respond(id, dto), updateStatus(id, dto)
+
+FaqPageComponent (/help):
+- Lista de preguntas agrupadas por categoria (acordeon expandible)
+- Buscador por texto
+- Accesible desde icono "?" en la barra de navegacion de todos los portales
+
+FaqAdminComponent (/admin/support/faq):
+- DataTable con pregunta, categoria, orden, estado
+- Formulario crear/editar en modal
+
+ReportIssueButtonComponent (flotante, todas las vistas):
+- Boton flotante "Ayuda" en esquina inferior derecha
+- Al hacer click: modal con formulario (asunto, descripcion, categoria dropdown, prioridad dropdown)
+- Captura automatica: currentUrl (window.location), userAgent (navigator.userAgent)
+- Al enviar: toast de confirmacion con numero de ticket
+
+MyTicketsComponent (/help/tickets):
+- Lista de tickets del usuario con: asunto, categoria, estado (badge), fecha, ultima respuesta
+- Detalle expandible con historial de respuestas
+
+AdminTicketsComponent (/admin/support/tickets):
+- DataTable con filtros: estado, categoria, prioridad, busqueda
+- Detalle con historial + formulario de respuesta + selector de estado
+
+**Criterios de aceptacion:**
+- El boton flotante de ayuda es visible en todos los portales (profesional, familiar, admin).
+- El FAQ se carga sin paginacion con cache local.
+- Al crear ticket el contexto (URL, userAgent) se agrega automaticamente sin intervencion del usuario.
+- El admin ve badges con la cantidad de tickets abiertos en el sidebar.
+- Con mock: 5 FAQ entries + 3 tickets hardcodeados.
+
+**Dependencias:** BE-20 (endpoints de FAQ y tickets)
+
+---
+
 ## Dependencias Cruzadas BE <> FE
 
 | FE necesita | BE que lo provee | Endpoint clave | Para que lo usa el FE |
@@ -1029,3 +1253,6 @@ AdaptiveLogService: getLog(personId, filters)
 | FE-16 | BE-15 | GET/POST /api/messages | Inbox y envio de mensajes |
 | FE-17 | BE-17 | GET/PUT /api/roadmap-activities/{id}/adaptive-config | Panel de configuracion del MDA |
 | FE-18 | BE-17 | GET /api/persons/{id}/adaptive-log | Timeline de ajustes adaptativos |
+| FE-19 | BE-18 | GET/POST/PUT /api/admin/users/* | Panel de gestion centralizada de usuarios |
+| FE-20 | BE-19 | PUT /api/professionals/me/profile + onboarding-complete | Wizard de onboarding por rol |
+| FE-21 | BE-20 | GET/POST /api/support/faq + /api/support/tickets | Centro de ayuda y tickets |

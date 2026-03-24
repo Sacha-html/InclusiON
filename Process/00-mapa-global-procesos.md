@@ -2,7 +2,7 @@
 
 ## Visión general
 
-El sistema InclusiON organiza sus procesos en 6 áreas funcionales que cubren el ciclo completo de trabajo con personas con discapacidad: desde la configuración inicial del sistema hasta el monitoreo continuo del progreso.
+El sistema InclusiON organiza sus procesos en 8 áreas funcionales que cubren el ciclo completo de trabajo con personas con discapacidad: desde la configuración inicial del sistema hasta el monitoreo continuo del progreso.
 
 ```mermaid
 flowchart TB
@@ -43,6 +43,15 @@ flowchart TB
         P16[16 Comunicación entre Actores]
     end
 
+    subgraph ADMIN_CUENTAS["Administración de Cuentas"]
+        P17[17 Gestión de Usuarios]
+        P18[18 Onboarding]
+    end
+
+    subgraph SOPORTE["Soporte"]
+        P19[19 Soporte y Ayuda]
+    end
+
     CONFIG --> USUARIOS
     USUARIOS --> ASIG
     ASIG --> EVAL
@@ -51,6 +60,9 @@ flowchart TB
     MONIT -->|Ajustar plan| EVAL
     COM -.->|Transversal| USUARIOS
     COM -.->|Transversal| MONIT
+    ADMIN_CUENTAS -.->|Transversal| USUARIOS
+    P18 -.->|Post primer login| USUARIOS
+    SOPORTE -.->|Transversal| CONFIG & USUARIOS & EVAL & EJEC & MONIT
 
 ```
 
@@ -83,6 +95,10 @@ flowchart LR
     P16[16 Comunicación] -.->|Notifica| P04 & P06
 
     P14 -->|Retroalimenta| P09
+
+    P17[17 Gestión Usuarios] -.->|Administra cuentas de| P04 & P05 & P06
+    P18[18 Onboarding] -->|Post alta| P04 & P06
+    P19[19 Soporte] -.->|Atiende a| P04 & P06
 ```
 
 ## Fases del sistema (DOCX)
@@ -102,6 +118,7 @@ El proyecto final define 4 fases secuenciales que agrupan los procesos:
 | 06 Familiares | Alta directa o por invitación |
 | 07 Invitaciones | Envío de email para registro de familiares |
 | 08 Asignaciones | Vincular profesionales a instituciones y personas |
+| 18 Onboarding | Guiar a cada usuario en su primer ingreso |
 
 ```mermaid
 flowchart LR
@@ -110,7 +127,8 @@ flowchart LR
     F1C --> F1D[Admin asigna profesional ↔ persona]
     F1D --> F1E[Profesional invita familiar]
     F1E --> F1F[Familiar se registra]
-    F1F --> LISTO[Sistema listo para operar]
+    F1F --> F1G[Onboarding de cada usuario]
+    F1G --> LISTO[Sistema listo para operar]
 ```
 
 ---
@@ -184,11 +202,11 @@ El estado de avance de cada proceso se puede consultar en el [checklist de proce
 
 | Actor | Procesos en los que participa |
 |-------|------------------------------|
-| **Admin Global** | 01, 02, 03, 04, 05, 06, 08 |
-| **Admin Institucional** | 04, 05, 06, 08 |
-| **Profesional** | 07, 08, 09, 10, 11, 14, 15, 16 |
-| **Persona con Discapacidad** | 12 |
-| **Familia** | 07, 14, 15, 16 |
+| **Admin Global** | 01, 02, 03, 04, 05, 06, 08, 17, 19 |
+| **Admin Institucional** | 04, 05, 06, 08, 17, 19 |
+| **Profesional** | 07, 08, 09, 10, 11, 14, 15, 16, 18, 19 |
+| **Persona con Discapacidad** | 12, 18 |
+| **Familia** | 07, 14, 15, 16, 18, 19 |
 | **Sistema (automático)** | 13 |
 
 ## Referencias transversales
@@ -199,3 +217,6 @@ Estos documentos describen capacidades que soportan todos los procesos:
 |------------|-------------|-----------|
 | Accesibilidad | 7 perfiles × 2 modos = 14 combinaciones visuales | `References/REF-accesibilidad.md` |
 | Autenticación | 5 métodos de login + JWT + refresh tokens | `References/REF-autenticacion.md` |
+| Gestión de Usuarios | Administración centralizada de cuentas | `Process/17-gestion-usuarios.md` |
+| Onboarding | Primer ingreso y configuración por rol | `Process/18-onboarding.md` |
+| Soporte | Centro de ayuda, FAQ y tickets | `Process/19-soporte.md` |
