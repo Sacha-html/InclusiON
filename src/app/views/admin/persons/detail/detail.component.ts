@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogsService, PersonsService } from '@services';
 import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem } from '../../../../models';
+import { formatDate, formatDateTime } from '@shared/utils';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -62,8 +63,8 @@ export class DetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.personsService.getPersonById(id).subscribe({
-        next: (response) => {
-          this.person = response.data;
+        next: (person) => {
+          this.person = person;
           this.loadSkillProfile();
         },
         error: () => this.router.navigate(['/admin/persons']),
@@ -74,7 +75,7 @@ export class DetailComponent implements OnInit {
   loadSkillProfile(): void {
     if (!this.person) return;
     this.personsService.getSkillProfile(this.person.id).subscribe({
-      next: (response) => (this.skillProfile = response.data ?? []),
+      next: (data) => (this.skillProfile = data ?? []),
     });
   }
 
@@ -126,20 +127,8 @@ export class DetailComponent implements OnInit {
     }
   }
 
-  formatDate(date: string | null | undefined): string {
-    if (!date) return 'Sin especificar';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return 'Sin especificar';
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
-
-  formatDateTime(date: string | null | undefined): string {
-    if (!date) return 'Sin especificar';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return 'Sin especificar';
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      + ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  }
+  formatDate = formatDate;
+  formatDateTime = formatDateTime;
 
   formatLevel(level: number | null | undefined): string {
     return level != null ? `${level} / 5` : 'Sin especificar';

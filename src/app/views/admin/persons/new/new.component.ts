@@ -1,8 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CatalogsService, PersonsService } from '@services';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '../../../../models';
+import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -58,7 +59,7 @@ export class NewComponent implements OnInit {
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     documentNumber: ['', [Validators.maxLength(20)]],
-    birthDate: ['', [Validators.required, NewComponent.validDate, NewComponent.notFutureDate]],
+    birthDate: ['', [Validators.required, validDate, notFutureDate]],
     // Discapacidad
     disabilityTypeId: [null],
     // Perfil funcional
@@ -105,28 +106,6 @@ export class NewComponent implements OnInit {
     });
   }
 
-  static validDate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(control.value)) return { invalidDate: true };
-    const [day, month, year] = control.value.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-      return { invalidDate: true };
-    }
-    return null;
-  }
-
-  static notFutureDate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(control.value)) return null;
-    const [day, month, year] = control.value.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    if (date > new Date()) return { futureDate: true };
-    return null;
-  }
-
   onSubmit(): void {
     this.submitted = true;
     this.serverError = '';
@@ -137,7 +116,7 @@ export class NewComponent implements OnInit {
     const request: CreatePersonRequest = {
       firstName: raw.firstName,
       lastName: raw.lastName,
-      birthDate: this.toIsoDate(raw.birthDate),
+      birthDate: toIsoDate(raw.birthDate),
       usesAAC: raw.usesAAC ?? false,
       usesSignLanguage: raw.usesSignLanguage ?? false,
       requiresLargeFont: raw.requiresLargeFont ?? false,
@@ -160,18 +139,13 @@ export class NewComponent implements OnInit {
     };
 
     this.personsService.createPerson(request).subscribe({
-      next: (response) => {
-        this.router.navigate(['/admin/persons', response.data.id]);
+      next: (person) => {
+        this.router.navigate(['/admin/persons', person.id]);
       },
       error: (err) => {
         this.serverError = err?.error?.message || 'Error al crear la persona';
       },
     });
-  }
-
-  private toIsoDate(ddmmyyyy: string): string {
-    const [day, month, year] = ddmmyyyy.split('/');
-    return `${year}-${month}-${day}T00:00:00`;
   }
 
   goBack(): void {

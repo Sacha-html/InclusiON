@@ -1,8 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
 import { ProfessionalResponse, UpdateProfessionalRequest } from '../../../../models';
+import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -49,34 +50,12 @@ export class EditComponent implements OnInit {
     phone: ['', [Validators.maxLength(20)]],
     specialty: ['', [Validators.maxLength(100)]],
     licenseNumber: ['', [Validators.maxLength(50)]],
-    birthDate: ['', [Validators.required, EditComponent.validDate, EditComponent.notFutureDate]],
+    birthDate: ['', [Validators.required, validDate, notFutureDate]],
     address: ['', [Validators.maxLength(200)]],
   });
 
   get f() {
     return this.form.controls;
-  }
-
-  static validDate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(control.value)) return { invalidDate: true };
-    const [day, month, year] = control.value.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-      return { invalidDate: true };
-    }
-    return null;
-  }
-
-  static notFutureDate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(control.value)) return null;
-    const [day, month, year] = control.value.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    if (date > new Date()) return { futureDate: true };
-    return null;
   }
 
   ngOnInit(): void {
@@ -100,19 +79,9 @@ export class EditComponent implements OnInit {
       phone: p.phone ?? '',
       specialty: p.specialty ?? '',
       licenseNumber: p.licenseNumber ?? '',
-      birthDate: this.toDisplayDate(p.birthDate),
+      birthDate: toDisplayDate(p.birthDate),
       address: p.address ?? '',
     });
-  }
-
-  private toDisplayDate(iso: string | undefined | null): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return '';
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
   }
 
   onSubmit(): void {
@@ -129,7 +98,7 @@ export class EditComponent implements OnInit {
       ...(raw.phone && { phone: raw.phone }),
       ...(raw.specialty && { specialty: raw.specialty }),
       ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
-      ...(raw.birthDate && { birthDate: this.toIsoDate(raw.birthDate) }),
+      ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
       ...(raw.address && { address: raw.address }),
     };
 
@@ -141,11 +110,6 @@ export class EditComponent implements OnInit {
         this.serverError = err?.error?.message || 'Error al actualizar el profesional';
       },
     });
-  }
-
-  private toIsoDate(ddmmyyyy: string): string {
-    const [day, month, year] = ddmmyyyy.split('/');
-    return `${year}-${month}-${day}T00:00:00`;
   }
 
   goBack(): void {

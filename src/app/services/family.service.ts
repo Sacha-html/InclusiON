@@ -10,7 +10,8 @@ import {
   FamilyListItemResponse,
   FamilyResponse,
 } from '../models';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,7 @@ export class FamilyService {
     return `${environment.apiUrl}/Family`;
   }
 
-  getFamily(request?: GetFamilyRequest): Observable<ApiResponse<PagedResponse<FamilyListItemResponse>>> {
+  getFamily(request?: GetFamilyRequest): Observable<PagedResponse<FamilyListItemResponse>> {
     let params = new HttpParams()
       .set('sortBy', request?.sortBy ?? 'lastName')
       .set('sortDirection', request?.sortDirection ?? 'ASC');
@@ -36,43 +37,30 @@ export class FamilyService {
 
     return this.http
       .get<ApiResponse<PagedResponse<FamilyListItemResponse>>>(this.apiUrl, { params })
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   getFamilyById(id: string): Observable<FamilyResponse> {
     return this.http
       .get<ApiResponse<FamilyResponse>>(`${this.apiUrl}/${id}`)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   createFamily(request: CreateFamilyRequest): Observable<FamilyResponse> {
     return this.http
       .post<ApiResponse<FamilyResponse>>(this.apiUrl, request)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   updateFamily(id: string, request: UpdateFamilyRequest): Observable<FamilyResponse> {
     return this.http
       .put<ApiResponse<FamilyResponse>>(`${this.apiUrl}/${id}`, request)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   deactivateFamily(id: string): Observable<void> {
     return this.http
       .put<void>(`${this.apiUrl}/${id}/deactivate`, {})
-      .pipe(catchError(this.handleError));
-  }
-
-  private handleError(error: unknown): Observable<never> {
-    return throwError(() => error);
+      .pipe(handleApiError());
   }
 }

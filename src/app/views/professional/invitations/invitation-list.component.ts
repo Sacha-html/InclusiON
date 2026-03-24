@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { InvitationsService, ToastService, PersonsService } from '@services';
+import { getInvitationStatusColor } from '@shared/utils';
 import {
   InvitationResponse,
   CreateInvitationRequest,
@@ -112,7 +113,7 @@ export class InvitationListComponent implements OnInit {
   private loadPersons(): void {
     this.personsService.getPersons({ pageSize: 100 }).subscribe({
       next: (response) => {
-        this.persons = response.data?.data ?? [];
+        this.persons = response?.data ?? [];
       },
       error: () => {
         // Non-critical, persons dropdown will be empty
@@ -166,14 +167,7 @@ export class InvitationListComponent implements OnInit {
     });
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Enviada': return 'info';
-      case 'Aceptada': return 'success';
-      case 'Expirada': return 'danger';
-      default: return 'secondary';
-    }
-  }
+  getStatusColor = getInvitationStatusColor;
 
   getInviteUrl(code: string): string {
     return `${window.location.origin}/#/invite/${code}`;

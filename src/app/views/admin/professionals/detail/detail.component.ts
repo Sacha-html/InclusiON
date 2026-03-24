@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AssignmentsService, InstitutionsService, PersonsService, ProfessionalsService, ToastService } from '@services';
+import { formatDate, formatDateTime } from '@shared/utils';
 import {
   InstitutionResponse,
   PersonListItemResponse,
@@ -162,7 +163,7 @@ export class DetailComponent implements OnInit {
     this.personsService.getPersons({ pageSize: 1000, isActive: true }).subscribe({
       next: (response) => {
         const assignedIds = new Set(this.assignedPersons.filter((p) => p.isActive).map((p) => p.personId));
-        this.availablePersons = response.data.data.filter((p) => !assignedIds.has(p.id));
+        this.availablePersons = response.data.filter((p) => !assignedIds.has(p.id));
         this.showAssignPersonModal = true;
       },
       error: () => this.toastService.error('Error al cargar personas disponibles'),
@@ -296,20 +297,8 @@ export class DetailComponent implements OnInit {
 
   // ---- Helpers ----
 
-  formatDate(date: string | null | undefined): string {
-    if (!date) return 'Sin especificar';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return 'Sin especificar';
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
-
-  formatDateTime(date: string | null | undefined): string {
-    if (!date) return 'Sin especificar';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return 'Sin especificar';
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      + ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  }
+  formatDate = formatDate;
+  formatDateTime = formatDateTime;
 
   goBack(): void {
     this.router.navigate(['/admin/professionals']);
