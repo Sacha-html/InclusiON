@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Commands;
@@ -124,7 +125,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
                 _logger.LogInformation("Persona creada: {PersonId}, Usuario: {UserId}", person.Id, user.Id);
 
-                var response = MapToResponse(person);
+                var response = PersonMapper.ToResponse(person);
                 return ApiResponse<PersonResponse>.SuccessResult(response, SuccessMessages.PersonCreated);
             }
             catch (InvalidOperationException ex) when (ex.Message.StartsWith(ErrorMessages.UserCreationError.Replace("{0}", "")))
@@ -134,41 +135,6 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     ErrorCode.ValidationFailed,
                     ex.Message);
             }
-        }
-
-        private static PersonResponse MapToResponse(PersonWithDisability person)
-        {
-            return new PersonResponse
-            {
-                Id = person.Id,
-                UserId = person.UserId,
-                FirstName = person.FirstName,
-                LastName = person.LastName,
-                DocumentNumber = person.DocumentNumber,
-                BirthDate = person.BirthDate,
-                PhotoUrl = person.PhotoUrl,
-                AttentionLevel = person.AttentionLevel,
-                CommunicationLevel = person.CommunicationLevel,
-                UsesAAC = person.UsesAAC,
-                UsesSignLanguage = person.UsesSignLanguage,
-                MotorSkillLevel = person.MotorSkillLevel,
-                InterestsAndMotivators = person.InterestsAndMotivators,
-                LearningStyle = person.LearningStyle,
-                AvailableResources = person.AvailableResources,
-                AdditionalTherapies = person.AdditionalTherapies,
-                RequiresLargeFont = person.RequiresLargeFont,
-                RequiresHighContrast = person.RequiresHighContrast,
-                VisualNoiseSensitivity = person.VisualNoiseSensitivity,
-                SoundSensitivity = person.SoundSensitivity,
-                AutonomyLevelId = person.AutonomyLevelId,
-                LoginMethodId = person.LoginMethodId,
-                HasPinConfigured = !string.IsNullOrEmpty(person.PinCodeHash),
-                SupervisorUserId = person.SupervisorUserId,
-                AvatarColor = person.AvatarColor,
-                DisabilityTypeId = person.DisabilityTypeId,
-                IsActive = true,
-                CreatedAt = person.CreatedAt
-            };
         }
 
         private static string GenerateUsername(string firstName, string lastName)
