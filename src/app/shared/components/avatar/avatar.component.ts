@@ -1,6 +1,4 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
 /**
  * Componente de avatar para login visual con seleccion de perfil.
  * Muestra inicial del nombre con color de fondo configurable.
@@ -9,7 +7,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-avatar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <button
       type="button"

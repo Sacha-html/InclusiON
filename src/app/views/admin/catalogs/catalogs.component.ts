@@ -1,5 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService, CatalogAdminService, ToastService } from '@services';
@@ -39,7 +39,7 @@ interface CatalogConfig {
   selector: 'app-catalogs',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule,
+    ReactiveFormsModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     TableDirective, ButtonDirective, BadgeComponent, SpinnerComponent,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
@@ -51,6 +51,7 @@ interface CatalogConfig {
 })
 export class CatalogsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly catalogsService = inject(CatalogsService);
   private readonly adminService = inject(CatalogAdminService);
   private readonly toastService = inject(ToastService);
@@ -191,7 +192,7 @@ export class CatalogsComponent implements OnInit {
       next: (areas) => this.skillAreasCache = areas,
     });
 
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const type = params.get('type') as CatalogType;
       if (type) this.catalogType = type;
       this.loadData();
@@ -207,7 +208,7 @@ export class CatalogsComponent implements OnInit {
   }
 
   private buildForm(values?: any): void {
-    const group: Record<string, any> = {};
+    const group: any = {};
     for (const field of this.config.fields) {
       const value = values?.[field.key] ?? field.default ?? (field.type === 'checkbox' ? false : '');
       group[field.key] = field.required ? [value, Validators.required] : [value];

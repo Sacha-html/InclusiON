@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -35,7 +35,7 @@ import {
   selector: 'app-invitation-list',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     ReactiveFormsModule,
     CardComponent,
     CardBodyComponent,

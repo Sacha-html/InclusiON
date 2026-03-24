@@ -1,5 +1,4 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProfessionalsService, AssignmentsService } from '@services';
 import { ProfessionalPersonResponse } from '@models';
@@ -12,7 +11,6 @@ import {
   selector: 'app-classroom',
   standalone: true,
   imports: [
-    CommonModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     ColComponent, RowComponent, SpinnerComponent, BadgeComponent,
   ],

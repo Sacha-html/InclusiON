@@ -1,5 +1,4 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -30,7 +29,6 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-register-by-invitation',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     ContainerComponent,
     RowComponent,
