@@ -1,21 +1,19 @@
-# Proceso 09 — Gestión de Catálogos
+# Proceso 03 — Gestión de Catálogos
 
-**Origen:** Implementación del sistema (no definido en proyecto final original)
+**Área:** Configuración del Sistema
 
 ## Descripción
-
-Administración de las tablas de referencia del sistema que alimentan los formularios y configuraciones. Los catálogos son gestionados exclusivamente por el admin global y consultados por todos los roles autenticados. Todo el proceso está completamente implementado.
+Proceso de administración de las tablas de referencia del sistema que alimentan formularios, dropdowns y configuraciones. Los catálogos son gestionados exclusivamente por el admin global y consultados por todos los roles autenticados.
 
 ## Participantes
-
 - **Admin Global** — CRUD completo de catálogos (protegido por policy `global-admin`)
 - **Admin Institucional** — Solo lectura
 - **Profesional** — Solo lectura (usa los catálogos en formularios)
 
 ## Catálogos del sistema ✅ Implementado
 
-| Catálogo | Endpoint lectura | Endpoint escritura | Uso |
-|----------|-----------------|-------------------|-----|
+| Catálogo | Endpoint lectura | Endpoint escritura | Uso en el sistema |
+|----------|-----------------|-------------------|-------------------|
 | Tipos de Discapacidad | `GET /api/catalogs/disability-types` | `POST/PUT /api/admin/catalogs/disability-types` | Alta de persona |
 | Niveles de Autonomía | `GET /api/catalogs/autonomy-levels` | `POST/PUT /api/admin/catalogs/autonomy-levels` | Configuración de login |
 | Categorías de Actividad | `GET /api/catalogs/activity-categories` | `POST/PUT /api/admin/catalogs/activity-categories` | Clasificación de actividades |
@@ -25,28 +23,24 @@ Administración de las tablas de referencia del sistema que alimentan los formul
 
 ## Pasos del proceso
 
-### 1. Consulta de catálogos (todos los roles) ✅ Implementado
-Los catálogos se consultan desde `CatalogsController`. Cualquier usuario autenticado puede leerlos.
+### 1. Consulta de Catálogos ✅ Implementado
+Cualquier usuario autenticado consulta los catálogos para llenar dropdowns.
 - **Controlador:** `CatalogsController`
 - **6 endpoints GET** listados en la tabla anterior
 
-### 2. Alta de item en catálogo (solo admin global) ✅ Implementado
-El admin global crea nuevos items desde el panel admin (`/admin/catalogs/{tipo}`).
+### 2. Alta de Item ✅ Implementado
+El admin global crea nuevos items desde el panel admin.
 - **Controlador:** `CatalogAdminController`
-- **Protección:** `[Authorize(Policy = "global-admin")]`
-- Se valida nombre único por tipo de catálogo.
+- **Endpoint:** `POST /api/admin/catalogs/{tipo}`
+- **Validación:** Nombre único por tipo de catálogo
+- **Frontend:** `/admin/catalogs/{tipo}` (modal de creación)
 
-### 3. Edición de item en catálogo (solo admin global) ✅ Implementado
+### 3. Edición de Item ✅ Implementado
 El admin global edita items existentes. Se valida nombre único.
 - **Endpoint:** `PUT /api/admin/catalogs/{tipo}/{id}`
+- **Frontend:** `/admin/catalogs/{tipo}` (modal de edición)
 
-### 4. Uso en formularios ✅ Implementado
-Los catálogos alimentan dropdowns en:
-- Alta/edición de persona: tipo de discapacidad, nivel de autonomía, método de login
-- Perfil de habilidades: áreas de habilidad
-- ⏳ Pendiente: Creación de actividades usará categorías y tipos de template (BE-06)
-
-## Estructura del sidebar admin
+## Frontend — Sidebar Admin
 
 ```
 Catálogos ▼
@@ -64,20 +58,7 @@ Catálogos ▼
 flowchart TD
     AG[Admin Global] -->|Accede a| SIDEBAR[Sidebar: Catálogos]
     SIDEBAR --> TIPO{Tipo de catálogo}
-
-    TIPO --> DT[Tipos de Discapacidad]
-    TIPO --> AL[Niveles de Autonomía]
-    TIPO --> AC[Categorías de Actividad]
-    TIPO --> SA[Áreas de Habilidad]
-    TIPO --> TT[Tipos de Template]
-    TIPO --> LM[Métodos de Login]
-
-    DT --> LIST[DataTable: lista de items]
-    AL --> LIST
-    AC --> LIST
-    SA --> LIST
-    TT --> LIST
-    LM --> LIST
+    TIPO --> LIST[DataTable: lista de items]
 
     LIST -->|Botón Nuevo| MODAL_NEW[Modal: crear item]
     LIST -->|Botón Editar| MODAL_EDIT[Modal: editar item]
@@ -87,18 +68,17 @@ flowchart TD
 
     API -->|Valida nombre único| CHECK{¿Duplicado?}
     CHECK -->|No| SAVE[Guardar]
-    CHECK -->|Sí| ERR[Error 409: nombre duplicado]
-
-    SAVE --> LIST
-
-    subgraph Protección
-        POLICY[Policy: global-admin]
-        POLICY -->|Bloquea| AI[Admin Institucional — solo lectura]
-        POLICY -->|Permite| AG
-    end
+    CHECK -->|Sí| ERR[Error 409]
 
     subgraph Lectura — todos los roles
         ANY[Usuario autenticado] -->|GET /api/catalogs/tipo| READ[CatalogsController]
-        READ -->|Devuelve| ITEMS[Lista de items]
     end
 ```
+
+## Estado resumen
+
+| Paso | Estado |
+|------|--------|
+| Consulta de catálogos | ✅ Implementado |
+| Alta de item | ✅ Implementado |
+| Edición de item | ✅ Implementado |

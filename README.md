@@ -24,7 +24,65 @@ Plataforma web de inclusión educativa para personas con discapacidad. Permite a
 | [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) | Especificación del Motor de Dificultad Adaptativa | Todo el equipo |
 | [Features/integracion-semantic-search.md](./Features/integracion-semantic-search.md) | Plan de integración de búsqueda semántica ONNX | Backend devs |
 | [ARQUITECTURA.md](./ARQUITECTURA.md) | Visión general de la arquitectura y decisiones técnicas | Todo el equipo |
-| [Process/](./Process/) | Documentación de procesos del sistema con diagramas Mermaid | Todo el equipo |
+| [Process/](./Process/) | Procesos del sistema de información | Todo el equipo |
+| [References/](./References/) | Documentación de capacidades transversales (accesibilidad, autenticación) | Todo el equipo |
+
+---
+
+## Procesos del Sistema de Información
+
+**[00 — Mapa Global de Procesos](./Process/00-mapa-global-procesos.md)** — Visión general, fases del DOCX, relación entre procesos y estado por fase.
+
+### Configuración del Sistema
+| # | Proceso | Estado |
+|---|---------|--------|
+| 01 | [Gestión de Instituciones Educativas](./Process/01-gestion-instituciones.md) | ✅ Implementado |
+| 02 | [Gestión de Roles y Permisos](./Process/02-gestion-roles-permisos.md) | ✅ Implementado |
+| 03 | [Gestión de Catálogos](./Process/03-gestion-catalogos.md) | ✅ Implementado |
+
+### Gestión de Usuarios
+| # | Proceso | Estado |
+|---|---------|--------|
+| 04 | [Gestión de Profesionales](./Process/04-gestion-profesionales.md) | ✅ Implementado |
+| 05 | [Gestión de Personas con Discapacidad](./Process/05-gestion-personas.md) | ✅ Implementado |
+| 06 | [Gestión de Familiares](./Process/06-gestion-familiares.md) | ✅ Implementado |
+| 07 | [Gestión de Invitaciones](./Process/07-gestion-invitaciones.md) | ✅ Implementado |
+
+### Asignaciones y Vinculaciones
+| # | Proceso | Estado |
+|---|---------|--------|
+| 08 | [Asignación de Profesionales](./Process/08-asignacion-profesionales.md) | ✅ Implementado |
+
+### Evaluación y Planificación
+| # | Proceso | Estado |
+|---|---------|--------|
+| 09 | [Evaluación y Diagnóstico](./Process/09-evaluacion-diagnostico.md) | ⏳ Parcial |
+| 10 | [Gestión de Actividades](./Process/10-gestion-actividades.md) | ⏳ Pendiente |
+| 11 | [Gestión del Plan de Trabajo (Roadmap)](./Process/11-gestion-plan-trabajo.md) | ⏳ Pendiente |
+
+### Ejecución
+| # | Proceso | Estado |
+|---|---------|--------|
+| 12 | [Resolución de Actividades](./Process/12-resolucion-actividades.md) | ⏳ Pendiente |
+| 13 | [Dificultad Adaptativa (MDA)](./Process/13-dificultad-adaptativa.md) | ⏳ Pendiente |
+
+### Monitoreo y Reportes
+| # | Proceso | Estado |
+|---|---------|--------|
+| 14 | [Seguimiento de Avances](./Process/14-seguimiento-avances.md) | ⏳ Parcial |
+| 15 | [Generación de Informes](./Process/15-generacion-informes.md) | ⏳ Pendiente |
+
+### Comunicación
+| # | Proceso | Estado |
+|---|---------|--------|
+| 16 | [Comunicación entre Actores](./Process/16-comunicacion-actores.md) | ⏳ Parcial |
+
+### Referencias Transversales
+```
+References/
+  REF-accesibilidad.md            Sistema de Accesibilidad (7 perfiles × 2 modos)
+  REF-autenticacion.md            Autenticación multi-método y JWT
+```
 
 ---
 
