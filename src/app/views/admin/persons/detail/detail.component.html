@@ -1,0 +1,253 @@
+@if (person) {
+  <c-card>
+    <c-card-header>
+      <strong>Detalle de Persona con Discapacidad</strong>
+      <c-badge class="ms-2" [color]="person.isActive ? 'success' : 'danger'"
+            role="status"
+            [attr.aria-label]="'Estado: ' + (person.isActive ? 'Activo' : 'Inactivo')">
+        {{ person.isActive ? 'Activo' : 'Inactivo' }}
+      </c-badge>
+    </c-card-header>
+    <c-card-body>
+
+      <!-- Datos personales -->
+      <h5 class="mb-3">Datos personales</h5>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-firstName">Nombre</label>
+          <input cFormControl id="detail-firstName" [value]="person.firstName" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-lastName">Apellido</label>
+          <input cFormControl id="detail-lastName" [value]="person.lastName" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-documentNumber">Documento</label>
+          <input cFormControl id="detail-documentNumber" [value]="person.documentNumber ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-birthDate">Fecha de nacimiento</label>
+          <input cFormControl id="detail-birthDate" [value]="formatDate(person.birthDate)" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-age">Edad</label>
+          <input cFormControl id="detail-age" [value]="person.age + ' años'" readonly />
+        </c-col>
+      </c-row>
+
+      <!-- Discapacidad -->
+      <h5 class="mt-4 mb-3">Discapacidad</h5>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-disabilityType">Tipo de discapacidad</label>
+          <input cFormControl id="detail-disabilityType" [value]="person.disabilityTypeName ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <!-- Perfil funcional -->
+      <h5 class="mt-4 mb-3">Perfil funcional</h5>
+
+      <c-row class="mb-3">
+        <c-col sm="4">
+          <label cLabel for="detail-attentionLevel">Atención</label>
+          <input cFormControl id="detail-attentionLevel" [value]="formatLevel(person.attentionLevel)" readonly />
+        </c-col>
+        <c-col sm="4">
+          <label cLabel for="detail-communicationLevel">Comunicación</label>
+          <input cFormControl id="detail-communicationLevel" [value]="formatLevel(person.communicationLevel)" readonly />
+        </c-col>
+        <c-col sm="4">
+          <label cLabel for="detail-motorSkillLevel">Motricidad</label>
+          <input cFormControl id="detail-motorSkillLevel" [value]="formatLevel(person.motorSkillLevel)" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-usesAAC">Usa CAA</label>
+          <input cFormControl id="detail-usesAAC" [value]="formatBoolean(person.usesAAC)" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-usesSignLanguage">Usa lengua de señas</label>
+          <input cFormControl id="detail-usesSignLanguage" [value]="formatBoolean(person.usesSignLanguage)" readonly />
+        </c-col>
+      </c-row>
+
+      <!-- Preferencias -->
+      <h5 class="mt-4 mb-3">Preferencias</h5>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-interests">Intereses y motivadores</label>
+          <textarea cFormControl id="detail-interests" [value]="person.interestsAndMotivators ?? 'Sin especificar'" readonly rows="3"></textarea>
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-learningStyle">Estilo de aprendizaje</label>
+          <textarea cFormControl id="detail-learningStyle" [value]="person.learningStyle ?? 'Sin especificar'" readonly rows="3"></textarea>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-resources">Recursos disponibles</label>
+          <textarea cFormControl id="detail-resources" [value]="person.availableResources ?? 'Sin especificar'" readonly rows="3"></textarea>
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-therapies">Terapias adicionales</label>
+          <textarea cFormControl id="detail-therapies" [value]="person.additionalTherapies ?? 'Sin especificar'" readonly rows="3"></textarea>
+        </c-col>
+      </c-row>
+
+      <!-- Accesibilidad -->
+      <h5 class="mt-4 mb-3">Accesibilidad</h5>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-largeFont">Requiere fuente grande</label>
+          <input cFormControl id="detail-largeFont" [value]="formatBoolean(person.requiresLargeFont)" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-highContrast">Requiere alto contraste</label>
+          <input cFormControl id="detail-highContrast" [value]="formatBoolean(person.requiresHighContrast)" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-visualNoise">Sensibilidad al ruido visual</label>
+          <input cFormControl id="detail-visualNoise" [value]="formatBoolean(person.visualNoiseSensitivity)" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-sound">Sensibilidad al sonido</label>
+          <input cFormControl id="detail-sound" [value]="formatBoolean(person.soundSensitivity)" readonly />
+        </c-col>
+      </c-row>
+
+      <!-- Configuración de acceso -->
+      <h5 class="mt-4 mb-3">Configuración de acceso</h5>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-autonomyLevel">Nivel de autonomía</label>
+          <input cFormControl id="detail-autonomyLevel" [value]="person.autonomyLevelName ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-loginMethod">Método de login</label>
+          <input cFormControl id="detail-loginMethod" [value]="person.loginMethodName ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-pinConfigured">PIN configurado</label>
+          <input cFormControl id="detail-pinConfigured" [value]="formatBoolean(person.hasPinConfigured)" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-avatarColor">Color de avatar</label>
+          <div class="d-flex align-items-center gap-2">
+            <span class="avatar-color-preview" [style.background-color]="person.avatarColor ?? '#ccc'"></span>
+            <input cFormControl id="detail-avatarColor" [value]="person.avatarColor ?? 'Sin especificar'" readonly />
+          </div>
+        </c-col>
+      </c-row>
+
+      <!-- Perfil de Habilidades -->
+      <h5 class="mt-4 mb-3">Perfil de Habilidades</h5>
+
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        @for (sp of skillProfile; track sp.skillAreaId) {
+          <span class="skill-chip d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
+                [style.background-color]="sp.color ?? '#6c757d'"
+                [style.color]="'#fff'">
+            @if (sp.icon) {
+              <span class="material-icons skill-chip-icon">{{ sp.icon }}</span>
+            }
+            <span>{{ sp.skillAreaName }}</span>
+            @if (person.isActive) {
+              <button type="button"
+                      class="btn-close btn-close-white ms-1 skill-chip-close"
+                      (click)="deactivateSkillArea(sp.skillAreaId)"
+                      [attr.aria-label]="'Quitar ' + sp.skillAreaName">
+              </button>
+            }
+          </span>
+        }
+        @if (skillProfile.length === 0) {
+          <span class="text-body-secondary">Sin areas de habilidad asignadas.</span>
+        }
+      </div>
+
+      @if (person.isActive) {
+        <button cButton color="primary" size="sm" (click)="openAddSkillAreaModal()"
+                aria-label="Agregar area de habilidad">
+          Agregar Area
+        </button>
+      }
+
+      <!-- Auditoría -->
+      <h5 class="mt-4 mb-3">Auditoría</h5>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="detail-createdAt">Fecha de alta</label>
+          <input cFormControl id="detail-createdAt" [value]="formatDateTime(person.createdAt)" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="detail-updatedAt">Última actualización</label>
+          <input cFormControl id="detail-updatedAt" [value]="person.updatedAt ? formatDateTime(person.updatedAt) : 'Sin actualizar'" readonly />
+        </c-col>
+      </c-row>
+
+      <div class="mt-3 d-flex gap-2">
+        <button cButton color="secondary" (click)="goBack()"
+                aria-label="Volver al listado de personas">
+          Volver
+        </button>
+        @if (person.isActive) {
+          <button cButton color="primary" (click)="goToEdit()"
+                  [attr.aria-label]="'Editar persona ' + person.fullName">
+            Editar
+          </button>
+        }
+      </div>
+    </c-card-body>
+  </c-card>
+}
+
+<!-- Modal Agregar Area de Habilidad -->
+<c-modal [visible]="showAddSkillAreaModal" (visibleChange)="!$event && closeAddSkillAreaModal()"
+         aria-labelledby="add-skill-area-modal-title">
+  <c-modal-header>
+    <strong id="add-skill-area-modal-title">Agregar Area de Habilidad</strong>
+  </c-modal-header>
+  <c-modal-body>
+    @if (skillAreaError) {
+      <div class="alert alert-danger">{{ skillAreaError }}</div>
+    }
+    <div class="mb-3">
+      <label cLabel for="skill-area-select">Area de habilidad</label>
+      <select cSelect id="skill-area-select" [(ngModel)]="selectedSkillAreaId"
+              aria-label="Seleccionar area de habilidad">
+        <option [ngValue]="null">-- Seleccionar --</option>
+        @for (area of allSkillAreas; track area.id) {
+          <option [ngValue]="area.id">{{ area.name }}</option>
+        }
+      </select>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeAddSkillAreaModal()">Cancelar</button>
+    <button cButton color="primary" (click)="confirmAddSkillArea()"
+            [disabled]="!selectedSkillAreaId || skillAreaLoading">
+      {{ skillAreaLoading ? 'Guardando...' : 'Agregar' }}
+    </button>
+  </c-modal-footer>
+</c-modal>

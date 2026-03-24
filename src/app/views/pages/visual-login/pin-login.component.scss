@@ -244,37 +244,37 @@
 [data-profile="high-contrast"] {
   .pin-key {
     border-width: 4px;
-    border-color: #000000;
-    &:hover:not(:disabled) { background-color: #FFFF00; color: #000000; border-color: #000000; }
-    &:active:not(:disabled) { background-color: #000000; color: #FFFFFF; }
-    &.clear { border-color: #000000; color: #CC0000; }
-    &.submit { border-color: #000000; color: #006600; }
+    border-color: var(--a11y-border, #000000);
+    &:hover:not(:disabled) { background-color: var(--a11y-primary, #FFFF00); color: var(--a11y-bg, #000000); border-color: var(--a11y-border, #000000); }
+    &:active:not(:disabled) { background-color: var(--a11y-bg, #000000); color: var(--a11y-text, #FFFFFF); }
+    &.clear { border-color: var(--a11y-border, #000000); color: var(--a11y-danger, #CC0000); }
+    &.submit { border-color: var(--a11y-border, #000000); color: var(--a11y-success, #006600); }
   }
   .pin-dot {
     border-width: 4px;
-    border-color: #000000;
-    &.filled { background-color: #000000; border-color: #000000; }
+    border-color: var(--a11y-border, #000000);
+    &.filled { background-color: var(--a11y-bg, #000000); border-color: var(--a11y-border, #000000); }
   }
   .toggle-input-btn {
     border-width: 3px;
-    border-color: #000000;
-    &:hover { background-color: #FFFF00; color: #000000; }
+    border-color: var(--a11y-border, #000000);
+    &:hover { background-color: var(--a11y-primary, #FFFF00); color: var(--a11y-bg, #000000); }
   }
-  .keyboard-input-wrapper { border-width: 3px; border-color: #000000; }
-  .pin-text-input { border-width: 4px !important; border-color: #000000 !important; }
+  .keyboard-input-wrapper { border-width: 3px; border-color: var(--a11y-border, #000000); }
+  .pin-text-input { border-width: 4px !important; border-color: var(--a11y-border, #000000) !important; }
 }
 
 // Dark + high-contrast
 [data-color-mode="dark"][data-profile="high-contrast"] {
   .pin-key {
-    border-color: #FFFFFF;
-    color: #FFFFFF;
-    &:hover:not(:disabled) { background-color: #FFFF00; color: #000000; border-color: #FFFF00; }
-    &.clear { color: #FF6666; border-color: #FFFFFF; }
-    &.submit { color: #66FF66; border-color: #FFFFFF; }
+    border-color: var(--a11y-text, #FFFFFF);
+    color: var(--a11y-text, #FFFFFF);
+    &:hover:not(:disabled) { background-color: var(--a11y-primary, #FFFF00); color: var(--a11y-bg, #000000); border-color: var(--a11y-primary, #FFFF00); }
+    &.clear { color: var(--a11y-danger, #FF6666); border-color: var(--a11y-text, #FFFFFF); }
+    &.submit { color: var(--a11y-success, #66FF66); border-color: var(--a11y-text, #FFFFFF); }
   }
   .pin-dot {
-    border-color: #FFFFFF;
-    &.filled { background-color: #FFFF00; border-color: #FFFF00; }
+    border-color: var(--a11y-text, #FFFFFF);
+    &.filled { background-color: var(--a11y-primary, #FFFF00); border-color: var(--a11y-primary, #FFFF00); }
   }
 }

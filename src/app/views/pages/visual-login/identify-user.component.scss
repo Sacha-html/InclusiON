@@ -127,19 +127,19 @@
 // High contrast mode
 @media (prefers-contrast: more) {
   .identify-card {
-    border: 3px solid #000 !important;
+    border: 3px solid var(--a11y-border, #000) !important;
   }
 
   .user-type-badge {
-    background: #000;
-    color: #fff;
+    background: var(--a11y-bg, #000);
+    color: var(--a11y-text, #fff);
   }
 
   .form-control-lg {
-    border: 2px solid #000 !important;
+    border: 2px solid var(--a11y-border, #000) !important;
 
     &:focus {
-      outline: 3px solid #000;
+      outline: 3px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 2px;
     }
   }

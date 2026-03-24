@@ -158,8 +158,8 @@ export class LoginMethodSelectorComponent implements OnInit {
         return;
       }
 
-      if (!/^\d{4,6}$/.test(pin)) {
-        this.errorMessage = 'El PIN debe tener entre 4 y 6 digitos numericos';
+      if (!/^\d{4}$/.test(pin)) {
+        this.errorMessage = 'El PIN debe tener 4 dígitos numéricos';
         return;
       }
     }

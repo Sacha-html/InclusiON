@@ -22,25 +22,25 @@ export class AacNavComponent {
       path: '/app',
       label: 'Inicio',
       icon: 'cilHome',
-      color: '#4CAF50'
+      color: 'var(--a11y-nav-home, #4CAF50)'
     },
     {
       path: '/app/activities',
       label: 'Actividades',
       icon: 'cilTask',
-      color: '#2196F3'
+      color: 'var(--a11y-nav-activities, #2196F3)'
     },
     {
       path: '/app/calendar',
       label: 'Calendario',
       icon: 'cilCalendar',
-      color: '#FF9800'
+      color: 'var(--a11y-nav-calendar, #FF9800)'
     },
     {
       path: '/app/talk',
       label: 'Hablar',
       icon: 'cilChatBubble',
-      color: '#9C27B0'
+      color: 'var(--a11y-nav-talk, #9C27B0)'
     }
   ];
 }

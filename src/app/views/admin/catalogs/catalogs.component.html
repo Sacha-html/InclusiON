@@ -1,0 +1,100 @@
+<c-card class="mb-4">
+  <c-card-header class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{{ config.title }}</h5>
+    @if (config.canCreate) {
+      <button cButton color="primary" size="sm" (click)="openNew()">Nuevo</button>
+    }
+  </c-card-header>
+  <c-card-body>
+
+    @if (isLoading) {
+      <div class="text-center p-4"><c-spinner color="primary"></c-spinner></div>
+    }
+
+    @if (!isLoading) {
+      <table cTable hover responsive>
+        <thead>
+          <tr>
+            @for (col of config.columns; track col.key) {
+              <th>{{ col.label }}</th>
+            }
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track item.id) {
+            <tr>
+              @for (col of config.columns; track col.key) {
+                <td>
+                  @if (col.badge) {
+                    <c-badge [color]="col.badge(item).color">{{ col.badge(item).text }}</c-badge>
+                  } @else if (col.key === 'color' && item[col.key]) {
+                    <span class="d-inline-block rounded" [style.background-color]="item[col.key]" style="width: 20px; height: 20px; vertical-align: middle;"></span>
+                    <small class="ms-1">{{ item[col.key] }}</small>
+                  } @else if (col.key === 'code') {
+                    <code>{{ item[col.key] }}</code>
+                  } @else {
+                    {{ getCellValue(item, col) }}
+                  }
+                </td>
+              }
+              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+            </tr>
+          }
+          @if (items.length === 0) {
+            <tr><td [attr.colspan]="config.columns.length + 1" class="text-center text-body-secondary">Sin registros</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </c-card-body>
+</c-card>
+
+<!-- Modal -->
+<c-modal [visible]="showModal" (visibleChange)="showModal = $event" alignment="center">
+  <c-modal-header><h5 cModalTitle>{{ modalTitle }}</h5></c-modal-header>
+  <c-modal-body>
+    @if (form) {
+      <form [formGroup]="form">
+        @for (field of visibleFields; track field.key) {
+          @if (field.type === 'checkbox') {
+            <div class="mb-3">
+              <c-form-check>
+                <input cFormCheckInput type="checkbox" [formControlName]="field.key" />
+                <label cFormCheckLabel>{{ field.label }}</label>
+              </c-form-check>
+            </div>
+          } @else if (field.type === 'select') {
+            <div class="mb-3">
+              <label cLabel>{{ field.label }}</label>
+              <select cSelect [formControlName]="field.key">
+                <option [ngValue]="null">-- Ninguna --</option>
+                @for (opt of field.options!(); track opt.id) {
+                  <option [ngValue]="opt.id">{{ opt.name }}</option>
+                }
+              </select>
+            </div>
+          } @else if (field.type === 'color') {
+            <div class="mb-3">
+              <label cLabel>{{ field.label }}</label>
+              <input type="color" class="form-control form-control-color" [formControlName]="field.key" />
+            </div>
+          } @else {
+            <div class="mb-3">
+              <label cLabel>{{ field.label }}@if (field.required) { *}</label>
+              <input cFormControl [type]="field.type" [formControlName]="field.key" />
+            </div>
+          }
+        }
+      </form>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
+    <button cButton color="primary" (click)="save()" [disabled]="isSaving || form?.invalid">
+      @if (isSaving) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      Guardar
+    </button>
+  </c-modal-footer>
+</c-modal>

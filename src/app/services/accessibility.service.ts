@@ -316,11 +316,50 @@ export class AccessibilityService {
   }
 
   /**
+   * Aplica las preferencias de accesibilidad del perfil del usuario (del backend).
+   * Mapea los flags del perfil a configuraciones del panel.
+   * Solo ajusta si el usuario no tiene ya configuraciones personalizadas guardadas.
+   */
+  applyUserPreferences(prefs: {
+    requiresLargeFont?: boolean;
+    requiresHighContrast?: boolean;
+    visualNoiseSensitivity?: boolean;
+    soundSensitivity?: boolean;
+  }): void {
+    const hasCustomSettings = !!this.storage.getAccessibilitySettings();
+    if (hasCustomSettings) return;
+
+    const overrides: Partial<AccessibilitySettings> = {};
+
+    if (prefs.requiresHighContrast) {
+      overrides.profile = 'high-contrast';
+    }
+
+    if (prefs.requiresLargeFont) {
+      overrides.fontSize = 'large';
+    }
+
+    if (prefs.visualNoiseSensitivity) {
+      overrides.reducedMotion = true;
+      overrides.readingMode = false;
+    }
+
+    if (prefs.soundSensitivity) {
+      overrides.textToSpeechEnabled = false;
+    }
+
+    if (Object.keys(overrides).length > 0) {
+      this.settings.update(current => ({ ...current, ...overrides }));
+      this.saveSettings();
+    }
+  }
+
+  /**
    * Restablece todas las configuraciones a los valores por defecto
    */
   resetSettings(): void {
     this.settings.set({ ...DEFAULT_SETTINGS });
-    this.saveSettings();
+    this.storage.setAccessibilitySettings(null);
     this.announce('Configuraciones de accesibilidad restablecidas a valores por defecto');
   }
 
@@ -571,7 +610,6 @@ export class AccessibilityService {
     };
 
     utterance.onerror = (event) => {
-      console.warn('TTS Error:', event.error);
       this.isSpeaking.set(false);
       this.announce('Error al leer el texto');
     };

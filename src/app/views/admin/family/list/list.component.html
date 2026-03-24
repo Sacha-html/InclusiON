@@ -1,0 +1,27 @@
+<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadFamily()"></app-institution-filter>
+
+<app-data-table
+  title="Familiares"
+  [columns]="cols"
+  [items]="families"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [headerButtons]="canCreate ? [{action: 'new', label: 'Nuevo Familiar'}] : []"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
+</app-data-table>
+
+<app-confirm-modal
+  [visible]="showConfirmModal"
+  title="Confirmar desactivacion"
+  messagePrefix="¿Esta seguro de que desea desactivar al familiar "
+  [itemName]="itemToDeactivate?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Esta accion deshabilitara su acceso al sistema."
+  confirmLabel="Desactivar"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()">
+</app-confirm-modal>

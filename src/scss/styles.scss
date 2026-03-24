@@ -48,7 +48,7 @@
 
 // Focus visible mejorado
 *:focus-visible {
-  outline: 3px solid rgba(#1565C0, 0.5) !important;
+  outline: 3px solid var(--a11y-focus-color) !important;
   outline-offset: 2px;
 }
 
@@ -57,8 +57,8 @@
   position: absolute;
   top: -40px;
   left: 0;
-  background: #1565C0;
-  color: #FFFFFF;
+  background: var(--a11y-primary);
+  color: var(--a11y-primary-text);
   padding: 8px 16px;
   z-index: 10000;
   text-decoration: none;
@@ -72,39 +72,39 @@
 // Mejora de contraste en inputs
 .form-control,
 .form-select {
-  border-color: #BDBDBD;
+  border-color: var(--a11y-border);
 
   &:focus {
-    border-color: #1565C0;
-    box-shadow: 0 0 0 3px rgba(#1565C0, 0.5);
+    border-color: var(--a11y-primary);
+    box-shadow: 0 0 0 3px var(--a11y-focus-color);
   }
 
   &::placeholder {
-    color: #757575;
+    color: var(--a11y-text-muted);
   }
 }
 
 // Botones con contraste accesible
 .btn-primary {
-  background-color: #1565C0;
-  border-color: #1565C0;
-  color: #FFFFFF;
+  background-color: var(--a11y-primary);
+  border-color: var(--a11y-primary);
+  color: var(--a11y-primary-text);
 
   &:hover,
   &:focus {
-    background-color: #0D47A1;
-    border-color: #0D47A1;
+    background-color: var(--a11y-primary-dark);
+    border-color: var(--a11y-primary-dark);
   }
 }
 
 // Links accesibles (no solo color)
 a {
-  color: #1565C0;
+  color: var(--a11y-primary);
   text-decoration: underline;
 
   &:hover,
   &:focus {
-    color: #0D47A1;
+    color: var(--a11y-primary-dark);
     text-decoration: none;
   }
 }

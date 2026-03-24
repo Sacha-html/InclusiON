@@ -33,10 +33,11 @@
 .role-card {
   cursor: pointer;
   transition: all 0.3s ease;
+  border: 2px solid var(--a11y-border, #E0E0E0);
   border-radius: 1.5rem !important;
   overflow: hidden;
   min-height: 320px;
-  background-color: #fff;
+  background-color: var(--a11y-surface, #fff);
 
   &:hover,
   &:focus {
@@ -74,7 +75,7 @@
 
 .role-title {
   font-size: 1.75rem;
-  color: #333;
+  color: var(--a11y-text, #333);
 }
 
 .role-description {
@@ -106,11 +107,11 @@
 // High contrast mode
 @media (prefers-contrast: more) {
   .role-card {
-    border: 3px solid #000 !important;
+    border: 3px solid var(--a11y-border, #000) !important;
 
     &:hover,
     &:focus {
-      outline: 4px solid #000;
+      outline: 4px solid var(--a11y-border, #000);
     }
   }
 

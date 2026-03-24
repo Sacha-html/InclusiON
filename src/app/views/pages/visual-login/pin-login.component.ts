@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PinLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
@@ -11,7 +10,6 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-pin-login',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonDirective,
     IconDirective,
@@ -84,7 +82,7 @@ export class PinLoginComponent extends BaseVisualLoginComponent {
     this.authService.loginWithPin(request).subscribe({
       next: (response) => {
         if (response.success && response.data?.success) {
-          this.navigateToDashboard();
+          this.navigateToDashboard(response.data.mustChangePassword);
         } else {
           this.handleLoginResponseError(
             response.data,

@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssistedLoginRequest, ErrorCode } from '@models';
-import { BaseVisualLoginComponent } from './base-visual-login.component';
+import { BaseVisualLoginComponent, LoginErrorResponse } from './base-visual-login.component';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 import {
   ButtonDirective,
@@ -17,7 +16,6 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-assisted-login',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonDirective,
     FormControlDirective,
@@ -56,7 +54,7 @@ export class AssistedLoginComponent extends BaseVisualLoginComponent {
     this.authService.loginAssisted(request).subscribe({
       next: (response) => {
         if (response.success && response.data?.success) {
-          this.navigateToDashboard();
+          this.navigateToDashboard(response.data.mustChangePassword);
         } else {
           this.handleAssistedLoginError(response.data);
         }
@@ -75,7 +73,7 @@ export class AssistedLoginComponent extends BaseVisualLoginComponent {
    * Maneja errores específicos del login asistido.
    * No usa lockout timer ya que el bloqueo es del supervisor.
    */
-  private handleAssistedLoginError(data: any): void {
+  private handleAssistedLoginError(data: LoginErrorResponse): void {
     this.supervisorPassword = '';
     this.isLoading = false;
 
