@@ -13,8 +13,10 @@ Proceso de alta, edición y desactivación de los representantes familiares en l
 ## Pasos del proceso
 
 ### 1. Alta de Familiar (vía Admin) ✅ Implementado
-El admin crea directamente al familiar con datos personales, vinculándolo a una persona con discapacidad.
+El admin crea al familiar con datos personales (nombre, apellido, email, documento, teléfono, relación). La vinculación con una persona con discapacidad se realiza como paso separado (ver Proceso 08 — Asignación de Profesionales).
 - **Endpoint:** `POST /api/family`
+- **Campos:** FirstName, LastName, Email, DocumentNumber (opcional), Phone (opcional), Relationship (opcional)
+- **Nota:** El request NO incluye PersonId; la vinculación persona-familiar se establece por separado
 - **Frontend:** `/admin/family` (formulario)
 
 ### 2. Alta de Familiar (vía Invitación) ✅ Implementado

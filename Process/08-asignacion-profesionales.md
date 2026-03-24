@@ -43,7 +43,7 @@ Se establece la relación persona-familiar por dos vías:
 El profesional configura qué áreas de habilidad se van a trabajar con la persona.
 - **Crear perfil:** `POST /api/persons/{id}/skill-profile`
 - **Leer perfil:** `GET /api/persons/{id}/skill-profile`
-- **Actualizar área:** `PUT /api/persons/{id}/skill-profile/{areaId}`
+- **Desactivar área:** `PUT /api/persons/{id}/skill-profile/{areaId}`
 
 ### 5. Desvinculación (soft-delete) ✅ Implementado
 Todas las relaciones soportan desactivación sin eliminar datos históricos.
