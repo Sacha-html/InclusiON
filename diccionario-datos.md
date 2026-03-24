@@ -129,6 +129,7 @@ Profesionales que trabajan con personas con discapacidad (docentes, terapeutas, 
 | Matrícula | Texto (50) | No | Número de matrícula profesional |
 | Fecha de nacimiento | Fecha | No | Fecha de nacimiento |
 | Dirección | Texto (255) | No | Domicilio |
+| Onboarding completado | Booleano | Sí | Si completó el flujo de onboarding (perfil + tour). Default: false |
 | Activo | Booleano | Sí | Estado lógico |
 
 ### Persona con Discapacidad
@@ -177,6 +178,7 @@ Familiares o tutores que acompañan el proceso de la persona con discapacidad.
 | DNI | Texto (20) | No | Documento de identidad (único) |
 | Teléfono | Texto (20) | No | Número de contacto |
 | Relación | Texto (50) | No | Madre, Padre, Tutor, Abuelo, etc. |
+| Onboarding completado | Booleano | Sí | Si el familiar completó la pantalla de bienvenida. Default: false |
 | Activo | Booleano | Sí | Estado lógico |
 
 ---
@@ -515,6 +517,51 @@ Rastro de auditoría para accesos a datos sensibles.
 
 ---
 
+## 12. Soporte y Ayuda
+
+### Entrada de FAQ
+Pregunta frecuente del centro de ayuda, gestionada por el administrador.
+
+| Atributo | Tipo | Obligatorio | Descripción |
+|----------|------|:-----------:|-------------|
+| Id | Entero | Sí | Identificador único |
+| Pregunta | Texto (500) | Sí | La pregunta frecuente |
+| Respuesta | Texto largo | Sí | La respuesta a la pregunta |
+| Categoría | Enumerado | Sí | Cuenta y Acceso, Actividades, Reportes, Comunicación, Accesibilidad, General |
+| Orden de visualización | Entero | Sí | Para ordenar dentro de la categoría |
+| Activo | Booleano | Sí | Estado lógico (soft-delete) |
+| Fecha de creación | Fecha/hora | Sí | Cuándo se creó |
+
+### Ticket de Soporte
+Reporte de problema o consulta creado por un usuario.
+
+| Atributo | Tipo | Obligatorio | Descripción |
+|----------|------|:-----------:|-------------|
+| Id | Entero | Sí | Identificador único |
+| Usuario creador | Referencia | Sí | Quién reportó el problema |
+| Asunto | Texto (200) | Sí | Título breve del problema |
+| Descripción | Texto largo | Sí | Detalle del problema |
+| Categoría | Enumerado | Sí | Bug, Consulta, Sugerencia |
+| Prioridad | Enumerado | Sí | Baja, Media, Alta |
+| Estado | Enumerado | Sí | Abierto, En Revisión, Respondido, Resuelto, Cerrado |
+| URL actual | Texto (500) | No | Sección de la app donde se reportó (captura automática) |
+| User Agent | Texto (500) | No | Navegador y SO del usuario (captura automática) |
+| Fecha de creación | Fecha/hora | Sí | Cuándo se creó |
+| Fecha de actualización | Fecha/hora | Sí | Última modificación |
+
+### Respuesta de Ticket
+Respuesta del administrador a un ticket de soporte.
+
+| Atributo | Tipo | Obligatorio | Descripción |
+|----------|------|:-----------:|-------------|
+| Id | Entero | Sí | Identificador único |
+| Ticket | Referencia | Sí | Ticket al que responde |
+| Usuario respondedor | Referencia | Sí | Admin que respondió |
+| Contenido | Texto largo | Sí | Texto de la respuesta |
+| Fecha de creación | Fecha/hora | Sí | Cuándo se respondió |
+
+---
+
 ## Resumen de Entidades
 
 | # | Entidad | Área | Relaciones principales |
@@ -550,3 +597,6 @@ Rastro de auditoría para accesos a datos sensibles.
 | 29 | Reporte de Progreso | Reportes | Persona, Profesional, Tipo |
 | 30 | Mensaje | Comunicación | Remitente, Destinatario, Persona |
 | 31 | Registro de Acceso | Auditoría | Usuario, Persona |
+| 32 | Entrada de FAQ | Soporte | — |
+| 33 | Ticket de Soporte | Soporte | Usuario creador |
+| 34 | Respuesta de Ticket | Soporte | Ticket, Usuario respondedor |
