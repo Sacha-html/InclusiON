@@ -24,7 +24,11 @@ builder.Host.UseSerilog((context, config) =>
                          outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
+    options.Filters.Add<InclusiON.Api.Filters.InstitutionAccessFilter>();
+});
 
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);

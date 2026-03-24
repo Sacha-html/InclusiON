@@ -51,9 +51,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return professional;
         }
 
-        public async Task UpdateAsync(Professional professional, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(Professional professional, CancellationToken cancellationToken = default)
         {
             _context.Professionals.Update(professional);
+            return Task.CompletedTask;
         }
 
         public async Task<PagedResponse<Professional>> GetPagedAsync(
@@ -64,6 +65,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             bool? isActive,
             SortField? sortBy,
             string sortDirection,
+            List<int>? institutionIds = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.Professionals
@@ -90,6 +92,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (isActive.HasValue)
             {
                 query = query.Where(p => p.User.IsActive == isActive.Value);
+            }
+
+            if (institutionIds is not null && institutionIds.Count > 0)
+            {
+                var professionalIdsInInstitution = _context.ProfessionalInstitutions
+                    .Where(pi => institutionIds.Contains(pi.InstitutionId) && pi.IsActive)
+                    .Select(pi => pi.ProfessionalId)
+                    .Distinct();
+
+                query = query.Where(p => professionalIdsInInstitution.Contains(p.Id));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<Professional, object>>>
