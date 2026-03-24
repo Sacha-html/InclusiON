@@ -23,6 +23,9 @@ import {
           <p>Se genero una contraseña temporal para su acceso al sistema:</p>
           <div class="alert alert-warning d-flex align-items-center justify-content-between">
             <code class="fs-5">{{ password }}</code>
+            <button cButton color="light" size="sm" (click)="copyPassword()">
+              {{ copied ? 'Copiado!' : 'Copiar' }}
+            </button>
           </div>
           <p class="text-body-secondary mb-0">
             Asegurese de copiar esta contraseña. No se podra volver a consultar.
@@ -44,6 +47,15 @@ export class PasswordModalComponent {
   @Input() password = '';
   @Output() close = new EventEmitter<void>();
 
+  copied = false;
+
   get entityTypeLower(): string { return this.entityType.toLowerCase(); }
   get entityArticleUpper(): string { return this.entityArticle.charAt(0).toUpperCase() + this.entityArticle.slice(1); }
+
+  copyPassword(): void {
+    navigator.clipboard.writeText(this.password).then(() => {
+      this.copied = true;
+      setTimeout(() => this.copied = false, 2000);
+    });
+  }
 }
