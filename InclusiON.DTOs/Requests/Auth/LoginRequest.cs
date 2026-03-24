@@ -13,5 +13,11 @@ namespace InclusiON.DTOs.Requests.Auth
         public string Password { get; set; } = string.Empty;
 
         public bool RememberMe { get; set; } = false;
+
+        /// <summary>
+        /// Roles permitidos para este flujo de login.
+        /// Si se envian, el backend valida que el usuario tenga uno de estos roles.
+        /// </summary>
+        public List<string>? AllowedRoles { get; set; }
     }
 }

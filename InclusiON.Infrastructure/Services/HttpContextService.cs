@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Infrastructure;
 
 namespace InclusiON.Infrastructure.Services
@@ -104,6 +105,29 @@ namespace InclusiON.Infrastructure.Services
             }
 
             return userId;
+        }
+
+        /// <inheritdoc />
+        public bool IsGlobalAdmin()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user is null) return false;
+
+            var claim = user.FindFirst(Permissions.GlobalAdminClaimType);
+            return claim is not null && claim.Value.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <inheritdoc />
+        public List<int> GetInstitutionIds()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user is null) return new List<int>();
+
+            return user.FindAll(Permissions.InstitutionIdClaimType)
+                .Select(c => int.TryParse(c.Value, out var id) ? id : (int?)null)
+                .Where(id => id.HasValue)
+                .Select(id => id!.Value)
+                .ToList();
         }
     }
 }

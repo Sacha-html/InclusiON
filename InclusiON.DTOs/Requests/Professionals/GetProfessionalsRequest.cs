@@ -5,7 +5,7 @@ namespace InclusiON.DTOs.Requests.Professionals
     /// <summary>
     /// Request para listar profesionales con filtros y paginacion.
     /// </summary>
-    public class GetProfessionalsRequest : PagedRequest
+    public class GetProfessionalsRequest : PagedRequest, IInstitutionFilterable
     {
         /// <summary>
         /// Filtro por nombre, apellido o documento (busqueda parcial).
@@ -26,5 +26,11 @@ namespace InclusiON.DTOs.Requests.Professionals
         /// Filtro por institucion educativa.
         /// </summary>
         public int? InstitutionId { get; set; }
+
+        /// <summary>
+        /// IDs de instituciones validados por el filter (no se bindea desde query string).
+        /// </summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        public List<int>? InstitutionIds { get; set; }
     }
 }

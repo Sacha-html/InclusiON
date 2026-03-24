@@ -13,7 +13,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<PagedResponse<FamilyRepresentative>> GetPagedAsync(
             int page, int pageSize, string? search, bool? isActive,
             SortField? sortBy, string sortDirection,
-            int? institutionId = null,
+            List<int>? institutionIds = null,
             CancellationToken cancellationToken = default);
     }
 }
