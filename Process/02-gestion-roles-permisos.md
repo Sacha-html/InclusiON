@@ -10,32 +10,25 @@ Proceso de configuración de los roles del sistema y asignación de permisos a c
 
 ## Pasos del proceso
 
-### 1. Consulta de Roles ✅ Implementado
+### 1. Consulta de Roles
 El admin global visualiza los roles del sistema con sus permisos actuales.
 - **Listar roles:** `GET /api/roles`
 - **Detalle de rol:** `GET /api/roles/{id}`
 - **Permisos disponibles:** `GET /api/roles/available-permissions`
 - **Frontend:** `/admin/roles` (DataTable con roles)
 
-### 2. Asignación de Permisos ✅ Implementado
+### 2. Asignación de Permisos
 El admin global selecciona permisos mediante checkboxes agrupados por módulo y los asigna al rol.
 - **Endpoint:** `PUT /api/roles/{id}/permissions`
 - **Protección:** `[Authorize(Policy = "global-admin")]`
 - **Frontend:** `/admin/roles/{id}` (checkboxes por módulo)
 
-### 3. Jerarquía Admin Global / Institucional ✅ Implementado
+### 3. Jerarquía Admin Global / Institucional
 
 | Capacidad | Admin Global | Admin Institucional |
 |-----------|-------------|-------------------|
-| Gestionar roles y permisos | ✅ | ❌ |
-| Modificar catálogos | ✅ | ❌ (solo lectura) |
-| Crear instituciones | ✅ | ❌ |
-| Crear admins institucionales | ✅ | ❌ |
-| Crear profesionales | ✅ | ✅ (su institución) |
-| Crear personas | ✅ | ✅ (su institución) |
-| Crear familiares | ✅ | ✅ (su institución) |
 
-### 4. Creación de Admins Institucionales ✅ Implementado
+### 4. Creación de Admins Institucionales
 El admin global crea usuarios admin y los vincula a instituciones. Se genera contraseña temporal.
 - **Crear admin:** `POST /api/admin/institutions-assignments/users`
 - **Asignar institución:** `POST /api/admin/institutions-assignments/{adminUserId}`
@@ -44,7 +37,7 @@ El admin global crea usuarios admin y los vincula a instituciones. Se genera con
 - **Mis instituciones:** `GET /api/admin/institutions-assignments/me`
 - **Frontend:** `/admin/admins`
 
-### 5. Filtrado por Institución ✅ Implementado
+### 5. Filtrado por Institución
 Los admins institucionales solo ven datos de sus instituciones asignadas.
 ```
 Admin Institucional
@@ -73,11 +66,4 @@ flowchart TD
     end
 ```
 
-## Estado resumen
 
-| Paso | Estado |
-|------|--------|
-| Consulta de roles | ✅ Implementado |
-| Asignación de permisos | ✅ Implementado |
-| Creación de admins institucionales | ✅ Implementado |
-| Filtrado por institución | ✅ Implementado |
