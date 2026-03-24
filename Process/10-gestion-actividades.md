@@ -12,11 +12,9 @@ Proceso de creación, edición y organización de actividades educativas con con
 ## Pasos del proceso
 
 ### 1. Consulta de Templates de Actividad ✅ Implementado
-Los templates definen la estructura del contenido dinámico de cada tipo de actividad (selección, emparejamiento, secuencia, completar, respuesta libre).
-- **Listar:** `GET /api/activity-templates`
-- **Detalle:** `GET /api/activity-templates/{id}`
-- **Por código:** `GET /api/activity-templates/by-code/{code}` (SELECT_FIGURE, etc.)
-- Cada template incluye `ContentSchema` que define los campos dinámicos
+Los tipos de template definen la estructura del contenido dinámico de cada tipo de actividad (selección, emparejamiento, secuencia, completar, respuesta libre). Se consultan como catálogo.
+- **Endpoint:** `GET /api/catalogs/activity-template-types`
+- No existe controller dedicado de templates; los tipos se gestionan desde el catálogo
 
 ### 2. Creación de Actividad ⏳ Pendiente (BE-06, FE-04)
 El profesional creará actividades con un wizard multi-paso:
@@ -41,7 +39,7 @@ Vista donde el profesional puede navegar sus actividades creadas y las actividad
 
 ```mermaid
 flowchart TD
-    PROF[Profesional] -->|GET /api/activity-templates| TMPL[Templates Disponibles ✅]
+    PROF[Profesional] -->|GET /api/catalogs/activity-template-types| TMPL[Tipos de Template ✅]
 
     PROF -.->|⏳ BE-06| WIZARD[Wizard de Creación]
     WIZARD -.->|Paso 1| AREA[Seleccionar Área de Habilidad]
@@ -63,7 +61,7 @@ flowchart TD
 
 | Paso | Estado | Referencia |
 |------|--------|------------|
-| Templates de actividad | ✅ Implementado | BE-05 |
+| Tipos de template (catálogo) | ✅ Implementado | BE-05 |
 | Catálogos de soporte | ✅ Implementado | BE-01 |
 | CRUD de actividades | ⏳ Pendiente | BE-06, FE-04 |
 | Catálogo del profesional | ⏳ Pendiente | FE-05 |
