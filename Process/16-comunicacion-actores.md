@@ -12,10 +12,10 @@ Procesos de comunicación entre los distintos actores del sistema. Abarca la men
 
 ## Canales de comunicación
 
-### 1. Invitaciones por Email ✅ Implementado
+### 1. Invitaciones por Email
 Canal de comunicación unidireccional para el registro de familiares. Documentado en detalle en el **Proceso 07 — Gestión de Invitaciones**.
 
-### 2. Mensajería Interna ⏳ Pendiente (BE-15, FE-16)
+### 2. Mensajería Interna (BE-15, FE-16)
 Sistema de mensajes dentro de la plataforma entre profesional y familia, con bandeja de entrada, mensajes enviados y estado de lectura.
 
 **Endpoints previstos:**
@@ -32,7 +32,7 @@ Sistema de mensajes dentro de la plataforma entre profesional y familia, con ban
 - `UnreadBadgeComponent` en sidebar (poll cada 30s)
 - Se prevé integración con SignalR para tiempo real (dependencia `@microsoft/signalr` ya instalada)
 
-### 3. Notificaciones ⏳ Pendiente
+### 3. Notificaciones
 Alertas automáticas del sistema ante eventos relevantes:
 - Nueva actividad asignada
 - Actividad completada por la persona
@@ -44,33 +44,23 @@ Alertas automáticas del sistema ante eventos relevantes:
 
 ```mermaid
 flowchart TD
-    PROF[Profesional] -.->|⏳ BE-15| MSG_OUT[Enviar Mensaje]
+    PROF[Profesional] -.->|BE-15| MSG_OUT[Enviar Mensaje]
     MSG_OUT -.->|POST /api/messages| SERVER[Servidor]
     SERVER -.->|SignalR / Poll| FAM_IN[Familiar recibe]
 
-    FAM[Familiar] -.->|⏳ BE-15| MSG_BACK[Responder]
+    FAM[Familiar] -.->|BE-15| MSG_BACK[Responder]
     MSG_BACK -.->|POST /api/messages| SERVER
     SERVER -.->|SignalR / Poll| PROF_IN[Profesional recibe]
 
-    SYS[Sistema] -.->|⏳ Pendiente| NOTIF[Notificaciones]
+    SYS[Sistema] -.->|Pendiente| NOTIF[Notificaciones]
     NOTIF -.->|Actividades, reportes, alertas| PROF
     NOTIF -.->|Progreso, mensajes| FAM
 
     subgraph Implementado
-        PROF2[Profesional] -->|POST /api/invitations| INV[Email Invitación ✅]
+        PROF2[Profesional] -->|POST /api/invitations| INV[Email Invitación]
         INV -->|Ver Proceso 07| FAM2[Familiar]
     end
 
-    style MSG_OUT fill:#fff3cd,stroke:#ffc107
-    style MSG_BACK fill:#fff3cd,stroke:#ffc107
-    style NOTIF fill:#fff3cd,stroke:#ffc107
-    style INV fill:#d4edda,stroke:#28a745
 ```
 
-## Estado resumen
 
-| Canal | Estado | Referencia |
-|-------|--------|------------|
-| Invitaciones por email | ✅ Implementado | Proceso 07 |
-| Mensajería interna | ⏳ Pendiente | BE-15, FE-16 |
-| Notificaciones | ⏳ Pendiente | — |
