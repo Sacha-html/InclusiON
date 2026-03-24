@@ -40,17 +40,20 @@ namespace InclusiON.Infrastructure.Data
         {
             if (!_disposed)
             {
+                _context.Dispose();
                 _disposed = true;
             }
+            GC.SuppressFinalize(this);
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (!_disposed)
             {
+                await _context.DisposeAsync();
                 _disposed = true;
             }
-            return ValueTask.CompletedTask;
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -24,5 +24,16 @@ namespace InclusiON.Application.Interfaces.Infrastructure
         /// Obtiene el ID del usuario autenticado a partir de los claims del token JWT.
         /// </summary>
         Guid? GetCurrentUserId();
+
+        /// <summary>
+        /// Indica si el usuario autenticado es administrador global.
+        /// </summary>
+        bool IsGlobalAdmin();
+
+        /// <summary>
+        /// Obtiene los IDs de instituciones asignadas al admin desde los claims del JWT.
+        /// Retorna lista vacia si no tiene claims de institucion.
+        /// </summary>
+        List<int> GetInstitutionIds();
     }
 }

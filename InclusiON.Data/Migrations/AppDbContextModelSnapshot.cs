@@ -734,6 +734,27 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("AdaptiveEngineConfigs", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdminInstitution", b =>
+                {
+                    b.Property<Guid>("AdminUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InstitutionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AdminUserId", "InstitutionId");
+
+                    b.HasIndex("InstitutionId");
+
+                    b.ToTable("AdminInstitutions");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
                 {
                     b.Property<int>("Id")
@@ -1161,22 +1182,13 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<bool>("RequiresColorShape")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("RequiresEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresEmojiSequence")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresPassword")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresPin")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresProfileSelect")
                         .HasColumnType("bit");
 
                     b.Property<bool>("RequiresSupervisor")
@@ -1199,12 +1211,9 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             MinAutonomyLevel = 1,
                             Name = "Email y Contrasena",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = true,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
@@ -1216,98 +1225,24 @@ namespace InclusiON.Data.Migrations
                             IsActive = true,
                             MinAutonomyLevel = 1,
                             Name = "PIN Numerico",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
                             RequiresPin = true,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = false
                         },
                         new
                         {
                             Id = 3,
-                            Code = "EMOJI_SEQUENCE",
-                            Description = "Login seleccionando 4 emojis en orden - DEPRECADO",
-                            DisplayOrder = 3,
-                            IsActive = false,
-                            MinAutonomyLevel = 2,
-                            Name = "Secuencia de Emojis (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = true,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "COLOR_SHAPE",
-                            Description = "Login seleccionando 4 colores y formas en orden - DEPRECADO",
-                            DisplayOrder = 4,
-                            IsActive = false,
-                            MinAutonomyLevel = 2,
-                            Name = "Colores y Formas (Deprecado)",
-                            RequiresColorShape = true,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 5,
                             Code = "ASSISTED",
                             Description = "Login asistido donde un familiar o profesional autoriza el acceso",
                             DisplayOrder = 3,
                             IsActive = true,
                             MinAutonomyLevel = 3,
                             Name = "Login Asistido",
-                            RequiresColorShape = false,
                             RequiresEmail = false,
-                            RequiresEmojiSequence = false,
                             RequiresPassword = false,
                             RequiresPin = false,
-                            RequiresProfileSelect = false,
                             RequiresSupervisor = true
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Code = "TRUSTED_DEVICE",
-                            Description = "Login automatico en dispositivos previamente autorizados - DEPRECADO",
-                            DisplayOrder = 6,
-                            IsActive = false,
-                            MinAutonomyLevel = 3,
-                            Name = "Dispositivo Confiable (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = false,
-                            RequiresSupervisor = false
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Code = "PROFILE_SELECT",
-                            Description = "Login seleccionando nombre y avatar del usuario - DEPRECADO",
-                            DisplayOrder = 7,
-                            IsActive = false,
-                            MinAutonomyLevel = 3,
-                            Name = "Seleccion de Perfil (Deprecado)",
-                            RequiresColorShape = false,
-                            RequiresEmail = false,
-                            RequiresEmojiSequence = false,
-                            RequiresPassword = false,
-                            RequiresPin = false,
-                            RequiresProfileSelect = true,
-                            RequiresSupervisor = false
                         });
                 });
 
@@ -1576,6 +1511,29 @@ namespace InclusiON.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("PersonRoadmapAreas", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonSkillProfile", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SkillAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.HasKey("PersonId", "SkillAreaId");
+
+                    b.HasIndex("SkillAreaId");
+
+                    b.ToTable("PersonSkillProfiles", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonWithDisability", b =>
@@ -2924,6 +2882,25 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("PersonRoadmapActivity");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdminInstitution", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.User", "AdminUser")
+                        .WithMany("AdminInstitutions")
+                        .HasForeignKey("AdminUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.EducationalInstitution", "Institution")
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AdminUser");
+
+                    b.Navigation("Institution");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -3084,6 +3061,25 @@ namespace InclusiON.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("PersonRoadmap");
+
+                    b.Navigation("SkillArea");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonSkillProfile", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.SkillArea", "SkillArea")
+                        .WithMany()
+                        .HasForeignKey("SkillAreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
 
                     b.Navigation("SkillArea");
                 });
@@ -3414,6 +3410,8 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.User", b =>
                 {
                     b.Navigation("AccessAudits");
+
+                    b.Navigation("AdminInstitutions");
 
                     b.Navigation("FamilyRepresentative");
 

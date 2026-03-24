@@ -25,6 +25,17 @@ namespace InclusiON.Infrastructure.Authorization
 
         public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
         {
+            // Policy especial para admin global
+            if (policyName == "global-admin")
+            {
+                var globalPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddRequirements(new GlobalAdminRequirement())
+                    .Build();
+
+                return Task.FromResult<AuthorizationPolicy?>(globalPolicy);
+            }
+
             // Si el nombre de la política contiene ":", es un permiso
             if (policyName.Contains(':'))
             {
