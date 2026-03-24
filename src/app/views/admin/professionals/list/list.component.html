@@ -1,17 +1,27 @@
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="mb-0">Profesionales</h3>
-  @if (canCreate) {
-    <button cButton color="primary" routerLink="new" aria-label="Crear nuevo profesional">Nuevo Profesional</button>
-  }
-</div>
+<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadProfessionals()"></app-institution-filter>
 
 <app-data-table
+  title="Profesionales"
   [columns]="cols"
   [items]="professionals"
   [totalItems]="totalItems"
   [pageSize]="pageSize"
   [currentPage]="currentPage"
+  [headerButtons]="canCreate ? [{action: 'new', label: 'Nuevo Profesional'}] : []"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
-  (rowAction)="onRowAction($event)">
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
 </app-data-table>
+
+<app-confirm-modal
+  [visible]="showConfirmModal"
+  title="Confirmar desactivacion"
+  messagePrefix="¿Esta seguro de que desea desactivar al profesional "
+  [itemName]="itemToDeactivate?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Esta accion deshabilitara su acceso al sistema."
+  confirmLabel="Desactivar"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()">
+</app-confirm-modal>

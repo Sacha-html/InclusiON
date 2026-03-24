@@ -1,0 +1,127 @@
+@if (isLoading) {
+  <div class="text-center p-5">
+    <c-spinner color="primary"></c-spinner>
+  </div>
+} @else {
+
+  <!-- Saludo -->
+  <c-row class="mb-4">
+    <c-col xs="12">
+      <c-card>
+        <c-card-body>
+          <h4 class="mb-1">{{ getGreeting() }}, {{ professional?.firstName }}!</h4>
+          <p class="text-body-secondary mb-0">Panel de gestion profesional</p>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+  <!-- Contadores -->
+  <c-row class="mb-4">
+    <c-col md="4">
+      <c-card class="mb-4 cursor-pointer counter-card-primary" (click)="navigateTo('/pro/persons')">
+        <c-card-body class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fs-4 fw-semibold">{{ personCount }}</div>
+            <div class="counter-card-muted">Personas a cargo</div>
+          </div>
+          <svg cIcon name="cil-people" size="3xl" class="counter-card-muted"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col md="4">
+      <c-card class="mb-4 cursor-pointer counter-card-primary" (click)="navigateTo('/pro/invitations')">
+        <c-card-body class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fs-4 fw-semibold">{{ pendingInvitations }}</div>
+            <div class="counter-card-muted">Invitaciones pendientes</div>
+          </div>
+          <svg cIcon name="cil-link" size="3xl" class="counter-card-muted"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col md="4">
+      <c-card class="mb-4 cursor-pointer counter-card-success" (click)="navigateTo('/pro/invitations')">
+        <c-card-body class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fs-4 fw-semibold">{{ acceptedInvitations }}</div>
+            <div class="counter-card-muted">Familias registradas</div>
+          </div>
+          <svg cIcon name="cil-check-circle" size="3xl" class="counter-card-muted"></svg>
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+  <!-- Tablas resumen -->
+  <c-row>
+    <!-- Personas a cargo -->
+    <c-col lg="6">
+      <c-card class="mb-4">
+        <c-card-body>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Mi Aula</h5>
+            <button cButton color="primary" size="sm" (click)="navigateTo('/pro/persons')">
+              Ver aula
+            </button>
+          </div>
+          @if (recentPersons.length === 0) {
+            <p class="text-body-secondary text-center py-3">No tienes personas asignadas</p>
+          } @else {
+            <table cTable hover small>
+              <tbody>
+                @for (person of recentPersons; track person.personId) {
+                  <tr>
+                    <td>
+                      <strong>{{ person.personFullName }}</strong>
+                      @if (person.isPrimaryProfessional) {
+                        <c-badge color="primary" class="ms-1">Principal</c-badge>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (persons.length > 5) {
+              <p class="text-body-secondary text-center small mt-2 mb-0">
+                y {{ persons.length - 5 }} mas...
+              </p>
+            }
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+    <!-- Invitaciones recientes -->
+    <c-col lg="6">
+      <c-card class="mb-4">
+        <c-card-body>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Invitaciones recientes</h5>
+            <button cButton color="primary" size="sm" (click)="navigateTo('/pro/invitations')">
+              Ver todas
+            </button>
+          </div>
+          @if (recentInvitations.length === 0) {
+            <p class="text-body-secondary text-center py-3">No hay invitaciones</p>
+          } @else {
+            <table cTable hover small>
+              <tbody>
+                @for (inv of recentInvitations; track inv.id) {
+                  <tr>
+                    <td>{{ inv.firstName }} {{ inv.lastName }}</td>
+                    <td>{{ inv.email }}</td>
+                    <td class="text-end">
+                      <c-badge [color]="getStatusColor(inv.status)">{{ inv.status }}</c-badge>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+}

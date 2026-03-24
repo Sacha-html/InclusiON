@@ -1,5 +1,4 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -9,6 +8,7 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { LoginRequest } from '@models';
+import { RoleRoutes } from '../../../shared/constants/roles';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 // CoreUI imports
@@ -33,7 +33,6 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     ContainerComponent,
     RowComponent,
@@ -65,6 +64,17 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
   showPassword = false;
   returnUrl = '/';
+  isProfessional = false;
+
+  get pageTitle(): string {
+    return this.isProfessional ? 'Acceso Profesional' : 'Acceso Administrativo';
+  }
+
+  get pageSubtitle(): string {
+    return this.isProfessional
+      ? 'Ingresa con tu cuenta de profesional'
+      : 'Ingresa con tu cuenta de administrador';
+  }
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -73,8 +83,8 @@ export class LoginComponent implements OnInit {
       rememberMe: [false],
     });
 
-    // Obtener la URL de retorno si existe
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.isProfessional = this.route.snapshot.queryParams['role'] === 'professional';
   }
 
   get f() {
@@ -99,6 +109,7 @@ export class LoginComponent implements OnInit {
       email: this.loginForm.value.email.trim(),
       password: this.loginForm.value.password,
       rememberMe: this.loginForm.value.rememberMe,
+      allowedRoles: this.isProfessional ? ['Professional'] : ['Admin'],
     };
 
     this.authService.login(loginData).subscribe({
@@ -107,7 +118,9 @@ export class LoginComponent implements OnInit {
           if (response.data?.mustChangePassword) {
             this.router.navigate(['/change-password']);
           } else {
-            this.router.navigate(['/dashboard']);
+            const role = this.authService.getUserRole();
+            const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
+            this.router.navigate([target]);
           }
         }
       },

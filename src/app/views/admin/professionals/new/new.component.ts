@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
 import { CreateProfessionalRequest } from '../../../../models';
+import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -12,13 +13,10 @@ import {
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
-  ModalBodyComponent,
-  ModalComponent,
-  ModalFooterComponent,
-  ModalHeaderComponent,
   RowComponent,
 } from '@coreui/angular';
 import { ProfessionalResponse } from '../../../../models';
+import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 
 @Component({
   selector: 'app-new',
@@ -33,10 +31,7 @@ import { ProfessionalResponse } from '../../../../models';
     FormLabelDirective,
     FormFeedbackComponent,
     ButtonDirective,
-    ModalComponent,
-    ModalHeaderComponent,
-    ModalBodyComponent,
-    ModalFooterComponent,
+    PasswordModalComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
@@ -59,34 +54,12 @@ export class NewComponent {
     phone: ['', [Validators.maxLength(20)]],
     specialty: ['', [Validators.maxLength(100)]],
     licenseNumber: ['', [Validators.maxLength(50)]],
-    birthDate: ['', [Validators.required, NewComponent.validDate, NewComponent.notFutureDate]],
+    birthDate: ['', [Validators.required, validDate, notFutureDate]],
     address: ['', [Validators.maxLength(200)]],
   });
 
   get f() {
     return this.form.controls;
-  }
-
-  static validDate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(control.value)) return { invalidDate: true };
-    const [day, month, year] = control.value.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-      return { invalidDate: true };
-    }
-    return null;
-  }
-
-  static notFutureDate(control: AbstractControl): ValidationErrors | null {
-    if (!control.value) return null;
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(control.value)) return null;
-    const [day, month, year] = control.value.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    if (date > new Date()) return { futureDate: true };
-    return null;
   }
 
   onSubmit(): void {
@@ -104,7 +77,7 @@ export class NewComponent {
       ...(raw.phone && { phone: raw.phone }),
       ...(raw.specialty && { specialty: raw.specialty }),
       ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
-      ...(raw.birthDate && { birthDate: this.toIsoDate(raw.birthDate) }),
+      ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
       ...(raw.address && { address: raw.address }),
     };
 
@@ -124,11 +97,6 @@ export class NewComponent {
     if (this.createdProfessional) {
       this.router.navigate(['/admin/professionals', this.createdProfessional.id]);
     }
-  }
-
-  private toIsoDate(ddmmyyyy: string): string {
-    const [day, month, year] = ddmmyyyy.split('/');
-    return `${year}-${month}-${day}T00:00:00`;
   }
 
   goBack(): void {

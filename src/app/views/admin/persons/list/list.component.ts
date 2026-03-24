@@ -1,12 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService, CatalogsService, PersonsService } from '@services';
+import { Router } from '@angular/router';
+import { AuthService, CatalogsService, PersonsService, ToastService } from '@services';
 import { LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 import {
-  ButtonDirective,
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
@@ -21,8 +21,7 @@ import {
   selector: 'app-list',
   imports: [
     DataTableComponent,
-    ButtonDirective,
-    RouterLink,
+    InstitutionFilterComponent,
     ReactiveFormsModule,
     FormControlDirective,
     FormFeedbackComponent,
@@ -36,14 +35,17 @@ import {
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
-export class ListComponent implements OnInit {
+export class ListComponent {
   private readonly personsService = inject(PersonsService);
   private readonly authService = inject(AuthService);
   private readonly catalogsService = inject(CatalogsService);
+  private readonly toastService = inject(ToastService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
   canCreate = this.authService.hasPermission('persons:create');
+
+  selectedInstitutionId: number | undefined;
 
   persons: PersonListItemResponse[] = [];
   totalItems = 0;
@@ -84,11 +86,16 @@ export class ListComponent implements OnInit {
     { key: 'isActive', label: 'Estado', type: 'badge' },
   ];
 
-  ngOnInit(): void {
-    this.loadPersons();
+  constructor() {
     this.catalogsService.getLoginMethods().subscribe({
       next: (data) => this.loginMethods = data,
     });
+  }
+
+  onInstitutionFilterChange(institutionId: number | undefined): void {
+    this.selectedInstitutionId = institutionId;
+    this.currentPage = 1;
+    this.loadPersons();
   }
 
   onPageChange(page: number): void {
@@ -99,6 +106,12 @@ export class ListComponent implements OnInit {
   onSearch(term: string): void {
     this.currentPage = 1;
     this.loadPersons(term);
+  }
+
+  onHeaderAction(action: string): void {
+    if (action === 'new') {
+      this.router.navigate(['/admin/persons/new']);
+    }
   }
 
   onRowAction(event: { action: string; item: any }): void {
@@ -155,16 +168,16 @@ export class ListComponent implements OnInit {
     });
   }
 
-  private loadPersons(search?: string): void {
+  loadPersons(search?: string): void {
     this.personsService
-      .getPersons({ page: this.currentPage, pageSize: this.pageSize, search, sortBy: 'lastName', sortDirection: 'ASC' })
+      .getPersons({ page: this.currentPage, pageSize: this.pageSize, search, sortBy: 'lastName', sortDirection: 'ASC', institutionId: this.selectedInstitutionId })
       .subscribe({
         next: (response) => {
-          this.persons = response.data.data;
-          this.totalItems = response.data.totalRecords;
+          this.persons = response.data;
+          this.totalItems = response.totalRecords;
         },
-        error: (error) => {
-          console.error('Error al obtener personas:', error);
+        error: () => {
+          this.toastService.error('Error al obtener personas');
         },
       });
   }

@@ -1,22 +1,24 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   ApiResponse,
   PagedResponse,
   PersonResponse,
   PersonListItemResponse,
+  PersonSkillProfileResponse,
   CreatePersonRequest,
   UpdatePersonRequest,
   GetPersonsRequest,
 } from '@models';
 import { environment } from '@env';
+import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PersonsService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   private get apiUrl(): string {
     return `${environment.apiUrl}/Persons`;
@@ -28,7 +30,7 @@ export class PersonsService {
    */
   getPersons(
     request?: GetPersonsRequest
-  ): Observable<ApiResponse<PagedResponse<PersonListItemResponse>>> {
+  ): Observable<PagedResponse<PersonListItemResponse>> {
     let params = new HttpParams();
 
     if (request) {
@@ -62,33 +64,36 @@ export class PersonsService {
       if (request.isActive !== undefined) {
         params = params.set('isActive', request.isActive.toString());
       }
+      if (request.institutionId) {
+        params = params.set('institutionId', request.institutionId.toString());
+      }
     }
 
     return this.http
       .get<ApiResponse<PagedResponse<PersonListItemResponse>>>(this.apiUrl, {
         params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
    * Obtiene una persona por su ID.
    * Requiere rol ValidUser.
    */
-  getPersonById(personId: string): Observable<ApiResponse<PersonResponse>> {
+  getPersonById(personId: string): Observable<PersonResponse> {
     return this.http
       .get<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}`)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
    * Obtiene el perfil de la persona autenticada.
    * Requiere autenticación.
    */
-  getMyProfile(): Observable<ApiResponse<PersonResponse>> {
+  getMyProfile(): Observable<PersonResponse> {
     return this.http
       .get<ApiResponse<PersonResponse>>(`${this.apiUrl}/me`)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -97,10 +102,10 @@ export class PersonsService {
    */
   createPerson(
     request: CreatePersonRequest
-  ): Observable<ApiResponse<PersonResponse>> {
+  ): Observable<PersonResponse> {
     return this.http
       .post<ApiResponse<PersonResponse>>(this.apiUrl, request)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -110,10 +115,10 @@ export class PersonsService {
   updatePerson(
     personId: string,
     request: UpdatePersonRequest
-  ): Observable<ApiResponse<PersonResponse>> {
+  ): Observable<PersonResponse> {
     return this.http
       .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}`, request)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -122,13 +127,58 @@ export class PersonsService {
    */
   updateMyProfile(
     request: UpdatePersonRequest
-  ): Observable<ApiResponse<PersonResponse>> {
+  ): Observable<PersonResponse> {
     return this.http
       .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/me`, request)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
-  private handleError(error: unknown): Observable<never> {
-    return throwError(() => error);
+  /**
+   * Obtiene el perfil de habilidades de una persona.
+   */
+  getSkillProfile(
+    personId: string,
+    all?: boolean
+  ): Observable<PersonSkillProfileResponse[]> {
+    let params = new HttpParams();
+    if (all) {
+      params = params.set('all', 'true');
+    }
+    return this.http
+      .get<ApiResponse<PersonSkillProfileResponse[]>>(
+        `${this.apiUrl}/${personId}/skill-profile`,
+        { params }
+      )
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Asigna un area de habilidad a una persona.
+   */
+  addSkillArea(
+    personId: string,
+    skillAreaId: number
+  ): Observable<PersonSkillProfileResponse> {
+    return this.http
+      .post<ApiResponse<PersonSkillProfileResponse>>(
+        `${this.apiUrl}/${personId}/skill-profile`,
+        { skillAreaId }
+      )
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Desactiva un area de habilidad de una persona.
+   */
+  deactivateSkillArea(
+    personId: string,
+    areaId: number
+  ): Observable<PersonSkillProfileResponse> {
+    return this.http
+      .put<ApiResponse<PersonSkillProfileResponse>>(
+        `${this.apiUrl}/${personId}/skill-profile/${areaId}`,
+        {}
+      )
+      .pipe(unwrapResponse());
   }
 }
