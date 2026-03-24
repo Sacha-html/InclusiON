@@ -27,6 +27,7 @@ builder.Host.UseSerilog((context, config) =>
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
+    options.Filters.Add<InclusiON.Api.Filters.InstitutionAccessFilter>();
 });
 
 builder.Services.AddPersistence(builder.Configuration);
