@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -56,7 +57,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 }
 
                 // Generar contrasena temporal
-                var password = GenerateTemporaryPassword();
+                var password = PasswordGenerator.GenerateTemporary();
 
                 // Crear usuario
                 var user = new User
@@ -116,9 +117,5 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             }
         }
 
-        private static string GenerateTemporaryPassword()
-        {
-            return $"Temp@{Guid.NewGuid().ToString()[..8]}";
-        }
     }
 }

@@ -734,6 +734,27 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("AdaptiveEngineConfigs", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdminInstitution", b =>
+                {
+                    b.Property<Guid>("AdminUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InstitutionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("AdminUserId", "InstitutionId");
+
+                    b.HasIndex("InstitutionId");
+
+                    b.ToTable("AdminInstitutions");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
                 {
                     b.Property<int>("Id")
@@ -1490,6 +1511,29 @@ namespace InclusiON.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("PersonRoadmapAreas", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonSkillProfile", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SkillAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.HasKey("PersonId", "SkillAreaId");
+
+                    b.HasIndex("SkillAreaId");
+
+                    b.ToTable("PersonSkillProfiles", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonWithDisability", b =>
@@ -2838,6 +2882,25 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("PersonRoadmapActivity");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.AdminInstitution", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.User", "AdminUser")
+                        .WithMany("AdminInstitutions")
+                        .HasForeignKey("AdminUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.EducationalInstitution", "Institution")
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AdminUser");
+
+                    b.Navigation("Institution");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -2998,6 +3061,25 @@ namespace InclusiON.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("PersonRoadmap");
+
+                    b.Navigation("SkillArea");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonSkillProfile", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.SkillArea", "SkillArea")
+                        .WithMany()
+                        .HasForeignKey("SkillAreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
 
                     b.Navigation("SkillArea");
                 });
@@ -3328,6 +3410,8 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.User", b =>
                 {
                     b.Navigation("AccessAudits");
+
+                    b.Navigation("AdminInstitutions");
 
                     b.Navigation("FamilyRepresentative");
 
