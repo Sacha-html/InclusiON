@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VisualStandardLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
@@ -20,7 +19,6 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-visual-standard-login',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonDirective,
     FormControlDirective,
@@ -62,7 +60,7 @@ export class VisualStandardLoginComponent extends BaseVisualLoginComponent {
     this.authService.loginVisualStandard(request).subscribe({
       next: (response) => {
         if (response.success && response.data?.success) {
-          this.navigateToDashboard();
+          this.navigateToDashboard(response.data.mustChangePassword);
         } else {
           this.handleLoginResponseError(
             response.data,

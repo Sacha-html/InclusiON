@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
@@ -20,7 +19,6 @@ interface RoleOption {
   selector: 'app-role-selection',
   standalone: true,
   imports: [
-    CommonModule,
     ButtonDirective,
     IconDirective,
     AccessibilityPanelComponent,
@@ -37,28 +35,34 @@ export class RoleSelectionComponent {
       title: 'Soy una Persona',
       description: 'Ingresa con tu cuenta personal',
       icon: 'cilUser',
-      color: '#4CAF50',
-      bgColor: '#E8F5E9',
+      color: 'var(--a11y-role-person, #4CAF50)',
+      bgColor: 'var(--a11y-role-person-bg, #E8F5E9)',
     },
     {
       type: 'PROFESSIONAL',
       title: 'Soy Profesional',
       description: 'Acceso para profesionales de apoyo',
       icon: 'cilMedicalCross',
-      color: '#2196F3',
-      bgColor: '#E3F2FD',
+      color: 'var(--a11y-role-professional, #2196F3)',
+      bgColor: 'var(--a11y-role-professional-bg, #E3F2FD)',
     },
     {
       type: 'FAMILY',
       title: 'Soy Familia',
       description: 'Acceso para familiares o tutores',
       icon: 'cilPeople',
-      color: '#9C27B0',
-      bgColor: '#F3E5F5',
+      color: 'var(--a11y-role-family, #9C27B0)',
+      bgColor: 'var(--a11y-role-family-bg, #F3E5F5)',
     },
   ];
 
   selectRole(role: UserRole): void {
+    // Profesionales van directo al login con email+password
+    if (role === 'PROFESSIONAL') {
+      this.router.navigate(['/admin-login'], { queryParams: { role: 'professional' } });
+      return;
+    }
+
     this.router.navigate(['/login/identify'], {
       queryParams: { userType: role },
     });

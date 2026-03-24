@@ -1,0 +1,95 @@
+<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadPersons()"></app-institution-filter>
+
+<app-data-table
+  title="Personas con Discapacidad"
+  [columns]="cols"
+  [items]="persons"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [headerButtons]="canCreate ? [{action: 'new', label: 'Nueva Persona'}] : []"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
+</app-data-table>
+
+<!-- Modal Cambiar Método de Login -->
+<c-modal [visible]="showLoginMethodModal" (visibleChange)="!$event && closeLoginMethodModal()"
+         aria-labelledby="login-method-modal-title">
+  <c-modal-header>
+    <strong id="login-method-modal-title">Cambiar método de login</strong>
+  </c-modal-header>
+  <c-modal-body>
+    @if (selectedPerson) {
+      <p class="text-body-secondary mb-3">
+        Persona: <strong>{{ selectedPerson.fullName }}</strong>
+      </p>
+      <p class="text-body-secondary mb-3">
+        Método actual: <strong>{{ selectedPerson.loginMethodName ?? 'Sin asignar' }}</strong>
+      </p>
+
+      @if (loginMethodError) {
+        <div class="alert alert-danger">{{ loginMethodError }}</div>
+      }
+      @if (loginMethodSuccess) {
+        <div class="alert alert-success">{{ loginMethodSuccess }}</div>
+        @if (temporaryPassword) {
+          <p>Se generó una contraseña temporal para el acceso por email y contraseña:</p>
+          <div class="alert alert-warning d-flex align-items-center justify-content-between">
+            <code class="fs-5">{{ temporaryPassword }}</code>
+          </div>
+          <p class="text-body-secondary mb-0">
+            Asegúrese de copiar esta contraseña. No se podrá volver a consultar.
+            La persona deberá cambiarla en su primer inicio de sesión.
+          </p>
+        }
+      }
+
+      @if (!loginMethodSuccess) {
+        <form [formGroup]="loginMethodForm">
+          <div class="mb-3">
+            <label cLabel for="lm-loginMethodId">Nuevo método de login *</label>
+            <select cSelect id="lm-loginMethodId" formControlName="loginMethodId"
+                    aria-label="Seleccionar método de login">
+              <option [ngValue]="null">-- Seleccionar --</option>
+              @for (lm of loginMethods; track lm.id) {
+                <option [value]="lm.id">{{ lm.name }}</option>
+              }
+            </select>
+            @if (loginMethodSubmitted && loginMethodForm.get('loginMethodId')?.errors) {
+              <c-form-feedback [valid]="false">
+                Debe seleccionar un método de login.
+              </c-form-feedback>
+            }
+          </div>
+
+          @if (selectedLoginMethod?.requiresPin) {
+            <div class="mb-3">
+              <label cLabel for="lm-pin">PIN (4 dígitos) *</label>
+              <input cFormControl id="lm-pin" formControlName="pin" type="password" maxlength="4"
+                     autofocus inputmode="numeric"
+                     [valid]="loginMethodSubmitted ? loginMethodForm.get('pin')?.valid : undefined" />
+              @if (loginMethodSubmitted && loginMethodForm.get('pin')?.errors) {
+                <c-form-feedback [valid]="false">
+                  El PIN debe tener 4 dígitos numéricos.
+                </c-form-feedback>
+              }
+            </div>
+          }
+        </form>
+      }
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    @if (loginMethodSuccess) {
+      <button cButton color="primary" (click)="closeLoginMethodModal()">Cerrar</button>
+    } @else {
+      <button cButton color="secondary" (click)="closeLoginMethodModal()">Cancelar</button>
+      <button cButton color="primary" (click)="onLoginMethodSubmit()"
+              [disabled]="loginMethodForm.invalid">
+        Guardar
+      </button>
+    }
+  </c-modal-footer>
+</c-modal>

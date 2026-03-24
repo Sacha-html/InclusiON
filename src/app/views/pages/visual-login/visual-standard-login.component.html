@@ -18,7 +18,7 @@
     </div>
 
     <!-- Main Card -->
-    <main class="login-card card border-0 shadow" role="main">
+    <main class="login-card card shadow" role="main">
       <div class="card-body p-4 p-md-5">
         <!-- User Avatar -->
         <header class="text-center mb-4">
@@ -81,7 +81,7 @@
                 [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
                 [attr.aria-pressed]="showPassword"
               >
-                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilDescription'" aria-hidden="true"></svg>
+                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilMagnifyingGlass'" aria-hidden="true"></svg>
               </button>
             </c-input-group>
             <small id="passwordHelp" class="visually-hidden">

@@ -1,0 +1,53 @@
+<c-card>
+  <c-card-header>
+    <strong>Nueva Institucion</strong>
+  </c-card-header>
+  <c-card-body>
+    @if (serverError) {
+      <div class="alert alert-danger">{{ serverError }}</div>
+    }
+
+    <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="name">Nombre *</label>
+          <input cFormControl id="name" formControlName="name"
+                 [valid]="submitted ? f['name'].valid : undefined" />
+          @if (submitted && f['name'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['name'].errors['required']) { El nombre es obligatorio. }
+              @if (f['name'].errors['minlength']) { Minimo 2 caracteres. }
+            </c-form-feedback>
+          }
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="email">Email</label>
+          <input cFormControl id="email" formControlName="email" type="email" />
+          @if (submitted && f['email'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['email'].errors['email']) { Ingrese un email valido. }
+            </c-form-feedback>
+          }
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="address">Direccion</label>
+          <input cFormControl id="address" formControlName="address" />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="phone">Telefono</label>
+          <input cFormControl id="phone" formControlName="phone" />
+        </c-col>
+      </c-row>
+
+      <div class="mt-3 d-flex gap-2">
+        <button cButton color="primary" type="submit" [disabled]="form.invalid">Guardar</button>
+        <button cButton color="secondary" type="button" (click)="goBack()">Cancelar</button>
+      </div>
+    </form>
+  </c-card-body>
+</c-card>
