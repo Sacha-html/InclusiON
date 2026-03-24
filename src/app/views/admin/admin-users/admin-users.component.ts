@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AdminUsersService } from '@services';
 import { AdminUserResponse } from '@models';
@@ -13,7 +13,7 @@ import {
   selector: 'app-admin-users',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     TableDirective, BadgeComponent, SpinnerComponent, ButtonDirective,
   ],

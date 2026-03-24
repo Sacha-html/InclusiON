@@ -33,7 +33,7 @@ export class ListComponent {
   currentPage = 1;
 
   showConfirmModal = false;
-  itemToDeactivate: any = null;
+  itemToDeactivate: ProfessionalListItemResponse | null = null;
 
   public cols: TableColumn[] = [
     {
@@ -130,8 +130,8 @@ export class ListComponent {
           this.professionals = response.data;
           this.totalItems = response.totalRecords;
         },
-        error: (error) => {
-          console.error('Error al obtener profesionales:', error);
+        error: () => {
+          this.toastService.error('Error al obtener profesionales');
         },
       });
   }

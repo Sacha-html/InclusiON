@@ -17,7 +17,9 @@
 <app-confirm-modal
   [visible]="showConfirmModal"
   title="Confirmar desactivacion"
-  [message]="itemToDeactivate ? '¿Esta seguro de que desea desactivar al profesional <strong>' + itemToDeactivate.fullName + '</strong>?' : ''"
+  messagePrefix="¿Esta seguro de que desea desactivar al profesional "
+  [itemName]="itemToDeactivate?.fullName ?? ''"
+  messageSuffix="?"
   detail="Esta accion deshabilitara su acceso al sistema."
   confirmLabel="Desactivar"
   (confirm)="confirmDeactivate()"

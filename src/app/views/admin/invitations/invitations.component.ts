@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { InvitationsService } from '@services';
 import { InvitationResponse } from '@models';
 import { getInvitationStatusColor } from '@shared/utils';
@@ -13,7 +13,7 @@ import {
   selector: 'app-admin-invitations',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     TableDirective, BadgeComponent, SpinnerComponent,
   ],

@@ -59,9 +59,7 @@ export class LocalStorageService {
     try {
       localStorage.setItem(key, value);
       return true;
-    } catch (error) {
-      // QuotaExceededError u otros errores
-      console.warn(`LocalStorage: Error al guardar '${key}'`, error);
+    } catch {
       return false;
     }
   }

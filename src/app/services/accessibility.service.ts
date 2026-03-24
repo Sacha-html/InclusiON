@@ -571,7 +571,6 @@ export class AccessibilityService {
     };
 
     utterance.onerror = (event) => {
-      console.warn('TTS Error:', event.error);
       this.isSpeaking.set(false);
       this.announce('Error al leer el texto');
     };

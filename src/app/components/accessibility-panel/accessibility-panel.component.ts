@@ -1,5 +1,4 @@
 import { Component, inject, HostListener, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IconModule } from '@coreui/icons-angular';
 import { ButtonModule, FormModule, TooltipModule } from '@coreui/angular';
@@ -14,7 +13,6 @@ import {
   selector: 'app-accessibility-panel',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     IconModule,
     ButtonModule,

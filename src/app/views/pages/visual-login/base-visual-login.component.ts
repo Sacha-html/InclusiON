@@ -5,6 +5,18 @@ import { ErrorCode } from '@models';
 import { RoleRoutes } from '../../../shared/constants/roles';
 
 /**
+ * Datos de error de respuesta de login visual.
+ */
+export interface LoginErrorResponse {
+  errorCode?: number;
+  userMessage?: string;
+  isLocked?: boolean;
+  lockoutSecondsRemaining?: number;
+  remainingAttempts?: number;
+  errorMessage?: string;
+}
+
+/**
  * Datos del usuario obtenidos de los query params
  */
 export interface VisualLoginUserData {
@@ -188,7 +200,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
    * @param clearFieldFn Función opcional para limpiar campos del form
    */
   protected handleHttpError(
-    error: any,
+    error: LoginErrorResponse,
     defaultMessage: string,
     clearFieldFn?: () => void
   ): void {
@@ -213,7 +225,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
    * @param clearFieldFn Función opcional para limpiar campos del form
    */
   protected handleLoginResponseError(
-    data: any,
+    data: LoginErrorResponse,
     defaultMessage: string,
     clearFieldFn?: () => void
   ): void {

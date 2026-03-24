@@ -33,7 +33,7 @@ export class ListComponent {
   currentPage = 1;
 
   showConfirmModal = false;
-  itemToDeactivate: any = null;
+  itemToDeactivate: FamilyListItemResponse | null = null;
 
   public cols: TableColumn[] = [
     {
@@ -117,8 +117,8 @@ export class ListComponent {
           this.families = response.data;
           this.totalItems = response.totalRecords;
         },
-        error: (error) => {
-          console.error('Error al obtener familiares:', error);
+        error: () => {
+          this.toastService.error('Error al obtener familiares');
         },
       });
   }

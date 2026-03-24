@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ShapeType } from '../../constants/login-color-shape-set';
 
 /**
@@ -10,7 +9,7 @@ import { ShapeType } from '../../constants/login-color-shape-set';
 @Component({
   selector: 'app-shape',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <button
       type="button"
