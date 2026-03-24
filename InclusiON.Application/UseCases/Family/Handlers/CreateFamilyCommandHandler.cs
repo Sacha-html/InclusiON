@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -53,7 +54,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         ErrorMessages.EmailAlreadyRegistered);
                 }
 
-                var password = $"Temp@{Guid.NewGuid().ToString()[..8]}";
+                var password = PasswordGenerator.GenerateTemporary();
 
                 var user = new User
                 {

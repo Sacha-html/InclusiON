@@ -7,8 +7,6 @@ using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Admin;
 using InclusiON.DTOs.Responses;
-using InclusiON.Shared.Resources;
-
 namespace InclusiON.Api.Controllers
 {
     [Route("api/admin/institutions-assignments")]
@@ -258,15 +256,6 @@ namespace InclusiON.Api.Controllers
             [FromBody] CreateAdminUserRequest request,
             CancellationToken cancellationToken)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<CreateAdminUserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             // Verificar que la institucion existe
             var institution = await _context.EducationalInstitutions
                 .FirstOrDefaultAsync(i => i.Id == request.InstitutionId, cancellationToken);
@@ -285,7 +274,7 @@ namespace InclusiON.Api.Controllers
             }
 
             // Generar contrasena temporal
-            var temporaryPassword = GenerateTemporaryPassword();
+            var temporaryPassword = InclusiON.Application.Helpers.PasswordGenerator.GenerateTemporary();
 
             // Crear usuario
             var user = new User
@@ -346,37 +335,6 @@ namespace InclusiON.Api.Controllers
                 ApiResponse<CreateAdminUserResponse>.SuccessResult(response, "Usuario administrador creado exitosamente."));
         }
 
-        private static string GenerateTemporaryPassword()
-        {
-            const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const string lower = "abcdefghijklmnopqrstuvwxyz";
-            const string digits = "0123456789";
-            const string special = "!@#$%^&*";
-
-            var random = new Random();
-            var password = new char[12];
-
-            // Ensure at least one of each required type
-            password[0] = upper[random.Next(upper.Length)];
-            password[1] = lower[random.Next(lower.Length)];
-            password[2] = digits[random.Next(digits.Length)];
-            password[3] = special[random.Next(special.Length)];
-
-            var all = upper + lower + digits + special;
-            for (int i = 4; i < password.Length; i++)
-            {
-                password[i] = all[random.Next(all.Length)];
-            }
-
-            // Shuffle
-            for (int i = password.Length - 1; i > 0; i--)
-            {
-                int j = random.Next(i + 1);
-                (password[i], password[j]) = (password[j], password[i]);
-            }
-
-            return new string(password);
-        }
     }
 
     /// <summary>

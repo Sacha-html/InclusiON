@@ -59,9 +59,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return person;
         }
 
-        public async Task UpdateAsync(PersonWithDisability person, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(PersonWithDisability person, CancellationToken cancellationToken = default)
         {
             _context.PersonsWithDisability.Update(person);
+            return Task.CompletedTask;
         }
 
         public async Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
@@ -110,14 +111,15 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (institutionId.HasValue)
             {
-                query = query.Where(p =>
-                    _context.ProfessionalPersons.Any(pp =>
-                        pp.PersonId == p.Id &&
-                        pp.IsActive &&
-                        _context.ProfessionalInstitutions.Any(pi =>
-                            pi.ProfessionalId == pp.ProfessionalId &&
-                            pi.InstitutionId == institutionId.Value &&
-                            pi.IsActive)));
+                var personIdsInInstitution = _context.ProfessionalInstitutions
+                    .Where(pi => pi.InstitutionId == institutionId.Value && pi.IsActive)
+                    .Join(_context.ProfessionalPersons.Where(pp => pp.IsActive),
+                        pi => pi.ProfessionalId,
+                        pp => pp.ProfessionalId,
+                        (pi, pp) => pp.PersonId)
+                    .Distinct();
+
+                query = query.Where(p => personIdsInInstitution.Contains(p.Id));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<PersonWithDisability, object>>>
