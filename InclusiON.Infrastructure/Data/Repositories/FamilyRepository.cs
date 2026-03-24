@@ -21,6 +21,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.FamilyRepresentatives
                 .Include(f => f.User)
+                .Include(f => f.PersonRepresentatives)
+                    .ThenInclude(pr => pr.Person)
+                        .ThenInclude(p => p.DisabilityType)
                 .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
         }
 

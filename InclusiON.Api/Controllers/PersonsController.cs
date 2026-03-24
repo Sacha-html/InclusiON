@@ -190,6 +190,25 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        /// <summary>
+        /// Desactiva una persona con discapacidad.
+        /// </summary>
+        [HttpPut("{personId:guid}/deactivate")]
+        [Authorize(Policy = "persons:delete")]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PersonResponse>>> DeactivatePerson(
+            Guid personId,
+            [FromServices] ICommandHandler<DeactivatePersonCommand, ApiResponse<PersonResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new DeactivatePersonCommand(personId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
         #endregion
 
         #region Login Method

@@ -15,5 +15,6 @@ namespace InclusiON.DTOs.Responses.Family
         public DateTime? UpdatedAt { get; set; }
         public string? TemporaryPassword { get; set; }
         public string? Email { get; set; }
+        public List<LinkedPersonInfo>? LinkedPersons { get; set; }
     }
 }
