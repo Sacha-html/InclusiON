@@ -65,7 +65,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             bool? isActive,
             SortField? sortBy,
             string sortDirection,
-            int? institutionId = null,
+            List<int>? institutionIds = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.Professionals
@@ -94,10 +94,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(p => p.User.IsActive == isActive.Value);
             }
 
-            if (institutionId.HasValue)
+            if (institutionIds is not null && institutionIds.Count > 0)
             {
                 var professionalIdsInInstitution = _context.ProfessionalInstitutions
-                    .Where(pi => pi.InstitutionId == institutionId.Value && pi.IsActive)
+                    .Where(pi => institutionIds.Contains(pi.InstitutionId) && pi.IsActive)
                     .Select(pi => pi.ProfessionalId)
                     .Distinct();
 

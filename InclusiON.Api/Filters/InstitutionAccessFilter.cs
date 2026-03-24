@@ -41,7 +41,7 @@ namespace InclusiON.Api.Filters
                 {
                     filterable.InstitutionIds = new List<int> { filterable.InstitutionId.Value };
                 }
-                // Si no mando filtro, InstitutionIds queda null = ve todo
+                // Si no mando filtro, InstitutionIds queda null = ve todas 
 
                 await next();
                 return;
