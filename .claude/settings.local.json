@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(mv 07-accesibilidad.md REF-accesibilidad.md)",
+      "Bash(mv 08-autenticacion.md REF-autenticacion.md)",
+      "Bash(xargs basename:*)"
+    ]
+  }
+}
