@@ -96,10 +96,7 @@ namespace InclusiON.Infrastructure.Services
                 return null;
             }
 
-            var userIdClaim = user.FindFirst("sub") ??
-                user.FindFirst("userId") ??
-                user.FindFirst(ClaimTypes.NameIdentifier) ??
-                user.FindFirst("id");
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
             {

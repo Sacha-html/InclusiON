@@ -59,9 +59,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return invitation;
         }
 
-        public async Task UpdateAsync(Invitation invitation, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(Invitation invitation, CancellationToken cancellationToken = default)
         {
             _context.Invitations.Update(invitation);
+            return Task.CompletedTask;
         }
 
         public async Task<FamilyRepresentative> CreateFamilyRepresentativeAsync(FamilyRepresentative representative, CancellationToken cancellationToken = default)

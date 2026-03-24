@@ -50,9 +50,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return representative;
         }
 
-        public async Task UpdateAsync(FamilyRepresentative representative, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(FamilyRepresentative representative, CancellationToken cancellationToken = default)
         {
             _context.FamilyRepresentatives.Update(representative);
+            return Task.CompletedTask;
         }
 
         public async Task<PagedResponse<FamilyRepresentative>> GetPagedAsync(
@@ -82,17 +83,19 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (institutionId.HasValue)
             {
-                query = query.Where(f =>
-                    _context.PersonRepresentatives.Any(pr =>
-                        pr.RepresentativeId == f.Id &&
-                        pr.IsActive &&
-                        _context.ProfessionalPersons.Any(pp =>
-                            pp.PersonId == pr.PersonId &&
-                            pp.IsActive &&
-                            _context.ProfessionalInstitutions.Any(pi =>
-                                pi.ProfessionalId == pp.ProfessionalId &&
-                                pi.InstitutionId == institutionId.Value &&
-                                pi.IsActive))));
+                var representativeIdsInInstitution = _context.ProfessionalInstitutions
+                    .Where(pi => pi.InstitutionId == institutionId.Value && pi.IsActive)
+                    .Join(_context.ProfessionalPersons.Where(pp => pp.IsActive),
+                        pi => pi.ProfessionalId,
+                        pp => pp.ProfessionalId,
+                        (pi, pp) => pp.PersonId)
+                    .Join(_context.PersonRepresentatives.Where(pr => pr.IsActive),
+                        personId => personId,
+                        pr => pr.PersonId,
+                        (personId, pr) => pr.RepresentativeId)
+                    .Distinct();
+
+                query = query.Where(f => representativeIdsInInstitution.Contains(f.Id));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<FamilyRepresentative, object>>>

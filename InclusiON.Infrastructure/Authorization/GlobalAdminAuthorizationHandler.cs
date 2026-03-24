@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using InclusiON.Application.Constants;
 
 namespace InclusiON.Infrastructure.Authorization
 {
@@ -16,7 +17,7 @@ namespace InclusiON.Infrastructure.Authorization
             }
 
             var isGlobalAdmin = context.User.Claims
-                .FirstOrDefault(c => c.Type == "isGlobalAdmin")?.Value == "true";
+                .FirstOrDefault(c => c.Type == Permissions.GlobalAdminClaimType)?.Value == "true";
 
             if (isGlobalAdmin)
             {

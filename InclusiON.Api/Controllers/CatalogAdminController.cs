@@ -1,8 +1,10 @@
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Catalogs;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
@@ -36,39 +38,21 @@ namespace InclusiON.Api.Controllers
         [HttpPost("disability-types")]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> CreateDisabilityType(
+        public Task<ActionResult<ApiResponse<CatalogItemResponse>>> CreateDisabilityType(
             [FromBody] CreateDisabilityTypeRequest request,
             CancellationToken cancellationToken)
         {
-            var exists = await _context.Set<DisabilityType>()
-                .AnyAsync(x => x.Name == request.Name, cancellationToken);
-
-            if (exists)
-            {
-                return Conflict(ApiResponse<CatalogItemResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un tipo de discapacidad con el nombre '{request.Name}'"));
-            }
-
-            var entity = new DisabilityType
-            {
-                Name = request.Name,
-                Description = request.Description,
-                IsActive = true
-            };
-
-            _context.Set<DisabilityType>().Add(entity);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new CatalogItemResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description
-            };
-
-            return StatusCode(StatusCodes.Status201Created,
-                ApiResponse<CatalogItemResponse>.SuccessResult(response, "Tipo de discapacidad creado exitosamente"));
+            return CreateCatalogAsync<DisabilityType, CatalogItemResponse>(
+                duplicateCheck: x => x.Name == request.Name,
+                createEntity: () => new DisabilityType
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    IsActive = true
+                },
+                toResponse: e => new CatalogItemResponse { Id = e.Id, Name = e.Name, Description = e.Description },
+                "Tipo de discapacidad",
+                cancellationToken);
         }
 
         /// <summary>
@@ -78,43 +62,21 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> UpdateDisabilityType(
-            int id,
-            [FromBody] UpdateDisabilityTypeRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<CatalogItemResponse>>> UpdateDisabilityType(
+            int id, [FromBody] UpdateDisabilityTypeRequest request, CancellationToken cancellationToken)
         {
-            var entity = await _context.Set<DisabilityType>()
-                .FindAsync(new object[] { id }, cancellationToken);
-
-            if (entity == null)
-            {
-                return NotFound(ApiResponse<CatalogItemResponse>.NotFound("Tipo de discapacidad"));
-            }
-
-            var duplicate = await _context.Set<DisabilityType>()
-                .AnyAsync(x => x.Name == request.Name && x.Id != id, cancellationToken);
-
-            if (duplicate)
-            {
-                return Conflict(ApiResponse<CatalogItemResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un tipo de discapacidad con el nombre '{request.Name}'"));
-            }
-
-            entity.Name = request.Name;
-            entity.Description = request.Description;
-            entity.IsActive = request.IsActive;
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new CatalogItemResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description
-            };
-
-            return Ok(ApiResponse<CatalogItemResponse>.SuccessResult(response, "Tipo de discapacidad actualizado exitosamente"));
+            return UpdateCatalogAsync<DisabilityType, CatalogItemResponse>(
+                id,
+                duplicateCheck: x => x.Name == request.Name && x.Id != id,
+                updateEntity: e =>
+                {
+                    e.Name = request.Name;
+                    e.Description = request.Description;
+                    e.IsActive = request.IsActive;
+                },
+                toResponse: e => new CatalogItemResponse { Id = e.Id, Name = e.Name, Description = e.Description },
+                "Tipo de discapacidad",
+                cancellationToken);
         }
 
         #endregion
@@ -127,43 +89,26 @@ namespace InclusiON.Api.Controllers
         [HttpPost("autonomy-levels")]
         [ProducesResponseType(typeof(ApiResponse<AutonomyLevelResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<AutonomyLevelResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<AutonomyLevelResponse>>> CreateAutonomyLevel(
-            [FromBody] CreateAutonomyLevelRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<AutonomyLevelResponse>>> CreateAutonomyLevel(
+            [FromBody] CreateAutonomyLevelRequest request, CancellationToken cancellationToken)
         {
-            var exists = await _context.Set<AutonomyLevel>()
-                .AnyAsync(x => x.Name == request.Name, cancellationToken);
-
-            if (exists)
-            {
-                return Conflict(ApiResponse<AutonomyLevelResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un nivel de autonomia con el nombre '{request.Name}'"));
-            }
-
-            var entity = new AutonomyLevel
-            {
-                Name = request.Name,
-                Description = request.Description,
-                RequiresSupervision = request.RequiresSupervision,
-                DisplayOrder = request.DisplayOrder,
-                IsActive = true
-            };
-
-            _context.Set<AutonomyLevel>().Add(entity);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new AutonomyLevelResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description,
-                RequiresSupervision = entity.RequiresSupervision,
-                DisplayOrder = entity.DisplayOrder
-            };
-
-            return StatusCode(StatusCodes.Status201Created,
-                ApiResponse<AutonomyLevelResponse>.SuccessResult(response, "Nivel de autonomia creado exitosamente"));
+            return CreateCatalogAsync<AutonomyLevel, AutonomyLevelResponse>(
+                duplicateCheck: x => x.Name == request.Name,
+                createEntity: () => new AutonomyLevel
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    RequiresSupervision = request.RequiresSupervision,
+                    DisplayOrder = request.DisplayOrder,
+                    IsActive = true
+                },
+                toResponse: e => new AutonomyLevelResponse
+                {
+                    Id = e.Id, Name = e.Name, Description = e.Description,
+                    RequiresSupervision = e.RequiresSupervision, DisplayOrder = e.DisplayOrder
+                },
+                "Nivel de autonomia",
+                cancellationToken);
         }
 
         /// <summary>
@@ -173,47 +118,27 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<AutonomyLevelResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AutonomyLevelResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<AutonomyLevelResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<AutonomyLevelResponse>>> UpdateAutonomyLevel(
-            int id,
-            [FromBody] UpdateAutonomyLevelRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<AutonomyLevelResponse>>> UpdateAutonomyLevel(
+            int id, [FromBody] UpdateAutonomyLevelRequest request, CancellationToken cancellationToken)
         {
-            var entity = await _context.Set<AutonomyLevel>()
-                .FindAsync(new object[] { id }, cancellationToken);
-
-            if (entity == null)
-            {
-                return NotFound(ApiResponse<AutonomyLevelResponse>.NotFound("Nivel de autonomia"));
-            }
-
-            var duplicate = await _context.Set<AutonomyLevel>()
-                .AnyAsync(x => x.Name == request.Name && x.Id != id, cancellationToken);
-
-            if (duplicate)
-            {
-                return Conflict(ApiResponse<AutonomyLevelResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un nivel de autonomia con el nombre '{request.Name}'"));
-            }
-
-            entity.Name = request.Name;
-            entity.Description = request.Description;
-            entity.RequiresSupervision = request.RequiresSupervision;
-            entity.DisplayOrder = request.DisplayOrder;
-            entity.IsActive = request.IsActive;
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new AutonomyLevelResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description,
-                RequiresSupervision = entity.RequiresSupervision,
-                DisplayOrder = entity.DisplayOrder
-            };
-
-            return Ok(ApiResponse<AutonomyLevelResponse>.SuccessResult(response, "Nivel de autonomia actualizado exitosamente"));
+            return UpdateCatalogAsync<AutonomyLevel, AutonomyLevelResponse>(
+                id,
+                duplicateCheck: x => x.Name == request.Name && x.Id != id,
+                updateEntity: e =>
+                {
+                    e.Name = request.Name;
+                    e.Description = request.Description;
+                    e.RequiresSupervision = request.RequiresSupervision;
+                    e.DisplayOrder = request.DisplayOrder;
+                    e.IsActive = request.IsActive;
+                },
+                toResponse: e => new AutonomyLevelResponse
+                {
+                    Id = e.Id, Name = e.Name, Description = e.Description,
+                    RequiresSupervision = e.RequiresSupervision, DisplayOrder = e.DisplayOrder
+                },
+                "Nivel de autonomia",
+                cancellationToken);
         }
 
         #endregion
@@ -226,39 +151,20 @@ namespace InclusiON.Api.Controllers
         [HttpPost("activity-categories")]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> CreateActivityCategory(
-            [FromBody] CreateActivityCategoryRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<CatalogItemResponse>>> CreateActivityCategory(
+            [FromBody] CreateActivityCategoryRequest request, CancellationToken cancellationToken)
         {
-            var exists = await _context.Set<ActivityCategory>()
-                .AnyAsync(x => x.Name == request.Name, cancellationToken);
-
-            if (exists)
-            {
-                return Conflict(ApiResponse<CatalogItemResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe una categoria de actividad con el nombre '{request.Name}'"));
-            }
-
-            var entity = new ActivityCategory
-            {
-                Name = request.Name,
-                Description = request.Description,
-                IsActive = true
-            };
-
-            _context.Set<ActivityCategory>().Add(entity);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new CatalogItemResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description
-            };
-
-            return StatusCode(StatusCodes.Status201Created,
-                ApiResponse<CatalogItemResponse>.SuccessResult(response, "Categoria de actividad creada exitosamente"));
+            return CreateCatalogAsync<ActivityCategory, CatalogItemResponse>(
+                duplicateCheck: x => x.Name == request.Name,
+                createEntity: () => new ActivityCategory
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    IsActive = true
+                },
+                toResponse: e => new CatalogItemResponse { Id = e.Id, Name = e.Name, Description = e.Description },
+                "Categoria de actividad",
+                cancellationToken);
         }
 
         /// <summary>
@@ -268,43 +174,21 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> UpdateActivityCategory(
-            int id,
-            [FromBody] UpdateActivityCategoryRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<CatalogItemResponse>>> UpdateActivityCategory(
+            int id, [FromBody] UpdateActivityCategoryRequest request, CancellationToken cancellationToken)
         {
-            var entity = await _context.Set<ActivityCategory>()
-                .FindAsync(new object[] { id }, cancellationToken);
-
-            if (entity == null)
-            {
-                return NotFound(ApiResponse<CatalogItemResponse>.NotFound("Categoria de actividad"));
-            }
-
-            var duplicate = await _context.Set<ActivityCategory>()
-                .AnyAsync(x => x.Name == request.Name && x.Id != id, cancellationToken);
-
-            if (duplicate)
-            {
-                return Conflict(ApiResponse<CatalogItemResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe una categoria de actividad con el nombre '{request.Name}'"));
-            }
-
-            entity.Name = request.Name;
-            entity.Description = request.Description;
-            entity.IsActive = request.IsActive;
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new CatalogItemResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description
-            };
-
-            return Ok(ApiResponse<CatalogItemResponse>.SuccessResult(response, "Categoria de actividad actualizada exitosamente"));
+            return UpdateCatalogAsync<ActivityCategory, CatalogItemResponse>(
+                id,
+                duplicateCheck: x => x.Name == request.Name && x.Id != id,
+                updateEntity: e =>
+                {
+                    e.Name = request.Name;
+                    e.Description = request.Description;
+                    e.IsActive = request.IsActive;
+                },
+                toResponse: e => new CatalogItemResponse { Id = e.Id, Name = e.Name, Description = e.Description },
+                "Categoria de actividad",
+                cancellationToken);
         }
 
         #endregion
@@ -317,46 +201,28 @@ namespace InclusiON.Api.Controllers
         [HttpPost("skill-areas")]
         [ProducesResponseType(typeof(ApiResponse<SkillAreaResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<SkillAreaResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<SkillAreaResponse>>> CreateSkillArea(
-            [FromBody] CreateSkillAreaRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<SkillAreaResponse>>> CreateSkillArea(
+            [FromBody] CreateSkillAreaRequest request, CancellationToken cancellationToken)
         {
-            var exists = await _context.Set<SkillArea>()
-                .AnyAsync(x => x.Name == request.Name, cancellationToken);
-
-            if (exists)
-            {
-                return Conflict(ApiResponse<SkillAreaResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un area de habilidad con el nombre '{request.Name}'"));
-            }
-
-            var entity = new SkillArea
-            {
-                Name = request.Name,
-                Description = request.Description,
-                Icon = request.Icon,
-                Color = request.Color,
-                DisplayOrder = request.DisplayOrder,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Set<SkillArea>().Add(entity);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new SkillAreaResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description,
-                Icon = entity.Icon,
-                Color = entity.Color,
-                DisplayOrder = entity.DisplayOrder
-            };
-
-            return StatusCode(StatusCodes.Status201Created,
-                ApiResponse<SkillAreaResponse>.SuccessResult(response, "Area de habilidad creada exitosamente"));
+            return CreateCatalogAsync<SkillArea, SkillAreaResponse>(
+                duplicateCheck: x => x.Name == request.Name,
+                createEntity: () => new SkillArea
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    Icon = request.Icon,
+                    Color = request.Color,
+                    DisplayOrder = request.DisplayOrder,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                },
+                toResponse: e => new SkillAreaResponse
+                {
+                    Id = e.Id, Name = e.Name, Description = e.Description,
+                    Icon = e.Icon, Color = e.Color, DisplayOrder = e.DisplayOrder
+                },
+                "Area de habilidad",
+                cancellationToken);
         }
 
         /// <summary>
@@ -366,50 +232,29 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<SkillAreaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<SkillAreaResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<SkillAreaResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<SkillAreaResponse>>> UpdateSkillArea(
-            int id,
-            [FromBody] UpdateSkillAreaRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<SkillAreaResponse>>> UpdateSkillArea(
+            int id, [FromBody] UpdateSkillAreaRequest request, CancellationToken cancellationToken)
         {
-            var entity = await _context.Set<SkillArea>()
-                .FindAsync(new object[] { id }, cancellationToken);
-
-            if (entity == null)
-            {
-                return NotFound(ApiResponse<SkillAreaResponse>.NotFound("Area de habilidad"));
-            }
-
-            var duplicate = await _context.Set<SkillArea>()
-                .AnyAsync(x => x.Name == request.Name && x.Id != id, cancellationToken);
-
-            if (duplicate)
-            {
-                return Conflict(ApiResponse<SkillAreaResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un area de habilidad con el nombre '{request.Name}'"));
-            }
-
-            entity.Name = request.Name;
-            entity.Description = request.Description;
-            entity.Icon = request.Icon;
-            entity.Color = request.Color;
-            entity.DisplayOrder = request.DisplayOrder;
-            entity.IsActive = request.IsActive;
-            entity.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new SkillAreaResponse
-            {
-                Id = entity.Id,
-                Name = entity.Name,
-                Description = entity.Description,
-                Icon = entity.Icon,
-                Color = entity.Color,
-                DisplayOrder = entity.DisplayOrder
-            };
-
-            return Ok(ApiResponse<SkillAreaResponse>.SuccessResult(response, "Area de habilidad actualizada exitosamente"));
+            return UpdateCatalogAsync<SkillArea, SkillAreaResponse>(
+                id,
+                duplicateCheck: x => x.Name == request.Name && x.Id != id,
+                updateEntity: e =>
+                {
+                    e.Name = request.Name;
+                    e.Description = request.Description;
+                    e.Icon = request.Icon;
+                    e.Color = request.Color;
+                    e.DisplayOrder = request.DisplayOrder;
+                    e.IsActive = request.IsActive;
+                    e.UpdatedAt = DateTime.UtcNow;
+                },
+                toResponse: e => new SkillAreaResponse
+                {
+                    Id = e.Id, Name = e.Name, Description = e.Description,
+                    Icon = e.Icon, Color = e.Color, DisplayOrder = e.DisplayOrder
+                },
+                "Area de habilidad",
+                cancellationToken);
         }
 
         #endregion
@@ -423,61 +268,33 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityTemplateTypeResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<ActivityTemplateTypeResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<ActivityTemplateTypeResponse>>> CreateActivityTemplateType(
-            [FromBody] CreateActivityTemplateTypeRequest request,
-            CancellationToken cancellationToken)
+            [FromBody] CreateActivityTemplateTypeRequest request, CancellationToken cancellationToken)
         {
             var skillAreaExists = await _context.Set<SkillArea>()
                 .AnyAsync(x => x.Id == request.SkillAreaId, cancellationToken);
 
             if (!skillAreaExists)
-            {
                 return NotFound(ApiResponse<ActivityTemplateTypeResponse>.NotFound("Area de habilidad"));
-            }
 
-            var exists = await _context.Set<ActivityTemplateType>()
-                .AnyAsync(x => x.Name == request.Name || x.Code == request.Code, cancellationToken);
-
-            if (exists)
-            {
-                return Conflict(ApiResponse<ActivityTemplateTypeResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un tipo de plantilla con el nombre '{request.Name}' o codigo '{request.Code}'"));
-            }
-
-            var entity = new ActivityTemplateType
-            {
-                SkillAreaId = request.SkillAreaId,
-                Name = request.Name,
-                Code = request.Code,
-                Description = request.Description,
-                ContentSchema = request.ContentSchema,
-                ComponentName = request.ComponentName,
-                UsesPictograms = request.UsesPictograms,
-                HasAudio = request.HasAudio,
-                DisplayOrder = request.DisplayOrder,
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Set<ActivityTemplateType>().Add(entity);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new ActivityTemplateTypeResponse
-            {
-                Id = entity.Id,
-                SkillAreaId = entity.SkillAreaId,
-                Name = entity.Name,
-                Code = entity.Code,
-                Description = entity.Description,
-                ContentSchema = entity.ContentSchema,
-                ComponentName = entity.ComponentName,
-                UsesPictograms = entity.UsesPictograms,
-                HasAudio = entity.HasAudio,
-                DisplayOrder = entity.DisplayOrder
-            };
-
-            return StatusCode(StatusCodes.Status201Created,
-                ApiResponse<ActivityTemplateTypeResponse>.SuccessResult(response, "Tipo de plantilla de actividad creado exitosamente"));
+            return await CreateCatalogAsync<ActivityTemplateType, ActivityTemplateTypeResponse>(
+                duplicateCheck: x => x.Name == request.Name || x.Code == request.Code,
+                createEntity: () => new ActivityTemplateType
+                {
+                    SkillAreaId = request.SkillAreaId,
+                    Name = request.Name,
+                    Code = request.Code,
+                    Description = request.Description,
+                    ContentSchema = request.ContentSchema,
+                    ComponentName = request.ComponentName,
+                    UsesPictograms = request.UsesPictograms,
+                    HasAudio = request.HasAudio,
+                    DisplayOrder = request.DisplayOrder,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                },
+                toResponse: MapActivityTemplateType,
+                "Tipo de plantilla de actividad",
+                cancellationToken);
         }
 
         /// <summary>
@@ -488,65 +305,34 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityTemplateTypeResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<ActivityTemplateTypeResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<ActivityTemplateTypeResponse>>> UpdateActivityTemplateType(
-            int id,
-            [FromBody] UpdateActivityTemplateTypeRequest request,
-            CancellationToken cancellationToken)
+            int id, [FromBody] UpdateActivityTemplateTypeRequest request, CancellationToken cancellationToken)
         {
-            var entity = await _context.Set<ActivityTemplateType>()
-                .FindAsync(new object[] { id }, cancellationToken);
-
-            if (entity == null)
-            {
-                return NotFound(ApiResponse<ActivityTemplateTypeResponse>.NotFound("Tipo de plantilla de actividad"));
-            }
-
             var skillAreaExists = await _context.Set<SkillArea>()
                 .AnyAsync(x => x.Id == request.SkillAreaId, cancellationToken);
 
             if (!skillAreaExists)
-            {
                 return NotFound(ApiResponse<ActivityTemplateTypeResponse>.NotFound("Area de habilidad"));
-            }
 
-            var duplicate = await _context.Set<ActivityTemplateType>()
-                .AnyAsync(x => (x.Name == request.Name || x.Code == request.Code) && x.Id != id, cancellationToken);
-
-            if (duplicate)
-            {
-                return Conflict(ApiResponse<ActivityTemplateTypeResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un tipo de plantilla con el nombre '{request.Name}' o codigo '{request.Code}'"));
-            }
-
-            entity.SkillAreaId = request.SkillAreaId;
-            entity.Name = request.Name;
-            entity.Code = request.Code;
-            entity.Description = request.Description;
-            entity.ContentSchema = request.ContentSchema;
-            entity.ComponentName = request.ComponentName;
-            entity.UsesPictograms = request.UsesPictograms;
-            entity.HasAudio = request.HasAudio;
-            entity.DisplayOrder = request.DisplayOrder;
-            entity.IsActive = request.IsActive;
-            entity.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            var response = new ActivityTemplateTypeResponse
-            {
-                Id = entity.Id,
-                SkillAreaId = entity.SkillAreaId,
-                Name = entity.Name,
-                Code = entity.Code,
-                Description = entity.Description,
-                ContentSchema = entity.ContentSchema,
-                ComponentName = entity.ComponentName,
-                UsesPictograms = entity.UsesPictograms,
-                HasAudio = entity.HasAudio,
-                DisplayOrder = entity.DisplayOrder
-            };
-
-            return Ok(ApiResponse<ActivityTemplateTypeResponse>.SuccessResult(response, "Tipo de plantilla de actividad actualizado exitosamente"));
+            return await UpdateCatalogAsync<ActivityTemplateType, ActivityTemplateTypeResponse>(
+                id,
+                duplicateCheck: x => (x.Name == request.Name || x.Code == request.Code) && x.Id != id,
+                updateEntity: e =>
+                {
+                    e.SkillAreaId = request.SkillAreaId;
+                    e.Name = request.Name;
+                    e.Code = request.Code;
+                    e.Description = request.Description;
+                    e.ContentSchema = request.ContentSchema;
+                    e.ComponentName = request.ComponentName;
+                    e.UsesPictograms = request.UsesPictograms;
+                    e.HasAudio = request.HasAudio;
+                    e.DisplayOrder = request.DisplayOrder;
+                    e.IsActive = request.IsActive;
+                    e.UpdatedAt = DateTime.UtcNow;
+                },
+                toResponse: MapActivityTemplateType,
+                "Tipo de plantilla de actividad",
+                cancellationToken);
         }
 
         #endregion
@@ -560,50 +346,93 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<LoginMethodResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<LoginMethodResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<LoginMethodResponse>), StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<ApiResponse<LoginMethodResponse>>> UpdateLoginMethod(
-            int id,
-            [FromBody] UpdateLoginMethodCatalogRequest request,
-            CancellationToken cancellationToken)
+        public Task<ActionResult<ApiResponse<LoginMethodResponse>>> UpdateLoginMethod(
+            int id, [FromBody] UpdateLoginMethodCatalogRequest request, CancellationToken cancellationToken)
         {
-            var entity = await _context.Set<LoginMethod>()
-                .FindAsync(new object[] { id }, cancellationToken);
+            return UpdateCatalogAsync<LoginMethod, LoginMethodResponse>(
+                id,
+                duplicateCheck: x => x.Name == request.Name && x.Id != id,
+                updateEntity: e =>
+                {
+                    e.Name = request.Name;
+                    e.Description = request.Description;
+                    e.DisplayOrder = request.DisplayOrder;
+                    e.IsActive = request.IsActive;
+                },
+                toResponse: e => new LoginMethodResponse
+                {
+                    Id = e.Id, Code = e.Code, Name = e.Name, Description = e.Description,
+                    RequiresPassword = e.RequiresPassword, RequiresPin = e.RequiresPin,
+                    RequiresSupervisor = e.RequiresSupervisor, DisplayOrder = e.DisplayOrder
+                },
+                "Metodo de login",
+                cancellationToken);
+        }
 
-            if (entity == null)
+        #endregion
+
+        #region Generic Helpers
+
+        private async Task<ActionResult<ApiResponse<TResponse>>> CreateCatalogAsync<TEntity, TResponse>(
+            Expression<Func<TEntity, bool>> duplicateCheck,
+            Func<TEntity> createEntity,
+            Func<TEntity, TResponse> toResponse,
+            string entityDisplayName,
+            CancellationToken cancellationToken)
+            where TEntity : class
+            where TResponse : class
+        {
+            var exists = await _context.Set<TEntity>().AnyAsync(duplicateCheck, cancellationToken);
+            if (exists)
             {
-                return NotFound(ApiResponse<LoginMethodResponse>.NotFound("Metodo de login"));
+                return Conflict(ApiResponse<TResponse>.Conflict(
+                    ErrorCode.DuplicateEntry,
+                    $"Ya existe un(a) {entityDisplayName.ToLower()} con ese nombre"));
             }
 
-            var duplicate = await _context.Set<LoginMethod>()
-                .AnyAsync(x => x.Name == request.Name && x.Id != id, cancellationToken);
-
-            if (duplicate)
-            {
-                return Conflict(ApiResponse<LoginMethodResponse>.Conflict(
-                    DTOs.Common.ErrorCode.DuplicateEntry,
-                    $"Ya existe un metodo de login con el nombre '{request.Name}'"));
-            }
-
-            entity.Name = request.Name;
-            entity.Description = request.Description;
-            entity.DisplayOrder = request.DisplayOrder;
-            entity.IsActive = request.IsActive;
-
+            var entity = createEntity();
+            _context.Set<TEntity>().Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            var response = new LoginMethodResponse
-            {
-                Id = entity.Id,
-                Code = entity.Code,
-                Name = entity.Name,
-                Description = entity.Description,
-                RequiresPassword = entity.RequiresPassword,
-                RequiresPin = entity.RequiresPin,
-                RequiresSupervisor = entity.RequiresSupervisor,
-                DisplayOrder = entity.DisplayOrder
-            };
-
-            return Ok(ApiResponse<LoginMethodResponse>.SuccessResult(response, "Metodo de login actualizado exitosamente"));
+            return StatusCode(StatusCodes.Status201Created,
+                ApiResponse<TResponse>.SuccessResult(toResponse(entity), $"{entityDisplayName} creado(a) exitosamente"));
         }
+
+        private async Task<ActionResult<ApiResponse<TResponse>>> UpdateCatalogAsync<TEntity, TResponse>(
+            int id,
+            Expression<Func<TEntity, bool>> duplicateCheck,
+            Action<TEntity> updateEntity,
+            Func<TEntity, TResponse> toResponse,
+            string entityDisplayName,
+            CancellationToken cancellationToken)
+            where TEntity : class
+            where TResponse : class
+        {
+            var entity = await _context.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken);
+            if (entity == null)
+                return NotFound(ApiResponse<TResponse>.NotFound(entityDisplayName));
+
+            var duplicate = await _context.Set<TEntity>().AnyAsync(duplicateCheck, cancellationToken);
+            if (duplicate)
+            {
+                return Conflict(ApiResponse<TResponse>.Conflict(
+                    ErrorCode.DuplicateEntry,
+                    $"Ya existe un(a) {entityDisplayName.ToLower()} con ese nombre"));
+            }
+
+            updateEntity(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Ok(ApiResponse<TResponse>.SuccessResult(toResponse(entity), $"{entityDisplayName} actualizado(a) exitosamente"));
+        }
+
+        private static ActivityTemplateTypeResponse MapActivityTemplateType(ActivityTemplateType e) => new()
+        {
+            Id = e.Id, SkillAreaId = e.SkillAreaId, Name = e.Name, Code = e.Code,
+            Description = e.Description, ContentSchema = e.ContentSchema,
+            ComponentName = e.ComponentName, UsesPictograms = e.UsesPictograms,
+            HasAudio = e.HasAudio, DisplayOrder = e.DisplayOrder
+        };
 
         #endregion
     }

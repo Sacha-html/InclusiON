@@ -121,14 +121,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<ProfessionalResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new CreateProfessionalCommand(
                 request.FirstName,
@@ -171,14 +163,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<ProfessionalResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new UpdateProfessionalCommand(
                 professionalId,

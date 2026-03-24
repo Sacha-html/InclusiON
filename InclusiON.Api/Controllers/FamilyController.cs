@@ -8,8 +8,6 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Family;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Family;
-using InclusiON.Shared.Resources;
-
 namespace InclusiON.Api.Controllers
 {
     [Route("api/[controller]")]
@@ -65,14 +63,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreateFamilyCommand, ApiResponse<FamilyResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<FamilyResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new CreateFamilyCommand(
                 request.FirstName,
@@ -106,14 +96,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateFamilyCommand, ApiResponse<FamilyResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<FamilyResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new UpdateFamilyCommand(
                 familyId,

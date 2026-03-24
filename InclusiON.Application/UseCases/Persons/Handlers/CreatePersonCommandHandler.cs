@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -52,7 +53,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 // Generar email y username unicos basados en nombre
                 var baseUsername = GenerateUsername(command.FirstName, command.LastName);
                 var email = $"{baseUsername}@inclusion.local";
-                var password = GenerateDefaultPassword();
+                var password = PasswordGenerator.GenerateTemporary();
 
                 // Crear usuario
                 var user = new User
@@ -175,11 +176,6 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             var baseUsername = $"{firstName.ToLower().Replace(" ", "")}.{lastName.ToLower().Replace(" ", "")}";
             var timestamp = DateTime.UtcNow.Ticks % 10000;
             return $"{baseUsername}{timestamp}";
-        }
-
-        private static string GenerateDefaultPassword()
-        {
-            return $"Temp@{Guid.NewGuid().ToString()[..8]}";
         }
 
         private static string GenerateRandomColor()

@@ -7,8 +7,6 @@ using InclusiON.Application.UseCases.Assignments.Queries;
 using InclusiON.DTOs.Requests.Assignments;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Assignments;
-using InclusiON.Shared.Resources;
-
 namespace InclusiON.Api.Controllers
 {
     /// <summary>
@@ -51,14 +49,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<AssignPersonCommand, ApiResponse<ProfessionalPersonResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<ProfessionalPersonResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new AssignPersonCommand(
                 professionalId,
@@ -122,15 +112,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<AssignInstitutionCommand, ApiResponse<ProfessionalInstitutionResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<ProfessionalInstitutionResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new AssignInstitutionCommand(
                 professionalId,
                 request.InstitutionId);
