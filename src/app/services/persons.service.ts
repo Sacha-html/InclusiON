@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   ApiResponse,
   PagedResponse,
@@ -12,12 +12,13 @@ import {
   GetPersonsRequest,
 } from '@models';
 import { environment } from '@env';
+import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PersonsService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   private get apiUrl(): string {
     return `${environment.apiUrl}/Persons`;
@@ -29,7 +30,7 @@ export class PersonsService {
    */
   getPersons(
     request?: GetPersonsRequest
-  ): Observable<ApiResponse<PagedResponse<PersonListItemResponse>>> {
+  ): Observable<PagedResponse<PersonListItemResponse>> {
     let params = new HttpParams();
 
     if (request) {
@@ -72,27 +73,27 @@ export class PersonsService {
       .get<ApiResponse<PagedResponse<PersonListItemResponse>>>(this.apiUrl, {
         params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
    * Obtiene una persona por su ID.
    * Requiere rol ValidUser.
    */
-  getPersonById(personId: string): Observable<ApiResponse<PersonResponse>> {
+  getPersonById(personId: string): Observable<PersonResponse> {
     return this.http
       .get<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}`)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
    * Obtiene el perfil de la persona autenticada.
    * Requiere autenticación.
    */
-  getMyProfile(): Observable<ApiResponse<PersonResponse>> {
+  getMyProfile(): Observable<PersonResponse> {
     return this.http
       .get<ApiResponse<PersonResponse>>(`${this.apiUrl}/me`)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -101,10 +102,10 @@ export class PersonsService {
    */
   createPerson(
     request: CreatePersonRequest
-  ): Observable<ApiResponse<PersonResponse>> {
+  ): Observable<PersonResponse> {
     return this.http
       .post<ApiResponse<PersonResponse>>(this.apiUrl, request)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -114,10 +115,10 @@ export class PersonsService {
   updatePerson(
     personId: string,
     request: UpdatePersonRequest
-  ): Observable<ApiResponse<PersonResponse>> {
+  ): Observable<PersonResponse> {
     return this.http
       .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}`, request)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -126,10 +127,10 @@ export class PersonsService {
    */
   updateMyProfile(
     request: UpdatePersonRequest
-  ): Observable<ApiResponse<PersonResponse>> {
+  ): Observable<PersonResponse> {
     return this.http
       .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/me`, request)
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -138,7 +139,7 @@ export class PersonsService {
   getSkillProfile(
     personId: string,
     all?: boolean
-  ): Observable<ApiResponse<PersonSkillProfileResponse[]>> {
+  ): Observable<PersonSkillProfileResponse[]> {
     let params = new HttpParams();
     if (all) {
       params = params.set('all', 'true');
@@ -148,7 +149,7 @@ export class PersonsService {
         `${this.apiUrl}/${personId}/skill-profile`,
         { params }
       )
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -157,13 +158,13 @@ export class PersonsService {
   addSkillArea(
     personId: string,
     skillAreaId: number
-  ): Observable<ApiResponse<PersonSkillProfileResponse>> {
+  ): Observable<PersonSkillProfileResponse> {
     return this.http
       .post<ApiResponse<PersonSkillProfileResponse>>(
         `${this.apiUrl}/${personId}/skill-profile`,
         { skillAreaId }
       )
-      .pipe(catchError(this.handleError));
+      .pipe(unwrapResponse());
   }
 
   /**
@@ -172,16 +173,12 @@ export class PersonsService {
   deactivateSkillArea(
     personId: string,
     areaId: number
-  ): Observable<ApiResponse<PersonSkillProfileResponse>> {
+  ): Observable<PersonSkillProfileResponse> {
     return this.http
       .put<ApiResponse<PersonSkillProfileResponse>>(
         `${this.apiUrl}/${personId}/skill-profile/${areaId}`,
         {}
       )
-      .pipe(catchError(this.handleError));
-  }
-
-  private handleError(error: unknown): Observable<never> {
-    return throwError(() => error);
+      .pipe(unwrapResponse());
   }
 }

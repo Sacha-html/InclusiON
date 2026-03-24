@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FamilyService, ToastService } from '@services';
 import { FamilyResponse } from '../../../../models';
+import { formatDateTime } from '@shared/utils';
 import {
   BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormLabelDirective, RowComponent,
@@ -67,13 +68,7 @@ export class DetailComponent implements OnInit {
     this.showConfirmModal = false;
   }
 
-  formatDateTime(date: string | null | undefined): string {
-    if (!date) return 'Sin especificar';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return 'Sin especificar';
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      + ' ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  }
+  formatDateTime = formatDateTime;
 
   goBack(): void {
     this.router.navigate(['/admin/family']);

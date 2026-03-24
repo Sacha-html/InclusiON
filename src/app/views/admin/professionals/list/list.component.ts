@@ -1,40 +1,31 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AdminInstitutionsService, AuthService, ProfessionalsService, ToastService } from '@services';
-import { AdminInstitutionResponse, ProfessionalListItemResponse } from '../../../../models';
+import { AuthService, ProfessionalsService, ToastService } from '@services';
+import { ProfessionalListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
-import {
-  ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
-  FormSelectDirective,
-} from '@coreui/angular';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 
 @Component({
   selector: 'app-list',
   imports: [
-    CommonModule,
-    FormsModule,
     DataTableComponent,
-    ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
-    FormSelectDirective,
+    ConfirmModalComponent,
+    InstitutionFilterComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
-export class ListComponent implements OnInit {
+export class ListComponent {
   private readonly professionalsService = inject(ProfessionalsService);
-  private readonly adminInstitutionsService = inject(AdminInstitutionsService);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   canCreate = this.authService.hasPermission('professionals:create');
 
-  adminInstitutions: AdminInstitutionResponse[] = [];
   selectedInstitutionId: number | undefined;
-  isGlobalAdmin = true;
 
   professionals: ProfessionalListItemResponse[] = [];
   totalItems = 0;
@@ -61,24 +52,8 @@ export class ListComponent implements OnInit {
     { key: 'isActive', label: 'Estado', type: 'badge' },
   ];
 
-  ngOnInit(): void {
-    this.adminInstitutionsService.getMyInstitutions().subscribe({
-      next: (institutions) => {
-        this.adminInstitutions = institutions;
-        if (institutions.length > 0) {
-          this.isGlobalAdmin = false;
-          this.selectedInstitutionId = institutions[0].institutionId;
-        }
-        this.loadProfessionals();
-      },
-      error: () => {
-        // If error (e.g. no assignments), treat as global admin
-        this.loadProfessionals();
-      },
-    });
-  }
-
-  onInstitutionFilterChange(): void {
+  onInstitutionFilterChange(institutionId: number | undefined): void {
+    this.selectedInstitutionId = institutionId;
     this.currentPage = 1;
     this.loadProfessionals();
   }
@@ -142,7 +117,7 @@ export class ListComponent implements OnInit {
     this.itemToDeactivate = null;
   }
 
-  private loadProfessionals(search?: string): void {
+  loadProfessionals(search?: string): void {
     this.professionalsService
       .getProfessionals({
         page: this.currentPage,

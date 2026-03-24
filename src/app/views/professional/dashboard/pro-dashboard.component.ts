@@ -7,6 +7,7 @@ import {
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ProfessionalsService, AssignmentsService, InvitationsService } from '@services';
+import { getInvitationStatusColor } from '@shared/utils';
 import {
   ProfessionalResponse,
   ProfessionalPersonResponse,
@@ -89,14 +90,7 @@ export class ProDashboardComponent implements OnInit {
     this.router.navigate([path]);
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Enviada': return 'info';
-      case 'Aceptada': return 'success';
-      case 'Expirada': return 'danger';
-      default: return 'secondary';
-    }
-  }
+  getStatusColor = getInvitationStatusColor;
 
   getGreeting(): string {
     const hour = new Date().getHours();

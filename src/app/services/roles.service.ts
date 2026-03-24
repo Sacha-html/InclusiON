@@ -2,7 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import { ApiResponse, RoleResponse } from '../models';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { unwrapResponse } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -17,40 +18,24 @@ export class RolesService {
   getRoles(): Observable<RoleResponse[]> {
     return this.http
       .get<ApiResponse<RoleResponse[]>>(this.apiUrl)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   getRoleById(id: string): Observable<RoleResponse> {
     return this.http
       .get<ApiResponse<RoleResponse>>(`${this.apiUrl}/${id}`)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   getAvailablePermissions(): Observable<string[]> {
     return this.http
       .get<ApiResponse<string[]>>(`${this.apiUrl}/available-permissions`)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   updateRolePermissions(roleId: string, permissions: string[]): Observable<RoleResponse> {
     return this.http
       .put<ApiResponse<RoleResponse>>(`${this.apiUrl}/${roleId}/permissions`, { permissions })
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
-  }
-
-  private handleError(error: unknown): Observable<never> {
-    return throwError(() => error);
+      .pipe(unwrapResponse());
   }
 }

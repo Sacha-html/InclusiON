@@ -3,14 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService, CatalogAdminService, ToastService } from '@services';
-import {
-  CatalogItem,
-  AutonomyLevelItem,
-  LoginMethodItem,
-  ActivityCategoryItem,
-  SkillAreaItem,
-  ActivityTemplateTypeItem,
-} from '@models';
+import { Observable } from 'rxjs';
 
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
@@ -18,10 +11,29 @@ import {
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
   FormControlDirective, FormLabelDirective, FormSelectDirective,
   FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-  RowComponent, ColComponent,
 } from '@coreui/angular';
 
 type CatalogType = 'disability-types' | 'autonomy-levels' | 'activity-categories' | 'skill-areas' | 'template-types' | 'login-methods';
+
+interface FieldConfig {
+  key: string;
+  label: string;
+  type: 'text' | 'number' | 'checkbox' | 'color' | 'select';
+  required?: boolean;
+  default?: any;
+  editOnly?: boolean;
+  options?: () => { id: number; name: string }[];
+}
+
+interface CatalogConfig {
+  title: string;
+  canCreate: boolean;
+  columns: { key: string; label: string; render?: (item: any) => string; badge?: (item: any) => { text: string; color: string } }[];
+  fields: FieldConfig[];
+  load: () => Observable<any[]>;
+  create?: (v: any) => Observable<any>;
+  update: (id: number, v: any) => Observable<any>;
+}
 
 @Component({
   selector: 'app-catalogs',
@@ -33,7 +45,6 @@ type CatalogType = 'disability-types' | 'autonomy-levels' | 'activity-categories
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
     FormControlDirective, FormLabelDirective, FormSelectDirective,
     FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-    RowComponent, ColComponent,
   ],
   templateUrl: './catalogs.component.html',
   styleUrl: './catalogs.component.scss',
@@ -46,45 +57,140 @@ export class CatalogsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   catalogType: CatalogType = 'disability-types';
-
-  disabilityTypes: CatalogItem[] = [];
-  autonomyLevels: AutonomyLevelItem[] = [];
-  activityCategories: ActivityCategoryItem[] = [];
-  skillAreas: SkillAreaItem[] = [];
-  templateTypes: ActivityTemplateTypeItem[] = [];
-  loginMethods: LoginMethodItem[] = [];
-
+  items: any[] = [];
   isLoading = true;
   isSaving = false;
   showModal = false;
   modalTitle = '';
   editingId: number | null = null;
+  form!: FormGroup;
 
-  disabilityForm!: FormGroup;
-  autonomyForm!: FormGroup;
-  categoryForm!: FormGroup;
-  skillAreaForm!: FormGroup;
-  templateTypeForm!: FormGroup;
-  loginMethodForm!: FormGroup;
+  private skillAreasCache: { id: number; name: string }[] = [];
 
-  get pageTitle(): string {
-    const titles: Record<CatalogType, string> = {
-      'disability-types': 'Tipos de Discapacidad',
-      'autonomy-levels': 'Niveles de Autonomia',
-      'activity-categories': 'Categorias de Actividad',
-      'skill-areas': 'Areas de Habilidad',
-      'template-types': 'Tipos de Template',
-      'login-methods': 'Metodos de Login',
-    };
-    return titles[this.catalogType] || 'Catalogos';
+  private configs: Record<CatalogType, CatalogConfig> = {
+    'disability-types': {
+      title: 'Tipos de Discapacidad',
+      canCreate: true,
+      columns: [
+        { key: 'name', label: 'Nombre' },
+        { key: 'description', label: 'Descripcion' },
+      ],
+      fields: [
+        { key: 'name', label: 'Nombre', type: 'text', required: true },
+        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'isActive', label: 'Activo', type: 'checkbox', default: true, editOnly: true },
+      ],
+      load: () => this.catalogsService.getDisabilityTypes(),
+      create: (v) => this.adminService.createDisabilityType(v),
+      update: (id, v) => this.adminService.updateDisabilityType(id, v),
+    },
+    'autonomy-levels': {
+      title: 'Niveles de Autonomia',
+      canCreate: true,
+      columns: [
+        { key: 'name', label: 'Nombre' },
+        { key: 'description', label: 'Descripcion' },
+        { key: 'requiresSupervision', label: 'Requiere Supervision', badge: (item) => ({ text: item.requiresSupervision ? 'Si' : 'No', color: item.requiresSupervision ? 'warning' : 'success' }) },
+        { key: 'displayOrder', label: 'Orden' },
+      ],
+      fields: [
+        { key: 'name', label: 'Nombre', type: 'text', required: true },
+        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'requiresSupervision', label: 'Requiere Supervision', type: 'checkbox', default: false },
+        { key: 'displayOrder', label: 'Orden', type: 'number', default: 0 },
+      ],
+      load: () => this.catalogsService.getAutonomyLevels(),
+      create: (v) => this.adminService.createAutonomyLevel(v),
+      update: (id, v) => this.adminService.updateAutonomyLevel(id, v),
+    },
+    'activity-categories': {
+      title: 'Categorias de Actividad',
+      canCreate: true,
+      columns: [
+        { key: 'name', label: 'Nombre' },
+        { key: 'description', label: 'Descripcion' },
+      ],
+      fields: [
+        { key: 'name', label: 'Nombre', type: 'text', required: true },
+        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'isActive', label: 'Activo', type: 'checkbox', default: true, editOnly: true },
+      ],
+      load: () => this.catalogsService.getActivityCategories(),
+      create: (v) => this.adminService.createActivityCategory(v),
+      update: (id, v) => this.adminService.updateActivityCategory(id, v),
+    },
+    'skill-areas': {
+      title: 'Areas de Habilidad',
+      canCreate: true,
+      columns: [
+        { key: 'name', label: 'Nombre' },
+        { key: 'icon', label: 'Icono' },
+        { key: 'color', label: 'Color' },
+        { key: 'displayOrder', label: 'Orden' },
+      ],
+      fields: [
+        { key: 'name', label: 'Nombre', type: 'text', required: true },
+        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'icon', label: 'Icono', type: 'text' },
+        { key: 'color', label: 'Color', type: 'color', default: '#000000' },
+        { key: 'displayOrder', label: 'Orden', type: 'number', default: 0 },
+      ],
+      load: () => this.catalogsService.getSkillAreas(),
+      create: (v) => this.adminService.createSkillArea(v),
+      update: (id, v) => this.adminService.updateSkillArea(id, v),
+    },
+    'template-types': {
+      title: 'Tipos de Template',
+      canCreate: true,
+      columns: [
+        { key: 'name', label: 'Nombre' },
+        { key: 'code', label: 'Codigo' },
+        { key: 'skillAreaName', label: 'Area' },
+        { key: 'supportsPictograms', label: 'Pictogramas', badge: (item) => ({ text: item.supportsPictograms ? 'Si' : 'No', color: item.supportsPictograms ? 'success' : 'secondary' }) },
+        { key: 'supportsAudio', label: 'Audio', badge: (item) => ({ text: item.supportsAudio ? 'Si' : 'No', color: item.supportsAudio ? 'success' : 'secondary' }) },
+      ],
+      fields: [
+        { key: 'name', label: 'Nombre', type: 'text', required: true },
+        { key: 'code', label: 'Codigo', type: 'text', required: true },
+        { key: 'skillAreaId', label: 'Area de Habilidad', type: 'select', options: () => this.skillAreasCache },
+        { key: 'supportsPictograms', label: 'Soporta Pictogramas', type: 'checkbox', default: false },
+        { key: 'supportsAudio', label: 'Soporta Audio', type: 'checkbox', default: false },
+      ],
+      load: () => this.catalogsService.getActivityTemplateTypes(),
+      create: (v) => this.adminService.createActivityTemplateType(v),
+      update: (id, v) => this.adminService.updateActivityTemplateType(id, v),
+    },
+    'login-methods': {
+      title: 'Metodos de Login',
+      canCreate: false,
+      columns: [
+        { key: 'name', label: 'Nombre' },
+        { key: 'code', label: 'Codigo' },
+        { key: 'description', label: 'Descripcion' },
+      ],
+      fields: [
+        { key: 'name', label: 'Nombre', type: 'text', required: true },
+        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'displayOrder', label: 'Orden', type: 'number', default: 0 },
+      ],
+      load: () => this.catalogsService.getLoginMethods(),
+      update: (id, v) => this.adminService.updateLoginMethod(id, v),
+    },
+  };
+
+  get config(): CatalogConfig {
+    return this.configs[this.catalogType];
   }
 
-  get canCreate(): boolean {
-    return this.catalogType !== 'login-methods';
+  get visibleFields(): FieldConfig[] {
+    return this.config.fields.filter(f => !f.editOnly || this.editingId);
   }
 
   ngOnInit(): void {
-    this.initForms();
+    this.catalogsService.getSkillAreas().subscribe({
+      next: (areas) => this.skillAreasCache = areas,
+    });
+
     this.route.paramMap.subscribe(params => {
       const type = params.get('type') as CatalogType;
       if (type) this.catalogType = type;
@@ -92,100 +198,68 @@ export class CatalogsComponent implements OnInit {
     });
   }
 
-  private initForms(): void {
-    this.disabilityForm = this.fb.group({ name: ['', Validators.required], description: [''], isActive: [true] });
-    this.autonomyForm = this.fb.group({ name: ['', Validators.required], description: [''], requiresSupervision: [false], displayOrder: [0], isActive: [true] });
-    this.categoryForm = this.fb.group({ name: ['', Validators.required], description: [''], isActive: [true] });
-    this.skillAreaForm = this.fb.group({ name: ['', Validators.required], description: [''], icon: [''], color: ['#000000'], displayOrder: [0] });
-    this.templateTypeForm = this.fb.group({ name: ['', Validators.required], code: ['', Validators.required], skillAreaId: [null], supportsPictograms: [false], supportsAudio: [false] });
-    this.loginMethodForm = this.fb.group({ name: ['', Validators.required], description: [''], displayOrder: [0] });
-  }
-
   private loadData(): void {
     this.isLoading = true;
-    switch (this.catalogType) {
-      case 'disability-types':
-        this.catalogsService.getDisabilityTypes().subscribe({ next: d => { this.disabilityTypes = d; this.isLoading = false; }, error: () => this.isLoading = false });
-        break;
-      case 'autonomy-levels':
-        this.catalogsService.getAutonomyLevels().subscribe({ next: d => { this.autonomyLevels = d; this.isLoading = false; }, error: () => this.isLoading = false });
-        break;
-      case 'activity-categories':
-        this.catalogsService.getActivityCategories().subscribe({ next: d => { this.activityCategories = d; this.isLoading = false; }, error: () => this.isLoading = false });
-        break;
-      case 'skill-areas':
-        this.catalogsService.getSkillAreas().subscribe({ next: d => { this.skillAreas = d; this.isLoading = false; }, error: () => this.isLoading = false });
-        break;
-      case 'template-types':
-        this.catalogsService.getSkillAreas().subscribe({ next: areas => {
-          this.skillAreas = areas;
-          this.catalogsService.getActivityTemplateTypes().subscribe({ next: d => { this.templateTypes = d; this.isLoading = false; }, error: () => this.isLoading = false });
-        }, error: () => this.isLoading = false });
-        break;
-      case 'login-methods':
-        this.catalogsService.getLoginMethods().subscribe({ next: d => { this.loginMethods = d; this.isLoading = false; }, error: () => this.isLoading = false });
-        break;
+    this.config.load().subscribe({
+      next: (data) => { this.items = data; this.isLoading = false; },
+      error: () => this.isLoading = false,
+    });
+  }
+
+  private buildForm(values?: any): void {
+    const group: Record<string, any> = {};
+    for (const field of this.config.fields) {
+      const value = values?.[field.key] ?? field.default ?? (field.type === 'checkbox' ? false : '');
+      group[field.key] = field.required ? [value, Validators.required] : [value];
     }
+    this.form = this.fb.group(group);
   }
 
   openNew(): void {
     this.editingId = null;
-    this.modalTitle = `Nuevo - ${this.pageTitle}`;
-    const resets: Record<string, () => void> = {
-      'disability-types': () => this.disabilityForm.reset({ name: '', description: '', isActive: true }),
-      'autonomy-levels': () => this.autonomyForm.reset({ name: '', description: '', requiresSupervision: false, displayOrder: 0, isActive: true }),
-      'activity-categories': () => this.categoryForm.reset({ name: '', description: '', isActive: true }),
-      'skill-areas': () => this.skillAreaForm.reset({ name: '', description: '', icon: '', color: '#000000', displayOrder: 0 }),
-      'template-types': () => this.templateTypeForm.reset({ name: '', code: '', skillAreaId: null, supportsPictograms: false, supportsAudio: false }),
-    };
-    resets[this.catalogType]?.();
+    this.modalTitle = `Nuevo - ${this.config.title}`;
+    this.buildForm();
     this.showModal = true;
   }
 
   openEdit(item: any): void {
     this.editingId = item.id;
-    this.modalTitle = `Editar - ${this.pageTitle}`;
-    switch (this.catalogType) {
-      case 'disability-types': this.disabilityForm.patchValue({ name: item.name, description: item.description || '', isActive: true }); break;
-      case 'autonomy-levels': this.autonomyForm.patchValue({ name: item.name, description: item.description || '', requiresSupervision: item.requiresSupervision, displayOrder: item.displayOrder, isActive: true }); break;
-      case 'activity-categories': this.categoryForm.patchValue({ name: item.name, description: item.description || '', isActive: item.isActive }); break;
-      case 'skill-areas': this.skillAreaForm.patchValue({ name: item.name, description: item.description || '', icon: item.icon || '', color: item.color || '#000000', displayOrder: item.displayOrder }); break;
-      case 'template-types': this.templateTypeForm.patchValue({ name: item.name, code: item.code, skillAreaId: item.skillAreaId, supportsPictograms: item.supportsPictograms, supportsAudio: item.supportsAudio }); break;
-      case 'login-methods': this.loginMethodForm.patchValue({ name: item.name, description: item.description || '', displayOrder: item.displayOrder }); break;
-    }
+    this.modalTitle = `Editar - ${this.config.title}`;
+    this.buildForm(item);
     this.showModal = true;
   }
 
-  closeModal(): void { this.showModal = false; this.editingId = null; }
-
-  getActiveForm(): FormGroup {
-    const forms: Record<string, FormGroup> = {
-      'disability-types': this.disabilityForm, 'autonomy-levels': this.autonomyForm,
-      'activity-categories': this.categoryForm, 'skill-areas': this.skillAreaForm,
-      'template-types': this.templateTypeForm, 'login-methods': this.loginMethodForm,
-    };
-    return forms[this.catalogType] || this.disabilityForm;
+  closeModal(): void {
+    this.showModal = false;
+    this.editingId = null;
   }
 
   save(): void {
-    const form = this.getActiveForm();
-    if (form.invalid) return;
+    if (!this.form || this.form.invalid) return;
     this.isSaving = true;
-    const v = form.value;
-    let obs;
-    switch (this.catalogType) {
-      case 'disability-types': obs = this.editingId ? this.adminService.updateDisabilityType(this.editingId, v) : this.adminService.createDisabilityType(v); break;
-      case 'autonomy-levels': obs = this.editingId ? this.adminService.updateAutonomyLevel(this.editingId, v) : this.adminService.createAutonomyLevel(v); break;
-      case 'activity-categories': obs = this.editingId ? this.adminService.updateActivityCategory(this.editingId, v) : this.adminService.createActivityCategory(v); break;
-      case 'skill-areas': obs = this.editingId ? this.adminService.updateSkillArea(this.editingId, v) : this.adminService.createSkillArea(v); break;
-      case 'template-types': obs = this.editingId ? this.adminService.updateActivityTemplateType(this.editingId, v) : this.adminService.createActivityTemplateType(v); break;
-      case 'login-methods': obs = this.editingId ? this.adminService.updateLoginMethod(this.editingId, v) : null; break;
-      default: obs = null;
-    }
+    const value = this.form.value;
+    const obs = this.editingId
+      ? this.config.update(this.editingId, value)
+      : this.config.create?.(value);
+
     if (!obs) { this.isSaving = false; return; }
+
     obs.subscribe({
-      next: () => { this.isSaving = false; this.toastService.success(this.editingId ? 'Actualizado' : 'Creado'); this.closeModal(); this.catalogsService.clearCache(); this.loadData(); },
-      error: () => { this.isSaving = false; this.toastService.error('Error al guardar'); },
+      next: () => {
+        this.isSaving = false;
+        this.toastService.success(this.editingId ? 'Actualizado' : 'Creado');
+        this.closeModal();
+        this.catalogsService.clearCache();
+        this.loadData();
+      },
+      error: () => {
+        this.isSaving = false;
+        this.toastService.error('Error al guardar');
+      },
     });
+  }
+
+  getCellValue(item: any, col: any): string {
+    return item[col.key] ?? '-';
   }
 }

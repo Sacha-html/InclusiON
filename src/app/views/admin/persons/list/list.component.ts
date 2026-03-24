@@ -1,10 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AdminInstitutionsService, AuthService, CatalogsService, PersonsService } from '@services';
-import { AdminInstitutionResponse, LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
+import { AuthService, CatalogsService, PersonsService } from '@services';
+import { LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 import {
   FormControlDirective,
   FormFeedbackComponent,
@@ -20,8 +21,8 @@ import {
   selector: 'app-list',
   imports: [
     DataTableComponent,
+    InstitutionFilterComponent,
     ReactiveFormsModule,
-    FormsModule,
     FormControlDirective,
     FormFeedbackComponent,
     FormLabelDirective,
@@ -34,9 +35,8 @@ import {
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
-export class ListComponent implements OnInit {
+export class ListComponent {
   private readonly personsService = inject(PersonsService);
-  private readonly adminInstitutionsService = inject(AdminInstitutionsService);
   private readonly authService = inject(AuthService);
   private readonly catalogsService = inject(CatalogsService);
   private readonly fb = inject(FormBuilder);
@@ -44,9 +44,7 @@ export class ListComponent implements OnInit {
 
   canCreate = this.authService.hasPermission('persons:create');
 
-  adminInstitutions: AdminInstitutionResponse[] = [];
   selectedInstitutionId: number | undefined;
-  isGlobalAdmin = true;
 
   persons: PersonListItemResponse[] = [];
   totalItems = 0;
@@ -87,26 +85,14 @@ export class ListComponent implements OnInit {
     { key: 'isActive', label: 'Estado', type: 'badge' },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this.catalogsService.getLoginMethods().subscribe({
       next: (data) => this.loginMethods = data,
     });
-    this.adminInstitutionsService.getMyInstitutions().subscribe({
-      next: (institutions) => {
-        this.adminInstitutions = institutions;
-        if (institutions.length > 0) {
-          this.isGlobalAdmin = false;
-          this.selectedInstitutionId = institutions[0].institutionId;
-        }
-        this.loadPersons();
-      },
-      error: () => {
-        this.loadPersons();
-      },
-    });
   }
 
-  onInstitutionFilterChange(): void {
+  onInstitutionFilterChange(institutionId: number | undefined): void {
+    this.selectedInstitutionId = institutionId;
     this.currentPage = 1;
     this.loadPersons();
   }
@@ -181,13 +167,13 @@ export class ListComponent implements OnInit {
     });
   }
 
-  private loadPersons(search?: string): void {
+  loadPersons(search?: string): void {
     this.personsService
       .getPersons({ page: this.currentPage, pageSize: this.pageSize, search, sortBy: 'lastName', sortDirection: 'ASC', institutionId: this.selectedInstitutionId })
       .subscribe({
         next: (response) => {
-          this.persons = response.data.data;
-          this.totalItems = response.data.totalRecords;
+          this.persons = response.data;
+          this.totalItems = response.totalRecords;
         },
         error: (error) => {
           console.error('Error al obtener personas:', error);

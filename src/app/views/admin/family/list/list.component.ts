@@ -1,38 +1,31 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AdminInstitutionsService, AuthService, FamilyService, ToastService } from '@services';
-import { AdminInstitutionResponse, FamilyListItemResponse } from '../../../../models';
+import { AuthService, FamilyService, ToastService } from '@services';
+import { FamilyListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
-import {
-  FormSelectDirective,
-  ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
-} from '@coreui/angular';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 
 @Component({
   selector: 'app-family-list',
   imports: [
     DataTableComponent,
-    FormsModule,
-    FormSelectDirective,
-    ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
+    ConfirmModalComponent,
+    InstitutionFilterComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
-export class ListComponent implements OnInit {
+export class ListComponent {
   private readonly familyService = inject(FamilyService);
-  private readonly adminInstitutionsService = inject(AdminInstitutionsService);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   canCreate = this.authService.hasPermission('family:create');
 
-  adminInstitutions: AdminInstitutionResponse[] = [];
   selectedInstitutionId: number | undefined;
-  isGlobalAdmin = true;
 
   families: FamilyListItemResponse[] = [];
   totalItems = 0;
@@ -57,23 +50,8 @@ export class ListComponent implements OnInit {
     { key: 'isActive', label: 'Estado', type: 'badge' },
   ];
 
-  ngOnInit(): void {
-    this.adminInstitutionsService.getMyInstitutions().subscribe({
-      next: (institutions) => {
-        this.adminInstitutions = institutions;
-        if (institutions.length > 0) {
-          this.isGlobalAdmin = false;
-          this.selectedInstitutionId = institutions[0].institutionId;
-        }
-        this.loadFamily();
-      },
-      error: () => {
-        this.loadFamily();
-      },
-    });
-  }
-
-  onInstitutionFilterChange(): void {
+  onInstitutionFilterChange(institutionId: number | undefined): void {
+    this.selectedInstitutionId = institutionId;
     this.currentPage = 1;
     this.loadFamily();
   }
@@ -131,13 +109,13 @@ export class ListComponent implements OnInit {
     this.itemToDeactivate = null;
   }
 
-  private loadFamily(search?: string): void {
+  loadFamily(search?: string): void {
     this.familyService
       .getFamily({ page: this.currentPage, pageSize: this.pageSize, search, institutionId: this.selectedInstitutionId })
       .subscribe({
         next: (response) => {
-          this.families = response.data.data;
-          this.totalItems = response.data.totalRecords;
+          this.families = response.data;
+          this.totalItems = response.totalRecords;
         },
         error: (error) => {
           console.error('Error al obtener familiares:', error);
