@@ -4,7 +4,13 @@
       "Bash(wc:*)",
       "Bash(mv 07-accesibilidad.md REF-accesibilidad.md)",
       "Bash(mv 08-autenticacion.md REF-autenticacion.md)",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(for f:*)",
+      "Bash(do sed:*)",
+      "Bash(done)",
+      "Bash(sed -i '/^| Paso | Estado/d; /^|------|--------/d; /^| .* | |/d; /^| .* | | /d' \"$f\")",
+      "Bash(sed -i '/^| Canal | Estado/d; /^|-------|--------/d' \"$f\")",
+      "Bash(sed -i '/style .* fill:#d4edda/d; /style .* fill:#fff3cd/d' \"$f\")"
     ]
   }
 }
