@@ -14,7 +14,7 @@ Proceso donde el profesional evalúa a la persona con discapacidad, establece su
 El profesional selecciona las áreas de habilidad que se van a trabajar con la persona y establece niveles iniciales.
 - **Crear perfil:** `POST /api/persons/{id}/skill-profile`
 - **Leer perfil:** `GET /api/persons/{id}/skill-profile`
-- **Actualizar área:** `PUT /api/persons/{id}/skill-profile/{areaId}`
+- **Desactivar área:** `PUT /api/persons/{id}/skill-profile/{areaId}`
 - **Frontend:** Sección "Perfil de habilidades" en `/pro/persons/{id}`
 - **Catálogo:** `GET /api/catalogs/skill-areas`
 
