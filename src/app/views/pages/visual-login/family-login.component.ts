@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FamilyLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
@@ -20,7 +19,6 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-family-login',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonDirective,
     FormControlDirective,
@@ -61,7 +59,7 @@ export class FamilyLoginComponent extends BaseVisualLoginComponent {
         } else {
           this.handleLoginResponseError(
             response.data,
-            'Contrasena incorrecta',
+            'Contraseña incorrecta',
             () => this.password = ''
           );
         }
@@ -69,7 +67,7 @@ export class FamilyLoginComponent extends BaseVisualLoginComponent {
       error: (error) => {
         this.handleHttpError(
           error,
-          'Error al verificar la contrasena',
+          'Error al verificar la contraseña',
           () => this.password = ''
         );
       },

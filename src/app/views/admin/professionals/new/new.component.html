@@ -99,24 +99,11 @@
   </c-card-body>
 </c-card>
 
-<c-modal [visible]="showPasswordModal" backdrop="static" [keyboard]="false">
-  <c-modal-header>
-    <strong>Profesional creado exitosamente</strong>
-  </c-modal-header>
-  <c-modal-body>
-    @if (createdProfessional) {
-      <p>Se creó el profesional <strong>{{ createdProfessional.fullName }}</strong>.</p>
-      <p>Se generó una contraseña temporal para su acceso al sistema:</p>
-      <div class="alert alert-warning d-flex align-items-center justify-content-between">
-        <code class="fs-5">{{ createdProfessional.temporaryPassword }}</code>
-      </div>
-      <p class="text-body-secondary mb-0">
-        Asegúrese de copiar esta contraseña. No se podrá volver a consultar.
-        El profesional deberá cambiarla en su primer inicio de sesión.
-      </p>
-    }
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="primary" (click)="closeModalAndNavigate()">Entendido</button>
-  </c-modal-footer>
-</c-modal>
+<app-password-modal
+  [visible]="showPasswordModal"
+  entityType="Profesional"
+  entityArticle="el"
+  [entityName]="createdProfessional?.fullName ?? ''"
+  [password]="createdProfessional?.temporaryPassword ?? ''"
+  (close)="closeModalAndNavigate()">
+</app-password-modal>

@@ -9,4 +9,5 @@ export interface GetPersonsRequest {
   disabilityTypeId?: number;
   autonomyLevelId?: number;
   isActive?: boolean;
+  institutionId?: number;
 }
