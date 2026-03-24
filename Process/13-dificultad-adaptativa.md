@@ -20,7 +20,7 @@ Proceso automático del Motor de Dificultad Adaptativa que ajusta los parámetro
 
 ## Pasos del proceso
 
-### 1. Evaluación de Rendimiento ⏳ Pendiente (BE-17)
+### 1. Evaluación de Rendimiento (BE-17)
 Tras cada actividad completada, el sistema analiza:
 - Porcentaje de éxito actual
 - Éxitos/fracasos consecutivos
@@ -28,18 +28,18 @@ Tras cada actividad completada, el sistema analiza:
 - Tiempo empleado vs. tiempo límite
 - Número de intentos vs. máximo
 
-### 2. Cálculo de Ajuste ⏳ Pendiente (BE-17)
+### 2. Cálculo de Ajuste (BE-17)
 El sistema determina el nuevo estado y calcula ajustes dentro de los rangos configurados:
 - **Dificultad:** Nivel numérico dentro del rango min-max
 - **Tiempo límite:** Segundos permitidos para completar
 - **Pistas:** Cantidad de ayudas disponibles
 - **Intentos:** Número máximo de intentos
 
-### 3. Aplicación de Ajuste ⏳ Pendiente (BE-17)
+### 3. Aplicación de Ajuste (BE-17)
 Se persisten los nuevos parámetros y se aplican a la siguiente actividad del roadmap.
 - **Pipeline:** Persist → Adapt → Unlock → Alert
 
-### 4. Registro de Auditoría ⏳ Pendiente (BE-17)
+### 4. Registro de Auditoría (BE-17)
 Cada ajuste se registra en `AdaptiveAdjustmentLog` para trazabilidad y análisis posterior.
 - **Endpoint previsto:** `GET /api/persons/{id}/adaptive-log` (historial de ajustes)
 - **Frontend previsto:** Timeline de ajustes adaptativos (FE-18)
@@ -65,18 +65,8 @@ flowchart TD
     UP & DOWN & ALERT -.->|Adapt| NEXT[Siguiente actividad]
     ALERT -.->|Alert| PROF[Notificar profesional]
 
-    style EVAL fill:#fff3cd,stroke:#ffc107
-    style STATE fill:#fff3cd,stroke:#ffc107
-    style LOG fill:#fff3cd,stroke:#ffc107
 ```
 
-## Estado resumen
 
-| Paso | Estado | Referencia |
-|------|--------|------------|
-| Evaluación de rendimiento | ⏳ Pendiente | BE-17 |
-| Cálculo de ajuste | ⏳ Pendiente | BE-17 |
-| Aplicación de ajuste | ⏳ Pendiente | BE-17 |
-| Registro de auditoría | ⏳ Pendiente | BE-17, FE-18 |
 
 **Referencia técnica completa:** `Features/MDA_Especificacion_Tecnica.md`

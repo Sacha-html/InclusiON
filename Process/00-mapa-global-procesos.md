@@ -52,13 +52,6 @@ flowchart TB
     COM -.->|Transversal| USUARIOS
     COM -.->|Transversal| MONIT
 
-    style CONFIG fill:#e3f2fd,stroke:#1565c0
-    style USUARIOS fill:#e8f5e9,stroke:#2e7d32
-    style ASIG fill:#fff3e0,stroke:#ef6c00
-    style EVAL fill:#fce4ec,stroke:#c62828
-    style EJEC fill:#f3e5f5,stroke:#6a1b9a
-    style MONIT fill:#fff8e1,stroke:#f9a825
-    style COM fill:#e0f7fa,stroke:#00838f
 ```
 
 ## Relación entre procesos
@@ -120,8 +113,6 @@ flowchart LR
     F1F --> LISTO[Sistema listo para operar]
 ```
 
-**Estado:** ✅ Todos los procesos implementados
-
 ---
 
 ### Fase 2 — Evaluación y Diagnóstico
@@ -138,8 +129,6 @@ flowchart LR
     F2B --> F2C[Profesional registra diagnóstico]
     F2C --> EVAL[Evaluación inicial completa]
 ```
-
-**Estado:** ⏳ Parcial — Perfil de habilidades y funcional ✅, diagnóstico formal ⏳
 
 ---
 
@@ -158,8 +147,6 @@ flowchart LR
     F3B --> F3C[Profesional configura MDA]
     F3C --> PLAN[Plan de trabajo listo]
 ```
-
-**Estado:** ⏳ Pendiente — Templates de actividad ✅, el resto ⏳
 
 ---
 
@@ -189,19 +176,9 @@ flowchart TD
     F4H -->|Mantener| F4A
 ```
 
-**Estado:** ⏳ Parcial — Dashboard y Mi Aula ✅, el resto ⏳
+El estado de avance de cada proceso se puede consultar en el [checklist de procesos](../Estado/checklist-procesos.md).
 
 ---
-
-## Resumen de estado por fase
-
-| Fase | Procesos | Implementados | Parciales | Pendientes |
-|------|----------|---------------|-----------|------------|
-| 1. Configuración y Onboarding | 01-08 | 8 | 0 | 0 |
-| 2. Evaluación y Diagnóstico | 09 | 0 | 1 | 0 |
-| 3. Intervención y Personalización | 10, 11, 13 | 0 | 0 | 3 |
-| 4. Seguimiento y Mejora | 12, 13, 14, 15, 16 | 0 | 2 | 3 |
-| **Total** | **16** | **8** | **3** | **6** |
 
 ## Actores y sus procesos
 

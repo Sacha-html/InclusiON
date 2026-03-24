@@ -10,17 +10,17 @@ Proceso de alta, edición y administración de las instituciones educativas dent
 
 ## Pasos del proceso
 
-### 1. Alta de Institución ✅ Implementado
+### 1. Alta de Institución
 El admin global registra la institución con nombre, dirección, teléfono y email.
 - **Endpoint:** `POST /api/institutions`
 - **Frontend:** `/admin/institutions` (formulario modal)
 
-### 2. Consulta de Instituciones ✅ Implementado
+### 2. Consulta de Instituciones
 Listado paginado de todas las instituciones del sistema.
 - **Endpoint:** `GET /api/institutions`
 - **Frontend:** `/admin/institutions` (DataTable)
 
-### 3. Edición de Institución ✅ Implementado
+### 3. Edición de Institución
 El admin global modifica los datos de una institución existente.
 - **Endpoint:** `PUT /api/institutions/{id}`
 - **Frontend:** `/admin/institutions` (modal de edición)
@@ -39,10 +39,4 @@ flowchart TD
     INST -->|Define alcance de| AI[Admin Institucional]
 ```
 
-## Estado resumen
 
-| Paso | Estado |
-|------|--------|
-| Alta de institución | ✅ Implementado |
-| Consulta de instituciones | ✅ Implementado |
-| Edición de institución | ✅ Implementado |

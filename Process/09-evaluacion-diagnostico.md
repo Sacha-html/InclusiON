@@ -10,7 +10,7 @@ Proceso donde el profesional evalúa a la persona con discapacidad, establece su
 
 ## Pasos del proceso
 
-### 1. Configuración del Perfil de Habilidades ✅ Implementado
+### 1. Configuración del Perfil de Habilidades
 El profesional selecciona las áreas de habilidad que se van a trabajar con la persona y establece niveles iniciales.
 - **Crear perfil:** `POST /api/persons/{id}/skill-profile`
 - **Leer perfil:** `GET /api/persons/{id}/skill-profile`
@@ -18,13 +18,13 @@ El profesional selecciona las áreas de habilidad que se van a trabajar con la p
 - **Frontend:** Sección "Perfil de habilidades" en `/pro/persons/{id}`
 - **Catálogo:** `GET /api/catalogs/skill-areas`
 
-### 2. Edición del Perfil Funcional ✅ Implementado
+### 2. Edición del Perfil Funcional
 El profesional edita los datos funcionales de la persona: tipo de discapacidad, nivel de autonomía, perfil de accesibilidad y método de login.
 - **Endpoint:** `PUT /api/persons/{id}`
 - **Método de login:** `PUT /api/persons/{id}/login-method`
 - **Frontend:** `/pro/persons/{id}` (edición inline)
 
-### 3. Diagnóstico Funcional ⏳ Pendiente (BE-13, FE-14)
+### 3. Diagnóstico Funcional (BE-13, FE-14)
 El profesional registrará diagnósticos formales con fecha, diagnóstico principal, observaciones, capacidades, desafíos, apoyos, objetivos y estrategias.
 - **Endpoints previstos:**
   - `GET /api/persons/{id}/diagnoses` (lista por fecha desc)
@@ -37,26 +37,16 @@ El profesional registrará diagnósticos formales con fecha, diagnóstico princi
 
 ```mermaid
 flowchart TD
-    PROF[Profesional] -->|POST /api/persons/.../skill-profile| SP[Perfil de Habilidades ✅]
+    PROF[Profesional] -->|POST /api/persons/.../skill-profile| SP[Perfil de Habilidades]
     SP -->|Áreas del catálogo| AREAS[Comunicación, Alfabetización, etc.]
 
-    PROF -->|PUT /api/persons/id| PF[Perfil Funcional ✅]
+    PROF -->|PUT /api/persons/id| PF[Perfil Funcional]
     PF -->|Tipo discapacidad, autonomía, login| PCD[Persona con Discapacidad]
 
-    PROF -.->|⏳ BE-13| DIAG[Diagnóstico Funcional]
+    PROF -.->|BE-13| DIAG[Diagnóstico Funcional]
     DIAG -.->|Observaciones, capacidades, desafíos| PCD
-    DIAG -.->|⏳ FE-14| TIMELINE[Timeline de Diagnósticos]
+    DIAG -.->|FE-14| TIMELINE[Timeline de Diagnósticos]
 
-    style SP fill:#d4edda,stroke:#28a745
-    style PF fill:#d4edda,stroke:#28a745
-    style DIAG fill:#fff3cd,stroke:#ffc107
-    style TIMELINE fill:#fff3cd,stroke:#ffc107
 ```
 
-## Estado resumen
 
-| Paso | Estado | Referencia |
-|------|--------|------------|
-| Perfil de habilidades | ✅ Implementado | BE-07 |
-| Perfil funcional | ✅ Implementado | — |
-| Diagnóstico funcional | ⏳ Pendiente | BE-13, FE-14 |

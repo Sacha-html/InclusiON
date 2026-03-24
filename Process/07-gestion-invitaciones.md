@@ -12,28 +12,28 @@ Proceso de generación, envío y aceptación de invitaciones por email para el r
 
 ## Pasos del proceso
 
-### 1. Crear Invitación ✅ Implementado
+### 1. Crear Invitación
 El profesional ingresa email, nombre, apellido y relación del familiar, y selecciona la persona con discapacidad asociada. El sistema genera un código único y envía un email SMTP.
 - **Endpoint:** `POST /api/invitations`
 - **Frontend:** `/pro/invitations` (formulario de invitación)
 
-### 2. Envío de Email ✅ Implementado
+### 2. Envío de Email
 El sistema envía un email HTML con un botón de acción que enlaza a `/invite/:code`.
 - **Infraestructura:** SMTP vía MailKit
 - **Templates:** HTML con datos pre-llenados del familiar y la persona
 - **Configuración:** Ethereal para desarrollo, configurable para producción
 
-### 3. Validación de Código ✅ Implementado
+### 3. Validación de Código
 Cuando el familiar abre el link, el sistema valida el código y devuelve los datos pre-llenados.
 - **Endpoint:** `GET /api/invitations/{code}` (público, sin JWT)
 - **Validaciones:** Código existente, no expirado, no aceptado
 
-### 4. Aceptación y Registro ✅ Implementado
+### 4. Aceptación y Registro
 El familiar completa el formulario de registro. El sistema crea en una transacción: el usuario, el perfil de familiar y la vinculación (`PersonRepresentative`) con la persona.
 - **Endpoint:** `POST /api/invitations/{code}/accept` (público)
 - **Frontend:** `/invite/:code` (formulario público)
 
-### 5. Consulta de Invitaciones ✅ Implementado
+### 5. Consulta de Invitaciones
 El profesional ve sus invitaciones; el admin ve todas con filtrado por institución.
 - **Endpoint:** `GET /api/invitations` (paginado)
 - **Frontend profesional:** `/pro/invitations`
@@ -64,12 +64,4 @@ flowchart TD
     EST -->|Pasaron 7 días| EXP[Expirada]
 ```
 
-## Estado resumen
 
-| Paso | Estado |
-|------|--------|
-| Crear invitación | ✅ Implementado |
-| Envío de email | ✅ Implementado |
-| Validación de código | ✅ Implementado |
-| Aceptación y registro | ✅ Implementado |
-| Consulta de invitaciones | ✅ Implementado |

@@ -12,24 +12,24 @@ Proceso de alta, edición y gestión de las personas con discapacidad en la plat
 
 ## Pasos del proceso
 
-### 1. Alta de Persona ✅ Implementado
+### 1. Alta de Persona
 El admin registra la persona con datos personales, tipo de discapacidad (del catálogo), nivel de autonomía y perfil de accesibilidad.
 - **Endpoint:** `POST /api/persons`
 - **Frontend:** `/admin/persons` (formulario)
 
-### 2. Consulta de Personas ✅ Implementado
+### 2. Consulta de Personas
 Listado paginado con búsqueda. Admins institucionales ven solo personas de sus instituciones.
 - **Listado:** `GET /api/persons` (paginado)
 - **Detalle:** `GET /api/persons/{id}`
 - **Frontend admin:** `/admin/persons` (DataTable)
 - **Frontend profesional:** `/pro/persons/{id}` (detalle con edición inline)
 
-### 3. Edición de Persona ✅ Implementado
+### 3. Edición de Persona
 El admin o profesional modifica datos personales y funcionales: tipo de discapacidad, nivel de autonomía, perfil de accesibilidad.
 - **Endpoint:** `PUT /api/persons/{id}`
 - **Frontend:** Edición inline en detalle de persona
 
-### 4. Configuración del Método de Login ✅ Implementado
+### 4. Configuración del Método de Login
 Se asigna el método de login según el nivel de autonomía de la persona (Standard, PIN, Assisted, Family).
 - **Endpoint:** `PUT /api/persons/{id}/login-method`
 - **Métodos disponibles:** `GET /api/catalogs/login-methods`
@@ -53,11 +53,4 @@ flowchart TD
     METHOD -->|Family| FAM[Contraseña familiar]
 ```
 
-## Estado resumen
 
-| Paso | Estado |
-|------|--------|
-| Alta de persona | ✅ Implementado |
-| Consulta de personas | ✅ Implementado |
-| Edición de persona | ✅ Implementado |
-| Configuración de login | ✅ Implementado |

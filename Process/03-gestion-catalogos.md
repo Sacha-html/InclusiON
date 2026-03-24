@@ -10,7 +10,7 @@ Proceso de administración de las tablas de referencia del sistema que alimentan
 - **Admin Institucional** — Solo lectura
 - **Profesional** — Solo lectura (usa los catálogos en formularios)
 
-## Catálogos del sistema ✅ Implementado
+## Catálogos del sistema
 
 | Catálogo | Endpoint lectura | Endpoint escritura | Uso en el sistema |
 |----------|-----------------|-------------------|-------------------|
@@ -23,19 +23,19 @@ Proceso de administración de las tablas de referencia del sistema que alimentan
 
 ## Pasos del proceso
 
-### 1. Consulta de Catálogos ✅ Implementado
+### 1. Consulta de Catálogos
 Cualquier usuario autenticado consulta los catálogos para llenar dropdowns.
 - **Controlador:** `CatalogsController`
 - **6 endpoints GET** listados en la tabla anterior
 
-### 2. Alta de Item ✅ Implementado
+### 2. Alta de Item
 El admin global crea nuevos items desde el panel admin.
 - **Controlador:** `CatalogAdminController`
 - **Endpoint:** `POST /api/admin/catalogs/{tipo}`
 - **Validación:** Nombre único por tipo de catálogo
 - **Frontend:** `/admin/catalogs/{tipo}` (modal de creación)
 
-### 3. Edición de Item ✅ Implementado
+### 3. Edición de Item
 El admin global edita items existentes. Se valida nombre único.
 - **Endpoint:** `PUT /api/admin/catalogs/{tipo}/{id}`
 - **Frontend:** `/admin/catalogs/{tipo}` (modal de edición)
@@ -75,10 +75,4 @@ flowchart TD
     end
 ```
 
-## Estado resumen
 
-| Paso | Estado |
-|------|--------|
-| Consulta de catálogos | ✅ Implementado |
-| Alta de item | ✅ Implementado |
-| Edición de item | ✅ Implementado |
