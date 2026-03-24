@@ -14,5 +14,7 @@
         public List<string> Permissions { get; set; } = new();
         public bool EmailConfirmed { get; set; }
         public bool PhoneNumberConfirmed { get; set; }
+        public bool? IsGlobalAdmin { get; set; }
+        public List<int>? InstitutionIds { get; set; }
     }
 }

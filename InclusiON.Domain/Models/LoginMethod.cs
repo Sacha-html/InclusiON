@@ -5,17 +5,14 @@ namespace InclusiON.Domain.Models
     /// <summary>
     /// Catalogo de metodos de autenticacion disponibles.
     /// Cada metodo esta adaptado a diferentes niveles de autonomia.
-    /// Valores: STANDARD, PIN, EMOJI_SEQUENCE, COLOR_SHAPE, SUPERVISED, TRUSTED_DEVICE, PROFILE_SELECT.
+    /// Valores: STANDARD, PIN, ASSISTED.
     /// </summary>
     public class LoginMethod : IActivatable
     {
-        /// <summary>
-        /// Identificador unico del metodo de login.
-        /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Codigo unico del metodo (ej: STANDARD, PIN, EMOJI_SEQUENCE, COLOR_SHAPE).
+        /// Codigo unico del metodo (ej: STANDARD, PIN, ASSISTED).
         /// </summary>
         public string Code { get; set; } = string.Empty;
 
@@ -48,21 +45,6 @@ namespace InclusiON.Domain.Models
         /// Indica si requiere PIN numerico.
         /// </summary>
         public bool RequiresPin { get; set; }
-
-        /// <summary>
-        /// Indica si requiere secuencia de emojis.
-        /// </summary>
-        public bool RequiresEmojiSequence { get; set; }
-
-        /// <summary>
-        /// Indica si requiere secuencia de colores y formas.
-        /// </summary>
-        public bool RequiresColorShape { get; set; }
-
-        /// <summary>
-        /// Indica si requiere seleccion de perfil (nombre/avatar).
-        /// </summary>
-        public bool RequiresProfileSelect { get; set; }
 
         /// <summary>
         /// Indica si requiere supervision de un familiar o profesional.

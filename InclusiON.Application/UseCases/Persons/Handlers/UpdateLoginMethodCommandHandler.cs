@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -16,6 +17,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
     public class UpdateLoginMethodCommandHandler : ICommandHandler<UpdateLoginMethodCommand, ApiResponse<UpdateLoginMethodResponse>>
     {
         private readonly IVisualLoginRepository _repository;
+        private readonly IIdentityService _identityService;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateLoginMethodCommandHandler> _logger;
@@ -23,15 +25,17 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         // Constantes para IDs de metodos de login
         private const int LoginMethodStandard = 1;
         private const int LoginMethodPin = 2;
-        private const int LoginMethodAssisted = 5;
+        private const int LoginMethodAssisted = 3;
 
         public UpdateLoginMethodCommandHandler(
             IVisualLoginRepository repository,
+            IIdentityService identityService,
             IPasswordHasher passwordHasher,
             IUnitOfWork unitOfWork,
             ILogger<UpdateLoginMethodCommandHandler> logger)
         {
             _repository = repository;
+            _identityService = identityService;
             _passwordHasher = passwordHasher;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -71,6 +75,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             // Validaciones segun el metodo de login
             string? pinHash = null;
             Guid? supervisorUserId = null;
+            string? temporaryPassword = null;
 
             switch (command.LoginMethodId)
             {
@@ -111,7 +116,27 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     break;
 
                 case LoginMethodStandard:
-                    // No requiere configuracion adicional, usa la contrasena del usuario
+                    // Generar contrasena temporal para que el usuario pueda loguearse
+                    temporaryPassword = PasswordGenerator.GenerateTemporary();
+                    var user = await _identityService.FindByIdAsync(command.UserId);
+                    if (user == null)
+                    {
+                        return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                            ErrorCode.PersonNotFound,
+                            ErrorMessages.PersonNotFound);
+                    }
+                    var (succeeded, errors) = await _identityService.ResetPasswordAsync(user, temporaryPassword);
+                    if (!succeeded)
+                    {
+                        _logger.LogWarning("Error al resetear contrasena para usuario {UserId}: {Errors}",
+                            command.UserId, string.Join(", ", errors));
+                        return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            string.Format(ErrorMessages.UserCreationError, string.Join(", ", errors)));
+                    }
+                    // Marcar que debe cambiar contrasena en primer login
+                    user.MustChangePassword = true;
+                    await _identityService.UpdateUserAsync(user);
                     break;
 
                 default:
@@ -138,9 +163,11 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 {
                     Updated = true,
                     LoginMethodId = loginMethod.Id,
-                    LoginMethodName = loginMethod.Name
+                    LoginMethodName = loginMethod.Name,
+                    TemporaryPassword = temporaryPassword
                 },
                 SuccessMessages.LoginMethodUpdated);
         }
+
     }
 }

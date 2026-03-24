@@ -60,6 +60,9 @@
 	<data name="PersonUpdated" xml:space="preserve">
 		<value>Persona actualizada exitosamente</value>
 	</data>
+	<data name="PersonDeactivated" xml:space="preserve">
+		<value>Persona desactivada exitosamente</value>
+	</data>
 	<data name="ProfessionalCreated" xml:space="preserve">
 		<value>Profesional creado exitosamente</value>
 	</data>
@@ -80,5 +83,14 @@
 	</data>
 	<data name="FamilyLoginSuccessful" xml:space="preserve">
 		<value>Login familiar exitoso</value>
+	</data>
+	<data name="PasswordChanged" xml:space="preserve">
+		<value>Contrasena cambiada exitosamente</value>
+	</data>
+	<data name="InvitationCreated" xml:space="preserve">
+		<value>Invitacion creada exitosamente</value>
+	</data>
+	<data name="InvitationAccepted" xml:space="preserve">
+		<value>Registro completado exitosamente</value>
 	</data>
 </root>

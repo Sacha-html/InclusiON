@@ -126,6 +126,12 @@ namespace InclusiON.Shared.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Persona actualizada exitosamente.
         /// </summary>
+        public static string PersonDeactivated {
+            get {
+                return ResourceManager.GetString("PersonDeactivated", resourceCulture);
+            }
+        }
+
         public static string PersonUpdated {
             get {
                 return ResourceManager.GetString("PersonUpdated", resourceCulture);
@@ -174,6 +180,24 @@ namespace InclusiON.Shared.Resources {
         public static string VisualLoginSuccessful {
             get {
                 return ResourceManager.GetString("VisualLoginSuccessful", resourceCulture);
+            }
+        }
+
+        public static string PasswordChanged {
+            get {
+                return ResourceManager.GetString("PasswordChanged", resourceCulture);
+            }
+        }
+
+        public static string InvitationCreated {
+            get {
+                return ResourceManager.GetString("InvitationCreated", resourceCulture);
+            }
+        }
+
+        public static string InvitationAccepted {
+            get {
+                return ResourceManager.GetString("InvitationAccepted", resourceCulture);
             }
         }
     }

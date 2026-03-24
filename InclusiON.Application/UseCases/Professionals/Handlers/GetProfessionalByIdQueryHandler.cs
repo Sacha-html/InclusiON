@@ -49,7 +49,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 Address = professional.Address,
                 IsActive = professional.User?.IsActive ?? false,
                 CreatedAt = professional.CreatedAt,
-                UpdatedAt = professional.UpdatedAt
+                UpdatedAt = professional.UpdatedAt,
+                Email = professional.User?.Email
             };
         }
     }

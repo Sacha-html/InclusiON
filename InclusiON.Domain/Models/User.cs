@@ -89,6 +89,11 @@ namespace InclusiON.Domain.Models
         /// </summary>
         public virtual ICollection<TrustedDevice> TrustedDevices { get; set; }
 
+        /// <summary>
+        /// Instituciones asignadas a este usuario administrador.
+        /// </summary>
+        public virtual ICollection<AdminInstitution> AdminInstitutions { get; set; }
+
         public User()
         {
             Id = Guid.NewGuid();
@@ -97,6 +102,7 @@ namespace InclusiON.Domain.Models
             ReceivedMessages = new HashSet<Message>();
             AccessAudits = new HashSet<AccessAudit>();
             TrustedDevices = new HashSet<TrustedDevice>();
+            AdminInstitutions = new HashSet<AdminInstitution>();
             CreatedAt = DateTime.UtcNow;
             IsActive = true;
             MustChangePassword = false;
