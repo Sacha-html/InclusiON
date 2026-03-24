@@ -109,6 +109,7 @@ export class LoginComponent implements OnInit {
       email: this.loginForm.value.email.trim(),
       password: this.loginForm.value.password,
       rememberMe: this.loginForm.value.rememberMe,
+      allowedRoles: this.isProfessional ? ['Professional'] : ['Admin'],
     };
 
     this.authService.login(loginData).subscribe({
