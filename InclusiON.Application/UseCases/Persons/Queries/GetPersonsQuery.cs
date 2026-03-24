@@ -11,6 +11,6 @@ namespace InclusiON.Application.UseCases.Persons.Queries
         bool? IsActive,
         SortField? SortBy,
         string SortDirection,
-        int? InstitutionId = null
+        List<int>? InstitutionIds = null
     );
 }

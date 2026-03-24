@@ -74,7 +74,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             bool? isActive,
             SortField? sortBy,
             string sortDirection,
-            int? institutionId = null,
+            List<int>? institutionIds = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.PersonsWithDisability
@@ -109,10 +109,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(p => p.User.IsActive == isActive.Value);
             }
 
-            if (institutionId.HasValue)
+            if (institutionIds is not null && institutionIds.Count > 0)
             {
                 var personIdsInInstitution = _context.ProfessionalInstitutions
-                    .Where(pi => pi.InstitutionId == institutionId.Value && pi.IsActive)
+                    .Where(pi => institutionIds.Contains(pi.InstitutionId) && pi.IsActive)
                     .Join(_context.ProfessionalPersons.Where(pp => pp.IsActive),
                         pi => pi.ProfessionalId,
                         pp => pp.ProfessionalId,
