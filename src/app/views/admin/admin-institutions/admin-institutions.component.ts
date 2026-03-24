@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminInstitutionsService, AuthService, InstitutionsService, ToastService } from '@services';
 import { AdminInstitutionResponse, InstitutionResponse } from '@models';
@@ -16,7 +16,7 @@ import { IfGlobalAdminDirective } from '@shared/directives/if-global-admin.direc
   selector: 'app-admin-institutions',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     FormsModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     TableDirective, BadgeComponent, SpinnerComponent,

@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
@@ -20,7 +19,6 @@ interface RoleOption {
   selector: 'app-role-selection',
   standalone: true,
   imports: [
-    CommonModule,
     ButtonDirective,
     IconDirective,
     AccessibilityPanelComponent,

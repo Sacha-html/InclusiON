@@ -1,5 +1,4 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
   CardBodyComponent, CardComponent, ColComponent, RowComponent,
@@ -19,7 +18,6 @@ import { forkJoin } from 'rxjs';
   selector: 'app-pro-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     CardComponent, CardBodyComponent, RowComponent, ColComponent,
     SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
     IconDirective,

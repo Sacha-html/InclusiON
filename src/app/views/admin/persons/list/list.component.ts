@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, CatalogsService, PersonsService } from '@services';
+import { AuthService, CatalogsService, PersonsService, ToastService } from '@services';
 import { LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
@@ -39,6 +39,7 @@ export class ListComponent {
   private readonly personsService = inject(PersonsService);
   private readonly authService = inject(AuthService);
   private readonly catalogsService = inject(CatalogsService);
+  private readonly toastService = inject(ToastService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
 
@@ -175,8 +176,8 @@ export class ListComponent {
           this.persons = response.data;
           this.totalItems = response.totalRecords;
         },
-        error: (error) => {
-          console.error('Error al obtener personas:', error);
+        error: () => {
+          this.toastService.error('Error al obtener personas');
         },
       });
   }

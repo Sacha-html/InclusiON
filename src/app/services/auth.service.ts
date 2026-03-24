@@ -23,6 +23,20 @@ import {
 import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
 import { environment } from '@env';
 
+interface JwtPayload {
+  sub?: string;
+  userId?: string;
+  email?: string;
+  name?: string;
+  surname?: string;
+  role?: string;
+  permission?: string | string[];
+  isGlobalAdmin?: string | boolean;
+  institutionId?: string | number | (string | number)[];
+  exp?: number;
+  [key: string]: unknown;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -144,14 +158,16 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      const expirationDate = new Date(payload.exp * 1000);
+      const exp = payload.exp;
+      if (!exp) return false;
+      const expirationDate = new Date(exp * 1000);
       return expirationDate > new Date();
     } catch (error) {
       return false;
     }
   }
 
-  private decodeToken(token: string): any {
+  private decodeToken(token: string): JwtPayload {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -231,8 +247,8 @@ export class AuthService {
       const payload = this.decodeToken(token);
 
       return {
-        id: payload.sub || payload.userId,
-        email: payload.email,
+        id: payload.sub || payload.userId || '',
+        email: payload.email || '',
         name: payload.name || '',
         surname: payload.surname || '',
         role: payload.role || 'user',
@@ -255,7 +271,8 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      const permissions: string[] = payload.permission || [];
+      const raw = payload.permission;
+      const permissions: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
       return Array.isArray(permissions)
         ? permissions.includes(permission)
         : permissions === permission;
@@ -421,7 +438,9 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      const expirationDate = new Date(payload.exp * 1000);
+      const exp = payload.exp;
+      if (!exp) return false;
+      const expirationDate = new Date(exp * 1000);
       const now = new Date();
       const fiveMinutes = 5 * 60 * 1000;
 
