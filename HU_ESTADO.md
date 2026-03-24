@@ -13,8 +13,8 @@ Leyenda de estados:
 
 | Track | Hechas | Parciales | Pendientes | Total |
 |-------|--------|-----------|------------|-------|
-| Backend | 7 | 2 | 8 | 17 |
-| Frontend | 6 | 0 | 12 | 18 |
+| Backend | 7 | 2 | 11 | 20 |
+| Frontend | 6 | 0 | 15 | 21 |
 
 ---
 
@@ -57,6 +57,14 @@ Leyenda de estados:
 | BE-16 | Búsqueda Semántica de Actividades | 🔧 PARCIAL | Entidades `ActivityEmbedding`, `ActivityResult` con migración. Library `SemanticSearch` existe. Falta: interfaces en Application, handler, endpoint. Ver [Features/integracion-semantic-search.md](./Features/integracion-semantic-search.md) |
 | BE-17 | Motor de Dificultad Adaptativa (MDA) | 🔧 PARCIAL | Entidades `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog` con migración. Falta: `IAdaptiveEngineService`, implementación, pipeline steps. Ver [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) |
 
+### Sprint 5 — Gestión de Usuarios, Onboarding y Soporte
+
+| ID | Historia | Estado | Notas |
+|----|----------|--------|-------|
+| BE-18 | Gestión Centralizada de Usuarios | ⏳ PENDIENTE | Endpoints admin: listado, reset password, desactivar, reactivar, actividad. Proceso 17 |
+| BE-19 | Onboarding de Usuarios | ⏳ PENDIENTE | Completar perfil profesional, flags onboarding, endpoint completado. Proceso 18 |
+| BE-20 | Soporte y Ayuda | ⏳ PENDIENTE | FAQ CRUD, tickets CRUD, respuestas. Proceso 19 |
+
 ---
 
 ## Track Frontend (FE)
@@ -98,6 +106,14 @@ Leyenda de estados:
 | FE-16 | Mensajería Interna — Inbox y Redactar | BE-15 | ⏳ PENDIENTE | |
 | FE-17 | Panel de Configuración del Motor Adaptativo | BE-17 | ⏳ PENDIENTE | Config de rangos para el profesional |
 | FE-18 | Timeline de Ajustes Adaptativos | BE-17 | ⏳ PENDIENTE | Gráficas de evolución |
+
+### Sprint 5 — Gestión de Usuarios, Onboarding y Soporte
+
+| ID | Historia | Depende de (BE) | Estado | Notas |
+|----|----------|-----------------|--------|-------|
+| FE-19 | Panel de Gestión de Usuarios (Admin) | BE-18 | ⏳ PENDIENTE | `/admin/users` listado + detalle + acciones (reset, desactivar, reactivar) |
+| FE-20 | Onboarding Wizard (Profesional y Familiar) | BE-19 | ⏳ PENDIENTE | `/pro/onboarding/profile`, `/family/onboarding/welcome`, tour guiado |
+| FE-21 | Centro de Ayuda y Tickets de Soporte | BE-20 | ⏳ PENDIENTE | `/help` FAQ, `/help/tickets` mis tickets, `/admin/support/*` gestión |
 
 ---
 
