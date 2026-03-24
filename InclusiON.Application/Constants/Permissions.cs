@@ -7,6 +7,9 @@ namespace InclusiON.Application.Constants
     public static class Permissions
     {
         public const string ClaimType = "permission";
+        public const string GlobalAdminClaimType = "isGlobalAdmin";
+        public const string InstitutionIdClaimType = "institutionId";
+        public const string IsActiveClaimType = "isActive";
 
         // ═══════════════════════════════════════════════════════════════
         // USUARIOS
