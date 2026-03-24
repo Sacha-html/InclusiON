@@ -1,0 +1,131 @@
+<c-card class="mb-3">
+
+  <!-- Header con titulo y botones -->
+  @if (title || headerButtons.length > 0) {
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">{{ title }}</h5>
+      <div class="d-flex gap-2">
+        @for (btn of headerButtons; track btn.action) {
+          <button
+            cButton
+            [color]="btn.color || 'primary'"
+            size="sm"
+            (click)="headerAction.emit(btn.action)"
+          >
+            {{ btn.label }}
+          </button>
+        }
+      </div>
+    </c-card-header>
+  }
+
+  <c-card-body>
+
+    <!-- Buscador -->
+    @if (showSearch) {
+      <c-row class="align-items-center mb-3">
+        <c-col sm="12">
+          <c-input-group>
+            <label cInputGroupText for="table-search">Buscar: </label>
+            <input
+              cFormControl
+              id="table-search"
+              placeholder="Buscar..."
+              aria-label="Buscar en la tabla"
+              #searchInput
+              (input)="onSearchInput(searchInput.value)"
+            />
+          </c-input-group>
+        </c-col>
+      </c-row>
+    }
+
+    <!-- Tabla -->
+    <table cTable hover striped aria-label="Tabla de datos">
+      <thead>
+        <tr>
+          @for (col of columns; track col.key) {
+            <th scope="col">{{ col.label }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.id) {
+          <tr>
+            @for (col of columns; track col.key) {
+              <td>
+                @switch (col.type) {
+                  @case ('badge') {
+                    <c-badge [color]="item[col.key] ? 'success' : 'danger'"
+                          role="status"
+                          [attr.aria-label]="item[col.key] ? 'Estado: Activo' : 'Estado: Inactivo'">
+                      {{ item[col.key] ? 'Activo' : 'Inactivo' }}
+                    </c-badge>
+                  }
+                  @case ('actions') {
+                    @if (col.actions && col.actions.length > 0) {
+                      <c-dropdown>
+                        <button cButton color="secondary" size="sm" cDropdownToggle
+                                [attr.aria-label]="'Acciones para ' + (item.fullName || item.name || 'este registro')">
+                          <span aria-hidden="true">&#9776;</span>
+                        </button>
+                        <ul cDropdownMenu>
+                          @for (action of getVisibleActions(col, item); track action.action) {
+                            <li>
+                              <button cDropdownItem
+                                      (click)="rowAction.emit({ action: action.action, item: item })">
+                                {{ action.label }}
+                              </button>
+                            </li>
+                          }
+                        </ul>
+                      </c-dropdown>
+                    } @else {
+                      <button cButton color="info" size="sm"
+                              [attr.aria-label]="'Ver detalles de ' + (item.fullName || item.name || 'este registro')"
+                              (click)="rowAction.emit({ action: 'view', item: item })">
+                        Ver
+                      </button>
+                    }
+                  }
+                  @default {
+                    {{ item[col.key] }}
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+        @if (items.length === 0) {
+          <tr>
+            <td [attr.colspan]="columns.length" class="text-center text-body-secondary py-4">
+              Sin registros
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Paginacion -->
+    @if (totalPages > 1) {
+      <nav aria-label="Paginacion de tabla">
+        <c-pagination align="end" class="mt-3">
+          <c-page-item [disabled]="currentPage === 1">
+            <a cPageLink (click)="pageChange.emit(currentPage - 1)" aria-label="Pagina anterior">Anterior</a>
+          </c-page-item>
+          @for (page of pages; track page) {
+            <c-page-item [active]="page === currentPage">
+              <a cPageLink (click)="pageChange.emit(page)"
+                 [attr.aria-label]="'Ir a pagina ' + page"
+                 [attr.aria-current]="page === currentPage ? 'page' : null">{{ page }}</a>
+            </c-page-item>
+          }
+          <c-page-item [disabled]="currentPage === totalPages">
+            <a cPageLink (click)="pageChange.emit(currentPage + 1)" aria-label="Pagina siguiente">Siguiente</a>
+          </c-page-item>
+        </c-pagination>
+      </nav>
+    }
+
+  </c-card-body>
+</c-card>

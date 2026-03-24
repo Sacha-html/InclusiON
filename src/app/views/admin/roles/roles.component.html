@@ -1,0 +1,146 @@
+<c-card class="mb-4">
+  <c-card-header>
+    <h5 class="mb-0">Roles y Permisos</h5>
+  </c-card-header>
+  <c-card-body>
+
+    @if (isLoading) {
+      <div class="text-center p-4">
+        <c-spinner color="primary"></c-spinner>
+      </div>
+    }
+
+    @if (!isLoading) {
+      <table cTable hover responsive>
+        <thead>
+          <tr>
+            <th>Rol</th>
+            <th>Permisos asignados</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (role of roles; track role.id) {
+            <tr>
+              <td>
+                <c-badge [color]="getRoleBadgeColor(role.name)">
+                  {{ getRoleLabel(role.name) }}
+                </c-badge>
+              </td>
+              <td>
+                <span class="text-body-secondary">
+                  {{ role.permissions.length }} permisos
+                </span>
+                <div class="mt-1">
+                  @for (perm of role.permissions.slice(0, 5); track perm) {
+                    <c-badge color="light" textColor="dark" class="me-1 mb-1" style="font-size: 0.7rem;">
+                      {{ perm }}
+                    </c-badge>
+                  }
+                  @if (role.permissions.length > 5) {
+                    <c-badge color="secondary" class="mb-1" style="font-size: 0.7rem;">
+                      +{{ role.permissions.length - 5 }} mas
+                    </c-badge>
+                  }
+                </div>
+              </td>
+              <td>
+                <button
+                  cButton
+                  color="primary"
+                  size="sm"
+                  (click)="openEditModal(role)"
+                >
+                  Editar permisos
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </c-card-body>
+</c-card>
+
+<!-- Modal: Editar Permisos -->
+<c-modal
+  [visible]="showModal"
+  (visibleChange)="showModal = $event"
+  alignment="center"
+  size="lg"
+>
+  <c-modal-header>
+    <h5 cModalTitle>
+      Permisos:
+      @if (selectedRole) {
+        <c-badge [color]="getRoleBadgeColor(selectedRole.name)" class="ms-2">
+          {{ getRoleLabel(selectedRole.name) }}
+        </c-badge>
+      }
+    </h5>
+  </c-modal-header>
+  <c-modal-body>
+    <c-row>
+      @for (group of permissionGroups; track group.module) {
+        <c-col md="6" class="mb-4">
+          <div class="border rounded p-3">
+
+            <!-- Module header with select all -->
+            <c-form-check class="mb-2">
+              <input
+                cFormCheckInput
+                type="checkbox"
+                [id]="'module-' + group.module"
+                [checked]="isModuleFullySelected(group.module)"
+                [indeterminate]="isModulePartiallySelected(group.module)"
+                (change)="toggleModule(group.module)"
+              />
+              <label
+                cFormCheckLabel
+                [for]="'module-' + group.module"
+                class="fw-bold"
+              >
+                {{ getModuleLabel(group.module) }}
+              </label>
+            </c-form-check>
+
+            <hr class="my-2" />
+
+            <!-- Individual permissions -->
+            @for (perm of group.permissions; track perm) {
+              <c-form-check class="ms-3">
+                <input
+                  cFormCheckInput
+                  type="checkbox"
+                  [id]="'perm-' + perm"
+                  [checked]="isPermissionSelected(perm)"
+                  (change)="togglePermission(perm)"
+                />
+                <label cFormCheckLabel [for]="'perm-' + perm">
+                  {{ getActionLabel(perm) }}
+                  <small class="text-body-secondary ms-1">({{ perm }})</small>
+                </label>
+              </c-form-check>
+            }
+
+          </div>
+        </c-col>
+      }
+    </c-row>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
+    <button
+      cButton
+      color="primary"
+      (click)="savePermissions()"
+      [disabled]="isSaving"
+    >
+      @if (isSaving) {
+        <c-spinner size="sm" class="me-1"></c-spinner>
+      }
+      Guardar permisos
+    </button>
+  </c-modal-footer>
+</c-modal>

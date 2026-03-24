@@ -2,6 +2,19 @@ import { inject, OnInit, OnDestroy, Directive } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { ErrorCode } from '@models';
+import { RoleRoutes } from '../../../shared/constants/roles';
+
+/**
+ * Datos de error de respuesta de login visual.
+ */
+export interface LoginErrorResponse {
+  errorCode?: number;
+  userMessage?: string;
+  isLocked?: boolean;
+  lockoutSecondsRemaining?: number;
+  remainingAttempts?: number;
+  errorMessage?: string;
+}
 
 /**
  * Datos del usuario obtenidos de los query params
@@ -187,7 +200,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
    * @param clearFieldFn Función opcional para limpiar campos del form
    */
   protected handleHttpError(
-    error: any,
+    error: LoginErrorResponse,
     defaultMessage: string,
     clearFieldFn?: () => void
   ): void {
@@ -212,7 +225,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
    * @param clearFieldFn Función opcional para limpiar campos del form
    */
   protected handleLoginResponseError(
-    data: any,
+    data: LoginErrorResponse,
     defaultMessage: string,
     clearFieldFn?: () => void
   ): void {
@@ -255,9 +268,16 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
 
   /**
    * Navega al dashboard después de login exitoso.
+   * Si mustChangePassword es true, redirige a cambio de contraseña.
    */
-  protected navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+  protected navigateToDashboard(mustChangePassword?: boolean): void {
+    if (mustChangePassword) {
+      this.router.navigate(['/change-password']);
+    } else {
+      const role = this.authService.getUserRole();
+      const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
+      this.router.navigate([target]);
+    }
   }
 
   // ============================================

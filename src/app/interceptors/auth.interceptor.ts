@@ -6,7 +6,7 @@ import { ErrorCodeService, ToastService, LocalStorageService } from '@services';
 import { ErrorCode } from '@models';
 
 /** URLs públicas que no requieren autenticación */
-const PUBLIC_URLS = ['/login', '/register', '/visual-login'];
+const PUBLIC_URLS = ['/login', '/register', '/visual-login', '/invite'];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);

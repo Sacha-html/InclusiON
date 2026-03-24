@@ -1,0 +1,13 @@
+<app-data-table
+  title="Instituciones"
+  [columns]="cols"
+  [items]="filteredInstitutions"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [headerButtons]="[{action: 'new', label: 'Nueva Institucion'}]"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
+</app-data-table>

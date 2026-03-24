@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { Location } from '@angular/common';
 import { AuthService, AccessibilityService } from '@services';
 import { IconDirective } from '@coreui/icons-angular';
 
@@ -12,6 +13,7 @@ import { IconDirective } from '@coreui/icons-angular';
 export class AacHeaderComponent {
   readonly authService = inject(AuthService);
   readonly a11y = inject(AccessibilityService);
+  private readonly location = inject(Location);
 
   get userName(): string {
     return this.authService.getCurrentUser()?.name || 'Usuario';
@@ -19,6 +21,14 @@ export class AacHeaderComponent {
 
   get userInitial(): string {
     return this.userName.charAt(0).toUpperCase();
+  }
+
+  get isReadingMode(): boolean {
+    return this.a11y.readingMode();
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   openSettings(): void {
