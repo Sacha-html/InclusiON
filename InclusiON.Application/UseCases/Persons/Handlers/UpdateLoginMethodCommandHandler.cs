@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -116,7 +117,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
                 case LoginMethodStandard:
                     // Generar contrasena temporal para que el usuario pueda loguearse
-                    temporaryPassword = GenerateTemporaryPassword();
+                    temporaryPassword = PasswordGenerator.GenerateTemporary();
                     var user = await _identityService.FindByIdAsync(command.UserId);
                     if (user == null)
                     {
@@ -168,9 +169,5 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 SuccessMessages.LoginMethodUpdated);
         }
 
-        private static string GenerateTemporaryPassword()
-        {
-            return $"Temp@{Guid.NewGuid().ToString()[..8]}";
-        }
     }
 }

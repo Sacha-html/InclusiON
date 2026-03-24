@@ -7,8 +7,6 @@ using InclusiON.Application.UseCases.Institutions.Queries;
 using InclusiON.DTOs.Requests.Institutions;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Institutions;
-using InclusiON.Shared.Resources;
-
 namespace InclusiON.Api.Controllers
 {
     /// <summary>
@@ -54,15 +52,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreateInstitutionCommand, ApiResponse<InstitutionResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<InstitutionResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new CreateInstitutionCommand(
                 request.Name,
                 request.Address,
@@ -89,15 +78,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateInstitutionCommand, ApiResponse<InstitutionResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<InstitutionResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new UpdateInstitutionCommand(
                 id,
                 request.Name,

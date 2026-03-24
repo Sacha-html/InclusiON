@@ -119,14 +119,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreateInvitationCommand, ApiResponse<InvitationResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<InvitationResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var professionalId = await GetCurrentProfessionalId(cancellationToken);
             if (professionalId == null)
@@ -177,15 +169,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<AcceptInvitationCommand, ApiResponse<AcceptInvitationResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<AcceptInvitationResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new AcceptInvitationCommand(
                 code,
                 request.Email,

@@ -104,14 +104,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreatePersonCommand, ApiResponse<PersonResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new CreatePersonCommand(
                 request.FirstName,
@@ -168,14 +160,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdatePersonCommand, ApiResponse<PersonResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<PersonResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new UpdatePersonCommand(
                 personId,
@@ -227,14 +211,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateLoginMethodCommand, ApiResponse<UpdateLoginMethodResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new UpdateLoginMethodCommand(
                 userId,
@@ -243,17 +219,7 @@ namespace InclusiON.Api.Controllers
                 request.SupervisorUserId);
 
             var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-            {
-                if (result.Message.Contains("no encontrad", StringComparison.OrdinalIgnoreCase))
-                {
-                    return NotFound(result);
-                }
-                return BadRequest(result);
-            }
-
-            return Ok(result);
+            return result.ToActionResult();
         }
 
         /// <summary>
@@ -276,15 +242,6 @@ namespace InclusiON.Api.Controllers
                 return Unauthorized(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.TokenInvalid));
             }
 
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<UpdateLoginMethodResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new UpdateLoginMethodCommand(
                 userId.Value,
                 request.LoginMethodId,
@@ -292,17 +249,7 @@ namespace InclusiON.Api.Controllers
                 request.SupervisorUserId);
 
             var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-            {
-                if (result.Message.Contains("no encontrad", StringComparison.OrdinalIgnoreCase))
-                {
-                    return NotFound(result);
-                }
-                return BadRequest(result);
-            }
-
-            return Ok(result);
+            return result.ToActionResult();
         }
 
         #endregion
