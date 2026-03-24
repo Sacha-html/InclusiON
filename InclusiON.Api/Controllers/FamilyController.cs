@@ -29,7 +29,7 @@ namespace InclusiON.Api.Controllers
 
             var query = new GetFamilyQuery(
                 request.Page, request.PageSize, request.Search, request.IsActive,
-                request.SortBy, request.SortDirection, request.InstitutionId);
+                request.SortBy, request.SortDirection, request.InstitutionIds);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
