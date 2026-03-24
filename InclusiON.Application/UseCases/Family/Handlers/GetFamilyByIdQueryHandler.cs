@@ -45,7 +45,17 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 IsActive = f.User?.IsActive ?? false,
                 CreatedAt = f.CreatedAt,
                 UpdatedAt = f.UpdatedAt,
-                Email = f.User?.Email
+                Email = f.User?.Email,
+                LinkedPersons = f.PersonRepresentatives?
+                    .Where(pr => pr.IsActive)
+                    .Select(pr => new LinkedPersonInfo
+                    {
+                        PersonId = pr.PersonId,
+                        FullName = $"{pr.Person.FirstName} {pr.Person.LastName}".Trim(),
+                        DisabilityType = pr.Person.DisabilityType?.Name,
+                        IsPrimary = pr.IsPrimary
+                    })
+                    .ToList()
             };
         }
     }

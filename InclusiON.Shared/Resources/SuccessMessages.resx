@@ -60,6 +60,9 @@
 	<data name="PersonUpdated" xml:space="preserve">
 		<value>Persona actualizada exitosamente</value>
 	</data>
+	<data name="PersonDeactivated" xml:space="preserve">
+		<value>Persona desactivada exitosamente</value>
+	</data>
 	<data name="ProfessionalCreated" xml:space="preserve">
 		<value>Profesional creado exitosamente</value>
 	</data>
