@@ -75,22 +75,11 @@
   </c-card-body>
 </c-card>
 
-<c-modal [visible]="showPasswordModal" backdrop="static" [keyboard]="false">
-  <c-modal-header><strong>Familiar creado exitosamente</strong></c-modal-header>
-  <c-modal-body>
-    @if (createdFamily) {
-      <p>Se creo el familiar <strong>{{ createdFamily.fullName }}</strong>.</p>
-      <p>Se genero una contraseña temporal para su acceso al sistema:</p>
-      <div class="alert alert-warning d-flex align-items-center justify-content-between">
-        <code class="fs-5">{{ createdFamily.temporaryPassword }}</code>
-      </div>
-      <p class="text-body-secondary mb-0">
-        Asegurese de copiar esta contraseña. No se podra volver a consultar.
-        El familiar debera cambiarla en su primer inicio de sesion.
-      </p>
-    }
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="primary" (click)="closeModalAndNavigate()">Entendido</button>
-  </c-modal-footer>
-</c-modal>
+<app-password-modal
+  [visible]="showPasswordModal"
+  entityType="Familiar"
+  entityArticle="el"
+  [entityName]="createdFamily?.fullName ?? ''"
+  [password]="createdFamily?.temporaryPassword ?? ''"
+  (close)="closeModalAndNavigate()">
+</app-password-modal>

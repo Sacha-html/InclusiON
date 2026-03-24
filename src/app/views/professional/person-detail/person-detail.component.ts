@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogsService, PersonsService, ToastService } from '@services';
 import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem, UpdatePersonRequest } from '@models';
+import { formatDate, toDisplayDate, toIsoDate } from '@shared/utils';
 import {
   BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent,
   CardHeaderComponent, ColComponent, FormControlDirective, FormLabelDirective,
@@ -84,8 +85,8 @@ export class PersonDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.personsService.getPersonById(id).subscribe({
-        next: (response) => {
-          this.person = response.data;
+        next: (person) => {
+          this.person = person;
           this.loadSkillProfile();
         },
         error: () => this.router.navigate(['/pro/persons']),
@@ -101,7 +102,7 @@ export class PersonDetailComponent implements OnInit {
       firstName: this.person.firstName,
       lastName: this.person.lastName,
       documentNumber: this.person.documentNumber ?? '',
-      birthDate: this.toDisplayDate(this.person.birthDate),
+      birthDate: toDisplayDate(this.person.birthDate),
     };
     this.isEditingData = true;
   }
@@ -118,12 +119,12 @@ export class PersonDetailComponent implements OnInit {
       firstName: this.editPersonalData.firstName,
       lastName: this.editPersonalData.lastName,
       documentNumber: this.editPersonalData.documentNumber || undefined,
-      birthDate: this.editPersonalData.birthDate ? this.toIsoDate(this.editPersonalData.birthDate) : undefined,
+      birthDate: this.editPersonalData.birthDate ? toIsoDate(this.editPersonalData.birthDate) : undefined,
     };
 
     this.personsService.updatePerson(this.person.id, request).subscribe({
-      next: (response) => {
-        this.person = response.data;
+      next: (person) => {
+        this.person = person;
         this.isEditingData = false;
         this.isSavingData = false;
         this.toastService.success('Datos personales actualizados');
@@ -133,18 +134,6 @@ export class PersonDetailComponent implements OnInit {
         this.toastService.error('Error al actualizar datos');
       },
     });
-  }
-
-  private toDisplayDate(iso: string | undefined | null): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return '';
-    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-  }
-
-  private toIsoDate(ddmmyyyy: string): string {
-    const [day, month, year] = ddmmyyyy.split('/');
-    return `${year}-${month}-${day}T00:00:00`;
   }
 
   // --- Functional profile editing ---
@@ -194,8 +183,8 @@ export class PersonDetailComponent implements OnInit {
     };
 
     this.personsService.updatePerson(this.person.id, request).subscribe({
-      next: (response) => {
-        this.person = response.data;
+      next: (person) => {
+        this.person = person;
         this.isEditing = false;
         this.isSaving = false;
         this.toastService.success('Perfil funcional actualizado');
@@ -210,7 +199,7 @@ export class PersonDetailComponent implements OnInit {
   loadSkillProfile(): void {
     if (!this.person) return;
     this.personsService.getSkillProfile(this.person.id).subscribe({
-      next: (response) => (this.skillProfile = response.data ?? []),
+      next: (data) => (this.skillProfile = data ?? []),
     });
   }
 
@@ -257,12 +246,7 @@ export class PersonDetailComponent implements OnInit {
     });
   }
 
-  formatDate(date: string | null | undefined): string {
-    if (!date) return 'Sin especificar';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return 'Sin especificar';
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
+  formatDate = formatDate;
 
   formatLevel(level: number | null | undefined): string {
     return level != null && level > 0 ? `${level} / 5` : 'Sin evaluar';

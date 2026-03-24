@@ -6,9 +6,9 @@ import { CreateFamilyRequest, FamilyResponse } from '../../../../models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
-  FormSelectDirective, ModalBodyComponent, ModalComponent, ModalFooterComponent,
-  ModalHeaderComponent, RowComponent,
+  FormSelectDirective, RowComponent,
 } from '@coreui/angular';
+import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 
 @Component({
   selector: 'app-family-new',
@@ -16,7 +16,7 @@ import {
     ReactiveFormsModule, CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective,
-    ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
+    PasswordModalComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',

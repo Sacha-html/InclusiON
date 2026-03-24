@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InvitationsService } from '@services';
 import { InvitationResponse } from '@models';
+import { getInvitationStatusColor } from '@shared/utils';
 
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
@@ -37,12 +38,5 @@ export class InvitationsComponent implements OnInit {
     });
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Enviada': return 'info';
-      case 'Aceptada': return 'success';
-      case 'Expirada': return 'danger';
-      default: return 'secondary';
-    }
-  }
+  getStatusColor = getInvitationStatusColor;
 }

@@ -7,7 +7,8 @@ import {
   InstitutionResponse,
   UpdateInstitutionRequest,
 } from '../models';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { unwrapResponse } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -22,31 +23,18 @@ export class InstitutionsService {
   getAll(): Observable<InstitutionResponse[]> {
     return this.http
       .get<ApiResponse<InstitutionResponse[]>>(this.apiUrl)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   create(request: CreateInstitutionRequest): Observable<InstitutionResponse> {
     return this.http
       .post<ApiResponse<InstitutionResponse>>(this.apiUrl, request)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   update(id: number, request: UpdateInstitutionRequest): Observable<InstitutionResponse> {
     return this.http
       .put<ApiResponse<InstitutionResponse>>(`${this.apiUrl}/${id}`, request)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
-  }
-
-  private handleError(error: unknown): Observable<never> {
-    return throwError(() => error);
+      .pipe(unwrapResponse());
   }
 }

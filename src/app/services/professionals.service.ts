@@ -10,7 +10,8 @@ import {
   ProfessionalResponse,
   UpdateProfessionalRequest,
 } from '../models';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -38,55 +39,36 @@ export class ProfessionalsService {
 
     return this.http
       .get<ApiResponse<PagedResponse<ProfessionalListItemResponse>>>(this.apiUrl, { params })
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   getProfessionalById(id: string): Observable<ProfessionalResponse> {
     return this.http
       .get<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/${id}`)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   createProfessional(request: CreateProfessionalRequest): Observable<ProfessionalResponse> {
     return this.http
       .post<ApiResponse<ProfessionalResponse>>(this.apiUrl, request)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   updateProfessional(id: string, request: UpdateProfessionalRequest): Observable<ProfessionalResponse> {
     return this.http
       .put<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/${id}`, request)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   getMyProfile(): Observable<ProfessionalResponse> {
     return this.http
       .get<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/me`)
-      .pipe(
-        map((response) => response.data),
-        catchError(this.handleError),
-      );
+      .pipe(unwrapResponse());
   }
 
   deactivateProfessional(id: string): Observable<void> {
     return this.http
       .put<void>(`${this.apiUrl}/${id}/deactivate`, {})
-      .pipe(catchError(this.handleError));
-  }
-
-  private handleError(error: unknown): Observable<never> {
-    return throwError(() => error);
+      .pipe(handleApiError());
   }
 }
