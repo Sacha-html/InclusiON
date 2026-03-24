@@ -30,6 +30,7 @@ chrome-profiler-events*.json
 !.vscode/launch.json
 !.vscode/extensions.json
 .history/*
+/vscode
 
 # Miscellaneous
 .npmrc
@@ -44,5 +45,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
-.claude/settings.local.json
-.claude/settings.local.json
+
+# Claude Code
+.claude/

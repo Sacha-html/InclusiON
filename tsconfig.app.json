@@ -8,7 +8,6 @@
       "@angular/localize"
     ],
     "paths": {
-      "@docs-components/*": ["./src/components/*"],
       "@app/*": ["./src/app/*"],
       "@services/*": ["./src/app/services/*"],
       "@services": ["./src/app/services/index.ts"],

@@ -9,6 +9,7 @@ export interface ProfessionalListItemResponse {
   specialty?: string;
   licenseNumber?: string;
   isActive: boolean;
+  email?: string;
 }
 
 export interface ProfessionalResponse {
@@ -27,4 +28,5 @@ export interface ProfessionalResponse {
   createdAt: string;
   updatedAt?: string;
   temporaryPassword?: string;
+  email?: string;
 }

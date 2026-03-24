@@ -2,13 +2,21 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 import { roleGuard } from './guards/role.guard';
+import { globalAdminGuard } from './guards/global-admin.guard';
+import { permissionGuard } from './guards/permission.guard';
 import { UserRoles } from './shared/constants/roles';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
     pathMatch: 'full',
+    canActivate: [guestGuard],
+    // Si no esta logueado: guestGuard deja pasar -> carga login
+    // Si esta logueado: guestGuard redirige al dashboard del rol
+    loadComponent: () =>
+      import('./views/pages/visual-login/role-selection.component').then(
+        (m) => m.RoleSelectionComponent,
+      ),
   },
 
   // Visual login
@@ -27,6 +35,15 @@ export const routes: Routes = [
         (m) => m.LoginComponent,
       ),
     canActivate: [guestGuard],
+  },
+
+  // Registro por invitacion familiar (publico)
+  {
+    path: 'invite/:code',
+    loadComponent: () =>
+      import('./views/pages/register-by-invitation/register-by-invitation.component').then(
+        (m) => m.RegisterByInvitationComponent,
+      ),
   },
 
   // Cambio de contraseña obligatorio
@@ -99,6 +116,7 @@ export const routes: Routes = [
       },
       {
         path: 'professionals',
+        data: { title: 'Profesionales' },
         loadChildren: () =>
           import('./views/admin/professionals/routes').then(
             (m) => m.professionalRoutes,
@@ -106,9 +124,82 @@ export const routes: Routes = [
       },
       {
         path: 'persons',
+        data: { title: 'Personas' },
         loadChildren: () =>
           import('./views/admin/persons/routes').then(
             (m) => m.personRoutes,
+          ),
+      },
+      {
+        path: 'family',
+        data: { title: 'Familiares' },
+        loadChildren: () =>
+          import('./views/admin/family/routes').then(
+            (m) => m.familyRoutes,
+          ),
+      },
+      {
+        path: 'institutions',
+        data: { title: 'Instituciones' },
+        canActivate: [globalAdminGuard],
+        loadChildren: () =>
+          import('./views/admin/institutions/routes').then(
+            (m) => m.institutionRoutes,
+          ),
+      },
+      {
+        path: 'catalogs/:type',
+        data: { title: 'Catalogos' },
+        loadComponent: () =>
+          import('./views/admin/catalogs/catalogs.component').then(
+            (m) => m.CatalogsComponent,
+          ),
+      },
+      {
+        path: 'invitations',
+        data: { title: 'Invitaciones', permission: 'invitations:read' },
+        canActivate: [permissionGuard],
+        loadComponent: () =>
+          import('./views/admin/invitations/invitations.component').then(
+            (m) => m.InvitationsComponent,
+          ),
+      },
+      {
+        path: 'my-institutions',
+        data: { title: 'Mis Instituciones' },
+        loadComponent: () =>
+          import('./views/admin/admin-institutions/admin-institutions.component').then(
+            (m) => m.AdminInstitutionsComponent,
+          ),
+      },
+      {
+        path: 'admins',
+        data: { title: 'Administradores' },
+        canActivate: [globalAdminGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./views/admin/admin-users/admin-users.component').then(
+                (m) => m.AdminUsersComponent,
+              ),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./views/admin/admin-users/new/new.component').then(
+                (m) => m.NewComponent,
+              ),
+          },
+        ],
+      },
+      {
+        path: 'roles',
+        data: { title: 'Roles y Permisos' },
+        canActivate: [globalAdminGuard],
+        loadComponent: () =>
+          import('./views/admin/roles/roles.component').then(
+            (m) => m.RolesComponent,
           ),
       },
     ],

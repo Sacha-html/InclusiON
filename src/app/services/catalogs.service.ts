@@ -1,70 +1,72 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, Observable, of, tap, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, shareReplay, Subject } from 'rxjs';
 import {
   ApiResponse,
   CatalogItem,
   AutonomyLevelItem,
   LoginMethodItem,
+  ActivityCategoryItem,
+  SkillAreaItem,
+  ActivityTemplateTypeItem,
 } from '@models';
 import { environment } from '@env';
+import { unwrapResponse } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CatalogsService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
   private get apiUrl(): string {
     return `${environment.apiUrl}/Catalogs`;
   }
 
-  // Caches
-  private disabilityTypes$ = new BehaviorSubject<CatalogItem[] | null>(null);
-  private autonomyLevels$ = new BehaviorSubject<AutonomyLevelItem[] | null>(null);
-  private loginMethods$ = new BehaviorSubject<LoginMethodItem[] | null>(null);
+  private cache = new Map<string, Observable<any>>();
+  private clearCache$ = new Subject<void>();
 
   getDisabilityTypes(): Observable<CatalogItem[]> {
-    if (this.disabilityTypes$.value) {
-      return of(this.disabilityTypes$.value);
-    }
-    return this.http
-      .get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/disability-types`)
-      .pipe(
-        map(response => response.data),
-        tap(data => this.disabilityTypes$.next(data)),
-        catchError(this.handleError),
-      );
+    return this.cached('disability-types');
   }
 
   getAutonomyLevels(): Observable<AutonomyLevelItem[]> {
-    if (this.autonomyLevels$.value) {
-      return of(this.autonomyLevels$.value);
-    }
-    return this.http
-      .get<ApiResponse<AutonomyLevelItem[]>>(`${this.apiUrl}/autonomy-levels`)
-      .pipe(
-        map(response => response.data),
-        tap(data => this.autonomyLevels$.next(data)),
-        catchError(this.handleError),
-      );
+    return this.cached('autonomy-levels');
   }
 
   getLoginMethods(): Observable<LoginMethodItem[]> {
-    if (this.loginMethods$.value) {
-      return of(this.loginMethods$.value);
-    }
-    return this.http
-      .get<ApiResponse<LoginMethodItem[]>>(`${this.apiUrl}/login-methods`)
-      .pipe(
-        map(response => response.data),
-        tap(data => this.loginMethods$.next(data)),
-        catchError(this.handleError),
-      );
+    return this.cached('login-methods');
   }
 
-  private handleError(error: unknown): Observable<never> {
-    return throwError(() => error);
+  getActivityCategories(): Observable<ActivityCategoryItem[]> {
+    return this.cached('activity-categories');
+  }
+
+  getSkillAreas(): Observable<SkillAreaItem[]> {
+    return this.cached('skill-areas');
+  }
+
+  getActivityTemplateTypes(): Observable<ActivityTemplateTypeItem[]> {
+    return this.cached('activity-template-types');
+  }
+
+  clearCache(): void {
+    this.cache.clear();
+    this.clearCache$.next();
+  }
+
+  private cached<T>(endpoint: string): Observable<T> {
+    if (!this.cache.has(endpoint)) {
+      this.cache.set(
+        endpoint,
+        this.http
+          .get<ApiResponse<T>>(`${this.apiUrl}/${endpoint}`)
+          .pipe(
+            unwrapResponse(),
+            shareReplay({ bufferSize: 1, refCount: false }),
+          ),
+      );
+    }
+    return this.cache.get(endpoint)!;
   }
 }

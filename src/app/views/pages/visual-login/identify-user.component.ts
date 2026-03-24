@@ -1,5 +1,4 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
@@ -12,7 +11,6 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-identify-user',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonDirective,
     IconDirective,
@@ -120,7 +118,7 @@ export class IdentifyUserComponent implements OnInit {
       return;
     }
 
-    // Profesionales van al login clasico de email+password
+    // Profesionales usan login con email+password
     if (userData.userType === 'Professional') {
       this.router.navigate(['/admin-login']);
       return;

@@ -182,6 +182,11 @@ export class ErrorCodeService {
       message: 'Método de acceso no permitido',
       userAction: 'Este método de inicio de sesión no está disponible para tu cuenta',
       severity: 'error'
+    }],
+    [ErrorCode.RoleNotAllowedForLogin, {
+      message: 'No tienes permisos para acceder desde este portal',
+      userAction: 'Usa el portal correspondiente a tu tipo de cuenta',
+      severity: 'error'
     }]
   ]);
 

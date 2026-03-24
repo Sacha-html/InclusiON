@@ -15,7 +15,7 @@ export const professionalNavItems: INavData[] = [
     name: 'Gestion'
   },
   {
-    name: 'Personas a Cargo',
+    name: 'Mi Aula',
     url: '/pro/persons',
     iconComponent: { name: 'cil-people' }
   },
@@ -56,5 +56,10 @@ export const professionalNavItems: INavData[] = [
     name: 'Calendario',
     url: '/pro/calendar',
     iconComponent: { name: 'cil-calendar' }
+  },
+  {
+    name: 'Invitaciones',
+    url: '/pro/invitations',
+    iconComponent: { name: 'cil-link' }
   }
 ];

@@ -13,3 +13,9 @@ export interface ActionItem {
   /** Función que recibe el item y devuelve si la acción es visible */
   visible?: (item: any) => boolean;
 }
+
+export interface HeaderButton {
+  action: string;
+  label: string;
+  color?: string;
+}

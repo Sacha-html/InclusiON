@@ -21,7 +21,22 @@ import {
   UserProfileResponse,
 } from '@models';
 import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
+import { AccessibilityService } from './accessibility.service';
 import { environment } from '@env';
+
+interface JwtPayload {
+  sub?: string;
+  userId?: string;
+  email?: string;
+  name?: string;
+  surname?: string;
+  role?: string;
+  permission?: string | string[];
+  isGlobalAdmin?: string | boolean;
+  institutionId?: string | number | (string | number)[];
+  exp?: number;
+  [key: string]: unknown;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +45,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private storage = inject(LocalStorageService);
+  private a11y = inject(AccessibilityService);
 
   private currentUserSubject = new BehaviorSubject<User | null>(
     this.getUserFromStorage()
@@ -144,14 +160,16 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      const expirationDate = new Date(payload.exp * 1000);
+      const exp = payload.exp;
+      if (!exp) return false;
+      const expirationDate = new Date(exp * 1000);
       return expirationDate > new Date();
     } catch (error) {
       return false;
     }
   }
 
-  private decodeToken(token: string): any {
+  private decodeToken(token: string): JwtPayload {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -180,6 +198,11 @@ export class AuthService {
 
     if (authResponse.data.user) {
       this.setUser(authResponse.data.user);
+    }
+
+    if (authResponse.data.accessibility) {
+      this.storage.setObject(STORAGE_KEYS.ACCESSIBILITY_PREFERENCES, authResponse.data.accessibility);
+      this.a11y.applyUserPreferences(authResponse.data.accessibility);
     }
 
     this.isAuthenticatedSubject.next(true);
@@ -231,8 +254,8 @@ export class AuthService {
       const payload = this.decodeToken(token);
 
       return {
-        id: payload.sub || payload.userId,
-        email: payload.email,
+        id: payload.sub || payload.userId || '',
+        email: payload.email || '',
         name: payload.name || '',
         surname: payload.surname || '',
         role: payload.role || 'user',
@@ -255,12 +278,55 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      const permissions: string[] = payload.permission || [];
+      const raw = payload.permission;
+      const permissions: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
       return Array.isArray(permissions)
         ? permissions.includes(permission)
         : permissions === permission;
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Verifica si el usuario autenticado es un administrador global.
+   * Retorna true solo si el rol es Admin y el claim isGlobalAdmin es "true".
+   */
+  isGlobalAdmin(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const payload = this.decodeToken(token);
+      const isAdmin = payload.role === 'Admin';
+      const isGlobal = payload.isGlobalAdmin === 'true' || payload.isGlobalAdmin === true;
+      return isAdmin && isGlobal;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Obtiene los IDs de instituciones asignadas al usuario desde el JWT.
+   * El claim institutionId puede ser un solo valor o un array.
+   */
+  getInstitutionIds(): number[] {
+    const token = this.getToken();
+    if (!token) return [];
+
+    try {
+      const payload = this.decodeToken(token);
+      const raw = payload.institutionId;
+      if (!raw) return [];
+
+      if (Array.isArray(raw)) {
+        return raw.map((id: string | number) => Number(id)).filter((id: number) => !isNaN(id));
+      }
+
+      const parsed = Number(raw);
+      return isNaN(parsed) ? [] : [parsed];
+    } catch {
+      return [];
     }
   }
 
@@ -361,9 +427,10 @@ export class AuthService {
       };
       this.setUser(user);
 
-      // Store accessibility preferences
+      // Store and apply accessibility preferences
       if (userInfo.accessibility) {
         this.storage.setObject(STORAGE_KEYS.ACCESSIBILITY_PREFERENCES, userInfo.accessibility);
+        this.a11y.applyUserPreferences(userInfo.accessibility);
       }
     }
     this.isAuthenticatedSubject.next(true);
@@ -379,7 +446,9 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      const expirationDate = new Date(payload.exp * 1000);
+      const exp = payload.exp;
+      if (!exp) return false;
+      const expirationDate = new Date(exp * 1000);
       const now = new Date();
       const fiveMinutes = 5 * 60 * 1000;
 

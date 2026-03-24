@@ -2,13 +2,11 @@
   <c-card>
     <c-card-header>
       <strong>Detalle de Persona con Discapacidad</strong>
-      <span class="badge ms-2"
-            [class.badge-success]="person.isActive"
-            [class.badge-danger]="!person.isActive"
+      <c-badge class="ms-2" [color]="person.isActive ? 'success' : 'danger'"
             role="status"
             [attr.aria-label]="'Estado: ' + (person.isActive ? 'Activo' : 'Inactivo')">
         {{ person.isActive ? 'Activo' : 'Inactivo' }}
-      </span>
+      </c-badge>
     </c-card-header>
     <c-card-body>
 
@@ -161,6 +159,39 @@
         </c-col>
       </c-row>
 
+      <!-- Perfil de Habilidades -->
+      <h5 class="mt-4 mb-3">Perfil de Habilidades</h5>
+
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        @for (sp of skillProfile; track sp.skillAreaId) {
+          <span class="skill-chip d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
+                [style.background-color]="sp.color ?? '#6c757d'"
+                [style.color]="'#fff'">
+            @if (sp.icon) {
+              <span class="material-icons skill-chip-icon">{{ sp.icon }}</span>
+            }
+            <span>{{ sp.skillAreaName }}</span>
+            @if (person.isActive) {
+              <button type="button"
+                      class="btn-close btn-close-white ms-1 skill-chip-close"
+                      (click)="deactivateSkillArea(sp.skillAreaId)"
+                      [attr.aria-label]="'Quitar ' + sp.skillAreaName">
+              </button>
+            }
+          </span>
+        }
+        @if (skillProfile.length === 0) {
+          <span class="text-body-secondary">Sin areas de habilidad asignadas.</span>
+        }
+      </div>
+
+      @if (person.isActive) {
+        <button cButton color="primary" size="sm" (click)="openAddSkillAreaModal()"
+                aria-label="Agregar area de habilidad">
+          Agregar Area
+        </button>
+      }
+
       <!-- Auditoría -->
       <h5 class="mt-4 mb-3">Auditoría</h5>
 
@@ -190,3 +221,33 @@
     </c-card-body>
   </c-card>
 }
+
+<!-- Modal Agregar Area de Habilidad -->
+<c-modal [visible]="showAddSkillAreaModal" (visibleChange)="!$event && closeAddSkillAreaModal()"
+         aria-labelledby="add-skill-area-modal-title">
+  <c-modal-header>
+    <strong id="add-skill-area-modal-title">Agregar Area de Habilidad</strong>
+  </c-modal-header>
+  <c-modal-body>
+    @if (skillAreaError) {
+      <div class="alert alert-danger">{{ skillAreaError }}</div>
+    }
+    <div class="mb-3">
+      <label cLabel for="skill-area-select">Area de habilidad</label>
+      <select cSelect id="skill-area-select" [(ngModel)]="selectedSkillAreaId"
+              aria-label="Seleccionar area de habilidad">
+        <option [ngValue]="null">-- Seleccionar --</option>
+        @for (area of allSkillAreas; track area.id) {
+          <option [ngValue]="area.id">{{ area.name }}</option>
+        }
+      </select>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeAddSkillAreaModal()">Cancelar</button>
+    <button cButton color="primary" (click)="confirmAddSkillArea()"
+            [disabled]="!selectedSkillAreaId || skillAreaLoading">
+      {{ skillAreaLoading ? 'Guardando...' : 'Agregar' }}
+    </button>
+  </c-modal-footer>
+</c-modal>
