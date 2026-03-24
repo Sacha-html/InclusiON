@@ -21,6 +21,7 @@ import {
   UserProfileResponse,
 } from '@models';
 import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
+import { AccessibilityService } from './accessibility.service';
 import { environment } from '@env';
 
 interface JwtPayload {
@@ -44,6 +45,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private storage = inject(LocalStorageService);
+  private a11y = inject(AccessibilityService);
 
   private currentUserSubject = new BehaviorSubject<User | null>(
     this.getUserFromStorage()
@@ -196,6 +198,11 @@ export class AuthService {
 
     if (authResponse.data.user) {
       this.setUser(authResponse.data.user);
+    }
+
+    if (authResponse.data.accessibility) {
+      this.storage.setObject(STORAGE_KEYS.ACCESSIBILITY_PREFERENCES, authResponse.data.accessibility);
+      this.a11y.applyUserPreferences(authResponse.data.accessibility);
     }
 
     this.isAuthenticatedSubject.next(true);
@@ -420,9 +427,10 @@ export class AuthService {
       };
       this.setUser(user);
 
-      // Store accessibility preferences
+      // Store and apply accessibility preferences
       if (userInfo.accessibility) {
         this.storage.setObject(STORAGE_KEYS.ACCESSIBILITY_PREFERENCES, userInfo.accessibility);
+        this.a11y.applyUserPreferences(userInfo.accessibility);
       }
     }
     this.isAuthenticatedSubject.next(true);
