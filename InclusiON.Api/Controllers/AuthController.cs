@@ -54,7 +54,7 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken
             )
         {
-            var command = new LoginCommand(request.Email, request.Password);
+            var command = new LoginCommand(request.Email, request.Password, request.RememberMe, request.AllowedRoles);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }

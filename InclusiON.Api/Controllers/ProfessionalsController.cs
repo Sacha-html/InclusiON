@@ -53,7 +53,7 @@ namespace InclusiON.Api.Controllers
                 request.IsActive,
                 request.SortBy,
                 request.SortDirection,
-                request.InstitutionId);
+                request.InstitutionIds);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
