@@ -68,22 +68,11 @@
   </c-card-body>
 </c-card>
 
-<c-modal [visible]="showPasswordModal" backdrop="static" [keyboard]="false">
-  <c-modal-header><strong>Administrador creado exitosamente</strong></c-modal-header>
-  <c-modal-body>
-    @if (createdAdmin) {
-      <p>Se creo el administrador <strong>{{ createdAdmin.firstName }} {{ createdAdmin.lastName }}</strong>.</p>
-      <p>Se genero una contraseña temporal para su acceso al sistema:</p>
-      <div class="alert alert-warning d-flex align-items-center justify-content-between">
-        <code class="fs-5">{{ createdAdmin.temporaryPassword }}</code>
-      </div>
-      <p class="text-body-secondary mb-0">
-        Asegurese de copiar esta contraseña. No se podra volver a consultar.
-        El administrador debera cambiarla en su primer inicio de sesion.
-      </p>
-    }
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="primary" (click)="closeModalAndNavigate()">Entendido</button>
-  </c-modal-footer>
-</c-modal>
+<app-password-modal
+  [visible]="showPasswordModal"
+  entityType="Administrador"
+  entityArticle="el"
+  [entityName]="createdAdmin ? createdAdmin.firstName + ' ' + createdAdmin.lastName : ''"
+  [password]="createdAdmin?.temporaryPassword ?? ''"
+  (close)="closeModalAndNavigate()">
+</app-password-modal>
