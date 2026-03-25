@@ -12,5 +12,6 @@ namespace InclusiON.DTOs.Responses.Family
         public string? Relationship { get; set; }
         public bool IsActive { get; set; }
         public string? Email { get; set; }
+        public List<LinkedPersonInfo> LinkedPersons { get; set; } = new();
     }
 }

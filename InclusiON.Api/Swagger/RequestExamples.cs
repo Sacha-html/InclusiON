@@ -204,7 +204,6 @@ namespace InclusiON.Api.Swagger
             Specialty = "Psicopedagogia",
             LicenseNumber = "MP-12345",
             BirthDate = new DateTime(1985, 8, 15),
-            Address = "Av. Corrientes 1234, CABA",
             Email = "carolina.mendez@inclusion.com"
         };
     }
@@ -214,8 +213,7 @@ namespace InclusiON.Api.Swagger
         public UpdateProfessionalRequest GetExamples() => new()
         {
             Phone = "1188776655",
-            Specialty = "Terapia Ocupacional",
-            Address = "Av. Santa Fe 5678, CABA"
+            Specialty = "Terapia Ocupacional"
         };
     }
 }

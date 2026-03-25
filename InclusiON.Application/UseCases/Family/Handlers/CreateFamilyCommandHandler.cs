@@ -15,18 +15,24 @@ namespace InclusiON.Application.UseCases.Family.Handlers
     public class CreateFamilyCommandHandler : ICommandHandler<CreateFamilyCommand, ApiResponse<FamilyResponse>>
     {
         private readonly IFamilyRepository _repository;
+        private readonly IPersonsRepository _personsRepository;
         private readonly IIdentityService _identityService;
+        private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateFamilyCommandHandler> _logger;
 
         public CreateFamilyCommandHandler(
             IFamilyRepository repository,
+            IPersonsRepository personsRepository,
             IIdentityService identityService,
+            IEmailService emailService,
             IUnitOfWork unitOfWork,
             ILogger<CreateFamilyCommandHandler> logger)
         {
             _repository = repository;
+            _personsRepository = personsRepository;
             _identityService = identityService;
+            _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -44,6 +50,14 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                             ErrorCode.DocumentAlreadyExists,
                             ErrorMessages.DocumentAlreadyExists);
                     }
+                }
+
+                var person = await _personsRepository.GetByIdAsync(command.PersonId, cancellationToken);
+                if (person is null)
+                {
+                    return ApiResponse<FamilyResponse>.ErrorResult(
+                        ErrorCode.PersonNotFound,
+                        ErrorMessages.PersonNotFound);
                 }
 
                 var existingUser = await _identityService.FindByEmailAsync(command.Email);
@@ -91,9 +105,40 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     family.UserId = user.Id;
                     await _repository.CreateAsync(family, ct);
                     await _unitOfWork.SaveChangesAsync(ct);
+
+                    // Vincular familiar con la persona
+                    family.PersonRepresentatives.Add(new PersonRepresentative
+                    {
+                        PersonId = command.PersonId,
+                        RepresentativeId = family.Id,
+                        IsPrimary = true,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                    await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
                 _logger.LogInformation("Familiar creado: {FamilyId}, Usuario: {UserId}", family.Id, user.Id);
+
+                // Enviar email con contraseña temporal
+                try
+                {
+                    await _emailService.SendTemplatedEmailAsync(
+                        command.Email,
+                        "Bienvenido a InclusiON — Tu cuenta ha sido creada",
+                        "PasswordReset",
+                        new Dictionary<string, string?>
+                        {
+                            { "UserName", command.FirstName },
+                            { "TemporaryPassword", password },
+                            { "Year", DateTime.UtcNow.Year.ToString() }
+                        },
+                        cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "No se pudo enviar email de bienvenida a {Email}", command.Email);
+                }
 
                 var response = GetFamilyByIdQueryHandler.MapToResponse(family);
                 response.TemporaryPassword = password;

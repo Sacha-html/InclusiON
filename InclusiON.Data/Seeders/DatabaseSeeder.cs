@@ -18,8 +18,8 @@ namespace InclusiON.Data.Seeders
             await SeedAdminUserAsync(userManager);
             await SeedSkillAreasAsync(context);
             await SeedProfessionalsAsync(userManager, context);
-            await SeedFamilyAsync(userManager, context);
             await SeedVisualLoginTestUsersAsync(userManager, context);
+            await SeedFamilyAsync(userManager, context);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
@@ -453,7 +453,8 @@ namespace InclusiON.Data.Seeders
                     FirstName = "Rosa",
                     LastName = "Sanchez",
                     Phone = "1155667788",
-                    Relationship = "Madre"
+                    Relationship = "Madre",
+                    LinkedPersonEmail = "maria@test.com"
                 },
                 new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000031"),
@@ -462,53 +463,76 @@ namespace InclusiON.Data.Seeders
                     FirstName = "Miguel",
                     LastName = "Fernandez",
                     Phone = "1144556677",
-                    Relationship = "Tutor Legal"
+                    Relationship = "Tutor Legal",
+                    LinkedPersonEmail = "juan@test.com"
                 }
             };
 
             foreach (var fam in families)
             {
-                // Verificar si ya existe por email o por ID
+                // Crear usuario si no existe
                 var existingUser = await userManager.FindByEmailAsync(fam.Email);
-                if (existingUser != null)
-                    continue;
-
-                var existingById = await userManager.FindByIdAsync(fam.Id.ToString());
-                if (existingById != null)
-                    continue;
-
-                var user = new User
+                if (existingUser == null)
                 {
-                    Id = fam.Id,
-                    Name = fam.FirstName,
-                    Surname = fam.LastName,
-                    Email = fam.Email,
-                    UserName = fam.Email,
-                    EmailConfirmed = true,
-                    IsActive = true,
-                    LockoutEnabled = true,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                var result = await userManager.CreateAsync(user, fam.Password);
-
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(user, IdentityRoles.FamilyRepresentative.ToString());
-
-                    var family = new FamilyRepresentative
+                    var existingById = await userManager.FindByIdAsync(fam.Id.ToString());
+                    if (existingById == null)
                     {
-                        Id = Guid.NewGuid(),
-                        UserId = fam.Id,
-                        FirstName = fam.FirstName,
-                        LastName = fam.LastName,
-                        Phone = fam.Phone,
-                        Relationship = fam.Relationship,
-                        IsActive = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
+                        var user = new User
+                        {
+                            Id = fam.Id,
+                            Name = fam.FirstName,
+                            Surname = fam.LastName,
+                            Email = fam.Email,
+                            UserName = fam.Email,
+                            EmailConfirmed = true,
+                            IsActive = true,
+                            LockoutEnabled = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
 
-                    context.FamilyRepresentatives.Add(family);
+                        var result = await userManager.CreateAsync(user, fam.Password);
+                        if (result.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(user, IdentityRoles.FamilyRepresentative.ToString());
+
+                            context.FamilyRepresentatives.Add(new FamilyRepresentative
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = fam.Id,
+                                FirstName = fam.FirstName,
+                                LastName = fam.LastName,
+                                Phone = fam.Phone,
+                                Relationship = fam.Relationship,
+                                IsActive = true,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                }
+
+                // Vincular con persona — siempre, aunque el familiar ya exista
+                var familyEntity = await context.FamilyRepresentatives
+                    .FirstOrDefaultAsync(f => f.User.Email == fam.Email);
+                var personToLink = await context.PersonsWithDisability
+                    .FirstOrDefaultAsync(p => p.User.Email == fam.LinkedPersonEmail);
+
+                if (familyEntity != null && personToLink != null)
+                {
+                    var alreadyLinked = await context.PersonRepresentatives
+                        .AnyAsync(pr => pr.RepresentativeId == familyEntity.Id && pr.PersonId == personToLink.Id);
+
+                    if (!alreadyLinked)
+                    {
+                        context.PersonRepresentatives.Add(new PersonRepresentative
+                        {
+                            PersonId = personToLink.Id,
+                            RepresentativeId = familyEntity.Id,
+                            IsPrimary = true,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
                 }
             }
 

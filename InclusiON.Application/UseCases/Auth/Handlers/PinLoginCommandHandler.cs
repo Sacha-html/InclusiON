@@ -97,7 +97,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 refreshTokenExpiryDays,
                 command.DeviceId,
                 command.RememberDevice,
-                "Nuevo login con PIN",
+                Constants.RevokeReasons.NewLogin,
                 SuccessMessages.VisualLoginSuccessful,
                 cancellationToken);
         }
