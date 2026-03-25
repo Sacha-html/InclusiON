@@ -16,17 +16,20 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
     {
         private readonly IProfessionalsRepository _repository;
         private readonly IIdentityService _identityService;
+        private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateProfessionalCommandHandler> _logger;
 
         public CreateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IIdentityService identityService,
+            IEmailService emailService,
             IUnitOfWork unitOfWork,
             ILogger<CreateProfessionalCommandHandler> logger)
         {
             _repository = repository;
             _identityService = identityService;
+            _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -82,8 +85,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     Phone = command.Phone,
                     Specialty = command.Specialty,
                     LicenseNumber = command.LicenseNumber,
-                    BirthDate = command.BirthDate,
-                    Address = command.Address
+                    BirthDate = command.BirthDate
                 };
 
                 // Crear usuario, asignar rol y profesional en transaccion
@@ -103,6 +105,26 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 }, cancellationToken);
 
                 _logger.LogInformation("Profesional creado: {ProfessionalId}, Usuario: {UserId}", professional.Id, user.Id);
+
+                // Enviar email con contraseña temporal
+                try
+                {
+                    await _emailService.SendTemplatedEmailAsync(
+                        command.Email,
+                        "Bienvenido a InclusiON — Tu cuenta ha sido creada",
+                        "PasswordReset",
+                        new Dictionary<string, string?>
+                        {
+                            { "UserName", command.FirstName },
+                            { "TemporaryPassword", password },
+                            { "Year", DateTime.UtcNow.Year.ToString() }
+                        },
+                        cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "No se pudo enviar email de bienvenida a {Email}", command.Email);
+                }
 
                 var response = GetProfessionalByIdQueryHandler.MapToResponse(professional);
                 response.TemporaryPassword = password;
