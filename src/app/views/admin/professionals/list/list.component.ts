@@ -39,11 +39,11 @@ export class ListComponent {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle' },
-        { action: 'persons', label: 'Personas a cargo' },
-        { action: 'institutions', label: 'Instituciones' },
-        { action: 'edit', label: 'Editar', visible: (item) => item.isActive },
-        { action: 'deactivate', label: 'Desactivar', visible: (item) => item.isActive },
+        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        { action: 'persons', label: 'Personas a cargo', icon: 'cil-people' },
+        { action: 'institutions', label: 'Instituciones', icon: 'cil-book' },
+        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
       ],
     },
     { key: 'fullName', label: 'Nombre' },

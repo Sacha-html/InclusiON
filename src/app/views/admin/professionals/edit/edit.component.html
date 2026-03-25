@@ -75,16 +75,9 @@
           </c-col>
         </c-row>
 
-        <c-row class="mb-3">
-          <c-col sm="12">
-            <label cLabel for="address">Dirección</label>
-            <input cFormControl id="address" formControlName="address" />
-          </c-col>
-        </c-row>
-
         <div class="mt-3 d-flex gap-2">
-          <button cButton color="primary" type="submit" [disabled]="form.invalid">Guardar</button>
-          <button cButton color="secondary" type="button" (click)="goBack()">Cancelar</button>
+          <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Guardar cambios">Guardar</button>
+          <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edición">Cancelar</button>
         </div>
       </form>
     </c-card-body>

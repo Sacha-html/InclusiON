@@ -75,6 +75,8 @@ export class DetailComponent implements OnInit {
   // Persons assignments
   assignedPersons: ProfessionalPersonResponse[] = [];
   availablePersons: PersonListItemResponse[] = [];
+  filteredPersons: PersonListItemResponse[] = [];
+  personSearchTerm = '';
   showAssignPersonModal = false;
   assignPersonForm: FormGroup = this.fb.group({
     personId: [''],
@@ -160,6 +162,8 @@ export class DetailComponent implements OnInit {
   openAssignPersonModal(): void {
     if (!this.professional) return;
     this.assignPersonForm.reset({ personId: '', isPrimaryProfessional: false, canSuperviseLogin: false });
+    this.personSearchTerm = '';
+    this.filteredPersons = [];
     this.personsService.getPersons({ pageSize: 1000, isActive: true }).subscribe({
       next: (response) => {
         const assignedIds = new Set(this.assignedPersons.filter((p) => p.isActive).map((p) => p.personId));
@@ -168,6 +172,20 @@ export class DetailComponent implements OnInit {
       },
       error: () => this.toastService.error('Error al cargar personas disponibles'),
     });
+  }
+
+  filterPersons(term: string): void {
+    this.personSearchTerm = term;
+    this.assignPersonForm.patchValue({ personId: '' });
+    if (term.length < 3) {
+      this.filteredPersons = [];
+      return;
+    }
+    const lower = term.toLowerCase();
+    this.filteredPersons = this.availablePersons.filter(p =>
+      p.fullName?.toLowerCase().includes(lower) ||
+      p.documentNumber?.toLowerCase().includes(lower)
+    );
   }
 
   confirmAssignPerson(): void {

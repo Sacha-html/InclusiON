@@ -116,9 +116,9 @@
           <label cFormLabel>Persona vinculada</label>
           <select cSelect formControlName="personId">
             <option value="">-- Seleccionar (opcional) --</option>
-            @for (person of persons; track person.id) {
-              <option [value]="person.id">
-                {{ person.firstName }} {{ person.lastName }}
+            @for (person of persons; track person.personId) {
+              <option [value]="person.personId">
+                {{ person.personFullName }}
               </option>
             }
           </select>
