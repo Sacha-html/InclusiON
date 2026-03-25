@@ -6,6 +6,7 @@ import { LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } fro
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   FormControlDirective,
   FormFeedbackComponent,
@@ -31,6 +32,7 @@ import {
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
+    ConfirmModalComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -54,6 +56,7 @@ export class ListComponent {
 
   // Modal login method
   showLoginMethodModal = false;
+  showLoginMethodConfirm = false;
   selectedPerson: PersonListItemResponse | null = null;
   loginMethods: LoginMethodItem[] = [];
   loginMethodForm: FormGroup = this.fb.group({
