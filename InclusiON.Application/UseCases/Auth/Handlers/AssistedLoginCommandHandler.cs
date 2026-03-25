@@ -109,7 +109,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 1, // Sesion asistida de 1 dia
                 command.DeviceId,
                 false, // No recordar dispositivo en login asistido
-                "Nuevo login asistido",
+                Constants.RevokeReasons.NewLogin,
                 SuccessMessages.AssistedLoginSuccessful,
                 cancellationToken);
         }

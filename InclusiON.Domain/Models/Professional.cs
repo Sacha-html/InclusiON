@@ -54,11 +54,6 @@ namespace InclusiON.Domain.Models
         public DateTime? BirthDate { get; set; }
 
         /// <summary>
-        /// Direccion del profesional.
-        /// </summary>
-        public string? Address { get; set; }
-
-        /// <summary>
         /// Usuario asociado a este perfil.
         /// </summary>
         public virtual User User { get; set; } = null!;

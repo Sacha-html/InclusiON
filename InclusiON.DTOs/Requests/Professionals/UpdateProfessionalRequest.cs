@@ -26,8 +26,5 @@ namespace InclusiON.DTOs.Requests.Professionals
         public string? LicenseNumber { get; set; }
 
         public DateTime? BirthDate { get; set; }
-
-        [StringLength(200, ErrorMessage = "La direccion no puede exceder 200 caracteres")]
-        public string? Address { get; set; }
     }
 }

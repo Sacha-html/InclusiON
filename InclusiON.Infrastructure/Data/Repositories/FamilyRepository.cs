@@ -67,6 +67,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             var query = _context.FamilyRepresentatives
                 .Include(f => f.User)
+                .Include(f => f.PersonRepresentatives.Where(pr => pr.IsActive))
+                    .ThenInclude(pr => pr.Person)
+                        .ThenInclude(p => p.DisabilityType)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))

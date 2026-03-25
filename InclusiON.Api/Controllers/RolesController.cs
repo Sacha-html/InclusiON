@@ -116,6 +116,8 @@ namespace InclusiON.Api.Controllers
                 "family:read", "family:create", "family:update", "family:delete",
                 // Actividades
                 "activities:read", "activities:create", "activities:update", "activities:delete", "activities:respond",
+                // Diagnósticos
+                "diagnoses:read", "diagnoses:create", "diagnoses:update",
                 // Reportes
                 "reports:read", "reports:create", "reports:export",
                 // Mensajes
@@ -174,8 +176,30 @@ namespace InclusiON.Api.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Invalidar cache de permisos para este rol
-            _cache.Remove($"RolePermissions_{role.Name}");
+            // Invalidar cache de permisos para este rol (NormalizedName para coincidir con key del cache)
+            _cache.Remove($"RolePermissions_{role.NormalizedName}");
+
+            // Revocar sesiones de todos los usuarios con este rol para forzar re-login
+            var userIdsWithRole = await _context.UserRoles
+                .Where(ur => ur.RoleId == roleId)
+                .Select(ur => ur.UserId)
+                .ToListAsync(cancellationToken);
+
+            if (userIdsWithRole.Count > 0)
+            {
+                var activeTokens = await _context.RefreshTokens
+                    .Where(rt => userIdsWithRole.Contains(rt.UserId) && rt.IsActive)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var token in activeTokens)
+                {
+                    token.IsActive = false;
+                    token.RevokedAt = DateTime.UtcNow;
+                    token.RevokedReason = InclusiON.Application.Constants.RevokeReasons.RolePermissionsUpdated;
+                }
+
+                await _context.SaveChangesAsync(cancellationToken);
+            }
 
             var response = new RoleResponse
             {
