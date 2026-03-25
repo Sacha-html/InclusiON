@@ -23,7 +23,6 @@ export interface ProfessionalResponse {
   specialty?: string;
   licenseNumber?: string;
   birthDate?: string;
-  address?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt?: string;

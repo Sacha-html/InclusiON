@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RolesService, ToastService } from '@services';
 import { RoleResponse } from '@models';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 
 import {
   CardComponent,
@@ -43,6 +44,7 @@ import {
     FormCheckLabelDirective,
     RowComponent,
     ColComponent,
+    ConfirmModalComponent,
   ],
   templateUrl: './roles.component.html',
   styleUrl: './roles.component.scss',
@@ -58,6 +60,7 @@ export class RolesComponent implements OnInit {
 
   // Modal state
   showModal = false;
+  showConfirmSave = false;
   selectedRole: RoleResponse | null = null;
   selectedPermissions: Set<string> = new Set();
 
@@ -121,6 +124,7 @@ export class RolesComponent implements OnInit {
       professionals: 'Profesionales',
       family: 'Familiares',
       activities: 'Actividades',
+      diagnoses: 'Diagnósticos',
       reports: 'Reportes',
       messages: 'Mensajes',
       invitations: 'Invitaciones',
@@ -195,6 +199,13 @@ export class RolesComponent implements OnInit {
 
   savePermissions(): void {
     if (!this.selectedRole) return;
+    this.showModal = false;
+    this.showConfirmSave = true;
+  }
+
+  confirmSavePermissions(): void {
+    if (!this.selectedRole) return;
+    this.showConfirmSave = false;
 
     this.isSaving = true;
     const permissions = Array.from(this.selectedPermissions);
@@ -206,7 +217,7 @@ export class RolesComponent implements OnInit {
         if (index >= 0) {
           this.roles[index] = updated;
         }
-        this.toastService.success(`Permisos de ${updated.name} actualizados`);
+        this.toastService.success(`Permisos de ${updated.name} actualizados. Los usuarios con este rol deberán iniciar sesión nuevamente.`);
         this.closeModal();
       },
       error: () => {

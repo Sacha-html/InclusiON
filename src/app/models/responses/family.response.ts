@@ -12,6 +12,7 @@ export interface FamilyResponse {
   updatedAt?: string;
   temporaryPassword?: string;
   email?: string;
+  linkedPersons?: LinkedPersonInfo[];
 }
 
 export interface FamilyListItemResponse {
@@ -25,4 +26,12 @@ export interface FamilyListItemResponse {
   relationship?: string;
   isActive: boolean;
   email?: string;
+  linkedPersons: LinkedPersonInfo[];
+}
+
+export interface LinkedPersonInfo {
+  personId: string;
+  fullName: string;
+  disabilityType?: string;
+  isPrimary: boolean;
 }
