@@ -32,8 +32,6 @@ import {
     ColComponent,
     RowComponent,
     FormSelectDirective,
-    CardComponent,
-    CardBodyComponent,
     AlertComponent,
     ModalComponent,
     ModalHeaderComponent,
