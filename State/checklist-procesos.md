@@ -32,32 +32,33 @@
 ## Gestión de Usuarios
 
 ### 04 — Gestión de Profesionales
-- [x] Alta de profesional con contraseña temporal
+- [x] Alta de profesional con contraseña temporal + envío email
 - [x] Consulta paginada con filtros
-- [x] Edición de profesional
+- [x] Edición de profesional (sin campo dirección, eliminado)
 - [x] Desactivación de profesional
 
 ### 05 — Gestión de Personas con Discapacidad
 - [x] Alta de persona con perfil funcional
 - [x] Consulta paginada con filtros
 - [x] Edición de datos personales y funcionales
-- [x] Configuración del método de login
+- [x] Configuración del método de login (con confirm popup)
 - [x] Desactivación de persona (soft-delete + revocación de tokens + confirm modal)
 
 ### 06 — Gestión de Familiares
-- [x] Alta directa por admin (con selector de persona obligatorio)
-- [x] Alta por invitación (auto-registro)
+- [x] Alta directa por admin (con selector de persona obligatorio, búsqueda mín. 3 caracteres)
+- [x] Alta por invitación (auto-registro → redirige a login)
 - [x] Consulta paginada con columna "Familiar de"
 - [x] Detalle con personas vinculadas (linkedPersons)
 - [x] Edición de familiar (muestra personas vinculadas readonly)
 - [x] Desactivación de familiar
 - [x] Vinculación automática persona-familiar en alta directa
+- [x] Envío de email con contraseña temporal en alta directa
 
 ### 07 — Gestión de Invitaciones
 - [x] Crear invitación y enviar email
 - [x] Validación de código
-- [x] Aceptación y registro automático
-- [x] Consulta de invitaciones por profesional
+- [x] Aceptación y registro automático (redirige a login post-registro)
+- [x] Consulta de invitaciones por profesional (solo personas asignadas)
 - [x] Consulta de invitaciones por admin
 
 ---
@@ -67,11 +68,11 @@
 ### 08 — Asignación de Profesionales
 - [x] Asignar profesional a institución
 - [x] Desasignar profesional de institución
-- [x] Asignar persona a profesional
+- [x] Asignar persona a profesional (búsqueda con mín. 3 caracteres)
 - [x] Desactivar asignación persona-profesional
 - [x] Vinculación familiar automática por invitación
 - [x] Vinculación familiar directa por admin
-- [x] Configuración de perfil de habilidades
+- [x] Configuración de perfil de habilidades (selección múltiple con checkboxes)
 - [x] Desvinculación lógica (soft-delete)
 
 ---
@@ -79,12 +80,13 @@
 ## Evaluación y Planificación
 
 ### 09 — Evaluación y Diagnóstico
-- [x] Configuración del perfil de habilidades
+- [x] Configuración del perfil de habilidades (selección múltiple)
 - [x] Edición del perfil funcional
-- [ ] Registro de diagnóstico funcional
-- [ ] Consulta de historial de diagnósticos
-- [ ] Edición de diagnóstico por su creador
-- [ ] Timeline de diagnósticos en perfil de persona
+- [x] Registro de diagnóstico funcional (BE + FE tab en detalle profesional)
+- [x] Consulta de historial de diagnósticos (lista por fecha desc)
+- [x] Edición de diagnóstico por su creador (validación server-side)
+- [ ] Timeline de diagnósticos en perfil de persona (vista admin readonly)
+- [x] Permisos dedicados: diagnoses:read, diagnoses:create, diagnoses:update
 
 ### 10 — Gestión de Actividades
 - [x] Consulta de tipos de template (catálogo)
@@ -184,6 +186,7 @@
 - [x] Cambio de contraseña obligatorio
 - [x] Redirección por rol al portal correspondiente
 - [x] Validación de rol en login admin/profesional (allowedRoles)
+- [x] Autofocus en todos los formularios de login
 
 ### Sistema
 - [x] Paginación con ordenamiento dinámico (elipsis + conteo de registros)
@@ -197,8 +200,11 @@
 - [x] Iconos en menú de acciones de tablas
 - [x] Botones homologados (aria-labels, confirm modals, layout consistente)
 - [x] Constantes centralizadas para razones de revocación (RevokeReasons)
-- [x] Permisos completos del rol Admin en seed (invitaciones, instituciones, mensajes)
+- [x] Permisos completos en seed (Admin: invitaciones, instituciones, mensajes, diagnósticos:read; Professional: diagnósticos CRUD)
 - [x] Templates de email con tildes y eñes correctas
+- [x] Envío de email en alta de profesional y familiar
+- [x] Selectores de persona con búsqueda (mín. 3 caracteres)
+- [x] Campo Address eliminado de profesional (entidad + migración)
 
 ---
 
@@ -238,4 +244,4 @@
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| Items checkeados | 86 | 60 |
+| Items checkeados | 95 | 57 |
