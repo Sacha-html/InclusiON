@@ -31,6 +31,9 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.InvalidOperation or
                 ErrorCode.PinNotConfigured or
                 ErrorCode.LoginMethodNotAllowed or
+                ErrorCode.CannotDeactivateSelf or
+                ErrorCode.UserAlreadyInactive or
+                ErrorCode.UserAlreadyActive or
                 ErrorCode.InvitationExpired or
                 ErrorCode.InvitationAlreadyUsed
                     => new BadRequestObjectResult(response),
@@ -49,7 +52,8 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.Forbidden or
                 ErrorCode.InsufficientPermissions or
                 ErrorCode.NotAuthorizedForResource or
-                ErrorCode.SupervisorNotAuthorized
+                ErrorCode.SupervisorNotAuthorized or
+                ErrorCode.RoleNotAllowedForLogin
                     => new ObjectResult(response) { StatusCode = StatusCodes.Status403Forbidden },
 
                 // 404 Not Found - Recursos no encontrados

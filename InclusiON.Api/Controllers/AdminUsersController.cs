@@ -1,0 +1,112 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using InclusiON.Api.Extensions;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.UseCases.AdminUsers.Commands;
+using InclusiON.Application.UseCases.AdminUsers.Queries;
+using InclusiON.DTOs.Common;
+using InclusiON.DTOs.Requests.Admin;
+using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
+
+namespace InclusiON.Api.Controllers
+{
+    [Route("api/admin/users")]
+    [ApiController]
+    [Produces("application/json")]
+    public class AdminUsersController : ControllerBase
+    {
+        private readonly IHttpContextService _httpContextService;
+
+        public AdminUsersController(IHttpContextService httpContextService)
+        {
+            _httpContextService = httpContextService;
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "users:read")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminUserListItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<AdminUserListItemResponse>>>> GetUsers(
+            [FromQuery] GetAdminUsersRequest request,
+            [FromServices] IQueryHandler<GetAdminUsersQuery, ApiResponse<PagedResponse<AdminUserListItemResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            request.Validate();
+
+            var query = new GetAdminUsersQuery(
+                request.Page,
+                request.PageSize,
+                request.Search,
+                request.Role,
+                request.IsActive,
+                request.SortBy,
+                request.SortDirection,
+                request.InstitutionIds);
+
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("{userId:guid}")]
+        [Authorize(Policy = "users:read")]
+        [ProducesResponseType(typeof(ApiResponse<AdminUserDetailResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<AdminUserDetailResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<AdminUserDetailResponse>>> GetUserDetail(
+            Guid userId,
+            [FromServices] IQueryHandler<GetAdminUserDetailQuery, ApiResponse<AdminUserDetailResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetAdminUserDetailQuery(userId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPost("{userId:guid}/reset-password")]
+        [Authorize(Policy = "users:update")]
+        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<ResetPasswordResultResponse>>> ResetPassword(
+            Guid userId,
+            [FromServices] ICommandHandler<AdminResetPasswordCommand, ApiResponse<ResetPasswordResultResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
+            var command = new AdminResetPasswordCommand(userId, currentUserId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPut("{userId:guid}/deactivate")]
+        [Authorize(Policy = "users:delete")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> DeactivateUser(
+            Guid userId,
+            [FromServices] ICommandHandler<AdminDeactivateUserCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
+            var command = new AdminDeactivateUserCommand(userId, currentUserId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPut("{userId:guid}/reactivate")]
+        [Authorize(Policy = "users:update")]
+        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<ResetPasswordResultResponse>>> ReactivateUser(
+            Guid userId,
+            [FromServices] ICommandHandler<AdminReactivateUserCommand, ApiResponse<ResetPasswordResultResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
+            var command = new AdminReactivateUserCommand(userId, currentUserId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+    }
+}

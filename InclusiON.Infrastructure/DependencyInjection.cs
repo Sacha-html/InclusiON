@@ -59,6 +59,7 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IAssignmentsRepository, AssignmentsRepository>();
             services.AddScoped<IInstitutionsRepository, InstitutionsRepository>();
             services.AddScoped<IAdminInstitutionRepository, AdminInstitutionRepository>();
+            services.AddScoped<IDiagnosesRepository, DiagnosesRepository>();
 
             // Email
             services.AddScoped<IEmailService, EmailService>();

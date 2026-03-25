@@ -6,6 +6,7 @@ namespace InclusiON.Application.UseCases.Family.Commands
         string Email,
         string? DocumentNumber,
         string? Phone,
-        string? Relationship
+        string? Relationship,
+        Guid PersonId
     );
 }

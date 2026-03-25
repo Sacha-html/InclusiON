@@ -10,7 +10,7 @@ namespace InclusiON.Data
 {
     public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {
-        private readonly IHttpContextAccessor? _httpContextAccessor;
+        private readonly IHttpContextAccessor? _httpContextAccessor;    
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)

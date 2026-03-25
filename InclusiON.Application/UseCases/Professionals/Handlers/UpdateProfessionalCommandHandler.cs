@@ -57,7 +57,6 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             if (command.Specialty != null) professional.Specialty = command.Specialty;
             if (command.LicenseNumber != null) professional.LicenseNumber = command.LicenseNumber;
             if (command.BirthDate.HasValue) professional.BirthDate = command.BirthDate;
-            if (command.Address != null) professional.Address = command.Address;
 
             await _repository.UpdateAsync(professional, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
