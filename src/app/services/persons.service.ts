@@ -125,6 +125,12 @@ export class PersonsService {
    * Actualiza el perfil de la persona autenticada.
    * Requiere autenticación.
    */
+  deactivatePerson(personId: string): Observable<PersonResponse> {
+    return this.http
+      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}/deactivate`, {})
+      .pipe(unwrapResponse());
+  }
+
   updateMyProfile(
     request: UpdatePersonRequest
   ): Observable<PersonResponse> {

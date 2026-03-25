@@ -144,3 +144,15 @@
     </button>
   </c-modal-footer>
 </c-modal>
+
+<app-confirm-modal
+  [visible]="showConfirmSave"
+  title="Confirmar cambio de permisos"
+  messagePrefix="¿Guardar los cambios de permisos para el rol "
+  [itemName]="selectedRole ? getRoleLabel(selectedRole.name) : ''"
+  messageSuffix="?"
+  detail="Todos los usuarios con este rol deberán iniciar sesión nuevamente para que los cambios tomen efecto."
+  confirmLabel="Guardar permisos"
+  (confirm)="confirmSavePermissions()"
+  (cancel)="showConfirmSave = false; showModal = true">
+</app-confirm-modal>

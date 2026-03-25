@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PinLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
@@ -18,7 +18,7 @@ import { IconDirective } from '@coreui/icons-angular';
   templateUrl: './pin-login.component.html',
   styleUrl: './pin-login.component.scss',
 })
-export class PinLoginComponent extends BaseVisualLoginComponent {
+export class PinLoginComponent extends BaseVisualLoginComponent implements AfterViewInit {
   // Estado específico de PIN
   pin = '';
   maxPinLength = 4;
@@ -32,6 +32,22 @@ export class PinLoginComponent extends BaseVisualLoginComponent {
     ['7', '8', '9'],
     ['clear', '0', 'submit'],
   ];
+
+  ngAfterViewInit(): void {
+    this.focusFirstPinKey();
+  }
+
+  private focusFirstPinKey(): void {
+    const tryFocus = (attempts: number) => {
+      const firstKey = document.querySelector('.pin-pad button.pin-key:not(.special):not([disabled])') as HTMLElement;
+      if (firstKey) {
+        firstKey.focus();
+      } else if (attempts < 10) {
+        setTimeout(() => tryFocus(attempts + 1), 200);
+      }
+    };
+    setTimeout(() => tryFocus(0), 300);
+  }
 
   // ============================================
   // Manejo de PIN
