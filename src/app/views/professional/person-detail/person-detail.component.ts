@@ -1,26 +1,66 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { CatalogsService, PersonsService, ToastService } from '@services';
-import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem, UpdatePersonRequest } from '@models';
+import { DiagnosesService } from '../../../services/diagnoses.service';
+import {
+  DiagnosisListItemResponse,
+  DiagnosisResponse,
+} from '../../../models/responses/diagnosis.response';
+import { CreateDiagnosisRequest } from '../../../models/requests/diagnoses/create-diagnosis.request';
+import {
+  PersonResponse,
+  PersonSkillProfileResponse,
+  SkillAreaItem,
+  UpdatePersonRequest,
+} from '@models';
 import { formatDate, toDisplayDate, toIsoDate } from '@shared/utils';
 import {
-  BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent,
-  CardHeaderComponent, ColComponent, FormControlDirective, FormLabelDirective,
-  FormSelectDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-  ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent,
-  RowComponent, SpinnerComponent,
+  BadgeComponent,
+  ButtonDirective,
+  CardBodyComponent,
+  CardComponent,
+  CardHeaderComponent,
+  ColComponent,
+  FormControlDirective,
+  FormLabelDirective,
+  FormSelectDirective,
+  FormCheckComponent,
+  FormCheckInputDirective,
+  FormCheckLabelDirective,
+  ModalBodyComponent,
+  ModalComponent,
+  ModalFooterComponent,
+  ModalHeaderComponent,
+  RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 
 @Component({
   selector: 'app-person-detail',
   standalone: true,
   imports: [
-    BadgeComponent, CardComponent, CardBodyComponent, CardHeaderComponent,
-    RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
-    FormSelectDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-    ButtonDirective, FormsModule, SpinnerComponent,
-    ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
+    BadgeComponent,
+    CardComponent,
+    CardBodyComponent,
+    CardHeaderComponent,
+    RowComponent,
+    ColComponent,
+    FormControlDirective,
+    FormLabelDirective,
+    FormSelectDirective,
+    FormCheckComponent,
+    FormCheckInputDirective,
+    FormCheckLabelDirective,
+    ButtonDirective,
+    FormsModule,
+    SpinnerComponent,
+    ModalComponent,
+    ModalHeaderComponent,
+    ModalBodyComponent,
+    ModalFooterComponent,
+    DatePipe,
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -31,9 +71,16 @@ export class PersonDetailComponent implements OnInit {
   private readonly personsService = inject(PersonsService);
   private readonly catalogsService = inject(CatalogsService);
   private readonly toastService = inject(ToastService);
+  private readonly diagnosesService = inject(DiagnosesService);
 
   person: PersonResponse | null = null;
-  activeTab: 'datos' | 'funcional' | 'habilidades' = 'datos';
+  activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' = 'datos';
+
+  // Diagnoses
+  diagnoses: DiagnosisListItemResponse[] = [];
+  showDiagnosisModal = false;
+  editingDiagnosis: DiagnosisResponse | null = null;
+  diagnosisForm: CreateDiagnosisRequest = this.emptyDiagnosisForm();
 
   // Edit personal data
   isEditingData = false;
@@ -68,7 +115,7 @@ export class PersonDetailComponent implements OnInit {
   skillProfile: PersonSkillProfileResponse[] = [];
   allSkillAreas: SkillAreaItem[] = [];
   showAddSkillAreaModal = false;
-  selectedSkillAreaId: number | null = null;
+  selectedSkillAreaIds: Set<number> = new Set();
   skillAreaError = '';
   skillAreaLoading = false;
 
@@ -119,7 +166,9 @@ export class PersonDetailComponent implements OnInit {
       firstName: this.editPersonalData.firstName,
       lastName: this.editPersonalData.lastName,
       documentNumber: this.editPersonalData.documentNumber || undefined,
-      birthDate: this.editPersonalData.birthDate ? toIsoDate(this.editPersonalData.birthDate) : undefined,
+      birthDate: this.editPersonalData.birthDate
+        ? toIsoDate(this.editPersonalData.birthDate)
+        : undefined,
     };
 
     this.personsService.updatePerson(this.person.id, request).subscribe({
@@ -205,11 +254,15 @@ export class PersonDetailComponent implements OnInit {
 
   openAddSkillAreaModal(): void {
     this.skillAreaError = '';
-    this.selectedSkillAreaId = null;
+    this.selectedSkillAreaIds = new Set();
     this.catalogsService.getSkillAreas().subscribe({
       next: (areas) => {
-        const activeIds = new Set(this.skillProfile.filter(sp => sp.isActive).map(sp => sp.skillAreaId));
-        this.allSkillAreas = (areas ?? []).filter(a => !activeIds.has(a.id));
+        const activeIds = new Set(
+          this.skillProfile
+            .filter((sp) => sp.isActive)
+            .map((sp) => sp.skillAreaId),
+        );
+        this.allSkillAreas = (areas ?? []).filter((a) => !activeIds.has(a.id));
         this.showAddSkillAreaModal = true;
       },
     });
@@ -219,21 +272,51 @@ export class PersonDetailComponent implements OnInit {
     this.showAddSkillAreaModal = false;
   }
 
-  confirmAddSkillArea(): void {
-    if (!this.person || !this.selectedSkillAreaId) return;
+  toggleSkillArea(id: number): void {
+    if (this.selectedSkillAreaIds.has(id)) {
+      this.selectedSkillAreaIds.delete(id);
+    } else {
+      this.selectedSkillAreaIds.add(id);
+    }
+  }
+
+  confirmAddSkillAreas(): void {
+    if (!this.person || this.selectedSkillAreaIds.size === 0) return;
     this.skillAreaLoading = true;
-    this.personsService.addSkillArea(this.person.id, this.selectedSkillAreaId).subscribe({
-      next: () => {
-        this.skillAreaLoading = false;
-        this.showAddSkillAreaModal = false;
-        this.loadSkillProfile();
-        this.toastService.success('Area de habilidad agregada');
-      },
-      error: (err) => {
-        this.skillAreaLoading = false;
-        this.skillAreaError = err?.error?.message ?? 'Error al agregar';
-      },
-    });
+    const ids = Array.from(this.selectedSkillAreaIds);
+    let completed = 0;
+    let errors = 0;
+
+    for (const areaId of ids) {
+      this.personsService.addSkillArea(this.person.id, areaId).subscribe({
+        next: () => {
+          completed++;
+          if (completed + errors === ids.length) {
+            this.skillAreaLoading = false;
+            this.showAddSkillAreaModal = false;
+            this.loadSkillProfile();
+            this.toastService.success(
+              `${completed} área(s) de habilidad agregada(s)`,
+            );
+          }
+        },
+        error: () => {
+          errors++;
+          if (completed + errors === ids.length) {
+            this.skillAreaLoading = false;
+            this.showAddSkillAreaModal = false;
+            this.loadSkillProfile();
+            if (completed > 0) {
+              this.toastService.warning(
+                `${completed} agregada(s), ${errors} con error`,
+              );
+            } else {
+              this.toastService.error('Error al agregar áreas de habilidad');
+            }
+          }
+        },
+      });
+    }
   }
 
   deactivateSkillArea(areaId: number): void {
@@ -258,5 +341,88 @@ export class PersonDetailComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/pro/persons']);
+  }
+
+  // ── Diagnoses ──────────────────────────────────────────
+
+  loadDiagnoses(): void {
+    if (!this.person) return;
+    this.diagnosesService.getByPerson(this.person.id).subscribe({
+      next: (data) => (this.diagnoses = data),
+      error: () => this.toastService.error('Error al cargar diagnósticos'),
+    });
+  }
+
+  openNewDiagnosis(): void {
+    this.editingDiagnosis = null;
+    this.diagnosisForm = this.emptyDiagnosisForm();
+    this.showDiagnosisModal = true;
+  }
+
+  openEditDiagnosis(item: DiagnosisListItemResponse): void {
+    this.diagnosesService.getById(item.id).subscribe({
+      next: (d) => {
+        this.editingDiagnosis = d;
+        this.diagnosisForm = {
+          diagnosisDate: d.diagnosisDate.substring(0, 10),
+          primaryDiagnosis: d.primaryDiagnosis,
+          initialObservations: d.initialObservations ?? '',
+          identifiedCapabilities: d.identifiedCapabilities ?? '',
+          identifiedChallenges: d.identifiedChallenges ?? '',
+          requiredSupports: d.requiredSupports ?? '',
+          pedagogicalObjectives: d.pedagogicalObjectives ?? '',
+          recommendedStrategies: d.recommendedStrategies ?? '',
+        };
+        this.showDiagnosisModal = true;
+      },
+      error: () => this.toastService.error('Error al cargar el diagnóstico'),
+    });
+  }
+
+  saveDiagnosis(): void {
+    if (!this.person || !this.diagnosisForm.primaryDiagnosis) return;
+
+    if (this.editingDiagnosis) {
+      this.diagnosesService
+        .update(this.editingDiagnosis.id, this.diagnosisForm)
+        .subscribe({
+          next: () => {
+            this.toastService.success('Diagnóstico actualizado exitosamente');
+            this.showDiagnosisModal = false;
+            this.loadDiagnoses();
+          },
+          error: () =>
+            this.toastService.error('Error al actualizar el diagnóstico'),
+        });
+    } else {
+      this.diagnosesService
+        .create(this.person.id, this.diagnosisForm)
+        .subscribe({
+          next: () => {
+            this.toastService.success('Diagnóstico creado exitosamente');
+            this.showDiagnosisModal = false;
+            this.loadDiagnoses();
+          },
+          error: () => this.toastService.error('Error al crear el diagnóstico'),
+        });
+    }
+  }
+
+  closeDiagnosisModal(): void {
+    this.showDiagnosisModal = false;
+    this.editingDiagnosis = null;
+  }
+
+  private emptyDiagnosisForm(): CreateDiagnosisRequest {
+    return {
+      diagnosisDate: new Date().toISOString().substring(0, 10),
+      primaryDiagnosis: '',
+      initialObservations: '',
+      identifiedCapabilities: '',
+      identifiedChallenges: '',
+      requiredSupports: '',
+      pedagogicalObjectives: '',
+      recommendedStrategies: '',
+    };
   }
 }

@@ -7,11 +7,11 @@
           {{ professional.isActive ? 'Activo' : 'Inactivo' }}
         </c-badge>
       </div>
-      <div class="d-flex gap-2">
-        <button cButton color="secondary" size="sm" (click)="goBack()">Volver</button>
+      <div class="d-flex gap-2 align-items-center">
+        <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado">Volver</button>
         @if (professional.isActive) {
-          <button cButton color="primary" size="sm" (click)="goToEdit()">Editar</button>
-          <button cButton color="danger" size="sm" (click)="deactivate()">Desactivar</button>
+          <button cButton color="primary" (click)="goToEdit()" [attr.aria-label]="'Editar profesional ' + professional.fullName">Editar</button>
+          <button cButton color="danger" class="ms-auto" (click)="deactivate()" [attr.aria-label]="'Desactivar profesional ' + professional.fullName">Desactivar</button>
         }
       </div>
     </c-card-header>
@@ -80,12 +80,6 @@
                 <c-col sm="6">
                   <label cLabel>Fecha de nacimiento</label>
                   <input cFormControl [value]="formatDate(professional.birthDate)" readonly />
-                </c-col>
-              </c-row>
-              <c-row class="mb-3">
-                <c-col sm="6">
-                  <label cLabel>Direccion</label>
-                  <input cFormControl [value]="professional.address ?? 'Sin especificar'" readonly />
                 </c-col>
               </c-row>
               <c-row class="mb-3">
@@ -203,12 +197,22 @@
       <form [formGroup]="assignPersonForm">
         <div class="mb-3">
           <label cLabel>Persona</label>
-          <select cSelect formControlName="personId">
-            <option value="">Seleccione una persona...</option>
-            @for (person of availablePersons; track person.id) {
-              <option [value]="person.id">{{ person.fullName }}</option>
-            }
-          </select>
+          <input cFormControl
+                 placeholder="Buscar por nombre o documento (mín. 3 caracteres)..."
+                 [value]="personSearchTerm"
+                 (input)="filterPersons($any($event.target).value)"
+                 class="mb-1" />
+          @if (filteredPersons.length > 0) {
+            <select cSelect formControlName="personId" size="5">
+              @for (person of filteredPersons; track person.id) {
+                <option [value]="person.id">{{ person.fullName }} — {{ person.disabilityTypeName ?? 'Sin tipo' }}</option>
+              }
+            </select>
+          } @else if (personSearchTerm.length >= 3) {
+            <small class="text-body-secondary">No se encontraron personas.</small>
+          } @else if (personSearchTerm.length > 0) {
+            <small class="text-body-secondary">Escribí al menos 3 caracteres para buscar.</small>
+          }
         </div>
         <c-form-check>
           <input cFormCheckInput type="checkbox" id="isPrimaryProfessional" formControlName="isPrimaryProfessional" />

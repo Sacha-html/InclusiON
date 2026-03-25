@@ -1,0 +1,61 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { environment } from '@env';
+import { Observable } from 'rxjs';
+import { ApiResponse, PagedResponse } from '../models';
+import { AdminUserListItemResponse } from '../models/responses/admin-user-list-item.response';
+import { AdminUserDetailResponse, ResetPasswordResultResponse } from '../models/responses/admin-user-detail.response';
+import { GetAdminUsersRequest } from '../models/requests/admin-users/get-admin-users.request';
+import { unwrapResponse, handleApiError } from '@shared/utils';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class UserManagementService {
+  private readonly http = inject(HttpClient);
+
+  private get apiUrl(): string {
+    return `${environment.apiUrl}/admin/users`;
+  }
+
+  getUsers(request?: GetAdminUsersRequest): Observable<PagedResponse<AdminUserListItemResponse>> {
+    let params = new HttpParams();
+    if (request) {
+      if (request.page) params = params.set('page', request.page);
+      if (request.pageSize) params = params.set('pageSize', request.pageSize);
+      if (request.search) params = params.set('search', request.search);
+      if (request.role) params = params.set('role', request.role);
+      if (request.isActive !== undefined) params = params.set('isActive', request.isActive);
+      if (request.institutionId) params = params.set('institutionId', request.institutionId);
+      if (request.sortBy) params = params.set('sortBy', request.sortBy);
+      if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
+    }
+    return this.http
+      .get<ApiResponse<PagedResponse<AdminUserListItemResponse>>>(this.apiUrl, { params })
+      .pipe(unwrapResponse());
+  }
+
+  getUserDetail(userId: string): Observable<AdminUserDetailResponse> {
+    return this.http
+      .get<ApiResponse<AdminUserDetailResponse>>(`${this.apiUrl}/${userId}`)
+      .pipe(unwrapResponse());
+  }
+
+  resetPassword(userId: string): Observable<ResetPasswordResultResponse> {
+    return this.http
+      .post<ApiResponse<ResetPasswordResultResponse>>(`${this.apiUrl}/${userId}/reset-password`, {})
+      .pipe(unwrapResponse());
+  }
+
+  deactivateUser(userId: string): Observable<ApiResponse<void>> {
+    return this.http
+      .put<ApiResponse<void>>(`${this.apiUrl}/${userId}/deactivate`, {})
+      .pipe(handleApiError());
+  }
+
+  reactivateUser(userId: string): Observable<ResetPasswordResultResponse> {
+    return this.http
+      .put<ApiResponse<ResetPasswordResultResponse>>(`${this.apiUrl}/${userId}/reactivate`, {})
+      .pipe(unwrapResponse());
+  }
+}

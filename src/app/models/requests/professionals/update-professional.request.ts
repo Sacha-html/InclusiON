@@ -6,5 +6,4 @@ export interface UpdateProfessionalRequest {
   specialty?: string;
   licenseNumber?: string;
   birthDate?: string; // ISO date string
-  address?: string;
 }
