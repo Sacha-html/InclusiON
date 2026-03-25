@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ToastService } from '@services';
 import { UserManagementService } from '../../../../services/user-management.service';
 import { AdminUserDetailResponse } from '../../../../models/responses/admin-user-detail.response';
@@ -19,13 +19,12 @@ import {
   ModalBodyComponent,
   ModalFooterComponent,
 } from '@coreui/angular';
-import { IconDirective } from '@coreui/icons-angular';
+
 
 @Component({
   selector: 'app-user-management-detail',
   imports: [
     DatePipe,
-    NgClass,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
@@ -38,7 +37,6 @@ import { IconDirective } from '@coreui/icons-angular';
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
-    IconDirective,
     ConfirmModalComponent,
   ],
   templateUrl: './detail.component.html',
