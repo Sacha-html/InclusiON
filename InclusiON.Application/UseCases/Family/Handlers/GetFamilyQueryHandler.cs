@@ -36,7 +36,16 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     Phone = f.Phone,
                     Relationship = f.Relationship,
                     IsActive = f.User?.IsActive ?? false,
-                    Email = f.User?.Email
+                    Email = f.User?.Email,
+                    LinkedPersons = f.PersonRepresentatives
+                        .Where(pr => pr.IsActive && pr.Person != null)
+                        .Select(pr => new LinkedPersonInfo
+                        {
+                            PersonId = pr.PersonId,
+                            FullName = $"{pr.Person.FirstName} {pr.Person.LastName}".Trim(),
+                            DisabilityType = pr.Person.DisabilityType?.Name,
+                            IsPrimary = pr.IsPrimary
+                        }).ToList()
                 }).ToList(),
                 TotalRecords = pagedResult.TotalRecords,
                 TotalPages = pagedResult.TotalPages,
