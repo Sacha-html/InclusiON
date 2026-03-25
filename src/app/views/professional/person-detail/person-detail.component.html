@@ -27,6 +27,14 @@
             }
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'diagnosticos'" (click)="activeTab = 'diagnosticos'; loadDiagnoses()" role="button">
+            Diagnósticos
+            @if (diagnoses.length > 0) {
+              <c-badge color="info" class="ms-1">{{ diagnoses.length }}</c-badge>
+            }
+          </a>
+        </li>
       </ul>
 
       <!-- Tab: Datos -->
@@ -273,32 +281,128 @@
         <button cButton color="primary" size="sm" (click)="openAddSkillAreaModal()">Agregar Area</button>
       }
 
+      <!-- Tab: Diagnósticos -->
+      @if (activeTab === 'diagnosticos') {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Diagnósticos registrados</h6>
+          <button cButton color="primary" size="sm" (click)="openNewDiagnosis()" aria-label="Nuevo diagnóstico">Nuevo diagnóstico</button>
+        </div>
+
+        @if (diagnoses.length === 0) {
+          <p class="text-body-secondary">No hay diagnósticos registrados para esta persona.</p>
+        }
+
+        @for (diag of diagnoses; track diag.id) {
+          <c-card class="mb-2">
+            <c-card-body class="py-2 px-3">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ diag.diagnosisDate | date:'dd/MM/yyyy' }}</strong>
+                  <span class="text-body-secondary ms-2">— {{ diag.professionalName }}</span>
+                  <p class="mb-0 mt-1">{{ diag.primaryDiagnosis }}</p>
+                </div>
+                <button cButton color="link" size="sm" (click)="openEditDiagnosis(diag)"
+                        aria-label="Ver/editar diagnóstico">Ver</button>
+              </div>
+            </c-card-body>
+          </c-card>
+        }
+      }
+
     </c-card-body>
   </c-card>
 }
 
-<!-- Modal Agregar Area -->
+<!-- Modal Diagnóstico -->
+<c-modal [visible]="showDiagnosisModal" (visibleChange)="!$event && closeDiagnosisModal()" size="lg">
+  <c-modal-header>
+    <strong>{{ editingDiagnosis ? 'Editar Diagnóstico' : 'Nuevo Diagnóstico' }}</strong>
+  </c-modal-header>
+  <c-modal-body>
+    <c-row class="mb-3">
+      <c-col sm="6">
+        <label cLabel>Fecha del diagnóstico *</label>
+        <input cFormControl type="date" [(ngModel)]="diagnosisForm.diagnosisDate" />
+      </c-col>
+    </c-row>
+    <c-row class="mb-3">
+      <c-col sm="12">
+        <label cLabel>Diagnóstico principal *</label>
+        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.primaryDiagnosis"></textarea>
+      </c-col>
+    </c-row>
+    <c-row class="mb-3">
+      <c-col sm="12">
+        <label cLabel>Observaciones iniciales</label>
+        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.initialObservations"></textarea>
+      </c-col>
+    </c-row>
+    <c-row class="mb-3">
+      <c-col sm="6">
+        <label cLabel>Capacidades identificadas</label>
+        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.identifiedCapabilities"></textarea>
+      </c-col>
+      <c-col sm="6">
+        <label cLabel>Desafíos identificados</label>
+        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.identifiedChallenges"></textarea>
+      </c-col>
+    </c-row>
+    <c-row class="mb-3">
+      <c-col sm="6">
+        <label cLabel>Apoyos requeridos</label>
+        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.requiredSupports"></textarea>
+      </c-col>
+      <c-col sm="6">
+        <label cLabel>Objetivos pedagógicos</label>
+        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.pedagogicalObjectives"></textarea>
+      </c-col>
+    </c-row>
+    <c-row class="mb-3">
+      <c-col sm="12">
+        <label cLabel>Estrategias recomendadas</label>
+        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.recommendedStrategies"></textarea>
+      </c-col>
+    </c-row>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeDiagnosisModal()">Cancelar</button>
+    <button cButton color="primary" (click)="saveDiagnosis()" [disabled]="!diagnosisForm.primaryDiagnosis" aria-label="Guardar diagnóstico">
+      {{ editingDiagnosis ? 'Guardar cambios' : 'Crear diagnóstico' }}
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal Agregar Areas -->
 <c-modal [visible]="showAddSkillAreaModal" (visibleChange)="!$event && closeAddSkillAreaModal()">
-  <c-modal-header><strong>Agregar Area de Habilidad</strong></c-modal-header>
+  <c-modal-header><strong>Agregar Áreas de Habilidad</strong></c-modal-header>
   <c-modal-body>
     @if (skillAreaError) {
       <div class="alert alert-danger">{{ skillAreaError }}</div>
     }
-    <div class="mb-3">
-      <label cLabel>Area de habilidad</label>
-      <select cSelect [(ngModel)]="selectedSkillAreaId">
-        <option [ngValue]="null">-- Seleccionar --</option>
-        @for (area of allSkillAreas; track area.id) {
-          <option [ngValue]="area.id">{{ area.name }}</option>
-        }
-      </select>
-    </div>
+    @if (allSkillAreas.length === 0) {
+      <p class="text-body-secondary">No hay áreas disponibles para agregar.</p>
+    } @else {
+      <p class="text-body-secondary mb-3">Seleccioná las áreas que deseas agregar:</p>
+      @for (area of allSkillAreas; track area.id) {
+        <c-form-check class="mb-2">
+          <input cFormCheckInput type="checkbox" [id]="'skill-' + area.id"
+                 [checked]="selectedSkillAreaIds.has(area.id)"
+                 (change)="toggleSkillArea(area.id)" />
+          <label cFormCheckLabel [for]="'skill-' + area.id">
+            <strong>{{ area.name }}</strong>
+            @if (area.description) {
+              <br /><small class="text-body-secondary">{{ area.description }}</small>
+            }
+          </label>
+        </c-form-check>
+      }
+    }
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="closeAddSkillAreaModal()">Cancelar</button>
-    <button cButton color="primary" (click)="confirmAddSkillArea()" [disabled]="!selectedSkillAreaId || skillAreaLoading">
+    <button cButton color="primary" (click)="confirmAddSkillAreas()" [disabled]="selectedSkillAreaIds.size === 0 || skillAreaLoading">
       @if (skillAreaLoading) { <c-spinner size="sm" class="me-1"></c-spinner> }
-      Agregar
+      Agregar ({{ selectedSkillAreaIds.size }})
     </button>
   </c-modal-footer>
 </c-modal>

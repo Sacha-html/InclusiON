@@ -1,9 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CatalogsService, PersonsService } from '@services';
+import { CatalogsService, PersonsService, ToastService } from '@services';
 import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem } from '../../../../models';
 import { formatDate, formatDateTime } from '@shared/utils';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -14,11 +15,15 @@ import {
   FormControlDirective,
   FormLabelDirective,
   FormSelectDirective,
+  FormCheckComponent,
+  FormCheckInputDirective,
+  FormCheckLabelDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
 
 @Component({
@@ -33,12 +38,17 @@ import {
     FormControlDirective,
     FormLabelDirective,
     FormSelectDirective,
+    FormCheckComponent,
+    FormCheckInputDirective,
+    FormCheckLabelDirective,
     ButtonDirective,
     FormsModule,
+    SpinnerComponent,
     ModalComponent,
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
+    ConfirmModalComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
@@ -48,14 +58,16 @@ export class DetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly personsService = inject(PersonsService);
   private readonly catalogsService = inject(CatalogsService);
+  private readonly toastService = inject(ToastService);
 
   person: PersonResponse | null = null;
+  showDeactivateModal = false;
 
   // Skill profile
   skillProfile: PersonSkillProfileResponse[] = [];
   allSkillAreas: SkillAreaItem[] = [];
   showAddSkillAreaModal = false;
-  selectedSkillAreaId: number | null = null;
+  selectedSkillAreaIds: Set<number> = new Set();
   skillAreaError = '';
   skillAreaLoading = false;
 
@@ -81,10 +93,9 @@ export class DetailComponent implements OnInit {
 
   openAddSkillAreaModal(): void {
     this.skillAreaError = '';
-    this.selectedSkillAreaId = null;
+    this.selectedSkillAreaIds = new Set();
     this.catalogsService.getSkillAreas().subscribe({
       next: (areas) => {
-        // Filter out already active areas
         const activeIds = new Set(this.skillProfile.filter(sp => sp.isActive).map(sp => sp.skillAreaId));
         this.allSkillAreas = (areas ?? []).filter(a => !activeIds.has(a.id));
         this.showAddSkillAreaModal = true;
@@ -97,21 +108,44 @@ export class DetailComponent implements OnInit {
     this.skillAreaError = '';
   }
 
-  confirmAddSkillArea(): void {
-    if (!this.person || !this.selectedSkillAreaId) return;
+  toggleSkillArea(id: number): void {
+    if (this.selectedSkillAreaIds.has(id)) {
+      this.selectedSkillAreaIds.delete(id);
+    } else {
+      this.selectedSkillAreaIds.add(id);
+    }
+  }
+
+  confirmAddSkillAreas(): void {
+    if (!this.person || this.selectedSkillAreaIds.size === 0) return;
     this.skillAreaLoading = true;
     this.skillAreaError = '';
-    this.personsService.addSkillArea(this.person.id, this.selectedSkillAreaId).subscribe({
-      next: () => {
-        this.skillAreaLoading = false;
-        this.showAddSkillAreaModal = false;
-        this.loadSkillProfile();
-      },
-      error: (err) => {
-        this.skillAreaLoading = false;
-        this.skillAreaError = err?.error?.message ?? 'Error al agregar el area de habilidad.';
-      },
-    });
+    const ids = Array.from(this.selectedSkillAreaIds);
+    let completed = 0;
+    let errors = 0;
+
+    for (const areaId of ids) {
+      this.personsService.addSkillArea(this.person.id, areaId).subscribe({
+        next: () => {
+          completed++;
+          if (completed + errors === ids.length) {
+            this.skillAreaLoading = false;
+            this.showAddSkillAreaModal = false;
+            this.loadSkillProfile();
+          }
+        },
+        error: () => {
+          errors++;
+          if (completed + errors === ids.length) {
+            this.skillAreaLoading = false;
+            this.skillAreaError = `${errors} área(s) no se pudieron agregar.`;
+            if (completed > 0) {
+              this.loadSkillProfile();
+            }
+          }
+        },
+      });
+    }
   }
 
   deactivateSkillArea(areaId: number): void {
@@ -140,5 +174,20 @@ export class DetailComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/admin/persons']);
+  }
+
+  confirmDeactivate(): void {
+    if (!this.person) return;
+    this.personsService.deactivatePerson(this.person.id).subscribe({
+      next: () => {
+        this.toastService.success('Persona desactivada exitosamente');
+        this.showDeactivateModal = false;
+        this.person!.isActive = false;
+      },
+      error: () => {
+        this.toastService.error('Error al desactivar la persona');
+        this.showDeactivateModal = false;
+      },
+    });
   }
 }

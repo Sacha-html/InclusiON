@@ -49,6 +49,9 @@ export enum ErrorCode {
   SupervisorNotAuthorized = 703,
   LoginMethodNotAllowed = 704,
   RoleNotAllowedForLogin = 705,
+  CannotDeactivateSelf = 706,
+  UserAlreadyInactive = 707,
+  UserAlreadyActive = 708,
 
   // Invitaciones (8xx)
   InvitationNotFound = 800,

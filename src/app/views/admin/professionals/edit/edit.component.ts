@@ -51,7 +51,6 @@ export class EditComponent implements OnInit {
     specialty: ['', [Validators.maxLength(100)]],
     licenseNumber: ['', [Validators.maxLength(50)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate]],
-    address: ['', [Validators.maxLength(200)]],
   });
 
   get f() {
@@ -80,7 +79,6 @@ export class EditComponent implements OnInit {
       specialty: p.specialty ?? '',
       licenseNumber: p.licenseNumber ?? '',
       birthDate: toDisplayDate(p.birthDate),
-      address: p.address ?? '',
     });
   }
 
@@ -99,7 +97,6 @@ export class EditComponent implements OnInit {
       ...(raw.specialty && { specialty: raw.specialty }),
       ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
       ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
-      ...(raw.address && { address: raw.address }),
     };
 
     this.professionalsService.updateProfessional(this.professional.id, request).subscribe({
