@@ -39,12 +39,13 @@ export class ListComponent {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle' },
-        { action: 'edit', label: 'Editar', visible: (item) => item.isActive },
-        { action: 'deactivate', label: 'Desactivar', visible: (item) => item.isActive },
+        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
       ],
     },
     { key: 'fullName', label: 'Nombre' },
+    { key: 'linkedPersonNames', label: 'Familiar de' },
     { key: 'relationship', label: 'Parentesco' },
     { key: 'phone', label: 'Telefono' },
     { key: 'isActive', label: 'Estado', type: 'badge' },
@@ -114,7 +115,10 @@ export class ListComponent {
       .getFamily({ page: this.currentPage, pageSize: this.pageSize, search, institutionId: this.selectedInstitutionId })
       .subscribe({
         next: (response) => {
-          this.families = response.data;
+          this.families = response.data.map((f: any) => ({
+            ...f,
+            linkedPersonNames: f.linkedPersons?.map((p: any) => p.fullName).join(', ') || '—',
+          }));
           this.totalItems = response.totalRecords;
         },
         error: () => {

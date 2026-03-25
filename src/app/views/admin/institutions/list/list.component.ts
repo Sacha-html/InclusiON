@@ -26,7 +26,7 @@ export class ListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'edit', label: 'Editar' },
+        { action: 'edit', label: 'Editar', icon: 'cil-notes' },
       ],
     },
     { key: 'name', label: 'Nombre' },

@@ -66,9 +66,25 @@
           </c-col>
         </c-row>
 
+        @if (family.linkedPersons && family.linkedPersons.length > 0) {
+          <c-row class="mb-3">
+            <c-col sm="12">
+              <label cLabel>Persona(s) a cargo</label>
+              <div class="d-flex flex-wrap gap-2 mt-1">
+                @for (person of family.linkedPersons; track person.personId) {
+                  <span class="badge bg-info text-dark">
+                    {{ person.fullName }}
+                    @if (person.disabilityType) { — {{ person.disabilityType }} }
+                  </span>
+                }
+              </div>
+            </c-col>
+          </c-row>
+        }
+
         <div class="mt-3 d-flex gap-2">
-          <button cButton color="primary" type="submit" [disabled]="form.invalid">Guardar</button>
-          <button cButton color="secondary" type="button" (click)="goBack()">Cancelar</button>
+          <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Guardar cambios">Guardar</button>
+          <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edición">Cancelar</button>
         </div>
       </form>
     </c-card-body>

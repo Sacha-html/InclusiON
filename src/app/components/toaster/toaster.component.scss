@@ -1,3 +1,42 @@
 :host ::ng-deep .toast {
   min-width: 300px;
+
+  &.bg-success {
+    background-color: var(--a11y-success, var(--cui-success)) !important;
+    color: var(--a11y-success-text, #fff) !important;
+  }
+
+  &.bg-danger {
+    background-color: var(--a11y-danger, var(--cui-danger)) !important;
+    color: var(--a11y-danger-text, #fff) !important;
+  }
+
+  &.bg-warning {
+    background-color: var(--a11y-warning, var(--cui-warning)) !important;
+    color: var(--a11y-warning-text, #fff) !important;
+  }
+
+  &.bg-info {
+    background-color: var(--a11y-info, var(--cui-info)) !important;
+    color: var(--a11y-info-text, #fff) !important;
+  }
+
+  &.bg-danger,
+  &.bg-success,
+  &.bg-warning,
+  &.bg-info {
+    .toast-header {
+      background-color: inherit;
+      color: inherit;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+
+      .btn-close {
+        filter: var(--a11y-close-btn-filter, invert(1));
+      }
+    }
+
+    .toast-body {
+      color: inherit;
+    }
+  }
 }
