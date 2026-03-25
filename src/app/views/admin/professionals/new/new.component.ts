@@ -55,7 +55,6 @@ export class NewComponent {
     specialty: ['', [Validators.maxLength(100)]],
     licenseNumber: ['', [Validators.maxLength(50)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate]],
-    address: ['', [Validators.maxLength(200)]],
   });
 
   get f() {
@@ -78,7 +77,6 @@ export class NewComponent {
       ...(raw.specialty && { specialty: raw.specialty }),
       ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
       ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
-      ...(raw.address && { address: raw.address }),
     };
 
     this.professionalsService.createProfessional(request).subscribe({
