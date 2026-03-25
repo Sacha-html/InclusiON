@@ -206,48 +206,68 @@
         </c-col>
       </c-row>
 
-      <div class="mt-3 d-flex gap-2">
-        <button cButton color="secondary" (click)="goBack()"
-                aria-label="Volver al listado de personas">
-          Volver
-        </button>
+      <div class="mt-3 d-flex justify-content-between">
+        <div class="d-flex gap-2">
+          <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado de personas">Volver</button>
+          @if (person.isActive) {
+            <button cButton color="primary" (click)="goToEdit()" [attr.aria-label]="'Editar persona ' + person.fullName">Editar</button>
+          }
+        </div>
         @if (person.isActive) {
-          <button cButton color="primary" (click)="goToEdit()"
-                  [attr.aria-label]="'Editar persona ' + person.fullName">
-            Editar
-          </button>
+          <button cButton color="danger" (click)="showDeactivateModal = true" [attr.aria-label]="'Desactivar persona ' + person.fullName">Desactivar</button>
         }
       </div>
     </c-card-body>
   </c-card>
 }
 
-<!-- Modal Agregar Area de Habilidad -->
+<app-confirm-modal
+  [visible]="showDeactivateModal"
+  title="Confirmar desactivación"
+  messagePrefix="¿Está seguro de que desea desactivar a "
+  [itemName]="person?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se revocará su acceso al sistema inmediatamente."
+  confirmLabel="Desactivar"
+  (confirm)="confirmDeactivate()"
+  (cancel)="showDeactivateModal = false">
+</app-confirm-modal>
+
+<!-- Modal Agregar Áreas de Habilidad -->
 <c-modal [visible]="showAddSkillAreaModal" (visibleChange)="!$event && closeAddSkillAreaModal()"
          aria-labelledby="add-skill-area-modal-title">
   <c-modal-header>
-    <strong id="add-skill-area-modal-title">Agregar Area de Habilidad</strong>
+    <strong id="add-skill-area-modal-title">Agregar Áreas de Habilidad</strong>
   </c-modal-header>
   <c-modal-body>
     @if (skillAreaError) {
       <div class="alert alert-danger">{{ skillAreaError }}</div>
     }
-    <div class="mb-3">
-      <label cLabel for="skill-area-select">Area de habilidad</label>
-      <select cSelect id="skill-area-select" [(ngModel)]="selectedSkillAreaId"
-              aria-label="Seleccionar area de habilidad">
-        <option [ngValue]="null">-- Seleccionar --</option>
-        @for (area of allSkillAreas; track area.id) {
-          <option [ngValue]="area.id">{{ area.name }}</option>
-        }
-      </select>
-    </div>
+    @if (allSkillAreas.length === 0) {
+      <p class="text-body-secondary">No hay áreas disponibles para agregar.</p>
+    } @else {
+      <p class="text-body-secondary mb-3">Seleccioná las áreas que deseas agregar:</p>
+      @for (area of allSkillAreas; track area.id) {
+        <c-form-check class="mb-2">
+          <input cFormCheckInput type="checkbox" [id]="'admin-skill-' + area.id"
+                 [checked]="selectedSkillAreaIds.has(area.id)"
+                 (change)="toggleSkillArea(area.id)" />
+          <label cFormCheckLabel [for]="'admin-skill-' + area.id">
+            <strong>{{ area.name }}</strong>
+            @if (area.description) {
+              <br /><small class="text-body-secondary">{{ area.description }}</small>
+            }
+          </label>
+        </c-form-check>
+      }
+    }
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="closeAddSkillAreaModal()">Cancelar</button>
-    <button cButton color="primary" (click)="confirmAddSkillArea()"
-            [disabled]="!selectedSkillAreaId || skillAreaLoading">
-      {{ skillAreaLoading ? 'Guardando...' : 'Agregar' }}
+    <button cButton color="primary" (click)="confirmAddSkillAreas()"
+            [disabled]="selectedSkillAreaIds.size === 0 || skillAreaLoading">
+      @if (skillAreaLoading) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      Agregar ({{ selectedSkillAreaIds.size }})
     </button>
   </c-modal-footer>
 </c-modal>

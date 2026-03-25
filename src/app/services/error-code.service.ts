@@ -187,6 +187,18 @@ export class ErrorCodeService {
       message: 'No tienes permisos para acceder desde este portal',
       userAction: 'Usa el portal correspondiente a tu tipo de cuenta',
       severity: 'error'
+    }],
+    [ErrorCode.CannotDeactivateSelf, {
+      message: 'No puedes desactivar tu propia cuenta',
+      severity: 'error'
+    }],
+    [ErrorCode.UserAlreadyInactive, {
+      message: 'El usuario ya se encuentra inactivo',
+      severity: 'warning'
+    }],
+    [ErrorCode.UserAlreadyActive, {
+      message: 'El usuario ya se encuentra activo',
+      severity: 'warning'
     }]
   ]);
 

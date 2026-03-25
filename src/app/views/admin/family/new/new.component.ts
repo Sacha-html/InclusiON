@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { FamilyService } from '@services';
-import { CreateFamilyRequest, FamilyResponse } from '../../../../models';
+import { FamilyService, PersonsService } from '@services';
+import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../../../../models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
@@ -21,15 +21,20 @@ import { PasswordModalComponent } from '@shared/components/password-modal/passwo
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
 })
-export class NewComponent {
+export class NewComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly familyService = inject(FamilyService);
+  private readonly personsService = inject(PersonsService);
 
   submitted = false;
   serverError = '';
   showPasswordModal = false;
   createdFamily: FamilyResponse | null = null;
+
+  persons: PersonListItemResponse[] = [];
+  filteredPersons: PersonListItemResponse[] = [];
+  personSearch = '';
 
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
 
@@ -40,7 +45,35 @@ export class NewComponent {
     documentNumber: ['', [Validators.maxLength(20)]],
     phone: ['', [Validators.maxLength(20)]],
     relationship: [''],
+    personId: ['', [Validators.required]],
   });
+
+  ngOnInit(): void {
+    this.loadPersons();
+  }
+
+  loadPersons(): void {
+    this.personsService.getPersons({ page: 1, pageSize: 200, isActive: true }).subscribe({
+      next: (response) => {
+        this.persons = response.data;
+        this.filteredPersons = this.persons;
+      },
+    });
+  }
+
+  filterPersons(search: string): void {
+    this.personSearch = search;
+    this.form.patchValue({ personId: '' });
+    if (search.length < 3) {
+      this.filteredPersons = [];
+      return;
+    }
+    const term = search.toLowerCase();
+    this.filteredPersons = this.persons.filter(p =>
+      p.fullName?.toLowerCase().includes(term) ||
+      p.documentNumber?.toLowerCase().includes(term)
+    );
+  }
 
   get f() { return this.form.controls; }
 
@@ -54,6 +87,7 @@ export class NewComponent {
       firstName: raw.firstName,
       lastName: raw.lastName,
       email: raw.email,
+      personId: raw.personId,
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       ...(raw.phone && { phone: raw.phone }),
       ...(raw.relationship && { relationship: raw.relationship }),

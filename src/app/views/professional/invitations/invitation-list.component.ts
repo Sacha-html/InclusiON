@@ -6,12 +6,12 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { InvitationsService, ToastService, PersonsService } from '@services';
+import { InvitationsService, ToastService, ProfessionalsService, AssignmentsService } from '@services';
 import { getInvitationStatusColor } from '@shared/utils';
 import {
   InvitationResponse,
   CreateInvitationRequest,
-  PersonListItemResponse,
+  ProfessionalPersonResponse,
 } from '@models';
 
 import {
@@ -57,12 +57,13 @@ import {
 })
 export class InvitationListComponent implements OnInit {
   private readonly invitationsService = inject(InvitationsService);
-  private readonly personsService = inject(PersonsService);
+  private readonly professionalsService = inject(ProfessionalsService);
+  private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
   private readonly fb = inject(FormBuilder);
 
   invitations: InvitationResponse[] = [];
-  persons: PersonListItemResponse[] = [];
+  persons: ProfessionalPersonResponse[] = [];
   isLoading = true;
   isSubmitting = false;
   showModal = false;
@@ -111,12 +112,19 @@ export class InvitationListComponent implements OnInit {
   }
 
   private loadPersons(): void {
-    this.personsService.getPersons({ pageSize: 100 }).subscribe({
-      next: (response) => {
-        this.persons = response?.data ?? [];
+    this.professionalsService.getMyProfile().subscribe({
+      next: (profile) => {
+        this.assignmentsService.getPersonsByProfessional(profile.id).subscribe({
+          next: (persons) => {
+            this.persons = persons.filter(p => p.isActive);
+          },
+          error: () => {
+            // Non-critical, persons dropdown will be empty
+          },
+        });
       },
       error: () => {
-        // Non-critical, persons dropdown will be empty
+        // Non-critical
       },
     });
   }
