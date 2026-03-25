@@ -105,7 +105,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 refreshTokenExpiryDays,
                 command.DeviceId,
                 command.RememberDevice,
-                "Nuevo login familiar",
+                Constants.RevokeReasons.NewLogin,
                 SuccessMessages.FamilyLoginSuccessful,
                 cancellationToken);
         }

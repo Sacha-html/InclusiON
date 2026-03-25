@@ -16,7 +16,6 @@ namespace InclusiON.DTOs.Responses.Professionals
         public string? Specialty { get; set; }
         public string? LicenseNumber { get; set; }
         public DateTime? BirthDate { get; set; }
-        public string? Address { get; set; }
 
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
