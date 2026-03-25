@@ -4,7 +4,7 @@ import { FamilyService, ToastService } from '@services';
 import { FamilyResponse } from '../../../../models';
 import { formatDateTime } from '@shared/utils';
 import {
-  BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
+  AlertComponent, BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormLabelDirective, RowComponent,
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
 } from '@coreui/angular';
@@ -12,7 +12,7 @@ import {
 @Component({
   selector: 'app-family-detail',
   imports: [
-    BadgeComponent, CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent,
+    AlertComponent, BadgeComponent, CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent,
     ColComponent, FormControlDirective, FormLabelDirective, ButtonDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
   ],

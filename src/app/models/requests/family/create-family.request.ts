@@ -5,4 +5,5 @@ export interface CreateFamilyRequest {
   documentNumber?: string;
   phone?: string;
   relationship?: string;
+  personId: string;
 }

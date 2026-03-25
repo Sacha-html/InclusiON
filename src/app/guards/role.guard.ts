@@ -1,10 +1,11 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
-import { AuthService } from '../services';
+import { AuthService, ToastService } from '../services';
 import { RoleRoutes } from '../shared/constants/roles';
 
 export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const authService = inject(AuthService);
+  const toastService = inject(ToastService);
   const router = inject(Router);
 
   const allowedRoles = route.data['roles'] as string[] | undefined;
@@ -24,7 +25,8 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return true;
   }
 
-  const targetRoute = RoleRoutes[user.role] || '/login';
+  toastService.warning('No tienes permisos para acceder a esta sección.');
+  const targetRoute = RoleRoutes[user.role] || '/';
   router.navigate([targetRoute]);
   return false;
 };
