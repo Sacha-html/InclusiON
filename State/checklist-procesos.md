@@ -1,6 +1,6 @@
 # Checklist de Procesos — InclusiON
 
-**Última actualización:** 2026-03-23
+**Última actualización:** 2026-03-25
 
 ---
 
@@ -17,6 +17,10 @@
 - [x] Creación de administradores institucionales
 - [x] Asignación de instituciones a admins
 - [x] Filtrado de datos por institución
+- [x] Enforcement de aislamiento por institución (InstitutionAccessFilter)
+- [x] Confirmación al guardar permisos con aviso de cierre de sesiones
+- [x] Revocación de tokens al cambiar permisos de un rol
+- [x] Invalidación correcta de caché de permisos (fix NormalizedName)
 
 ### 03 — Gestión de Catálogos
 - [x] Consulta de catálogos (6 tipos)
@@ -38,13 +42,16 @@
 - [x] Consulta paginada con filtros
 - [x] Edición de datos personales y funcionales
 - [x] Configuración del método de login
+- [x] Desactivación de persona (soft-delete + revocación de tokens + confirm modal)
 
 ### 06 — Gestión de Familiares
-- [x] Alta directa por admin
+- [x] Alta directa por admin (con selector de persona obligatorio)
 - [x] Alta por invitación (auto-registro)
-- [x] Consulta paginada
-- [x] Edición de familiar
+- [x] Consulta paginada con columna "Familiar de"
+- [x] Detalle con personas vinculadas (linkedPersons)
+- [x] Edición de familiar (muestra personas vinculadas readonly)
 - [x] Desactivación de familiar
+- [x] Vinculación automática persona-familiar en alta directa
 
 ### 07 — Gestión de Invitaciones
 - [x] Crear invitación y enviar email
@@ -164,6 +171,7 @@
 - [x] Modo claro y oscuro (14 combinaciones)
 - [x] Variables CSS por perfil
 - [x] Panel de accesibilidad (Alt+A)
+- [x] Toasts con colores de accesibilidad (--a11y-success, --a11y-danger, etc.)
 
 ### Autenticación
 - [x] Login estándar (email + contraseña)
@@ -175,26 +183,33 @@
 - [x] Refresh de token automático
 - [x] Cambio de contraseña obligatorio
 - [x] Redirección por rol al portal correspondiente
+- [x] Validación de rol en login admin/profesional (allowedRoles)
 
 ### Sistema
-- [x] Paginación con ordenamiento dinámico
+- [x] Paginación con ordenamiento dinámico (elipsis + conteo de registros)
 - [x] Filtrado por institución para admins institucionales
-- [x] Guards de ruta por rol y permiso
+- [x] Enforcement server-side de acceso por institución (InstitutionAccessFilter)
+- [x] Guards de ruta por rol y permiso (con toast de aviso)
 - [x] Directivas de permisos en interfaz
-- [x] Toasts de notificación
+- [x] Toasts de notificación (con colores de accesibilidad)
 - [x] Sidebar dinámico por rol
-- [x] Seeder de base de datos con datos iniciales
+- [x] Seeder de base de datos con datos iniciales (vinculación familiar incluida)
+- [x] Iconos en menú de acciones de tablas
+- [x] Botones homologados (aria-labels, confirm modals, layout consistente)
+- [x] Constantes centralizadas para razones de revocación (RevokeReasons)
+- [x] Permisos completos del rol Admin en seed (invitaciones, instituciones, mensajes)
+- [x] Templates de email con tildes y eñes correctas
 
 ---
 
 ## Administración de Cuentas
 
 ### 17 — Gestión de Usuarios
-- [ ] Listado centralizado de usuarios con filtros (rol, estado, institución)
-- [ ] Detalle de usuario con entidad asociada
-- [ ] Reseteo de contraseña (genera temporal + revoca sesiones)
-- [ ] Desactivación de cuenta (soft-delete + revocación de tokens)
-- [ ] Reactivación de cuenta (genera temporal)
+- [x] Listado centralizado de usuarios con filtros (rol, estado, institución)
+- [x] Detalle de usuario con entidad asociada
+- [x] Reseteo de contraseña (genera temporal + revoca sesiones + envío email)
+- [x] Desactivación de cuenta (soft-delete + revocación de tokens)
+- [x] Reactivación de cuenta (genera temporal + envío email)
 - [ ] Consulta de actividad reciente del usuario
 
 ### 18 — Onboarding
@@ -223,4 +238,4 @@
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| Items checkeados | 48 | 51 |
+| Items checkeados | 86 | 60 |

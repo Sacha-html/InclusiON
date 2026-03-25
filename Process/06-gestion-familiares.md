@@ -27,9 +27,9 @@ El familiar se registra desde una ruta pública usando un código de invitación
 - Ver detalle completo en **Proceso 07 — Gestión de Invitaciones**
 
 ### 3. Consulta de Familiares
-Listado paginado con búsqueda. Filtrado por institución para admins institucionales.
+Listado paginado con búsqueda. Filtrado por institución para admins institucionales. El detalle incluye las personas vinculadas vía `PersonRepresentative`.
 - **Listado:** `GET /api/family` (paginado)
-- **Detalle:** `GET /api/family/{id}`
+- **Detalle:** `GET /api/family/{id}` — incluye `linkedPersons` con nombre, tipo de discapacidad y si es representante primario
 - **Frontend:** `/admin/family` (DataTable)
 
 ### 4. Edición de Familiar

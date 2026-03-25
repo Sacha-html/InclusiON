@@ -34,6 +34,12 @@ Se asigna el método de login según el nivel de autonomía de la persona (Stand
 - **Endpoint:** `PUT /api/persons/{id}/login-method`
 - **Métodos disponibles:** `GET /api/catalogs/login-methods`
 
+### 5. Desactivación de Persona
+El admin desactiva a la persona (soft-delete). Se revoca el acceso y las sesiones activas. No se eliminan datos históricos.
+- **Endpoint:** `PUT /api/persons/{id}/deactivate`
+- **Autorización:** Policy `persons:delete`
+- **Transacción:** `User.IsActive = false` + revoca todos los RefreshTokens activos
+
 ## Diagrama de flujo
 
 ```mermaid
@@ -51,6 +57,9 @@ flowchart TD
     METHOD -->|PIN| PIN[PIN 4 dígitos]
     METHOD -->|Assisted| ASS[Login asistido]
     METHOD -->|Family| FAM[Contraseña familiar]
+
+    ADMIN -->|PUT /api/persons/id/deactivate| DEACT[Desactivar]
+    DEACT -->|IsActive = false + revoca tokens| SOFT[Soft-delete]
 ```
 
 
