@@ -8,7 +8,6 @@ namespace InclusiON.Application.UseCases.Professionals.Commands
         string? Specialty,
         string? LicenseNumber,
         DateTime? BirthDate,
-        string? Address,
         string Email
     );
 }

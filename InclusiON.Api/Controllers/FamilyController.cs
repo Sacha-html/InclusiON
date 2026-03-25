@@ -70,7 +70,8 @@ namespace InclusiON.Api.Controllers
                 request.Email,
                 request.DocumentNumber,
                 request.Phone,
-                request.Relationship);
+                request.Relationship,
+                request.PersonId);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 

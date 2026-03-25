@@ -130,7 +130,6 @@ namespace InclusiON.Api.Controllers
                 request.Specialty,
                 request.LicenseNumber,
                 request.BirthDate,
-                request.Address,
                 request.Email);
 
             var result = await handler.HandleAsync(command, cancellationToken);
@@ -172,8 +171,7 @@ namespace InclusiON.Api.Controllers
                 request.Phone,
                 request.Specialty,
                 request.LicenseNumber,
-                request.BirthDate,
-                request.Address);
+                request.BirthDate);
 
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();

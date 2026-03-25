@@ -24,5 +24,8 @@ namespace InclusiON.DTOs.Requests.Family
 
         [StringLength(50, ErrorMessage = "El parentesco no puede exceder 50 caracteres")]
         public string? Relationship { get; set; }
+
+        [Required(ErrorMessage = "Debe indicar la persona a la que representa")]
+        public Guid PersonId { get; set; }
     }
 }

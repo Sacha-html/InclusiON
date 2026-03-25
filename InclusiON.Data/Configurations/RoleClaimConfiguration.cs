@@ -36,8 +36,16 @@ namespace InclusiON.Data.Configurations
                 "family:read", "family:create", "family:update", "family:delete",
                 // Actividades
                 "activities:read", "activities:create", "activities:update", "activities:delete",
+                // Diagnósticos (solo lectura para admin)
+                "diagnoses:read",
                 // Reportes
                 "reports:read", "reports:create", "reports:export",
+                // Mensajes
+                "messages:read", "messages:create",
+                // Invitaciones
+                "invitations:read", "invitations:create",
+                // Instituciones
+                "institutions:read", "institutions:create", "institutions:update",
                 // Configuración
                 "settings:read", "settings:update",
                 // Auditoría
@@ -64,10 +72,14 @@ namespace InclusiON.Data.Configurations
                 "persons:read", "persons:update",
                 // Actividades
                 "activities:read", "activities:create", "activities:update",
+                // Diagnósticos
+                "diagnoses:read", "diagnoses:create", "diagnoses:update",
                 // Reportes
                 "reports:read", "reports:create",
                 // Mensajes
-                "messages:read", "messages:create"
+                "messages:read", "messages:create",
+                // Invitaciones
+                "invitations:read", "invitations:create"
             };
 
             foreach (var permission in professionalPermissions)
@@ -90,6 +102,8 @@ namespace InclusiON.Data.Configurations
                 "persons:read",
                 // Actividades (solo ver)
                 "activities:read",
+                // Diagnósticos (solo ver)
+                "diagnoses:read",
                 // Reportes (solo ver)
                 "reports:read",
                 // Mensajes

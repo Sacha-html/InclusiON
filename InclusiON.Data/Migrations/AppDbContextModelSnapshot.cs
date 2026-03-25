@@ -1699,10 +1699,6 @@ namespace InclusiON.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
@@ -2480,159 +2476,257 @@ namespace InclusiON.Data.Migrations
                         {
                             Id = 21,
                             ClaimType = "permission",
-                            ClaimValue = "reports:read",
+                            ClaimValue = "diagnoses:read",
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 22,
                             ClaimType = "permission",
-                            ClaimValue = "reports:create",
+                            ClaimValue = "reports:read",
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 23,
                             ClaimType = "permission",
-                            ClaimValue = "reports:export",
+                            ClaimValue = "reports:create",
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 24,
                             ClaimType = "permission",
-                            ClaimValue = "settings:read",
+                            ClaimValue = "reports:export",
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 25,
                             ClaimType = "permission",
-                            ClaimValue = "settings:update",
+                            ClaimValue = "messages:read",
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 26,
                             ClaimType = "permission",
-                            ClaimValue = "audit:read",
+                            ClaimValue = "messages:create",
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 27,
                             ClaimType = "permission",
-                            ClaimValue = "persons:read",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "invitations:read",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 28,
                             ClaimType = "permission",
-                            ClaimValue = "persons:update",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "invitations:create",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 29,
                             ClaimType = "permission",
-                            ClaimValue = "activities:read",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "institutions:read",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 30,
                             ClaimType = "permission",
-                            ClaimValue = "activities:create",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "institutions:create",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 31,
                             ClaimType = "permission",
-                            ClaimValue = "activities:update",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "institutions:update",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 32,
                             ClaimType = "permission",
-                            ClaimValue = "reports:read",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "settings:read",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 33,
                             ClaimType = "permission",
-                            ClaimValue = "reports:create",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "settings:update",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 34,
                             ClaimType = "permission",
-                            ClaimValue = "messages:read",
-                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                            ClaimValue = "audit:read",
+                            RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
                         new
                         {
                             Id = 35,
                             ClaimType = "permission",
-                            ClaimValue = "messages:create",
+                            ClaimValue = "persons:read",
                             RoleId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
                         {
                             Id = 36,
                             ClaimType = "permission",
-                            ClaimValue = "persons:read",
-                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
+                            ClaimValue = "persons:update",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
                         {
                             Id = 37,
                             ClaimType = "permission",
                             ClaimValue = "activities:read",
-                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
                         new
                         {
                             Id = 38,
+                            ClaimType = "permission",
+                            ClaimValue = "activities:create",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 39,
+                            ClaimType = "permission",
+                            ClaimValue = "activities:update",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 40,
+                            ClaimType = "permission",
+                            ClaimValue = "diagnoses:read",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 41,
+                            ClaimType = "permission",
+                            ClaimValue = "diagnoses:create",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 42,
+                            ClaimType = "permission",
+                            ClaimValue = "diagnoses:update",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 43,
+                            ClaimType = "permission",
+                            ClaimValue = "reports:read",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 44,
+                            ClaimType = "permission",
+                            ClaimValue = "reports:create",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 45,
+                            ClaimType = "permission",
+                            ClaimValue = "messages:read",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 46,
+                            ClaimType = "permission",
+                            ClaimValue = "messages:create",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 47,
+                            ClaimType = "permission",
+                            ClaimValue = "invitations:read",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 48,
+                            ClaimType = "permission",
+                            ClaimValue = "invitations:create",
+                            RoleId = new Guid("22222222-2222-2222-2222-222222222222")
+                        },
+                        new
+                        {
+                            Id = 49,
+                            ClaimType = "permission",
+                            ClaimValue = "persons:read",
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
+                        },
+                        new
+                        {
+                            Id = 50,
+                            ClaimType = "permission",
+                            ClaimValue = "activities:read",
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
+                        },
+                        new
+                        {
+                            Id = 51,
+                            ClaimType = "permission",
+                            ClaimValue = "diagnoses:read",
+                            RoleId = new Guid("33333333-3333-3333-3333-333333333333")
+                        },
+                        new
+                        {
+                            Id = 52,
                             ClaimType = "permission",
                             ClaimValue = "reports:read",
                             RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
                         {
-                            Id = 39,
+                            Id = 53,
                             ClaimType = "permission",
                             ClaimValue = "messages:read",
                             RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
                         {
-                            Id = 40,
+                            Id = 54,
                             ClaimType = "permission",
                             ClaimValue = "messages:create",
                             RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
                         new
                         {
-                            Id = 41,
+                            Id = 55,
                             ClaimType = "permission",
                             ClaimValue = "activities:read",
                             RoleId = new Guid("44444444-4444-4444-4444-444444444444")
                         },
                         new
                         {
-                            Id = 42,
+                            Id = 56,
                             ClaimType = "permission",
                             ClaimValue = "activities:respond",
                             RoleId = new Guid("44444444-4444-4444-4444-444444444444")
                         },
                         new
                         {
-                            Id = 43,
+                            Id = 57,
                             ClaimType = "permission",
                             ClaimValue = "messages:read",
                             RoleId = new Guid("44444444-4444-4444-4444-444444444444")
