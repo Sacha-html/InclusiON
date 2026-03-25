@@ -1,7 +1,7 @@
 <app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadPersons()"></app-institution-filter>
 
 <app-data-table
-  title="Personas con Discapacidad"
+  title="Gestión de Personas con Discapacidad"
   [columns]="cols"
   [items]="persons"
   [totalItems]="totalItems"
@@ -85,11 +85,23 @@
     @if (loginMethodSuccess) {
       <button cButton color="primary" (click)="closeLoginMethodModal()">Cerrar</button>
     } @else {
-      <button cButton color="secondary" (click)="closeLoginMethodModal()">Cancelar</button>
-      <button cButton color="primary" (click)="onLoginMethodSubmit()"
-              [disabled]="loginMethodForm.invalid">
+      <button cButton color="secondary" (click)="closeLoginMethodModal()" aria-label="Cancelar cambio de método">Cancelar</button>
+      <button cButton color="primary" (click)="showLoginMethodModal = false; showLoginMethodConfirm = true"
+              [disabled]="loginMethodForm.invalid" aria-label="Guardar método de login">
         Guardar
       </button>
     }
   </c-modal-footer>
 </c-modal>
+
+<app-confirm-modal
+  [visible]="showLoginMethodConfirm"
+  title="Confirmar cambio de método de login"
+  messagePrefix="¿Cambiar el método de login de "
+  [itemName]="selectedPerson?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Si el nuevo método requiere contraseña, se generará una temporal. Las sesiones activas serán revocadas."
+  confirmLabel="Cambiar método"
+  (confirm)="onLoginMethodSubmit(); showLoginMethodConfirm = false"
+  (cancel)="showLoginMethodConfirm = false; showLoginMethodModal = true">
+</app-confirm-modal>
