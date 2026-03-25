@@ -21,6 +21,7 @@ import {
   RowComponent,
   TableDirective,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
   selector: 'app-data-table',
@@ -43,6 +44,7 @@ import {
     DropdownToggleDirective,
     DropdownMenuDirective,
     DropdownItemDirective,
+    IconDirective,
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
@@ -85,8 +87,42 @@ export class DataTableComponent implements OnInit, OnDestroy {
     return Math.ceil(this.totalItems / this.pageSize);
   }
 
-  get pages(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  get pages(): (number | '...')[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const maxVisible = 5;
+
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const pages: (number | '...')[] = [];
+    pages.push(1);
+
+    let start = Math.max(2, current - 1);
+    let end = Math.min(total - 1, current + 1);
+
+    if (current <= 3) {
+      end = Math.min(total - 1, maxVisible - 1);
+    }
+    if (current >= total - 2) {
+      start = Math.max(2, total - maxVisible + 2);
+    }
+
+    if (start > 2) pages.push('...');
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < total - 1) pages.push('...');
+
+    pages.push(total);
+    return pages;
+  }
+
+  get showingFrom(): number {
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get showingTo(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalItems);
   }
 
   getVisibleActions(col: TableColumn, item: any): ActionItem[] {

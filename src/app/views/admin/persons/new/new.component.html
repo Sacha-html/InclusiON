@@ -234,8 +234,8 @@
       </c-row>
 
       <div class="mt-3 d-flex gap-2">
-        <button cButton color="primary" type="submit">Guardar</button>
-        <button cButton color="secondary" type="button" (click)="goBack()">Cancelar</button>
+        <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Crear persona">Guardar</button>
+        <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar y volver">Cancelar</button>
       </div>
     </form>
   </c-card-body>

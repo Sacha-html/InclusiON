@@ -7,5 +7,4 @@ export interface CreateProfessionalRequest {
   specialty?: string;
   licenseNumber?: string;
   birthDate?: string;
-  address?: string;
 }

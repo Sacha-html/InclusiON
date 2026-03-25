@@ -173,6 +173,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'users',
+        data: { title: 'Gestión de Usuarios' },
+        loadChildren: () =>
+          import('./views/admin/user-management/routes').then(
+            (m) => m.userManagementRoutes,
+          ),
+      },
+      {
         path: 'admins',
         data: { title: 'Administradores' },
         canActivate: [globalAdminGuard],
