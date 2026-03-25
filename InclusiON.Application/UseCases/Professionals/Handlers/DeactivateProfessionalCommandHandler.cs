@@ -46,7 +46,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             // Revocar refresh tokens activos
             await _refreshTokensRepository.RevokeAllUserTokensAsync(
                 professional.UserId,
-                "Profesional desactivado",
+                Constants.RevokeReasons.ProfessionalDeactivated,
                 cancellationToken);
 
             await _repository.UpdateAsync(professional, cancellationToken);

@@ -99,7 +99,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             return await _loginSessionService.CreateLoginSessionAsync(
                 user,
                 refreshTokenExpiryDays,
-                "New login detected - previous sessions invalidated",
+                Constants.RevokeReasons.NewLogin,
                 SuccessMessages.LoginSuccessful,
                 cancellationToken);
         }
