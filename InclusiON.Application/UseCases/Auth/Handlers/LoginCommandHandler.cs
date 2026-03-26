@@ -78,12 +78,28 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.InvalidCredentials);
             }
 
+            // Validar que el rol del usuario sea compatible con el flujo de login
+            if (command.AllowedRoles is not null && command.AllowedRoles.Count > 0)
+            {
+                var userRoles = await _identityService.GetRolesAsync(user);
+                if (!userRoles.Any(r => command.AllowedRoles.Contains(r, StringComparer.OrdinalIgnoreCase)))
+                {
+                    _logger.LogWarning(
+                        "Login rejected for {Email}: role {Roles} not in allowed roles {AllowedRoles}",
+                        command.Email, string.Join(",", userRoles), string.Join(",", command.AllowedRoles));
+
+                    return ApiResponse<LoginResponse>.ErrorResult(
+                        ErrorCode.RoleNotAllowedForLogin,
+                        "No tienes permisos para acceder desde este portal.");
+                }
+            }
+
             var refreshTokenExpiryDays = command.RememberMe ? 30 : 7;
 
             return await _loginSessionService.CreateLoginSessionAsync(
                 user,
                 refreshTokenExpiryDays,
-                "New login detected - previous sessions invalidated",
+                Constants.RevokeReasons.NewLogin,
                 SuccessMessages.LoginSuccessful,
                 cancellationToken);
         }

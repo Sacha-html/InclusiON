@@ -28,6 +28,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 query.IsActive,
                 query.SortBy,
                 query.SortDirection,
+                query.InstitutionIds,
                 cancellationToken);
 
             var response = new PagedResponse<ProfessionalListItemResponse>

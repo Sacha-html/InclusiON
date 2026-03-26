@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Commands;
@@ -86,45 +87,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
             _logger.LogInformation("Persona actualizada: {PersonId}", command.PersonId);
 
-            var response = new PersonResponse
-            {
-                Id = person.Id,
-                UserId = person.UserId,
-                FirstName = person.FirstName,
-                LastName = person.LastName,
-                DocumentNumber = person.DocumentNumber,
-                BirthDate = person.BirthDate,
-                PhotoUrl = person.PhotoUrl,
-                AttentionLevel = person.AttentionLevel,
-                CommunicationLevel = person.CommunicationLevel,
-                UsesAAC = person.UsesAAC,
-                UsesSignLanguage = person.UsesSignLanguage,
-                MotorSkillLevel = person.MotorSkillLevel,
-                InterestsAndMotivators = person.InterestsAndMotivators,
-                LearningStyle = person.LearningStyle,
-                AvailableResources = person.AvailableResources,
-                AdditionalTherapies = person.AdditionalTherapies,
-                RequiresLargeFont = person.RequiresLargeFont,
-                RequiresHighContrast = person.RequiresHighContrast,
-                VisualNoiseSensitivity = person.VisualNoiseSensitivity,
-                SoundSensitivity = person.SoundSensitivity,
-                AutonomyLevelId = person.AutonomyLevelId,
-                AutonomyLevelName = person.AutonomyLevel?.Name,
-                LoginMethodId = person.LoginMethodId,
-                LoginMethodName = person.LoginMethod?.Name,
-                HasPinConfigured = !string.IsNullOrEmpty(person.PinCodeHash),
-                SupervisorUserId = person.SupervisorUserId,
-                SupervisorName = person.SupervisorUser != null
-                    ? $"{person.SupervisorUser.Name} {person.SupervisorUser.Surname}".Trim()
-                    : null,
-                AvatarColor = person.AvatarColor,
-                DisabilityTypeId = person.DisabilityTypeId,
-                DisabilityTypeName = person.DisabilityType?.Name,
-                IsActive = person.User?.IsActive ?? false,
-                CreatedAt = person.CreatedAt,
-                UpdatedAt = person.UpdatedAt
-            };
-
+            var response = PersonMapper.ToResponse(person);
             return ApiResponse<PersonResponse>.SuccessResult(response, SuccessMessages.PersonUpdated);
         }
     }

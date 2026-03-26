@@ -14,15 +14,18 @@ namespace InclusiON.Application.UseCases.Users.Handlers
         private readonly IIdentityService _identityService;
         private readonly IRefreshTokensRepository _refreshTokenRepository;
         private readonly IPermissionService _permissionService;
+        private readonly IAdminInstitutionRepository _adminInstitutionRepository;
 
         public GetUserProfileQueryHandler(
             IIdentityService identityService,
             IRefreshTokensRepository refreshTokenRepository,
-            IPermissionService permissionService)
+            IPermissionService permissionService,
+            IAdminInstitutionRepository adminInstitutionRepository)
         {
             _identityService = identityService;
             _refreshTokenRepository = refreshTokenRepository;
             _permissionService = permissionService;
+            _adminInstitutionRepository = adminInstitutionRepository;
         }
 
         public async Task<ApiResponse<UserProfileResponse>> HandleAsync(GetUserProfileQuery query, CancellationToken cancellationToken)
@@ -51,6 +54,16 @@ namespace InclusiON.Application.UseCases.Users.Handlers
             var activeSessionsCount = await _refreshTokenRepository
                 .GetActiveTokensCountAsync(user.Id, cancellationToken);
 
+            bool? isGlobalAdmin = null;
+            List<int>? institutionIds = null;
+
+            if (primaryRole == "Admin")
+            {
+                institutionIds = await _adminInstitutionRepository
+                    .GetActiveInstitutionIdsByAdminAsync(user.Id, cancellationToken);
+                isGlobalAdmin = institutionIds.Count == 0;
+            }
+
             var response = new UserProfileResponse
             {
                 Id = user.Id,
@@ -63,7 +76,9 @@ namespace InclusiON.Application.UseCases.Users.Handlers
                 ActiveSessionsCount = activeSessionsCount,
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                Permissions = permissions
+                Permissions = permissions,
+                IsGlobalAdmin = isGlobalAdmin,
+                InstitutionIds = institutionIds
             };
 
             return ApiResponse<UserProfileResponse>.SuccessResult(response);

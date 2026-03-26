@@ -32,9 +32,6 @@ namespace InclusiON.Data.Configurations
             builder.Property(p => p.LicenseNumber)
                 .HasMaxLength(50);
 
-            builder.Property(p => p.Address)
-                .HasMaxLength(255);
-
             builder.Property(p => p.IsActive)
                 .HasDefaultValue(true);
 

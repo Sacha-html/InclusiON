@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using InclusiON.Application.Constants;
 
 namespace InclusiON.Infrastructure.Authentication
 {
@@ -42,8 +43,7 @@ namespace InclusiON.Infrastructure.Authentication
                 new Claim(ClaimTypes.Name, userData.Name ?? string.Empty),
                 new Claim(ClaimTypes.Email, userData.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, userData.Role ?? IdentityRoles.PersonWithDisability.ToString()),
-                new Claim("userId", userData.Id.ToString()),
-                new Claim("isActive", userData.IsActive.ToString()),
+                new Claim(Permissions.IsActiveClaimType, userData.IsActive.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat,
                     DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
@@ -54,6 +54,19 @@ namespace InclusiON.Infrastructure.Authentication
                     foreach (var permission in userData.Permissions)
                     {
                         claims.Add(new Claim("permission", permission));
+                    }
+                }
+
+                if (userData.Role == "Admin")
+                {
+                    claims.Add(new Claim(Permissions.GlobalAdminClaimType, userData.IsGlobalAdmin.ToString().ToLower()));
+
+                    if (!userData.IsGlobalAdmin && userData.InstitutionIds is not null)
+                    {
+                        foreach (var instId in userData.InstitutionIds)
+                        {
+                            claims.Add(new Claim(Permissions.InstitutionIdClaimType, instId.ToString()));
+                        }
                     }
                 }
 
@@ -124,7 +137,7 @@ namespace InclusiON.Infrastructure.Authentication
             try
             {
                 var principal = ValidateToken(token);
-                var userIdClaim = principal?.FindFirst("userId")?.Value;
+                var userIdClaim = principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (Guid.TryParse(userIdClaim, out Guid userId))
                     return userId;

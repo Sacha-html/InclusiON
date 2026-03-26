@@ -52,7 +52,8 @@ namespace InclusiON.Api.Controllers
                 request.Specialty,
                 request.IsActive,
                 request.SortBy,
-                request.SortDirection);
+                request.SortDirection,
+                request.InstitutionIds);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
@@ -120,14 +121,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<ProfessionalResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new CreateProfessionalCommand(
                 request.FirstName,
@@ -137,7 +130,6 @@ namespace InclusiON.Api.Controllers
                 request.Specialty,
                 request.LicenseNumber,
                 request.BirthDate,
-                request.Address,
                 request.Email);
 
             var result = await handler.HandleAsync(command, cancellationToken);
@@ -170,14 +162,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<ProfessionalResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
 
             var command = new UpdateProfessionalCommand(
                 professionalId,
@@ -187,8 +171,7 @@ namespace InclusiON.Api.Controllers
                 request.Phone,
                 request.Specialty,
                 request.LicenseNumber,
-                request.BirthDate,
-                request.Address);
+                request.BirthDate);
 
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();

@@ -7,6 +7,9 @@ namespace InclusiON.Application.Constants
     public static class Permissions
     {
         public const string ClaimType = "permission";
+        public const string GlobalAdminClaimType = "isGlobalAdmin";
+        public const string InstitutionIdClaimType = "institutionId";
+        public const string IsActiveClaimType = "isActive";
 
         // ═══════════════════════════════════════════════════════════════
         // USUARIOS
@@ -93,6 +96,16 @@ namespace InclusiON.Application.Constants
         }
 
         // ═══════════════════════════════════════════════════════════════
+        // DIAGNÓSTICOS
+        // ═══════════════════════════════════════════════════════════════
+        public static class Diagnoses
+        {
+            public const string Read = "diagnoses:read";
+            public const string Create = "diagnoses:create";
+            public const string Update = "diagnoses:update";
+        }
+
+        // ═══════════════════════════════════════════════════════════════
         // AUDITORÍA
         // ═══════════════════════════════════════════════════════════════
         public static class Audit
@@ -110,6 +123,7 @@ namespace InclusiON.Application.Constants
             Professionals.Read, Professionals.Create, Professionals.Update, Professionals.Delete,
             Family.Read, Family.Create, Family.Update, Family.Delete,
             Activities.Read, Activities.Create, Activities.Update, Activities.Delete, Activities.Respond,
+            Diagnoses.Read, Diagnoses.Create, Diagnoses.Update,
             Reports.Read, Reports.Create, Reports.Export,
             Messages.Read, Messages.Create,
             Settings.Read, Settings.Update,
