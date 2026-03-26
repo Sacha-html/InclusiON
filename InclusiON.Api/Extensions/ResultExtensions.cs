@@ -30,7 +30,12 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.BusinessRuleViolation or
                 ErrorCode.InvalidOperation or
                 ErrorCode.PinNotConfigured or
-                ErrorCode.LoginMethodNotAllowed
+                ErrorCode.LoginMethodNotAllowed or
+                ErrorCode.CannotDeactivateSelf or
+                ErrorCode.UserAlreadyInactive or
+                ErrorCode.UserAlreadyActive or
+                ErrorCode.InvitationExpired or
+                ErrorCode.InvitationAlreadyUsed
                     => new BadRequestObjectResult(response),
 
                 // 401 Unauthorized - Errores de autenticacion
@@ -47,7 +52,8 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.Forbidden or
                 ErrorCode.InsufficientPermissions or
                 ErrorCode.NotAuthorizedForResource or
-                ErrorCode.SupervisorNotAuthorized
+                ErrorCode.SupervisorNotAuthorized or
+                ErrorCode.RoleNotAllowedForLogin
                     => new ObjectResult(response) { StatusCode = StatusCodes.Status403Forbidden },
 
                 // 404 Not Found - Recursos no encontrados
@@ -55,7 +61,8 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.UserNotFound or
                 ErrorCode.PersonNotFound or
                 ErrorCode.ResourceNotFound or
-                ErrorCode.ProfessionalNotFound
+                ErrorCode.ProfessionalNotFound or
+                ErrorCode.InvitationNotFound
                     => new NotFoundObjectResult(response),
 
                 // 409 Conflict - Conflictos de datos

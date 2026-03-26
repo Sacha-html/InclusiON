@@ -31,6 +31,7 @@ namespace InclusiON.Infrastructure
             }
 
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+            services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
 
             var connectionString = configuration.GetConnectionString("SqlServerConn");
 
@@ -53,6 +54,15 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IVisualLoginRepository, VisualLoginRepository>();
             services.AddScoped<IPersonsRepository, PersonsRepository>();
             services.AddScoped<IProfessionalsRepository, ProfessionalsRepository>();
+            services.AddScoped<IInvitationsRepository, InvitationsRepository>();
+            services.AddScoped<IFamilyRepository, FamilyRepository>();
+            services.AddScoped<IAssignmentsRepository, AssignmentsRepository>();
+            services.AddScoped<IInstitutionsRepository, InstitutionsRepository>();
+            services.AddScoped<IAdminInstitutionRepository, AdminInstitutionRepository>();
+            services.AddScoped<IDiagnosesRepository, DiagnosesRepository>();
+
+            // Email
+            services.AddScoped<IEmailService, EmailService>();
 
             // Repositorios read-only para catalogos
             services.AddScoped<IReadOnlyRepository<DisabilityType>, ReadOnlyRepository<DisabilityType>>();
@@ -77,6 +87,7 @@ namespace InclusiON.Infrastructure
             // Autorización basada en permisos
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, GlobalAdminAuthorizationHandler>();
 
             services.AddAuthentication(options =>
             {

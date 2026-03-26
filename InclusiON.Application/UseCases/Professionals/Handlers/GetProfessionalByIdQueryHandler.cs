@@ -46,7 +46,6 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 Specialty = professional.Specialty,
                 LicenseNumber = professional.LicenseNumber,
                 BirthDate = professional.BirthDate,
-                Address = professional.Address,
                 IsActive = professional.User?.IsActive ?? false,
                 CreatedAt = professional.CreatedAt,
                 UpdatedAt = professional.UpdatedAt,
