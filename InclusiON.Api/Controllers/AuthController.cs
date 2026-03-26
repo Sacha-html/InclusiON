@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Auth.Commands;
 using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Requests.Auth;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
-using InclusiON.Shared.Resources;
-
 namespace InclusiON.Api.Controllers
 {
     /// <summary>
@@ -30,15 +29,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<RegisterUserCommand, ApiResponse<UserResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<UserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new RegisterUserCommand(
                 request.Name,
                 request.Surname,
@@ -48,11 +38,7 @@ namespace InclusiON.Api.Controllers
                 request.PhoneNumber);
 
             var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-                return BadRequest(result);
-
-            return Created($"api/auth/profile", result);
+            return result.ToActionResult();
         }
 
         /// <summary>
@@ -68,25 +54,9 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken
             )
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                return BadRequest(ApiResponse<LoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
-            var command = new LoginCommand(request.Email, request.Password);
+            var command = new LoginCommand(request.Email, request.Password, request.RememberMe, request.AllowedRoles);
             var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-            {
-                return Unauthorized(result);
-            }
-
-            return Ok(result);
+            return result.ToActionResult();
         }
 
         /// <summary>
@@ -116,15 +86,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<IdentifyUserQuery, ApiResponse<IdentifyUserResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<IdentifyUserResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var query = new IdentifyUserQuery(request.Identifier, request.DeviceId, request.UserType);
             var result = await handler.HandleAsync(query, cancellationToken);
 
@@ -143,15 +104,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<VisualStandardLoginCommand, ApiResponse<VisualLoginResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new VisualStandardLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -175,15 +127,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<PinLoginCommand, ApiResponse<VisualLoginResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new PinLoginCommand(request.UserId, request.Pin, request.DeviceId, request.RememberDevice);
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -207,15 +150,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<FamilyLoginCommand, ApiResponse<VisualLoginResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new FamilyLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -239,15 +173,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<AssistedLoginCommand, ApiResponse<VisualLoginResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<VisualLoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new AssistedLoginCommand(request.UserId, request.SupervisorEmail, request.SupervisorPassword, request.DeviceId);
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -275,15 +200,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] IHttpContextService httpContextService,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<ChangePasswordResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var userId = httpContextService.GetCurrentUserId();
             if (!userId.HasValue)
             {
@@ -297,13 +213,7 @@ namespace InclusiON.Api.Controllers
                 request.ConfirmNewPassword);
 
             var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
+            return result.ToActionResult();
         }
 
         /// <summary>
@@ -318,24 +228,9 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<RefreshTokenCommand, ApiResponse<LoginResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-                return BadRequest(ApiResponse<LoginResponse>.ErrorResult(ErrorMessages.ValidationFailed, errors));
-            }
-
             var command = new RefreshTokenCommand(request.RefreshToken);
             var result = await handler.HandleAsync(command, cancellationToken);
-
-            if (!result.Success)
-            {
-                return Unauthorized(result);
-            }
-
-            return Ok(result);
+            return result.ToActionResult();
         }
 
     }

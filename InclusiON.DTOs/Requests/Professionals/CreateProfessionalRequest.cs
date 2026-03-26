@@ -29,9 +29,6 @@ namespace InclusiON.DTOs.Requests.Professionals
 
         public DateTime? BirthDate { get; set; }
 
-        [StringLength(200, ErrorMessage = "La direccion no puede exceder 200 caracteres")]
-        public string? Address { get; set; }
-
         [Required(ErrorMessage = "El email es requerido")]
         [EmailAddress(ErrorMessage = "El formato del email es invalido")]
         public string Email { get; set; } = string.Empty;
