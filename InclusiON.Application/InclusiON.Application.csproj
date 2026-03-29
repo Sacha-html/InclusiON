@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Infrastructure\" />
+    <Folder Include="UseCases\Reports\Commands\" />
   </ItemGroup>
 
   <ItemGroup>
