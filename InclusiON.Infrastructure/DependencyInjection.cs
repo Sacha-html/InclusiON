@@ -60,6 +60,7 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IInstitutionsRepository, InstitutionsRepository>();
             services.AddScoped<IAdminInstitutionRepository, AdminInstitutionRepository>();
             services.AddScoped<IDiagnosesRepository, DiagnosesRepository>();
+            services.AddScoped<IReportsRepository, ReportsRepository>();
 
             // Email
             services.AddScoped<IEmailService, EmailService>();
