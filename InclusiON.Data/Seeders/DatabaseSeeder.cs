@@ -66,7 +66,8 @@ namespace InclusiON.Data.Seeders
                     Pin = "1234",
                     LoginMethodId = 2, // PIN
                     AvatarColor = "#4CAF50",
-                    SupervisorUserId = (Guid?)null
+                    SupervisorUserId = (Guid?)null,
+                    PersonId = Guid.Parse("00000000-0000-0000-0000-000000000100")
                 },
                 new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000011"),
@@ -77,7 +78,8 @@ namespace InclusiON.Data.Seeders
                     Pin = (string?)null,
                     LoginMethodId = 1, // STANDARD (password)
                     AvatarColor = "#2196F3", 
-                    SupervisorUserId = (Guid?)null
+                    SupervisorUserId = (Guid?)null,
+                    PersonId = Guid.Parse("00000000-0000-0000-0000-000000000101")
                 },
                 new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000012"),
@@ -88,7 +90,8 @@ namespace InclusiON.Data.Seeders
                     Pin = (string?)null,
                     LoginMethodId = 3, // ASSISTED (requiere supervisor)
                     AvatarColor = "#9C27B0",
-                    SupervisorUserId = (Guid?)Guid.Parse("00000000-0000-0000-0000-000000000020") // Supervisor
+                    SupervisorUserId = (Guid?)Guid.Parse("00000000-0000-0000-0000-000000000020"), // Supervisor
+                    PersonId = Guid.Parse("00000000-0000-0000-0000-000000000102")
                 },
                 new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000013"),
@@ -99,7 +102,8 @@ namespace InclusiON.Data.Seeders
                     Pin = "5678",
                     LoginMethodId = 2, // PIN
                     AvatarColor = "#FF9800",
-                    SupervisorUserId = (Guid?)null
+                    SupervisorUserId = (Guid?)null,
+                    PersonId = Guid.Parse("00000000-0000-0000-0000-000000000103")
                 }
             };
 
@@ -156,7 +160,7 @@ namespace InclusiON.Data.Seeders
                     // Crear PersonWithDisability
                     var person = new PersonWithDisability
                     {
-                        Id = Guid.NewGuid(),
+                        Id = testUser.PersonId,
                         UserId = user.Id,
                         FirstName = testUser.Name,
                         LastName = testUser.Surname,
@@ -380,7 +384,8 @@ namespace InclusiON.Data.Seeders
                     FirstName = "Pedro",
                     LastName = "Martinez",
                     LicenseNumber = "PROF-001",
-                    Specialty = "Terapia Ocupacional"
+                    Specialty = "Terapia Ocupacional",
+                    ProfessionalId = Guid.Parse("00000000-0000-0000-0000-000000000200")
                 },
                 new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000021"),
@@ -389,7 +394,8 @@ namespace InclusiON.Data.Seeders
                     FirstName = "Laura",
                     LastName = "Gonzalez",
                     LicenseNumber = "PROF-002",
-                    Specialty = "Educacion Especial"
+                    Specialty = "Educacion Especial",
+                    ProfessionalId = Guid.Parse("00000000-0000-0000-0000-000000000201")
                 }
             };
 
@@ -425,7 +431,7 @@ namespace InclusiON.Data.Seeders
 
                     var professional = new Professional
                     {
-                        Id = Guid.NewGuid(),
+                        Id = prof.ProfessionalId,
                         UserId = prof.Id,
                         FirstName = prof.FirstName,
                         LastName = prof.LastName,
@@ -454,7 +460,8 @@ namespace InclusiON.Data.Seeders
                     LastName = "Sanchez",
                     Phone = "1155667788",
                     Relationship = "Madre",
-                    LinkedPersonEmail = "maria@test.com"
+                    LinkedPersonEmail = "maria@test.com",
+                    FamilyId = Guid.Parse("00000000-0000-0000-0000-000000000300")
                 },
                 new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000031"),
@@ -464,7 +471,8 @@ namespace InclusiON.Data.Seeders
                     LastName = "Fernandez",
                     Phone = "1144556677",
                     Relationship = "Tutor Legal",
-                    LinkedPersonEmail = "juan@test.com"
+                    LinkedPersonEmail = "juan@test.com",
+                    FamilyId = Guid.Parse("00000000-0000-0000-0000-000000000301")
                 }
             };
 
@@ -497,7 +505,7 @@ namespace InclusiON.Data.Seeders
 
                             context.FamilyRepresentatives.Add(new FamilyRepresentative
                             {
-                                Id = Guid.NewGuid(),
+                                Id = fam.FamilyId,
                                 UserId = fam.Id,
                                 FirstName = fam.FirstName,
                                 LastName = fam.LastName,
