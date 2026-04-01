@@ -1,4 +1,5 @@
 ﻿
+using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Reports.Queries;
@@ -54,6 +55,25 @@ namespace InclusiON.Api.Controllers
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result); 
+        }
+
+        /// <summary>
+        /// Obtiene un reporte por su ID.
+        /// </summary>
+        [HttpGet("{reportId:int}")]
+        [Authorize(Policy = "reports:read")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<ReportsListItemReponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<ReportsListItemReponse>>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<ReportsListItemReponse>>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<ReportsListItemReponse>>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<ReportResponse>>> GetReportById(
+            int reportId,
+            [FromServices] IQueryHandler<GetReportByIdQuery, ApiResponse<ReportResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetReportByIdQuery(reportId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return result.ToActionResult();
         }
     }
 }
