@@ -58,7 +58,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
-        /// Obtiene un profesional por su ID.
+        /// Obtiene un reporte por su ID.
         /// </summary>
         [HttpGet("{reportId:int}")]
         [Authorize(Policy = "reports:read")]

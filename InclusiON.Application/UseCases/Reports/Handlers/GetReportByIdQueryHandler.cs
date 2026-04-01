@@ -34,27 +34,9 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                     ErrorMessages.ReportNotFound);
             }
 
-            var response = MapToResponse(report);
+            var response = GetReportByIdQuery.MapToResponse(report);
             return ApiResponse<ReportResponse>.SuccessResult(response);
         }
-
-        internal static ReportResponse MapToResponse(Report report)
-        {
-            return new ReportResponse
-            {
-                Id = report.Id,
-                Title = report.Title,
-                Content = report.Content,
-                ReportDate = report.ReportDate,
-                PersonId = report.PersonId,
-                ProfessionalId = report.ProfessionalId,
-                ReportTypeId = report.ReportTypeId,
-                AchievedGoals = report.AchievedGoals,
-                AreasToReinforce = report.AreasToReinforce,
-                FutureRecommendations = report.FutureRecommendations,
-                NextObjectives = report.NextObjectives,
-                IsActive = report.IsActive,
-            };
-        }
+                
     }
 }

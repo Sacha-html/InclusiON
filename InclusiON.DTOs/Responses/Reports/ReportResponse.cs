@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace InclusiON.DTOs.Responses.Reports
 {
     public class ReportResponse
@@ -15,13 +16,11 @@ namespace InclusiON.DTOs.Responses.Reports
         public Guid PersonId { get; set; }
         public string PersonName { get; set; }
         public Guid ProfessionalId { get; set; }
-        //public string ProfessionalName { get; set; }
         public int ReportTypeId { get; set; }
-        //public string ReportTypeName { get; set; }
         public string AchievedGoals { get; set; }
         public string AreasToReinforce { get; set; }
         public string FutureRecommendations { get; set; }
         public string NextObjectives { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; }        
     }
 }
