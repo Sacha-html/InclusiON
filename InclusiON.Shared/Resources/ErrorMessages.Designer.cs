@@ -403,5 +403,12 @@ namespace InclusiON.Shared.Resources {
                 return ResourceManager.GetString("InternalErrorAcceptInvitation", resourceCulture);
             }
         }
+        public static string ReportNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("ReportNotFound", resourceCulture);
+            }
+        }
     }
 }
