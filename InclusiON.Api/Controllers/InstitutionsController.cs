@@ -23,7 +23,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene todas las instituciones educativas.
         /// </summary>
         [HttpGet]
-        [Authorize(Policy = "institutions:read")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<List<InstitutionResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<InstitutionResponse>>>> GetInstitutions(
             [FromServices] IQueryHandler<GetInstitutionsQuery, ApiResponse<List<InstitutionResponse>>> handler,
@@ -42,8 +42,7 @@ namespace InclusiON.Api.Controllers
         /// Crea una nueva institucion educativa.
         /// </summary>
         [HttpPost]
-        [Authorize(Policy = "institutions:create")]
-        [Authorize(Policy = "global-admin")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status409Conflict)]
@@ -67,7 +66,6 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPut("{id:int}")]
         [Authorize(Policy = "institutions:update")]
-        [Authorize(Policy = "global-admin")]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status404NotFound)]

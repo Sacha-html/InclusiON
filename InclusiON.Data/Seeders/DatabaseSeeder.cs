@@ -16,6 +16,7 @@ namespace InclusiON.Data.Seeders
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             await SeedAdminUserAsync(userManager);
+            await SeedRolePermissionsAsync(context);
             await SeedSkillAreasAsync(context);
             await SeedProfessionalsAsync(userManager, context);
             await SeedVisualLoginTestUsersAsync(userManager, context);
@@ -50,6 +51,94 @@ namespace InclusiON.Data.Seeders
             {
                 await userManager.AddToRoleAsync(adminUser, IdentityRoles.Admin.ToString());
             }
+        }
+
+        private static async Task SeedRolePermissionsAsync(AppDbContext context)
+        {
+            if (await context.RoleClaims.AnyAsync())
+                return;
+
+            var adminRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var professionalRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var familyRoleId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+            var personRoleId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+
+            var claims = new List<IdentityRoleClaim<Guid>>
+            {
+                // === ADMIN ===
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:delete" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "persons:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "persons:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "persons:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "persons:delete" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "professionals:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "professionals:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "professionals:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "professionals:delete" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:delete" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:delete" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "diagnoses:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "diagnoses:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "diagnoses:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:export" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "messages:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "invitations:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "invitations:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "institutions:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "institutions:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "institutions:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "settings:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "settings:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "audit:read" },
+
+                // === PROFESSIONAL ===
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "persons:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "persons:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "persons:update" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:update" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:update" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "reports:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "reports:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "messages:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "invitations:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "invitations:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:update" },
+
+                // === FAMILY REPRESENTATIVE ===
+                new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "persons:read" },
+                new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
+                new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "diagnoses:read" },
+                new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "reports:read" },
+                new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
+                new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "messages:create" },
+
+                // === PERSON WITH DISABILITY ===
+                new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
+                new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "activities:respond" },
+                new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
+            };
+
+            context.RoleClaims.AddRange(claims);
+            await context.SaveChangesAsync();
         }
 
         private static async Task SeedVisualLoginTestUsersAsync(UserManager<User> userManager, AppDbContext context)
@@ -437,6 +526,7 @@ namespace InclusiON.Data.Seeders
                         LastName = prof.LastName,
                         LicenseNumber = prof.LicenseNumber,
                         Specialty = prof.Specialty,
+                        Status = ProfessionalStatusEnum.Approved,
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow
                     };

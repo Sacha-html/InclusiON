@@ -1,3 +1,4 @@
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Responses.Professionals;
 
@@ -7,6 +8,16 @@ namespace InclusiON.Application.UseCases.Professionals.Queries
     {
         internal static ProfessionalResponse MapToResponse(Professional professional)
         {
+            var statusName = professional.Status switch
+            {
+                ProfessionalStatusEnum.Pending => "Pendiente",
+                ProfessionalStatusEnum.Approved => "Aprobado",
+                ProfessionalStatusEnum.Rejected => "Rechazado",
+                ProfessionalStatusEnum.Suspended => "Suspendido",
+                ProfessionalStatusEnum.Terminated => "Dado de baja",
+                _ => "Desconocido"
+            };
+
             return new ProfessionalResponse
             {
                 Id = professional.Id,
@@ -18,6 +29,10 @@ namespace InclusiON.Application.UseCases.Professionals.Queries
                 Specialty = professional.Specialty,
                 LicenseNumber = professional.LicenseNumber,
                 BirthDate = professional.BirthDate,
+                Status = (int)professional.Status,
+                StatusName = statusName,
+                ValidatedAt = professional.ValidatedAt,
+                ValidatedByUserId = professional.ValidatedByUserId,
                 IsActive = professional.User?.IsActive ?? false,
                 CreatedAt = professional.CreatedAt,
                 UpdatedAt = professional.UpdatedAt,

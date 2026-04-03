@@ -7,6 +7,7 @@ using InclusiON.Application.UseCases.Professionals.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Professionals;
+using InclusiON.Domain.Models;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Professionals.Handlers
@@ -57,7 +58,40 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             if (command.Phone != null) professional.Phone = command.Phone;
             if (command.Specialty != null) professional.Specialty = command.Specialty;
             if (command.LicenseNumber != null) professional.LicenseNumber = command.LicenseNumber;
-            if (command.BirthDate.HasValue) professional.BirthDate = command.BirthDate;
+            if (command.BirthDate.HasValue) professional.BirthDate = command.BirthDate.Value;
+
+            // Actualizar instituciones si se proporcionaron
+            if (command.InstitutionIds != null)
+            {
+                // Desactivar las que ya no estan en la lista
+                foreach (var pi in professional.ProfessionalInstitutions.ToList())
+                {
+                    if (!command.InstitutionIds.Contains(pi.InstitutionId))
+                    {
+                        pi.IsActive = false;
+                    }
+                }
+
+                // Agregar las nuevas
+                var existingIds = professional.ProfessionalInstitutions
+                    .Where(pi => command.InstitutionIds.Contains(pi.InstitutionId))
+                    .Select(pi => pi.InstitutionId)
+                    .ToHashSet();
+
+                foreach (var instId in command.InstitutionIds)
+                {
+                    if (!existingIds.Contains(instId))
+                    {
+                        professional.ProfessionalInstitutions.Add(new ProfessionalInstitution
+                        {
+                            ProfessionalId = professional.Id,
+                            InstitutionId = instId,
+                            AssignedAt = DateTime.UtcNow,
+                            IsActive = true
+                        });
+                    }
+                }
+            }
 
             await _repository.UpdateAsync(professional, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

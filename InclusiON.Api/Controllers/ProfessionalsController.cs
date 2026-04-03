@@ -51,9 +51,36 @@ namespace InclusiON.Api.Controllers
                 request.Search,
                 request.Specialty,
                 request.IsActive,
+                request.Status,
                 request.SortBy,
                 request.SortDirection,
-                request.InstitutionIds);
+                request.InstitutionId.HasValue ? new List<int> { request.InstitutionId.Value } : null);
+
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Obtiene profesionales pendientes de validacion.
+        /// </summary>
+        [HttpGet("pending")]
+        [Authorize(Policy = "professionals:read")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<ProfessionalListItemResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<ProfessionalListItemResponse>>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<ProfessionalListItemResponse>>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<ProfessionalListItemResponse>>>> GetPendingProfessionals(
+            [FromQuery] GetPendingProfessionalsRequest request,
+            [FromServices] IQueryHandler<GetPendingProfessionalsQuery, ApiResponse<PagedResponse<ProfessionalListItemResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            request.Validate();
+
+            var query = new GetPendingProfessionalsQuery(
+                request.Page,
+                request.PageSize,
+                request.Search,
+                request.SortBy,
+                request.SortDirection);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
@@ -104,6 +131,47 @@ namespace InclusiON.Api.Controllers
 
         #endregion
 
+        #region Public Endpoints
+
+        /// <summary>
+        /// Registro público de un profesional. Queda pendiente de validación.
+        /// </summary>
+        [HttpPost("register")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<ProfessionalResponse>>> RegisterProfessional(
+            [FromBody] RegisterProfessionalRequest request,
+            [FromServices] ICommandHandler<RegisterProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new RegisterProfessionalCommand(
+                request.FirstName,
+                request.LastName,
+                request.DocumentNumber,
+                request.Phone,
+                request.Specialty,
+                request.LicenseNumber,
+                request.BirthDate,
+                request.Email,
+                request.InstitutionId);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+            {
+                return result.ToActionResult();
+            }
+
+            return CreatedAtAction(
+                nameof(GetProfessionalById),
+                new { professionalId = result.Data!.Id },
+                result);
+        }
+
+        #endregion
+
         #region Commands
 
         /// <summary>
@@ -125,12 +193,13 @@ namespace InclusiON.Api.Controllers
             var command = new CreateProfessionalCommand(
                 request.FirstName,
                 request.LastName,
+                request.Email,
                 request.DocumentNumber,
                 request.Phone,
                 request.Specialty,
                 request.LicenseNumber,
                 request.BirthDate,
-                request.Email);
+                request.InstitutionIds);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -171,7 +240,8 @@ namespace InclusiON.Api.Controllers
                 request.Phone,
                 request.Specialty,
                 request.LicenseNumber,
-                request.BirthDate);
+                request.BirthDate,
+                request.InstitutionIds);
 
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
@@ -188,10 +258,90 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ProfessionalResponse>>> DeactivateProfessional(
             Guid professionalId,
+            [FromBody] DeactivateProfessionalRequest? request,
             [FromServices] ICommandHandler<DeactivateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var command = new DeactivateProfessionalCommand(professionalId);
+            var command = new DeactivateProfessionalCommand(professionalId, request?.Observation);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Valida (aprobar o rechazar) un profesional registrado.
+        /// </summary>
+        [HttpPut("{professionalId:guid}/validate")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<ProfessionalResponse>>> ValidateProfessional(
+            Guid professionalId,
+            [FromBody] ValidateProfessionalRequest request,
+            [FromServices] ICommandHandler<ValidateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new ValidateProfessionalCommand(
+                professionalId,
+                request.IsApproved,
+                request.Observation);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Reactiva un profesional dado de baja o suspendido.
+        /// </summary>
+        [HttpPut("{professionalId:guid}/reactivate")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<ProfessionalResponse>>> ReactivateProfessional(
+            Guid professionalId,
+            [FromBody] ReactivateProfessionalRequest? request,
+            [FromServices] ICommandHandler<ReactivateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new ReactivateProfessionalCommand(professionalId, request?.Observation);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Obtiene el historial de estados de un profesional.
+        /// </summary>
+        [HttpGet("{professionalId:guid}/status-history")]
+        [Authorize(Policy = "professionals:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<List<ProfessionalStatusHistoryResponse>>>> GetStatusHistory(
+            Guid professionalId,
+            [FromServices] IQueryHandler<GetProfessionalStatusHistoryQuery, ApiResponse<List<ProfessionalStatusHistoryResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetProfessionalStatusHistoryQuery(professionalId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Suspende profesionales que no han iniciado sesión en los últimos días.
+        /// </summary>
+        [HttpPost("suspend-inactive")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<SuspendResult>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<SuspendResult>>> SuspendInactiveProfessionals(
+            [FromQuery] int days,
+            [FromServices] ICommandHandler<SuspendInactiveProfessionalsCommand, ApiResponse<SuspendResult>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new SuspendInactiveProfessionalsCommand(days > 0 ? days : 90);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }

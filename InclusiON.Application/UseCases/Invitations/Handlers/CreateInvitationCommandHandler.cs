@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Invitations.Commands;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Invitations;
@@ -14,6 +15,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
     public class CreateInvitationCommandHandler : ICommandHandler<CreateInvitationCommand, ApiResponse<InvitationResponse>>
     {
         private readonly IInvitationsRepository _repository;
+        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
@@ -21,12 +23,14 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
 
         public CreateInvitationCommandHandler(
             IInvitationsRepository repository,
+            IProfessionalsRepository professionalsRepository,
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
             IEmailService emailService,
             ILogger<CreateInvitationCommandHandler> logger)
         {
             _repository = repository;
+            _professionalsRepository = professionalsRepository;
             _identityService = identityService;
             _unitOfWork = unitOfWork;
             _emailService = emailService;
@@ -37,6 +41,21 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
         {
             try
             {
+                var professional = await _professionalsRepository.GetByIdAsync(command.ProfessionalId, cancellationToken);
+                if (professional == null)
+                {
+                    return ApiResponse<InvitationResponse>.ErrorResult(
+                        ErrorCode.ProfessionalNotFound,
+                        ErrorMessages.ProfessionalNotFound);
+                }
+
+                if (professional.Status != ProfessionalStatusEnum.Approved)
+                {
+                    return ApiResponse<InvitationResponse>.ErrorResult(
+                        ErrorCode.ProfessionalNotApproved,
+                        ErrorMessages.ProfessionalNotApprovedForInvitationCreation);
+                }
+
                 // Validar que el email no este ya registrado
                 var existingUser = await _identityService.FindByEmailAsync(command.Email);
                 if (existingUser != null)
