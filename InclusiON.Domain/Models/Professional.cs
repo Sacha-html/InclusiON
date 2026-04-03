@@ -1,3 +1,4 @@
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
@@ -52,6 +53,26 @@ namespace InclusiON.Domain.Models
         /// Fecha de nacimiento del profesional.
         /// </summary>
         public DateTime? BirthDate { get; set; }
+
+        /// <summary>
+        /// Estado del profesional en el proceso de validación.
+        /// </summary>
+        public ProfessionalStatusEnum Status { get; set; }
+
+        /// <summary>
+        /// Fecha en que el profesional fue validado/aprobado.
+        /// </summary>
+        public DateTime? ValidatedAt { get; set; }
+
+        /// <summary>
+        /// ID del usuario admin que validó al profesional.
+        /// </summary>
+        public Guid? ValidatedByUserId { get; set; }
+
+        /// <summary>
+        /// Email del profesional (guardado antes de crear el usuario).
+        /// </summary>
+        public string? Email { get; set; }
 
         /// <summary>
         /// Usuario asociado a este perfil.
