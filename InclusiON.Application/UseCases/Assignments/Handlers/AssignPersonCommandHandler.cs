@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
+using InclusiON.Application.UseCases.Assignments.Queries;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -70,7 +71,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 existing.Person = person;
-                var reactivatedResponse = GetPersonsByProfessionalQueryHandler.MapToResponse(existing);
+                var reactivatedResponse = GetPersonsByProfessionalQuery.MapToResponse(existing);
                 return ApiResponse<ProfessionalPersonResponse>.SuccessResult(reactivatedResponse, "Asignacion reactivada exitosamente.");
             }
 
@@ -88,7 +89,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             assignment.Person = person;
-            var response = GetPersonsByProfessionalQueryHandler.MapToResponse(assignment);
+            var response = GetPersonsByProfessionalQuery.MapToResponse(assignment);
             return ApiResponse<ProfessionalPersonResponse>.SuccessResult(response, "Persona asignada al profesional exitosamente.");
         }
     }
