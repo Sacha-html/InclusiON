@@ -37,6 +37,7 @@ namespace InclusiON.DTOs.Common
         PersonNotFound = 502,
         ResourceNotFound = 503,
         ProfessionalNotFound = 504,
+        ReportNotFound = 505,
 
         // Conflictos (6xx)
         Conflict = 600,
