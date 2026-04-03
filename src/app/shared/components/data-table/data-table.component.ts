@@ -20,6 +20,7 @@ import {
   PaginationComponent,
   RowComponent,
   TableDirective,
+  SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 
@@ -45,6 +46,7 @@ import { IconDirective } from '@coreui/icons-angular';
     DropdownMenuDirective,
     DropdownItemDirective,
     IconDirective,
+    SpinnerComponent,
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
@@ -59,11 +61,17 @@ export class DataTableComponent implements OnInit, OnDestroy {
   @Input() headerButtons: HeaderButton[] = [];
   @Input() showSearch: boolean = true;
   @Input() debounceMs: number = 400;
+  @Input() sortable: boolean = false;
+  @Input() loading: boolean = false;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() searchAction = new EventEmitter<string>();
+  @Output() sortAction = new EventEmitter<{ sortBy: string; sortDirection: 'ASC' | 'DESC' }>();
   @Output() rowAction = new EventEmitter<{ action: string; item: any }>();
   @Output() headerAction = new EventEmitter<string>();
+
+  sortField = '';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
 
   private searchSubject = new Subject<string>();
   private searchSub!: Subscription;
@@ -128,5 +136,38 @@ export class DataTableComponent implements OnInit, OnDestroy {
   getVisibleActions(col: TableColumn, item: any): ActionItem[] {
     if (!col.actions) return [];
     return col.actions.filter(a => !a.visible || a.visible(item));
+  }
+
+  onSort(col: TableColumn): void {
+    if (!col.sortable) return;
+    if (this.sortField === col.key) {
+      this.sortDirection = this.sortDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.sortField = col.key;
+      this.sortDirection = 'ASC';
+    }
+    this.sortAction.emit({ sortBy: this.sortField, sortDirection: this.sortDirection });
+  }
+
+  getBadgeColor(value: any): string {
+    if (typeof value === 'boolean') return value ? 'success' : 'danger';
+    switch (value?.toLowerCase()) {
+      case 'approved': return 'success';
+      case 'terminated': return 'secondary';
+      case 'suspended': return 'warning';
+      case 'rejected': return 'danger';
+      default: return 'info';
+    }
+  }
+
+  getBadgeLabel(value: any): string {
+    if (typeof value === 'boolean') return value ? 'Activo' : 'Inactivo';
+    switch (value?.toLowerCase()) {
+      case 'approved': return 'Aprobado';
+      case 'terminated': return 'Dado de baja';
+      case 'suspended': return 'Suspendido';
+      case 'rejected': return 'Rechazado';
+      default: return value ?? '';
+    }
   }
 }
