@@ -83,13 +83,6 @@ public static class DependencyInjection
             ? string.Join(",", settings.Headers.Select(h => $"{h.Key}={h.Value}"))
             : null;
 
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", settings.Endpoint);
-        Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf");
-        if (otlpHeaders != null)
-        {
-            Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_HEADERS", otlpHeaders);
-        }
-
         services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
@@ -115,9 +108,24 @@ public static class DependencyInjection
 
         services.AddSingleton(smtpSettings);
         
-        services.AddHealthChecks()
+        services.AddSingleton(sp => new SqlServerHealthCheck(connectionString));
+        
+        var otlpSettings = configuration.GetSection("OpenTelemetry")
+            .Get<OpenTelemetrySettings>();
+        
+        if (otlpSettings?.Enabled == true && !string.IsNullOrEmpty(otlpSettings.Endpoint))
+        {
+            services.AddSingleton<GrafanaCloudHealthCheck>();
+        }
+        
+        var builder = services.AddHealthChecks()
             .AddCheck<SqlServerHealthCheck>("sqlserver", tags: ["ready", "db"])
             .AddCheck<SmtpHealthCheck>("smtp", tags: ["ready", "email"]);
+        
+        if (otlpSettings?.Enabled == true && !string.IsNullOrEmpty(otlpSettings.Endpoint))
+        {
+            builder.AddCheck<GrafanaCloudHealthCheck>("grafana_cloud", tags: ["ready", "metrics"]);
+        }
 
         return services;
     }

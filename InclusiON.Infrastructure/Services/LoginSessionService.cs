@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Interfaces.Telemetry;
 using InclusiON.DTOs.Auth;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -19,6 +20,7 @@ namespace InclusiON.Infrastructure.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly IPersonsRepository _personsRepository;
+        private readonly ITelemetryService _telemetryService;
         private readonly ILogger<LoginSessionService> _logger;
 
         private const int TrustedDeviceExpiryDays = 90;
@@ -32,6 +34,7 @@ namespace InclusiON.Infrastructure.Services
             IUnitOfWork unitOfWork,
             IAdminInstitutionRepository adminInstitutionRepository,
             IPersonsRepository personsRepository,
+            ITelemetryService telemetryService,
             ILogger<LoginSessionService> logger)
         {
             _identityService = identityService;
@@ -42,6 +45,7 @@ namespace InclusiON.Infrastructure.Services
             _unitOfWork = unitOfWork;
             _adminInstitutionRepository = adminInstitutionRepository;
             _personsRepository = personsRepository;
+            _telemetryService = telemetryService;
             _logger = logger;
         }
 
@@ -214,6 +218,9 @@ namespace InclusiON.Infrastructure.Services
 
             var accessToken = _tokenServices.JwtTokenService.GenerateAccessToken(tokenUserData);
             var refreshToken = _tokenServices.JwtTokenService.GenerateRefreshToken();
+
+            _telemetryService.RecordTokenGenerated("access_token");
+            _telemetryService.RecordTokenGenerated("refresh_token");
 
             var refreshTokenEntity = new RefreshToken
             {
