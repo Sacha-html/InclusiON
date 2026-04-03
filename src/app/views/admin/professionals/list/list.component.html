@@ -1,27 +1,181 @@
-<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadProfessionals()"></app-institution-filter>
+<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="onFilterLoaded()"></app-institution-filter>
 
-<app-data-table
-  title="Gestión de Profesionales"
-  [columns]="cols"
-  [items]="professionals"
-  [totalItems]="totalItems"
-  [pageSize]="pageSize"
-  [currentPage]="currentPage"
-  [headerButtons]="canCreate ? [{action: 'new', label: 'Nuevo Profesional'}] : []"
-  (pageChange)="onPageChange($event)"
-  (searchAction)="onSearch($event)"
-  (rowAction)="onRowAction($event)"
-  (headerAction)="onHeaderAction($event)">
-</app-data-table>
+<!-- Tabs: Activos y Pendientes -->
+<div class="mb-3">
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='active'" (click)="switchTab('active')" type="button">Activos</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeTab==='validations'" (click)="switchTab('validations')" type="button">
+        Pendientes
+        <span class="badge bg-warning ms-2" *ngIf="pendingCount>0">{{ pendingCount }}</span>
+      </button>
+    </li>
+  </ul>
+</div>
 
+<div *ngIf="activeTab==='active'" class="mb-3">
+  <div class="d-flex gap-2 mb-2 align-items-center">
+    <label class="small text-muted mb-0">Filtrar por estado:</label>
+    <select cSelect class="form-select form-select-sm" style="width:auto"
+            [ngModel]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
+      <option value="">Todos</option>
+      <option value="active">Activos</option>
+      <option value="suspended">Suspendidos</option>
+      <option value="terminated">Dados de baja</option>
+    </select>
+  </div>
+  <app-data-table
+    title="Gestión de Profesionales"
+    [columns]="cols"
+    [items]="professionals"
+    [totalItems]="totalItems"
+    [pageSize]="pageSize"
+    [currentPage]="currentPage"
+    [sortable]="true"
+    [loading]="loading"
+    [headerButtons]="getHeaderButtons()"
+    (pageChange)="onPageChange($event)"
+    (searchAction)="onSearch($event)"
+    (sortAction)="onSort($event)"
+    (rowAction)="onRowAction($event)"
+    (headerAction)="onHeaderAction($event)">
+  </app-data-table>
+  @if (!professionals.length && !statusFilter) {
+    <div class="text-center text-body-secondary py-4">
+      <svg cIcon name="cilUser" size="3xl" class="mb-2"></svg>
+      <p class="mb-0">No hay profesionales registrados.</p>
+    </div>
+  }
+  @if (!professionals.length && statusFilter) {
+    <div class="text-center text-body-secondary py-4">
+      <p class="mb-0">No se encontraron profesionales con el filtro seleccionado.</p>
+    </div>
+  }
+</div>
+
+<div *ngIf="activeTab==='validations'" class="mb-3">
+  <app-data-table
+    title="Solicitudes Pendientes"
+    [columns]="pendingCols"
+    [items]="pendingProfessionals"
+    [totalItems]="pendingCount"
+    [pageSize]="pageSize"
+    [currentPage]="currentPage"
+    [sortable]="true"
+    [loading]="loading"
+    [showSearch]="true"
+    (pageChange)="onPageChange($event)"
+    (searchAction)="onSearch($event)"
+    (sortAction)="onSort($event)"
+    (rowAction)="onRowAction($event)">
+  </app-data-table>
+  @if (!pendingProfessionals.length) {
+    <div class="text-center text-body-secondary py-4">
+      <svg cIcon name="cilClock" size="3xl" class="mb-2"></svg>
+      <p class="mb-0">No hay solicitudes pendientes de validación.</p>
+    </div>
+  }
+</div>
+
+<!-- Modal desactivar -->
 <app-confirm-modal
   [visible]="showConfirmModal"
+  [loading]="isDeactivateLoading"
   title="Confirmar desactivacion"
   messagePrefix="¿Esta seguro de que desea desactivar al profesional "
   [itemName]="itemToDeactivate?.fullName ?? ''"
   messageSuffix="?"
-  detail="Esta accion deshabilitara su acceso al sistema."
+  [showObservation]="true"
+  observationLabel="Motivo de la desactivacion"
+  observationPlaceholder="Indique el motivo de la desactivacion..."
   confirmLabel="Desactivar"
-  (confirm)="confirmDeactivate()"
+  confirmColor="danger"
+  (confirm)="confirmDeactivate($event)"
   (cancel)="cancelDeactivate()">
 </app-confirm-modal>
+
+<!-- Modal aprobar/rechazar -->
+<app-confirm-modal
+  [visible]="showValidateModal"
+  [loading]="isValidationLoading"
+  [title]="isApproveAction ? 'Aprobar Solicitud' : 'Rechazar Solicitud'"
+  [messagePrefix]="isApproveAction ? '¿Desea aprobar la solicitud de ' : '¿Desea rechazar la solicitud de '"
+  [itemName]="itemToValidate?.fullName ?? ''"
+  messageSuffix="?"
+  [detail]="!isApproveAction ? 'Se notificara al solicitante con el motivo del rechazo.' : 'Se activara el usuario y se enviaran las credenciales por email.'"
+  [confirmLabel]="isApproveAction ? 'Aprobar' : 'Rechazar'"
+  [confirmColor]="isApproveAction ? 'success' : 'danger'"
+  [showObservation]="!isApproveAction"
+  observationLabel="Motivo de rechazo"
+  observationPlaceholder="Indique el motivo del rechazo..."
+  (confirm)="onValidationConfirm($event)"
+  (cancel)="cancelValidation()">
+</app-confirm-modal>
+
+<!-- Modal reactivar -->
+<app-confirm-modal
+  [visible]="showReactivateModal"
+  [loading]="isReactivateLoading"
+  title="Reactivar Profesional"
+  [messagePrefix]="'¿Desea reactivar al profesional '"
+  [itemName]="itemToReactivate?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se restablecera el acceso del profesional al sistema."
+  confirmLabel="Reactivar"
+  confirmColor="success"
+  (confirm)="confirmReactivate()"
+  (cancel)="cancelReactivate()">
+</app-confirm-modal>
+
+<!-- Modal historial de estados -->
+<c-modal [visible]="showHistoryModal" (visibleChange)="showHistoryModal = $event" alignment="center" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>
+      <svg cIcon name="cilHistory" class="me-2"></svg>
+      Historial de Estados
+    </h5>
+    <button cButtonClose (click)="showHistoryModal = false"></button>
+  </c-modal-header>
+  <c-modal-body>
+    @if (statusHistoryLoading) {
+      <div class="text-center py-3">
+        <c-spinner size="sm"></c-spinner>
+        <span class="ms-2">Cargando historial...</span>
+      </div>
+    } @else if (statusHistory.length) {
+      <table cTable hover small>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>De</th>
+            <th>A</th>
+            <th>Observacion</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of statusHistory; track h.id) {
+            <tr>
+              <td class="text-nowrap">{{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                @if (h.oldStatus) {
+                  <c-badge [color]="getBadgeColor(h.oldStatus)">{{ getBadgeLabel(h.oldStatus) }}</c-badge>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td><c-badge [color]="getBadgeColor(h.newStatus)">{{ getBadgeLabel(h.newStatus) }}</c-badge></td>
+              <td>{{ h.observation || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <p class="text-center text-body-secondary">No hay registros de cambios de estado.</p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showHistoryModal = false">Cerrar</button>
+  </c-modal-footer>
+</c-modal>
