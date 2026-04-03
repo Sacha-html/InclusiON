@@ -3,11 +3,12 @@ namespace InclusiON.Application.UseCases.Professionals.Commands
     public record CreateProfessionalCommand(
         string FirstName,
         string LastName,
-        string? DocumentNumber,
-        string? Phone,
-        string? Specialty,
-        string? LicenseNumber,
-        DateTime? BirthDate,
-        string Email
+        string Email,
+        string? DocumentNumber = null,
+        string? Phone = null,
+        string? Specialty = null,
+        string? LicenseNumber = null,
+        DateTime? BirthDate = null,
+        List<int>? InstitutionIds = null
     );
 }

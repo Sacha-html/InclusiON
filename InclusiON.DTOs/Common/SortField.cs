@@ -10,6 +10,9 @@ namespace InclusiON.DTOs.Common
         BirthDate,
         Email,
         Title,
-        ReportDate
+        ReportDate,
+        Specialty,
+        LicenseNumber,
+        Status
     }
 }

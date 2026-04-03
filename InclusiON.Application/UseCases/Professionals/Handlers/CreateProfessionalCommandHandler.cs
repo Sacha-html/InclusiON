@@ -86,7 +86,9 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     Phone = command.Phone,
                     Specialty = command.Specialty,
                     LicenseNumber = command.LicenseNumber,
-                    BirthDate = command.BirthDate
+                    BirthDate = command.BirthDate,
+                    Status = InclusiON.Domain.Enums.ProfessionalStatusEnum.Approved,
+                    IsActive = true
                 };
 
                 // Crear usuario, asignar rol y profesional en transaccion
@@ -101,6 +103,21 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     await _identityService.AddToRoleAsync(user, "Professional");
 
                     professional.UserId = user.Id;
+
+                    if (command.InstitutionIds != null && command.InstitutionIds.Count > 0)
+                    {
+                        foreach (var instId in command.InstitutionIds)
+                        {
+                            professional.ProfessionalInstitutions.Add(new ProfessionalInstitution
+                            {
+                                ProfessionalId = professional.Id,
+                                InstitutionId = instId,
+                                AssignedAt = DateTime.UtcNow,
+                                IsActive = true
+                            });
+                        }
+                    }
+
                     await _repository.CreateAsync(professional, ct);
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);

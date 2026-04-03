@@ -32,6 +32,22 @@ namespace InclusiON.Data.Configurations
             builder.Property(p => p.LicenseNumber)
                 .HasMaxLength(50);
 
+            builder.Property(p => p.Email)
+                .HasMaxLength(255);
+
+            builder.HasIndex(p => p.Email)
+                .IsUnique()
+                .HasFilter("[Email] IS NOT NULL");
+
+            builder.Property(p => p.Status)
+                .HasConversion<int>();
+
+            builder.Property(p => p.ValidatedAt);
+
+            builder.Property(p => p.ValidatedByUserId);
+
+            builder.HasIndex(p => p.Status);
+
             builder.Property(p => p.IsActive)
                 .HasDefaultValue(true);
 

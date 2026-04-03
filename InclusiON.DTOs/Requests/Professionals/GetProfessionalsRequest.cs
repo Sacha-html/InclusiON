@@ -23,6 +23,11 @@ namespace InclusiON.DTOs.Requests.Professionals
         public bool? IsActive { get; set; }
 
         /// <summary>
+        /// Filtro por estado de validacion (Approved, Pending, Rejected, etc.).
+        /// </summary>
+        public string? Status { get; set; }
+
+        /// <summary>
         /// Filtro por institucion educativa.
         /// </summary>
         public int? InstitutionId { get; set; }

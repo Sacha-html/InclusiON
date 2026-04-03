@@ -26,5 +26,10 @@ namespace InclusiON.DTOs.Requests.Professionals
         public string? LicenseNumber { get; set; }
 
         public DateTime? BirthDate { get; set; }
+
+        /// <summary>
+        /// IDs de instituciones a asignar al profesional.
+        /// </summary>
+        public List<int>? InstitutionIds { get; set; }
     }
 }

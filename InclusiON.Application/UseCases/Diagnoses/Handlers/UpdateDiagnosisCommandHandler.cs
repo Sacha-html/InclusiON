@@ -4,24 +4,29 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Diagnoses.Commands;
 using InclusiON.Application.UseCases.Diagnoses.Queries;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Diagnoses;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Diagnoses.Handlers
 {
     public class UpdateDiagnosisCommandHandler : ICommandHandler<UpdateDiagnosisCommand, ApiResponse<DiagnosisResponse>>
     {
         private readonly IDiagnosesRepository _repository;
+        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateDiagnosisCommandHandler> _logger;
 
         public UpdateDiagnosisCommandHandler(
             IDiagnosesRepository repository,
+            IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
             ILogger<UpdateDiagnosisCommandHandler> logger)
         {
             _repository = repository;
+            _professionalsRepository = professionalsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -29,6 +34,21 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         public async Task<ApiResponse<DiagnosisResponse>> HandleAsync(
             UpdateDiagnosisCommand command, CancellationToken cancellationToken)
         {
+            var professional = await _professionalsRepository.GetByIdAsync(command.RequestedByProfessionalId, cancellationToken);
+            if (professional == null)
+            {
+                return ApiResponse<DiagnosisResponse>.ErrorResult(
+                    ErrorCode.ProfessionalNotFound,
+                    ErrorMessages.ProfessionalNotFound);
+            }
+
+            if (professional.Status != ProfessionalStatusEnum.Approved)
+            {
+                return ApiResponse<DiagnosisResponse>.ErrorResult(
+                    ErrorCode.ProfessionalNotApproved,
+                    ErrorMessages.ProfessionalNotApprovedForDiagnosisUpdate);
+            }
+
             var diagnosis = await _repository.GetByIdAsync(command.DiagnosisId, cancellationToken);
             if (diagnosis is null)
                 return ApiResponse<DiagnosisResponse>.NotFound("Diagnóstico");
