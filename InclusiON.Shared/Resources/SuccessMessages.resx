@@ -72,6 +72,15 @@
 	<data name="ProfessionalDeactivated" xml:space="preserve">
 		<value>Profesional desactivado exitosamente</value>
 	</data>
+	<data name="ProfessionalPendingApproval" xml:space="preserve">
+		<value>Registro pendiente de validacion</value>
+	</data>
+	<data name="ProfessionalValidated" xml:space="preserve">
+		<value>Profesional validado exitosamente</value>
+	</data>
+	<data name="ProfessionalRejected" xml:space="preserve">
+		<value>Profesional rechazado</value>
+	</data>
 	<data name="LoginMethodUpdated" xml:space="preserve">
 		<value>Metodo de login actualizado correctamente</value>
 	</data>
