@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Diagnoses.Commands;
+using InclusiON.Application.UseCases.Diagnoses.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Diagnoses;
@@ -63,7 +64,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             // Recargar con includes para el response
             var created = await _repository.GetByIdAsync(diagnosis.Id, cancellationToken);
             return ApiResponse<DiagnosisResponse>.SuccessResult(
-                GetDiagnosisByIdQueryHandler.MapToResponse(created!),
+                GetDiagnosisByIdQuery.MapToResponse(created!),
                 "Diagnóstico creado exitosamente.");
         }
     }

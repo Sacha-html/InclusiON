@@ -70,7 +70,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     _ = SendInvitationEmailAsync(invitation, command.BaseUrl, cancellationToken);
                 }
 
-                var response = MapToResponse(invitation);
+                var response = CreateInvitationCommand.MapToResponse(invitation);
                 return ApiResponse<InvitationResponse>.SuccessResult(response, SuccessMessages.InvitationCreated);
             }
             catch (Exception ex)
@@ -111,40 +111,6 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             {
                 _logger.LogWarning(ex, "No se pudo enviar email de invitacion a {Email}", invitation.Email);
             }
-        }
-
-        internal static InvitationResponse MapToResponse(Invitation invitation)
-        {
-            var now = DateTime.UtcNow;
-            string status;
-
-            if (invitation.IsUsed)
-                status = "Aceptada";
-            else if (invitation.ExpiresAt < now)
-                status = "Expirada";
-            else
-                status = "Enviada";
-
-            return new InvitationResponse
-            {
-                Id = invitation.Id,
-                Code = invitation.Code,
-                Email = invitation.Email,
-                FirstName = invitation.FirstName,
-                LastName = invitation.LastName,
-                Relationship = invitation.Relationship,
-                PersonName = invitation.ForPerson != null
-                    ? $"{invitation.ForPerson.FirstName} {invitation.ForPerson.LastName}".Trim()
-                    : null,
-                ExpiresAt = invitation.ExpiresAt,
-                IsUsed = invitation.IsUsed,
-                UsedAt = invitation.UsedAt,
-                Status = status,
-                CreatedByProfessionalName = invitation.CreatedByProfessional != null
-                    ? $"{invitation.CreatedByProfessional.FirstName} {invitation.CreatedByProfessional.LastName}".Trim()
-                    : null,
-                CreatedAt = invitation.CreatedAt
-            };
         }
     }
 }
