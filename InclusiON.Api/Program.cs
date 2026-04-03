@@ -3,15 +3,19 @@ using Microsoft.OpenApi;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using InclusiON.Application;
+using InclusiON.Application.Interfaces.Telemetry;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
 using InclusiON.Api.Middleware;
 using InclusiON.Infrastructure;
+using InclusiON.Infrastructure.Configuration;
+using InclusiON.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
 
 builder.Host.UseSerilog((context, config) =>
 {
@@ -31,6 +35,11 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddPersistence(builder.Configuration);
+
+var connectionString = builder.Configuration.GetConnectionString("SqlServerConn") 
+    ?? throw new InvalidOperationException("Connection string 'SqlServerConn' not found.");
+
+builder.Services.AddInfrastructureTelemetry(builder.Configuration, connectionString);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
 
@@ -102,6 +111,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapPrometheusScrapingEndpoint("/metrics");
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false
+});
 
 using (var scope = app.Services.CreateScope())
 {
