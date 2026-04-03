@@ -224,4 +224,20 @@
 	<data name="InternalErrorAcceptInvitation" xml:space="preserve">
 		<value>Error interno al aceptar invitacion</value>
 	</data>
+	<!-- Validaciones de profesionales -->
+	<data name="ProfessionalNotApprovedForPersonAssignment" xml:space="preserve">
+		<value>El profesional debe estar aprobado para asignar personas</value>
+	</data>
+	<data name="ProfessionalNotApprovedForInstitutionAssignment" xml:space="preserve">
+		<value>El profesional debe estar aprobado para asignar instituciones</value>
+	</data>
+	<data name="ProfessionalNotApprovedForInvitationCreation" xml:space="preserve">
+		<value>El profesional debe estar aprobado para crear invitaciones</value>
+	</data>
+	<data name="ProfessionalNotApprovedForDiagnosisCreation" xml:space="preserve">
+		<value>El profesional debe estar aprobado para crear diagnosticos</value>
+	</data>
+	<data name="ProfessionalNotApprovedForDiagnosisUpdate" xml:space="preserve">
+		<value>El profesional debe estar aprobado para actualizar diagnosticos</value>
+	</data>
 </root>

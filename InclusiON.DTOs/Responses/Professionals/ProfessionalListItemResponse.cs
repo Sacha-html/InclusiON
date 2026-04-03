@@ -1,8 +1,5 @@
 namespace InclusiON.DTOs.Responses.Professionals
 {
-    /// <summary>
-    /// Response resumido para listados de profesionales.
-    /// </summary>
     public class ProfessionalListItemResponse
     {
         public Guid Id { get; set; }
@@ -15,6 +12,8 @@ namespace InclusiON.DTOs.Responses.Professionals
         public string? Specialty { get; set; }
         public string? LicenseNumber { get; set; }
         public bool IsActive { get; set; }
-        public string? Email { get; set; } 
+        public string Status { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 }
