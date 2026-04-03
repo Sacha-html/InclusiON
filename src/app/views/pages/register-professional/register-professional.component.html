@@ -1,0 +1,174 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center py-4">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="8" lg="7">
+        <c-card class="p-4 shadow">
+          <c-card-body>
+            <div class="text-center mb-4">
+              <svg cIcon name="cilUserPlus" size="3xl" class="text-primary mb-3"></svg>
+              <h1 class="h3">Registro de Profesional</h1>
+              <p class="text-body-secondary">Completa el formulario para solicitar tu alta en el sistema</p>
+            </div>
+
+            @if (serverError) {
+              <c-alert color="danger" class="mb-3" dismissible (closed)="serverError = ''">
+                {{ serverError }}
+              </c-alert>
+            }
+
+            <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+              <c-row class="mb-3">
+                <c-col sm="6">
+                  <label cLabel for="firstName">Nombre *</label>
+                  <input cFormControl id="firstName" formControlName="firstName"
+                         [valid]="showFieldError('firstName') ? (f['firstName'].valid ? true : false) : undefined" />
+                  @if (showFieldError('firstName')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['firstName'].errors?.['required']) { El nombre es obligatorio. }
+                      @else if (f['firstName'].errors?.['minlength']) { Mínimo 2 caracteres. }
+                    </c-form-feedback>
+                  }
+                </c-col>
+                <c-col sm="6">
+                  <label cLabel for="lastName">Apellido *</label>
+                  <input cFormControl id="lastName" formControlName="lastName"
+                         [valid]="showFieldError('lastName') ? (f['lastName'].valid ? true : false) : undefined" />
+                  @if (showFieldError('lastName')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['lastName'].errors?.['required']) { El apellido es obligatorio. }
+                      @else if (f['lastName'].errors?.['minlength']) { Mínimo 2 caracteres. }
+                    </c-form-feedback>
+                  }
+                </c-col>
+              </c-row>
+
+              <c-row class="mb-3">
+                <c-col sm="6">
+                  <label cLabel for="email">Email *</label>
+                  <input cFormControl id="email" formControlName="email" type="email"
+                         [valid]="showFieldError('email') ? (f['email'].valid ? true : false) : undefined" />
+                  @if (showFieldError('email')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['email'].errors?.['required']) { El email es obligatorio. }
+                      @else if (f['email'].errors?.['email']) { Ingrese un email válido. }
+                      @else if (f['email'].errors?.['emailExists']) { {{ f['email'].errors?.['message'] || 'Este email ya está registrado.' }} }
+                    </c-form-feedback>
+                  }
+                  @if (f['email'].pending) {
+                    <small class="text-body-secondary">Verificando email...</small>
+                  }
+                </c-col>
+                <c-col sm="6">
+                  <label cLabel for="documentNumber">Documento</label>
+                  <input cFormControl id="documentNumber" formControlName="documentNumber" />
+                </c-col>
+              </c-row>
+
+              <c-row class="mb-3">
+                <c-col sm="6">
+                  <label cLabel for="specialty">Especialidad *</label>
+                  <input cFormControl id="specialty" formControlName="specialty"
+                         [valid]="showFieldError('specialty') ? (f['specialty'].valid ? true : false) : undefined" />
+                  @if (showFieldError('specialty')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['specialty'].errors?.['required']) { La especialidad es obligatoria. }
+                    </c-form-feedback>
+                  }
+                </c-col>
+                <c-col sm="6">
+                  <label cLabel for="licenseNumber">Matrícula</label>
+                  <input cFormControl id="licenseNumber" formControlName="licenseNumber"
+                         [valid]="showFieldError('licenseNumber') ? (f['licenseNumber'].valid ? true : false) : undefined" />
+                  @if (showFieldError('licenseNumber')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['licenseNumber'].errors?.['licenseExists']) { {{ f['licenseNumber'].errors?.['message'] || 'Esta matrícula ya está registrada.' }} }
+                    </c-form-feedback>
+                  }
+                  @if (f['licenseNumber'].pending) {
+                    <small class="text-body-secondary">Verificando matrícula...</small>
+                  }
+                </c-col>
+              </c-row>
+
+              <c-row class="mb-3">
+                <c-col sm="6">
+                  <label cLabel for="phone">Teléfono</label>
+                  <input cFormControl id="phone" formControlName="phone" />
+                </c-col>
+                <c-col sm="6">
+                  <label cLabel for="birthDate">Fecha de nacimiento *</label>
+                  <input cFormControl id="birthDate" formControlName="birthDate"
+                         placeholder="dd/mm/aaaa"
+                         [valid]="showFieldError('birthDate') ? (f['birthDate'].valid ? true : false) : undefined" />
+                  @if (showFieldError('birthDate')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['birthDate'].errors?.['required']) { La fecha de nacimiento es obligatoria. }
+                      @else if (f['birthDate'].errors?.['invalidDate']) { Formato inválido. Use dd/mm/aaaa. }
+                      @else if (f['birthDate'].errors?.['futureDate']) { La fecha no puede ser futura. }
+                      @else if (f['birthDate'].errors?.['minAge']) { Debe ser mayor de 18 años. }
+                    </c-form-feedback>
+                  }
+                </c-col>
+              </c-row>
+
+              <c-row class="mb-3">
+                <c-col sm="12">
+                  <label cLabel for="institutionId">Institución (opcional)</label>
+                  <select cSelect id="institutionId" formControlName="institutionId">
+                    <option value="">Seleccionar institución...</option>
+                    @for (inst of institutions; track inst.id) {
+                      <option [value]="inst.id">{{ inst.name }}</option>
+                    }
+                  </select>
+                  <small class="text-body-secondary">Si trabajas en una institución, selecciónala.</small>
+                </c-col>
+              </c-row>
+
+              <div class="mt-4 d-flex gap-2">
+                <button cButton color="primary" type="submit" [disabled]="isLoading || form.invalid" aria-label="Enviar solicitud de registro">
+                  @if (!isLoading) {
+                    <svg cIcon name="cilPaperPlane" class="me-2"></svg>
+                    Enviar Solicitud
+                  } @else {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Enviando...
+                  }
+                </button>
+                <button cButton color="secondary" type="button" (click)="goToLogin()" aria-label="Volver al login">
+                  <svg cIcon name="cilArrowLeft" class="me-2"></svg>
+                  Volver
+                </button>
+              </div>
+            </form>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>
+
+<!-- Modal de éxito -->
+<c-modal [visible]="showSuccessModal" [backdrop]="false" [keyboard]="false" alignment="center">
+  <c-modal-header class="border-0 pb-0">
+  </c-modal-header>
+  <c-modal-body class="text-center pt-0">
+    <div class="mb-3">
+      <svg cIcon name="cilCheckCircle" size="5xl" class="text-success"></svg>
+    </div>
+    <h4 class="mb-2">¡Registro exitoso!</h4>
+    <p class="text-body-secondary mb-0">
+      Tu solicitud de registro ha sido enviada correctamente.<br>
+      Un administrador revisará tu solicitud y te contactará por email.
+    </p>
+  </c-modal-body>
+  <c-modal-footer class="border-0 pt-0 justify-content-center">
+    <button cButton color="primary" class="px-4" (click)="goToLogin()">
+      Aceptar
+    </button>
+  </c-modal-footer>
+</c-modal>
