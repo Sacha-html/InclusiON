@@ -46,6 +46,15 @@ export const routes: Routes = [
       ),
   },
 
+  // Registro público de profesionales
+  {
+    path: 'register-professional',
+    loadComponent: () =>
+      import('./views/pages/register-professional/register-professional.component').then(
+        (m) => m.RegisterProfessionalComponent,
+      ),
+  },
+
   // Cambio de contraseña obligatorio
   {
     path: 'change-password',

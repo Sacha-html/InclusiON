@@ -8,5 +8,6 @@ export interface GetProfessionalsRequest {
   search?: string;
   specialty?: string;
   isActive?: boolean;
+  status?: string;
   institutionId?: number;
 }

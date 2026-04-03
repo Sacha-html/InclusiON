@@ -41,11 +41,25 @@
     }
 
     <!-- Tabla -->
-    <table cTable hover striped aria-label="Tabla de datos">
+    <div class="table-wrapper" [class.loading]="loading">
+      @if (loading) {
+        <div class="table-overlay">
+          <c-spinner size="sm"></c-spinner>
+        </div>
+      }
+      <table cTable hover striped aria-label="Tabla de datos">
       <thead>
         <tr>
           @for (col of columns; track col.key) {
-            <th scope="col">{{ col.label }}</th>
+            <th scope="col" [class.cursor-pointer]="col.sortable" (click)="col.sortable && onSort(col)">
+              {{ col.label }}
+              @if (col.sortable) {
+                <span class="sort-arrows ms-1">
+                  <svg cIcon name="cil-caret-top" [class.active]="sortField === col.key && sortDirection === 'ASC'" size="sm" class="sort-arrow-up"></svg>
+                  <svg cIcon name="cil-caret-bottom" [class.active]="sortField === col.key && sortDirection === 'DESC'" size="sm" class="sort-arrow-down"></svg>
+                </span>
+              }
+            </th>
           }
         </tr>
       </thead>
@@ -56,10 +70,10 @@
               <td>
                 @switch (col.type) {
                   @case ('badge') {
-                    <c-badge [color]="item[col.key] ? 'success' : 'danger'"
+                    <c-badge [color]="getBadgeColor(item[col.key])"
                           role="status"
-                          [attr.aria-label]="item[col.key] ? 'Estado: Activo' : 'Estado: Inactivo'">
-                      {{ item[col.key] ? 'Activo' : 'Inactivo' }}
+                          [attr.aria-label]="'Estado: ' + getBadgeLabel(item[col.key])">
+                      {{ getBadgeLabel(item[col.key]) }}
                     </c-badge>
                   }
                   @case ('actions') {
@@ -92,7 +106,7 @@
                     }
                   }
                   @default {
-                    {{ item[col.key] }}
+                    {{ item[col.key] || '-' }}
                   }
                 }
               </td>
@@ -108,6 +122,7 @@
         }
       </tbody>
     </table>
+    </div>
 
     <!-- Info y paginacion -->
     @if (totalItems > 0) {
