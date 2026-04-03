@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace InclusiON.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreate_NET10 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -241,6 +241,32 @@ namespace InclusiON.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AdminInstitutions",
+                columns: table => new
+                {
+                    AdminUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    InstitutionId = table.Column<int>(type: "int", nullable: false),
+                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdminInstitutions", x => new { x.AdminUserId, x.InstitutionId });
+                    table.ForeignKey(
+                        name: "FK_AdminInstitutions_EducationalInstitutions_InstitutionId",
+                        column: x => x.InstitutionId,
+                        principalTable: "EducationalInstitutions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AdminInstitutions_Users_AdminUserId",
+                        column: x => x.AdminUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -439,7 +465,6 @@ namespace InclusiON.Data.Migrations
                     Specialty = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     LicenseNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -629,6 +654,32 @@ namespace InclusiON.Data.Migrations
                         principalTable: "PersonsWithDisability",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PersonSkillProfiles",
+                columns: table => new
+                {
+                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SkillAreaId = table.Column<int>(type: "int", nullable: false),
+                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PersonSkillProfiles", x => new { x.PersonId, x.SkillAreaId });
+                    table.ForeignKey(
+                        name: "FK_PersonSkillProfiles_PersonsWithDisability_PersonId",
+                        column: x => x.PersonId,
+                        principalTable: "PersonsWithDisability",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PersonSkillProfiles_SkillAreas_SkillAreaId",
+                        column: x => x.SkillAreaId,
+                        principalTable: "SkillAreas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1222,10 +1273,10 @@ namespace InclusiON.Data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), null, "Admin", "ADMIN" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), null, "Professional", "PROFESSIONAL" },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), null, "FamilyRepresentative", "FAMILYREPRESENTATIVE" },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), null, "PersonWithDisability", "PERSONWITHDISABILITY" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "b0e457dd-4770-41f6-b143-67c7b3bb4549", "Admin", "ADMIN" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "921e8414-7bee-45be-88b2-0cbb889ccc25", "Professional", "PROFESSIONAL" },
+                    { new Guid("33333333-3333-3333-3333-333333333333"), "8733bbad-7b94-4336-8bf7-f8fbb0f80646", "FamilyRepresentative", "FAMILYREPRESENTATIVE" },
+                    { new Guid("44444444-4444-4444-4444-444444444444"), "47004376-4a34-4f23-870a-974d9eaaf918", "PersonWithDisability", "PERSONWITHDISABILITY" }
                 });
 
             migrationBuilder.InsertData(
@@ -1297,29 +1348,43 @@ namespace InclusiON.Data.Migrations
                     { 18, "permission", "activities:create", new Guid("11111111-1111-1111-1111-111111111111") },
                     { 19, "permission", "activities:update", new Guid("11111111-1111-1111-1111-111111111111") },
                     { 20, "permission", "activities:delete", new Guid("11111111-1111-1111-1111-111111111111") },
-                    { 21, "permission", "reports:read", new Guid("11111111-1111-1111-1111-111111111111") },
-                    { 22, "permission", "reports:create", new Guid("11111111-1111-1111-1111-111111111111") },
-                    { 23, "permission", "reports:export", new Guid("11111111-1111-1111-1111-111111111111") },
-                    { 24, "permission", "settings:read", new Guid("11111111-1111-1111-1111-111111111111") },
-                    { 25, "permission", "settings:update", new Guid("11111111-1111-1111-1111-111111111111") },
-                    { 26, "permission", "audit:read", new Guid("11111111-1111-1111-1111-111111111111") },
-                    { 27, "permission", "persons:read", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 28, "permission", "persons:update", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 29, "permission", "activities:read", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 30, "permission", "activities:create", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 31, "permission", "activities:update", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 32, "permission", "reports:read", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 33, "permission", "reports:create", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 34, "permission", "messages:read", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 35, "permission", "messages:create", new Guid("22222222-2222-2222-2222-222222222222") },
-                    { 36, "permission", "persons:read", new Guid("33333333-3333-3333-3333-333333333333") },
-                    { 37, "permission", "activities:read", new Guid("33333333-3333-3333-3333-333333333333") },
-                    { 38, "permission", "reports:read", new Guid("33333333-3333-3333-3333-333333333333") },
-                    { 39, "permission", "messages:read", new Guid("33333333-3333-3333-3333-333333333333") },
-                    { 40, "permission", "messages:create", new Guid("33333333-3333-3333-3333-333333333333") },
-                    { 41, "permission", "activities:read", new Guid("44444444-4444-4444-4444-444444444444") },
-                    { 42, "permission", "activities:respond", new Guid("44444444-4444-4444-4444-444444444444") },
-                    { 43, "permission", "messages:read", new Guid("44444444-4444-4444-4444-444444444444") }
+                    { 21, "permission", "diagnoses:read", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 22, "permission", "reports:read", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 23, "permission", "reports:create", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 24, "permission", "reports:export", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 25, "permission", "messages:read", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 26, "permission", "messages:create", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 27, "permission", "invitations:read", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 28, "permission", "invitations:create", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 29, "permission", "institutions:read", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 30, "permission", "institutions:create", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 31, "permission", "institutions:update", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 32, "permission", "settings:read", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 33, "permission", "settings:update", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 34, "permission", "audit:read", new Guid("11111111-1111-1111-1111-111111111111") },
+                    { 35, "permission", "persons:read", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 36, "permission", "persons:update", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 37, "permission", "activities:read", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 38, "permission", "activities:create", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 39, "permission", "activities:update", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 40, "permission", "diagnoses:read", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 41, "permission", "diagnoses:create", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 42, "permission", "diagnoses:update", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 43, "permission", "reports:read", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 44, "permission", "reports:create", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 45, "permission", "messages:read", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 46, "permission", "messages:create", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 47, "permission", "invitations:read", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 48, "permission", "invitations:create", new Guid("22222222-2222-2222-2222-222222222222") },
+                    { 49, "permission", "persons:read", new Guid("33333333-3333-3333-3333-333333333333") },
+                    { 50, "permission", "activities:read", new Guid("33333333-3333-3333-3333-333333333333") },
+                    { 51, "permission", "diagnoses:read", new Guid("33333333-3333-3333-3333-333333333333") },
+                    { 52, "permission", "reports:read", new Guid("33333333-3333-3333-3333-333333333333") },
+                    { 53, "permission", "messages:read", new Guid("33333333-3333-3333-3333-333333333333") },
+                    { 54, "permission", "messages:create", new Guid("33333333-3333-3333-3333-333333333333") },
+                    { 55, "permission", "activities:read", new Guid("44444444-4444-4444-4444-444444444444") },
+                    { 56, "permission", "activities:respond", new Guid("44444444-4444-4444-4444-444444444444") },
+                    { 57, "permission", "messages:read", new Guid("44444444-4444-4444-4444-444444444444") }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1435,6 +1500,11 @@ namespace InclusiON.Data.Migrations
                 table: "AdaptiveEngineConfigs",
                 column: "PersonRoadmapActivityId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminInstitutions_InstitutionId",
+                table: "AdminInstitutions",
+                column: "InstitutionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -1618,6 +1688,11 @@ namespace InclusiON.Data.Migrations
                 table: "PersonRoadmaps",
                 column: "PersonId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonSkillProfiles_SkillAreaId",
+                table: "PersonSkillProfiles",
+                column: "SkillAreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PersonsWithDisability_AutonomyLevelId",
@@ -1831,6 +1906,9 @@ namespace InclusiON.Data.Migrations
                 name: "AdaptiveEngineConfigs");
 
             migrationBuilder.DropTable(
+                name: "AdminInstitutions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -1856,6 +1934,9 @@ namespace InclusiON.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "PersonRepresentatives");
+
+            migrationBuilder.DropTable(
+                name: "PersonSkillProfiles");
 
             migrationBuilder.DropTable(
                 name: "ProfessionalInstitutions");
