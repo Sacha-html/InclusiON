@@ -17,6 +17,11 @@ namespace InclusiON.DTOs.Responses.Professionals
         public string? LicenseNumber { get; set; }
         public DateTime? BirthDate { get; set; }
 
+        public int Status { get; set; }
+        public string StatusName { get; set; } = string.Empty;
+        public DateTime? ValidatedAt { get; set; }
+        public Guid? ValidatedByUserId { get; set; }
+
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
