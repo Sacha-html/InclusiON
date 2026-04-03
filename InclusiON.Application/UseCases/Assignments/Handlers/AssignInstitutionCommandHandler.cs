@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
 using InclusiON.Application.UseCases.Assignments.Queries;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -41,6 +42,14 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 return ApiResponse<ProfessionalInstitutionResponse>.ErrorResult(
                     ErrorCode.ProfessionalNotFound,
                     ErrorMessages.ProfessionalNotFound);
+            }
+
+            // Validar que el profesional está aprobado
+            if (professional.Status != ProfessionalStatusEnum.Approved)
+            {
+                return ApiResponse<ProfessionalInstitutionResponse>.ErrorResult(
+                    ErrorCode.ProfessionalNotApproved,
+                    ErrorMessages.ProfessionalNotApprovedForInstitutionAssignment);
             }
 
             // Validar que la institucion existe

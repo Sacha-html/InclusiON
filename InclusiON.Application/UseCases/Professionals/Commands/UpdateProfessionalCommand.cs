@@ -2,12 +2,13 @@ namespace InclusiON.Application.UseCases.Professionals.Commands
 {
     public record UpdateProfessionalCommand(
         Guid ProfessionalId,
-        string? FirstName,
-        string? LastName,
-        string? DocumentNumber,
-        string? Phone,
-        string? Specialty,
-        string? LicenseNumber,
-        DateTime? BirthDate
+        string? FirstName = null,
+        string? LastName = null,
+        string? DocumentNumber = null,
+        string? Phone = null,
+        string? Specialty = null,
+        string? LicenseNumber = null,
+        DateTime? BirthDate = null,
+        List<int>? InstitutionIds = null
     );
 }

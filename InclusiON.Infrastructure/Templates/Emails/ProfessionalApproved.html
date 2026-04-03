@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuenta aprobada - InclusiON</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f5f7; font-family: Arial, Helvetica, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f5f7; padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #321fdb; padding: 30px 40px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">InclusiON</h1>
+              <p style="color: #c8c2f4; margin: 8px 0 0; font-size: 14px;">Plataforma de Inclusión Educativa</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="color: #333; margin: 0 0 20px; font-size: 22px;">¡Tu cuenta ha sido aprobada!</h2>
+
+              <p style="color: #555; font-size: 16px; line-height: 1.6;">
+                Hola <strong>{{UserName}}</strong>,
+              </p>
+
+              <p style="color: #555; font-size: 16px; line-height: 1.6;">
+                Tu solicitud de registro en <strong>InclusiON</strong> ha sido <strong style="color: #2eb85e;">aprobada</strong>.
+                Ya puedes acceder a la plataforma con tus credenciales.
+              </p>
+
+              <div style="background-color: #f0fdf4; border: 2px solid #2eb85e; padding: 20px; margin: 24px 0; border-radius: 6px;">
+                <p style="color: #333; margin: 0 0 12px; font-weight: bold; font-size: 16px;">Tus credenciales de acceso:</p>
+                
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="padding: 8px 0; color: #555; font-size: 14px;" width="100">Email:</td>
+                    <td style="padding: 8px 0; color: #333; font-weight: bold; font-size: 14px;"><strong>{{Email}}</strong></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #555; font-size: 14px;">Contraseña:</td>
+                    <td style="padding: 8px 0;">
+                      <code style="background-color: #fff3cd; padding: 4px 8px; border-radius: 4px; font-size: 14px;">{{TemporaryPassword}}</code>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <p style="color: #555; font-size: 16px; line-height: 1.6;">
+                <strong>Importante:</strong> Debes cambiar tu contraseña al iniciar sesión por primera vez.
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="{{LoginUrl}}" style="background-color: #321fdb; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                  Iniciar sesión
+                </a>
+              </div>
+
+              <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+
+              <p style="color: #999; font-size: 12px; line-height: 1.5;">
+                Si no puedes iniciar sesión, contacta al administrador de tu institución.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8f9fa; padding: 20px 40px; text-align: center;">
+              <p style="color: #aaa; font-size: 12px; margin: 0;">
+                &copy; {{Year}} InclusiON. Todos los derechos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
