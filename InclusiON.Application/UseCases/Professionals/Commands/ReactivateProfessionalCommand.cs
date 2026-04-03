@@ -1,6 +1,7 @@
 namespace InclusiON.Application.UseCases.Professionals.Commands
 {
-    public record DeactivateProfessionalCommand(
+    public record ReactivateProfessionalCommand(
         Guid ProfessionalId,
-        string? Observation = null);
+        string? Observation = null
+    );
 }
