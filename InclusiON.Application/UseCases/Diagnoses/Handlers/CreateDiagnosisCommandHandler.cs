@@ -4,27 +4,32 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Diagnoses.Commands;
 using InclusiON.Application.UseCases.Diagnoses.Queries;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Diagnoses;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Diagnoses.Handlers
 {
     public class CreateDiagnosisCommandHandler : ICommandHandler<CreateDiagnosisCommand, ApiResponse<DiagnosisResponse>>
     {
         private readonly IDiagnosesRepository _repository;
+        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateDiagnosisCommandHandler> _logger;
 
         public CreateDiagnosisCommandHandler(
             IDiagnosesRepository repository,
+            IProfessionalsRepository professionalsRepository,
             IPersonsRepository personsRepository,
             IUnitOfWork unitOfWork,
             ILogger<CreateDiagnosisCommandHandler> logger)
         {
             _repository = repository;
+            _professionalsRepository = professionalsRepository;
             _personsRepository = personsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -33,6 +38,21 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         public async Task<ApiResponse<DiagnosisResponse>> HandleAsync(
             CreateDiagnosisCommand command, CancellationToken cancellationToken)
         {
+            var professional = await _professionalsRepository.GetByIdAsync(command.ProfessionalId, cancellationToken);
+            if (professional == null)
+            {
+                return ApiResponse<DiagnosisResponse>.ErrorResult(
+                    ErrorCode.ProfessionalNotFound,
+                    ErrorMessages.ProfessionalNotFound);
+            }
+
+            if (professional.Status != ProfessionalStatusEnum.Approved)
+            {
+                return ApiResponse<DiagnosisResponse>.ErrorResult(
+                    ErrorCode.ProfessionalNotApproved,
+                    ErrorMessages.ProfessionalNotApprovedForDiagnosisCreation);
+            }
+
             var person = await _personsRepository.GetByIdAsync(command.PersonId, cancellationToken);
             if (person is null)
                 return ApiResponse<DiagnosisResponse>.ErrorResult(ErrorCode.PersonNotFound, "Persona no encontrada.");

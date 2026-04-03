@@ -8,6 +8,7 @@ namespace InclusiON.Application.UseCases.Professionals.Queries
         string? Search,
         string? Specialty,
         bool? IsActive,
+        string? Status,
         SortField? SortBy,
         string SortDirection,
         List<int>? InstitutionIds = null

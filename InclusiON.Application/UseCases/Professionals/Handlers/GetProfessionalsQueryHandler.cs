@@ -26,6 +26,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 query.Search,
                 query.Specialty,
                 query.IsActive,
+                query.Status,
                 query.SortBy,
                 query.SortDirection,
                 query.InstitutionIds,
@@ -44,6 +45,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     Specialty = p.Specialty,
                     LicenseNumber = p.LicenseNumber,
                     IsActive = p.User?.IsActive ?? false,
+                    Status = p.Status.ToString(),
                     Email = p.User?.Email
                 }).ToList(),
                 TotalRecords = pagedResult.TotalRecords,
