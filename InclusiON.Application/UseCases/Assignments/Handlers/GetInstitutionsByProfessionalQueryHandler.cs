@@ -1,7 +1,7 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Queries;
-using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Assignments;
 
@@ -22,20 +22,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         {
             var assignments = await _repository.GetInstitutionsByProfessionalIdAsync(query.ProfessionalId, cancellationToken);
 
-            var response = assignments.Select(MapToResponse).ToList();
+            var response = assignments.Select(GetInstitutionsByProfessionalQuery.MapToResponse).ToList();
             return ApiResponse<List<ProfessionalInstitutionResponse>>.SuccessResult(response);
-        }
-
-        internal static ProfessionalInstitutionResponse MapToResponse(ProfessionalInstitution assignment)
-        {
-            return new ProfessionalInstitutionResponse
-            {
-                ProfessionalId = assignment.ProfessionalId,
-                InstitutionId = assignment.InstitutionId,
-                InstitutionName = assignment.Institution?.Name ?? string.Empty,
-                AssignedAt = assignment.AssignedAt,
-                IsActive = assignment.IsActive
-            };
         }
     }
 }

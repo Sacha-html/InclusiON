@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Institutions.Commands;
+using InclusiON.Application.UseCases.Institutions.Queries;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -48,7 +49,7 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
             await _repository.CreateAsync(institution, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var response = GetInstitutionsQueryHandler.MapToResponse(institution);
+            var response = GetInstitutionsQuery.MapToResponse(institution);
             return ApiResponse<InstitutionResponse>.SuccessResult(response, "Institucion creada exitosamente.");
         }
     }

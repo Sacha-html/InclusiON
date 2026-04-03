@@ -8,6 +8,8 @@ namespace InclusiON.DTOs.Common
         FirstName,
         LastName,
         BirthDate,
-        Email
+        Email,
+        Title,
+        ReportDate
     }
 }
