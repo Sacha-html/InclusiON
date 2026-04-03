@@ -24,28 +24,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             if (diagnosis is null)
                 return ApiResponse<DiagnosisResponse>.NotFound("Diagnóstico");
 
-            return ApiResponse<DiagnosisResponse>.SuccessResult(MapToResponse(diagnosis));
-        }
-
-        internal static DiagnosisResponse MapToResponse(Domain.Models.Diagnosis d)
-        {
-            return new DiagnosisResponse
-            {
-                Id = d.Id,
-                PersonId = d.PersonId,
-                ProfessionalId = d.ProfessionalId,
-                ProfessionalName = $"{d.Professional.FirstName} {d.Professional.LastName}".Trim(),
-                DiagnosisDate = d.DiagnosisDate,
-                PrimaryDiagnosis = d.PrimaryDiagnosis,
-                InitialObservations = d.InitialObservations,
-                IdentifiedCapabilities = d.IdentifiedCapabilities,
-                IdentifiedChallenges = d.IdentifiedChallenges,
-                RequiredSupports = d.RequiredSupports,
-                PedagogicalObjectives = d.PedagogicalObjectives,
-                RecommendedStrategies = d.RecommendedStrategies,
-                CreatedAt = d.CreatedAt,
-                UpdatedAt = d.UpdatedAt
-            };
+            return ApiResponse<DiagnosisResponse>.SuccessResult(GetDiagnosisByIdQuery.MapToResponse(diagnosis));
         }
     }
 }

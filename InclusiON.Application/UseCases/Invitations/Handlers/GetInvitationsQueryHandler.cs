@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.UseCases.Invitations.Commands;
 using InclusiON.Application.UseCases.Invitations.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -33,7 +34,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         : await _repository.GetAllAsync(cancellationToken);
 
                 var response = invitations
-                    .Select(CreateInvitationCommandHandler.MapToResponse)
+                    .Select(CreateInvitationCommand.MapToResponse)
                     .ToList();
 
                 return ApiResponse<List<InvitationResponse>>.SuccessResult(response);
