@@ -126,10 +126,27 @@ Profesionales que trabajan con personas con discapacidad (docentes, terapeutas, 
 | DNI | Texto (20) | No | Documento de identidad (único) |
 | Teléfono | Texto (20) | No | Número de contacto |
 | Especialidad | Texto (100) | No | Área de especialización |
-| Matrícula | Texto (50) | No | Número de matrícula profesional |
+| Matrícula | Texto (50) | No | Número de matrícula profesional (único) |
 | Fecha de nacimiento | Fecha | No | Fecha de nacimiento |
-| Dirección | Texto (255) | No | Domicilio |
-| Onboarding completado | Booleano | Sí | Si completó el flujo de onboarding (perfil + tour). Default: false |
+| Email | Texto (255) | No | Email del profesional (guardado antes de crear el usuario) |
+| **Estado de validación** | | | |
+| Status | Enumerado | Sí | `Pending`, `Approved`, `Rejected`, `Suspended`, `Terminated` |
+| Fecha de validación | Fecha/hora | No | Cuándo fue validado/aprobado |
+| Validado por | Referencia | No | Usuario admin que validó al profesional |
+| Activo | Booleano | Sí | Estado lógico |
+
+### Historial de Estados del Profesional
+Registro de cada cambio de estado de un profesional.
+
+| Atributo | Tipo | Obligatorio | Descripción |
+|----------|------|:-----------:|-------------|
+| Id | Identificador único | Sí | Identificador del registro |
+| Profesional | Referencia | Sí | Profesional al que corresponde |
+| Estado anterior | Enumerado | No | Estado antes del cambio (null si es el primero) |
+| Estado nuevo | Enumerado | Sí | Estado después del cambio |
+| Observación | Texto (500) | No | Motivo del cambio (ej: motivo de rechazo o desactivación) |
+| Modificado por | Referencia | No | Usuario que realizó el cambio |
+| Fecha de creación | Fecha/hora | Sí | Cuándo se realizó el cambio |
 | Activo | Booleano | Sí | Estado lógico |
 
 ### Persona con Discapacidad
@@ -575,6 +592,7 @@ Respuesta del administrador a un ticket de soporte.
 | 7 | Tipo de Reporte | Catálogo | → Reporte |
 | 8 | Usuario | Usuarios | → Profesional / Persona / Familiar (1:1) |
 | 9 | Profesional | Usuarios | → Instituciones, Personas, Actividades |
+| 9b | Historial de Estados | Usuarios | → Profesional |
 | 10 | Persona con Discapacidad | Usuarios | → Profesionales, Familiares, Roadmap |
 | 11 | Representante Familiar | Usuarios | → Personas |
 | 12 | Institución Educativa | Instituciones | → Profesionales, Admins |
