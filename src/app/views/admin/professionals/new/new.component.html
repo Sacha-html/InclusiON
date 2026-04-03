@@ -39,12 +39,16 @@
         <c-col sm="6">
           <label cLabel for="email">Email *</label>
           <input cFormControl id="email" formControlName="email" type="email"
-                 [valid]="submitted ? f['email'].valid : undefined" />
-          @if (submitted && f['email'].errors) {
+                 [valid]="showFieldError('email') ? (f['email'].valid ? true : false) : undefined" />
+          @if (showFieldError('email')) {
             <c-form-feedback [valid]="false">
-              @if (f['email'].errors['required']) { El email es obligatorio. }
-              @if (f['email'].errors['email']) { Ingrese un email válido. }
+              @if (f['email'].errors?.['required']) { El email es obligatorio. }
+              @else if (f['email'].errors?.['email']) { Ingrese un email válido. }
+              @else if (f['email'].errors?.['emailExists']) { {{ f['email'].errors?.['message'] || 'Este email ya está registrado.' }} }
             </c-form-feedback>
+          }
+          @if (f['email'].pending) {
+            <small class="text-body-secondary">Verificando email...</small>
           }
         </c-col>
         <c-col sm="6">
@@ -60,7 +64,16 @@
         </c-col>
         <c-col sm="6">
           <label cLabel for="licenseNumber">Matrícula</label>
-          <input cFormControl id="licenseNumber" formControlName="licenseNumber" />
+          <input cFormControl id="licenseNumber" formControlName="licenseNumber"
+                 [valid]="showFieldError('licenseNumber') ? (f['licenseNumber'].valid ? true : false) : undefined" />
+          @if (showFieldError('licenseNumber')) {
+            <c-form-feedback [valid]="false">
+              @if (f['licenseNumber'].errors?.['licenseExists']) { {{ f['licenseNumber'].errors?.['message'] || 'Esta matrícula ya está registrada.' }} }
+            </c-form-feedback>
+          }
+          @if (f['licenseNumber'].pending) {
+            <small class="text-body-secondary">Verificando matrícula...</small>
+          }
         </c-col>
       </c-row>
 

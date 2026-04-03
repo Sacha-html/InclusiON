@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
 import { CreateProfessionalRequest } from '../../../../models';
-import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
+import { validDate, notFutureDate, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -46,26 +46,58 @@ export class NewComponent {
   showPasswordModal = false;
   createdProfessional: ProfessionalResponse | null = null;
 
-  form: FormGroup = this.fb.group({
-    firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.maxLength(20)]],
-    phone: ['', [Validators.maxLength(20)]],
-    specialty: ['', [Validators.maxLength(100)]],
-    licenseNumber: ['', [Validators.maxLength(50)]],
-    birthDate: ['', [Validators.required, validDate, notFutureDate]],
-  });
+  form: FormGroup;
+
+  constructor() {
+    const fb = inject(FormBuilder);
+    const professionalsService = inject(ProfessionalsService);
+
+    this.form = fb.group({
+      firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
+      documentNumber: ['', [Validators.maxLength(20)]],
+      phone: ['', [Validators.maxLength(20)]],
+      specialty: ['', [Validators.maxLength(100)]],
+      licenseNumber: ['', [Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
+      birthDate: ['', [Validators.required, validDate, notFutureDate]],
+    });
+  }
 
   get f() {
     return this.form.controls;
+  }
+
+  showFieldError(fieldName: string): boolean {
+    const control = this.form.get(fieldName);
+    if (!control) return false;
+    if (this.submitted) return true;
+    if (control.errors?.['emailExists'] || control.errors?.['licenseExists']) return true;
+    return control.touched && control.invalid;
   }
 
   onSubmit(): void {
     this.submitted = true;
     this.serverError = '';
 
+    if (this.form.pending) {
+      this.form.statusChanges.subscribe(status => {
+        if (status !== 'PENDING') {
+          this.attemptSubmit();
+        }
+      });
+      return;
+    }
+
+    this.attemptSubmit();
+  }
+
+  private attemptSubmit(): void {
     if (this.form.invalid) return;
+
+    if (this.f['email'].errors?.['emailExists'] || this.f['licenseNumber'].errors?.['licenseExists']) {
+      return;
+    }
 
     const raw = this.form.value;
     const request: CreateProfessionalRequest = {
