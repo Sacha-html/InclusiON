@@ -8,6 +8,7 @@ public class GrafanaCloudHealthCheck : IHealthCheck
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _endpoint;
+    private readonly string? _authHeader;
 
     public GrafanaCloudHealthCheck(IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
@@ -15,20 +16,8 @@ public class GrafanaCloudHealthCheck : IHealthCheck
         
         var otlpSettings = configuration.GetSection("OpenTelemetry");
         _endpoint = otlpSettings["Endpoint"] ?? "";
-        
-        var headers = otlpSettings.GetSection("Headers");
-        var authHeader = headers["Authorization"];
-        
-        _httpClient = httpClientFactory.CreateClient();
-        
-        if (!string.IsNullOrEmpty(authHeader))
-        {
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authHeader.Replace("Basic ", ""));
-        }
+        _authHeader = otlpSettings["Headers:Authorization"];
     }
-
-    private readonly HttpClient? _httpClient;
 
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
@@ -41,13 +30,21 @@ public class GrafanaCloudHealthCheck : IHealthCheck
 
         try
         {
+            var httpClient = _httpClientFactory.CreateClient("GrafanaHealthCheck");
+            
+            if (!string.IsNullOrEmpty(_authHeader))
+            {
+                httpClient.DefaultRequestHeaders.Authorization = 
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _authHeader.Replace("Basic ", ""));
+            }
+
             var testPayload = new byte[] { 0x00 };
             
             var request = new HttpRequestMessage(HttpMethod.Post, _endpoint);
             request.Content = new ByteArrayContent(testPayload);
             request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-protobuf");
             
-            var response = await (_httpClient ?? throw new InvalidOperationException("HttpClient not initialized")).SendAsync(request, cancellationToken);
+            var response = await httpClient.SendAsync(request, cancellationToken);
             
             if (response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
