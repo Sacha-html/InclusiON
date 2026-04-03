@@ -117,6 +117,24 @@ namespace InclusiON.Shared.Resources {
             }
         }
 
+        public static string ProfessionalPendingApproval {
+            get {
+                return ResourceManager.GetString("ProfessionalPendingApproval", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalValidated {
+            get {
+                return ResourceManager.GetString("ProfessionalValidated", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalRejected {
+            get {
+                return ResourceManager.GetString("ProfessionalRejected", resourceCulture);
+            }
+        }
+
         public static string PersonCreated {
             get {
                 return ResourceManager.GetString("PersonCreated", resourceCulture);
