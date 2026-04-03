@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Family.Commands;
+using InclusiON.Application.UseCases.Family.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Family;
@@ -79,7 +80,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
             _logger.LogInformation("Familiar actualizado: {FamilyId}", family.Id);
 
-            var response = GetFamilyByIdQueryHandler.MapToResponse(family);
+            var response = GetFamilyByIdQuery.MapToResponse(family);
             return ApiResponse<FamilyResponse>.SuccessResult(response, "Familiar actualizado exitosamente");
         }
     }

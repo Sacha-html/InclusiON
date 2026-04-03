@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
+using InclusiON.Application.UseCases.Assignments.Queries;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -66,7 +67,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 existing.Institution = institution;
-                var reactivatedResponse = GetInstitutionsByProfessionalQueryHandler.MapToResponse(existing);
+                var reactivatedResponse = GetInstitutionsByProfessionalQuery.MapToResponse(existing);
                 return ApiResponse<ProfessionalInstitutionResponse>.SuccessResult(reactivatedResponse, "Asignacion reactivada exitosamente.");
             }
 
@@ -82,7 +83,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             assignment.Institution = institution;
-            var response = GetInstitutionsByProfessionalQueryHandler.MapToResponse(assignment);
+            var response = GetInstitutionsByProfessionalQuery.MapToResponse(assignment);
             return ApiResponse<ProfessionalInstitutionResponse>.SuccessResult(response, "Institucion asignada al profesional exitosamente.");
         }
     }

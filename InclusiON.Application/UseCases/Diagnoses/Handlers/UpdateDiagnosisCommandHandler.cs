@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Diagnoses.Commands;
+using InclusiON.Application.UseCases.Diagnoses.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Diagnoses;
@@ -59,7 +60,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
                 command.DiagnosisId, command.RequestedByProfessionalId);
 
             return ApiResponse<DiagnosisResponse>.SuccessResult(
-                GetDiagnosisByIdQueryHandler.MapToResponse(diagnosis),
+                GetDiagnosisByIdQuery.MapToResponse(diagnosis),
                 "Diagnóstico actualizado exitosamente.");
         }
     }
