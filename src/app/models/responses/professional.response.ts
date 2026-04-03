@@ -9,6 +9,7 @@ export interface ProfessionalListItemResponse {
   specialty?: string;
   licenseNumber?: string;
   isActive: boolean;
+  status: string;
   email?: string;
 }
 
