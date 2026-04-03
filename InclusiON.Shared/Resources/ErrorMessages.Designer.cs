@@ -410,5 +410,35 @@ namespace InclusiON.Shared.Resources {
                 return ResourceManager.GetString("ReportNotFound", resourceCulture);
             }
         }
+
+        public static string ProfessionalNotApprovedForPersonAssignment {
+            get {
+                return ResourceManager.GetString("ProfessionalNotApprovedForPersonAssignment", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalNotApprovedForInstitutionAssignment {
+            get {
+                return ResourceManager.GetString("ProfessionalNotApprovedForInstitutionAssignment", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalNotApprovedForInvitationCreation {
+            get {
+                return ResourceManager.GetString("ProfessionalNotApprovedForInvitationCreation", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalNotApprovedForDiagnosisCreation {
+            get {
+                return ResourceManager.GetString("ProfessionalNotApprovedForDiagnosisCreation", resourceCulture);
+            }
+        }
+
+        public static string ProfessionalNotApprovedForDiagnosisUpdate {
+            get {
+                return ResourceManager.GetString("ProfessionalNotApprovedForDiagnosisUpdate", resourceCulture);
+            }
+        }
     }
 }
