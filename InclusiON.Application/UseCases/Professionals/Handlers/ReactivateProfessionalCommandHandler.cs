@@ -13,29 +13,26 @@ using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Professionals.Handlers
 {
-    public class DeactivateProfessionalCommandHandler : ICommandHandler<DeactivateProfessionalCommand, ApiResponse<ProfessionalResponse>>
+    public class ReactivateProfessionalCommandHandler : ICommandHandler<ReactivateProfessionalCommand, ApiResponse<ProfessionalResponse>>
     {
         private readonly IProfessionalsRepository _repository;
-        private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IHttpContextService _httpContextService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<DeactivateProfessionalCommandHandler> _logger;
+        private readonly ILogger<ReactivateProfessionalCommandHandler> _logger;
 
-        public DeactivateProfessionalCommandHandler(
+        public ReactivateProfessionalCommandHandler(
             IProfessionalsRepository repository,
-            IRefreshTokensRepository refreshTokensRepository,
             IHttpContextService httpContextService,
             IUnitOfWork unitOfWork,
-            ILogger<DeactivateProfessionalCommandHandler> logger)
+            ILogger<ReactivateProfessionalCommandHandler> logger)
         {
             _repository = repository;
-            _refreshTokensRepository = refreshTokensRepository;
             _httpContextService = httpContextService;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
-        public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(DeactivateProfessionalCommand command, CancellationToken cancellationToken)
+        public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(ReactivateProfessionalCommand command, CancellationToken cancellationToken)
         {
             var professional = await _repository.GetByIdAsync(command.ProfessionalId, cancellationToken);
 
@@ -46,11 +43,11 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     ErrorMessages.ProfessionalNotFound);
             }
 
-            if (professional.Status == ProfessionalStatusEnum.Terminated)
+            if (professional.Status == ProfessionalStatusEnum.Approved && professional.User.IsActive)
             {
                 return ApiResponse<ProfessionalResponse>.ErrorResult(
                     ErrorCode.BusinessRuleViolation,
-                    "El profesional ya se encuentra dado de baja");
+                    "El profesional ya se encuentra activo");
             }
 
             var adminUserId = _httpContextService.GetCurrentUserId();
@@ -60,38 +57,32 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             }
 
             var oldStatus = professional.Status;
-
-            professional.User.IsActive = false;
-            professional.Status = ProfessionalStatusEnum.Terminated;
+            professional.User.IsActive = true;
+            professional.Status = ProfessionalStatusEnum.Approved;
 
             foreach (var pi in professional.ProfessionalInstitutions)
             {
-                pi.IsActive = false;
+                pi.IsActive = true;
             }
 
             await _repository.AddStatusHistoryAsync(new ProfessionalStatusHistory
             {
                 ProfessionalId = professional.Id,
                 OldStatus = oldStatus,
-                NewStatus = ProfessionalStatusEnum.Terminated,
+                NewStatus = ProfessionalStatusEnum.Approved,
                 Observation = command.Observation,
                 ChangedByUserId = adminUserId,
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = adminUserId.Value
             }, cancellationToken);
 
-            await _refreshTokensRepository.RevokeAllUserTokensAsync(
-                professional.UserId,
-                Constants.RevokeReasons.ProfessionalDeactivated,
-                cancellationToken);
-
             await _repository.UpdateAsync(professional, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Profesional dado de baja: {ProfessionalId}, Usuario: {UserId}", command.ProfessionalId, professional.UserId);
+            _logger.LogInformation("Profesional reactivado: {ProfessionalId}, Usuario: {UserId}", command.ProfessionalId, professional.UserId);
 
             var response = GetProfessionalByIdQuery.MapToResponse(professional);
-            return ApiResponse<ProfessionalResponse>.SuccessResult(response, SuccessMessages.ProfessionalDeactivated);
+            return ApiResponse<ProfessionalResponse>.SuccessResult(response, "Profesional reactivado exitosamente");
         }
     }
 }
