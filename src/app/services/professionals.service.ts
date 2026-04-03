@@ -4,11 +4,14 @@ import { environment } from '@env';
 import {
   ApiResponse,
   CreateProfessionalRequest,
+  DeactivateProfessionalRequest,
   GetProfessionalsRequest,
   PagedResponse,
   ProfessionalListItemResponse,
   ProfessionalResponse,
+  RegisterProfessionalRequest,
   UpdateProfessionalRequest,
+  ValidateProfessionalRequest,
 } from '../models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
@@ -35,6 +38,8 @@ export class ProfessionalsService {
       if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
       if (request.search) params = params.set('search', request.search);
       if (request.institutionId) params = params.set('institutionId', request.institutionId.toString());
+      if (request.status) params = params.set('status', request.status);
+      if (request.isActive !== undefined) params = params.set('isActive', request.isActive.toString());
     }
 
     return this.http
@@ -66,9 +71,61 @@ export class ProfessionalsService {
       .pipe(unwrapResponse());
   }
 
-  deactivateProfessional(id: string): Observable<void> {
+  deactivateProfessional(id: string, request?: DeactivateProfessionalRequest): Observable<void> {
     return this.http
-      .put<void>(`${this.apiUrl}/${id}/deactivate`, {})
+      .put<void>(`${this.apiUrl}/${id}/deactivate`, request ?? {})
       .pipe(handleApiError());
+  }
+
+  registerProfessional(request: RegisterProfessionalRequest): Observable<void> {
+    return this.http
+      .post<void>(`${environment.apiUrl}/Professionals/register`, request)
+      .pipe(handleApiError());
+  }
+
+  getPendingProfessionals(
+    request?: GetProfessionalsRequest,
+  ): Observable<PagedResponse<ProfessionalListItemResponse>> {
+    let params = new HttpParams()
+      .set('sortBy', request?.sortBy ?? 'createdAt')
+      .set('sortDirection', request?.sortDirection ?? 'DESC');
+
+    if (request) {
+      if (request.page) params = params.set('page', request.page.toString());
+      if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
+      if (request.search) params = params.set('search', request.search);
+    }
+
+    return this.http
+      .get<ApiResponse<PagedResponse<ProfessionalListItemResponse>>>(`${this.apiUrl}/pending`, { params })
+      .pipe(unwrapResponse());
+  }
+
+  validateProfessional(id: string, request: ValidateProfessionalRequest): Observable<void> {
+    return this.http
+      .put<void>(`${this.apiUrl}/${id}/validate`, request)
+      .pipe(handleApiError());
+  }
+
+  reactivateProfessional(id: string): Observable<void> {
+    return this.http
+      .put<void>(`${this.apiUrl}/${id}/reactivate`, {})
+      .pipe(handleApiError());
+  }
+
+  getStatusHistory(id: string): Observable<any[]> {
+    return this.http
+      .get<ApiResponse<any[]>>(`${this.apiUrl}/${id}/status-history`)
+      .pipe(unwrapResponse());
+  }
+
+  checkEmail(email: string): Observable<{ isAvailable: boolean; message?: string }> {
+    return this.http
+      .get<{ isAvailable: boolean; message?: string }>(`${environment.apiUrl}/ProfessionalValidation/email?email=${encodeURIComponent(email)}`);
+  }
+
+  checkLicenseNumber(licenseNumber: string): Observable<{ isAvailable: boolean; message?: string }> {
+    return this.http
+      .get<{ isAvailable: boolean; message?: string }>(`${environment.apiUrl}/ProfessionalValidation/license-number?licenseNumber=${encodeURIComponent(licenseNumber)}`);
   }
 }

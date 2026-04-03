@@ -1,50 +1,61 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProfessionalsService } from '@services';
-import { CreateProfessionalRequest } from '../../../../models';
-import { validDate, notFutureDate, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
+import { ProfessionalsService, InstitutionsService } from '@services';
+import { InstitutionResponse, RegisterProfessionalRequest } from '@models';
+import { validDate, notFutureDate, minAge, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
+
 import {
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
-  CardHeaderComponent,
   ColComponent,
+  ContainerComponent,
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
+  FormSelectDirective,
   RowComponent,
+  AlertComponent,
+  ModalModule,
 } from '@coreui/angular';
-import { ProfessionalResponse } from '../../../../models';
-import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
+import { IconDirective } from '@coreui/icons-angular';
+import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 @Component({
-  selector: 'app-new',
+  selector: 'app-register-professional',
+  standalone: true,
   imports: [
     ReactiveFormsModule,
+    ContainerComponent,
     CardComponent,
     CardBodyComponent,
-    CardHeaderComponent,
     RowComponent,
     ColComponent,
     FormControlDirective,
     FormLabelDirective,
     FormFeedbackComponent,
+    FormSelectDirective,
     ButtonDirective,
-    PasswordModalComponent,
+    AlertComponent,
+    ModalModule,
+    IconDirective,
+    AccessibilityPanelComponent,
   ],
-  templateUrl: './new.component.html',
-  styleUrl: './new.component.scss',
+  templateUrl: './register-professional.component.html',
+  styleUrl: './register-professional.component.scss',
 })
-export class NewComponent {
+export class RegisterProfessionalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
+  private readonly institutionsService = inject(InstitutionsService);
 
+  institutions: InstitutionResponse[] = [];
   submitted = false;
   serverError = '';
-  showPasswordModal = false;
-  createdProfessional: ProfessionalResponse | null = null;
+  isLoading = false;
+  showSuccessModal = false;
 
   form: FormGroup;
 
@@ -58,9 +69,10 @@ export class NewComponent {
       email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
       documentNumber: ['', [Validators.maxLength(20)]],
       phone: ['', [Validators.maxLength(20)]],
-      specialty: ['', [Validators.maxLength(100)]],
+      specialty: ['', [Validators.required, Validators.maxLength(100)]],
       licenseNumber: ['', [Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
-      birthDate: ['', [Validators.required, validDate, notFutureDate]],
+      birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
+      institutionId: [''],
     });
   }
 
@@ -76,10 +88,18 @@ export class NewComponent {
     return control.touched && control.invalid;
   }
 
+  ngOnInit(): void {
+    this.institutionsService.getAll().subscribe({
+      next: (data) => this.institutions = data.filter(i => i.isActive),
+      error: () => this.institutions = [],
+    });
+  }
+
   onSubmit(): void {
     this.submitted = true;
     this.serverError = '';
 
+    // Esperar a que terminen las validaciones async antes de enviar
     if (this.form.pending) {
       this.form.statusChanges.subscribe(status => {
         if (status !== 'PENDING') {
@@ -95,41 +115,41 @@ export class NewComponent {
   private attemptSubmit(): void {
     if (this.form.invalid) return;
 
+    // Verificar errores async explícitamente
     if (this.f['email'].errors?.['emailExists'] || this.f['licenseNumber'].errors?.['licenseExists']) {
       return;
     }
 
+    this.isLoading = true;
+
     const raw = this.form.value;
-    const request: CreateProfessionalRequest = {
+    const request: RegisterProfessionalRequest = {
       firstName: raw.firstName,
       lastName: raw.lastName,
       email: raw.email,
-      ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
-      ...(raw.phone && { phone: raw.phone }),
-      ...(raw.specialty && { specialty: raw.specialty }),
-      ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
-      ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
+      documentNumber: raw.documentNumber || undefined,
+      phone: raw.phone || undefined,
+      specialty: raw.specialty,
+      licenseNumber: raw.licenseNumber || undefined,
+      birthDate: raw.birthDate ? toIsoDate(raw.birthDate) : undefined,
+      institutionId: raw.institutionId ? +raw.institutionId : undefined,
     };
 
-    this.professionalsService.createProfessional(request).subscribe({
-      next: (response) => {
-        this.createdProfessional = response;
-        this.showPasswordModal = true;
+    this.professionalsService.registerProfessional(request).subscribe({
+      next: () => {
+        this.form.reset();
+        this.submitted = false;
+        this.isLoading = false;
+        this.showSuccessModal = true;
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al crear el profesional';
+        this.isLoading = false;
+        this.serverError = err?.userMessage || err?.error?.message || 'Error al enviar la solicitud de registro.';
       },
     });
   }
 
-  closeModalAndNavigate(): void {
-    this.showPasswordModal = false;
-    if (this.createdProfessional) {
-      this.router.navigate(['/admin/professionals', this.createdProfessional.id]);
-    }
-  }
-
-  goBack(): void {
-    this.router.navigate(['/admin/professionals']);
+  goToLogin(): void {
+    this.router.navigate(['/admin-login'], { queryParams: { role: 'professional' } });
   }
 }

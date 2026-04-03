@@ -5,7 +5,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { LoginRequest } from '@models';
 import { RoleRoutes } from '../../../shared/constants/roles';
@@ -49,6 +49,7 @@ import { IconDirective } from '@coreui/icons-angular';
     InputGroupTextDirective,
     IconDirective,
     AccessibilityPanelComponent,
+    RouterModule,
   ],
   templateUrl: './login.component.html'
 })
