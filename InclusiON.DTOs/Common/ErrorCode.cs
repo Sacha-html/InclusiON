@@ -56,6 +56,7 @@ namespace InclusiON.DTOs.Common
         CannotDeactivateSelf = 706,
         UserAlreadyInactive = 707,
         UserAlreadyActive = 708,
+        ProfessionalNotApproved = 709,
 
         // Invitaciones (8xx)
         InvitationNotFound = 800,
