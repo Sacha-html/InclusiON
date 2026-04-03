@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
+using InclusiON.Application.UseCases.Assignments.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Assignments;
@@ -42,7 +43,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             assignment.IsActive = false;
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var response = GetPersonsByProfessionalQueryHandler.MapToResponse(assignment);
+            var response = GetPersonsByProfessionalQuery.MapToResponse(assignment);
             return ApiResponse<ProfessionalPersonResponse>.SuccessResult(response, "Asignacion desactivada exitosamente.");
         }
     }

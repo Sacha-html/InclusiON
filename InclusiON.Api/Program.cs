@@ -1,17 +1,21 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using InclusiON.Application;
+using InclusiON.Application.Interfaces.Telemetry;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
 using InclusiON.Api.Middleware;
 using InclusiON.Infrastructure;
+using InclusiON.Infrastructure.Configuration;
+using InclusiON.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
 
 builder.Host.UseSerilog((context, config) =>
 {
@@ -31,6 +35,11 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddPersistence(builder.Configuration);
+
+var connectionString = builder.Configuration.GetConnectionString("SqlServerConn") 
+    ?? throw new InvalidOperationException("Connection string 'SqlServerConn' not found.");
+
+builder.Services.AddInfrastructureTelemetry(builder.Configuration, connectionString);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
 
@@ -51,26 +60,17 @@ builder.Services.AddSwaggerGen(p =>
 
     p.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = @"JWT Authorization header. Enter 'Bearer' [space] and token",
+        Description = @"JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token. Example: 'Bearer 12345abcdef'",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "bearer"
     });
 
-    p.AddSecurityRequirement(new OpenApiSecurityRequirement
+    p.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-            },
-            Array.Empty<string>()
-        }
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
     });
 
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -95,7 +95,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseSwagger();
+app.MapSwagger();
 app.UseSwaggerUI(p =>
 {
     p.SwaggerEndpoint("/swagger/v1/swagger.json", "InclusiON API V1");
@@ -111,6 +111,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapPrometheusScrapingEndpoint("/metrics");
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false
+});
 
 using (var scope = app.Services.CreateScope())
 {

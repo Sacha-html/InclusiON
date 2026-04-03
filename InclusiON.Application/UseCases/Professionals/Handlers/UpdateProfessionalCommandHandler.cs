@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Professionals.Commands;
+using InclusiON.Application.UseCases.Professionals.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Professionals;
@@ -63,7 +64,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
             _logger.LogInformation("Profesional actualizado: {ProfessionalId}", command.ProfessionalId);
 
-            var response = GetProfessionalByIdQueryHandler.MapToResponse(professional);
+            var response = GetProfessionalByIdQuery.MapToResponse(professional);
             return ApiResponse<ProfessionalResponse>.SuccessResult(response, SuccessMessages.ProfessionalUpdated);
         }
     }

@@ -1,7 +1,7 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Institutions.Queries;
-using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Institutions;
 
@@ -22,23 +22,8 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
         {
             var institutions = await _repository.GetAllAsync(cancellationToken);
 
-            var response = institutions.Select(MapToResponse).ToList();
+            var response = institutions.Select(GetInstitutionsQuery.MapToResponse).ToList();
             return ApiResponse<List<InstitutionResponse>>.SuccessResult(response);
-        }
-
-        internal static InstitutionResponse MapToResponse(EducationalInstitution institution)
-        {
-            return new InstitutionResponse
-            {
-                Id = institution.Id,
-                Name = institution.Name,
-                Address = institution.Address,
-                Phone = institution.Phone,
-                Email = institution.Email,
-                IsActive = institution.IsActive,
-                CreatedAt = institution.CreatedAt,
-                UpdatedAt = institution.UpdatedAt
-            };
         }
     }
 }

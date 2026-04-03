@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,8 @@ namespace InclusiON.Data
                     .LogTo(Console.WriteLine,
                         new[] { DbLoggerCategory.Database.Command.Name },
                         LogLevel.Information)
-                    .EnableSensitiveDataLogging();
+                    .EnableSensitiveDataLogging()
+                    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 opt
                     .UseSqlServer(configuration
                     .GetConnectionString("SqlServerConn"), sqlOptions =>
