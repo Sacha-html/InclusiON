@@ -1,52 +1,25 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { CatalogsService, PersonsService, ToastService } from '@services';
-import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem } from '../../../../models';
-import { formatDate, formatDateTime } from '@shared/utils';
+import { CatalogsService, PersonsService, ToastService, FamilyService, AuthService } from '@services';
+import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem, PersonRepresentativeResponse, FamilyResponse } from '../../../../models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
-import {
-  BadgeComponent,
-  ButtonDirective,
-  CardBodyComponent,
-  CardComponent,
-  CardHeaderComponent,
-  ColComponent,
-  FormControlDirective,
-  FormLabelDirective,
-  FormCheckComponent,
-  FormCheckInputDirective,
-  FormCheckLabelDirective,
-  ModalBodyComponent,
-  ModalComponent,
-  ModalFooterComponent,
-  ModalHeaderComponent,
-  RowComponent,
-  SpinnerComponent,
-} from '@coreui/angular';
+import { PersonBasicInfoComponent } from './components/person-basic-info.component';
+import { PersonSkillsComponent } from './components/person-skills.component';
+import { PersonLinksComponent } from './components/person-links.component';
+import { BadgeComponent, CardBodyComponent, CardComponent, CardHeaderComponent } from '@coreui/angular';
 
 @Component({
   selector: 'app-detail',
+  standalone: true,
   imports: [
     BadgeComponent,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
-    RowComponent,
-    ColComponent,
-    FormControlDirective,
-    FormLabelDirective,
-    FormCheckComponent,
-    FormCheckInputDirective,
-    FormCheckLabelDirective,
-    ButtonDirective,
-    FormsModule,
-    SpinnerComponent,
-    ModalComponent,
-    ModalHeaderComponent,
-    ModalBodyComponent,
-    ModalFooterComponent,
     ConfirmModalComponent,
+    PersonBasicInfoComponent,
+    PersonSkillsComponent,
+    PersonLinksComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
@@ -57,9 +30,12 @@ export class DetailComponent implements OnInit {
   private readonly personsService = inject(PersonsService);
   private readonly catalogsService = inject(CatalogsService);
   private readonly toastService = inject(ToastService);
+  private readonly familyService = inject(FamilyService);
+  private readonly authService = inject(AuthService);
 
   person: PersonResponse | null = null;
   showDeactivateModal = false;
+  activeTab = 'datos';
 
   // Skill profile
   skillProfile: PersonSkillProfileResponse[] = [];
@@ -69,6 +45,32 @@ export class DetailComponent implements OnInit {
   skillAreaError = '';
   skillAreaLoading = false;
 
+  // Family links
+  representatives: PersonRepresentativeResponse[] = [];
+  loadingRepresentatives = false;
+  showLinkModal = false;
+  availableFamilies: FamilyResponse[] = [];
+  loadingFamilies = false;
+  searchFamily = '';
+  linkingFamily = false;
+  linkFamilyError = '';
+  selectedFamilyId = '';
+  linkRelationship = '';
+  linkIsPrimary = false;
+  showUnlinkModal = false;
+  unlinkingRepresentative: PersonRepresentativeResponse | null = null;
+  unlinkObservation = '';
+  unlinking = false;
+
+  // History
+  showHistoryModal = false;
+  linkHistory: any[] = [];
+  loadingHistory = false;
+
+  canLink = this.authService.hasPermission('family:link');
+  canUnlink = this.authService.hasPermission('family:unlink');
+  canViewHistory = this.authService.hasPermission('family:read');
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -76,6 +78,7 @@ export class DetailComponent implements OnInit {
         next: (person) => {
           this.person = person;
           this.loadSkillProfile();
+          this.loadRepresentatives();
         },
         error: () => this.router.navigate(['/admin/persons']),
       });
@@ -89,9 +92,7 @@ export class DetailComponent implements OnInit {
     });
   }
 
-  openAddSkillAreaModal(): void {
-    this.skillAreaError = '';
-    this.selectedSkillAreaIds = new Set();
+  loadSkillAreas(): void {
     this.catalogsService.getSkillAreas().subscribe({
       next: (areas) => {
         const activeIds = new Set(this.skillProfile.filter(sp => sp.isActive).map(sp => sp.skillAreaId));
@@ -104,14 +105,6 @@ export class DetailComponent implements OnInit {
   closeAddSkillAreaModal(): void {
     this.showAddSkillAreaModal = false;
     this.skillAreaError = '';
-  }
-
-  toggleSkillArea(id: number): void {
-    if (this.selectedSkillAreaIds.has(id)) {
-      this.selectedSkillAreaIds.delete(id);
-    } else {
-      this.selectedSkillAreaIds.add(id);
-    }
   }
 
   confirmAddSkillAreas(): void {
@@ -146,32 +139,19 @@ export class DetailComponent implements OnInit {
     }
   }
 
+  toggleSkillArea(id: number): void {
+    if (this.selectedSkillAreaIds.has(id)) {
+      this.selectedSkillAreaIds.delete(id);
+    } else {
+      this.selectedSkillAreaIds.add(id);
+    }
+  }
+
   deactivateSkillArea(areaId: number): void {
     if (!this.person) return;
     this.personsService.deactivateSkillArea(this.person.id, areaId).subscribe({
       next: () => this.loadSkillProfile(),
     });
-  }
-
-  goToEdit(): void {
-    if (this.person) {
-      this.router.navigate(['/admin/persons', this.person.id, 'edit']);
-    }
-  }
-
-  formatDate = formatDate;
-  formatDateTime = formatDateTime;
-
-  formatLevel(level: number | null | undefined): string {
-    return level != null ? `${level} / 5` : 'Sin especificar';
-  }
-
-  formatBoolean(value: boolean): string {
-    return value ? 'Si' : 'No';
-  }
-
-  goBack(): void {
-    this.router.navigate(['/admin/persons']);
   }
 
   confirmDeactivate(): void {
@@ -187,5 +167,199 @@ export class DetailComponent implements OnInit {
         this.showDeactivateModal = false;
       },
     });
+  }
+
+  // Family links methods
+  loadRepresentatives(): void {
+    if (!this.person) return;
+    this.loadingRepresentatives = true;
+    this.familyService.getPersonRepresentatives(this.person.id).subscribe({
+      next: (data) => {
+        this.representatives = data ?? [];
+        this.loadingRepresentatives = false;
+      },
+      error: () => {
+        this.loadingRepresentatives = false;
+        this.toastService.error('Error al cargar familiares vinculados');
+      },
+    });
+  }
+
+  openLinkModal(): void {
+    this.searchFamily = '';
+    this.availableFamilies = [];
+    this.selectedFamilyId = '';
+    this.linkRelationship = '';
+    this.linkIsPrimary = false;
+    this.linkFamilyError = '';
+    this.loadAvailableFamilies();
+  }
+
+  loadAvailableFamilies(): void {
+    this.loadingFamilies = true;
+    this.familyService.getAvailableFamilies(this.searchFamily || undefined).subscribe({
+      next: (data) => {
+        const linkedIds = new Set(this.representatives.filter(r => r.isActive).map(r => r.representativeId));
+        this.availableFamilies = (data ?? []).filter(f => !linkedIds.has(f.id));
+        this.loadingFamilies = false;
+      },
+      error: () => {
+        this.loadingFamilies = false;
+      },
+    });
+  }
+
+  closeLinkModal(): void {
+    this.showLinkModal = false;
+  }
+
+  confirmLinkFamily(): void {
+    if (!this.person || !this.selectedFamilyId || !this.linkRelationship) return;
+    this.linkingFamily = true;
+    this.linkFamilyError = '';
+
+    this.familyService.linkFamilyToPerson(this.selectedFamilyId, this.person.id, {
+      relationship: this.linkRelationship,
+      isPrimary: this.linkIsPrimary
+    }).subscribe({
+      next: () => {
+        this.toastService.success('Familiar vinculado exitosamente');
+        this.showLinkModal = false;
+        this.loadRepresentatives();
+      },
+      error: (err) => {
+        this.linkingFamily = false;
+        this.linkFamilyError = err?.error?.message || 'Error al vincular el familiar';
+      },
+    });
+  }
+
+  openUnlinkModal(rep: PersonRepresentativeResponse): void {
+    this.unlinkingRepresentative = rep;
+    this.unlinkObservation = '';
+    this.showUnlinkModal = true;
+  }
+
+  closeUnlinkModal(): void {
+    this.showUnlinkModal = false;
+    this.unlinkingRepresentative = null;
+    this.unlinkObservation = '';
+  }
+
+  confirmUnlink(): void {
+    if (!this.person || !this.unlinkingRepresentative || !this.unlinkObservation.trim()) return;
+    this.unlinking = true;
+
+    this.familyService.unlinkFamilyFromPerson(
+      this.unlinkingRepresentative.representativeId,
+      this.person.id,
+      this.unlinkObservation
+    ).subscribe({
+      next: () => {
+        this.toastService.success('Familiar desvinculado exitosamente');
+        this.showUnlinkModal = false;
+        this.loadRepresentatives();
+      },
+      error: () => {
+        this.unlinking = false;
+        this.toastService.error('Error al desvincular el familiar');
+      },
+    });
+  }
+
+  // Child component handlers
+  confirmAddSkillAreasFromChild(ids: number[]): void {
+    if (!this.person || ids.length === 0) return;
+    this.skillAreaLoading = true;
+    this.skillAreaError = '';
+    let completed = 0;
+    let errors = 0;
+
+    for (const areaId of ids) {
+      this.personsService.addSkillArea(this.person.id, areaId).subscribe({
+        next: () => {
+          completed++;
+          if (completed + errors === ids.length) {
+            this.skillAreaLoading = false;
+            this.showAddSkillAreaModal = false;
+            this.loadSkillProfile();
+          }
+        },
+        error: () => {
+          errors++;
+          if (completed + errors === ids.length) {
+            this.skillAreaLoading = false;
+            this.skillAreaError = `${errors} área(s) no se pudieron agregar.`;
+            if (completed > 0) {
+              this.loadSkillProfile();
+            }
+          }
+        },
+      });
+    }
+  }
+
+  confirmLinkFromChild(data: { familyId: string; relationship: string; isPrimary: boolean }): void {
+    if (!this.person) return;
+    this.linkingFamily = true;
+    this.linkFamilyError = '';
+
+    this.familyService.linkFamilyToPerson(data.familyId, this.person.id, {
+      relationship: data.relationship,
+      isPrimary: data.isPrimary
+    }).subscribe({
+      next: () => {
+        this.toastService.success('Familiar vinculado exitosamente');
+        this.showLinkModal = false;
+        this.loadRepresentatives();
+      },
+      error: (err) => {
+        this.linkingFamily = false;
+        this.linkFamilyError = err?.error?.message || 'Error al vincular el familiar';
+      },
+    });
+  }
+
+  confirmUnlinkFromChild(observation: string): void {
+    if (!this.person || !this.unlinkingRepresentative || !observation.trim()) return;
+    this.unlinking = true;
+
+    this.familyService.unlinkFamilyFromPerson(
+      this.unlinkingRepresentative.representativeId,
+      this.person.id,
+      observation
+    ).subscribe({
+      next: () => {
+        this.toastService.success('Familiar desvinculado exitosamente');
+        this.showUnlinkModal = false;
+        this.loadRepresentatives();
+      },
+      error: () => {
+        this.unlinking = false;
+        this.toastService.error('Error al desvincular el familiar');
+      },
+    });
+  }
+
+  openHistoryModal(): void {
+    if (!this.person) return;
+    this.linkHistory = [];
+    this.loadingHistory = true;
+    this.showHistoryModal = true;
+
+    this.familyService.getPersonLinkHistory(this.person.id).subscribe({
+      next: (data) => {
+        this.linkHistory = data ?? [];
+        this.loadingHistory = false;
+      },
+      error: () => {
+        this.loadingHistory = false;
+        this.toastService.error('Error al cargar historial');
+      },
+    });
+  }
+
+  closeHistoryModal(): void {
+    this.showHistoryModal = false;
   }
 }
