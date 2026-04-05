@@ -20,15 +20,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         {
             var diagnoses = await _repository.GetByPersonIdAsync(query.PersonId, cancellationToken);
 
-            var response = diagnoses.Select(d => new DiagnosisListItemResponse
-            {
-                Id = d.Id,
-                DiagnosisDate = d.DiagnosisDate,
-                PrimaryDiagnosis = d.PrimaryDiagnosis,
-                ProfessionalName = $"{d.Professional.FirstName} {d.Professional.LastName}".Trim(),
-                ProfessionalId = d.ProfessionalId,
-                CreatedAt = d.CreatedAt
-            }).ToList();
+            var response = diagnoses.Select(DiagnosisListItemResponse.MapToResponse).ToList();
 
             return ApiResponse<List<DiagnosisListItemResponse>>.SuccessResult(response);
         }
