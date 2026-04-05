@@ -42,6 +42,8 @@ namespace InclusiON.Application.Constants
             public const string Create = "professionals:create";
             public const string Update = "professionals:update";
             public const string Delete = "professionals:delete";
+            public const string LinkFamily = "professionals:link-family";
+            public const string UnlinkFamily = "professionals:unlink-family";
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -53,6 +55,8 @@ namespace InclusiON.Application.Constants
             public const string Create = "family:create";
             public const string Update = "family:update";
             public const string Delete = "family:delete";
+            public const string Link = "family:link";
+            public const string Unlink = "family:unlink";
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -121,7 +125,7 @@ namespace InclusiON.Application.Constants
             Users.Read, Users.Create, Users.Update, Users.Delete,
             Persons.Read, Persons.Create, Persons.Update, Persons.Delete,
             Professionals.Read, Professionals.Create, Professionals.Update, Professionals.Delete,
-            Family.Read, Family.Create, Family.Update, Family.Delete,
+            Family.Read, Family.Create, Family.Update, Family.Delete, Family.Link, Family.Unlink,
             Activities.Read, Activities.Create, Activities.Update, Activities.Delete, Activities.Respond,
             Diagnoses.Read, Diagnoses.Create, Diagnoses.Update,
             Reports.Read, Reports.Create, Reports.Export,

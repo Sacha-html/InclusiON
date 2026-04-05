@@ -26,7 +26,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 return ApiResponse<FamilyResponse>.NotFound("Familiar");
             }
 
-            var response = GetFamilyByIdQuery.MapToResponse(family);
+            var response = FamilyResponse.MapToResponse(family);
             return ApiResponse<FamilyResponse>.SuccessResult(response);
         }
     }

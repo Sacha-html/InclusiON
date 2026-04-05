@@ -22,14 +22,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         {
             var items = await _repository.GetAllActiveAsync(cancellationToken);
 
-            var response = items.Select(x => new AutonomyLevelResponse
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description,
-                RequiresSupervision = x.RequiresSupervision,
-                DisplayOrder = x.DisplayOrder
-            }).ToList();
+            var response = items.Select(AutonomyLevelResponse.MapToResponse).ToList();
 
             return ApiResponse<List<AutonomyLevelResponse>>.SuccessResult(response);
         }

@@ -11,6 +11,8 @@ using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
+using InclusiON.Application.UseCases.Family.Queries;
+using InclusiON.DTOs.Responses.Family;
 using InclusiON.DTOs.Responses.Persons;
 using InclusiON.Shared.Resources;
 
@@ -84,6 +86,57 @@ namespace InclusiON.Api.Controllers
             var query = new GetPersonByIdQuery(personId);
             var result = await handler.HandleAsync(query, cancellationToken);
             return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Obtiene los familiares vinculados a una persona.
+        /// </summary>
+        [HttpGet("{personId:guid}/representatives")]
+        [Authorize(Policy = "persons:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<PersonRepresentativeResponse>>>> GetPersonRepresentatives(
+            Guid personId,
+            CancellationToken cancellationToken = default)
+        {
+            var representatives = await _context.PersonRepresentatives
+                .Include(pr => pr.Representative)
+                    .ThenInclude(r => r.User)
+                .Where(pr => pr.PersonId == personId)
+                .OrderByDescending(pr => pr.IsPrimary)
+                .ThenBy(pr => pr.CreatedAt)
+                .ToListAsync(cancellationToken);
+
+            var response = representatives.Select(pr => new PersonRepresentativeResponse
+            {
+                PersonId = pr.PersonId,
+                RepresentativeId = pr.RepresentativeId,
+                RepresentativeFullName = $"{pr.Representative.FirstName} {pr.Representative.LastName}",
+                Relationship = pr.Relationship,
+                IsPrimary = pr.IsPrimary,
+                IsActive = pr.IsActive,
+                CreatedAt = pr.CreatedAt,
+                UpdatedAt = pr.UpdatedAt,
+                EndedAt = pr.EndedAt,
+                UnlinkObservation = pr.UnlinkObservation
+            }).ToList();
+
+            return Ok(ApiResponse<List<PersonRepresentativeResponse>>.SuccessResult(response));
+        }
+
+        /// <summary>
+        /// Obtiene el historial de vinculaciones de una persona.
+        /// </summary>
+        [HttpGet("{personId:guid}/link-history")]
+        [Authorize(Policy = "family:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeHistoryResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<PersonRepresentativeHistoryResponse>>>> GetPersonLinkHistory(
+            Guid personId,
+            [FromServices] IQueryHandler<GetPersonLinkHistoryQuery, ApiResponse<List<PersonRepresentativeHistoryResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetPersonLinkHistoryQuery(personId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
         }
 
         #endregion

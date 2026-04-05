@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models;
+
 namespace InclusiON.DTOs.Responses.Catalogs
 {
     public class ActivityTemplateTypeResponse
@@ -12,5 +14,22 @@ namespace InclusiON.DTOs.Responses.Catalogs
         public bool UsesPictograms { get; set; }
         public bool HasAudio { get; set; }
         public int DisplayOrder { get; set; }
+
+        public static ActivityTemplateTypeResponse MapToResponse(ActivityTemplateType x)
+        {
+            return new ActivityTemplateTypeResponse
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description,
+                Code = x.Code,
+                SkillAreaId = x.SkillAreaId,
+                ContentSchema = x.ContentSchema,
+                ComponentName = x.ComponentName,
+                UsesPictograms = x.UsesPictograms,
+                HasAudio = x.HasAudio,
+                DisplayOrder = x.DisplayOrder
+            };
+        }
     }
 }

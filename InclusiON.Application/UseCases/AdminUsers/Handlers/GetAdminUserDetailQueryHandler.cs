@@ -34,7 +34,13 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             if (user is null)
                 return ApiResponse<AdminUserDetailResponse>.NotFound("Usuario");
 
-            var roles = await _identityService.GetRolesAsync(user);
+            var rolesTask = _identityService.GetRolesAsync(user);
+            var linkedEntityTask = LoadLinkedEntityAsync(user.Id, cancellationToken);
+            
+            await Task.WhenAll(rolesTask, linkedEntityTask);
+            
+            var roles = await rolesTask;
+            var (entityType, linkedEntity) = await linkedEntityTask;
             var primaryRole = roles.FirstOrDefault() ?? "Unknown";
 
             var response = new AdminUserDetailResponse
@@ -43,74 +49,72 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 Email = user.Email ?? string.Empty,
                 Name = user.Name,
                 Surname = user.Surname,
-                FullName = $"{user.Name} {user.Surname}".Trim(),
+                FullName = (entityType, linkedEntity) switch
+                {
+                    ("Professional", { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
+                    ("PersonWithDisability", { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
+                    ("FamilyRepresentative", { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
+                    _ => $"{user.Name} {user.Surname}".Trim()
+                },
                 Role = primaryRole,
                 IsActive = user.IsActive,
                 LastLoginDate = user.LastLoginDate,
                 LastLoginIpAddress = user.LastLoginIpAddress,
                 CreatedAt = user.CreatedAt,
-                MustChangePassword = user.MustChangePassword
+                MustChangePassword = user.MustChangePassword,
+                LinkedEntity = (entityType, linkedEntity) switch
+                {
+                    ("Professional", { } e) => new LinkedEntityInfo
+                    {
+                        EntityType = entityType,
+                        EntityId = e.Id,
+                        Specialty = e.Specialty,
+                        LicenseNumber = e.LicenseNumber,
+                        DocumentNumber = e.DocumentNumber,
+                        Phone = e.Phone
+                    },
+                    ("PersonWithDisability", { } e) => new LinkedEntityInfo
+                    {
+                        EntityType = entityType,
+                        EntityId = e.Id,
+                        DocumentNumber = e.DocumentNumber
+                    },
+                    ("FamilyRepresentative", { } e) => new LinkedEntityInfo
+                    {
+                        EntityType = entityType,
+                        EntityId = e.Id,
+                        DocumentNumber = e.DocumentNumber,
+                        Phone = e.Phone,
+                        Relationship = e.Relationship
+                    },
+                    _ => null
+                }
             };
-
-            // Cargar entidad vinculada segun el rol
-            switch (primaryRole)
-            {
-                case "Professional":
-                    var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
-                    if (pro is not null)
-                    {
-                        response.FullName = $"{pro.FirstName} {pro.LastName}".Trim();
-                        response.LinkedEntity = new LinkedEntityInfo
-                        {
-                            EntityType = "Professional",
-                            EntityId = pro.Id,
-                            Specialty = pro.Specialty,
-                            LicenseNumber = pro.LicenseNumber,
-                            DocumentNumber = pro.DocumentNumber,
-                            Phone = pro.Phone
-                        };
-                    }
-                    break;
-
-                case "PersonWithDisability":
-                    var person = await _personsRepository.GetByUserIdAsync(user.Id, cancellationToken);
-                    if (person is not null)
-                    {
-                        response.FullName = $"{person.FirstName} {person.LastName}".Trim();
-                        response.LinkedEntity = new LinkedEntityInfo
-                        {
-                            EntityType = "PersonWithDisability",
-                            EntityId = person.Id,
-                            DocumentNumber = person.DocumentNumber
-                        };
-                    }
-                    break;
-
-                case "FamilyRepresentative":
-                    var family = await _familyRepository.GetByUserIdAsync(user.Id, cancellationToken);
-                    if (family is not null)
-                    {
-                        response.FullName = $"{family.FirstName} {family.LastName}".Trim();
-                        response.LinkedEntity = new LinkedEntityInfo
-                        {
-                            EntityType = "FamilyRepresentative",
-                            EntityId = family.Id,
-                            DocumentNumber = family.DocumentNumber,
-                            Phone = family.Phone,
-                            Relationship = family.Relationship
-                        };
-                    }
-                    break;
-
-                case "Admin":
-                    response.LinkedEntity = new LinkedEntityInfo
-                    {
-                        EntityType = "Admin"
-                    };
-                    break;
-            }
 
             return ApiResponse<AdminUserDetailResponse>.SuccessResult(response);
         }
+
+        private async Task<(string? EntityType, LinkedEntityData?)> LoadLinkedEntityAsync(
+            Guid userId, CancellationToken cancellationToken)
+        {
+            var proTask = _professionalsRepository.GetByUserIdAsync(userId, cancellationToken);
+            var personTask = _personsRepository.GetByUserIdAsync(userId, cancellationToken);
+            var familyTask = _familyRepository.GetByUserIdAsync(userId, cancellationToken);
+
+            await Task.WhenAll(proTask, personTask, familyTask);
+
+            if (await proTask is { } pro)
+                return ("Professional", new LinkedEntityData(pro.Id, pro.FirstName, pro.LastName, pro.Specialty, pro.LicenseNumber, pro.DocumentNumber, pro.Phone, null));
+
+            if (await personTask is { } person)
+                return ("PersonWithDisability", new LinkedEntityData(person.Id, person.FirstName, person.LastName, null, null, person.DocumentNumber, null, null));
+
+            if (await familyTask is { } family)
+                return ("FamilyRepresentative", new LinkedEntityData(family.Id, family.FirstName, family.LastName, null, null, family.DocumentNumber, family.Phone, family.Relationship));
+
+            return (null, null);
+        }
+
+        private record LinkedEntityData(Guid Id, string FirstName, string LastName, string? Specialty, string? LicenseNumber, string? DocumentNumber, string? Phone, string? Relationship);
     }
 }

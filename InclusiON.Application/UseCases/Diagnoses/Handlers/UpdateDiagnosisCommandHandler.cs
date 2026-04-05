@@ -80,7 +80,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
                 command.DiagnosisId, command.RequestedByProfessionalId);
 
             return ApiResponse<DiagnosisResponse>.SuccessResult(
-                GetDiagnosisByIdQuery.MapToResponse(diagnosis),
+                DiagnosisResponse.MapToResponse(diagnosis),
                 "Diagnóstico actualizado exitosamente.");
         }
     }

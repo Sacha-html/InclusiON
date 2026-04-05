@@ -43,7 +43,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             assignment.IsActive = false;
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var response = GetInstitutionsByProfessionalQuery.MapToResponse(assignment);
+            var response = ProfessionalInstitutionResponse.MapToResponse(assignment);
             return ApiResponse<ProfessionalInstitutionResponse>.SuccessResult(response, "Asignacion removida exitosamente.");
         }
     }

@@ -63,6 +63,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             int page, int pageSize, string? search, bool? isActive,
             SortField? sortBy, string sortDirection,
             List<int>? institutionIds = null,
+            string? linkedPersonSearch = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.FamilyRepresentatives
@@ -104,6 +105,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(f => representativeIdsInInstitution.Contains(f.Id));
             }
 
+            if (!string.IsNullOrWhiteSpace(linkedPersonSearch))
+            {
+                var linkedSearchLower = linkedPersonSearch.ToLower();
+                query = query.Where(f =>
+                    f.PersonRepresentatives.Any(pr => pr.IsActive &&
+                        (pr.Person.FirstName.ToLower().Contains(linkedSearchLower) ||
+                         pr.Person.LastName.ToLower().Contains(linkedSearchLower) ||
+                         (pr.Person.DocumentNumber != null && pr.Person.DocumentNumber.Contains(linkedPersonSearch)))));
+            }
+
             var sortMappings = new Dictionary<SortField, Expression<Func<FamilyRepresentative, object>>>
             {
                 [SortField.Id] = f => f.Id,
@@ -117,6 +128,131 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 sortBy, sortDirection,
                 sortMappings,
                 cancellationToken);
+        }
+
+        public async Task<List<(FamilyRepresentative Family, bool WasPreviouslyLinked)>> GetAvailableFamiliesAsync(string? search = null, Guid? personId = null, CancellationToken cancellationToken = default)
+        {
+            var query = _context.FamilyRepresentatives
+                .Include(f => f.User)
+                .Include(f => f.PersonRepresentatives)
+                    .ThenInclude(pr => pr.Person)
+                        .ThenInclude(p => p.DisabilityType)
+                .Where(f => f.User.IsActive && f.Status == Domain.Enums.FamilyStatusEnum.Active)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(f =>
+                    (f.FirstName + " " + f.LastName).ToLower().Contains(searchLower) ||
+                    f.FirstName.ToLower().Contains(searchLower) ||
+                    f.LastName.ToLower().Contains(searchLower));
+            }
+
+            var families = await query.OrderBy(f => f.FirstName).ThenBy(f => f.LastName).ToListAsync(cancellationToken);
+
+            if (personId.HasValue)
+            {
+                var existingLinks = await _context.PersonRepresentatives
+                    .Where(pr => pr.PersonId == personId.Value)
+                    .ToListAsync(cancellationToken);
+
+                var alreadyLinkedIds = existingLinks
+                    .Where(pr => pr.IsActive)
+                    .Select(pr => pr.RepresentativeId)
+                    .ToHashSet();
+
+                var previouslyLinkedIds = existingLinks
+                    .Where(pr => !pr.IsActive)
+                    .Select(pr => pr.RepresentativeId)
+                    .ToHashSet();
+
+                return families
+                    .Where(f => !alreadyLinkedIds.Contains(f.Id))
+                    .Select(f => (f, WasPreviouslyLinked: previouslyLinkedIds.Contains(f.Id)))
+                    .ToList();
+            }
+
+            return families.Select(f => (f, WasPreviouslyLinked: false)).ToList();
+        }
+
+        public async Task<List<PersonRepresentative>> GetPersonRepresentativesByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonRepresentatives
+                .Include(pr => pr.Representative)
+                    .ThenInclude(r => r.User)
+                .Where(pr => pr.PersonId == personId)
+                .OrderByDescending(pr => pr.IsPrimary)
+                .ThenBy(pr => pr.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<PersonRepresentative>> GetPersonRepresentativesByFamilyIdAsync(Guid familyId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonRepresentatives
+                .Include(pr => pr.Person)
+                    .ThenInclude(p => p.DisabilityType)
+                .Where(pr => pr.RepresentativeId == familyId)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<PersonRepresentative?> GetPersonRepresentativeAsync(Guid personId, Guid representativeId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonRepresentatives
+                .FirstOrDefaultAsync(pr => pr.PersonId == personId && pr.RepresentativeId == representativeId, cancellationToken);
+        }
+
+        public async Task CreatePersonRepresentativeAsync(PersonRepresentative personRepresentative, CancellationToken cancellationToken = default)
+        {
+            await _context.PersonRepresentatives.AddAsync(personRepresentative, cancellationToken);
+        }
+
+        public Task UpdatePersonRepresentativeAsync(PersonRepresentative personRepresentative, CancellationToken cancellationToken = default)
+        {
+            _context.PersonRepresentatives.Update(personRepresentative);
+            return Task.CompletedTask;
+        }
+
+        public Task DeletePersonRepresentativeAsync(PersonRepresentative personRepresentative, CancellationToken cancellationToken = default)
+        {
+            _context.PersonRepresentatives.Remove(personRepresentative);
+            return Task.CompletedTask;
+        }
+
+        public async Task CreateFamilyStatusHistoryAsync(FamilyStatusHistory history, CancellationToken cancellationToken = default)
+        {
+            await _context.FamilyStatusHistories.AddAsync(history, cancellationToken);
+        }
+
+        public async Task<List<FamilyStatusHistory>> GetFamilyStatusHistoryAsync(Guid familyId, CancellationToken cancellationToken = default)
+        {
+            return await _context.FamilyStatusHistories
+                .Where(h => h.FamilyId == familyId)
+                .OrderByDescending(h => h.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task CreatePersonRepresentativeHistoryAsync(PersonRepresentativeHistory history, CancellationToken cancellationToken = default)
+        {
+            await _context.PersonRepresentativeHistories.AddAsync(history, cancellationToken);
+        }
+
+        public async Task<List<PersonRepresentativeHistory>> GetPersonRepresentativeHistoryAsync(Guid personId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonRepresentativeHistories
+                .Include(h => h.Representative)
+                .Where(h => h.PersonId == personId)
+                .OrderByDescending(h => h.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<PersonRepresentativeHistory>> GetPersonRepresentativeHistoryByFamilyAsync(Guid familyId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonRepresentativeHistories
+                .Include(h => h.Person)
+                .Where(h => h.RepresentativeId == familyId)
+                .OrderByDescending(h => h.CreatedAt)
+                .ToListAsync(cancellationToken);
         }
     }
 }

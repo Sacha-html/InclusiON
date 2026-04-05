@@ -112,8 +112,9 @@ namespace InclusiON.Api.Controllers
                 "persons:read", "persons:create", "persons:update", "persons:delete",
                 // Profesionales
                 "professionals:read", "professionals:create", "professionals:update", "professionals:delete",
+                "professionals:link-family", "professionals:unlink-family",
                 // Familiares
-                "family:read", "family:create", "family:update", "family:delete",
+                "family:read", "family:create", "family:update", "family:delete", "family:link", "family:unlink",
                 // Actividades
                 "activities:read", "activities:create", "activities:update", "activities:delete", "activities:respond",
                 // Diagnósticos
