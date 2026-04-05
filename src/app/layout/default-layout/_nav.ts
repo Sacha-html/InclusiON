@@ -8,17 +8,7 @@ export const navItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Gestion',
-  },
-  {
-    name: 'Profesionales',
-    url: '/admin/professionals',
-    iconComponent: { name: 'cil-user' },
-  },
-  {
-    name: 'Personas',
-    url: '/admin/persons',
-    iconComponent: { name: 'cil-people' },
+    name: 'Gestión',
   },
   {
     name: 'Familiares',
@@ -36,31 +26,41 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-link' },
   },
   {
-    name: 'Usuarios',
-    url: '/admin/users',
+    name: 'Personas',
+    url: '/admin/persons',
     iconComponent: { name: 'cil-people' },
   },
   {
-    title: true,
-    name: 'Configuracion',
+    name: 'Profesionales',
+    url: '/admin/professionals',
+    iconComponent: { name: 'cil-user' },
   },
   {
-    name: 'Catalogos',
+    name: 'Usuarios',
+    url: '/admin/users',
+    iconComponent: { name: 'cil-group' },
+  },
+  {
+    title: true,
+    name: 'Configuración',
+  },
+  {
+    name: 'Catálogos',
     url: '/admin/catalogs',
     iconComponent: { name: 'cil-notes' },
     children: [
+      { name: 'Áreas de Habilidad', url: '/admin/catalogs/skill-areas' },
+      { name: 'Categorías de Actividad', url: '/admin/catalogs/activity-categories' },
+      { name: 'Métodos de Login', url: '/admin/catalogs/login-methods' },
+      { name: 'Niveles de Autonomía', url: '/admin/catalogs/autonomy-levels' },
       { name: 'Tipos de Discapacidad', url: '/admin/catalogs/disability-types' },
-      { name: 'Niveles de Autonomia', url: '/admin/catalogs/autonomy-levels' },
-      { name: 'Categorias de Actividad', url: '/admin/catalogs/activity-categories' },
-      { name: 'Areas de Habilidad', url: '/admin/catalogs/skill-areas' },
-      { name: 'Tipos de Template', url: '/admin/catalogs/template-types' },
-      { name: 'Metodos de Login', url: '/admin/catalogs/login-methods' },
+      { name: 'Tipos de Plantilla', url: '/admin/catalogs/template-types' },
     ],
   },
   {
     name: 'Mis Instituciones',
     url: '/admin/my-institutions',
-    iconComponent: { name: 'cil-book' },
+    iconComponent: { name: 'cil-library' },
   },
   {
     title: true,
