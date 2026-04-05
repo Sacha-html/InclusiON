@@ -8,7 +8,9 @@ using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 {
-    public class GetAdminUsersQueryHandler : IQueryHandler<GetAdminUsersQuery, ApiResponse<PagedResponse<AdminUserListItemResponse>>>
+    public class
+        GetAdminUsersQueryHandler : IQueryHandler<GetAdminUsersQuery,
+        ApiResponse<PagedResponse<AdminUserListItemResponse>>>
     {
         private readonly IRawDbExecutor _db;
 
@@ -20,18 +22,12 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         public async Task<ApiResponse<PagedResponse<AdminUserListItemResponse>>> HandleAsync(
             GetAdminUsersQuery query, CancellationToken cancellationToken)
         {
-            var whereClauses = new List<string>();
-            var configureParams = BuildParameters(query, whereClauses);
-
-            var whereClause = whereClauses.Count > 0
-                ? "WHERE " + string.Join(" AND ", whereClauses)
-                : "";
+            var (whereClause, sqlParams) = BuildFilters(query);
 
             var orderColumn = query.SortBy switch
             {
                 SortField.Email => "u.Email",
                 SortField.Name or SortField.FirstName => "FullName",
-                SortField.CreatedAt => "u.CreatedAt",
                 _ => "u.CreatedAt"
             };
             var orderDirection = query.SortDirection?.ToUpper() == "ASC" ? "ASC" : "DESC";
@@ -48,7 +44,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             // Count
             var countSql = $"SELECT COUNT(*) {baseSql}";
-            var totalRecords = (int)(await _db.ExecuteScalarAsync<int>(countSql, configureParams, cancellationToken))!;
+            var totalRecords = (int)(await _db.ExecuteScalarAsync<int>(countSql, sqlParams, cancellationToken))!;
 
             // Data
             var dataSql = $@"
@@ -62,7 +58,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 ORDER BY {orderColumn} {orderDirection}
                 OFFSET {skip} ROWS FETCH NEXT {query.PageSize} ROWS ONLY";
 
-            var items = await _db.QueryAsync(dataSql, MapRow, configureParams, cancellationToken);
+            var items = await _db.QueryAsync(dataSql, AdminUserListItemResponse.FromReader, sqlParams,
+                cancellationToken);
 
             var totalPages = (int)Math.Ceiling((double)totalRecords / query.PageSize);
 
@@ -80,85 +77,77 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             return ApiResponse<PagedResponse<AdminUserListItemResponse>>.SuccessResult(response);
         }
 
-        private static Action<IDbCommand> BuildParameters(GetAdminUsersQuery query, List<string> whereClauses)
+        private static (string whereClause, Action<IDbCommand> configureParams) BuildFilters(GetAdminUsersQuery query)
         {
-            return cmd =>
+            var whereClauses = new List<string>();
+            var parameters = new List<(string Name, object Value)>();
+
+            if (!string.IsNullOrWhiteSpace(query.Search))
             {
-                if (!string.IsNullOrWhiteSpace(query.Search))
-                {
-                    whereClauses.Add(@"(u.Email LIKE @Search
-                        OR COALESCE(p.FirstName, pwd.FirstName, fr.FirstName, u.Name, '') LIKE @Search
-                        OR COALESCE(p.LastName, pwd.LastName, fr.LastName, u.Surname, '') LIKE @Search)");
-                    AddParam(cmd, "@Search", $"%{query.Search}%");
-                }
+                whereClauses.Add(@"(u.Email LIKE @Search
+                    OR COALESCE(p.FirstName, pwd.FirstName, fr.FirstName, u.Name, '') LIKE @Search
+                    OR COALESCE(p.LastName, pwd.LastName, fr.LastName, u.Surname, '') LIKE @Search)");
+                parameters.Add(("@Search", $"%{query.Search}%"));
+            }
 
-                if (!string.IsNullOrWhiteSpace(query.Role))
-                {
-                    whereClauses.Add("r.Name = @Role");
-                    AddParam(cmd, "@Role", query.Role);
-                }
-
-                if (query.IsActive.HasValue)
-                {
-                    whereClauses.Add("u.IsActive = @IsActive");
-                    AddParam(cmd, "@IsActive", query.IsActive.Value);
-                }
-
-                if (query.InstitutionIds is not null && query.InstitutionIds.Count > 0)
-                {
-                    // Build IN clause with individual parameters
-                    var paramNames = new List<string>();
-                    for (int i = 0; i < query.InstitutionIds.Count; i++)
-                    {
-                        var paramName = $"@InstId{i}";
-                        paramNames.Add(paramName);
-                        AddParam(cmd, paramName, query.InstitutionIds[i]);
-                    }
-                    var inClause = string.Join(", ", paramNames);
-
-                    whereClauses.Add($@"EXISTS (
-                        SELECT 1 FROM ProfessionalInstitutions pi
-                        WHERE pi.ProfessionalId = p.Id AND pi.InstitutionId IN ({inClause}) AND pi.IsActive = 1
-                        UNION ALL
-                        SELECT 1 FROM ProfessionalInstitutions pi2
-                        INNER JOIN ProfessionalPersons pp2 ON pi2.ProfessionalId = pp2.ProfessionalId AND pp2.IsActive = 1
-                        WHERE pp2.PersonId = pwd.Id AND pi2.InstitutionId IN ({inClause}) AND pi2.IsActive = 1
-                        UNION ALL
-                        SELECT 1 FROM AdminInstitutions ai
-                        WHERE ai.AdminUserId = u.Id AND ai.InstitutionId IN ({inClause}) AND ai.IsActive = 1
-                        UNION ALL
-                        SELECT 1 FROM ProfessionalInstitutions pi3
-                        INNER JOIN ProfessionalPersons pp3 ON pi3.ProfessionalId = pp3.ProfessionalId AND pp3.IsActive = 1
-                        INNER JOIN PersonRepresentatives pr ON pp3.PersonId = pr.PersonId AND pr.IsActive = 1
-                        WHERE pr.RepresentativeId = fr.Id AND pi3.InstitutionId IN ({inClause}) AND pi3.IsActive = 1
-                    )");
-                }
-            };
-        }
-
-        private static void AddParam(IDbCommand cmd, string name, object value)
-        {
-            var param = cmd.CreateParameter();
-            param.ParameterName = name;
-            param.Value = value;
-            cmd.Parameters.Add(param);
-        }
-
-        private static AdminUserListItemResponse MapRow(IDataReader reader)
-        {
-            return new AdminUserListItemResponse
+            if (!string.IsNullOrWhiteSpace(query.Role))
             {
-                UserId = reader.GetGuid(reader.GetOrdinal("UserId")),
-                Email = reader.GetString(reader.GetOrdinal("Email")),
-                IsActive = reader.GetBoolean(reader.GetOrdinal("IsActive")),
-                LastLoginDate = reader.IsDBNull(reader.GetOrdinal("LastLoginDate"))
-                    ? null
-                    : reader.GetDateTime(reader.GetOrdinal("LastLoginDate")),
-                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CreatedAt")),
-                MustChangePassword = reader.GetBoolean(reader.GetOrdinal("MustChangePassword")),
-                Role = reader.GetString(reader.GetOrdinal("Role")),
-                FullName = reader.GetString(reader.GetOrdinal("FullName"))
-            };
+                whereClauses.Add("r.Name = @Role");
+                parameters.Add(("@Role", query.Role));
+            }
+
+            if (query.IsActive.HasValue)
+            {
+                whereClauses.Add("u.IsActive = @IsActive");
+                parameters.Add(("@IsActive", query.IsActive.Value));
+            }
+
+            if (query.InstitutionIds is not null && query.InstitutionIds.Count > 0)
+            {
+                var paramNames = new List<string>();
+                for (int i = 0; i < query.InstitutionIds.Count; i++)
+                {
+                    var paramName = $"@InstId{i}";
+                    paramNames.Add(paramName);
+                    parameters.Add((paramName, query.InstitutionIds[i]));
+                }
+
+                var inClause = string.Join(", ", paramNames);
+
+                whereClauses.Add($@"EXISTS (
+                    SELECT 1 FROM ProfessionalInstitutions pi
+                    WHERE pi.ProfessionalId = p.Id AND pi.InstitutionId IN ({inClause}) AND pi.IsActive = 1
+                    UNION ALL
+                    SELECT 1 FROM ProfessionalInstitutions pi2
+                    INNER JOIN ProfessionalPersons pp2 ON pi2.ProfessionalId = pp2.ProfessionalId AND pp2.IsActive = 1
+                    WHERE pp2.PersonId = pwd.Id AND pi2.InstitutionId IN ({inClause}) AND pi2.IsActive = 1
+                    UNION ALL
+                    SELECT 1 FROM AdminInstitutions ai
+                    WHERE ai.AdminUserId = u.Id AND ai.InstitutionId IN ({inClause}) AND ai.IsActive = 1
+                    UNION ALL
+                    SELECT 1 FROM ProfessionalInstitutions pi3
+                    INNER JOIN ProfessionalPersons pp3 ON pi3.ProfessionalId = pp3.ProfessionalId AND pp3.IsActive = 1
+                    INNER JOIN PersonRepresentatives pr ON pp3.PersonId = pr.PersonId AND pr.IsActive = 1
+                    WHERE pr.RepresentativeId = fr.Id AND pi3.InstitutionId IN ({inClause}) AND pi3.IsActive = 1
+                )");
+            }
+
+            var whereClause = whereClauses.Count > 0
+                ? "WHERE " + string.Join(" AND ", whereClauses)
+                : "";
+
+            var configureParams = (Action<IDbCommand>)((IDbCommand cmd) =>
+            {
+                foreach (var (name, value) in parameters)
+                {
+                    var param = cmd.CreateParameter();
+                    param.ParameterName = name;
+                    param.Value = value;
+                    cmd.Parameters.Add(param);
+                }
+            });
+
+            return (whereClause, configureParams);
         }
     }
 }

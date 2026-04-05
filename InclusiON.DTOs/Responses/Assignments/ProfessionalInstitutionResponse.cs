@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models;
+
 namespace InclusiON.DTOs.Responses.Assignments
 {
     /// <summary>
@@ -10,5 +12,17 @@ namespace InclusiON.DTOs.Responses.Assignments
         public string InstitutionName { get; set; } = string.Empty;
         public DateTime AssignedAt { get; set; }
         public bool IsActive { get; set; }
+
+        public static ProfessionalInstitutionResponse MapToResponse(ProfessionalInstitution assignment)
+        {
+            return new ProfessionalInstitutionResponse
+            {
+                ProfessionalId = assignment.ProfessionalId,
+                InstitutionId = assignment.InstitutionId,
+                InstitutionName = assignment.Institution?.Name ?? string.Empty,
+                AssignedAt = assignment.AssignedAt,
+                IsActive = assignment.IsActive
+            };
+        }
     }
 }

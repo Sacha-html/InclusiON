@@ -22,7 +22,7 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
         {
             var institutions = await _repository.GetAllAsync(cancellationToken);
 
-            var response = institutions.Select(GetInstitutionsQuery.MapToResponse).ToList();
+            var response = institutions.Select(InstitutionResponse.MapToResponse).ToList();
             return ApiResponse<List<InstitutionResponse>>.SuccessResult(response);
         }
     }

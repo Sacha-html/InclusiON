@@ -51,17 +51,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             // Si no está en cache, consultar BD
             var loginMethods = await _repository.GetActiveLoginMethodsAsync(cancellationToken);
 
-            var response = loginMethods.Select(lm => new LoginMethodResponse
-            {
-                Id = lm.Id,
-                Code = lm.Code,
-                Name = lm.Name,
-                Description = lm.Description,
-                RequiresPassword = lm.RequiresPassword,
-                RequiresPin = lm.RequiresPin,
-                RequiresSupervisor = lm.RequiresSupervisor,
-                DisplayOrder = lm.DisplayOrder
-            }).ToList();
+            var response = loginMethods.Select(LoginMethodResponse.MapToResponse).ToList();
 
             // Guardar en cache
             var cacheOptions = new MemoryCacheEntryOptions()

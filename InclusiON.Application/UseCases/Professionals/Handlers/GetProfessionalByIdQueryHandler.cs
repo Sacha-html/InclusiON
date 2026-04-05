@@ -28,7 +28,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     ErrorMessages.ProfessionalNotFound);
             }
 
-            var response = GetProfessionalByIdQuery.MapToResponse(professional);
+            var response = ProfessionalResponse.MapToResponse(professional);
             return ApiResponse<ProfessionalResponse>.SuccessResult(response);
         }
     }

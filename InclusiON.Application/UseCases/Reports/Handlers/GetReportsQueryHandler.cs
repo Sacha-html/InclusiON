@@ -35,24 +35,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             var response = new PagedResponse<ReportsListItemReponse>
             {
-                Data = pagedResult.Data.Select(r => new ReportsListItemReponse
-                {
-                    Id = r.Id,
-                    Title = r.Title,
-                    Content = r.Content,
-                    ReportDate = r.ReportDate,
-                    PersonId = r.PersonId,
-                    PersonName = r.Person != null ? $"{r.Person.FirstName} {r.Person.LastName}".Trim() : null,
-                    ProfessionalId = r.ProfessionalId,
-                    ProfessionalName = r.Professional != null ? $"{r.Professional.FirstName} {r.Professional.LastName}".Trim() : null,
-                    ReportTypeId = r.ReportTypeId,
-                    ReportTypeName = r.ReportType?.Name,
-                    AchievedGoals = r.AchievedGoals,
-                    AreasToReinforce = r.AreasToReinforce,
-                    FutureRecommendations = r.FutureRecommendations,
-                    NextObjectives = r.NextObjectives,
-                    IsActive = r.IsActive
-                }).ToList(),
+                Data = pagedResult.Data.Select(ReportsListItemReponse.MapToResponse).ToList(),
                 TotalRecords = pagedResult.TotalRecords,
                 TotalPages = pagedResult.TotalPages,
                 CurrentPage = pagedResult.CurrentPage,

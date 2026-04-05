@@ -5,6 +5,7 @@ using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.AdminUsers.Commands;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 {
@@ -63,7 +64,19 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             await _refreshTokensRepository.RevokeAllUserTokensAsync(
                 user.Id, Constants.RevokeReasons.UserDeactivated, cancellationToken);
 
-            // Desactivar entidad vinculada
+            await SetLinkedEntityActiveAsync(user, false, cancellationToken);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "User {UserId} ({Email}) deactivated by admin {AdminId}",
+                user.Id, user.Email, command.RequestedByUserId);
+
+            return ApiResponse<object>.SuccessResult("Usuario desactivado exitosamente.");
+        }
+
+        private async Task SetLinkedEntityActiveAsync(User user, bool isActive, CancellationToken cancellationToken)
+        {
             var roles = await _identityService.GetRolesAsync(user);
             var primaryRole = roles.FirstOrDefault();
 
@@ -73,7 +86,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (pro is not null)
                     {
-                        pro.User.IsActive = false;
+                        pro.User.IsActive = isActive;
                         await _professionalsRepository.UpdateAsync(pro, cancellationToken);
                     }
                     break;
@@ -82,7 +95,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     var person = await _personsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (person is not null)
                     {
-                        person.User.IsActive = false;
+                        person.User.IsActive = isActive;
                         await _personsRepository.UpdateAsync(person, cancellationToken);
                     }
                     break;
@@ -91,19 +104,11 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     var family = await _familyRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (family is not null)
                     {
-                        family.User.IsActive = false;
+                        family.User.IsActive = isActive;
                         await _familyRepository.UpdateAsync(family, cancellationToken);
                     }
                     break;
             }
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation(
-                "User {UserId} ({Email}) deactivated by admin {AdminId}",
-                user.Id, user.Email, command.RequestedByUserId);
-
-            return ApiResponse<object>.SuccessResult("Usuario desactivado exitosamente.");
         }
     }
 }

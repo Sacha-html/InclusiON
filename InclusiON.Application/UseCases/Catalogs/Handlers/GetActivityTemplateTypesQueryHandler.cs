@@ -22,19 +22,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         {
             var items = await _repository.GetAllActiveAsync(cancellationToken);
 
-            var response = items.Select(x => new ActivityTemplateTypeResponse
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description,
-                Code = x.Code,
-                SkillAreaId = x.SkillAreaId,
-                ContentSchema = x.ContentSchema,
-                ComponentName = x.ComponentName,
-                UsesPictograms = x.UsesPictograms,
-                HasAudio = x.HasAudio,
-                DisplayOrder = x.DisplayOrder
-            }).ToList();
+            var response = items.Select(ActivityTemplateTypeResponse.MapToResponse).ToList();
 
             return ApiResponse<List<ActivityTemplateTypeResponse>>.SuccessResult(response);
         }
