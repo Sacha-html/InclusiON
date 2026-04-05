@@ -1,7 +1,7 @@
 <c-card class="mb-3">
 
   <!-- Header con titulo y botones -->
-  @if (title || headerButtons.length > 0) {
+  @if (showTitle && (title || headerButtons.length > 0)) {
     <c-card-header class="d-flex justify-content-between align-items-center">
       <h5 class="mb-0">{{ title }}</h5>
       <div class="d-flex gap-2">
@@ -12,6 +12,9 @@
             size="sm"
             (click)="headerAction.emit(btn.action)"
           >
+            @if (btn.icon) {
+              <svg cIcon [name]="btn.icon" size="sm" class="me-1"></svg>
+            }
             {{ btn.label }}
           </button>
         }
@@ -64,24 +67,24 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of items; track item.id) {
+        @for (item of items; track $index) {
           <tr>
             @for (col of columns; track col.key) {
               <td>
                 @switch (col.type) {
                   @case ('badge') {
-                    <c-badge [color]="getBadgeColor(item[col.key])"
+                    <c-badge [color]="getBadgeColor(item[col.key], col)"
                           role="status"
-                          [attr.aria-label]="'Estado: ' + getBadgeLabel(item[col.key])">
-                      {{ getBadgeLabel(item[col.key]) }}
+                          [attr.aria-label]="'Estado: ' + getBadgeLabel(item[col.key], col)">
+                      {{ getBadgeLabel(item[col.key], col) }}
                     </c-badge>
                   }
                   @case ('actions') {
-                    @if (col.actions && col.actions.length > 0) {
+                    @if (col.actions && getVisibleActions(col, item).length > 0) {
                       <c-dropdown>
                         <button cButton color="secondary" size="sm" cDropdownToggle
                                 [attr.aria-label]="'Acciones para ' + (item.fullName || item.name || 'este registro')">
-                          <span aria-hidden="true">&#9776;</span>
+                          <svg cIcon name="cilMenu" size="sm"></svg>
                         </button>
                         <ul cDropdownMenu>
                           @for (action of getVisibleActions(col, item); track action.action) {
@@ -98,11 +101,7 @@
                         </ul>
                       </c-dropdown>
                     } @else {
-                      <button cButton color="info" size="sm"
-                              [attr.aria-label]="'Ver detalles de ' + (item.fullName || item.name || 'este registro')"
-                              (click)="rowAction.emit({ action: 'view', item: item })">
-                        Ver
-                      </button>
+                      <span class="text-body-secondary">-</span>
                     }
                   }
                   @default {
@@ -125,7 +124,7 @@
     </div>
 
     <!-- Info y paginacion -->
-    @if (totalItems > 0) {
+    @if (totalItems > 0 && showPagination) {
       <div class="d-flex justify-content-between align-items-center mt-3">
         <small class="text-body-secondary">
           Mostrando {{ showingFrom }}–{{ showingTo }} de {{ totalItems }}

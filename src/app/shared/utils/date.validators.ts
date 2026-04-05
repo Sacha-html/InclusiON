@@ -1,6 +1,6 @@
 import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
 import { Observable, of, timer } from 'rxjs';
-import { map, switchMap, debounceTime, distinctUntilChanged, catchError } from 'rxjs/operators';
+import { map, switchMap, catchError } from 'rxjs/operators';
 
 export function validDate(control: AbstractControl): ValidationErrors | null {
   if (!control.value) return null;
@@ -79,7 +79,7 @@ export function toIsoDate(ddmmyyyy: string): string {
 export function toDisplayDate(iso: string | undefined | null): string {
   if (!iso) return '';
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return '';
+  if (Number.isNaN(d.getTime())) return '';
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();

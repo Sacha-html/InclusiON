@@ -1,5 +1,6 @@
 export { AdminInstitutionsService } from './admin-institutions.service';
 export { AdminUsersService } from './admin-users.service';
+export { UserManagementService } from './user-management.service';
 export { AuthService } from './auth.service';
 export { ToastService } from './toast.service';
 export { AccessibilityService } from './accessibility.service';
