@@ -20,8 +20,10 @@ builder.Services.AddHttpClient();
 builder.Host.UseSerilog((context, config) =>
 {
     config
-        .MinimumLevel.Debug()
+        .MinimumLevel.Information()
         .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
         .WriteTo.File("logs/inclusion-.log",
                         rollingInterval: RollingInterval.Day,

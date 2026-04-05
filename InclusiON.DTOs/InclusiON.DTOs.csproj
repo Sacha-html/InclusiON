@@ -14,4 +14,8 @@
     <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\InclusiON.Domain\InclusiON.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

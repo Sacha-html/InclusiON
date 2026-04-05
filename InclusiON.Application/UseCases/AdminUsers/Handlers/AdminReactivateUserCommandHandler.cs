@@ -7,6 +7,7 @@ using InclusiON.Application.UseCases.AdminUsers.Commands;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Admin;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 {
@@ -66,39 +67,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             user.MustChangePassword = true;
             await _identityService.UpdateUserAsync(user);
 
-            // Reactivar entidad vinculada
-            var roles = await _identityService.GetRolesAsync(user);
-            var primaryRole = roles.FirstOrDefault();
-
-            switch (primaryRole)
-            {
-                case "Professional":
-                    var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
-                    if (pro is not null)
-                    {
-                        pro.User.IsActive = true;
-                        await _professionalsRepository.UpdateAsync(pro, cancellationToken);
-                    }
-                    break;
-
-                case "PersonWithDisability":
-                    var person = await _personsRepository.GetByUserIdAsync(user.Id, cancellationToken);
-                    if (person is not null)
-                    {
-                        person.User.IsActive = true;
-                        await _personsRepository.UpdateAsync(person, cancellationToken);
-                    }
-                    break;
-
-                case "FamilyRepresentative":
-                    var family = await _familyRepository.GetByUserIdAsync(user.Id, cancellationToken);
-                    if (family is not null)
-                    {
-                        family.User.IsActive = true;
-                        await _familyRepository.UpdateAsync(family, cancellationToken);
-                    }
-                    break;
-            }
+            await SetLinkedEntityActiveAsync(user, true, cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -136,6 +105,42 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     UserEmail = user.Email ?? string.Empty
                 },
                 "Usuario reactivado exitosamente.");
+        }
+
+        private async Task SetLinkedEntityActiveAsync(User user, bool isActive, CancellationToken cancellationToken)
+        {
+            var roles = await _identityService.GetRolesAsync(user);
+            var primaryRole = roles.FirstOrDefault();
+
+            switch (primaryRole)
+            {
+                case "Professional":
+                    var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
+                    if (pro is not null)
+                    {
+                        pro.User.IsActive = isActive;
+                        await _professionalsRepository.UpdateAsync(pro, cancellationToken);
+                    }
+                    break;
+
+                case "PersonWithDisability":
+                    var person = await _personsRepository.GetByUserIdAsync(user.Id, cancellationToken);
+                    if (person is not null)
+                    {
+                        person.User.IsActive = isActive;
+                        await _personsRepository.UpdateAsync(person, cancellationToken);
+                    }
+                    break;
+
+                case "FamilyRepresentative":
+                    var family = await _familyRepository.GetByUserIdAsync(user.Id, cancellationToken);
+                    if (family is not null)
+                    {
+                        family.User.IsActive = isActive;
+                        await _familyRepository.UpdateAsync(family, cancellationToken);
+                    }
+                    break;
+            }
         }
     }
 }

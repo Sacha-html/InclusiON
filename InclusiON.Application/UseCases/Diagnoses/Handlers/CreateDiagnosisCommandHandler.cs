@@ -84,7 +84,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             // Recargar con includes para el response
             var created = await _repository.GetByIdAsync(diagnosis.Id, cancellationToken);
             return ApiResponse<DiagnosisResponse>.SuccessResult(
-                GetDiagnosisByIdQuery.MapToResponse(created!),
+                DiagnosisResponse.MapToResponse(created!),
                 "Diagnóstico creado exitosamente.");
         }
     }

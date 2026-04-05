@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using InclusiON.Domain.Models;
 
 namespace InclusiON.DTOs.Responses.Reports
 {
@@ -23,5 +19,27 @@ namespace InclusiON.DTOs.Responses.Reports
         public string? FutureRecommendations { get; set; }
         public string? NextObjectives { get; set; }
         public bool IsActive { get; set; }
+
+        public static ReportsListItemReponse MapToResponse(Report r)
+        {
+            return new ReportsListItemReponse
+            {
+                Id = r.Id,
+                Title = r.Title,
+                Content = r.Content,
+                ReportDate = r.ReportDate,
+                PersonId = r.PersonId,
+                PersonName = r.Person != null ? $"{r.Person.FirstName} {r.Person.LastName}".Trim() : null,
+                ProfessionalId = r.ProfessionalId,
+                ProfessionalName = r.Professional != null ? $"{r.Professional.FirstName} {r.Professional.LastName}".Trim() : null,
+                ReportTypeId = r.ReportTypeId,
+                ReportTypeName = r.ReportType?.Name,
+                AchievedGoals = r.AchievedGoals,
+                AreasToReinforce = r.AreasToReinforce,
+                FutureRecommendations = r.FutureRecommendations,
+                NextObjectives = r.NextObjectives,
+                IsActive = r.IsActive
+            };
+        }
     }
 }

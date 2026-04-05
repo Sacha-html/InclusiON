@@ -1,3 +1,4 @@
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
@@ -45,6 +46,21 @@ namespace InclusiON.Domain.Models
         public string? Relationship { get; set; }
 
         /// <summary>
+        /// Indica si el familiar esta activo.
+        /// </summary>
+        public bool IsActive { get; set; } = true;
+
+        /// <summary>
+        /// Estado del familiar en el sistema.
+        /// </summary>
+        public FamilyStatusEnum Status { get; set; } = FamilyStatusEnum.Active;
+
+        /// <summary>
+        /// Historial de cambios de estado del familiar.
+        /// </summary>
+        public virtual ICollection<FamilyStatusHistory> StatusHistory { get; set; }
+
+        /// <summary>
         /// Usuario asociado a este perfil.
         /// </summary>
         public virtual User User { get; set; } = null!;
@@ -58,6 +74,7 @@ namespace InclusiON.Domain.Models
         {
             Id = Guid.NewGuid();
             PersonRepresentatives = new HashSet<PersonRepresentative>();
+            StatusHistory = new HashSet<FamilyStatusHistory>();
         }
     }
 }

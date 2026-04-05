@@ -35,23 +35,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
             var response = new PagedResponse<PersonListItemResponse>
             {
-                Data = pagedResult.Data.Select(p => new PersonListItemResponse
-                {
-                    Id = p.Id,
-                    UserId = p.UserId,
-                    FirstName = p.FirstName,
-                    LastName = p.LastName,
-                    DocumentNumber = p.DocumentNumber,
-                    BirthDate = p.BirthDate,
-                    PhotoUrl = p.PhotoUrl,
-                    AvatarColor = p.AvatarColor,
-                    DisabilityTypeId = p.DisabilityTypeId,
-                    DisabilityTypeName = p.DisabilityType?.Name,
-                    AutonomyLevelId = p.AutonomyLevelId,
-                    AutonomyLevelName = p.AutonomyLevel?.Name,
-                    LoginMethodName = p.LoginMethod?.Name,
-                    IsActive = p.User?.IsActive ?? false
-                }).ToList(),
+                Data = pagedResult.Data.Select(PersonListItemResponse.MapToResponse).ToList(),
                 TotalRecords = pagedResult.TotalRecords,
                 TotalPages = pagedResult.TotalPages,
                 CurrentPage = pagedResult.CurrentPage,
