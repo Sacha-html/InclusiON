@@ -752,7 +752,7 @@ namespace InclusiON.Data.Migrations
 
                     b.HasIndex("InstitutionId");
 
-                    b.ToTable("AdminInstitutions", (string)null);
+                    b.ToTable("AdminInstitutions");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.AutonomyLevel", b =>
@@ -1022,9 +1022,7 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -1039,6 +1037,9 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -1050,9 +1051,7 @@ namespace InclusiON.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DocumentNumber")
-                        .IsUnique()
-                        .HasFilter("[DocumentNumber] IS NOT NULL");
+                    b.HasIndex("DocumentNumber");
 
                     b.HasIndex("FirstName");
 
@@ -1064,6 +1063,50 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("IsActive", "FirstName");
 
                     b.ToTable("FamilyRepresentatives", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.FamilyStatusHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ChangedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NewStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observation")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("OldStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FamilyId");
+
+                    b.ToTable("FamilyStatusHistories", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.Invitation", b =>
@@ -1307,10 +1350,8 @@ namespace InclusiON.Data.Migrations
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRepresentative", b =>
                 {
-                    b.Property<Guid>("PersonId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RepresentativeId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("CanSuperviseLogin")
@@ -1322,6 +1363,9 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EndedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("HasInformedConsent")
@@ -1339,11 +1383,89 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.HasKey("PersonId", "RepresentativeId");
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Relationship")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("RepresentativeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UnlinkObservation")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RepresentativeId");
 
+                    b.HasIndex("PersonId", "RepresentativeId")
+                        .IsUnique();
+
                     b.ToTable("PersonRepresentatives", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonRepresentativeHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ChangeType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ChangedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Observation")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PersonRepresentativeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Relationship")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("RepresentativeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool?>("WasPrimary")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("PersonRepresentativeId");
+
+                    b.HasIndex("RepresentativeId");
+
+                    b.ToTable("PersonRepresentativeHistories", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRoadmap", b =>
@@ -2685,10 +2807,21 @@ namespace InclusiON.Data.Migrations
                     b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithOne("FamilyRepresentative")
                         .HasForeignKey("InclusiON.Domain.Models.FamilyRepresentative", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.FamilyStatusHistory", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.FamilyRepresentative", "Family")
+                        .WithMany("StatusHistory")
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Family");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.Invitation", b =>
@@ -2759,6 +2892,25 @@ namespace InclusiON.Data.Migrations
 
                     b.HasOne("InclusiON.Domain.Models.FamilyRepresentative", "Representative")
                         .WithMany("PersonRepresentatives")
+                        .HasForeignKey("RepresentativeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+
+                    b.Navigation("Representative");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonRepresentativeHistory", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.FamilyRepresentative", "Representative")
+                        .WithMany()
                         .HasForeignKey("RepresentativeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -3099,6 +3251,8 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.FamilyRepresentative", b =>
                 {
                     b.Navigation("PersonRepresentatives");
+
+                    b.Navigation("StatusHistory");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.LoginMethod", b =>
