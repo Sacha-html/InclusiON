@@ -144,6 +144,8 @@ export class RolesComponent implements OnInit {
       delete: 'Eliminar',
       export: 'Exportar',
       respond: 'Responder',
+      link: 'Vincular',
+      unlink: 'Desvincular',
     };
     return labels[action] || action;
   }
