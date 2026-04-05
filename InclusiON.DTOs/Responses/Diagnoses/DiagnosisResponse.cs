@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models;
+
 namespace InclusiON.DTOs.Responses.Diagnoses
 {
     public class DiagnosisResponse
@@ -16,5 +18,26 @@ namespace InclusiON.DTOs.Responses.Diagnoses
         public string? RecommendedStrategies { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        public static DiagnosisResponse MapToResponse(Diagnosis d)
+        {
+            return new DiagnosisResponse
+            {
+                Id = d.Id,
+                PersonId = d.PersonId,
+                ProfessionalId = d.ProfessionalId,
+                ProfessionalName = $"{d.Professional.FirstName} {d.Professional.LastName}".Trim(),
+                DiagnosisDate = d.DiagnosisDate,
+                PrimaryDiagnosis = d.PrimaryDiagnosis,
+                InitialObservations = d.InitialObservations,
+                IdentifiedCapabilities = d.IdentifiedCapabilities,
+                IdentifiedChallenges = d.IdentifiedChallenges,
+                RequiredSupports = d.RequiredSupports,
+                PedagogicalObjectives = d.PedagogicalObjectives,
+                RecommendedStrategies = d.RecommendedStrategies,
+                CreatedAt = d.CreatedAt,
+                UpdatedAt = d.UpdatedAt
+            };
+        }
     }
 }

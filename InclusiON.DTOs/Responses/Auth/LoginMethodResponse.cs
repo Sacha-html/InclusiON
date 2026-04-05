@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models;
+
 namespace InclusiON.DTOs.Responses.Auth
 {
     /// <summary>
@@ -44,5 +46,20 @@ namespace InclusiON.DTOs.Responses.Auth
         /// Orden de visualizacion.
         /// </summary>
         public int DisplayOrder { get; set; }
+
+        public static LoginMethodResponse MapToResponse(LoginMethod lm)
+        {
+            return new LoginMethodResponse
+            {
+                Id = lm.Id,
+                Code = lm.Code,
+                Name = lm.Name,
+                Description = lm.Description,
+                RequiresPassword = lm.RequiresPassword,
+                RequiresPin = lm.RequiresPin,
+                RequiresSupervisor = lm.RequiresSupervisor,
+                DisplayOrder = lm.DisplayOrder
+            };
+        }
     }
 }
