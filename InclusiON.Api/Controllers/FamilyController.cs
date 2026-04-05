@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.UseCases.Family.Commands;
@@ -8,6 +9,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Family;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Family;
+
 namespace InclusiON.Api.Controllers
 {
     [Route("api/[controller]")]
@@ -15,6 +17,12 @@ namespace InclusiON.Api.Controllers
     [Produces("application/json")]
     public class FamilyController : ControllerBase
     {
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+        }
+
         #region Queries
 
         [HttpGet]
@@ -29,7 +37,7 @@ namespace InclusiON.Api.Controllers
 
             var query = new GetFamilyQuery(
                 request.Page, request.PageSize, request.Search, request.IsActive,
-                request.SortBy, request.SortDirection, request.InstitutionIds);
+                request.SortBy, request.SortDirection, request.InstitutionIds, request.LinkedPersonSearch);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
@@ -49,6 +57,48 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        [HttpGet("available")]
+        [Authorize(Policy = "family:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<FamilyResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<FamilyResponse>>>> GetAvailableFamilies(
+            [FromQuery] string? search,
+            [FromQuery] Guid? personId,
+            [FromServices] IQueryHandler<GetAvailableFamiliesQuery, ApiResponse<List<FamilyResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetAvailableFamiliesQuery(search, personId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("{familyId:guid}/status-history")]
+        [Authorize(Policy = "family:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<FamilyStatusHistoryResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<FamilyStatusHistoryResponse>>>> GetFamilyStatusHistory(
+            Guid familyId,
+            [FromServices]
+            IQueryHandler<GetFamilyStatusHistoryQuery, ApiResponse<List<FamilyStatusHistoryResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetFamilyStatusHistoryQuery(familyId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("{familyId:guid}/link-history")]
+        [Authorize(Policy = "family:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeHistoryResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<PersonRepresentativeHistoryResponse>>>> GetFamilyLinkHistory(
+            Guid familyId,
+            [FromServices]
+            IQueryHandler<GetFamilyLinkHistoryQuery, ApiResponse<List<PersonRepresentativeHistoryResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetFamilyLinkHistoryQuery(familyId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
         #endregion
 
         #region Commands
@@ -63,7 +113,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreateFamilyCommand, ApiResponse<FamilyResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-
             var command = new CreateFamilyCommand(
                 request.FirstName,
                 request.LastName,
@@ -97,7 +146,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateFamilyCommand, ApiResponse<FamilyResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-
             var command = new UpdateFamilyCommand(
                 familyId,
                 request.FirstName,
@@ -121,6 +169,136 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
             var command = new DeactivateFamilyCommand(familyId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPost("{familyId:guid}/link/{personId:guid}")]
+        [Authorize(Policy = "family:link")]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<PersonRepresentativeResponse>>> LinkFamilyToPerson(
+            Guid familyId,
+            Guid personId,
+            [FromBody] LinkFamilyToPersonRequest request,
+            [FromServices]
+            ICommandHandler<LinkFamilyToPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new LinkFamilyToPersonCommand(
+                familyId,
+                personId,
+                request.Relationship,
+                request.IsPrimary,
+                GetCurrentUserId());
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+            {
+                return result.ToActionResult();
+            }
+
+            return CreatedAtAction(
+                nameof(GetFamilyById),
+                new { familyId },
+                result);
+        }
+
+        [HttpDelete("{familyId:guid}/unlink/{personId:guid}")]
+        [Authorize(Policy = "family:unlink")]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PersonRepresentativeResponse>>> UnlinkFamilyFromPerson(
+            Guid familyId,
+            Guid personId,
+            [FromBody] UnlinkFamilyFromPersonRequest request,
+            [FromServices]
+            ICommandHandler<UnlinkFamilyFromPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new UnlinkFamilyFromPersonCommand(
+                familyId,
+                personId,
+                request.Observation ?? string.Empty,
+                GetCurrentUserId());
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        #endregion
+
+        #region Professional Endpoints
+
+        [HttpGet("professional/available")]
+        [Authorize(Policy = "family:link")]
+        [ProducesResponseType(typeof(ApiResponse<List<FamilyResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<FamilyResponse>>>> GetAvailableFamiliesForProfessional(
+            [FromQuery] string? search,
+            [FromQuery] Guid? personId,
+            [FromServices] IQueryHandler<GetAvailableFamiliesQuery, ApiResponse<List<FamilyResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetAvailableFamiliesQuery(search, personId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPost("professional/link/{familyId:guid}/{personId:guid}")]
+        [Authorize(Policy = "family:link")]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<PersonRepresentativeResponse>>> LinkFamilyToPersonAsProfessional(
+            Guid familyId,
+            Guid personId,
+            [FromBody] LinkFamilyToPersonRequest request,
+            [FromServices]
+            ICommandHandler<LinkFamilyToPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new LinkFamilyToPersonCommand(
+                familyId,
+                personId,
+                request.Relationship,
+                request.IsPrimary,
+                GetCurrentUserId());
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+            {
+                return result.ToActionResult();
+            }
+
+            return CreatedAtAction(
+                nameof(GetFamilyById),
+                new { familyId },
+                result);
+        }
+
+        [HttpDelete("professional/unlink/{familyId:guid}/{personId:guid}")]
+        [Authorize(Policy = "family:unlink")]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PersonRepresentativeResponse>>> UnlinkFamilyFromPersonAsProfessional(
+            Guid familyId,
+            Guid personId,
+            [FromBody] UnlinkFamilyFromPersonRequest request,
+            [FromServices]
+            ICommandHandler<UnlinkFamilyFromPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new UnlinkFamilyFromPersonCommand(
+                familyId,
+                personId,
+                request.Observation ?? string.Empty,
+                GetCurrentUserId());
+
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }
