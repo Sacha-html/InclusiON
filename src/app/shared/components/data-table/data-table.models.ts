@@ -4,6 +4,7 @@ export interface TableColumn {
   type?: 'text' | 'number' | 'date' | 'boolean' | 'badge' | 'actions';
   sortable?: boolean;
   actions?: ActionItem[];
+  badgeMap?: Record<string, { color: string; label: string }>;
 }
 
 export interface ActionItem {
@@ -19,4 +20,5 @@ export interface HeaderButton {
   action: string;
   label: string;
   color?: string;
+  icon?: string;
 }
