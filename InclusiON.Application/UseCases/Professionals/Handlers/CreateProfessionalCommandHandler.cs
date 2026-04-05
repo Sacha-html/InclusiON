@@ -144,7 +144,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     _logger.LogWarning(ex, "No se pudo enviar email de bienvenida a {Email}", command.Email);
                 }
 
-                var response = GetProfessionalByIdQuery.MapToResponse(professional);
+                var response = ProfessionalResponse.MapToResponse(professional);
                 response.TemporaryPassword = password;
                 return ApiResponse<ProfessionalResponse>.SuccessResult(response, SuccessMessages.ProfessionalCreated);
             }

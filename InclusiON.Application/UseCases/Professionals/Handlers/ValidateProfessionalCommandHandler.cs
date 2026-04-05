@@ -222,7 +222,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     });
                 }
 
-                var response = GetProfessionalByIdQuery.MapToResponse(professional);
+                var response = ProfessionalResponse.MapToResponse(professional);
                 var message = command.IsApproved
                     ? SuccessMessages.ProfessionalValidated
                     : SuccessMessages.ProfessionalRejected;

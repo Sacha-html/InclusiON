@@ -98,7 +98,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
             _logger.LogInformation("Profesional actualizado: {ProfessionalId}", command.ProfessionalId);
 
-            var response = GetProfessionalByIdQuery.MapToResponse(professional);
+            var response = ProfessionalResponse.MapToResponse(professional);
             return ApiResponse<ProfessionalResponse>.SuccessResult(response, SuccessMessages.ProfessionalUpdated);
         }
     }

@@ -43,7 +43,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             assignment.IsActive = false;
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var response = GetPersonsByProfessionalQuery.MapToResponse(assignment);
+            var response = ProfessionalPersonResponse.MapToResponse(assignment);
             return ApiResponse<ProfessionalPersonResponse>.SuccessResult(response, "Asignacion desactivada exitosamente.");
         }
     }

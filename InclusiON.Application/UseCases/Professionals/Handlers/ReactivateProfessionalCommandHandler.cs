@@ -81,7 +81,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
             _logger.LogInformation("Profesional reactivado: {ProfessionalId}, Usuario: {UserId}", command.ProfessionalId, professional.UserId);
 
-            var response = GetProfessionalByIdQuery.MapToResponse(professional);
+            var response = ProfessionalResponse.MapToResponse(professional);
             return ApiResponse<ProfessionalResponse>.SuccessResult(response, "Profesional reactivado exitosamente");
         }
     }
