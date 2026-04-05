@@ -1,25 +1,26 @@
-<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadUsers()"></app-institution-filter>
-
-<c-row class="mb-3">
-  <c-col sm="3">
-    <label class="form-label">Rol</label>
-    <select cSelect [(ngModel)]="selectedRole" (ngModelChange)="onRoleFilterChange()">
-      <option value="">Todos los roles</option>
-      <option value="Admin">Administrador</option>
-      <option value="Professional">Profesional</option>
-      <option value="FamilyRepresentative">Familiar</option>
-      <option value="PersonWithDisability">Persona</option>
-    </select>
-  </c-col>
-  <c-col sm="3">
-    <label class="form-label">Estado</label>
-    <select cSelect [(ngModel)]="selectedStatus" (ngModelChange)="onStatusFilterChange()">
-      <option value="">Todos</option>
-      <option value="true">Activos</option>
-      <option value="false">Inactivos</option>
-    </select>
-  </c-col>
-</c-row>
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label class="form-label">Rol</label>
+      <select cSelect [(ngModel)]="selectedRole" (ngModelChange)="onRoleFilterChange()">
+        <option value="">Todos los roles</option>
+        <option value="Admin">Administrador</option>
+        <option value="Professional">Profesional</option>
+        <option value="FamilyRepresentative">Familiar</option>
+        <option value="PersonWithDisability">Persona</option>
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label class="form-label">Estado</label>
+      <select cSelect [(ngModel)]="selectedStatus" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </c-col>
+  </c-row>
+</fieldset>
 
 <app-data-table
   title="Gestión de Usuarios"
