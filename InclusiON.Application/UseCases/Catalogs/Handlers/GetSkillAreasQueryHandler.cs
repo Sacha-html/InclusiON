@@ -22,15 +22,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         {
             var items = await _repository.GetAllActiveAsync(cancellationToken);
 
-            var response = items.Select(x => new SkillAreaResponse
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description,
-                Icon = x.Icon,
-                Color = x.Color,
-                DisplayOrder = x.DisplayOrder
-            }).ToList();
+            var response = items.Select(SkillAreaResponse.MapToResponse).ToList();
 
             return ApiResponse<List<SkillAreaResponse>>.SuccessResult(response);
         }
