@@ -1,13 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, ProfessionalsService, ToastService } from '@services';
+import { AuthService, ProfessionalsService, ToastService, UserManagementService } from '@services';
 import { ProfessionalListItemResponse, ValidateProfessionalRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
-import { NavModule, ModalModule, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent } from '@coreui/angular';
-import { IconDirective } from '@coreui/icons-angular';
+import { NavModule, ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
+import { IconModule } from '@coreui/icons-angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 
@@ -22,12 +22,18 @@ import { CommonModule, DatePipe } from '@angular/common';
     InstitutionFilterComponent,
     NavModule,
     ModalModule,
+    ModalHeaderComponent,
+    ModalBodyComponent,
+    ModalFooterComponent,
     FormsModule,
     FormSelectDirective,
     ButtonDirective,
     SpinnerComponent,
     TableDirective,
     BadgeComponent,
+    IconModule,
+    AlertComponent,
+    GridModule,
   ],
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss'],
@@ -37,6 +43,7 @@ export class ListComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly userService = inject(UserManagementService);
 
   canCreate = this.authService.hasPermission('professionals:create');
   canValidate = this.authService.hasPermission('professionals:update') || this.authService.isGlobalAdmin();
@@ -70,12 +77,18 @@ export class ListComponent implements OnInit {
   statusHistory: any[] = [];
   statusHistoryLoading = false;
 
+  // Password modal
+  showPasswordModal = false;
+  tempPassword = '';
+  tempPasswordEmail = '';
+
   public cols: TableColumn[] = [
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
-        { action: 'history', label: 'Historial de estados', icon: 'cil-history' },
+        { action: 'reset-password', label: 'Resetear contraseña', icon: 'cil-reload', visible: (item) => item.status === 'Approved' },
+        { action: 'history', label: 'Historial de estados', icon: 'cilHistory' },
         { action: 'persons', label: 'Personas a cargo', icon: 'cil-people' },
         { action: 'institutions', label: 'Instituciones', icon: 'cil-book' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === 'Approved' },
@@ -195,6 +208,9 @@ export class ListComponent implements OnInit {
     switch (event.action) {
       case 'view':
         this.router.navigate(['/admin/professionals', event.item.id]);
+        break;
+      case 'reset-password':
+        this.resetPassword(event.item);
         break;
       case 'persons':
         this.router.navigate(['/admin/professionals', event.item.id], { queryParams: { tab: 'personas' } });
@@ -373,6 +389,36 @@ export class ListComponent implements OnInit {
         this.statusHistoryLoading = false;
       },
     });
+  }
+
+  resetPassword(item: ProfessionalListItemResponse): void {
+    if (!item.userId) {
+      this.toastService.error('El profesional no tiene usuario asociado');
+      return;
+    }
+    this.userService.resetPassword(item.userId).subscribe({
+      next: (result) => {
+        this.tempPassword = result.temporaryPassword;
+        this.tempPasswordEmail = result.userEmail;
+        this.showPasswordModal = true;
+        this.toastService.success('Contraseña reseteada exitosamente');
+      },
+      error: () => {
+        this.toastService.error('Error al resetear la contraseña');
+      },
+    });
+  }
+
+  copyPassword(): void {
+    navigator.clipboard.writeText(this.tempPassword).then(() => {
+      this.toastService.success('Contraseña copiada al portapapeles');
+    });
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal = false;
+    this.tempPassword = '';
+    this.tempPasswordEmail = '';
   }
 
   confirmReactivate(): void {

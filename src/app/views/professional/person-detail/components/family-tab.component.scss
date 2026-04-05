@@ -1,0 +1,29 @@
+.family-list-scroll {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.family-list-item {
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus-visible {
+    outline: 2px solid var(--cui-primary, #0d6efd);
+    outline-offset: -2px;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  &.active {
+    background-color: var(--cui-primary, #0d6efd);
+    color: #fff;
+    border-color: var(--cui-primary, #0d6efd);
+
+    .text-body-secondary {
+      color: rgba(255, 255, 255, 0.75) !important;
+    }
+  }
+
+  &.family-previously-linked {
+    border-left: 3px solid var(--cui-warning, #ffc107);
+  }
+}

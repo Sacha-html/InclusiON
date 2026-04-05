@@ -22,387 +22,54 @@
         <li class="nav-item">
           <a class="nav-link" [class.active]="activeTab === 'habilidades'" (click)="activeTab = 'habilidades'" role="button">
             Habilidades
-            @if (skillProfile.length > 0) {
-              <c-badge color="primary" class="ms-1">{{ skillProfile.length }}</c-badge>
+            @if (skillProfile().length > 0) {
+              <c-badge color="primary" class="ms-1">{{ skillProfile().length }}</c-badge>
             }
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'diagnosticos'" (click)="activeTab = 'diagnosticos'; loadDiagnoses()" role="button">
+          <a class="nav-link" [class.active]="activeTab === 'diagnosticos'" (click)="activeTab = 'diagnosticos'" role="button">
             Diagnósticos
-            @if (diagnoses.length > 0) {
-              <c-badge color="info" class="ms-1">{{ diagnoses.length }}</c-badge>
+            @if (diagnoses().length > 0) {
+              <c-badge color="info" class="ms-1">{{ diagnoses().length }}</c-badge>
+            }
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'familiares'" (click)="activeTab = 'familiares'; loadRepresentatives()" role="button">
+            Familiares
+            @if (representatives.length > 0) {
+              <c-badge color="success" class="ms-1">{{ representatives.length }}</c-badge>
             }
           </a>
         </li>
       </ul>
 
-      <!-- Tab: Datos -->
       @if (activeTab === 'datos') {
-
-        @if (!isEditingData) {
-          <!-- Readonly -->
-          <div class="d-flex justify-content-end mb-3">
-            <button cButton color="primary" size="sm" (click)="startEditingData()">Editar datos</button>
-          </div>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Nombre</label>
-              <input cFormControl [value]="person.firstName" readonly />
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Apellido</label>
-              <input cFormControl [value]="person.lastName" readonly />
-            </c-col>
-          </c-row>
-          <c-row class="mb-3">
-            <c-col sm="4">
-              <label cLabel>Documento</label>
-              <input cFormControl [value]="person.documentNumber ?? 'Sin especificar'" readonly />
-            </c-col>
-            <c-col sm="4">
-              <label cLabel>Fecha de nacimiento</label>
-              <input cFormControl [value]="formatDate(person.birthDate)" readonly />
-            </c-col>
-            <c-col sm="4">
-              <label cLabel>Edad</label>
-              <input cFormControl [value]="person.age + ' años'" readonly />
-            </c-col>
-          </c-row>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Tipo de discapacidad</label>
-              <input cFormControl [value]="person.disabilityTypeName ?? 'Sin especificar'" readonly />
-            </c-col>
-          </c-row>
-
-        } @else {
-          <!-- Edicion -->
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Nombre</label>
-              <input cFormControl [(ngModel)]="editPersonalData.firstName" />
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Apellido</label>
-              <input cFormControl [(ngModel)]="editPersonalData.lastName" />
-            </c-col>
-          </c-row>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Documento</label>
-              <input cFormControl [(ngModel)]="editPersonalData.documentNumber" />
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Fecha de nacimiento (dd/mm/aaaa)</label>
-              <input cFormControl [(ngModel)]="editPersonalData.birthDate" placeholder="dd/mm/aaaa" />
-            </c-col>
-          </c-row>
-          <div class="d-flex gap-2 mt-3">
-            <button cButton color="primary" (click)="savePersonalData()" [disabled]="isSavingData">
-              @if (isSavingData) { <c-spinner size="sm" class="me-1"></c-spinner> }
-              Guardar
-            </button>
-            <button cButton color="secondary" (click)="cancelEditingData()">Cancelar</button>
-          </div>
-        }
+        <app-professional-person-data [person]="person" (personChange)="onPersonChange($event)" />
       }
 
-      <!-- Tab: Perfil Funcional -->
       @if (activeTab === 'funcional') {
-
-        @if (!isEditing) {
-          <!-- Vista readonly -->
-          <div class="d-flex justify-content-end mb-3">
-            <button cButton color="primary" size="sm" (click)="startEditing()">Editar perfil</button>
-          </div>
-
-          <h6 class="mb-3">Niveles funcionales</h6>
-          <c-row class="mb-3">
-            <c-col sm="4">
-              <label cLabel>Atencion</label>
-              <input cFormControl [value]="formatLevel(person.attentionLevel)" readonly />
-            </c-col>
-            <c-col sm="4">
-              <label cLabel>Comunicacion</label>
-              <input cFormControl [value]="formatLevel(person.communicationLevel)" readonly />
-            </c-col>
-            <c-col sm="4">
-              <label cLabel>Motricidad</label>
-              <input cFormControl [value]="formatLevel(person.motorSkillLevel)" readonly />
-            </c-col>
-          </c-row>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Usa CAA</label>
-              <input cFormControl [value]="formatBoolean(person.usesAAC)" readonly />
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Usa lengua de señas</label>
-              <input cFormControl [value]="formatBoolean(person.usesSignLanguage)" readonly />
-            </c-col>
-          </c-row>
-
-          <h6 class="mt-4 mb-3">Preferencias</h6>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Intereses y motivadores</label>
-              <textarea cFormControl [value]="person.interestsAndMotivators ?? 'Sin especificar'" readonly rows="2"></textarea>
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Estilo de aprendizaje</label>
-              <textarea cFormControl [value]="person.learningStyle ?? 'Sin especificar'" readonly rows="2"></textarea>
-            </c-col>
-          </c-row>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Recursos disponibles</label>
-              <textarea cFormControl [value]="person.availableResources ?? 'Sin especificar'" readonly rows="2"></textarea>
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Terapias adicionales</label>
-              <textarea cFormControl [value]="person.additionalTherapies ?? 'Sin especificar'" readonly rows="2"></textarea>
-            </c-col>
-          </c-row>
-
-          <h6 class="mt-4 mb-3">Accesibilidad</h6>
-          <c-row class="mb-3">
-            <c-col sm="3"><label cLabel>Fuente grande</label><input cFormControl [value]="formatBoolean(person.requiresLargeFont)" readonly /></c-col>
-            <c-col sm="3"><label cLabel>Alto contraste</label><input cFormControl [value]="formatBoolean(person.requiresHighContrast)" readonly /></c-col>
-            <c-col sm="3"><label cLabel>Ruido visual</label><input cFormControl [value]="formatBoolean(person.visualNoiseSensitivity)" readonly /></c-col>
-            <c-col sm="3"><label cLabel>Sonido</label><input cFormControl [value]="formatBoolean(person.soundSensitivity)" readonly /></c-col>
-          </c-row>
-
-        } @else {
-          <!-- Vista edicion -->
-          <h6 class="mb-3">Niveles funcionales</h6>
-          <c-row class="mb-3">
-            <c-col sm="4">
-              <label cLabel>Atencion</label>
-              <select cSelect [(ngModel)]="editData.attentionLevel">
-                @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
-              </select>
-            </c-col>
-            <c-col sm="4">
-              <label cLabel>Comunicacion</label>
-              <select cSelect [(ngModel)]="editData.communicationLevel">
-                @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
-              </select>
-            </c-col>
-            <c-col sm="4">
-              <label cLabel>Motricidad</label>
-              <select cSelect [(ngModel)]="editData.motorSkillLevel">
-                @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
-              </select>
-            </c-col>
-          </c-row>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <c-form-check>
-                <input cFormCheckInput type="checkbox" id="edit-usesAAC" [(ngModel)]="editData.usesAAC" />
-                <label cFormCheckLabel for="edit-usesAAC">Usa CAA</label>
-              </c-form-check>
-            </c-col>
-            <c-col sm="6">
-              <c-form-check>
-                <input cFormCheckInput type="checkbox" id="edit-usesSignLanguage" [(ngModel)]="editData.usesSignLanguage" />
-                <label cFormCheckLabel for="edit-usesSignLanguage">Usa lengua de señas</label>
-              </c-form-check>
-            </c-col>
-          </c-row>
-
-          <h6 class="mt-4 mb-3">Preferencias</h6>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Intereses y motivadores</label>
-              <textarea cFormControl [(ngModel)]="editData.interestsAndMotivators" rows="2"></textarea>
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Estilo de aprendizaje</label>
-              <textarea cFormControl [(ngModel)]="editData.learningStyle" rows="2"></textarea>
-            </c-col>
-          </c-row>
-          <c-row class="mb-3">
-            <c-col sm="6">
-              <label cLabel>Recursos disponibles</label>
-              <textarea cFormControl [(ngModel)]="editData.availableResources" rows="2"></textarea>
-            </c-col>
-            <c-col sm="6">
-              <label cLabel>Terapias adicionales</label>
-              <textarea cFormControl [(ngModel)]="editData.additionalTherapies" rows="2"></textarea>
-            </c-col>
-          </c-row>
-
-          <h6 class="mt-4 mb-3">Accesibilidad</h6>
-          <c-row class="mb-3">
-            <c-col sm="3">
-              <c-form-check><input cFormCheckInput type="checkbox" id="edit-largeFont" [(ngModel)]="editData.requiresLargeFont" /><label cFormCheckLabel for="edit-largeFont">Fuente grande</label></c-form-check>
-            </c-col>
-            <c-col sm="3">
-              <c-form-check><input cFormCheckInput type="checkbox" id="edit-highContrast" [(ngModel)]="editData.requiresHighContrast" /><label cFormCheckLabel for="edit-highContrast">Alto contraste</label></c-form-check>
-            </c-col>
-            <c-col sm="3">
-              <c-form-check><input cFormCheckInput type="checkbox" id="edit-visualNoise" [(ngModel)]="editData.visualNoiseSensitivity" /><label cFormCheckLabel for="edit-visualNoise">Ruido visual</label></c-form-check>
-            </c-col>
-            <c-col sm="3">
-              <c-form-check><input cFormCheckInput type="checkbox" id="edit-sound" [(ngModel)]="editData.soundSensitivity" /><label cFormCheckLabel for="edit-sound">Sonido</label></c-form-check>
-            </c-col>
-          </c-row>
-
-          <div class="d-flex gap-2 mt-3">
-            <button cButton color="primary" (click)="saveProfile()" [disabled]="isSaving">
-              @if (isSaving) { <c-spinner size="sm" class="me-1"></c-spinner> }
-              Guardar
-            </button>
-            <button cButton color="secondary" (click)="cancelEditing()">Cancelar</button>
-          </div>
-        }
+        <app-professional-functional-profile [person]="person" (personChange)="onPersonChange($event)" />
       }
 
-      <!-- Tab: Habilidades -->
       @if (activeTab === 'habilidades') {
-        <div class="d-flex flex-wrap gap-2 mb-3">
-          @for (sp of skillProfile; track sp.skillAreaId) {
-            <span class="skill-chip d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
-                  [style.background-color]="sp.color ?? '#6c757d'" style="color: #fff;">
-              @if (sp.icon) {
-                <span class="skill-chip-icon">{{ sp.icon }}</span>
-              }
-              <span>{{ sp.skillAreaName }}</span>
-              <button type="button" class="btn-close btn-close-white ms-1 skill-chip-close"
-                      (click)="deactivateSkillArea(sp.skillAreaId)"
-                      [attr.aria-label]="'Quitar ' + sp.skillAreaName"></button>
-            </span>
-          }
-          @if (skillProfile.length === 0) {
-            <span class="text-body-secondary">Sin areas de habilidad asignadas.</span>
-          }
-        </div>
-        <button cButton color="primary" size="sm" (click)="openAddSkillAreaModal()">Agregar Area</button>
+        <app-professional-skills [personId]="person.id" [skillProfile]="skillProfile()" (skillProfileChange)="onSkillProfileChange($event)" />
       }
 
-      <!-- Tab: Diagnósticos -->
       @if (activeTab === 'diagnosticos') {
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="mb-0">Diagnósticos registrados</h6>
-          <button cButton color="primary" size="sm" (click)="openNewDiagnosis()" aria-label="Nuevo diagnóstico">Nuevo diagnóstico</button>
-        </div>
+        <app-professional-diagnoses [personId]="person.id" [diagnoses]="diagnoses()" (diagnosesChange)="onDiagnosesChange($event)" />
+      }
 
-        @if (diagnoses.length === 0) {
-          <p class="text-body-secondary">No hay diagnósticos registrados para esta persona.</p>
-        }
-
-        @for (diag of diagnoses; track diag.id) {
-          <c-card class="mb-2">
-            <c-card-body class="py-2 px-3">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <strong>{{ diag.diagnosisDate | date:'dd/MM/yyyy' }}</strong>
-                  <span class="text-body-secondary ms-2">— {{ diag.professionalName }}</span>
-                  <p class="mb-0 mt-1">{{ diag.primaryDiagnosis }}</p>
-                </div>
-                <button cButton color="link" size="sm" (click)="openEditDiagnosis(diag)"
-                        aria-label="Ver/editar diagnóstico">Ver</button>
-              </div>
-            </c-card-body>
-          </c-card>
-        }
+      @if (activeTab === 'familiares') {
+        <app-professional-family-tab
+          [personId]="person.id"
+          [representatives]="representatives"
+          [loading]="loadingRepresentatives"
+          (refresh)="onRefreshFamily()">
+        </app-professional-family-tab>
       }
 
     </c-card-body>
   </c-card>
 }
-
-<!-- Modal Diagnóstico -->
-<c-modal [visible]="showDiagnosisModal" (visibleChange)="!$event && closeDiagnosisModal()" size="lg">
-  <c-modal-header>
-    <strong>{{ editingDiagnosis ? 'Editar Diagnóstico' : 'Nuevo Diagnóstico' }}</strong>
-  </c-modal-header>
-  <c-modal-body>
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel>Fecha del diagnóstico *</label>
-        <input cFormControl type="date" [(ngModel)]="diagnosisForm.diagnosisDate" />
-      </c-col>
-    </c-row>
-    <c-row class="mb-3">
-      <c-col sm="12">
-        <label cLabel>Diagnóstico principal *</label>
-        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.primaryDiagnosis"></textarea>
-      </c-col>
-    </c-row>
-    <c-row class="mb-3">
-      <c-col sm="12">
-        <label cLabel>Observaciones iniciales</label>
-        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.initialObservations"></textarea>
-      </c-col>
-    </c-row>
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel>Capacidades identificadas</label>
-        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.identifiedCapabilities"></textarea>
-      </c-col>
-      <c-col sm="6">
-        <label cLabel>Desafíos identificados</label>
-        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.identifiedChallenges"></textarea>
-      </c-col>
-    </c-row>
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel>Apoyos requeridos</label>
-        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.requiredSupports"></textarea>
-      </c-col>
-      <c-col sm="6">
-        <label cLabel>Objetivos pedagógicos</label>
-        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.pedagogicalObjectives"></textarea>
-      </c-col>
-    </c-row>
-    <c-row class="mb-3">
-      <c-col sm="12">
-        <label cLabel>Estrategias recomendadas</label>
-        <textarea cFormControl rows="2" [(ngModel)]="diagnosisForm.recommendedStrategies"></textarea>
-      </c-col>
-    </c-row>
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="closeDiagnosisModal()">Cancelar</button>
-    <button cButton color="primary" (click)="saveDiagnosis()" [disabled]="!diagnosisForm.primaryDiagnosis" aria-label="Guardar diagnóstico">
-      {{ editingDiagnosis ? 'Guardar cambios' : 'Crear diagnóstico' }}
-    </button>
-  </c-modal-footer>
-</c-modal>
-
-<!-- Modal Agregar Areas -->
-<c-modal [visible]="showAddSkillAreaModal" (visibleChange)="!$event && closeAddSkillAreaModal()">
-  <c-modal-header><strong>Agregar Áreas de Habilidad</strong></c-modal-header>
-  <c-modal-body>
-    @if (skillAreaError) {
-      <div class="alert alert-danger">{{ skillAreaError }}</div>
-    }
-    @if (allSkillAreas.length === 0) {
-      <p class="text-body-secondary">No hay áreas disponibles para agregar.</p>
-    } @else {
-      <p class="text-body-secondary mb-3">Seleccioná las áreas que deseas agregar:</p>
-      @for (area of allSkillAreas; track area.id) {
-        <c-form-check class="mb-2">
-          <input cFormCheckInput type="checkbox" [id]="'skill-' + area.id"
-                 [checked]="selectedSkillAreaIds.has(area.id)"
-                 (change)="toggleSkillArea(area.id)" />
-          <label cFormCheckLabel [for]="'skill-' + area.id">
-            <strong>{{ area.name }}</strong>
-            @if (area.description) {
-              <br /><small class="text-body-secondary">{{ area.description }}</small>
-            }
-          </label>
-        </c-form-check>
-      }
-    }
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="closeAddSkillAreaModal()">Cancelar</button>
-    <button cButton color="primary" (click)="confirmAddSkillAreas()" [disabled]="selectedSkillAreaIds.size === 0 || skillAreaLoading">
-      @if (skillAreaLoading) { <c-spinner size="sm" class="me-1"></c-spinner> }
-      Agregar ({{ selectedSkillAreaIds.size }})
-    </button>
-  </c-modal-footer>
-</c-modal>

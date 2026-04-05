@@ -15,14 +15,14 @@ export const professionalNavItems: INavData[] = [
     name: 'Gestion'
   },
   {
-    name: 'Mi Aula',
-    url: '/pro/persons',
-    iconComponent: { name: 'cil-people' }
-  },
-  {
     name: 'Actividades',
     url: '/pro/activities',
     iconComponent: { name: 'cil-task' }
+  },
+  {
+    name: 'Mi Aula',
+    url: '/pro/persons',
+    iconComponent: { name: 'cil-people' }
   },
   {
     name: 'Objetivos',
@@ -48,11 +48,6 @@ export const professionalNavItems: INavData[] = [
     name: 'Comunicacion'
   },
   {
-    name: 'Mensajes',
-    url: '/pro/messages',
-    iconComponent: { name: 'cil-envelope-closed' }
-  },
-  {
     name: 'Calendario',
     url: '/pro/calendar',
     iconComponent: { name: 'cil-calendar' }
@@ -61,5 +56,10 @@ export const professionalNavItems: INavData[] = [
     name: 'Invitaciones',
     url: '/pro/invitations',
     iconComponent: { name: 'cil-link' }
+  },
+  {
+    name: 'Mensajes',
+    url: '/pro/messages',
+    iconComponent: { name: 'cil-envelope-closed' }
   }
 ];

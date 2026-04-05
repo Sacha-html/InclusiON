@@ -21,12 +21,12 @@ export class UserManagementService {
   getUsers(request?: GetAdminUsersRequest): Observable<PagedResponse<AdminUserListItemResponse>> {
     let params = new HttpParams();
     if (request) {
-      if (request.page) params = params.set('page', request.page);
-      if (request.pageSize) params = params.set('pageSize', request.pageSize);
+      if (request.page) params = params.set('page', request.page.toString());
+      if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
       if (request.search) params = params.set('search', request.search);
       if (request.role) params = params.set('role', request.role);
-      if (request.isActive !== undefined) params = params.set('isActive', request.isActive);
-      if (request.institutionId) params = params.set('institutionId', request.institutionId);
+      if (request.isActive !== undefined) params = params.set('isActive', request.isActive.toString());
+      if (request.institutionId) params = params.set('institutionId', request.institutionId.toString());
       if (request.sortBy) params = params.set('sortBy', request.sortBy);
       if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
     }
