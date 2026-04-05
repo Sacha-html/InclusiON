@@ -49,7 +49,7 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var response = GetInstitutionsQuery.MapToResponse(institution);
+            var response = InstitutionResponse.MapToResponse(institution);
             return ApiResponse<InstitutionResponse>.SuccessResult(response, "Institucion actualizada exitosamente.");
         }
     }

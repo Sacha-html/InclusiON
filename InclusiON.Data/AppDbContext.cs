@@ -62,6 +62,8 @@ namespace InclusiON.Data
         public DbSet<Message> Messages { get; set; }
         public DbSet<AccessAudit> AccessAudits { get; set; }
         public DbSet<ProfessionalStatusHistory> ProfessionalStatusHistories { get; set; }
+        public DbSet<FamilyStatusHistory> FamilyStatusHistories { get; set; }
+        public DbSet<PersonRepresentativeHistory> PersonRepresentativeHistories { get; set; }
 
         // Nivel 5: Respuestas, resultados y embeddings de actividades
         public DbSet<ActivityResponse> ActivityResponses { get; set; }

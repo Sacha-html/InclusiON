@@ -141,7 +141,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     _logger.LogWarning(ex, "No se pudo enviar email de bienvenida a {Email}", command.Email);
                 }
 
-                var response = GetFamilyByIdQuery.MapToResponse(family);
+                var response = FamilyResponse.MapToResponse(family);
                 response.TemporaryPassword = password;
                 response.Email = user.Email;
                 return ApiResponse<FamilyResponse>.SuccessResult(response, "Familiar creado exitosamente");

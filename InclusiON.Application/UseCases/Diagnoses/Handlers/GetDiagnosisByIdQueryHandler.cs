@@ -24,7 +24,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             if (diagnosis is null)
                 return ApiResponse<DiagnosisResponse>.NotFound("Diagnóstico");
 
-            return ApiResponse<DiagnosisResponse>.SuccessResult(GetDiagnosisByIdQuery.MapToResponse(diagnosis));
+            return ApiResponse<DiagnosisResponse>.SuccessResult(DiagnosisResponse.MapToResponse(diagnosis));
         }
     }
 }

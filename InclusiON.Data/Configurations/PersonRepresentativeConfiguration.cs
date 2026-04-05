@@ -10,7 +10,10 @@ namespace InclusiON.Data.Configurations
         {
             builder.ToTable("PersonRepresentatives");
 
-            builder.HasKey(pr => new { pr.PersonId, pr.RepresentativeId });
+            builder.HasKey(pr => pr.Id);
+
+            builder.Property(pr => pr.Relationship)
+                .HasMaxLength(50);
 
             builder.Property(pr => pr.IsPrimary)
                 .HasDefaultValue(false);
@@ -26,6 +29,11 @@ namespace InclusiON.Data.Configurations
 
             builder.Property(pr => pr.CreatedAt)
                 .IsRequired();
+
+            builder.Property(pr => pr.UnlinkObservation)
+                .HasMaxLength(500);
+
+            builder.HasIndex(pr => new { pr.PersonId, pr.RepresentativeId }).IsUnique();
 
             builder.HasOne(pr => pr.Person)
                 .WithMany(p => p.PersonRepresentatives)

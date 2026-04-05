@@ -34,20 +34,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
             var response = new PagedResponse<ProfessionalListItemResponse>
             {
-                Data = pagedResult.Data.Select(p => new ProfessionalListItemResponse
-                {
-                    Id = p.Id,
-                    UserId = p.UserId,
-                    FirstName = p.FirstName,
-                    LastName = p.LastName,
-                    DocumentNumber = p.DocumentNumber,
-                    Phone = p.Phone,
-                    Specialty = p.Specialty,
-                    LicenseNumber = p.LicenseNumber,
-                    IsActive = p.User?.IsActive ?? false,
-                    Status = p.Status.ToString(),
-                    Email = p.User?.Email
-                }).ToList(),
+                Data = pagedResult.Data.Select(p => ProfessionalListItemResponse.MapToResponse(p)).ToList(),
                 TotalRecords = pagedResult.TotalRecords,
                 TotalPages = pagedResult.TotalPages,
                 CurrentPage = pagedResult.CurrentPage,

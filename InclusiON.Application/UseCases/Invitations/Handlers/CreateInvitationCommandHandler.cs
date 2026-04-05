@@ -89,7 +89,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     _ = SendInvitationEmailAsync(invitation, command.BaseUrl, cancellationToken);
                 }
 
-                var response = CreateInvitationCommand.MapToResponse(invitation);
+                var response = InvitationResponse.MapToResponse(invitation);
                 return ApiResponse<InvitationResponse>.SuccessResult(response, SuccessMessages.InvitationCreated);
             }
             catch (Exception ex)

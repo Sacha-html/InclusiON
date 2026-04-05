@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models;
+
 namespace InclusiON.DTOs.Responses.Institutions
 {
     /// <summary>
@@ -13,5 +15,20 @@ namespace InclusiON.DTOs.Responses.Institutions
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        public static InstitutionResponse MapToResponse(EducationalInstitution institution)
+        {
+            return new InstitutionResponse
+            {
+                Id = institution.Id,
+                Name = institution.Name,
+                Address = institution.Address,
+                Phone = institution.Phone,
+                Email = institution.Email,
+                IsActive = institution.IsActive,
+                CreatedAt = institution.CreatedAt,
+                UpdatedAt = institution.UpdatedAt
+            };
+        }
     }
 }

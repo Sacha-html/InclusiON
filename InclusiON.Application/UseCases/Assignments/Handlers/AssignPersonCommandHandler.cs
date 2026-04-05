@@ -80,7 +80,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 existing.Person = person;
-                var reactivatedResponse = GetPersonsByProfessionalQuery.MapToResponse(existing);
+                var reactivatedResponse = ProfessionalPersonResponse.MapToResponse(existing);
                 return ApiResponse<ProfessionalPersonResponse>.SuccessResult(reactivatedResponse, "Asignacion reactivada exitosamente.");
             }
 
@@ -98,7 +98,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             assignment.Person = person;
-            var response = GetPersonsByProfessionalQuery.MapToResponse(assignment);
+            var response = ProfessionalPersonResponse.MapToResponse(assignment);
             return ApiResponse<ProfessionalPersonResponse>.SuccessResult(response, "Persona asignada al profesional exitosamente.");
         }
     }
