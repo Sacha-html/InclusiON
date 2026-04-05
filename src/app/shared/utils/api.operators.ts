@@ -1,21 +1,25 @@
-import { Observable, OperatorFunction, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs';
+import { Observable, OperatorFunction, throwError, of } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs';
 import { ApiResponse } from '@models';
 
-/**
- * Operador RxJS que extrae `data` de un `ApiResponse<T>` y maneja errores.
- */
 export function unwrapResponse<T>(): OperatorFunction<ApiResponse<T>, T> {
   return (source: Observable<ApiResponse<T>>) =>
     source.pipe(
-      map((response) => response.data),
+      mergeMap((response) => {
+        if (!response.success) {
+          return throwError(() => ({
+            status: response.errorCode ?? 500,
+            message: response.message ?? 'Error desconocido',
+            errors: response.errors ?? [],
+            fieldErrors: response.fieldErrors,
+          }));
+        }
+        return of(response.data as T);
+      }),
       catchError((error: unknown) => throwError(() => error)),
     );
 }
 
-/**
- * Operador RxJS que solo maneja errores (para endpoints que no retornan ApiResponse).
- */
 export function handleApiError<T>(): OperatorFunction<T, T> {
   return (source: Observable<T>) =>
     source.pipe(

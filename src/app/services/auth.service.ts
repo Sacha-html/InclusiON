@@ -320,11 +320,11 @@ export class AuthService {
       if (!raw) return [];
 
       if (Array.isArray(raw)) {
-        return raw.map((id: string | number) => Number(id)).filter((id: number) => !isNaN(id));
+        return raw.map((id: string | number) => Number(id)).filter((id: number) => !Number.isNaN(id));
       }
 
       const parsed = Number(raw);
-      return isNaN(parsed) ? [] : [parsed];
+      return Number.isNaN(parsed) ? [] : [parsed];
     } catch {
       return [];
     }
