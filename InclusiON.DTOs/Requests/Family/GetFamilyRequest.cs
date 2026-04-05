@@ -7,6 +7,7 @@ namespace InclusiON.DTOs.Requests.Family
         public string? Search { get; set; }
         public bool? IsActive { get; set; }
         public int? InstitutionId { get; set; }
+        public string? LinkedPersonSearch { get; set; }
 
         /// <summary>
         /// IDs de instituciones validados por el filter (no se bindea desde query string).
