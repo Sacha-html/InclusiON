@@ -45,20 +45,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 institutionIds,
                 cancellationToken);
 
-            var items = pagedResult.Data.Select(p => new ProfessionalListItemResponse
-            {
-                Id = p.Id,
-                UserId = p.UserId,
-                FirstName = p.FirstName,
-                LastName = p.LastName,
-                DocumentNumber = p.DocumentNumber,
-                Phone = p.Phone,
-                Email = !string.IsNullOrEmpty(p.Email) ? p.Email : (p.User != null ? p.User.Email : null),
-                Specialty = p.Specialty,
-                LicenseNumber = p.LicenseNumber,
-                IsActive = p.User?.IsActive ?? false,
-                CreatedAt = p.CreatedAt
-            }).ToList();
+            var items = pagedResult.Data.Select(p => ProfessionalListItemResponse.MapToResponse(p, true)).ToList();
 
             var response = new PagedResponse<ProfessionalListItemResponse>
             {

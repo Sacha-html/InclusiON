@@ -34,7 +34,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         : await _repository.GetAllAsync(cancellationToken);
 
                 var response = invitations
-                    .Select(CreateInvitationCommand.MapToResponse)
+                    .Select(InvitationResponse.MapToResponse)
                     .ToList();
 
                 return ApiResponse<List<InvitationResponse>>.SuccessResult(response);

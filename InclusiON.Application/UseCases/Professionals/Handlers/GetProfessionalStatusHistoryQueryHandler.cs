@@ -23,15 +23,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         {
             var history = await _repository.GetStatusHistoryAsync(query.ProfessionalId, cancellationToken);
 
-            var response = history.Select(h => new ProfessionalStatusHistoryResponse
-            {
-                Id = h.Id,
-                OldStatus = h.OldStatus?.ToString(),
-                NewStatus = h.NewStatus.ToString(),
-                Observation = h.Observation,
-                ChangedByUserId = h.ChangedByUserId,
-                CreatedAt = h.CreatedAt
-            }).ToList();
+            var response = history.Select(ProfessionalStatusHistoryResponse.MapToResponse).ToList();
 
             return ApiResponse<List<ProfessionalStatusHistoryResponse>>.SuccessResult(response);
         }

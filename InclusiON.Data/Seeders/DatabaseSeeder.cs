@@ -82,6 +82,8 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:create" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:update" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:delete" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:link" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "family:unlink" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:create" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:update" },
@@ -122,6 +124,10 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:read" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:create" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:update" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:link" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "family:unlink" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "professionals:link-family" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "professionals:unlink-family" },
 
                 // === FAMILY REPRESENTATIVE ===
                 new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "persons:read" },

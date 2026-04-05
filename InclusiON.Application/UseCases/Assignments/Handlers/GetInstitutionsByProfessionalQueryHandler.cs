@@ -22,7 +22,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         {
             var assignments = await _repository.GetInstitutionsByProfessionalIdAsync(query.ProfessionalId, cancellationToken);
 
-            var response = assignments.Select(GetInstitutionsByProfessionalQuery.MapToResponse).ToList();
+            var response = assignments.Select(ProfessionalInstitutionResponse.MapToResponse).ToList();
             return ApiResponse<List<ProfessionalInstitutionResponse>>.SuccessResult(response);
         }
     }

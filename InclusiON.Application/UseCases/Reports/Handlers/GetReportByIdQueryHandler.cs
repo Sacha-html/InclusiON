@@ -34,7 +34,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                     ErrorMessages.ReportNotFound);
             }
 
-            var response = GetReportByIdQuery.MapToResponse(report);
+            var response = ReportResponse.MapToResponse(report);
             return ApiResponse<ReportResponse>.SuccessResult(response);
         }
                 

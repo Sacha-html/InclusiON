@@ -144,7 +144,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     _logger.LogWarning(ex, "No se pudo enviar email de registro pendiente a {Email}", command.Email);
                 }
 
-                var response = GetProfessionalByIdQuery.MapToResponse(professional);
+                var response = ProfessionalResponse.MapToResponse(professional);
                 return ApiResponse<ProfessionalResponse>.SuccessResult(response, SuccessMessages.ProfessionalPendingApproval);
             }
             catch (Exception ex)
