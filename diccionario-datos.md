@@ -196,7 +196,21 @@ Familiares o tutores que acompañan el proceso de la persona con discapacidad.
 | Teléfono | Texto (20) | No | Número de contacto |
 | Relación | Texto (50) | No | Madre, Padre, Tutor, Abuelo, etc. |
 | Onboarding completado | Booleano | Sí | Si el familiar completó la pantalla de bienvenida. Default: false |
+| Estado | Enum (FamilyStatusEnum) | Sí | Estado del familiar en el sistema (Active/Terminated). Default: Active |
 | Activo | Booleano | Sí | Estado lógico |
+
+### Historial de Estados del Familiar
+Registro de cambios de estado del familiar.
+
+| Atributo | Tipo | Obligatorio | Descripción |
+|----------|------|:-----------:|-------------|
+| Id | Identificador único | Sí | Identificador del registro |
+| Familiar | Referencia | Sí | Familiar al que pertenece |
+| Estado anterior | Enum (FamilyStatusEnum) | No | Estado anterior |
+| Estado nuevo | Enum (FamilyStatusEnum) | Sí | Nuevo estado |
+| Observación | Texto (500) | No | Motivo del cambio |
+| Usuario que cambió | Referencia | No | Usuario que realizó el cambio |
+| Fecha de cambio | Fecha/hora | Sí | Cuándo se realizó el cambio |
 
 ---
 
@@ -251,13 +265,35 @@ Vinculación de personas con discapacidad a sus representantes familiares.
 
 | Atributo | Tipo | Obligatorio | Descripción |
 |----------|------|:-----------:|-------------|
+| Id | Identificador único | Sí | ID del registro de vinculación |
 | Persona | Referencia | Sí | La persona con discapacidad |
 | Familiar | Referencia | Sí | El representante familiar |
+| Relación | Texto (50) | No | Tipo de parentesco (Madre, Padre, Tutor, etc.) |
 | Es primario | Booleano | Sí | Si es el representante principal |
 | Tiene consentimiento informado | Booleano | Sí | Si firmó consentimiento |
 | Fecha de consentimiento | Fecha | No | Cuándo firmó el consentimiento |
 | Puede supervisar login | Booleano | Sí | Si puede autorizar el login asistido |
 | Activo | Booleano | Sí | Estado lógico |
+| Fecha de creación | Fecha/hora | Sí | Cuándo se creó el vínculo |
+| Fecha de modificación | Fecha/hora | No | Última modificación |
+| Fecha de desvinculación | Fecha/hora | No | Cuando se desvinculó (null si activo) |
+| Observación de desvinculación | Texto (500) | No | Motivo de desvinculación |
+
+### Historial de Cambios de Vinculación
+Registro de cambios en las vinculaciones familiar-persona.
+
+| Atributo | Tipo | Obligatorio | Descripción |
+|----------|------|:-----------:|-------------|
+| Id | Identificador único | Sí | ID del registro |
+| ID de vínculo | Referencia | Sí | ID del PersonRepresentative |
+| Persona | Referencia | Sí | La persona con discapacidad |
+| Familiar | Referencia | Sí | El representante familiar |
+| Tipo de cambio | Enum | Sí | Linked, Updated, Unlinked |
+| Relación | Texto (50) | No | Relación en el momento del cambio |
+| Era primario | Booleano | No | Si era principal en el momento |
+| Observación | Texto (500) | No | Motivo (especialmente para Unlinked) |
+| Usuario que cambió | Referencia | No | Usuario que realizó el cambio |
+| Fecha de cambio | Fecha/hora | Sí | Cuándo se realizó el cambio |
 
 ### Perfil de Habilidades (Persona ↔ Área)
 Áreas de habilidad asignadas a cada persona para trabajar.
