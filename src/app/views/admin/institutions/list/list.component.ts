@@ -1,13 +1,15 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { InstitutionsService, ToastService } from '@services';
 import { InstitutionResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { FormSelectDirective, GridModule } from '@coreui/angular';
 
 @Component({
   selector: 'app-list',
-  imports: [DataTableComponent],
+  imports: [DataTableComponent, FormsModule, FormSelectDirective, GridModule],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
@@ -15,6 +17,8 @@ export class ListComponent implements OnInit {
   private readonly institutionsService = inject(InstitutionsService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
+
+  statusFilter = '';
 
   institutions: InstitutionResponse[] = [];
   filteredInstitutions: InstitutionResponse[] = [];
@@ -49,6 +53,11 @@ export class ListComponent implements OnInit {
     this.applyFilter(term);
   }
 
+  onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
   onHeaderAction(action: string): void {
     if (action === 'new') {
       this.router.navigate(['/admin/institutions/new']);
@@ -77,9 +86,15 @@ export class ListComponent implements OnInit {
 
   private applyFilter(search?: string): void {
     let filtered = this.institutions;
+
+    if (this.statusFilter) {
+      const isActive = this.statusFilter === 'active';
+      filtered = filtered.filter(i => i.isActive === isActive);
+    }
+
     if (search) {
       const term = search.toLowerCase();
-      filtered = this.institutions.filter(
+      filtered = filtered.filter(
         (i) =>
           i.name.toLowerCase().includes(term) ||
           (i.address && i.address.toLowerCase().includes(term)),
