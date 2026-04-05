@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService, ToastService } from '@services';
@@ -7,7 +7,6 @@ import { AdminUserListItemResponse } from '../../../../models/responses/admin-us
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
-import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 import {
   ColComponent,
   RowComponent,
@@ -20,6 +19,7 @@ import {
   ModalBodyComponent,
   ModalFooterComponent,
   ButtonDirective,
+  GridModule,
 } from '@coreui/angular';
 
 @Component({
@@ -28,7 +28,6 @@ import {
     FormsModule,
     DataTableComponent,
     ConfirmModalComponent,
-    InstitutionFilterComponent,
     ColComponent,
     RowComponent,
     FormSelectDirective,
@@ -38,16 +37,16 @@ import {
     ModalBodyComponent,
     ModalFooterComponent,
     ButtonDirective,
+    GridModule,
   ],
   templateUrl: './list.component.html',
 })
-export class UserManagementListComponent {
+export class UserManagementListComponent implements OnInit {
   private readonly userService = inject(UserManagementService);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
-  selectedInstitutionId: number | undefined;
   selectedRole = '';
   selectedStatus = '';
   searchTerm = '';
@@ -56,6 +55,10 @@ export class UserManagementListComponent {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
 
   // Deactivate modal
   showConfirmModal = false;
@@ -82,12 +85,6 @@ export class UserManagementListComponent {
     { key: 'isActive', label: 'Estado', type: 'badge' },
     { key: 'lastLoginDate', label: 'Último acceso', type: 'date' },
   ];
-
-  onInstitutionFilterChange(institutionId: number | undefined): void {
-    this.selectedInstitutionId = institutionId;
-    this.currentPage = 1;
-    this.loadUsers();
-  }
 
   onRoleFilterChange(): void {
     this.currentPage = 1;
@@ -200,11 +197,10 @@ export class UserManagementListComponent {
         search: this.searchTerm || undefined,
         role: this.selectedRole || undefined,
         isActive: this.selectedStatus === '' ? undefined : this.selectedStatus === 'true',
-        institutionId: this.selectedInstitutionId,
       })
       .subscribe({
         next: (response) => {
-          this.users = response.data;
+          this.users = [...response.data];
           this.totalItems = response.totalRecords;
         },
         error: () => {

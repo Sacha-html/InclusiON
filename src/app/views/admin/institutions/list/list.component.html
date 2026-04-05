@@ -1,3 +1,17 @@
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label class="form-label">Estado</label>
+      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="active">Activas</option>
+        <option value="inactive">Inactivas</option>
+      </select>
+    </c-col>
+  </c-row>
+</fieldset>
+
 <app-data-table
   title="Gestión de Instituciones"
   [columns]="cols"
@@ -5,7 +19,7 @@
   [totalItems]="totalItems"
   [pageSize]="pageSize"
   [currentPage]="currentPage"
-  [headerButtons]="[{action: 'new', label: 'Nueva Institucion'}]"
+  [headerButtons]="[{action: 'new', label: 'Agregar'}]"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
   (rowAction)="onRowAction($event)"

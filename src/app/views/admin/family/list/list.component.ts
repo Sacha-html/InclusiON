@@ -1,5 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { GridModule } from '@coreui/angular';
 import { AuthService, FamilyService, ToastService } from '@services';
 import { FamilyListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -10,6 +12,8 @@ import { InstitutionFilterComponent } from '@shared/components/institution-filte
 @Component({
   selector: 'app-family-list',
   imports: [
+    FormsModule,
+    GridModule,
     DataTableComponent,
     ConfirmModalComponent,
     InstitutionFilterComponent,
@@ -26,6 +30,8 @@ export class ListComponent {
   canCreate = this.authService.hasPermission('family:create');
 
   selectedInstitutionId: number | undefined;
+
+  linkedPersonSearch = '';
 
   families: FamilyListItemResponse[] = [];
   totalItems = 0;
@@ -59,6 +65,17 @@ export class ListComponent {
 
   onPageChange(page: number): void {
     this.currentPage = page;
+    this.loadFamily();
+  }
+
+  onLinkedPersonSearch(): void {
+    this.currentPage = 1;
+    this.loadFamily();
+  }
+
+  clearLinkedPersonSearch(): void {
+    this.linkedPersonSearch = '';
+    this.currentPage = 1;
     this.loadFamily();
   }
 
@@ -112,7 +129,13 @@ export class ListComponent {
 
   loadFamily(search?: string): void {
     this.familyService
-      .getFamily({ page: this.currentPage, pageSize: this.pageSize, search, institutionId: this.selectedInstitutionId })
+      .getFamily({ 
+        page: this.currentPage, 
+        pageSize: this.pageSize, 
+        search, 
+        institutionId: this.selectedInstitutionId,
+        linkedPersonSearch: this.linkedPersonSearch || undefined
+      })
       .subscribe({
         next: (response) => {
           this.families = response.data.map((f: any) => ({

@@ -16,16 +16,20 @@
 </div>
 
 <div *ngIf="activeTab==='active'" class="mb-3">
-  <div class="d-flex gap-2 mb-2 align-items-center">
-    <label class="small text-muted mb-0">Filtrar por estado:</label>
-    <select cSelect class="form-select form-select-sm" style="width:auto"
-            [ngModel]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
-      <option value="">Todos</option>
-      <option value="active">Activos</option>
-      <option value="suspended">Suspendidos</option>
-      <option value="terminated">Dados de baja</option>
-    </select>
-  </div>
+  <fieldset class="p-3 border rounded mb-4">
+    <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+    <c-row class="align-items-end">
+      <c-col sm="3">
+        <label class="form-label">Estado</label>
+        <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
+          <option value="">Todos</option>
+          <option value="active">Activos</option>
+          <option value="suspended">Suspendidos</option>
+          <option value="terminated">Dados de baja</option>
+        </select>
+      </c-col>
+    </c-row>
+  </fieldset>
   <app-data-table
     title="Gestión de Profesionales"
     [columns]="cols"
@@ -136,7 +140,6 @@
       <svg cIcon name="cilHistory" class="me-2"></svg>
       Historial de Estados
     </h5>
-    <button cButtonClose (click)="showHistoryModal = false"></button>
   </c-modal-header>
   <c-modal-body>
     @if (statusHistoryLoading) {
@@ -177,5 +180,23 @@
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="showHistoryModal = false">Cerrar</button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal password -->
+<c-modal [visible]="showPasswordModal" (visibleChange)="closePasswordModal()">
+  <c-modal-header>
+    <h5 cModalTitle>Contraseña temporal generada</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p>Se generó una contraseña temporal para <strong>{{ tempPasswordEmail }}</strong>.</p>
+    <p>El usuario deberá cambiarla en su próximo inicio de sesión.</p>
+    <c-alert color="warning" class="d-flex align-items-center justify-content-between">
+      <code class="fs-5">{{ tempPassword }}</code>
+      <button cButton color="primary" size="sm" (click)="copyPassword()">Copiar</button>
+    </c-alert>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closePasswordModal()">Cerrar</button>
   </c-modal-footer>
 </c-modal>
