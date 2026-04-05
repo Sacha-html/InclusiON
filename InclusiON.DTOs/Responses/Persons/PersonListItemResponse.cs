@@ -1,3 +1,5 @@
+using InclusiON.Domain.Models;
+
 namespace InclusiON.DTOs.Responses.Persons
 {
     /// <summary>
@@ -32,6 +34,27 @@ namespace InclusiON.DTOs.Responses.Persons
             var age = today.Year - birthDate.Year;
             if (birthDate.Date > today.AddYears(-age)) age--;
             return age;
+        }
+
+        public static PersonListItemResponse MapToResponse(PersonWithDisability p)
+        {
+            return new PersonListItemResponse
+            {
+                Id = p.Id,
+                UserId = p.UserId,
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                DocumentNumber = p.DocumentNumber,
+                BirthDate = p.BirthDate,
+                PhotoUrl = p.PhotoUrl,
+                AvatarColor = p.AvatarColor,
+                DisabilityTypeId = p.DisabilityTypeId,
+                DisabilityTypeName = p.DisabilityType?.Name,
+                AutonomyLevelId = p.AutonomyLevelId,
+                AutonomyLevelName = p.AutonomyLevel?.Name,
+                LoginMethodName = p.LoginMethod?.Name,
+                IsActive = p.User?.IsActive ?? false
+            };
         }
     }
 }
