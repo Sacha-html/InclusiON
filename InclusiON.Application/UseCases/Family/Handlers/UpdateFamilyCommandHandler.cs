@@ -80,7 +80,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
             _logger.LogInformation("Familiar actualizado: {FamilyId}", family.Id);
 
-            var response = GetFamilyByIdQuery.MapToResponse(family);
+            var response = FamilyResponse.MapToResponse(family);
             return ApiResponse<FamilyResponse>.SuccessResult(response, "Familiar actualizado exitosamente");
         }
     }
