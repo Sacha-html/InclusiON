@@ -53,6 +53,7 @@ import { IconDirective } from '@coreui/icons-angular';
 })
 export class DataTableComponent implements OnInit, OnDestroy {
   @Input() title: string = '';
+  @Input() showTitle: boolean = true;
   @Input() columns: TableColumn[] = [];
   @Input() items: any[] = [];
   @Input() totalItems: number = 0;
@@ -60,6 +61,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
   @Input() currentPage: number = 1;
   @Input() headerButtons: HeaderButton[] = [];
   @Input() showSearch: boolean = true;
+  @Input() showPagination: boolean = true;
   @Input() debounceMs: number = 400;
   @Input() sortable: boolean = false;
   @Input() loading: boolean = false;
@@ -149,24 +151,40 @@ export class DataTableComponent implements OnInit, OnDestroy {
     this.sortAction.emit({ sortBy: this.sortField, sortDirection: this.sortDirection });
   }
 
-  getBadgeColor(value: any): string {
+  getBadgeColor(value: any, col?: TableColumn): string {
+    if (col?.badgeMap) {
+      const key = String(value);
+      return col.badgeMap[key]?.color || 'secondary';
+    }
     if (typeof value === 'boolean') return value ? 'success' : 'danger';
     switch (value?.toLowerCase()) {
       case 'approved': return 'success';
       case 'terminated': return 'secondary';
       case 'suspended': return 'warning';
       case 'rejected': return 'danger';
+      case 'admin': return 'primary';
+      case 'professional': return 'info';
+      case 'familyrepresentative': return 'success';
+      case 'personwithdisability': return 'warning';
       default: return 'info';
     }
   }
 
-  getBadgeLabel(value: any): string {
+  getBadgeLabel(value: any, col?: TableColumn): string {
+    if (col?.badgeMap) {
+      const key = String(value);
+      return col.badgeMap[key]?.label || '-';
+    }
     if (typeof value === 'boolean') return value ? 'Activo' : 'Inactivo';
     switch (value?.toLowerCase()) {
       case 'approved': return 'Aprobado';
       case 'terminated': return 'Dado de baja';
       case 'suspended': return 'Suspendido';
       case 'rejected': return 'Rechazado';
+      case 'admin': return 'Administrador';
+      case 'professional': return 'Profesional';
+      case 'familyrepresentative': return 'Familiar';
+      case 'personwithdisability': return 'Persona';
       default: return value ?? '';
     }
   }
