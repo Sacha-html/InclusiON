@@ -1,6 +1,6 @@
 # Checklist de Procesos — InclusiON
 
-**Última actualización:** 2026-03-25
+**Última actualización:** 2026-04-06
 
 ---
 
@@ -36,6 +36,14 @@
 - [x] Consulta paginada con filtros
 - [x] Edición de profesional (sin campo dirección, eliminado)
 - [x] Desactivación de profesional
+- [x] Auto-registro público de profesional (IN-149)
+- [x] Selección opcional de institución durante registro (IN-149)
+- [x] Validación asíncrona de email y matrícula en registro (IN-149)
+- [x] Validación de solicitudes pendientes por admin (IN-150)
+- [x] Aprobación/rechazo con motivo y email (IN-150)
+- [x] Reactivación de profesionales dados de baja (IN-150)
+- [x] Historial de estados del profesional (IN-150)
+- [x] Vinculación de familiar a persona por profesional (IN-148)
 
 ### 05 — Gestión de Personas con Discapacidad
 - [x] Alta de persona con perfil funcional
@@ -53,6 +61,10 @@
 - [x] Desactivación de familiar
 - [x] Vinculación automática persona-familiar en alta directa
 - [x] Envío de email con contraseña temporal en alta directa
+- [x] Listar familiares disponibles con filtro personId (IN-148)
+- [x] Reactivación de vínculos desvinculados previamente (IN-148)
+- [x] Desvinculación con motivo obligatorio (IN-148)
+- [x] Historial de cambios de vinculación (IN-148)
 
 ### 07 — Gestión de Invitaciones
 - [x] Crear invitación y enviar email
@@ -146,9 +158,9 @@
 - [ ] Portal familia con progreso completo
 
 ### 15 — Generación de Informes
+- [x] Consulta de reportes por profesional
+- [x] Consulta de reportes por familia
 - [ ] Creación de reporte de progreso (tipo, período, contenido)
-- [ ] Consulta de reportes por profesional
-- [ ] Consulta de reportes por familia
 - [ ] Exportación de reporte a PDF
 
 ---
@@ -244,4 +256,4 @@
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| Items checkeados | 95 | 57 |
+| Items checkeados | 107 | 57 |
