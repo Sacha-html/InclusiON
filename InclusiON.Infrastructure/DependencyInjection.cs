@@ -33,14 +33,14 @@ namespace InclusiON.Infrastructure
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
 
-            var connectionString = configuration.GetConnectionString("SqlServerConn");
+            var connectionString = configuration.GetConnectionString("PostgreSqlConn");
 
             if (string.IsNullOrEmpty(connectionString))
             {
                 throw new InvalidOperationException("Connection string is missing");
             }
 
-            services.AddScoped<IConnectionFactory>(_ => new SqlConnectionFactory(connectionString));
+            services.AddScoped<IConnectionFactory>(_ => new NpgsqlConnectionFactory(connectionString));
 
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
