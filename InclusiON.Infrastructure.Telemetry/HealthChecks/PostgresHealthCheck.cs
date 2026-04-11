@@ -3,11 +3,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace InclusiON.Infrastructure.Telemetry.HealthChecks;
 
-public class PostgreSqlHealthCheck : IHealthCheck
+public class PostgresHealthCheck : IHealthCheck
 {
     private readonly string _connectionString;
 
-    public PostgreSqlHealthCheck(string connectionString)
+    public PostgresHealthCheck(string connectionString)
     {
         _connectionString = connectionString;
     }
