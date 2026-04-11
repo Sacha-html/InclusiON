@@ -16,6 +16,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IRefreshTokensRepository _refreshTokensRepository;
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly ILogger<AdminResetPasswordCommandHandler> _logger;
 
         public AdminResetPasswordCommandHandler(
@@ -23,12 +24,14 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             IRefreshTokensRepository refreshTokensRepository,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
+            IAdminInstitutionRepository adminInstitutionRepository,
             ILogger<AdminResetPasswordCommandHandler> logger)
         {
             _identityService = identityService;
             _refreshTokensRepository = refreshTokensRepository;
             _emailService = emailService;
             _unitOfWork = unitOfWork;
+            _adminInstitutionRepository = adminInstitutionRepository;
             _logger = logger;
         }
 
@@ -38,6 +41,35 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             var user = await _identityService.FindByIdAsync(command.UserId);
             if (user is null)
                 return ApiResponse<ResetPasswordResultResponse>.NotFound("Usuario");
+
+            // Validación de alcance institucional:
+            // Si el admin solicitante NO es global (tiene instituciones asignadas),
+            // verificar que el target user pertenezca a alguna de sus instituciones.
+            var requestingAdminInstitutions = await _adminInstitutionRepository
+                .GetActiveInstitutionIdsByAdminAsync(command.RequestedByUserId, cancellationToken);
+
+            var isGlobalAdmin = requestingAdminInstitutions.Count == 0;
+
+            if (!isGlobalAdmin)
+            {
+                var targetUserInstitutions = await _adminInstitutionRepository
+                    .GetActiveInstitutionIdsByAdminAsync(command.UserId, cancellationToken);
+
+                // Si el target tiene instituciones asignadas (es admin institucional),
+                // verificar que haya solapamiento con el admin solicitante.
+                if (targetUserInstitutions.Count > 0)
+                {
+                    var hasOverlap = targetUserInstitutions.Any(id => requestingAdminInstitutions.Contains(id));
+                    if (!hasOverlap)
+                    {
+                        _logger.LogWarning(
+                            "Admin {AdminId} attempted to reset password of user {UserId} from a different institution.",
+                            command.RequestedByUserId, command.UserId);
+                        return ApiResponse<ResetPasswordResultResponse>.Forbidden(
+                            "No tiene permisos para resetear la contraseña de un usuario de otra institución.");
+                    }
+                }
+            }
 
             var tempPassword = PasswordGenerator.GenerateTemporary();
 
