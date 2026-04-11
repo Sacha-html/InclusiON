@@ -19,7 +19,6 @@ namespace InclusiON.Data.Configurations
                 .IsRequired();
 
             builder.Property(p => p.JsonResponse)
-                .HasColumnType("nvarchar(max)")
                 .IsRequired(false);
 
             builder.HasOne(x => x.PersonRoadmapActivity)

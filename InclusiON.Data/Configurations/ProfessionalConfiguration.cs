@@ -37,7 +37,7 @@ namespace InclusiON.Data.Configurations
 
             builder.HasIndex(p => p.Email)
                 .IsUnique()
-                .HasFilter("[Email] IS NOT NULL");
+                .HasFilter("\"Email\" IS NOT NULL");
 
             builder.Property(p => p.Status)
                 .HasConversion<int>();
@@ -56,7 +56,7 @@ namespace InclusiON.Data.Configurations
 
             builder.HasIndex(p => p.DocumentNumber)
                 .IsUnique()
-                .HasFilter("[DocumentNumber] IS NOT NULL");
+                .HasFilter("\"DocumentNumber\" IS NOT NULL");
 
             builder.HasIndex(p => p.UserId)
                 .IsUnique();
