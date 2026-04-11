@@ -108,7 +108,7 @@ public static class DependencyInjection
 
         services.AddSingleton(smtpSettings);
         
-        services.AddSingleton(sp => new SqlServerHealthCheck(connectionString));
+        services.AddSingleton(sp => new PostgresHealthCheck(connectionString));
         
         var otlpSettings = configuration.GetSection("OpenTelemetry")
             .Get<OpenTelemetrySettings>();
@@ -119,7 +119,7 @@ public static class DependencyInjection
         }
         
         var builder = services.AddHealthChecks()
-            .AddCheck<SqlServerHealthCheck>("sqlserver", tags: ["ready", "db"])
+            .AddCheck<PostgresHealthCheck>("postgresql", tags: ["ready", "db"])
             .AddCheck<SmtpHealthCheck>("smtp", tags: ["ready", "email"]);
         
         if (otlpSettings?.Enabled == true && !string.IsNullOrEmpty(otlpSettings.Endpoint))
