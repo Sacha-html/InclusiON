@@ -1,13 +1,13 @@
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace InclusiON.Infrastructure.Telemetry.HealthChecks;
 
-public class SqlServerHealthCheck : IHealthCheck
+public class PostgreSqlHealthCheck : IHealthCheck
 {
     private readonly string _connectionString;
 
-    public SqlServerHealthCheck(string connectionString)
+    public PostgreSqlHealthCheck(string connectionString)
     {
         _connectionString = connectionString;
     }
@@ -18,19 +18,19 @@ public class SqlServerHealthCheck : IHealthCheck
     {
         try
         {
-            await using var connection = new SqlConnection(_connectionString);
+            await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync(cancellationToken);
-            
+
             await using var command = connection.CreateCommand();
             command.CommandText = "SELECT 1";
             await command.ExecuteScalarAsync(cancellationToken);
 
-            return HealthCheckResult.Healthy("SQL Server is healthy");
+            return HealthCheckResult.Healthy("PostgreSQL is healthy");
         }
         catch (Exception ex)
         {
             return HealthCheckResult.Unhealthy(
-                "SQL Server is unhealthy",
+                "PostgreSQL is unhealthy",
                 exception: ex);
         }
     }
