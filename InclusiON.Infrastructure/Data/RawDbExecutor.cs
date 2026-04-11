@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Infrastructure;
 using System.Data;
@@ -6,7 +6,7 @@ using System.Data;
 namespace InclusiON.Infrastructure.Data
 {
     /// <summary>
-    /// Implementacion de IRawDbExecutor usando ADO.NET puro (Microsoft.Data.SqlClient).
+    /// Implementacion de IRawDbExecutor usando ADO.NET puro (Npgsql).
     ///
     /// Cada operacion de lectura abre y cierra su propia conexion (connection-per-call).
     /// Las operaciones transaccionales manejan conexion + transaccion como una unidad.
@@ -39,9 +39,9 @@ namespace InclusiON.Infrastructure.Data
             Action<IDbCommand>? configureParams = null,
             CancellationToken cancellationToken = default)
         {
-            await using var connection = (SqlConnection)await _connectionFactory.CreateConnectionAsync();
+            await using var connection = (NpgsqlConnection)await _connectionFactory.CreateConnectionAsync();
 
-            using var command = new SqlCommand(sql, connection);
+            using var command = new NpgsqlCommand(sql, connection);
             configureParams?.Invoke(command);
 
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -61,9 +61,9 @@ namespace InclusiON.Infrastructure.Data
             Action<IDbCommand>? configureParams = null,
             CancellationToken cancellationToken = default)
         {
-            await using var connection = (SqlConnection)await _connectionFactory.CreateConnectionAsync();
+            await using var connection = (NpgsqlConnection)await _connectionFactory.CreateConnectionAsync();
 
-            using var command = new SqlCommand(sql, connection);
+            using var command = new NpgsqlCommand(sql, connection);
             configureParams?.Invoke(command);
 
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -81,9 +81,9 @@ namespace InclusiON.Infrastructure.Data
             Action<IDbCommand>? configureParams = null,
             CancellationToken cancellationToken = default)
         {
-            await using var connection = (SqlConnection)await _connectionFactory.CreateConnectionAsync();
+            await using var connection = (NpgsqlConnection)await _connectionFactory.CreateConnectionAsync();
 
-            using var command = new SqlCommand(sql, connection);
+            using var command = new NpgsqlCommand(sql, connection);
             configureParams?.Invoke(command);
 
             var result = await command.ExecuteScalarAsync(cancellationToken);
@@ -106,9 +106,9 @@ namespace InclusiON.Infrastructure.Data
             Action<IDbCommand>? configureParams = null,
             CancellationToken cancellationToken = default)
         {
-            await using var connection = (SqlConnection)await _connectionFactory.CreateConnectionAsync();
+            await using var connection = (NpgsqlConnection)await _connectionFactory.CreateConnectionAsync();
 
-            using var command = new SqlCommand(storedProcedure, connection)
+            using var command = new NpgsqlCommand(storedProcedure, connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -130,9 +130,9 @@ namespace InclusiON.Infrastructure.Data
             Action<IDbCommand>? configureParams = null,
             CancellationToken cancellationToken = default)
         {
-            await using var connection = (SqlConnection)await _connectionFactory.CreateConnectionAsync();
+            await using var connection = (NpgsqlConnection)await _connectionFactory.CreateConnectionAsync();
 
-            using var command = new SqlCommand(storedProcedure, connection)
+            using var command = new NpgsqlCommand(storedProcedure, connection)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -149,8 +149,8 @@ namespace InclusiON.Infrastructure.Data
             Func<IDbConnection, IDbTransaction, CancellationToken, Task> operation,
             CancellationToken cancellationToken = default)
         {
-            await using var connection = (SqlConnection)await _connectionFactory.CreateConnectionAsync();
-            await using var transaction = (SqlTransaction)connection.BeginTransaction();
+            await using var connection = (NpgsqlConnection)await _connectionFactory.CreateConnectionAsync();
+            await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
             try
             {
@@ -176,8 +176,8 @@ namespace InclusiON.Infrastructure.Data
             Func<IDbConnection, IDbTransaction, CancellationToken, Task<T>> operation,
             CancellationToken cancellationToken = default)
         {
-            await using var connection = (SqlConnection)await _connectionFactory.CreateConnectionAsync();
-            await using var transaction = (SqlTransaction)connection.BeginTransaction();
+            await using var connection = (NpgsqlConnection)await _connectionFactory.CreateConnectionAsync();
+            await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
             try
             {
