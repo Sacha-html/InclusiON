@@ -2,6 +2,8 @@
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.UseCases.Reports.Commands;
 using InclusiON.Application.UseCases.Reports.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Reports;
@@ -20,9 +22,14 @@ namespace InclusiON.Api.Controllers
     public class ReportsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
-        public ReportsController(IHttpContextService httpContextService)
+        private readonly IProfessionalsRepository _professionalsRepository;
+
+        public ReportsController(
+            IHttpContextService httpContextService,
+            IProfessionalsRepository professionalsRepository)
         {
             _httpContextService = httpContextService;
+            _professionalsRepository = professionalsRepository;
         }
 
         /// <summary>
@@ -73,6 +80,50 @@ namespace InclusiON.Api.Controllers
         {
             var query = new GetReportByIdQuery(reportId);
             var result = await handler.HandleAsync(query, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Crea un nuevo reporte.
+        /// </summary>
+        [HttpPost]
+        [Authorize(Policy = "reports:create")]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<ReportResponse>>> CreateReport(
+            [FromBody] CreateReportRequest request,
+            [FromServices] ICommandHandler<CreateReportCommand, ApiResponse<ReportResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponse<ReportResponse>.ErrorResult("Datos inválidos"));
+            }
+
+            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
+            var professional = await _professionalsRepository.GetByUserIdAsync(currentUserId, cancellationToken);
+
+            if (professional is null)
+                return BadRequest(ApiResponse<ReportResponse>.ErrorResult("Solo los profesionales pueden crear reportes."));
+
+            var command = new CreateReportCommand(
+                request.PersonId,
+                professional.Id,
+                request.Title,
+                request.Content,
+                request.ReportTypeId,
+                request.ReportDate,
+                request.PeriodStartDate,
+                request.PeriodEndDate,
+                request.AchievedGoals,
+                request.AreasToReinforce,
+                request.FutureRecommendations,
+                request.NextObjectives
+            );
+
+            var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }
     }
