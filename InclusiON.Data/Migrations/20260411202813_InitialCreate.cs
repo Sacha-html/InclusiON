@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -17,11 +18,11 @@ namespace InclusiON.Data.Migrations
                 name: "ActivityCategories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,10 +33,10 @@ namespace InclusiON.Data.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -46,13 +47,13 @@ namespace InclusiON.Data.Migrations
                 name: "AutonomyLevels",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    RequiresSupervision = table.Column<bool>(type: "bit", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    RequiresSupervision = table.Column<bool>(type: "boolean", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -63,11 +64,11 @@ namespace InclusiON.Data.Migrations
                 name: "DisabilityTypes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -78,17 +79,17 @@ namespace InclusiON.Data.Migrations
                 name: "EducationalInstitutions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Address = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -99,18 +100,18 @@ namespace InclusiON.Data.Migrations
                 name: "LoginMethods",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    MinAutonomyLevel = table.Column<int>(type: "int", nullable: false),
-                    RequiresEmail = table.Column<bool>(type: "bit", nullable: false),
-                    RequiresPassword = table.Column<bool>(type: "bit", nullable: false),
-                    RequiresPin = table.Column<bool>(type: "bit", nullable: false),
-                    RequiresSupervisor = table.Column<bool>(type: "bit", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Code = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    MinAutonomyLevel = table.Column<int>(type: "integer", nullable: false),
+                    RequiresEmail = table.Column<bool>(type: "boolean", nullable: false),
+                    RequiresPassword = table.Column<bool>(type: "boolean", nullable: false),
+                    RequiresPin = table.Column<bool>(type: "boolean", nullable: false),
+                    RequiresSupervisor = table.Column<bool>(type: "boolean", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -121,11 +122,11 @@ namespace InclusiON.Data.Migrations
                 name: "ReportTypes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -136,18 +137,18 @@ namespace InclusiON.Data.Migrations
                 name: "SkillAreas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Icon = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Color = table.Column<string>(type: "nvarchar(7)", maxLength: 7, nullable: true),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    Icon = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    Color = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: true),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -158,29 +159,29 @@ namespace InclusiON.Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Surname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    LastLoginDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LastLoginIpAddress = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
-                    LastLoginUserAgent = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    MustChangePassword = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    Surname = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    LastLoginDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastLoginIpAddress = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: true),
+                    LastLoginUserAgent = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    MustChangePassword = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "text", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -191,11 +192,11 @@ namespace InclusiON.Data.Migrations
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClaimType = table.Column<string>(type: "text", nullable: true),
+                    ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -212,22 +213,22 @@ namespace InclusiON.Data.Migrations
                 name: "ActivityTemplateTypes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SkillAreaId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    ContentSchema = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
-                    ComponentName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UsesPictograms = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    HasAudio = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SkillAreaId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ContentSchema = table.Column<string>(type: "text", nullable: false),
+                    ComponentName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    UsesPictograms = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    HasAudio = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -244,10 +245,10 @@ namespace InclusiON.Data.Migrations
                 name: "AdminInstitutions",
                 columns: table => new
                 {
-                    AdminUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    InstitutionId = table.Column<int>(type: "int", nullable: false),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    AdminUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstitutionId = table.Column<int>(type: "integer", nullable: false),
+                    AssignedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -270,11 +271,11 @@ namespace InclusiON.Data.Migrations
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClaimType = table.Column<string>(type: "text", nullable: true),
+                    ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -291,10 +292,10 @@ namespace InclusiON.Data.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    LoginProvider = table.Column<string>(type: "text", nullable: false),
+                    ProviderKey = table.Column<string>(type: "text", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -311,8 +312,8 @@ namespace InclusiON.Data.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -335,10 +336,10 @@ namespace InclusiON.Data.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LoginProvider = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Value = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -355,18 +356,19 @@ namespace InclusiON.Data.Migrations
                 name: "FamilyRepresentatives",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DocumentNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Relationship = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    DocumentNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Relationship = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -376,46 +378,46 @@ namespace InclusiON.Data.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PersonsWithDisability",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DocumentNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DisabilityTypeId = table.Column<int>(type: "int", nullable: true),
-                    PhotoUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    AttentionLevel = table.Column<int>(type: "int", nullable: true),
-                    CommunicationLevel = table.Column<int>(type: "int", nullable: true),
-                    UsesAAC = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    UsesSignLanguage = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    MotorSkillLevel = table.Column<int>(type: "int", nullable: true),
-                    InterestsAndMotivators = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    LearningStyle = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    AvailableResources = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    AdditionalTherapies = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    RequiresLargeFont = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    RequiresHighContrast = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    VisualNoiseSensitivity = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    SoundSensitivity = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    AutonomyLevelId = table.Column<int>(type: "int", nullable: true),
-                    LoginMethodId = table.Column<int>(type: "int", nullable: true),
-                    PinCodeHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    EmojiSequence = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    ColorShapeId = table.Column<int>(type: "int", nullable: true),
-                    AvatarColor = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    SupervisorUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    DocumentNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DisabilityTypeId = table.Column<int>(type: "integer", nullable: true),
+                    PhotoUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    AttentionLevel = table.Column<int>(type: "integer", nullable: true),
+                    CommunicationLevel = table.Column<int>(type: "integer", nullable: true),
+                    UsesAAC = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    UsesSignLanguage = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    MotorSkillLevel = table.Column<int>(type: "integer", nullable: true),
+                    InterestsAndMotivators = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    LearningStyle = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    AvailableResources = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    AdditionalTherapies = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    RequiresLargeFont = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    RequiresHighContrast = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    VisualNoiseSensitivity = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    SoundSensitivity = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    AutonomyLevelId = table.Column<int>(type: "integer", nullable: true),
+                    LoginMethodId = table.Column<int>(type: "integer", nullable: true),
+                    PinCodeHash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    EmojiSequence = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ColorShapeId = table.Column<int>(type: "integer", nullable: true),
+                    AvatarColor = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    SupervisorUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -456,24 +458,24 @@ namespace InclusiON.Data.Migrations
                 name: "Professionals",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DocumentNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Specialty = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    LicenseNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    ValidatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ValidatedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    DocumentNumber = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    Specialty = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    LicenseNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    BirthDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    ValidatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ValidatedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -490,17 +492,17 @@ namespace InclusiON.Data.Migrations
                 name: "RefreshTokens",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    RevokedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    RevokedByIp = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
-                    RevokedReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserAgent = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedByIp = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    RevokedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    RevokedByIp = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: true),
+                    RevokedReason = table.Column<string>(type: "text", nullable: true),
+                    UserAgent = table.Column<string>(type: "text", nullable: true),
+                    CreatedByIp = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -517,23 +519,23 @@ namespace InclusiON.Data.Migrations
                 name: "TrustedDevices",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DeviceId = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    DeviceName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeviceType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Browser = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    OperatingSystem = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    RegisteredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastUsedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AuthorizedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DeviceId = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    DeviceName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    DeviceType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    Browser = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    OperatingSystem = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    RegisteredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastUsedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    AuthorizedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -553,19 +555,46 @@ namespace InclusiON.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FamilyStatusHistories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FamilyId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OldStatus = table.Column<int>(type: "integer", nullable: true),
+                    NewStatus = table.Column<int>(type: "integer", nullable: false),
+                    Observation = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ChangedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FamilyStatusHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FamilyStatusHistories_FamilyRepresentatives_FamilyId",
+                        column: x => x.FamilyId,
+                        principalTable: "FamilyRepresentatives",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AccessAudits",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccessedPersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ActionType = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AffectedTable = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    AffectedRecordId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    IpAddress = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Details = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AccessedPersonId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ActionType = table.Column<string>(type: "text", nullable: false),
+                    AffectedTable = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    AffectedRecordId = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    IpAddress = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Details = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -588,18 +617,18 @@ namespace InclusiON.Data.Migrations
                 name: "Messages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ReceiverId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RelatedPersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Content = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReadAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    ParentMessageId = table.Column<int>(type: "int", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SenderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReceiverId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RelatedPersonId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Subject = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ReadAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    ParentMessageId = table.Column<int>(type: "integer", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -631,21 +660,62 @@ namespace InclusiON.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PersonRepresentatives",
+                name: "PersonRepresentativeHistories",
                 columns: table => new
                 {
-                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RepresentativeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsPrimary = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    HasInformedConsent = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    ConsentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CanSuperviseLogin = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PersonRepresentativeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RepresentativeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ChangeType = table.Column<int>(type: "integer", nullable: false),
+                    Relationship = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    WasPrimary = table.Column<bool>(type: "boolean", nullable: true),
+                    Observation = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ChangedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PersonRepresentatives", x => new { x.PersonId, x.RepresentativeId });
+                    table.PrimaryKey("PK_PersonRepresentativeHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PersonRepresentativeHistories_FamilyRepresentatives_Represe~",
+                        column: x => x.RepresentativeId,
+                        principalTable: "FamilyRepresentatives",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_PersonRepresentativeHistories_PersonsWithDisability_PersonId",
+                        column: x => x.PersonId,
+                        principalTable: "PersonsWithDisability",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PersonRepresentatives",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RepresentativeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Relationship = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    IsPrimary = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    HasInformedConsent = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    ConsentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CanSuperviseLogin = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    EndedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UnlinkObservation = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PersonRepresentatives", x => x.Id);
                     table.ForeignKey(
                         name: "FK_PersonRepresentatives_FamilyRepresentatives_RepresentativeId",
                         column: x => x.RepresentativeId,
@@ -664,10 +734,10 @@ namespace InclusiON.Data.Migrations
                 name: "PersonSkillProfiles",
                 columns: table => new
                 {
-                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SkillAreaId = table.Column<int>(type: "int", nullable: false),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SkillAreaId = table.Column<int>(type: "integer", nullable: false),
+                    AssignedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -690,28 +760,28 @@ namespace InclusiON.Data.Migrations
                 name: "Activities",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Description = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    Instructions = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    HasVisualSupport = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    HasAudioSupport = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    UsesEasyReading = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    UsesPictograms = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    ResourcesUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    SkillAreaId = table.Column<int>(type: "int", nullable: true),
-                    EstimatedDurationMinutes = table.Column<int>(type: "int", nullable: true),
-                    ComplexityLevel = table.Column<int>(type: "int", nullable: true),
-                    RequiresSupervision = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    IsStandardActivity = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryId = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Instructions = table.Column<string>(type: "text", nullable: true),
+                    HasVisualSupport = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    HasAudioSupport = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    UsesEasyReading = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    UsesPictograms = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    ResourcesUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    SkillAreaId = table.Column<int>(type: "integer", nullable: true),
+                    EstimatedDurationMinutes = table.Column<int>(type: "integer", nullable: true),
+                    ComplexityLevel = table.Column<int>(type: "integer", nullable: true),
+                    RequiresSupervision = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    IsStandardActivity = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -740,23 +810,23 @@ namespace InclusiON.Data.Migrations
                 name: "Diagnoses",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DiagnosisDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PrimaryDiagnosis = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    InitialObservations = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    IdentifiedCapabilities = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    IdentifiedChallenges = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    RequiredSupports = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    PedagogicalObjectives = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    RecommendedStrategies = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DiagnosisDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PrimaryDiagnosis = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    InitialObservations = table.Column<string>(type: "text", nullable: true),
+                    IdentifiedCapabilities = table.Column<string>(type: "text", nullable: true),
+                    IdentifiedChallenges = table.Column<string>(type: "text", nullable: true),
+                    RequiredSupports = table.Column<string>(type: "text", nullable: true),
+                    PedagogicalObjectives = table.Column<string>(type: "text", nullable: true),
+                    RecommendedStrategies = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -779,24 +849,24 @@ namespace InclusiON.Data.Migrations
                 name: "Invitations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatedByProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ForPersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Relationship = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsUsed = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    UsedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UsedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CreatedByProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ForPersonId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Code = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Relationship = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsUsed = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    UsedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UsedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -825,16 +895,16 @@ namespace InclusiON.Data.Migrations
                 name: "PersonRoadmaps",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedByProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedByProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -857,16 +927,16 @@ namespace InclusiON.Data.Migrations
                 name: "ProfessionalInstitutions",
                 columns: table => new
                 {
-                    ProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    InstitutionId = table.Column<int>(type: "int", nullable: false),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    ProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InstitutionId = table.Column<int>(type: "integer", nullable: false),
+                    AssignedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProfessionalInstitutions", x => new { x.ProfessionalId, x.InstitutionId });
                     table.ForeignKey(
-                        name: "FK_ProfessionalInstitutions_EducationalInstitutions_InstitutionId",
+                        name: "FK_ProfessionalInstitutions_EducationalInstitutions_Institutio~",
                         column: x => x.InstitutionId,
                         principalTable: "EducationalInstitutions",
                         principalColumn: "Id",
@@ -883,12 +953,12 @@ namespace InclusiON.Data.Migrations
                 name: "ProfessionalPersons",
                 columns: table => new
                 {
-                    ProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsPrimaryProfessional = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    CanSuperviseLogin = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    ProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssignedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsPrimaryProfessional = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    CanSuperviseLogin = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -911,17 +981,17 @@ namespace InclusiON.Data.Migrations
                 name: "ProfessionalStatusHistories",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OldStatus = table.Column<int>(type: "int", nullable: true),
-                    NewStatus = table.Column<int>(type: "int", nullable: false),
-                    Observation = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    ChangedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OldStatus = table.Column<int>(type: "integer", nullable: true),
+                    NewStatus = table.Column<int>(type: "integer", nullable: false),
+                    Observation = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ChangedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -938,25 +1008,25 @@ namespace InclusiON.Data.Migrations
                 name: "Reports",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ReportTypeId = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Content = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
-                    ReportDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PeriodStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PeriodEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AchievedGoals = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    AreasToReinforce = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    FutureRecommendations = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    NextObjectives = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ReportTypeId = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    ReportDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    PeriodStartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    PeriodEndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    AchievedGoals = table.Column<string>(type: "text", nullable: true),
+                    AreasToReinforce = table.Column<string>(type: "text", nullable: true),
+                    FutureRecommendations = table.Column<string>(type: "text", nullable: true),
+                    NextObjectives = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -985,21 +1055,21 @@ namespace InclusiON.Data.Migrations
                 name: "ActivityAssignments",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ActivityId = table.Column<int>(type: "int", nullable: false),
-                    PersonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignedByProfessionalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Pendiente"),
-                    SequenceOrder = table.Column<int>(type: "int", nullable: true),
-                    IsEvaluationActivity = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ActivityId = table.Column<int>(type: "integer", nullable: false),
+                    PersonId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssignedByProfessionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssignedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "Pendiente"),
+                    SequenceOrder = table.Column<int>(type: "integer", nullable: true),
+                    IsEvaluationActivity = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -1028,16 +1098,16 @@ namespace InclusiON.Data.Migrations
                 name: "ActivityContents",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ActivityId = table.Column<int>(type: "int", nullable: false),
-                    TemplateTypeId = table.Column<int>(type: "int", nullable: false),
-                    ContentJson = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ActivityId = table.Column<int>(type: "integer", nullable: false),
+                    TemplateTypeId = table.Column<int>(type: "integer", nullable: false),
+                    ContentJson = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -1060,15 +1130,15 @@ namespace InclusiON.Data.Migrations
                 name: "ActivityEmbeddings",
                 columns: table => new
                 {
-                    ActivityId = table.Column<int>(type: "int", nullable: false),
-                    Model = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Dimensions = table.Column<int>(type: "int", nullable: false),
-                    EmbeddingJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    ActivityId = table.Column<int>(type: "integer", nullable: false),
+                    Model = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Dimensions = table.Column<int>(type: "integer", nullable: false),
+                    EmbeddingJson = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1085,16 +1155,16 @@ namespace InclusiON.Data.Migrations
                 name: "PersonRoadmapAreas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonRoadmapId = table.Column<int>(type: "int", nullable: false),
-                    SkillAreaId = table.Column<int>(type: "int", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonRoadmapId = table.Column<int>(type: "integer", nullable: false),
+                    SkillAreaId = table.Column<int>(type: "integer", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -1117,24 +1187,24 @@ namespace InclusiON.Data.Migrations
                 name: "ActivityResponses",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AssignmentId = table.Column<int>(type: "int", nullable: false),
-                    StartedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TimeSpentSeconds = table.Column<int>(type: "int", nullable: true),
-                    Result = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SuccessPercentage = table.Column<decimal>(type: "DECIMAL(5,2)", nullable: true),
-                    AttemptCount = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    ResponsePattern = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    RequiredSupport = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    FrustrationLevel = table.Column<int>(type: "int", nullable: true),
-                    Observations = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AssignmentId = table.Column<int>(type: "integer", nullable: false),
+                    StartedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    TimeSpentSeconds = table.Column<int>(type: "integer", nullable: true),
+                    Result = table.Column<string>(type: "text", nullable: true),
+                    SuccessPercentage = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
+                    AttemptCount = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    ResponsePattern = table.Column<string>(type: "text", nullable: true),
+                    RequiredSupport = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    FrustrationLevel = table.Column<int>(type: "integer", nullable: true),
+                    Observations = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1151,23 +1221,23 @@ namespace InclusiON.Data.Migrations
                 name: "PersonRoadmapActivities",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonRoadmapAreaId = table.Column<int>(type: "int", nullable: false),
-                    ActivityId = table.Column<int>(type: "int", nullable: false),
-                    SequenceOrder = table.Column<int>(type: "int", nullable: false),
-                    IsUnlocked = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    UnlockedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UnlockThresholdPercent = table.Column<int>(type: "int", nullable: false, defaultValue: 60),
-                    TimeLimitSeconds = table.Column<int>(type: "int", nullable: true),
-                    MaxAttempts = table.Column<int>(type: "int", nullable: true),
-                    ShowHints = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    DifficultyLevel = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonRoadmapAreaId = table.Column<int>(type: "integer", nullable: false),
+                    ActivityId = table.Column<int>(type: "integer", nullable: false),
+                    SequenceOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsUnlocked = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    UnlockedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UnlockThresholdPercent = table.Column<int>(type: "integer", nullable: false, defaultValue: 60),
+                    TimeLimitSeconds = table.Column<int>(type: "integer", nullable: true),
+                    MaxAttempts = table.Column<int>(type: "integer", nullable: true),
+                    ShowHints = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    DifficultyLevel = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -1179,7 +1249,7 @@ namespace InclusiON.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_PersonRoadmapActivities_PersonRoadmapAreas_PersonRoadmapAreaId",
+                        name: "FK_PersonRoadmapActivities_PersonRoadmapAreas_PersonRoadmapAre~",
                         column: x => x.PersonRoadmapAreaId,
                         principalTable: "PersonRoadmapAreas",
                         principalColumn: "Id",
@@ -1190,25 +1260,25 @@ namespace InclusiON.Data.Migrations
                 name: "ActivityResults",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonRoadmapActivityId = table.Column<int>(type: "int", nullable: false),
-                    AttemptNumber = table.Column<int>(type: "int", nullable: false),
-                    JsonResponse = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonRoadmapActivityId = table.Column<int>(type: "integer", nullable: false),
+                    AttemptNumber = table.Column<int>(type: "integer", nullable: false),
+                    JsonResponse = table.Column<string>(type: "text", nullable: true),
                     ScorePercent = table.Column<float>(type: "real", nullable: false),
-                    TimeSpentSeconds = table.Column<int>(type: "int", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    TimeSpentSeconds = table.Column<int>(type: "integer", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ActivityResults", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ActivityResults_PersonRoadmapActivities_PersonRoadmapActivityId",
+                        name: "FK_ActivityResults_PersonRoadmapActivities_PersonRoadmapActivi~",
                         column: x => x.PersonRoadmapActivityId,
                         principalTable: "PersonRoadmapActivities",
                         principalColumn: "Id",
@@ -1219,20 +1289,20 @@ namespace InclusiON.Data.Migrations
                 name: "AdaptiveAdjustmentLogs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonRoadmapActivityId = table.Column<int>(type: "int", nullable: false),
-                    ActivityResponseId = table.Column<int>(type: "int", nullable: false),
-                    AdjustmentType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PreviousValue = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
-                    NewValue = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    AdjustedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonRoadmapActivityId = table.Column<int>(type: "integer", nullable: false),
+                    ActivityResponseId = table.Column<int>(type: "integer", nullable: false),
+                    AdjustmentType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    PreviousValue = table.Column<string>(type: "text", nullable: false),
+                    NewValue = table.Column<string>(type: "text", nullable: false),
+                    Reason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    AdjustedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -1244,7 +1314,7 @@ namespace InclusiON.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_AdaptiveAdjustmentLogs_PersonRoadmapActivities_PersonRoadmapActivityId",
+                        name: "FK_AdaptiveAdjustmentLogs_PersonRoadmapActivities_PersonRoadma~",
                         column: x => x.PersonRoadmapActivityId,
                         principalTable: "PersonRoadmapActivities",
                         principalColumn: "Id",
@@ -1255,29 +1325,29 @@ namespace InclusiON.Data.Migrations
                 name: "AdaptiveEngineConfigs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PersonRoadmapActivityId = table.Column<int>(type: "int", nullable: false),
-                    IsEnabled = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    MinDifficultyLevel = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
-                    MaxDifficultyLevel = table.Column<int>(type: "int", nullable: false, defaultValue: 5),
-                    MinTimeLimitSeconds = table.Column<int>(type: "int", nullable: true),
-                    MaxTimeLimitSeconds = table.Column<int>(type: "int", nullable: true),
-                    ConsecutiveSuccessToUpgrade = table.Column<int>(type: "int", nullable: false, defaultValue: 3),
-                    ConsecutiveFailuresToDowngrade = table.Column<int>(type: "int", nullable: false, defaultValue: 2),
-                    SuccessThresholdPercent = table.Column<int>(type: "int", nullable: false, defaultValue: 70),
-                    FrustrationThreshold = table.Column<int>(type: "int", nullable: false, defaultValue: 3),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PersonRoadmapActivityId = table.Column<int>(type: "integer", nullable: false),
+                    IsEnabled = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    MinDifficultyLevel = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    MaxDifficultyLevel = table.Column<int>(type: "integer", nullable: false, defaultValue: 5),
+                    MinTimeLimitSeconds = table.Column<int>(type: "integer", nullable: true),
+                    MaxTimeLimitSeconds = table.Column<int>(type: "integer", nullable: true),
+                    ConsecutiveSuccessToUpgrade = table.Column<int>(type: "integer", nullable: false, defaultValue: 3),
+                    ConsecutiveFailuresToDowngrade = table.Column<int>(type: "integer", nullable: false, defaultValue: 2),
+                    SuccessThresholdPercent = table.Column<int>(type: "integer", nullable: false, defaultValue: 70),
+                    FrustrationThreshold = table.Column<int>(type: "integer", nullable: false, defaultValue: 3),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AdaptiveEngineConfigs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AdaptiveEngineConfigs_PersonRoadmapActivities_PersonRoadmapActivityId",
+                        name: "FK_AdaptiveEngineConfigs_PersonRoadmapActivities_PersonRoadmap~",
                         column: x => x.PersonRoadmapActivityId,
                         principalTable: "PersonRoadmapActivities",
                         principalColumn: "Id",
@@ -1482,8 +1552,7 @@ namespace InclusiON.Data.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -1525,9 +1594,7 @@ namespace InclusiON.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_FamilyRepresentatives_DocumentNumber",
                 table: "FamilyRepresentatives",
-                column: "DocumentNumber",
-                unique: true,
-                filter: "[DocumentNumber] IS NOT NULL");
+                column: "DocumentNumber");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FamilyRepresentatives_FirstName",
@@ -1549,6 +1616,11 @@ namespace InclusiON.Data.Migrations
                 table: "FamilyRepresentatives",
                 column: "UserId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FamilyStatusHistories_FamilyId",
+                table: "FamilyStatusHistories",
+                column: "FamilyId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Invitations_Code",
@@ -1606,6 +1678,27 @@ namespace InclusiON.Data.Migrations
                 name: "IX_Messages_SentAt",
                 table: "Messages",
                 column: "SentAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonRepresentativeHistories_PersonId",
+                table: "PersonRepresentativeHistories",
+                column: "PersonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonRepresentativeHistories_PersonRepresentativeId",
+                table: "PersonRepresentativeHistories",
+                column: "PersonRepresentativeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonRepresentativeHistories_RepresentativeId",
+                table: "PersonRepresentativeHistories",
+                column: "RepresentativeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PersonRepresentatives_PersonId_RepresentativeId",
+                table: "PersonRepresentatives",
+                columns: new[] { "PersonId", "RepresentativeId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PersonRepresentatives_RepresentativeId",
@@ -1676,7 +1769,7 @@ namespace InclusiON.Data.Migrations
                 table: "PersonsWithDisability",
                 column: "DocumentNumber",
                 unique: true,
-                filter: "[DocumentNumber] IS NOT NULL");
+                filter: "\"DocumentNumber\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PersonsWithDisability_FirstName",
@@ -1729,14 +1822,14 @@ namespace InclusiON.Data.Migrations
                 table: "Professionals",
                 column: "DocumentNumber",
                 unique: true,
-                filter: "[DocumentNumber] IS NOT NULL");
+                filter: "\"DocumentNumber\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Professionals_Email",
                 table: "Professionals",
                 column: "Email",
                 unique: true,
-                filter: "[Email] IS NOT NULL");
+                filter: "\"Email\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Professionals_FirstName",
@@ -1852,8 +1945,7 @@ namespace InclusiON.Data.Migrations
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
-                unique: true,
-                filter: "[Email] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_IsActive",
@@ -1864,8 +1956,7 @@ namespace InclusiON.Data.Migrations
                 name: "UserNameIndex",
                 table: "Users",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -1911,10 +2002,16 @@ namespace InclusiON.Data.Migrations
                 name: "Diagnoses");
 
             migrationBuilder.DropTable(
+                name: "FamilyStatusHistories");
+
+            migrationBuilder.DropTable(
                 name: "Invitations");
 
             migrationBuilder.DropTable(
                 name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "PersonRepresentativeHistories");
 
             migrationBuilder.DropTable(
                 name: "PersonRepresentatives");

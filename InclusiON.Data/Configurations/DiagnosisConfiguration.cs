@@ -22,23 +22,17 @@ namespace InclusiON.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(500);
 
-            builder.Property(d => d.InitialObservations)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(d => d.InitialObservations);
 
-            builder.Property(d => d.IdentifiedCapabilities)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(d => d.IdentifiedCapabilities);
 
-            builder.Property(d => d.IdentifiedChallenges)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(d => d.IdentifiedChallenges);
 
-            builder.Property(d => d.RequiredSupports)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(d => d.RequiredSupports);
 
-            builder.Property(d => d.PedagogicalObjectives)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(d => d.PedagogicalObjectives);
 
-            builder.Property(d => d.RecommendedStrategies)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(d => d.RecommendedStrategies);
 
             builder.Property(d => d.IsActive)
                 .HasDefaultValue(true);

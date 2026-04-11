@@ -81,7 +81,7 @@ namespace InclusiON.Data.Configurations
             // Indexes
             builder.HasIndex(p => p.DocumentNumber)
                 .IsUnique()
-                .HasFilter("[DocumentNumber] IS NOT NULL");
+                .HasFilter("\"DocumentNumber\" IS NOT NULL");
 
             builder.HasIndex(p => p.UserId)
                 .IsUnique();

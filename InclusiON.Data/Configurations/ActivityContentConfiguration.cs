@@ -16,8 +16,7 @@ namespace InclusiON.Data.Configurations
                 .ValueGeneratedOnAdd();
 
             builder.Property(c => c.ContentJson)
-                .IsRequired()
-                .HasColumnType("NVARCHAR(MAX)");
+                .IsRequired();
 
             builder.Property(c => c.IsActive)
                 .HasDefaultValue(true);

@@ -30,8 +30,7 @@ namespace InclusiON.Data.Configurations
             builder.Property(a => a.Timestamp)
                 .IsRequired();
 
-            builder.Property(a => a.Details)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(a => a.Details);
 
             builder.HasIndex(a => a.UserId);
             builder.HasIndex(a => a.AccessedPersonId);
