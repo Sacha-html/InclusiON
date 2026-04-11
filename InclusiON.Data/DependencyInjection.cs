@@ -21,10 +21,10 @@ namespace InclusiON.Data
                     .EnableSensitiveDataLogging()
                     .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
                 opt
-                    .UseSqlServer(configuration
-                    .GetConnectionString("SqlServerConn"), sqlOptions =>
+                    .UseNpgsql(configuration
+                    .GetConnectionString("PostgreSqlConn"), npgsqlOptions =>
                     {
-                        sqlOptions.CommandTimeout(180);
+                        npgsqlOptions.CommandTimeout(180);
                     });
             });
 

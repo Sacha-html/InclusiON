@@ -19,11 +19,9 @@ namespace InclusiON.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(150);
 
-            builder.Property(a => a.Description)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(a => a.Description);
 
-            builder.Property(a => a.Instructions)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(a => a.Instructions);
 
             builder.Property(a => a.ResourcesUrl)
                 .HasMaxLength(500);

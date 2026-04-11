@@ -17,7 +17,7 @@ namespace InclusiON.Data.Configurations
                   .IsRequired();
 
             builder.Property(e => e.CreatedAt)
-                  .HasDefaultValueSql("GETUTCDATE()");
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             // Relación con User
             builder.HasOne(rt => rt.User)
