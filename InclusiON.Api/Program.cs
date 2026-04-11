@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Serilog;
-using Swashbuckle.AspNetCore.Filters;
+using Scalar.AspNetCore;
 using InclusiON.Application;
-using InclusiON.Application.Interfaces.Telemetry;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
 using InclusiON.Api.Middleware;
+using InclusiON.Api.Scalar;
 using InclusiON.Infrastructure;
-using InclusiON.Infrastructure.Configuration;
 using InclusiON.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,51 +37,60 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddPersistence(builder.Configuration);
 
-var connectionString = builder.Configuration.GetConnectionString("SqlServerConn") 
-    ?? throw new InvalidOperationException("Connection string 'SqlServerConn' not found.");
+var connectionString = builder.Configuration.GetConnectionString("PostgreSqlConn")
+    ?? throw new InvalidOperationException("Connection string 'PostgreSqlConn' not found.");
 
 builder.Services.AddInfrastructureTelemetry(builder.Configuration, connectionString);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(p =>
+builder.Services.AddTransient<OpenApiExamplesTransformer>();
+
+builder.Services.AddOpenApi(options =>
 {
-    p.SwaggerDoc("v1", new OpenApiInfo
+    options.AddDocumentTransformer((document, context, ct) =>
     {
-        Title = "InclusiON API",
-        Version = "v1",
-        Description = "InclusiON - API Template",
-        Contact = new OpenApiContact
+        document.Info = new OpenApiInfo
         {
-            Name = "Your Name",
-            Email = "your@email.com"
-        }
+            Title = "InclusiON API",
+            Version = "v1",
+            Description = "InclusiON - Sistema de gestión para instituciones de educación especial",
+            Contact = new OpenApiContact
+            {
+                Name = "InclusiON",
+                Email = "contacto@inclusion.edu.ar"
+            }   
+        };
+
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+        {
+            ["Bearer"] = new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization. Ingresá 'Bearer' seguido de tu token. Ejemplo: 'Bearer eyJhbGci...'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = "bearer"
+            }
+        };
+
+        return Task.CompletedTask;
     });
 
-    p.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddOperationTransformer((operation, context, ct) =>
     {
-        Description = @"JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token. Example: 'Bearer 12345abcdef'",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
+        operation.Security ??= [];
+        operation.Security.Add(new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer")] = []
+        });
+        return Task.CompletedTask;
     });
 
-    p.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-    {
-        [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
-    });
-
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    p.IncludeXmlComments(xmlPath);
-
-    p.ExampleFilters();
+    options.AddOperationTransformer<OpenApiExamplesTransformer>();
 });
-
-builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
 builder.Services.AddCors(options =>
 {
@@ -97,12 +105,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.MapSwagger();
-app.UseSwaggerUI(p =>
+if (app.Environment.IsDevelopment())
 {
-    p.SwaggerEndpoint("/swagger/v1/swagger.json", "InclusiON API V1");
-    p.RoutePrefix = string.Empty;
-});
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("InclusiON API")
+               .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+               .AddPreferredSecuritySchemes(["Bearer"])
+               .AddHttpAuthentication("Bearer", scheme =>
+               {
+                   scheme.Token = string.Empty;
+               });
+    });
+}
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
@@ -135,6 +151,6 @@ using (var scope = app.Services.CreateScope())
 await DatabaseSeeder.SeedAsync(app.Services);
 
 Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
-Log.Information("Swagger UI: {SwaggerUrl}/swagger", app.Urls.FirstOrDefault());
+Log.Information("API Docs: {Url}/scalar/v1", app.Urls.FirstOrDefault());
 
 app.Run();
