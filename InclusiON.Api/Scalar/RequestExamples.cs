@@ -11,7 +11,7 @@ using InclusiON.DTOs.Requests.Professionals;
 using InclusiON.DTOs.Requests.Reports;
 using InclusiON.DTOs.Requests.Roles;
 
-namespace InclusiON.Api.Swagger
+namespace InclusiON.Api.Scalar
 {
     /// <summary>
     /// Ejemplos de request para documentación y tests manuales.
