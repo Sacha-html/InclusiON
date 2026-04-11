@@ -3,7 +3,7 @@ using Microsoft.OpenApi;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace InclusiON.Api.Swagger;
+namespace InclusiON.Api.Scalar;
 
 /// <summary>
 /// Inyecta ejemplos de request en la documentación OpenAPI sin tocar los DTOs.
