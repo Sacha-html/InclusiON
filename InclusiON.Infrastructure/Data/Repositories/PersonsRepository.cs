@@ -75,6 +75,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             SortField? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
+            string? representativeSearch = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.PersonsWithDisability
@@ -82,6 +83,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.DisabilityType)
                 .Include(p => p.AutonomyLevel)
                 .Include(p => p.LoginMethod)
+                .Include(p => p.PersonRepresentatives.Where(pr => pr.IsActive))
+                    .ThenInclude(pr => pr.Representative)
                 .AsQueryable();
 
             // Filtros
@@ -107,6 +110,15 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (isActive.HasValue)
             {
                 query = query.Where(p => p.User.IsActive == isActive.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(representativeSearch))
+            {
+                var repSearchLower = representativeSearch.ToLower();
+                query = query.Where(p => p.PersonRepresentatives.Any(pr =>
+                    pr.IsActive &&
+                    (pr.Representative.FirstName.ToLower().Contains(repSearchLower) ||
+                     pr.Representative.LastName.ToLower().Contains(repSearchLower))));
             }
 
             if (institutionIds is not null && institutionIds.Count > 0)
