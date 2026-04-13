@@ -7,7 +7,7 @@
 }
 
 .visual-login-container {
-  background-color: var(--a11y-bg, #f5f7fa);
+  background-color: var(--a11y-bg);
   padding: 2rem 0;
   min-height: 100vh;
   width: 100vw;
@@ -30,16 +30,16 @@
   padding: 1rem 2rem;
   min-height: 56px;
   border-radius: 1rem;
-  border: 3px solid var(--a11y-border, #9E9E9E) !important;
-  background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
-  color: var(--a11y-text, #1A1A1A) !important;
+  border: 3px solid var(--a11y-border) !important;
+  background-color: var(--a11y-bg-secondary) !important;
+  color: var(--a11y-text) !important;
 
   svg { width: 24px; height: 24px; color: inherit; }
 
   &:hover, &:focus {
-    background-color: var(--a11y-primary, #0D47A1) !important;
-    border-color: var(--a11y-primary, #0D47A1) !important;
-    color: var(--a11y-primary-text, #FFFFFF) !important;
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
@@ -75,18 +75,18 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: var(--a11y-bg-secondary, #e0e0e0);
-  border: 3px solid var(--a11y-border, #bdbdbd);
+  background-color: var(--a11y-bg-secondary);
+  border: 3px solid var(--a11y-border);
   transition: all 0.2s ease;
 
   &.filled {
-    background-color: var(--a11y-primary, #0D47A1);
-    border-color: var(--a11y-primary, #0D47A1);
+    background-color: var(--a11y-primary);
+    border-color: var(--a11y-primary);
     transform: scale(1.1);
   }
 
   &.error {
-    border-color: var(--a11y-danger, #B71C1C);
+    border-color: var(--a11y-danger);
     animation: shake 0.3s ease;
   }
 }
