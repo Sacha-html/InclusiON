@@ -17,6 +17,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<List<EducationalInstitution>> GetAllAsync(CancellationToken ct = default)
         {
             return await _context.EducationalInstitutions
+                .AsNoTracking()
                 .OrderBy(i => i.Name)
                 .ToListAsync(ct);
         }
@@ -24,6 +25,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<EducationalInstitution?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.EducationalInstitutions
+                .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Id == id, ct);
         }
 
