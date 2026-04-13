@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -273,7 +273,7 @@ namespace InclusiON.Api.Controllers
                     "Ya existe un usuario con ese email."));
             }
 
-            // Generar contrasena temporal
+            // Generar contraseña temporal
             var temporaryPassword = InclusiON.Application.Helpers.PasswordGenerator.GenerateTemporary();
 
             // Crear usuario
