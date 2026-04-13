@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -116,7 +116,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     break;
 
                 case LoginMethodStandard:
-                    // Generar contrasena temporal para que el usuario pueda loguearse
+                    // Generar contraseña temporal para que el usuario pueda loguearse
                     temporaryPassword = PasswordGenerator.GenerateTemporary();
                     var user = await _identityService.FindByIdAsync(command.UserId);
                     if (user == null)
@@ -128,13 +128,13 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     var (succeeded, errors) = await _identityService.ResetPasswordAsync(user, temporaryPassword);
                     if (!succeeded)
                     {
-                        _logger.LogWarning("Error al resetear contrasena para usuario {UserId}: {Errors}",
+                        _logger.LogWarning("Error al resetear contraseña para usuario {UserId}: {Errors}",
                             command.UserId, string.Join(", ", errors));
                         return ApiResponse<UpdateLoginMethodResponse>.ErrorResult(
                             ErrorCode.ValidationFailed,
                             string.Format(ErrorMessages.UserCreationError, string.Join(", ", errors)));
                     }
-                    // Marcar que debe cambiar contrasena en primer login
+                    // Marcar que debe cambiar contraseña en primer login
                     user.MustChangePassword = true;
                     await _identityService.UpdateUserAsync(user);
                     break;

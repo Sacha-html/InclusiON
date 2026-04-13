@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -58,7 +58,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         ErrorMessages.InvitationExpired);
                 }
 
-                // Validar contrasenas
+                // Validar contraseñs
                 if (command.Password != command.ConfirmPassword)
                 {
                     return ApiResponse<AcceptInvitationResponse>.ErrorResult(
