@@ -1,11 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InvitationsService, ToastService, ProfessionalsService, AssignmentsService } from '@services';
 import { getInvitationStatusColor } from '@shared/utils';
 import {
@@ -32,8 +27,7 @@ import {
 } from '@coreui/angular';
 
 @Component({
-  selector: 'app-invitation-list',
-  standalone: true,
+  selector: 'app-invitations-list',
   imports: [
     DatePipe,
     ReactiveFormsModule,
@@ -52,14 +46,14 @@ import {
     AlertComponent,
     SpinnerComponent,
   ],
-  templateUrl: './invitation-list.component.html',
-  styleUrl: './invitation-list.component.scss',
+  templateUrl: './list.component.html',
+  styleUrl: './list.component.scss',
 })
-export class InvitationListComponent implements OnInit {
+export class ListComponent implements OnInit {
   private readonly invitationsService = inject(InvitationsService);
+  private readonly toastService = inject(ToastService);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
-  private readonly toastService = inject(ToastService);
   private readonly fb = inject(FormBuilder);
 
   invitations: InvitationResponse[] = [];

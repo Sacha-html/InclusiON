@@ -4,11 +4,19 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end">
     <c-col sm="3">
-      <label class="form-label">Buscar por persona a cargo</label>
-      <input type="text" class="form-control" [(ngModel)]="linkedPersonSearch" (keyup.enter)="onLinkedPersonSearch()" placeholder="Nombre o documento de la persona">
+      <label cLabel>Persona a cargo</label>
+      <input cFormControl type="text" [(ngModel)]="linkedPersonSearch" (ngModelChange)="onLinkedPersonSearch()" placeholder="Nombre o documento de la persona">
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
     </c-col>
     <c-col sm="auto">
-      <button cButton color="secondary" variant="outline" (click)="clearLinkedPersonSearch()">Limpiar</button>
+      <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
     </c-col>
   </c-row>
 </fieldset>
@@ -29,11 +37,11 @@
 
 <app-confirm-modal
   [visible]="showConfirmModal"
-  title="Confirmar desactivacion"
-  messagePrefix="¿Esta seguro de que desea desactivar al familiar "
+  title="Confirmar desactivación"
+  messagePrefix="¿Está seguro de que desea desactivar al familiar "
   [itemName]="itemToDeactivate?.fullName ?? ''"
   messageSuffix="?"
-  detail="Esta accion deshabilitara su acceso al sistema."
+  detail="Esta acción deshabilitará su acceso al sistema."
   confirmLabel="Desactivar"
   (confirm)="confirmDeactivate()"
   (cancel)="cancelDeactivate()">
