@@ -1,4 +1,4 @@
-using InclusiON.Domain.Enums;
+﻿using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 
 namespace InclusiON.DTOs.Responses.Professionals
@@ -30,7 +30,7 @@ namespace InclusiON.DTOs.Responses.Professionals
         public DateTime? UpdatedAt { get; set; }
 
         /// <summary>
-        /// Contrasena temporal generada al crear el profesional. Solo se muestra una vez.
+        /// contraseña temporal generada al crear el profesional. Solo se muestra una vez.
         /// </summary>
         public string? TemporaryPassword { get; set; }
         public string? Email { get; set; }
