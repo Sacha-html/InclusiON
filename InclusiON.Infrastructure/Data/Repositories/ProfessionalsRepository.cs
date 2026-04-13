@@ -22,6 +22,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.Professionals
                 .Include(p => p.User)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == professionalId, cancellationToken);
         }
 
@@ -29,6 +30,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.Professionals
                 .Include(p => p.User)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
         }
 
@@ -98,6 +100,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             var query = _context.Professionals
                 .Include(p => p.User)
+                .AsNoTracking()
                 .Where(p => p.Status != ProfessionalStatusEnum.Pending && p.Status != ProfessionalStatusEnum.Rejected);
 
             // Filtros
@@ -105,17 +108,17 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 var searchLower = search.ToLower();
                 query = query.Where(p =>
-                    p.FirstName.ToLower().Contains(searchLower) ||
-                    p.LastName.ToLower().Contains(searchLower) ||
+                    p.FirstName.Contains(searchLower) ||
+                    p.LastName.Contains(searchLower) ||
                     (p.DocumentNumber != null && p.DocumentNumber.Contains(search)) ||
                     (p.Phone != null && p.Phone.Contains(search)) ||
-                    (p.User.Email != null && p.User.Email.ToLower().Contains(searchLower)));
+                    (p.User.Email != null && p.User.Email.Contains(searchLower)));
             }
 
             if (!string.IsNullOrWhiteSpace(specialty))
             {
                 var specialtyLower = specialty.ToLower();
-                query = query.Where(p => p.Specialty != null && p.Specialty.ToLower().Contains(specialtyLower));
+                query = query.Where(p => p.Specialty != null && p.Specialty.Contains(specialtyLower));
             }
 
             if (!string.IsNullOrWhiteSpace(status))
@@ -187,6 +190,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             var query = _context.Professionals
                 .Include(p => p.User)
                 .Include(p => p.ProfessionalInstitutions)
+                .AsNoTracking()
                 .Where(p => p.Status == ProfessionalStatusEnum.Pending)
                 .AsQueryable();
 
@@ -194,10 +198,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 var searchLower = search.ToLower();
                 query = query.Where(p =>
-                    p.FirstName.ToLower().Contains(searchLower) ||
-                    p.LastName.ToLower().Contains(searchLower) ||
+                    p.FirstName.Contains(searchLower) ||
+                    p.LastName.Contains(searchLower) ||
                     (p.DocumentNumber != null && p.DocumentNumber.Contains(search)) ||
-                    (p.User.Email != null && p.User.Email.ToLower().Contains(searchLower)));
+                    (p.User.Email != null && p.User.Email.Contains(searchLower)));
             }
 
             if (institutionIds is not null && institutionIds.Count > 0)
@@ -225,6 +229,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<int> GetPendingCountAsync(List<int>? institutionIds = null, CancellationToken cancellationToken = default)
         {
             var query = _context.Professionals
+                .AsNoTracking()
                 .Where(p => p.Status == ProfessionalStatusEnum.Pending);
 
             if (institutionIds is not null && institutionIds.Count > 0)
@@ -248,6 +253,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<List<ProfessionalStatusHistory>> GetStatusHistoryAsync(Guid professionalId, CancellationToken cancellationToken = default)
         {
             return await _context.ProfessionalStatusHistories
+                .AsNoTracking()
                 .Where(h => h.ProfessionalId == professionalId)
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync(cancellationToken);
@@ -257,6 +263,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             var cutoffDate = DateTime.UtcNow.AddDays(-inactiveDays);
             return await _context.Professionals
+                .AsNoTracking()
                 .Include(p => p.User)
                 .Where(p => p.Status == ProfessionalStatusEnum.Approved
                     && p.User.IsActive
