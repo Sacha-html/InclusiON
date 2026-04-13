@@ -70,4 +70,5 @@ export interface PersonListItemResponse {
   loginMethodName?: string;
 
   isActive: boolean;
+  representativeNames?: string;
 }

@@ -6,7 +6,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
-import { NavModule, ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
+import { NavModule, ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormLabelDirective, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -26,6 +26,7 @@ import { CommonModule, DatePipe } from '@angular/common';
     ModalBodyComponent,
     ModalFooterComponent,
     FormsModule,
+    FormLabelDirective,
     FormSelectDirective,
     ButtonDirective,
     SpinnerComponent,
@@ -148,6 +149,12 @@ export class ListComponent implements OnInit {
 
   onStatusFilterChange(status: string): void {
     this.statusFilter = status;
+    this.currentPage = 1;
+    this.loadProfessionals();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
     this.currentPage = 1;
     this.loadProfessionals();
   }
