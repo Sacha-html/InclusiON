@@ -1,4 +1,4 @@
-namespace InclusiON.DTOs.Responses.Persons
+﻿namespace InclusiON.DTOs.Responses.Persons
 {
     /// <summary>
     /// Respuesta al actualizar el metodo de login de una persona.
@@ -21,7 +21,7 @@ namespace InclusiON.DTOs.Responses.Persons
         public string LoginMethodName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Contrasena temporal generada al cambiar a metodo STANDARD.
+        /// contraseña temporal generada al cambiar a metodo STANDARD.
         /// Solo se devuelve una vez.
         /// </summary>
         public string? TemporaryPassword { get; set; }
