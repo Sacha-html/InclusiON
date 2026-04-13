@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Api.Extensions;
@@ -42,7 +42,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
-        /// Inicia sesion con email y contrasena.
+        /// Inicia sesion con email y contraseña.
         /// </summary>
         [HttpPost("login")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
@@ -93,7 +93,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
-        /// Login visual estandar con contrasena para personas con discapacidad.
+        /// Login visual estandar con contraseña para personas con discapacidad.
         /// </summary>
         [HttpPost("login/visual-standard")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
@@ -139,7 +139,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
-        /// Login para familiares/tutores con contrasena.
+        /// Login para familiares/tutores con contraseña.
         /// </summary>
         [HttpPost("login/family")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
@@ -187,7 +187,7 @@ namespace InclusiON.Api.Controllers
         #endregion
 
         /// <summary>
-        /// Cambia la contrasena del usuario autenticado.
+        /// Cambia la contraseña del usuario autenticado.
         /// </summary>
         [Authorize]
         [HttpPut("change-password")]
