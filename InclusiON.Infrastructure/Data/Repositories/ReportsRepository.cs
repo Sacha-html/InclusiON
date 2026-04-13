@@ -23,6 +23,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(r => r.Person)
                 .Include(r => r.Professional)
                 .Include(r => r.ReportType)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == reportId, cancellationToken);
         }
 
@@ -55,18 +56,19 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(r => r.Person)
                 .Include(r => r.Professional)
                 .Include(r => r.ReportType)
+                .AsNoTracking()
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchLower = search.ToLower();
                 query = query.Where(r =>
-                    r.Title.ToLower().Contains(searchLower) ||
-                    r.Content.ToLower().Contains(searchLower) ||
-                    (r.AchievedGoals != null && r.AchievedGoals.ToLower().Contains(searchLower)) ||
-                    (r.AreasToReinforce != null && r.AreasToReinforce.ToLower().Contains(searchLower)) ||
-                    (r.FutureRecommendations != null && r.FutureRecommendations.ToLower().Contains(searchLower)) ||
-                    (r.NextObjectives != null && r.NextObjectives.ToLower().Contains(searchLower)));
+                    r.Title.Contains(searchLower) ||
+                    r.Content.Contains(searchLower) ||
+                    (r.AchievedGoals != null && r.AchievedGoals.Contains(searchLower)) ||
+                    (r.AreasToReinforce != null && r.AreasToReinforce.Contains(searchLower)) ||
+                    (r.FutureRecommendations != null && r.FutureRecommendations.Contains(searchLower)) ||
+                    (r.NextObjectives != null && r.NextObjectives.Contains(searchLower)));
             }
 
             if (!string.IsNullOrWhiteSpace(personId) && Guid.TryParse(personId, out var parsedPersonId))

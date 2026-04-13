@@ -33,12 +33,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     .Include(p => p.User)
                     .Include(p => p.LoginMethod)
                     .Include(p => p.SupervisorUser)
-                    .Where(p => p.IsActive &&
+                    .Where(p => p.IsActive && p.User.IsActive &&
                         (EF.Functions.Like(p.FirstName, searchPattern) ||
                          EF.Functions.Like(p.LastName, searchPattern) ||
                          EF.Functions.Like(p.FirstName + " " + p.LastName, searchPattern) ||
-                         EF.Functions.Like(p.User.UserName!, identifier) ||
-                         EF.Functions.Like(p.User.Email!, identifier)))
+                         EF.Functions.Like(p.User.UserName!, searchPattern) ||
+                         EF.Functions.Like(p.User.Email!, searchPattern)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
             }

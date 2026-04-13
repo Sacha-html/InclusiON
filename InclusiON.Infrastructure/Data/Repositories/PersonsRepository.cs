@@ -25,6 +25,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.AutonomyLevel)
                 .Include(p => p.LoginMethod)
                 .Include(p => p.SupervisorUser)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == personId, cancellationToken);
         }
 
@@ -36,6 +37,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.AutonomyLevel)
                 .Include(p => p.LoginMethod)
                 .Include(p => p.SupervisorUser)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
         }
 
@@ -85,6 +87,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.LoginMethod)
                 .Include(p => p.PersonRepresentatives.Where(pr => pr.IsActive))
                     .ThenInclude(pr => pr.Representative)
+                .AsNoTracking()
                 .AsQueryable();
 
             // Filtros
@@ -92,8 +95,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 var searchLower = search.ToLower();
                 query = query.Where(p =>
-                    p.FirstName.ToLower().Contains(searchLower) ||
-                    p.LastName.ToLower().Contains(searchLower) ||
+                    p.FirstName.Contains(searchLower) ||
+                    p.LastName.Contains(searchLower) ||
                     (p.DocumentNumber != null && p.DocumentNumber.Contains(search)));
             }
 
@@ -117,8 +120,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 var repSearchLower = representativeSearch.ToLower();
                 query = query.Where(p => p.PersonRepresentatives.Any(pr =>
                     pr.IsActive &&
-                    (pr.Representative.FirstName.ToLower().Contains(repSearchLower) ||
-                     pr.Representative.LastName.ToLower().Contains(repSearchLower))));
+                    (pr.Representative.FirstName.Contains(repSearchLower) ||
+                     pr.Representative.LastName.Contains(repSearchLower))));
             }
 
             if (institutionIds is not null && institutionIds.Count > 0)
