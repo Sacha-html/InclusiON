@@ -46,6 +46,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             SortField? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
+            string? representativeSearch = null,
             CancellationToken cancellationToken = default);
     }
 }

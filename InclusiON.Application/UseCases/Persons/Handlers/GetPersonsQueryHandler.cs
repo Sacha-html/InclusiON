@@ -31,6 +31,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 query.SortBy,
                 query.SortDirection,
                 query.InstitutionIds,
+                query.RepresentativeSearch,
                 cancellationToken);
 
             var response = new PagedResponse<PersonListItemResponse>

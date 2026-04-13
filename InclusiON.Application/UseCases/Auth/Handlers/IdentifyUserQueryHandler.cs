@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Auth.Queries;
@@ -127,7 +127,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
                     AvatarColor = person.AvatarColor ?? "#2196F3",
                     LoginMethodCode = loginMethodCode,
-                    LoginMethodName = loginMethod?.Name ?? "Contrasena",
+                    LoginMethodName = loginMethod?.Name ?? "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = loginMethod?.RequiresSupervisor ?? false,
                     UserType = "Person"
@@ -165,7 +165,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
                     AvatarColor = "#4CAF50",
                     LoginMethodCode = "STANDARD",
-                    LoginMethodName = "Contrasena",
+                    LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = false,
                     UserType = "Professional"
@@ -203,7 +203,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
                     AvatarColor = "#9C27B0",
                     LoginMethodCode = "STANDARD",
-                    LoginMethodName = "Contrasena",
+                    LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = false,
                     UserType = "Family"

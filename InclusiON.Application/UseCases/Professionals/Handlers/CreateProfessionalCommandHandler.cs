@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -60,7 +60,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         ErrorMessages.EmailAlreadyRegistered);
                 }
 
-                // Generar contrasena temporal
+                // Generar contraseña temporal
                 var password = PasswordGenerator.GenerateTemporary();
 
                 // Crear usuario
