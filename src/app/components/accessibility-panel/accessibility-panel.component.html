@@ -1,5 +1,6 @@
 <!-- Botón flotante para abrir el panel -->
 <button
+  type="button"
   class="a11y-trigger-btn"
   (click)="togglePanel()"
   [attr.aria-expanded]="a11y.panelOpen()"
@@ -13,6 +14,7 @@
 <!-- Botón de salida del modo lectura (visible solo cuando está activo) -->
 @if (a11y.readingMode()) {
 <button
+  type="button"
   class="a11y-exit-reading-btn"
   (click)="toggleReadingMode()"
   aria-label="Salir del modo lectura"
@@ -39,6 +41,7 @@
   </div>
   <span class="speaking-text">Leyendo...</span>
   <button
+    type="button"
     class="speaking-stop-btn"
     (click)="stopSpeaking()"
     aria-label="Detener lectura"
@@ -70,6 +73,7 @@
       Accesibilidad
     </h2>
     <button
+      type="button"
       #closeButton
       class="a11y-panel-close"
       (click)="closePanel()"
@@ -88,6 +92,7 @@
       <div class="a11y-color-mode-toggle" role="group" aria-labelledby="color-mode-title">
         @for (mode of a11y.colorModes; track mode.id) {
         <button
+          type="button"
           class="a11y-mode-btn"
           [class.active]="a11y.colorMode() === mode.id"
           (click)="setColorMode(mode.id)"
@@ -107,6 +112,7 @@
       <div class="a11y-theme-list" role="group" aria-labelledby="profile-title">
         @for (profile of a11y.profiles; track profile.id) {
         <button
+          type="button"
           class="a11y-theme-btn"
           [class.active]="a11y.profile() === profile.id"
           (click)="setProfile(profile.id)"
@@ -131,6 +137,7 @@
       <h3 id="text-size-title" class="a11y-section-title">Texto</h3>
       <div class="a11y-size-controls" role="group" aria-labelledby="text-size-title">
         <button
+          type="button"
           class="a11y-size-btn"
           (click)="decreaseFontSize()"
           [disabled]="a11y.fontSize() === 'small'"
@@ -148,6 +155,7 @@
         </div>
 
         <button
+          type="button"
           class="a11y-size-btn"
           (click)="increaseFontSize()"
           [disabled]="a11y.fontSize() === 'x-large'"
@@ -163,6 +171,7 @@
       <h3 id="options-title" class="a11y-section-title">Opciones</h3>
 
       <button
+        type="button"
         class="a11y-option-btn"
         [class.active]="a11y.largeCursor()"
         (click)="toggleLargeCursor()"
@@ -176,6 +185,7 @@
       </button>
 
       <button
+        type="button"
         class="a11y-option-btn"
         [class.active]="a11y.highlightLinks()"
         (click)="toggleHighlightLinks()"
@@ -189,6 +199,7 @@
       </button>
 
       <button
+        type="button"
         class="a11y-option-btn"
         [class.active]="a11y.reducedMotion()"
         (click)="toggleReducedMotion()"
@@ -202,6 +213,7 @@
       </button>
 
       <button
+        type="button"
         class="a11y-option-btn"
         [class.active]="a11y.readingGuide()"
         (click)="toggleReadingGuide()"
@@ -215,6 +227,7 @@
       </button>
 
       <button
+        type="button"
         class="a11y-option-btn"
         [class.active]="a11y.readingMode()"
         (click)="toggleReadingMode()"
@@ -233,6 +246,7 @@
       <h3 id="tts-title" class="a11y-section-title">Texto a Voz</h3>
 
       <button
+        type="button"
         class="a11y-option-btn"
         [class.active]="a11y.textToSpeechEnabled()"
         (click)="toggleTextToSpeech()"
@@ -252,6 +266,7 @@
           <label id="tts-speed-label">Velocidad: {{ a11y.textToSpeechRate() }}x</label>
           <div class="a11y-size-controls" role="group" aria-labelledby="tts-speed-label">
             <button
+              type="button"
               class="a11y-size-btn a11y-size-btn-small"
               (click)="decreaseTTSRate()"
               [disabled]="a11y.textToSpeechRate() <= 0.5"
@@ -274,6 +289,7 @@
               [attr.aria-valuetext]="a11y.textToSpeechRate() + 'x'"
             />
             <button
+              type="button"
               class="a11y-size-btn a11y-size-btn-small"
               (click)="increaseTTSRate()"
               [disabled]="a11y.textToSpeechRate() >= 2"
@@ -287,6 +303,7 @@
         <!-- Controles de reproducción -->
         <div class="a11y-tts-controls" role="group" aria-label="Controles de lectura">
           <button
+            type="button"
             class="a11y-tts-btn"
             (click)="speakSelection()"
             aria-label="Leer texto seleccionado"
@@ -296,6 +313,7 @@
           </button>
 
           <button
+            type="button"
             class="a11y-tts-btn"
             (click)="speakMainContent()"
             aria-label="Leer contenido principal de la página"
@@ -306,6 +324,7 @@
 
           @if (a11y.isSpeaking()) {
             <button
+              type="button"
               class="a11y-tts-btn a11y-tts-stop"
               (click)="stopSpeaking()"
               aria-label="Detener lectura en voz alta"
@@ -346,6 +365,7 @@
   <!-- Footer -->
   <footer class="a11y-panel-footer">
     <button
+      type="button"
       class="a11y-reset-btn"
       (click)="resetSettings()"
       aria-label="Restablecer todas las configuraciones de accesibilidad"
