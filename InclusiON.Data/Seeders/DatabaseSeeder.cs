@@ -55,9 +55,6 @@ namespace InclusiON.Data.Seeders
 
         private static async Task SeedRolePermissionsAsync(AppDbContext context)
         {
-            if (await context.RoleClaims.AnyAsync())
-                return;
-
             var adminRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var professionalRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var familyRoleId = Guid.Parse("33333333-3333-3333-3333-333333333333");
@@ -143,8 +140,22 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
             };
 
-            context.RoleClaims.AddRange(claims);
-            await context.SaveChangesAsync();
+            // Upsert: solo agregar los claims que no existen aun
+            var existingClaims = await context.RoleClaims
+                .Select(c => new { c.RoleId, c.ClaimType, c.ClaimValue })
+                .ToListAsync();
+
+            var newClaims = claims.Where(c => !existingClaims.Any(e =>
+                e.RoleId == c.RoleId &&
+                e.ClaimType == c.ClaimType &&
+                e.ClaimValue == c.ClaimValue))
+                .ToList();
+
+            if (newClaims.Count > 0)
+            {
+                context.RoleClaims.AddRange(newClaims);
+                await context.SaveChangesAsync();
+            }
         }
 
         private static async Task SeedVisualLoginTestUsersAsync(UserManager<User> userManager, AppDbContext context)
