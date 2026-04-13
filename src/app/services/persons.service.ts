@@ -10,6 +10,7 @@ import {
   CreatePersonRequest,
   UpdatePersonRequest,
   GetPersonsRequest,
+  ProfessionalPersonResponse,
 } from '@models';
 import { environment } from '@env';
 import { unwrapResponse, handleApiError } from '@shared/utils';
@@ -66,6 +67,9 @@ export class PersonsService {
       }
       if (request.institutionId) {
         params = params.set('institutionId', request.institutionId.toString());
+      }
+      if (request.representativeSearch) {
+        params = params.set('representativeSearch', request.representativeSearch);
       }
     }
 
@@ -185,6 +189,15 @@ export class PersonsService {
         `${this.apiUrl}/${personId}/skill-profile/${areaId}`,
         {}
       )
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Obtiene los profesionales asignados a una persona.
+   */
+  getProfessionalsByPerson(personId: string): Observable<ProfessionalPersonResponse[]> {
+    return this.http
+      .get<ApiResponse<ProfessionalPersonResponse[]>>(`${this.apiUrl}/${personId}/professionals`)
       .pipe(unwrapResponse());
   }
 }
