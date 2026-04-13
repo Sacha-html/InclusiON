@@ -10,14 +10,14 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
 import {
   ColComponent,
   RowComponent,
+  FormLabelDirective,
   FormSelectDirective,
-  CardComponent,
-  CardBodyComponent,
   AlertComponent,
   ModalComponent,
   ModalHeaderComponent,
   ModalBodyComponent,
   ModalFooterComponent,
+  ModalTitleDirective,
   ButtonDirective,
   GridModule,
 } from '@coreui/angular';
@@ -30,12 +30,14 @@ import {
     ConfirmModalComponent,
     ColComponent,
     RowComponent,
+    FormLabelDirective,
     FormSelectDirective,
     AlertComponent,
     ModalComponent,
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
+    ModalTitleDirective,
     ButtonDirective,
     GridModule,
   ],
@@ -64,7 +66,11 @@ export class UserManagementListComponent implements OnInit {
   showConfirmModal = false;
   itemToDeactivate: AdminUserListItemResponse | null = null;
 
-  // Password modal
+  // Reset password modal
+  showResetPasswordModal = false;
+  itemToReset: AdminUserListItemResponse | null = null;
+
+  // Password result modal
   showPasswordModal = false;
   tempPassword = '';
   tempPasswordEmail = '';
@@ -96,6 +102,13 @@ export class UserManagementListComponent implements OnInit {
     this.loadUsers();
   }
 
+  clearFilters(): void {
+    this.selectedRole = '';
+    this.selectedStatus = '';
+    this.currentPage = 1;
+    this.loadUsers();
+  }
+
   onPageChange(page: number): void {
     this.currentPage = page;
     this.loadUsers();
@@ -114,7 +127,8 @@ export class UserManagementListComponent implements OnInit {
         this.router.navigate(['/admin/users', user.userId]);
         break;
       case 'reset-password':
-        this.resetPassword(user);
+        this.itemToReset = user;
+        this.showResetPasswordModal = true;
         break;
       case 'deactivate':
         this.itemToDeactivate = user;
@@ -126,7 +140,11 @@ export class UserManagementListComponent implements OnInit {
     }
   }
 
-  resetPassword(user: AdminUserListItemResponse): void {
+  confirmResetPassword(): void {
+    if (!this.itemToReset) return;
+    const user = this.itemToReset;
+    this.showResetPasswordModal = false;
+    this.itemToReset = null;
     this.userService.resetPassword(user.userId).subscribe({
       next: (result) => {
         this.tempPassword = result.temporaryPassword;
@@ -138,6 +156,11 @@ export class UserManagementListComponent implements OnInit {
         this.toastService.error('Error al resetear la contraseña');
       },
     });
+  }
+
+  cancelResetPassword(): void {
+    this.showResetPasswordModal = false;
+    this.itemToReset = null;
   }
 
   confirmDeactivate(): void {

@@ -1,5 +1,26 @@
 <app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadPersons()"></app-institution-filter>
 
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label cLabel>Responsable</label>
+      <input cFormControl type="text" [(ngModel)]="representativeSearch" (ngModelChange)="onRepresentativeSearch()" placeholder="Nombre del responsable">
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
 <app-data-table
   title="Gestión de Personas con Discapacidad"
   [columns]="cols"
@@ -15,10 +36,10 @@
 </app-data-table>
 
 <!-- Modal Cambiar Método de Login -->
-<c-modal [visible]="showLoginMethodModal" (visibleChange)="!$event && closeLoginMethodModal()"
+<c-modal [visible]="showLoginMethodModal" (visibleChange)="onLoginMethodModalVisibleChange($event)"
          aria-labelledby="login-method-modal-title">
   <c-modal-header>
-    <strong id="login-method-modal-title">Cambiar método de login</strong>
+    <h5 cModalTitle>Cambiar método de login</h5>
   </c-modal-header>
   <c-modal-body>
     @if (selectedPerson) {
@@ -30,15 +51,15 @@
       </p>
 
       @if (loginMethodError) {
-        <div class="alert alert-danger">{{ loginMethodError }}</div>
+        <c-alert color="danger">{{ loginMethodError }}</c-alert>
       }
       @if (loginMethodSuccess) {
-        <div class="alert alert-success">{{ loginMethodSuccess }}</div>
+        <c-alert color="success">{{ loginMethodSuccess }}</c-alert>
         @if (temporaryPassword) {
           <p>Se generó una contraseña temporal para el acceso por email y contraseña:</p>
-          <div class="alert alert-warning d-flex align-items-center justify-content-between">
+          <c-alert color="warning" class="d-flex align-items-center justify-content-between">
             <code class="fs-5">{{ temporaryPassword }}</code>
-          </div>
+          </c-alert>
           <p class="text-body-secondary mb-0">
             Asegúrese de copiar esta contraseña. No se podrá volver a consultar.
             La persona deberá cambiarla en su primer inicio de sesión.
@@ -77,6 +98,24 @@
               }
             </div>
           }
+
+          @if (selectedLoginMethod?.requiresSupervisor) {
+            <div class="mb-3">
+              <label cLabel for="lm-supervisor">Supervisor *</label>
+              <select cSelect id="lm-supervisor" formControlName="supervisorUserId"
+                      aria-label="Seleccionar supervisor">
+                <option [ngValue]="null">-- Seleccionar profesional --</option>
+                @for (sup of supervisors; track sup.userId) {
+                  <option [value]="sup.userId">{{ sup.fullName }}</option>
+                }
+              </select>
+              @if (loginMethodSubmitted && !loginMethodForm.get('supervisorUserId')?.value) {
+                <c-form-feedback [valid]="false">
+                  Debe seleccionar un supervisor.
+                </c-form-feedback>
+              }
+            </div>
+          }
         </form>
       }
     }
@@ -86,8 +125,9 @@
       <button cButton color="primary" (click)="closeLoginMethodModal()">Cerrar</button>
     } @else {
       <button cButton color="secondary" (click)="closeLoginMethodModal()" aria-label="Cancelar cambio de método">Cancelar</button>
-      <button cButton color="primary" (click)="showLoginMethodModal = false; showLoginMethodConfirm = true"
-              [disabled]="loginMethodForm.invalid" aria-label="Guardar método de login">
+      <button cButton color="primary" (click)="showLoginMethodConfirm = true; showLoginMethodModal = false"
+              [disabled]="loginMethodForm.invalid || (selectedLoginMethod?.requiresSupervisor && !loginMethodForm.get('supervisorUserId')?.value)"
+              aria-label="Guardar método de login">
         Guardar
       </button>
     }

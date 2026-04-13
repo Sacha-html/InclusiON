@@ -5,11 +5,11 @@ import { InstitutionsService, ToastService } from '@services';
 import { InstitutionResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
-import { FormSelectDirective, GridModule } from '@coreui/angular';
+import { ButtonDirective, FormLabelDirective, FormSelectDirective, GridModule } from '@coreui/angular';
 
 @Component({
   selector: 'app-list',
-  imports: [DataTableComponent, FormsModule, FormSelectDirective, GridModule],
+  imports: [DataTableComponent, FormsModule, ButtonDirective, FormLabelDirective, FormSelectDirective, GridModule],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
@@ -54,6 +54,12 @@ export class ListComponent implements OnInit {
   }
 
   onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
     this.currentPage = 1;
     this.applyFilter();
   }

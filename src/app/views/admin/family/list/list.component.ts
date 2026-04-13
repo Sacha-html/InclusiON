@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { GridModule } from '@coreui/angular';
+import { ButtonDirective, FormControlDirective, FormLabelDirective, FormSelectDirective, GridModule } from '@coreui/angular';
 import { AuthService, FamilyService, ToastService } from '@services';
 import { FamilyListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -14,6 +14,10 @@ import { InstitutionFilterComponent } from '@shared/components/institution-filte
   imports: [
     FormsModule,
     GridModule,
+    ButtonDirective,
+    FormControlDirective,
+    FormLabelDirective,
+    FormSelectDirective,
     DataTableComponent,
     ConfirmModalComponent,
     InstitutionFilterComponent,
@@ -32,6 +36,7 @@ export class ListComponent {
   selectedInstitutionId: number | undefined;
 
   linkedPersonSearch = '';
+  statusFilter = '';
 
   families: FamilyListItemResponse[] = [];
   totalItems = 0;
@@ -73,8 +78,14 @@ export class ListComponent {
     this.loadFamily();
   }
 
-  clearLinkedPersonSearch(): void {
+  onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.loadFamily();
+  }
+
+  clearFilters(): void {
     this.linkedPersonSearch = '';
+    this.statusFilter = '';
     this.currentPage = 1;
     this.loadFamily();
   }
@@ -128,13 +139,18 @@ export class ListComponent {
   }
 
   loadFamily(search?: string): void {
+    const isActive = this.statusFilter === 'true' ? true
+                   : this.statusFilter === 'false' ? false
+                   : undefined;
+
     this.familyService
-      .getFamily({ 
-        page: this.currentPage, 
-        pageSize: this.pageSize, 
-        search, 
+      .getFamily({
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        search,
         institutionId: this.selectedInstitutionId,
-        linkedPersonSearch: this.linkedPersonSearch || undefined
+        linkedPersonSearch: this.linkedPersonSearch || undefined,
+        isActive,
       })
       .subscribe({
         next: (response) => {

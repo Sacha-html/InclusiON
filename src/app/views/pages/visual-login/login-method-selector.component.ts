@@ -7,7 +7,8 @@ import {
   ButtonModule,
   AlertModule,
   SpinnerModule,
-  GridModule
+  GridModule,
+  BadgeModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { AuthService, UpdateLoginMethodApiResponse } from '../../../services/auth.service';
@@ -25,7 +26,8 @@ import { LoginMethod, UpdateLoginMethodRequest } from '../../../models';
     AlertModule,
     SpinnerModule,
     GridModule,
-    IconModule
+    IconModule,
+    BadgeModule
   ],
   templateUrl: './login-method-selector.component.html',
   styleUrls: ['./login-method-selector.component.scss']

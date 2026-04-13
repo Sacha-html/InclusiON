@@ -1,0 +1,48 @@
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label cLabel>Persona</label>
+      <select cSelect [(ngModel)]="selectedPersonId" (ngModelChange)="onPersonFilterChange()">
+        <option value="">Todas</option>
+        @for (p of persons(); track p.personId) {
+          <option [value]="p.personId">{{ p.personFullName }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Reportes"
+  [columns]="columns"
+  [items]="reports()"
+  [totalItems]="totalRecords()"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  [sortable]="true"
+  [loading]="isLoading()"
+  [headerButtons]="headerButtons"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (sortAction)="onSort($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
+</app-data-table>
+
+@if (!reports().length && !isLoading()) {
+  <div class="text-center text-body-secondary py-5">
+    <svg cIcon name="cilNotes" size="3xl"></svg>
+  </div>
+}
