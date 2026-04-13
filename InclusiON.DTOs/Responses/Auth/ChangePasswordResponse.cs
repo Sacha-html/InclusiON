@@ -1,9 +1,9 @@
-namespace InclusiON.DTOs.Responses.Auth
+﻿namespace InclusiON.DTOs.Responses.Auth
 {
     public class ChangePasswordResponse
     {
         /// <summary>
-        /// Indica si el cambio de contrasena fue exitoso.
+        /// Indica si el cambio de contraseña fue exitoso.
         /// </summary>
         public bool Success { get; set; }
     }

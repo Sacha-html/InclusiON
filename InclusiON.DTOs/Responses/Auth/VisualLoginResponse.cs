@@ -1,4 +1,4 @@
-namespace InclusiON.DTOs.Responses.Auth
+﻿namespace InclusiON.DTOs.Responses.Auth
 {
     /// <summary>
     /// Respuesta comun para todos los metodos de login visual.
@@ -31,7 +31,7 @@ namespace InclusiON.DTOs.Responses.Auth
         public VisualLoginUserInfo? User { get; set; }
 
         /// <summary>
-        /// Indica si el usuario debe cambiar su contrasena en el proximo inicio de sesion.
+        /// Indica si el usuario debe cambiar su contraseña en el proximo inicio de sesion.
         /// </summary>
         public bool MustChangePassword { get; set; }
 

@@ -1,4 +1,4 @@
-using InclusiON.Domain.Models;
+﻿using InclusiON.Domain.Models;
 
 namespace InclusiON.DTOs.Responses.Auth
 {
@@ -28,7 +28,7 @@ namespace InclusiON.DTOs.Responses.Auth
         public string? Description { get; set; }
 
         /// <summary>
-        /// Indica si requiere contrasena.
+        /// Indica si requiere contraseña.
         /// </summary>
         public bool RequiresPassword { get; set; }
 
