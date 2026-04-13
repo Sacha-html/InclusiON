@@ -5,8 +5,8 @@
   <div class="role-cards-wrapper">
     <!-- Header -->
     <div class="text-center mb-5">
-      <h1 class="display-4 fw-bold text-primary mb-3">Bienvenido a InclusiON</h1>
-      <p class="lead text-muted fs-4">Selecciona cómo quieres ingresar</p>
+      <h1 class="display-4 fw-bold mb-3" style="color: var(--a11y-primary)">Bienvenido a InclusiON</h1>
+      <p class="lead mb-0 fs-4" style="color: var(--a11y-text-muted)">Selecciona cómo quieres ingresar</p>
     </div>
 
     <!-- Role Cards -->
@@ -33,8 +33,8 @@
                   [style.color]="role.color"
                 ></svg>
               </div>
-              <h2 class="h3 mb-3 fw-bold role-title">{{ role.title }}</h2>
-              <p class="text-muted mb-0 fs-5 role-description">{{ role.description }}</p>
+              <h2 class="h3 mb-3 fw-bold role-title" style="color: var(--a11y-text)">{{ role.title }}</h2>
+              <p class="mb-0 fs-5 role-description" style="color: var(--a11y-text-muted)">{{ role.description }}</p>
             </div>
           </div>
         </div>
@@ -46,9 +46,10 @@
       <button
         cButton
         color="link"
-        class="text-muted small"
+        class="small"
         (click)="goToAdminLogin()"
         aria-label="Acceso para administradores"
+        style="color: var(--a11y-text-muted)"
       >
         Acceso administrativo
       </button>

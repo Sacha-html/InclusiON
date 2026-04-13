@@ -26,8 +26,8 @@
           <div class="user-type-badge mb-3" aria-label="Tipo de usuario seleccionado">
             {{ userTypeLabel }}
           </div>
-          <h1 class="h2 fw-bold mb-3">Escribe tu nombre</h1>
-          <p class="text-muted fs-5" id="identify-instructions">Así te encontramos</p>
+          <h1 class="h2 fw-bold mb-3" style="color: var(--a11y-text)">Escribe tu nombre</h1>
+          <p class="fs-5 mb-0" id="identify-instructions" style="color: var(--a11y-text-muted)">Así te encontramos</p>
         </header>
 
         <!-- Error Alert -->
@@ -46,8 +46,8 @@
         <div class="mb-4">
           <label for="identifierInput" class="visually-hidden">Tu nombre</label>
           <div class="input-group input-group-lg" role="group">
-            <span class="input-group-text bg-light" aria-hidden="true">
-              <svg cIcon name="cilUser" class="text-primary" aria-hidden="true"></svg>
+            <span class="input-group-text" aria-hidden="true" style="background-color: var(--a11y-bg-secondary); border-color: var(--a11y-border)">
+              <svg cIcon name="cilUser" aria-hidden="true" style="color: var(--a11y-primary)"></svg>
             </span>
             <input
               type="text"
@@ -86,23 +86,24 @@
             cButton
             color="primary"
             size="lg"
-            class="py-3 fs-4"
+            class="py-3 fs-4 a11y-btn-primary"
+            style="background-color: #0D47A1 !important; border-color: #0D47A1 !important; color: #FFFFFF !important; font-weight: 600;"
             (click)="onIdentify()"
             [disabled]="isLoading || !identifier.trim()"
           >
             @if (isLoading) {
-              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-              <span>Buscando...</span>
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true" style="border-color: #FFFFFF;"></span>
+              <span style="color: #FFFFFF !important;">Buscando...</span>
             } @else {
-              <svg cIcon name="cilSearch" class="me-2" aria-hidden="true"></svg>
-              <span>Buscar mi cuenta</span>
+              <svg cIcon name="cilSearch" class="me-2" aria-hidden="true" style="color: #FFFFFF !important;"></svg>
+              <span style="color: #FFFFFF !important;">Buscar mi cuenta</span>
             }
           </button>
         </div>
 
         <!-- Help Text -->
         <footer class="text-center mt-4">
-          <p class="text-muted mb-0">
+          <p class="mb-0" style="color: var(--a11y-text-muted)">
             <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
             ¿No lo recuerdas? Pide ayuda
           </p>
