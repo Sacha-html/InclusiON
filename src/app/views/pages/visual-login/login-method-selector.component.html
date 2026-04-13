@@ -136,7 +136,8 @@
       cButton
       color="primary"
       [disabled]="!selectedMethod || isSaving"
-      (click)="validateAndSave()">
+      (click)="validateAndSave()"
+      style="background-color: #0D47A1 !important; border-color: #0D47A1 !important; color: #FFFFFF !important;">
       <c-spinner *ngIf="isSaving" size="sm" class="me-2"></c-spinner>
       {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
     </button>

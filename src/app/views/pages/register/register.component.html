@@ -1,12 +1,12 @@
-<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center register-layout">
+<div class="min-vh-100 d-flex flex-row align-items-center register-layout" style="background-color: var(--a11y-bg-secondary)">
   <c-container>
     <c-row class="justify-content-center">
       <c-col md="6">
         <c-card class="mx-4">
           <c-card-body class="p-4">
             <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-              <h1>Registrar Usuario</h1>
-              <p class="text-body-secondary">Crea tu cuenta</p>
+              <h1 style="color: var(--a11y-text)">Registrar Usuario</h1>
+              <p class="mb-0" style="color: var(--a11y-text-muted)">Crea tu cuenta</p>
 
               <!-- Mensaje de error general -->
               @if (errorMessage) {
@@ -151,7 +151,7 @@
                   [class.is-invalid]="hasError('acceptTerms', 'requiredTrue')"
                 />
                 <label cFormCheckLabel for="acceptTerms">
-                  Acepto los <a href="#" class="text-primary">términos y condiciones</a>
+                  Acepto los <a href="#" style="color: var(--a11y-primary)">términos y condiciones</a>
                 </label>
               </c-form-check>
               @if (hasError('acceptTerms', 'requiredTrue')) {

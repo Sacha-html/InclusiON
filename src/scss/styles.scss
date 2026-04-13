@@ -84,17 +84,59 @@
   }
 }
 
-// Botones con contraste accesible
-.btn-primary {
-  background-color: var(--a11y-primary);
-  border-color: var(--a11y-primary);
-  color: var(--a11y-primary-text);
+// Botones con contraste accesible - Mayor especificidad para override
+.btn-primary,
+.btn-primary:not([class*="btn-outline"]) {
+  background-color: var(--a11y-primary) !important;
+  border-color: var(--a11y-primary) !important;
+  color: var(--a11y-primary-text) !important;
+
+  svg, .icon, c-icon {
+    color: var(--a11y-primary-text) !important;
+    fill: var(--a11y-primary-text) !important;
+  }
+
+  svg path, .icon path, c-icon path {
+    fill: var(--a11y-primary-text) !important;
+  }
 
   &:hover,
   &:focus {
-    background-color: var(--a11y-primary-dark);
-    border-color: var(--a11y-primary-dark);
+    background-color: var(--a11y-primary-dark) !important;
+    border-color: var(--a11y-primary-dark) !important;
+    color: var(--a11y-primary-text) !important;
+
+    svg, .icon, c-icon {
+      color: var(--a11y-primary-text) !important;
+      fill: var(--a11y-primary-text) !important;
+    }
   }
+
+  &:disabled {
+    background-color: var(--a11y-primary) !important;
+    opacity: 0.6;
+    color: var(--a11y-primary-text) !important;
+
+    svg, .icon, c-icon {
+      color: var(--a11y-primary-text) !important;
+    }
+  }
+}
+
+// Override específico para iconos CoreUI en botones
+.btn-primary svg[fill],
+.btn-primary c-icon [fill] {
+  fill: var(--a11y-primary-text) !important;
+}
+
+// Override para la variable --ci-primary-color de CoreUI icons
+.btn-primary {
+  --ci-primary-color: var(--a11y-primary-text);
+}
+
+.btn-primary svg path,
+.btn-primary c-icon path {
+  fill: var(--a11y-primary-text) !important;
 }
 
 // Links accesibles (no solo color)

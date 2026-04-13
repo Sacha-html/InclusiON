@@ -73,14 +73,20 @@
   height: 80px;
 }
 
+.role-title,
+.role-description {
+  color: var(--a11y-text);
+}
+
 .role-title {
   font-size: 1.75rem;
-  color: var(--a11y-text, #333);
+  color: var(--a11y-text);
 }
 
 .role-description {
   font-size: 1.25rem;
   line-height: 1.5;
+  color: var(--a11y-text-muted);
 }
 
 // Accessibility - Reduced motion

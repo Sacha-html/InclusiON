@@ -1,4 +1,4 @@
-<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+<div class="min-vh-100 d-flex flex-row align-items-center" style="background-color: var(--a11y-bg-secondary)">
   <c-container>
     <c-row class="justify-content-center">
       <c-col md="8" lg="6" xl="5">
@@ -49,7 +49,7 @@
             <c-card-header>
               <h4 class="mb-0">Registro Familiar</h4>
               @if (invitationData.personName) {
-                <small class="text-body-secondary">
+                <small style="color: var(--a11y-text-muted)">
                   Vinculacion con: <strong>{{ invitationData.personName }}</strong>
                 </small>
               }
