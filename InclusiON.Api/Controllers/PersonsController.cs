@@ -90,6 +90,39 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Obtiene los profesionales asignados a una persona con discapacidad.
+        /// </summary>
+        [HttpGet("{personId:guid}/professionals")]
+        [Authorize(Policy = "persons:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonProfessionalResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<PersonProfessionalResponse>>>> GetPersonProfessionals(
+            Guid personId,
+            CancellationToken cancellationToken = default)
+        {
+            var assignments = await _context.ProfessionalPersons
+                .Include(pp => pp.Professional)
+                .Where(pp => pp.PersonId == personId && pp.IsActive)
+                .OrderByDescending(pp => pp.IsPrimaryProfessional)
+                .ThenByDescending(pp => pp.AssignedAt)
+                .ToListAsync(cancellationToken);
+
+            var response = assignments.Select(pp => new PersonProfessionalResponse
+            {
+                ProfessionalId = pp.ProfessionalId,
+                PersonId = pp.PersonId,
+                PersonFirstName = pp.Professional.FirstName,
+                PersonLastName = pp.Professional.LastName,
+                PersonFullName = $"{pp.Professional.FirstName} {pp.Professional.LastName}",
+                IsPrimaryProfessional = pp.IsPrimaryProfessional,
+                CanSuperviseLogin = pp.CanSuperviseLogin,
+                IsActive = pp.IsActive,
+                AssignedAt = pp.AssignedAt
+            }).ToList();
+
+            return Ok(ApiResponse<List<PersonProfessionalResponse>>.SuccessResult(response));
+        }
+
+        /// <summary>
         /// Obtiene los familiares vinculados a una persona.
         /// </summary>
         [HttpGet("{personId:guid}/representatives")]
