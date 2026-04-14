@@ -75,6 +75,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 "User {UserId} ({Email}) reactivated by admin {AdminId}",
                 user.Id, user.Email, command.RequestedByUserId);
 
+            // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+            // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
             // Enviar email de reactivación (si el usuario tiene email)
             if (!string.IsNullOrEmpty(user.Email))
             {
