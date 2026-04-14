@@ -93,6 +93,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 "Password reset by admin {AdminId} for user {UserId} ({Email})",
                 command.RequestedByUserId, user.Id, user.Email);
 
+            // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+            // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
             // Enviar email con contraseña temporal (si el usuario tiene email)
             if (!string.IsNullOrEmpty(user.Email))
             {
