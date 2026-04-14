@@ -124,6 +124,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
                 _logger.LogInformation("Profesional creado: {ProfessionalId}, Usuario: {UserId}", professional.Id, user.Id);
 
+                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                 // Enviar email con contraseña temporal
                 try
                 {
