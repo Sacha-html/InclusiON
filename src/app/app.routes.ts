@@ -165,6 +165,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'reports',
+        data: { title: 'Reportes' },
+        loadChildren: () =>
+          import('./views/admin/reports/routes').then(
+            (m) => m.adminReportRoutes,
+          ),
+      },
+      {
         path: 'invitations',
         data: { title: 'Invitaciones', permission: 'invitations:read' },
         canActivate: [permissionGuard],
