@@ -13,12 +13,12 @@
 
 .sort-arrow-up,
 .sort-arrow-down {
-  color: #ccc;
+  color: var(--a11y-border, #9E9E9E);
   transition: color 0.15s;
   display: block;
 
   &.active {
-    color: #321fdb;
+    color: var(--a11y-primary, #0D47A1);
   }
 }
 

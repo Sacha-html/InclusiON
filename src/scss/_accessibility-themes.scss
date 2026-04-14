@@ -25,9 +25,17 @@
   --a11y-text: #1A1A1A;                    // Contraste 17.4:1 (AAA)
   --a11y-text-secondary: #3D3D3D;          // Contraste 10.3:1 (AAA)
   --a11y-text-muted: #595959;              // Contraste 7.0:1 (AAA)
-  --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA)
+
+  // Color de acción (botones, foco, elementos interactivos)
+  --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA) — solo para botones/fondos
   --a11y-primary-dark: #002171;
   --a11y-primary-text: #FFFFFF;
+
+  // Color de link/texto interactivo — más legible como texto inline
+  // #1565C0 = 7.2:1 sobre blanco (AAA) — perceptualmente más amigable que navy puro
+  // Se diferencia del texto cuerpo (#1A1A1A) por tono, no solo contraste
+  --a11y-link: #1565C0;                    // Contraste 7.2:1 (AAA)
+  --a11y-link-hover: #0D47A1;             // Más oscuro en hover (=primary)
   --a11y-success: #1B5E20;                 // Contraste 8.5:1 (AAA)
   --a11y-warning: #BF360C;                 // Contraste 6.3:1 (AA Large)
   --a11y-danger: #B71C1C;                  // Contraste 6.7:1 (AA Large)
@@ -85,6 +93,122 @@
 }
 
 // =========================================
+// BRIDGE COREUI → A11Y (ÚNICO, EN :root)
+// Mapea todas las variables --cui-* a --a11y-*
+// Como --a11y-* cambia por perfil, los componentes
+// CoreUI (badges, alerts, cards, botones, etc.)
+// heredan automáticamente TODOS los perfiles.
+// NO repetir este bloque en cada perfil.
+// =========================================
+:root {
+  // Colores semánticos
+  --cui-primary:             var(--a11y-primary);
+  --cui-primary-bg-subtle:   color-mix(in srgb, var(--a11y-primary) 15%, transparent);
+  --cui-primary-text-emphasis: var(--a11y-primary-dark, var(--a11y-primary));
+  --cui-secondary:           var(--a11y-text-secondary);
+  --cui-success:             var(--a11y-success);
+  --cui-success-bg-subtle:   color-mix(in srgb, var(--a11y-success) 15%, transparent);
+  --cui-success-text-emphasis: var(--a11y-success);
+  --cui-danger:              var(--a11y-danger);
+  --cui-danger-bg-subtle:    color-mix(in srgb, var(--a11y-danger) 15%, transparent);
+  --cui-danger-text-emphasis: var(--a11y-danger);
+  --cui-warning:             var(--a11y-warning);
+  --cui-warning-bg-subtle:   color-mix(in srgb, var(--a11y-warning) 15%, transparent);
+  --cui-warning-text-emphasis: var(--a11y-warning);
+  --cui-info:                var(--a11y-primary);
+  --cui-link-color:          var(--a11y-link, var(--a11y-primary));
+  --cui-link-hover-color:    var(--a11y-link-hover, var(--a11y-primary-dark, var(--a11y-primary)));
+
+  // Tipografía y fondo
+  --cui-body-bg:             var(--a11y-bg);
+  --cui-body-color:          var(--a11y-text);
+  --cui-secondary-bg:        var(--a11y-bg-secondary);
+  --cui-tertiary-bg:         var(--a11y-surface);
+  --cui-secondary-color:     var(--a11y-text-secondary);
+  --cui-tertiary-color:      var(--a11y-text-muted);
+
+  // Cards
+  --cui-card-bg:             var(--a11y-surface);
+  --cui-card-color:          var(--a11y-text);
+  --cui-card-border-color:   var(--a11y-border);
+  --cui-card-cap-bg:         var(--a11y-bg-secondary);
+
+  // Bordes
+  --cui-border-color:        var(--a11y-border);
+  --cui-border-color-translucent: var(--a11y-border);
+
+  // Inputs y formularios
+  --cui-input-bg:            var(--a11y-bg);
+  --cui-input-color:         var(--a11y-text);
+  --cui-input-border-color:  var(--a11y-border);
+  --cui-input-placeholder-color: var(--a11y-text-muted);
+  --cui-input-focus-border-color: var(--a11y-primary);
+
+  // Dropdown
+  --cui-dropdown-bg:         var(--a11y-dropdown-bg);
+  --cui-dropdown-color:      var(--a11y-dropdown-text);
+  --cui-dropdown-border-color: var(--a11y-dropdown-border);
+  --cui-dropdown-link-color: var(--a11y-dropdown-text);
+  --cui-dropdown-link-hover-bg: var(--a11y-dropdown-hover-bg);
+  --cui-dropdown-link-hover-color: var(--a11y-text);
+  --cui-dropdown-link-active-bg: var(--a11y-primary);
+  --cui-dropdown-link-active-color: var(--a11y-primary-text);
+  --cui-dropdown-header-color: var(--a11y-text-muted);
+
+  // Tabla
+  --cui-table-bg:            var(--a11y-bg);
+  --cui-table-color:         var(--a11y-text);
+  --cui-table-border-color:  var(--a11y-border);
+  --cui-table-striped-bg:    var(--a11y-bg-secondary);
+  --cui-table-striped-color: var(--a11y-text);
+  --cui-table-hover-bg:      var(--a11y-surface);
+  --cui-table-hover-color:   var(--a11y-text);
+
+  // Paginación
+  --cui-pagination-bg:       var(--a11y-bg);
+  --cui-pagination-color:    var(--a11y-primary);
+  --cui-pagination-border-color: var(--a11y-border);
+  --cui-pagination-hover-bg: var(--a11y-bg-secondary);
+  --cui-pagination-hover-color: var(--a11y-primary-dark, var(--a11y-primary));
+  --cui-pagination-hover-border-color: var(--a11y-border);
+  --cui-pagination-active-bg: var(--a11y-primary);
+  --cui-pagination-active-color: var(--a11y-primary-text);
+  --cui-pagination-active-border-color: var(--a11y-primary);
+  --cui-pagination-disabled-bg: var(--a11y-bg-secondary);
+  --cui-pagination-disabled-color: var(--a11y-text-muted);
+
+  // Modal
+  --cui-modal-bg:            var(--a11y-bg);
+  --cui-modal-color:         var(--a11y-text);
+  --cui-modal-header-bg:     var(--a11y-bg-secondary);
+  --cui-modal-header-border-color: var(--a11y-border);
+  --cui-modal-footer-bg:     var(--a11y-bg-secondary);
+  --cui-modal-footer-border-color: var(--a11y-border);
+
+  // Header
+  --cui-header-bg:           var(--a11y-header-bg);
+  --cui-header-color:        var(--a11y-header-text);
+  --cui-header-border-color: var(--a11y-header-border);
+
+  // Footer
+  --cui-footer-bg:           var(--a11y-bg-secondary);
+  --cui-footer-color:        var(--a11y-text-muted);
+  --cui-footer-border-color: var(--a11y-border);
+
+  // Sidebar
+  --cui-sidebar-bg:          var(--a11y-sidebar-bg);
+  --cui-sidebar-color:       var(--a11y-sidebar-text);
+  --cui-sidebar-nav-link-color: var(--a11y-sidebar-nav-link);
+  --cui-sidebar-nav-link-hover-bg: var(--a11y-sidebar-nav-link-hover-bg);
+  --cui-sidebar-nav-link-active-bg: var(--a11y-sidebar-nav-link-active-bg);
+  --cui-sidebar-nav-icon-color: var(--a11y-sidebar-icon);
+
+  // Focus
+  --cui-focus-ring-color:    var(--a11y-focus-color);
+  --cui-focus-ring-width:    var(--a11y-focus-width);
+}
+
+// =========================================
 // VARIABLES BASE - MODO OSCURO
 // =========================================
 [data-color-mode="dark"],
@@ -99,6 +223,8 @@
     --a11y-primary: #90CAF9;                // Contraste 10.5:1 (AAA)
     --a11y-primary-dark: #64B5F6;
     --a11y-primary-text: #000000;
+    --a11y-link: #90CAF9;                   // Mismo que primary en oscuro — ya es legible
+    --a11y-link-hover: #BBDEFB;             // Más claro en hover
     --a11y-success: #A5D6A7;                // Contraste 10.7:1 (AAA)
     --a11y-warning: #FFCC80;                // Contraste 11.5:1 (AAA)
     --a11y-danger: #EF9A9A;                 // Contraste 8.8:1 (AAA)
@@ -171,6 +297,8 @@
   --a11y-primary: #0000CC;
   --a11y-primary-dark: #000099;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #0000CC;                   // Navy puro, 21:1 en alto contraste
+  --a11y-link-hover: #000099;
   --a11y-success: #006600;
   --a11y-warning: #CC6600;
   --a11y-danger: #CC0000;
@@ -218,23 +346,6 @@
   --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1.25rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 0, 0, 204;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 102, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 204, 0, 0;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 204, 102, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 0, 0, 204;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -254,6 +365,8 @@
   --a11y-primary: #FFFF00;
   --a11y-primary-dark: #FFD600;
   --a11y-primary-text: #000000;
+  --a11y-link: #FFFF00;                   // Amarillo sobre negro
+  --a11y-link-hover: #FFD600;
   --a11y-success: #00FF00;
   --a11y-warning: #FFA500;
   --a11y-danger: #FF4444;
@@ -299,23 +412,6 @@
   --a11y-role-professional-bg: rgba(255, 255, 0, 0.15);
   --a11y-role-family: #FF44FF;
   --a11y-role-family-bg: rgba(255, 68, 255, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 255, 255, 0;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 255, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 255, 68, 68;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 165, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 255, 255, 0;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -340,6 +436,8 @@
   --a11y-primary: #268BD2;
   --a11y-primary-dark: #1A6091;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #1A6091;                   // Azul más oscuro, legible sobre crema #FDF6E3
+  --a11y-link-hover: #0D47A1;
   --a11y-success: #859900;
   --a11y-warning: #CB4B16;
   --a11y-danger: #DC322F;
@@ -387,23 +485,6 @@
   --a11y-role-family-bg: rgba(108, 113, 196, 0.1);
 
   --a11y-spacing-base: 1.5rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 38, 139, 210;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 133, 153, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 220, 50, 47;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 203, 75, 22;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 38, 139, 210;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -423,6 +504,8 @@
   --a11y-primary: #2AA198;
   --a11y-primary-dark: #268BD2;
   --a11y-primary-text: #002B36;
+  --a11y-link: #2AA198;                   // Teal claro sobre fondo oscuro
+  --a11y-link-hover: #3CB8AE;
   --a11y-success: #859900;
   --a11y-warning: #CB4B16;
   --a11y-danger: #DC322F;
@@ -468,23 +551,6 @@
   --a11y-role-professional-bg: rgba(42, 161, 152, 0.15);
   --a11y-role-family: #6C71C4;
   --a11y-role-family-bg: rgba(108, 113, 196, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 42, 161, 152;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 133, 153, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 220, 50, 47;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 203, 75, 22;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 42, 161, 152;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -508,6 +574,8 @@
   --a11y-primary: #0D47A1;
   --a11y-primary-dark: #002171;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #1565C0;                   // Azul medio, legible en 20px
+  --a11y-link-hover: #0D47A1;
   --a11y-success: #1B5E20;
   --a11y-warning: #E65100;
   --a11y-danger: #B71C1C;
@@ -555,23 +623,6 @@
   --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1.5rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 13, 71, 161;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 27, 94, 32;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 183, 28, 28;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 230, 81, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 13, 71, 161;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -590,6 +641,8 @@
   --a11y-primary: #82B1FF;
   --a11y-primary-dark: #448AFF;
   --a11y-primary-text: #000000;
+  --a11y-link: #82B1FF;                   // Azul claro sobre oscuro
+  --a11y-link-hover: #BBDEFB;
   --a11y-success: #69F0AE;
   --a11y-warning: #FFAB40;
   --a11y-danger: #FF5252;
@@ -635,23 +688,6 @@
   --a11y-role-professional-bg: rgba(130, 177, 255, 0.15);
   --a11y-role-family: #EA80FC;
   --a11y-role-family-bg: rgba(234, 128, 252, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 130, 177, 255;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 105, 240, 174;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 255, 82, 82;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 171, 64;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 130, 177, 255;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -677,6 +713,8 @@
   --a11y-primary: #0077B6;                 // Azul distintivo
   --a11y-primary-dark: #005A8C;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #0077B6;                   // Azul seguro para deuteranopia
+  --a11y-link-hover: #005A8C;
   --a11y-success: #0077B6;                 // Azul en lugar de verde
   --a11y-warning: #FFA500;                 // Naranja brillante
   --a11y-danger: #D62828;                  // Rojo con más azul
@@ -725,23 +763,6 @@
   --a11y-role-family-bg: #FCE4EC;
 
   --a11y-spacing-base: 1rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 0, 119, 182;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 119, 182;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 214, 40, 40;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 165, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 0, 119, 182;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -760,6 +781,8 @@
   --a11y-primary: #48CAE4;                 // Cyan claro
   --a11y-primary-dark: #00B4D8;
   --a11y-primary-text: #000000;
+  --a11y-link: #48CAE4;
+  --a11y-link-hover: #00B4D8;
   --a11y-success: #48CAE4;                 // Cyan en lugar de verde
   --a11y-warning: #FFB703;                 // Amarillo/naranja
   --a11y-danger: #FB8500;                  // Naranja fuerte
@@ -805,23 +828,6 @@
   --a11y-role-professional-bg: rgba(0, 119, 182, 0.15);
   --a11y-role-family: #FB8500;
   --a11y-role-family-bg: rgba(251, 133, 0, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 72, 202, 228;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 72, 202, 228;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 251, 133, 0;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 183, 3;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 72, 202, 228;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -847,6 +853,8 @@
   --a11y-primary: #1D3557;                 // Azul oscuro
   --a11y-primary-dark: #14213D;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #0077B6;
+  --a11y-link-hover: #005A8C;
   --a11y-success: #457B9D;                 // Azul medio
   --a11y-warning: #E9C46A;                 // Amarillo dorado
   --a11y-danger: #F4A261;                  // Naranja (visible para protanopia)
@@ -895,23 +903,6 @@
   --a11y-role-family-bg: rgba(244, 162, 97, 0.1);
 
   --a11y-spacing-base: 1rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 29, 53, 87;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 69, 123, 157;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 244, 162, 97;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 233, 196, 106;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 29, 53, 87;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -930,6 +921,8 @@
   --a11y-primary: #A8DADC;
   --a11y-primary-dark: #8ECAE6;
   --a11y-primary-text: #14213D;
+  --a11y-link: #A8DADC;
+  --a11y-link-hover: #8ECAE6;
   --a11y-success: #8ECAE6;
   --a11y-warning: #E9C46A;
   --a11y-danger: #F4A261;
@@ -975,23 +968,6 @@
   --a11y-role-professional-bg: rgba(168, 218, 220, 0.15);
   --a11y-role-family: #F4A261;
   --a11y-role-family-bg: rgba(244, 162, 97, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 168, 218, 220;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 142, 202, 230;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 244, 162, 97;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 233, 196, 106;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 168, 218, 220;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -1017,6 +993,8 @@
   --a11y-primary: #9B2335;                 // Rojo/magenta oscuro
   --a11y-primary-dark: #7B1A29;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #1D3557;                   // Azul navy oscuro, legible sobre blanco
+  --a11y-link-hover: #457B9D;
   --a11y-success: #00838F;                 // Cyan/teal
   --a11y-warning: #E91E63;                 // Magenta/rosa
   --a11y-danger: #B71C1C;                  // Rojo oscuro
@@ -1065,23 +1043,6 @@
   --a11y-role-family-bg: rgba(74, 20, 140, 0.1);
 
   --a11y-spacing-base: 1rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 155, 35, 53;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 131, 143;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 183, 28, 28;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 233, 30, 99;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 155, 35, 53;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -1100,6 +1061,8 @@
   --a11y-primary: #E94560;                 // Rosa/rojo
   --a11y-primary-dark: #C73E54;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #E94560;
+  --a11y-link-hover: #C73E54;
   --a11y-success: #4DD0E1;                 // Cyan claro
   --a11y-warning: #F48FB1;                 // Rosa claro
   --a11y-danger: #EF5350;                  // Rojo claro
@@ -1145,23 +1108,6 @@
   --a11y-role-professional-bg: rgba(233, 69, 96, 0.15);
   --a11y-role-family: #7C4DFF;
   --a11y-role-family-bg: rgba(124, 77, 255, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 233, 69, 96;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 77, 208, 225;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 239, 83, 80;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 244, 143, 177;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 233, 69, 96;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -1207,12 +1153,17 @@ small {
 // =========================================
 
 a {
-  color: var(--a11y-primary) !important;
+  // Usa --a11y-link (separado del primary de botones)
+  // para evitar que texto azul compita visualmente con cuerpo negro
+  color: var(--a11y-link, var(--a11y-primary)) !important;
   text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-underline-offset: 3px;
 
   &:hover,
   &:focus {
-    color: var(--a11y-primary-dark) !important;
+    color: var(--a11y-link-hover, var(--a11y-primary-dark)) !important;
+    text-decoration-thickness: 2px;
   }
 }
 
@@ -1330,11 +1281,11 @@ a {
 
       &:hover,
       &:focus {
-        color: var(--a11y-primary) !important;
+        color: var(--a11y-link, var(--a11y-primary)) !important;
       }
 
       &.active {
-        color: var(--a11y-primary) !important;
+        color: var(--a11y-link, var(--a11y-primary)) !important;
         font-weight: 600;
       }
     }
@@ -1360,7 +1311,7 @@ a {
     color: var(--a11y-text-secondary) !important;
 
     a {
-      color: var(--a11y-primary) !important;
+      color: var(--a11y-link, var(--a11y-primary)) !important;
     }
 
     &.active {
@@ -1481,7 +1432,12 @@ a {
 }
 
 .btn-link {
-  color: var(--a11y-primary) !important;
+  color: var(--a11y-link, var(--a11y-primary)) !important;
+
+  &:hover,
+  &:focus {
+    color: var(--a11y-link-hover, var(--a11y-primary-dark)) !important;
+  }
 }
 
 // =========================================
@@ -1708,7 +1664,7 @@ a {
 .text-success { color: var(--a11y-success) !important; }
 .text-warning { color: var(--a11y-warning) !important; }
 .text-danger { color: var(--a11y-danger) !important; }
-.text-primary { color: var(--a11y-primary) !important; }
+.text-primary { color: var(--a11y-link, var(--a11y-primary)) !important; }
 
 .bg-primary { background-color: var(--a11y-primary) !important; }
 .bg-success { background-color: var(--a11y-success) !important; }
@@ -1922,20 +1878,22 @@ a {
 // CLASES UTILITARIAS DE ACCESIBILIDAD
 // =========================================
 
-// Resaltar enlaces
+// Resaltar enlaces — sin gradiente, usa outline-bottom accesible
 body.a11y-highlight-links {
   a:not(.btn):not(.nav-link):not(.dropdown-item) {
-    background: linear-gradient(to bottom, transparent 60%, rgba(var(--a11y-primary-rgb, 21, 101, 192), 0.3) 60%) !important;
+    background: transparent !important;
     padding: 0 2px;
     border-radius: 2px;
     text-decoration: underline !important;
-    text-decoration-thickness: 2px !important;
-    text-underline-offset: 3px !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 3px !important;
+    text-underline-offset: 4px !important;
 
     &:hover,
     &:focus {
       background: var(--a11y-primary) !important;
       color: var(--a11y-primary-text) !important;
+      text-decoration-color: var(--a11y-primary-text, #FFFFFF) !important;
     }
   }
 }
@@ -1989,40 +1947,22 @@ body.a11y-reading-guide {
   transform: translateY(-50%);
   transition: top 0.05s ease-out;
 
-  // Colores por defecto (modo claro)
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(21, 101, 192, 0.15) 15%,
-    rgba(21, 101, 192, 0.15) 85%,
-    transparent 100%
-  );
-  border-top: 2px solid rgba(21, 101, 192, 0.4);
-  border-bottom: 2px solid rgba(21, 101, 192, 0.4);
+  // Color sólido con opacidad — sin gradiente (WCAG: no información solo por color)
+  background-color: rgba(21, 101, 192, 0.12);
+  border-top: 2px solid rgba(21, 101, 192, 0.5);
+  border-bottom: 2px solid rgba(21, 101, 192, 0.5);
 }
 
 // Modo oscuro
 [data-color-mode="dark"] .a11y-reading-guide-bar {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(100, 181, 246, 0.2) 15%,
-    rgba(100, 181, 246, 0.2) 85%,
-    transparent 100%
-  );
-  border-color: rgba(100, 181, 246, 0.5);
+  background-color: rgba(100, 181, 246, 0.18);
+  border-color: rgba(100, 181, 246, 0.6);
 }
 
 // Alto contraste
 [data-profile="high-contrast"] .a11y-reading-guide-bar {
   height: 52px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(255, 255, 0, 0.25) 15%,
-    rgba(255, 255, 0, 0.25) 85%,
-    transparent 100%
-  );
+  background-color: rgba(255, 255, 0, 0.2);
   border-color: #FFFF00;
   border-width: 3px;
 }
@@ -2030,53 +1970,29 @@ body.a11y-reading-guide {
 // Dislexia
 [data-profile="dyslexia"] .a11y-reading-guide-bar {
   height: 48px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(147, 161, 161, 0.15) 15%,
-    rgba(147, 161, 161, 0.15) 85%,
-    transparent 100%
-  );
-  border-color: rgba(147, 161, 161, 0.4);
+  background-color: rgba(147, 161, 161, 0.15);
+  border-color: rgba(147, 161, 161, 0.5);
 }
 
 // Visión reducida
 [data-profile="low-vision"] .a11y-reading-guide-bar {
   height: 56px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(21, 101, 192, 0.25) 15%,
-    rgba(21, 101, 192, 0.25) 85%,
-    transparent 100%
-  );
-  border-color: rgba(21, 101, 192, 0.6);
+  background-color: rgba(21, 101, 192, 0.2);
+  border-color: rgba(21, 101, 192, 0.7);
   border-width: 3px;
 }
 
 // Daltonismo rojo-verde (deuteranopia, protanopia)
 [data-profile="deuteranopia"] .a11y-reading-guide-bar,
 [data-profile="protanopia"] .a11y-reading-guide-bar {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 114, 178, 0.2) 15%,
-    rgba(0, 114, 178, 0.2) 85%,
-    transparent 100%
-  );
-  border-color: rgba(0, 114, 178, 0.5);
+  background-color: rgba(0, 114, 178, 0.18);
+  border-color: rgba(0, 114, 178, 0.6);
 }
 
 // Daltonismo azul-amarillo (tritanopia)
 [data-profile="tritanopia"] .a11y-reading-guide-bar {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(204, 121, 167, 0.2) 15%,
-    rgba(204, 121, 167, 0.2) 85%,
-    transparent 100%
-  );
-  border-color: rgba(204, 121, 167, 0.5);
+  background-color: rgba(204, 121, 167, 0.18);
+  border-color: rgba(204, 121, 167, 0.6);
 }
 
 // =========================================
