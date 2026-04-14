@@ -1,16 +1,18 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AssignmentsService, ProfessionalsService, ReportsService } from '@services';
-import { ReportListItemResponse } from '@models/responses/reports/report.response';
+import { AssignmentsService, ProfessionalsService, ReportsService, ToastService } from '@services';
+import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
 import { ProfessionalPersonResponse } from '@models';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   ButtonDirective,
   FormLabelDirective,
   FormSelectDirective,
+  FormControlDirective,
   GridModule,
 } from '@coreui/angular';
 
@@ -20,9 +22,11 @@ import {
     RouterModule,
     FormsModule,
     DataTableComponent,
+    ConfirmModalComponent,
     ButtonDirective,
     FormLabelDirective,
     FormSelectDirective,
+    FormControlDirective,
     GridModule,
   ],
   templateUrl: './list.component.html',
@@ -32,6 +36,7 @@ export class ListComponent implements OnInit {
   private readonly reportsService = inject(ReportsService);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   reports = signal<ReportListItemResponse[]>([]);
@@ -43,8 +48,24 @@ export class ListComponent implements OnInit {
   totalPages = signal(0);
   searchTerm = signal('');
 
+  // Filtros
   selectedPersonId = '';
   statusFilter = '';
+  typeFilter = '';
+  dateFrom = '';
+  dateTo = '';
+
+  // Modal de envío
+  showSubmitModal = false;
+  reportToSubmit: ReportListItemResponse | null = null;
+  isSubmitting = false;
+
+  readonly reportTypes = [
+    { id: 1, name: 'Evaluación Mensual' },
+    { id: 2, name: 'Informe de Progreso' },
+    { id: 3, name: 'Evaluación Trimestral' },
+    { id: 4, name: 'Informe Anual' },
+  ];
 
   columns: TableColumn[] = [
     {
@@ -53,6 +74,12 @@ export class ListComponent implements OnInit {
       type: 'actions',
       actions: [
         { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        {
+          action: 'submit',
+          label: 'Enviar al admin',
+          icon: 'cil-send',
+          visible: (item: ReportListItemResponse) => item.status === 'Draft',
+        },
       ],
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
@@ -60,19 +87,21 @@ export class ListComponent implements OnInit {
     { key: 'personName', label: 'Persona', sortable: true },
     { key: 'reportTypeName', label: 'Tipo', sortable: true },
     {
-      key: 'isActive',
+      key: 'status',
       label: 'Estado',
       type: 'badge',
       sortable: true,
       badgeMap: {
-        true: { color: 'success', label: 'Activo' },
-        false: { color: 'secondary', label: 'Inactivo' },
-      }
+        Draft:     { color: 'secondary', label: 'Borrador' },
+        Submitted: { color: 'warning',   label: 'Enviado' },
+        Approved:  { color: 'success',   label: 'Aprobado' },
+        Rejected:  { color: 'danger',    label: 'Rechazado' },
+      },
     },
   ];
 
   headerButtons = [
-    { action: 'create', label: 'Agregar', icon: 'cilPlus', routerLink: '/pro/reports/new' },
+    { action: 'create', label: 'Nuevo borrador', icon: 'cilPlus', routerLink: '/pro/reports/new' },
   ];
 
   ngOnInit(): void {
@@ -93,10 +122,6 @@ export class ListComponent implements OnInit {
   loadReports(): void {
     this.isLoading.set(true);
 
-    const isActive = this.statusFilter === 'true' ? true
-                   : this.statusFilter === 'false' ? false
-                   : undefined;
-
     const request: GetReportsRequest = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
@@ -104,7 +129,10 @@ export class ListComponent implements OnInit {
       sortBy: 'reportDate',
       sortDirection: 'desc',
       personId: this.selectedPersonId || undefined,
-      isActive,
+      status: this.statusFilter || undefined,
+      reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
+      dateFrom: this.dateFrom || undefined,
+      dateTo: this.dateTo || undefined,
     };
 
     this.reportsService.getReports(request).subscribe({
@@ -118,19 +146,17 @@ export class ListComponent implements OnInit {
     });
   }
 
-  onPersonFilterChange(): void {
-    this.currentPage.set(1);
-    this.loadReports();
-  }
-
-  onStatusFilterChange(): void {
-    this.currentPage.set(1);
-    this.loadReports();
-  }
+  onPersonFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
+  onStatusFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
+  onTypeFilterChange(): void   { this.currentPage.set(1); this.loadReports(); }
+  onDateChange(): void         { this.currentPage.set(1); this.loadReports(); }
 
   clearFilters(): void {
     this.selectedPersonId = '';
     this.statusFilter = '';
+    this.typeFilter = '';
+    this.dateFrom = '';
+    this.dateTo = '';
     this.currentPage.set(1);
     this.loadReports();
   }
@@ -146,13 +172,16 @@ export class ListComponent implements OnInit {
     this.loadReports();
   }
 
-  onSort(event: { sortBy: string; sortDirection: string }): void {
+  onSort(_event: { sortBy: string; sortDirection: string }): void {
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     if (event.action === 'view') {
       this.router.navigate(['/pro/reports', event.item.id]);
+    } else if (event.action === 'submit') {
+      this.reportToSubmit = event.item;
+      this.showSubmitModal = true;
     }
   }
 
@@ -160,5 +189,28 @@ export class ListComponent implements OnInit {
     if (action === 'create') {
       this.router.navigate(['/pro/reports/new']);
     }
+  }
+
+  confirmSubmit(): void {
+    if (!this.reportToSubmit) return;
+    this.isSubmitting = true;
+    this.reportsService.submitReport(this.reportToSubmit.id).subscribe({
+      next: () => {
+        this.toastService.success('Reporte enviado al administrador para revisión.');
+        this.showSubmitModal = false;
+        this.reportToSubmit = null;
+        this.isSubmitting = false;
+        this.loadReports();
+      },
+      error: () => {
+        this.toastService.error('Error al enviar el reporte.');
+        this.isSubmitting = false;
+      },
+    });
+  }
+
+  cancelSubmit(): void {
+    this.showSubmitModal = false;
+    this.reportToSubmit = null;
   }
 }
