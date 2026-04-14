@@ -1,5 +1,5 @@
-﻿using InclusiON.Domain.Models;
-using System;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 
 namespace InclusiON.DTOs.Responses.Reports
 {
@@ -22,33 +22,36 @@ namespace InclusiON.DTOs.Responses.Reports
         public string? FutureRecommendations { get; set; }
         public string? NextObjectives { get; set; }
         public bool IsActive { get; set; }
+        public ReportStatus Status { get; set; }
+        public string? AdminComment { get; set; }
+        public DateTime? ApprovedAt { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
-        public static ReportResponse MapToResponse(Report report)
+        public static ReportResponse MapToResponse(Report report) => new()
         {
-            return new ReportResponse
-            {
-                Id = report.Id,
-                Title = report.Title,
-                Content = report.Content,
-                ReportDate = report.ReportDate,
-                PersonId = report.PersonId,
-                PersonName = report.Person != null ? $"{report.Person.FirstName} {report.Person.LastName}" : string.Empty,
-                ProfessionalId = report.ProfessionalId,
-                ProfessionalName = report.Professional != null ? $"{report.Professional.FirstName} {report.Professional.LastName}" : string.Empty,
-                ReportTypeId = report.ReportTypeId,
-                ReportTypeName = report.ReportType != null ? report.ReportType.Name : string.Empty,
-                PeriodStartDate = report.PeriodStartDate,
-                PeriodEndDate = report.PeriodEndDate,
-                AchievedGoals = report.AchievedGoals,
-                AreasToReinforce = report.AreasToReinforce,
-                FutureRecommendations = report.FutureRecommendations,
-                NextObjectives = report.NextObjectives,
-                IsActive = report.IsActive,
-                CreatedAt = report.CreatedAt,
-                UpdatedAt = report.UpdatedAt
-            };
-        }
+            Id = report.Id,
+            Title = report.Title,
+            Content = report.Content,
+            ReportDate = report.ReportDate,
+            PersonId = report.PersonId,
+            PersonName = report.Person != null ? $"{report.Person.FirstName} {report.Person.LastName}" : string.Empty,
+            ProfessionalId = report.ProfessionalId,
+            ProfessionalName = report.Professional != null ? $"{report.Professional.FirstName} {report.Professional.LastName}" : string.Empty,
+            ReportTypeId = report.ReportTypeId,
+            ReportTypeName = report.ReportType?.Name ?? string.Empty,
+            PeriodStartDate = report.PeriodStartDate,
+            PeriodEndDate = report.PeriodEndDate,
+            AchievedGoals = report.AchievedGoals,
+            AreasToReinforce = report.AreasToReinforce,
+            FutureRecommendations = report.FutureRecommendations,
+            NextObjectives = report.NextObjectives,
+            IsActive = report.IsActive,
+            Status = report.Status,
+            AdminComment = report.AdminComment,
+            ApprovedAt = report.ApprovedAt,
+            CreatedAt = report.CreatedAt,
+            UpdatedAt = report.UpdatedAt
+        };
     }
 }
