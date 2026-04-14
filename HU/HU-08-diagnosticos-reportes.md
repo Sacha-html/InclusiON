@@ -11,8 +11,12 @@
 **Quiero** registrar diagnósticos funcionales y generar reportes de progreso formales
 **Para** documentar la evaluación inicial como base del plan educativo y comunicar avances a la familia de forma estructurada
 
+**Como** administrador
+**Quiero** revisar los reportes enviados por los profesionales y aprobarlos o rechazarlos con un comentario
+**Para** garantizar la calidad de la información que recibe la familia
+
 **Como** familiar
-**Quiero** consultar y descargar los reportes de progreso de mi familiar
+**Quiero** consultar los reportes de progreso aprobados de mi familiar
 **Para** conocer su avance sin depender de reuniones presenciales
 
 ---
@@ -35,14 +39,14 @@ Se pueden registrar múltiples diagnósticos a lo largo del tiempo, formando un 
 ### Reportes de Progreso
 El profesional genera reportes formales para un período determinado:
 - **Tipo de reporte** (del catálogo del sistema)
-- **Título y período** (fecha inicio - fecha fin)
+- **Título y fecha**
 - **Contenido** — Texto libre con descripción del progreso
 - **Metas alcanzadas**
 - **Áreas a reforzar**
 - **Recomendaciones futuras**
 - **Próximos objetivos**
 
-Los reportes son visibles tanto para el profesional como para la familia. Se pueden exportar a PDF.
+Los reportes siguen un flujo de aprobación antes de quedar visibles para la familia. El profesional trabaja en un borrador, lo envía al admin, y el admin aprueba o rechaza con comentario. La familia solo accede a reportes aprobados.
 
 ---
 
@@ -55,9 +59,28 @@ Los reportes son visibles tanto para el profesional como para la familia. Se pue
 - [ ] Solo la fecha y el diagnóstico principal son campos obligatorios
 - [ ] El historial se muestra en orden cronológico descendente
 
-### Reportes
-- [ ] El profesional puede crear reportes seleccionando tipo, período y completando campos de texto
-- [ ] La familia puede ver los reportes de su familiar pero no crear ni editar
+### Reportes — Flujo de aprobación
+- [x] El profesional puede crear un reporte en estado `Draft`
+- [x] El profesional puede editar el reporte solo mientras está en `Draft`
+- [x] El profesional puede enviar el reporte al admin (`Draft → Submitted`)
+- [x] Un reporte en `Submitted`, `Approved` o `Rejected` no puede editarse (`400 InvalidOperation`)
+- [x] El admin puede aprobar un reporte enviado (`Submitted → Approved`)
+- [x] El admin puede rechazar un reporte con comentario obligatorio (`Submitted → Rejected`)
+- [x] Un reporte rechazado no puede reabrirse; el profesional crea un nuevo `Draft`
+- [x] El familiar solo ve reportes `Approved` de sus personas a cargo
+- [x] Al aprobar: email a todos los familiares activos vinculados a la persona (background)
+- [x] Al rechazar: email al profesional autor con el motivo del rechazo (background)
+- [x] Filtros por `dateFrom`, `dateTo` y `reportTypeId` en la vista del familiar
 - [ ] Los reportes se pueden exportar a PDF
 - [ ] Los reportes nuevos se marcan con indicador "Nuevo" que desaparece al abrirlo
-- [ ] El tipo de reporte se selecciona del catálogo del sistema
+
+---
+
+## Visibilidad por actor
+
+| Estado | Profesional | Admin | Familiar |
+|--------|:-----------:|:-----:|:--------:|
+| `Draft` | Ve y edita | No ve | No ve |
+| `Submitted` | Solo lectura | Ve y decide | No ve |
+| `Approved` | Ve | Ve | Ve |
+| `Rejected` | Ve (con motivo) | Ve | No ve |
