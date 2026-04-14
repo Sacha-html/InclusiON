@@ -47,7 +47,7 @@
           <label for="identifierInput" class="visually-hidden">Tu nombre</label>
           <div class="input-group input-group-lg" role="group">
             <span class="input-group-text" aria-hidden="true" style="background-color: var(--a11y-bg-secondary); border-color: var(--a11y-border)">
-              <svg cIcon name="cilUser" aria-hidden="true" style="color: var(--a11y-primary)"></svg>
+              <svg cIcon name="cilUser" aria-hidden="true" style="color: var(--a11y-text-muted)"></svg>
             </span>
             <input
               type="text"
@@ -87,16 +87,15 @@
             color="primary"
             size="lg"
             class="py-3 fs-4 a11y-btn-primary"
-            style="background-color: #0D47A1 !important; border-color: #0D47A1 !important; color: #FFFFFF !important; font-weight: 600;"
             (click)="onIdentify()"
             [disabled]="isLoading || !identifier.trim()"
           >
             @if (isLoading) {
-              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true" style="border-color: #FFFFFF;"></span>
-              <span style="color: #FFFFFF !important;">Buscando...</span>
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              <span>Buscando...</span>
             } @else {
-              <svg cIcon name="cilSearch" class="me-2" aria-hidden="true" style="color: #FFFFFF !important;"></svg>
-              <span style="color: #FFFFFF !important;">Buscar mi cuenta</span>
+              <svg cIcon name="cilSearch" class="me-2" aria-hidden="true"></svg>
+              <span>Buscar mi cuenta</span>
             }
           </button>
         </div>

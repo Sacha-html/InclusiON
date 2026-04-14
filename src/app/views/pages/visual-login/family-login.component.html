@@ -115,15 +115,14 @@
             type="submit"
             size="lg"
             class="w-100 submit-button a11y-btn-primary"
-            style="background-color: #0D47A1 !important; border-color: #0D47A1 !important; color: #FFFFFF !important; font-weight: 600;"
             [disabled]="!password || isLoading || isLocked"
           >
             @if (isLoading) {
               <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
-              <span style="color: #FFFFFF !important;">Verificando...</span>
+              <span>Verificando...</span>
             } @else {
-              <svg cIcon name="cilLockUnlocked" class="me-2" aria-hidden="true" style="color: #FFFFFF !important;"></svg>
-              <span style="color: #FFFFFF !important;">Entrar</span>
+              <svg cIcon name="cilLockUnlocked" class="me-2" aria-hidden="true"></svg>
+              <span>Entrar</span>
             }
           </button>
         </form>

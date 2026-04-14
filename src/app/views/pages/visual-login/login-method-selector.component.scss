@@ -6,21 +6,24 @@
 .method-card {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  border: 2px solid transparent;
+  border: 2px solid var(--a11y-border, #9E9E9E);
+  background-color: var(--a11y-surface, #FAFAFA);
+  color: var(--a11y-text, #1A1A1A);
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--a11y-primary, #0D47A1);
   }
 
   &:focus {
-    outline: 2px solid var(--cui-primary);
+    outline: 3px solid var(--a11y-focus-color, rgba(13, 71, 161, 0.5));
     outline-offset: 2px;
   }
 
   &.selected {
-    border-color: var(--cui-primary);
-    background-color: rgba(var(--cui-primary-rgb), 0.05);
+    border-color: var(--a11y-primary, #0D47A1);
+    background-color: var(--a11y-bg-secondary, #F5F5F5);
   }
 
   &.current {
@@ -33,7 +36,7 @@
       right: 8px;
       width: 12px;
       height: 12px;
-      background-color: var(--cui-info);
+      background-color: var(--a11y-primary, #0D47A1);
       border-radius: 50%;
     }
   }
@@ -46,29 +49,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cui-light);
+  background-color: var(--a11y-bg-secondary, #F5F5F5);
+  border: 2px solid var(--a11y-border, #9E9E9E);
   border-radius: 50%;
 
   svg {
     width: 32px;
     height: 32px;
+    color: var(--a11y-primary, #0D47A1);
   }
 }
 
 .method-name {
   margin-bottom: 0.5rem;
   font-weight: 600;
+  color: var(--a11y-text, #1A1A1A);
 }
 
 .method-description {
   margin-bottom: 0.5rem;
   min-height: 40px;
+  color: var(--a11y-text-secondary, #3D3D3D);
 }
 
 .config-section {
-  background-color: var(--cui-light);
+  background-color: var(--a11y-bg-secondary, #F5F5F5);
+  border: 1px solid var(--a11y-border, #9E9E9E);
   padding: 1.5rem;
   border-radius: 0.5rem;
+  color: var(--a11y-text, #1A1A1A);
 }
 
 .pin-config input {
