@@ -1,4 +1,4 @@
-﻿using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Queries;
 using InclusiON.DTOs.Common;
@@ -28,6 +28,9 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 query.ProfessionalId,
                 query.ReportTypeId,
                 query.IsActive,
+                query.Status,
+                query.DateFrom,
+                query.DateTo,
                 query.SortBy,
                 query.SortDirection,
                 query.InstitutionIds,

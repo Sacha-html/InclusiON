@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Reports;
@@ -66,6 +67,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 AreasToReinforce = command.AreasToReinforce,
                 FutureRecommendations = command.FutureRecommendations,
                 NextObjectives = command.NextObjectives,
+                Status = ReportStatus.Draft,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
