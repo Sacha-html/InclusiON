@@ -144,6 +144,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     var tempPassword = password;
                     if (!string.IsNullOrEmpty(email))
                     {
+                        // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                        // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                         _ = Task.Run(async () =>
                         {
                             try
@@ -196,6 +198,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
                     _logger.LogInformation("Profesional rechazado: {ProfessionalId}", professional.Id);
 
+                    // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                    // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                     // Enviar email de rechazo sin bloquear la respuesta
                     var rejectEmail = professional.Email ?? $"{professional.FirstName.ToLower()}.{professional.LastName.ToLower()}@inclusion.app";
                     var rejectFirstName = professional.FirstName;
