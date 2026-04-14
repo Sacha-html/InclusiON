@@ -1,3 +1,4 @@
+using InclusiON.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using InclusiON.Domain.Models;
@@ -35,6 +36,21 @@ namespace InclusiON.Data.Configurations
 
             builder.Property(r => r.IsActive)
                 .HasDefaultValue(true);
+
+            builder.Property(r => r.Status)
+                .IsRequired()
+                .HasDefaultValue(ReportStatus.Draft)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            builder.Property(r => r.AdminComment)
+                .HasMaxLength(1000);
+
+            builder.Property(r => r.ApprovedAt);
+
+            builder.Property(r => r.ApprovedBy);
+
+            builder.HasIndex(r => r.Status);
 
             builder.Property(r => r.CreatedAt)
                 .IsRequired();
