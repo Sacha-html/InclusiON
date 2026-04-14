@@ -125,6 +125,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 _logger.LogInformation("Profesional registrado (pendiente): {ProfessionalId}, UserId: {UserId}, Email: {Email}", 
                     professional.Id, userId, command.Email);
 
+                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                 try
                 {
                     await _emailService.SendTemplatedEmailAsync(

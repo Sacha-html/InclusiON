@@ -119,6 +119,8 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     ["Year"] = DateTime.UtcNow.Year.ToString()
                 };
 
+                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                 await _emailService.SendTemplatedEmailAsync(
                     invitation.Email,
                     "InclusiON - Invitacion para registro familiar",
