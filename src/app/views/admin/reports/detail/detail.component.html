@@ -1,7 +1,5 @@
 @if (isLoading()) {
-  <div class="text-center py-4">
-    <c-spinner></c-spinner>
-  </div>
+  <div class="text-center py-4"><c-spinner></c-spinner></div>
 } @else if (report()) {
   <c-card>
     <c-card-header>
@@ -11,10 +9,14 @@
           <c-badge [color]="getStatusColor(report()!.status)">
             {{ getStatusLabel(report()!.status) }}
           </c-badge>
-          @if (report()!.status === 'Draft') {
-            <button cButton color="primary" size="sm" (click)="onSubmitClick()">
-              <svg cIcon name="cilSend" class="me-1" size="sm" aria-hidden="true"></svg>
-              Enviar al admin
+          @if (report()!.status === 'Submitted') {
+            <button cButton color="success" size="sm" (click)="showApproveModal = true">
+              <svg cIcon name="cilCheckCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+              Aprobar
+            </button>
+            <button cButton color="danger" size="sm" (click)="showRejectModal = true">
+              <svg cIcon name="cilXCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+              Rechazar
             </button>
           }
         </div>
@@ -22,20 +24,16 @@
     </c-card-header>
     <c-card-body>
 
-      <!-- Alerta si fue rechazado -->
       @if (report()!.status === 'Rejected' && report()!.adminComment) {
         <c-alert color="danger" class="mb-4">
           <strong>Motivo de rechazo:</strong> {{ report()!.adminComment }}
         </c-alert>
       }
 
-      <!-- Alerta si fue aprobado -->
       @if (report()!.status === 'Approved') {
         <c-alert color="success" class="mb-4">
-          Reporte aprobado por el administrador.
-          @if (report()!.approvedAt) {
-            Fecha de aprobación: {{ report()!.approvedAt | date:'dd/MM/yyyy' }}.
-          }
+          Reporte aprobado.
+          @if (report()!.approvedAt) { Fecha: {{ report()!.approvedAt | date:'dd/MM/yyyy' }}. }
         </c-alert>
       }
 
@@ -45,7 +43,7 @@
           <p>{{ report()!.reportDate | date:'dd/MM/yyyy' }}</p>
         </c-col>
         <c-col xs="12" md="6">
-          <label class="text-muted">Tipo de reporte</label>
+          <label class="text-muted">Tipo</label>
           <p>{{ report()!.reportTypeName }}</p>
         </c-col>
       </c-row>
@@ -91,7 +89,6 @@
           </c-col>
         </c-row>
       }
-
       @if (report()!.areasToReinforce) {
         <c-row class="mb-3">
           <c-col xs="12">
@@ -100,7 +97,6 @@
           </c-col>
         </c-row>
       }
-
       @if (report()!.futureRecommendations) {
         <c-row class="mb-3">
           <c-col xs="12">
@@ -109,7 +105,6 @@
           </c-col>
         </c-row>
       }
-
       @if (report()!.nextObjectives) {
         <c-row class="mb-3">
           <c-col xs="12">
@@ -120,24 +115,36 @@
       }
 
       <hr />
-
-      <button cButton color="secondary" (click)="onBack()">
-        Volver a la lista
-      </button>
+      <button cButton color="secondary" (click)="onBack()">Volver a la lista</button>
     </c-card-body>
   </c-card>
 
-  <!-- Modal de confirmación de envío -->
   <app-confirm-modal
-    [visible]="showSubmitModal"
-    title="Enviar reporte al administrador"
-    messagePrefix="¿Confirmas el envío de &quot;"
+    [visible]="showApproveModal"
+    title="Aprobar reporte"
+    messagePrefix="¿Confirmás la aprobación del reporte &quot;"
     [itemName]="report()!.title"
-    messageSuffix="&quot; al administrador para su revisión? Una vez enviado no podrás editarlo."
-    confirmLabel="Enviar"
-    confirmColor="primary"
-    [loading]="isSubmitting"
-    (confirm)="confirmSubmit()"
-    (cancel)="cancelSubmit()">
+    messageSuffix="&quot;? El familiar podrá consultarlo a partir de ahora."
+    confirmLabel="Aprobar"
+    confirmColor="success"
+    [loading]="isActioning"
+    (confirm)="confirmApprove()"
+    (cancel)="cancelAction()">
+  </app-confirm-modal>
+
+  <app-confirm-modal
+    [visible]="showRejectModal"
+    title="Rechazar reporte"
+    messagePrefix="Estás rechazando el reporte &quot;"
+    [itemName]="report()!.title"
+    messageSuffix="&quot;. Indicá el motivo para el profesional."
+    confirmLabel="Rechazar"
+    confirmColor="danger"
+    [showObservation]="true"
+    observationLabel="Motivo del rechazo *"
+    observationPlaceholder="Indicá el motivo del rechazo..."
+    [loading]="isActioning"
+    (confirm)="confirmReject($event)"
+    (cancel)="cancelAction()">
   </app-confirm-modal>
 }

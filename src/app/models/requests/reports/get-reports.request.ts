@@ -4,8 +4,11 @@ export interface GetReportsRequest {
   search?: string;
   personId?: string;
   professionalId?: string;
-  reportTypeId?: string;
+  reportTypeId?: number;
   isActive?: boolean;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
   sortBy?: string;
   sortDirection?: string;
 }

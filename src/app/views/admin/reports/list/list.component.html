@@ -2,25 +2,16 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end g-2">
     <c-col sm="3">
-      <label cLabel>Persona</label>
-      <select cSelect [(ngModel)]="selectedPersonId" (ngModelChange)="onPersonFilterChange()">
-        <option value="">Todas</option>
-        @for (p of persons(); track p.personId) {
-          <option [value]="p.personId">{{ p.personFullName }}</option>
-        }
-      </select>
-    </c-col>
-    <c-col sm="2">
       <label cLabel>Estado</label>
       <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="Draft">Borrador</option>
-        <option value="Submitted">Enviado</option>
-        <option value="Approved">Aprobado</option>
-        <option value="Rejected">Rechazado</option>
+        <option value="Submitted">Pendientes de revisión</option>
+        <option value="Approved">Aprobados</option>
+        <option value="Rejected">Rechazados</option>
       </select>
     </c-col>
-    <c-col sm="2">
+    <c-col sm="3">
       <label cLabel>Tipo</label>
       <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
         <option value="">Todos</option>
@@ -44,7 +35,7 @@
 </fieldset>
 
 <app-data-table
-  title="Mis Reportes"
+  title="Reportes"
   [columns]="columns"
   [items]="reports()"
   [totalItems]="totalRecords()"
@@ -52,31 +43,46 @@
   [currentPage]="currentPage()"
   [sortable]="true"
   [loading]="isLoading()"
-  [headerButtons]="headerButtons"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
   (sortAction)="onSort($event)"
-  (rowAction)="onRowAction($event)"
-  (headerAction)="onHeaderAction($event)">
+  (rowAction)="onRowAction($event)">
 </app-data-table>
 
 @if (!reports().length && !isLoading()) {
   <div class="text-center text-body-secondary py-5">
     <svg cIcon name="cilNotes" size="3xl" class="mb-2"></svg>
-    <p class="mb-0">No hay reportes que coincidan con los filtros seleccionados.</p>
+    <p class="mb-0">No hay reportes que coincidan con los filtros.</p>
   </div>
 }
 
-<!-- Modal: Confirmar envío al admin -->
+<!-- Modal: Aprobar -->
 <app-confirm-modal
-  [visible]="showSubmitModal"
-  title="Enviar reporte al administrador"
-  messagePrefix="¿Confirmas el envío de &quot;"
-  [itemName]="reportToSubmit?.title ?? ''"
-  messageSuffix="&quot; al administrador para su revisión? Una vez enviado no podrás editarlo."
-  confirmLabel="Enviar"
-  confirmColor="primary"
-  [loading]="isSubmitting"
-  (confirm)="confirmSubmit()"
-  (cancel)="cancelSubmit()">
+  [visible]="showApproveModal"
+  title="Aprobar reporte"
+  messagePrefix="¿Confirmás la aprobación del reporte &quot;"
+  [itemName]="selectedReport?.title ?? ''"
+  messageSuffix="&quot;? El familiar podrá consultarlo a partir de ese momento."
+  confirmLabel="Aprobar"
+  confirmColor="success"
+  [loading]="isActioning"
+  (confirm)="confirmApprove()"
+  (cancel)="cancelAction()">
+</app-confirm-modal>
+
+<!-- Modal: Rechazar -->
+<app-confirm-modal
+  [visible]="showRejectModal"
+  title="Rechazar reporte"
+  messagePrefix="Estás rechazando el reporte &quot;"
+  [itemName]="selectedReport?.title ?? ''"
+  messageSuffix="&quot;. El profesional recibirá el motivo."
+  confirmLabel="Rechazar"
+  confirmColor="danger"
+  [showObservation]="true"
+  observationLabel="Motivo del rechazo *"
+  observationPlaceholder="Indicá el motivo del rechazo para que el profesional pueda corregirlo..."
+  [loading]="isActioning"
+  (confirm)="confirmReject($event)"
+  (cancel)="cancelAction()">
 </app-confirm-modal>

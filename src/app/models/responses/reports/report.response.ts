@@ -1,3 +1,5 @@
+export type ReportStatus = 'Draft' | 'Submitted' | 'Approved' | 'Rejected';
+
 export interface ReportListItemResponse {
   id: number;
   personId: string;
@@ -11,6 +13,9 @@ export interface ReportListItemResponse {
   periodStartDate?: string;
   periodEndDate?: string;
   isActive: boolean;
+  status: ReportStatus;
+  adminComment?: string;
+  approvedAt?: string;
   createdAt: string;
   updatedAt?: string;
 }

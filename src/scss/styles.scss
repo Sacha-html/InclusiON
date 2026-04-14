@@ -39,6 +39,9 @@
 // Custom styles
 @use "custom";
 
+// Fixes de accesibilidad (iconos, colores neutros)
+@use "fixes";
+
 // Temas de accesibilidad
 @use "accessibility-themes";
 

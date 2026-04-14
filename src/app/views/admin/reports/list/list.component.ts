@@ -1,32 +1,31 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AssignmentsService, ProfessionalsService, ReportsService, ToastService } from '@services';
-import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
-import { ProfessionalPersonResponse } from '@models';
+import { ReportsService, ToastService } from '@services';
+import { ReportListItemResponse } from '@models/responses/reports/report.response';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   ButtonDirective,
+  FormControlDirective,
   FormLabelDirective,
   FormSelectDirective,
-  FormControlDirective,
   GridModule,
 } from '@coreui/angular';
 
 @Component({
-  selector: 'app-reports-list',
+  selector: 'app-admin-reports-list',
+  standalone: true,
   imports: [
-    RouterModule,
     FormsModule,
     DataTableComponent,
     ConfirmModalComponent,
     ButtonDirective,
+    FormControlDirective,
     FormLabelDirective,
     FormSelectDirective,
-    FormControlDirective,
     GridModule,
   ],
   templateUrl: './list.component.html',
@@ -34,31 +33,26 @@ import {
 })
 export class ListComponent implements OnInit {
   private readonly reportsService = inject(ReportsService);
-  private readonly professionalsService = inject(ProfessionalsService);
-  private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   reports = signal<ReportListItemResponse[]>([]);
-  persons = signal<ProfessionalPersonResponse[]>([]);
   isLoading = signal(true);
   currentPage = signal(1);
   pageSize = signal(10);
   totalRecords = signal(0);
-  totalPages = signal(0);
-  searchTerm = signal('');
 
   // Filtros
-  selectedPersonId = '';
-  statusFilter = '';
+  statusFilter = 'Submitted'; // Por defecto: pendientes de revisión
   typeFilter = '';
   dateFrom = '';
   dateTo = '';
 
-  // Modal de envío
-  showSubmitModal = false;
-  reportToSubmit: ReportListItemResponse | null = null;
-  isSubmitting = false;
+  // Modales
+  showApproveModal = false;
+  showRejectModal = false;
+  selectedReport: ReportListItemResponse | null = null;
+  isActioning = false;
 
   readonly reportTypes = [
     { id: 1, name: 'Evaluación Mensual' },
@@ -75,60 +69,48 @@ export class ListComponent implements OnInit {
       actions: [
         { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
         {
-          action: 'submit',
-          label: 'Enviar al admin',
-          icon: 'cil-send',
-          visible: (item: ReportListItemResponse) => item.status === 'Draft',
+          action: 'approve',
+          label: 'Aprobar',
+          icon: 'cil-check-circle',
+          visible: (item: ReportListItemResponse) => item.status === 'Submitted',
+        },
+        {
+          action: 'reject',
+          label: 'Rechazar',
+          icon: 'cil-x-circle',
+          visible: (item: ReportListItemResponse) => item.status === 'Submitted',
         },
       ],
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
     { key: 'title', label: 'Título', sortable: true },
     { key: 'personName', label: 'Persona', sortable: true },
+    { key: 'professionalName', label: 'Profesional', sortable: true },
     { key: 'reportTypeName', label: 'Tipo', sortable: true },
     {
       key: 'status',
       label: 'Estado',
       type: 'badge',
-      sortable: true,
       badgeMap: {
         Draft:     { color: 'secondary', label: 'Borrador' },
-        Submitted: { color: 'warning',   label: 'Enviado' },
+        Submitted: { color: 'warning',   label: 'Pendiente' },
         Approved:  { color: 'success',   label: 'Aprobado' },
         Rejected:  { color: 'danger',    label: 'Rechazado' },
       },
     },
   ];
 
-  headerButtons = [
-    { action: 'create', label: 'Nuevo borrador', icon: 'cilPlus', routerLink: '/pro/reports/new' },
-  ];
-
   ngOnInit(): void {
     this.loadReports();
-    this.loadPersons();
-  }
-
-  private loadPersons(): void {
-    this.professionalsService.getMyProfile().subscribe({
-      next: (profile) => {
-        this.assignmentsService.getPersonsByProfessional(profile.id).subscribe({
-          next: (persons) => this.persons.set(persons.filter(p => p.isActive)),
-        });
-      },
-    });
   }
 
   loadReports(): void {
     this.isLoading.set(true);
-
     const request: GetReportsRequest = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
-      search: this.searchTerm() || undefined,
       sortBy: 'reportDate',
       sortDirection: 'desc',
-      personId: this.selectedPersonId || undefined,
       status: this.statusFilter || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
@@ -139,30 +121,21 @@ export class ListComponent implements OnInit {
       next: (response) => {
         this.reports.set(response.data);
         this.totalRecords.set(response.totalRecords);
-        this.totalPages.set(response.totalPages);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false),
     });
   }
 
-  onPersonFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
   onStatusFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
   onTypeFilterChange(): void   { this.currentPage.set(1); this.loadReports(); }
   onDateChange(): void         { this.currentPage.set(1); this.loadReports(); }
 
   clearFilters(): void {
-    this.selectedPersonId = '';
-    this.statusFilter = '';
+    this.statusFilter = 'Submitted';
     this.typeFilter = '';
     this.dateFrom = '';
     this.dateTo = '';
-    this.currentPage.set(1);
-    this.loadReports();
-  }
-
-  onSearch(term: string): void {
-    this.searchTerm.set(term);
     this.currentPage.set(1);
     this.loadReports();
   }
@@ -172,45 +145,65 @@ export class ListComponent implements OnInit {
     this.loadReports();
   }
 
+  onSearch(term: string): void {
+    this.currentPage.set(1);
+    this.loadReports();
+  }
+
   onSort(_event: { sortBy: string; sortDirection: string }): void {
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
+    this.selectedReport = event.item;
     if (event.action === 'view') {
-      this.router.navigate(['/pro/reports', event.item.id]);
-    } else if (event.action === 'submit') {
-      this.reportToSubmit = event.item;
-      this.showSubmitModal = true;
+      this.router.navigate(['/admin/reports', event.item.id]);
+    } else if (event.action === 'approve') {
+      this.showApproveModal = true;
+    } else if (event.action === 'reject') {
+      this.showRejectModal = true;
     }
   }
 
-  onHeaderAction(action: string): void {
-    if (action === 'create') {
-      this.router.navigate(['/pro/reports/new']);
-    }
-  }
-
-  confirmSubmit(): void {
-    if (!this.reportToSubmit) return;
-    this.isSubmitting = true;
-    this.reportsService.submitReport(this.reportToSubmit.id).subscribe({
+  confirmApprove(): void {
+    if (!this.selectedReport) return;
+    this.isActioning = true;
+    this.reportsService.approveReport(this.selectedReport.id).subscribe({
       next: () => {
-        this.toastService.success('Reporte enviado al administrador para revisión.');
-        this.showSubmitModal = false;
-        this.reportToSubmit = null;
-        this.isSubmitting = false;
+        this.toastService.success('Reporte aprobado. El familiar ya puede consultarlo.');
+        this.showApproveModal = false;
+        this.selectedReport = null;
+        this.isActioning = false;
         this.loadReports();
       },
       error: () => {
-        this.toastService.error('Error al enviar el reporte.');
-        this.isSubmitting = false;
+        this.toastService.error('Error al aprobar el reporte.');
+        this.isActioning = false;
       },
     });
   }
 
-  cancelSubmit(): void {
-    this.showSubmitModal = false;
-    this.reportToSubmit = null;
+  confirmReject(comment: string): void {
+    if (!this.selectedReport) return;
+    this.isActioning = true;
+    this.reportsService.rejectReport(this.selectedReport.id, comment).subscribe({
+      next: () => {
+        this.toastService.success('Reporte rechazado. El profesional fue notificado.');
+        this.showRejectModal = false;
+        this.selectedReport = null;
+        this.isActioning = false;
+        this.loadReports();
+      },
+      error: () => {
+        this.toastService.error('Error al rechazar el reporte.');
+        this.isActioning = false;
+      },
+    });
+  }
+
+  cancelAction(): void {
+    this.showApproveModal = false;
+    this.showRejectModal = false;
+    this.selectedReport = null;
   }
 }
