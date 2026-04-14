@@ -1,4 +1,77 @@
-// Place for temp fixes
+// ============================================
+// FIXES DE ACCESIBILIDAD - InclusiON
+// Principio WCAG: el color primario (azul) se
+// reserva para elementos INTERACTIVOS (botones,
+// links activos, focus). Los iconos decorativos
+// y estructurales usan colores neutros.
+// ============================================
 
 
+// ─────────────────────────────────────────────
+// ICONOS EN HEADER / NAV / DROPDOWNS
+// Por defecto CoreUI los hereda del primary.
+// Deben ser neutros (color de texto del header).
+// ─────────────────────────────────────────────
+c-header svg,
+c-header-nav svg,
+.header-toggler svg,
+[cHeaderToggler] svg {
+  color: var(--a11y-header-text, #212121) !important;
+}
 
+// Iconos en dropdown items (menú usuario, accesibilidad, modo color)
+[cDropdownItem] svg,
+[cDropdownToggle] svg,
+ul[cDropdownMenu] svg,
+div[cDropdownMenu] svg {
+  color: var(--a11y-text-secondary, #3D3D3D);
+}
+
+// Iconos de dropdown toggle en el header (campana, sol, perfil accesibilidad)
+// son interactivos pero no primarios — usan color de header
+c-header c-dropdown [cDropdownToggle] svg {
+  color: var(--a11y-header-text, #212121);
+  transition: color 0.15s ease;
+}
+
+c-header c-dropdown [cDropdownToggle]:hover svg,
+c-header c-dropdown [cDropdownToggle]:focus svg {
+  color: var(--a11y-primary, #0D47A1);
+}
+
+
+// ─────────────────────────────────────────────
+// ICONOS DECORATIVOS EN FORMULARIOS / INPUT GROUP
+// El ícono del input group (ej: cilUser, cilLock)
+// es aria-hidden y no interactivo → muted
+// ─────────────────────────────────────────────
+.input-group .input-group-text svg,
+.input-group [cInputGroupText] svg {
+  color: var(--a11y-text-muted, #595959);
+}
+
+
+// ─────────────────────────────────────────────
+// ICONOS ILUSTRATIVOS DE PÁGINA (login, register)
+// Grandes iconos al tope de un formulario que
+// son puramente decorativos → text-secondary
+// ─────────────────────────────────────────────
+.login-layout svg.illustrative-icon,
+.register-layout svg.illustrative-icon {
+  color: var(--a11y-text-secondary, #3D3D3D);
+}
+
+
+// ─────────────────────────────────────────────
+// ICONOS EN BOTONES PRIMARIOS → mantener blanco
+// ─────────────────────────────────────────────
+.btn-primary svg,
+button[color="primary"] svg {
+  color: var(--a11y-primary-text, #FFFFFF) !important;
+}
+
+// Botón secondary / outline: icon hereda del botón
+.btn-secondary svg,
+button[color="secondary"] svg {
+  color: inherit;
+}

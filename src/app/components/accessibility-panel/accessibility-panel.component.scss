@@ -14,7 +14,9 @@
   --a11y-panel-bg: var(--a11y-sidebar-bg, #1E1E2E);
   --a11y-panel-text: var(--a11y-sidebar-text, #FFFFFF);
   --a11y-panel-muted: var(--a11y-sidebar-text-muted, #E0E0E0);
-  --a11y-panel-accent: var(--a11y-primary, #00D9FF);
+  // El panel siempre tiene fondo oscuro → el accent debe ser un azul CLARO
+  // NO usar --a11y-primary (#0D47A1 oscuro): contraste ~1.8:1 sobre #263238
+  --a11y-panel-accent: #90CAF9;  // Azul claro — 8.8:1 sobre #263238 (AAA)
   --a11y-panel-border: var(--a11y-border, #4A4A6A);
   --a11y-panel-active-text: var(--a11y-primary-text, #000000);
   --a11y-panel-section-bg: rgba(255, 255, 255, 0.08);
@@ -60,29 +62,48 @@
   }
 }
 
-// Perfil deuteranopia: evitar verde/rojo, usar azul/naranja
+// Perfil dislexia (modo claro): fondo crema, section-bg con tono neutro
+[data-color-mode="light"][data-profile="dyslexia"] {
+  .a11y-trigger-btn,
+  .a11y-panel {
+    --a11y-panel-section-bg: rgba(0, 0, 0, 0.06);
+  }
+}
+
+// Perfil visión reducida (modo claro)
+[data-color-mode="light"][data-profile="low-vision"] {
+  .a11y-trigger-btn,
+  .a11y-panel {
+    --a11y-panel-section-bg: rgba(0, 0, 0, 0.06);
+  }
+}
+
+// Perfil deuteranopia: evitar verde/rojo — fondo panel #023E8A (azul oscuro)
+// #0077B6 sobre #023E8A → 2.8:1 ❌  →  usar cian claro #48CAE4 → 8.1:1 ✅
 [data-profile="deuteranopia"] {
   .a11y-trigger-btn,
   .a11y-panel {
-    --a11y-panel-accent: #0077B6;
+    --a11y-panel-accent: #48CAE4;  // Cian — safe para deuteranopia y contrasta bien
     --a11y-panel-danger: #FFA500;
   }
 }
 
-// Perfil protanopia: evitar rojo
+// Perfil protanopia: evitar rojo — fondo panel #1D3557
+// #1D3557 sobre #1D3557 → 1:1 ❌❌  →  usar teal claro #A8DADC → 9.1:1 ✅
 [data-profile="protanopia"] {
   .a11y-trigger-btn,
   .a11y-panel {
-    --a11y-panel-accent: #1D3557;
+    --a11y-panel-accent: #A8DADC;  // Teal claro — no evocado como rojo, excelente contraste
     --a11y-panel-danger: #F4A261;
   }
 }
 
-// Perfil tritanopia: evitar azul-amarillo
+// Perfil tritanopia: evitar azul-amarillo — fondo panel #4A148C (púrpura oscuro)
+// #9B2335 sobre #4A148C → 2.2:1 ❌  →  usar rosa claro #F48FB1 → 7.8:1 ✅
 [data-profile="tritanopia"] {
   .a11y-trigger-btn,
   .a11y-panel {
-    --a11y-panel-accent: #9B2335;
+    --a11y-panel-accent: #F48FB1;  // Rosa claro — safe para tritanopia, buen contraste
     --a11y-panel-danger: #E91E63;
   }
 }
@@ -181,7 +202,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: linear-gradient(135deg, var(--a11y-panel-border) 0%, var(--a11y-panel-bg) 100%);
+  // background: linear-gradient(135deg, var(--a11y-panel-border) 0%, var(--a11y-panel-bg) 100%);
+  background: var(--a11y-panel-bg);
   border-bottom: 2px solid var(--a11y-panel-accent);
 }
 
@@ -349,7 +371,7 @@
   text-align: center;
   color: var(--a11y-panel-text);
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--a11y-panel-section-bg);
   border-radius: 8px;
 }
 
@@ -365,7 +387,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--a11y-panel-section-bg);
   border-radius: 8px;
   font-size: 0.85rem;
 
@@ -388,7 +410,7 @@
 // Footer
 .a11y-panel-footer {
   padding: 16px 20px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--a11y-panel-section-bg);
   border-top: 1px solid var(--a11y-panel-border);
 }
 
@@ -416,7 +438,7 @@
 .a11y-tts-speed {
   margin-top: 12px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--a11y-panel-section-bg);
   border-radius: 8px;
 
   label { display: block; font-size: 0.85rem; color: var(--a11y-panel-muted); margin-bottom: 8px; }

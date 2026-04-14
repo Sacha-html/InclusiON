@@ -10,20 +10,37 @@
     border-radius: 8px;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.08);
+      background-color: var(--a11y-dropdown-hover-bg, rgba(0, 0, 0, 0.08));
     }
 
     svg {
       width: 26px !important;
       height: 26px !important;
+      // Iconos de toggle del header: neutros, no azul primario
+      color: var(--a11y-header-text, #212121);
+    }
+
+    &:hover svg,
+    &:focus svg {
+      color: var(--a11y-primary, #0D47A1);
     }
   }
 
-  // Iconos del header
+  // Iconos del header: hamburger, campana, etc.
   .header-toggler svg,
   c-header-nav svg {
     width: 26px;
     height: 26px;
+    color: var(--a11y-header-text, #212121);
+  }
+
+  // Iconos en dropdown items (menú usuario, accesibilidad)
+  [cDropdownItem] svg,
+  a[cDropdownItem] svg,
+  button[cDropdownItem] svg {
+    color: var(--a11y-text-secondary, #3D3D3D);
+    width: 18px;
+    height: 18px;
   }
 
   // Links de navegación
@@ -31,5 +48,6 @@
   [cNavLink] {
     font-size: 1.05rem;
     font-weight: 500;
+    color: var(--a11y-header-text, #212121);
   }
 }
