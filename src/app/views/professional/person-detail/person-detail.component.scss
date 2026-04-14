@@ -20,3 +20,30 @@
     opacity: 1;
   }
 }
+
+:host ::ng-deep .nav-tabs .nav-link {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--a11y-text-secondary, #6c757d);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--a11y-text, #495057);
+    border-bottom-color: var(--a11y-border, #dee2e6);
+  }
+
+  &.active {
+    color: var(--a11y-primary, #0d47a1);
+    border-bottom-color: var(--a11y-primary, #0d47a1);
+    font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--a11y-focus-color, rgba(21, 101, 192, 0.5));
+    outline-offset: 2px;
+  }
+}
