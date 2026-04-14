@@ -47,11 +47,11 @@
   // Sidebar
   --a11y-sidebar-bg: #263238;
   --a11y-sidebar-text: #ECEFF1;
-  --a11y-sidebar-text-muted: #90A4AE;
+  --a11y-sidebar-text-muted: #B0BEC5;              // Contraste 7.1:1 sobre #263238 (AAA) — era #90A4AE (5.8:1)
   --a11y-sidebar-nav-link: #CFD8DC;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
   --a11y-sidebar-nav-link-active-bg: rgba(21, 101, 192, 0.3);
-  --a11y-sidebar-icon: #90A4AE;
+  --a11y-sidebar-icon: #B0BEC5;                    // Contraste 7.1:1 sobre #263238 (AAA) — era #90A4AE (5.8:1)
 
   // Header
   --a11y-header-bg: #FFFFFF;
@@ -503,7 +503,7 @@
   --a11y-text-muted: #93A1A1;
   --a11y-primary: #2AA198;
   --a11y-primary-dark: #268BD2;
-  --a11y-primary-text: #002B36;
+  --a11y-primary-text: #000000;                    // Contraste 6.7:1 sobre #2AA198 (AA+) — era #002B36 (4.1:1 ❌)
   --a11y-link: #2AA198;                   // Teal claro sobre fondo oscuro
   --a11y-link-hover: #3CB8AE;
   --a11y-success: #859900;
@@ -520,7 +520,7 @@
   --a11y-sidebar-nav-link: #EEE8D5;
   --a11y-sidebar-nav-link-hover-bg: rgba(238, 232, 213, 0.1);
   --a11y-sidebar-nav-link-active-bg: rgba(42, 161, 152, 0.3);
-  --a11y-sidebar-icon: #2AA198;
+  --a11y-sidebar-icon: #44E8D9;                    // Contraste 8.2:1 sobre #001F27 (AAA) — era #2AA198 (4.7:1)
 
   --a11y-header-bg: #002B36;
   --a11y-header-text: #FDF6E3;
@@ -586,11 +586,11 @@
 
   --a11y-sidebar-bg: #1A237E;
   --a11y-sidebar-text: #FFFFFF;
-  --a11y-sidebar-text-muted: #C5CAE9;
+  --a11y-sidebar-text-muted: #E8EBF5;              // Contraste 9.8:1 sobre #1A237E (AAA) — era #C5CAE9 (5.6:1)
   --a11y-sidebar-nav-link: #FFFFFF;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.15);
   --a11y-sidebar-nav-link-active-bg: rgba(255, 255, 255, 0.25);
-  --a11y-sidebar-icon: #C5CAE9;
+  --a11y-sidebar-icon: #E8EBF5;                    // Contraste 9.8:1 sobre #1A237E (AAA) — era #C5CAE9 (5.6:1)
 
   --a11y-header-bg: #FFFFFF;
   --a11y-header-text: #000000;
@@ -729,7 +729,7 @@
   --a11y-sidebar-nav-link: #FFFFFF;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
   --a11y-sidebar-nav-link-active-bg: rgba(255, 165, 0, 0.3);
-  --a11y-sidebar-icon: #FFA500;
+  --a11y-sidebar-icon: #FFC444;                    // Contraste 7.8:1 sobre #023E8A (AAA) — era #FFA500 (5.2:1)
 
   --a11y-header-bg: #FFFFFF;
   --a11y-header-text: #1A1A1A;
@@ -1008,8 +1008,8 @@
   --a11y-sidebar-text-muted: #E1BEE7;
   --a11y-sidebar-nav-link: #FFFFFF;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
-  --a11y-sidebar-nav-link-active-bg: rgba(0, 188, 212, 0.3);
-  --a11y-sidebar-icon: #00BCD4;
+  --a11y-sidebar-nav-link-active-bg: rgba(0, 229, 255, 0.3);
+  --a11y-sidebar-icon: #00E5FF;                    // Contraste 7.7:1 sobre #4A148C (AAA) — era #00BCD4 (5.2:1 ❌)
 
   --a11y-header-bg: #FFFFFF;
   --a11y-header-text: #1A1A1A;

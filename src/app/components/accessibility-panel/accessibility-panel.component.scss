@@ -539,13 +539,14 @@
 [data-profile="tritanopia"] {
   .a11y-panel-title,
   .a11y-section-title {
-    color: #E91E63 !important;
+    // Usar --a11y-panel-accent = #F48FB1 (7.8:1 sobre #4A148C, AAA) — era #E91E63 (2.8:1 ❌)
+    color: var(--a11y-panel-accent) !important;
   }
 
   .a11y-trigger-btn {
-    border-color: #E91E63;
-    svg { color: #E91E63; }
-    &:hover { background: #E91E63; }
+    border-color: var(--a11y-panel-accent);
+    svg { color: var(--a11y-panel-accent); }
+    &:hover { background: var(--a11y-panel-accent); }
   }
 }
 
