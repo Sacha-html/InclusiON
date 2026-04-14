@@ -1249,11 +1249,11 @@ namespace InclusiON.Data.Migrations
                         {
                             Id = 1,
                             Code = "STANDARD",
-                            Description = "Login visual con nombre de usuario y contrasena",
+                            Description = "Login visual con nombre de usuario y contraseña",
                             DisplayOrder = 1,
                             IsActive = true,
                             MinAutonomyLevel = 1,
-                            Name = "Email y Contrasena",
+                            Name = "Email y contraseña",
                             RequiresEmail = false,
                             RequiresPassword = true,
                             RequiresPin = false,
@@ -2076,6 +2076,16 @@ namespace InclusiON.Data.Migrations
                     b.Property<string>("AchievedGoals")
                         .HasColumnType("text");
 
+                    b.Property<string>("AdminComment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("AreasToReinforce")
                         .HasColumnType("text");
 
@@ -2118,6 +2128,13 @@ namespace InclusiON.Data.Migrations
                     b.Property<int>("ReportTypeId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Draft");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -2136,6 +2153,8 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("ProfessionalId");
 
                     b.HasIndex("ReportTypeId");
+
+                    b.HasIndex("Status");
 
                     b.ToTable("Reports", (string)null);
                 });
