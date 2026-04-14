@@ -7,33 +7,29 @@ using InclusiON.DTOs.Responses.Reports;
 
 namespace InclusiON.Application.UseCases.Reports.Handlers
 {
-    public class GetReportsQueryHandler : IQueryHandler<GetReportsQuery, ApiResponse<PagedResponse<ReportsListItemReponse>>>
+    public class GetFamilyReportsQueryHandler
+        : IQueryHandler<GetFamilyReportsQuery, ApiResponse<PagedResponse<ReportsListItemReponse>>>
     {
         private readonly IReportsRepository _repository;
 
-        public GetReportsQueryHandler(IReportsRepository repository)
+        public GetFamilyReportsQueryHandler(IReportsRepository repository)
         {
             _repository = repository;
         }
 
         public async Task<ApiResponse<PagedResponse<ReportsListItemReponse>>> HandleAsync(
-            GetReportsQuery query,
+            GetFamilyReportsQuery query,
             CancellationToken cancellationToken)
         {
-            var pagedResult = await _repository.GetPagedAsync(
+            var pagedResult = await _repository.GetFamilyPagedAsync(
+                query.FamilyRepresentativeId,
                 query.Page,
                 query.PageSize,
-                query.Search,
-                query.PersonId,
-                query.ProfessionalId,
                 query.ReportTypeId,
-                query.IsActive,
-                query.Status,
                 query.DateFrom,
                 query.DateTo,
                 query.SortBy,
                 query.SortDirection,
-                query.InstitutionIds,
                 cancellationToken);
 
             var response = new PagedResponse<ReportsListItemReponse>
