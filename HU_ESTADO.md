@@ -52,7 +52,7 @@ Leyenda de estados:
 | ID | Historia | Estado | Notas |
 |----|----------|--------|-------|
 | BE-13 | Diagnósticos Funcionales | ⏳ PENDIENTE | Entidad `Diagnosis` existe. Sin handlers |
-| BE-14 | Reportes de Progreso | ⏳ PENDIENTE | Entidades `Report`, `ReportType` existen. Sin handlers |
+| BE-14 | Reportes de Progreso | ✅ HECHO | Flujo completo: Draft→Submitted→Approved/Rejected. Endpoints: GET, POST, PUT, PATCH submit/approve/reject, GET /family. Emails a familiar (aprobación) y profesional (rechazo). Ver [Features/reportes-flujo-aprobacion.md](./Features/reportes-flujo-aprobacion.md) |
 | BE-15 | Mensajería Interna | ⏳ PENDIENTE | Entidad `Message` existe. Sin handlers |
 | BE-16 | Búsqueda Semántica de Actividades | 🔧 PARCIAL | Entidades `ActivityEmbedding`, `ActivityResult` con migración. Library `SemanticSearch` existe. Falta: interfaces en Application, handler, endpoint. Ver [Features/integracion-semantic-search.md](./Features/integracion-semantic-search.md) |
 | BE-17 | Motor de Dificultad Adaptativa (MDA) | 🔧 PARCIAL | Entidades `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog` con migración. Falta: `IAdaptiveEngineService`, implementación, pipeline steps. Ver [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) |

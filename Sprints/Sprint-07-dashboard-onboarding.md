@@ -1,26 +1,20 @@
-# Sprint 7 — Dashboard, Onboarding y Frontend Reportes (IN-86, IN-90-92, IN-98-102, IN-137-138)
+# Sprint 7 — Onboarding y Gestión de Usuarios (IN-98 a IN-102)
 
 **Período:** 
 
-**Objetivo:** Completar dashboard familiar, radar chart, timeline diagnósticos, onboarding y frontend de reportes
+**Objetivo:** Completar onboarding, wizard de perfil, tour guiado y gestión de usuarios
 
 ---
 
 ## Tareas
 
-| Código | Task | Estado | Notas |
-|--------|------|--------|-------|
-| IN-86 | Timeline de diagnósticos en perfil de persona | ⏳ PENDIENTE | |
-| IN-90 | Radar chart de habilidades (promedio de éxito por área) | ⏳ PENDIENTE | |
-| IN-91 | Dashboard familiar (últimas actividades, mensajes, reportes) | ⏳ PENDIENTE | |
-| IN-92 | Portal familia con progreso completo | ⏳ PENDIENTE | |
-| IN-98 | Consulta de actividad reciente del usuario | ⏳ PENDIENTE | |
-| IN-99 | Wizard de completado de perfil (profesional) | ⏳ PENDIENTE | |
-| IN-100 | Tour guiado del portal (profesional) | ⏳ PENDIENTE | |
-| IN-101 | Pantalla de bienvenida (familiar) | ⏳ PENDIENTE | |
-| IN-102 | Pantalla de bienvenida (persona con discapacidad) | ⏳ PENDIENTE | |
-| IN-137 | Frontend: Consulta de reportes por profesional | ⏳ PENDIENTE | Backend existe |
-| IN-138 | Frontend: Consulta de reportes por familia | ⏳ PENDIENTE | Backend existe |
+| Código | Task | Backend | Frontend | Estado |
+|--------|------|---------|----------|--------|
+| IN-98 | Consulta de actividad reciente del usuario | ❌ No existe | ❌ No existe | ⏳ Pendiente |
+| IN-99 | Wizard de completado de perfil (profesional) | ❌ No existe | ❌ No existe | ⏳ Pendiente |
+| IN-100 | Tour guiado del portal (profesional) | ❌ No existe | ❌ No existe | ⏳ Pendiente |
+| IN-101 | Pantalla de bienvenida (familiar) | ❌ No existe | ❌ No existe | ⏳ Pendiente |
+| IN-102 | Pantalla de bienvenida (persona con discapacidad) | ❌ No existe | ❌ No existe | ⏳ Pendiente |
 
 ---
 
@@ -28,14 +22,20 @@
 
 | Métrica | Valor |
 |---------|-------|
-| Total tareas | 11 |
+| Total tareas | 5 |
 | Completadas | 0 |
-| Pendientes | 11 |
+| Pendientes | 5 |
+
+---
+
+## Notas
+
+- Estas tareas dependen de la завершенность de los módulos anteriores
+- IN-99 y IN-100 pueden implementarse con Angular tour (ngx-joyride o similar)
+- IN-101 y IN-102 requieren diseño específico para usuario con discapacidad (AAC)
 
 ---
 
 ## Épicas padre
 
-- **IN-7:** Evaluación, Diagnóstico y Dashboard
 - **IN-8:** Administración de Cuentas y Onboarding
-- **IN-12:** Motor Adaptativo y Reportes
