@@ -1,0 +1,48 @@
+<div class="aac-home">
+  <h1 class="home-greeting">{{ greeting }}</h1>
+
+  <section class="quick-actions">
+    <h2 class="section-title">Acciones rapidas</h2>
+    <div class="actions-grid">
+      <app-big-button
+        label="Mis Actividades"
+        icon="cilTask"
+        color="#2196F3"
+        (buttonClick)="goTo('/app/activities')"
+      />
+      <app-big-button
+        label="Ver Calendario"
+        icon="cilCalendar"
+        color="#FF9800"
+        (buttonClick)="goTo('/app/calendar')"
+      />
+      <app-big-button
+        label="Hablar"
+        icon="cilChatBubble"
+        color="#9C27B0"
+        (buttonClick)="goTo('/app/talk')"
+      />
+      <app-big-button
+        label="Pedir Ayuda"
+        icon="cilBell"
+        color="#F44336"
+        (buttonClick)="requestHelp()"
+      />
+    </div>
+  </section>
+
+  <section class="today-activities">
+    <h2 class="section-title">Hoy</h2>
+    <div class="cards-list">
+      <app-visual-card
+        title="Actividad de ejemplo"
+        subtitle="10:00 AM"
+        icon="cilPuzzle"
+        accentColor="#4CAF50"
+        badge="Pendiente"
+        badgeColor="#FF9800"
+        (cardClick)="goTo('/app/activities')"
+      />
+    </div>
+  </section>
+</div>
