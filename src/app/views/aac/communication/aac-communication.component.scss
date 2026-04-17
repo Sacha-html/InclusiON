@@ -1,0 +1,128 @@
+.aac-communication {
+  padding: 8px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--aac-text, #1a1a1a);
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--aac-text, #1a1a1a);
+  margin: 0 0 16px;
+}
+
+.quick-phrases {
+  margin-bottom: 32px;
+}
+
+.phrases-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.feelings {
+  margin-bottom: 24px;
+}
+
+.feelings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.feeling-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 12px;
+  background: var(--a11y-surface, white);
+  border: 3px solid var(--feeling-color);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feeling-btn {
+    transition: none;
+  }
+
+  .feeling-btn:hover {
+    transform: none;
+  }
+}
+
+.feeling-btn:hover {
+  transform: scale(1.05);
+  background: var(--feeling-color);
+
+  .feeling-label {
+    color: var(--a11y-primary-text, white);
+  }
+}
+
+.feeling-btn:focus {
+  outline: none;
+}
+
+.feeling-btn:focus-visible {
+  outline: 4px solid var(--a11y-focus-accent, #0D47A1);
+  outline-offset: 4px;
+}
+
+.feeling-emoji {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.feeling-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--a11y-text, #1a1a1a);
+}
+
+:host-context([data-profile="high-contrast"]) {
+  .page-title,
+  .section-title {
+    color: var(--a11y-text, #fff);
+  }
+
+  .feeling-btn {
+    background: var(--a11y-bg, #000);
+    .feeling-label {
+      color: var(--a11y-text, #fff);
+    }
+  }
+}
+
+:host-context([data-color-mode="dark"]) {
+  .page-title,
+  .section-title {
+    color: var(--a11y-text, #f5f5f5);
+  }
+
+  .feeling-btn {
+    background: var(--a11y-surface, #2a2a3e);
+    .feeling-label {
+      color: var(--a11y-text, #f5f5f5);
+    }
+  }
+}
+
+@media (min-width: 600px) {
+  .phrases-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .feelings-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
