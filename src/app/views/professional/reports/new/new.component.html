@@ -4,49 +4,71 @@
   </c-card-header>
   <c-card-body>
     <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
-    
+
     <form (ngSubmit)="onSubmit()">
       <c-row class="mb-4">
         <!-- Persona -->
         <c-col xs="12" md="6">
           <label class="form-label">Persona con discapacidad *</label>
-          <input
-            cFormControl
-            class="mb-2"
-            placeholder="Buscar por nombre..."
-            [(ngModel)]="personSearch"
-            name="personSearch"
-            (input)="onPersonSearch($any($event.target).value)"
-          />
-          <select
-            cFormControl
-            [(ngModel)]="form().personId"
-            name="personId"
-            required
-          >
-            <option value="">Seleccionar persona...</option>
-            @for (person of filteredPersons(); track person.id) {
-              <option [value]="person.id">
-                {{ person.firstName }} {{ person.lastName }}
-              </option>
+
+          <div class="person-combobox">
+            <!-- Input de búsqueda -->
+            <div class="person-combobox__input-wrap">
+              <input
+                cFormControl
+                class="person-combobox__input"
+                [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre...'"
+                [disabled]="isLoadingPersons()"
+                [value]="personSearch"
+                (focus)="onPersonInputFocus()"
+                (input)="onPersonSearch($any($event.target).value)"
+                autocomplete="off"
+              />
+              @if (isLoadingPersons()) {
+                <c-spinner size="sm" class="person-combobox__spinner"></c-spinner>
+              } @else if (selectedPerson()) {
+                <button
+                  type="button"
+                  class="person-combobox__clear"
+                  (click)="clearPerson()"
+                  title="Limpiar selección"
+                >✕</button>
+              }
+            </div>
+
+            <!-- Dropdown -->
+            @if (personDropdownOpen) {
+              <ul class="person-combobox__dropdown">
+                @if (filteredPersons().length === 0) {
+                  <li class="person-combobox__empty">Sin resultados</li>
+                }
+                @for (person of filteredPersons(); track person.personId) {
+                  <li
+                    class="person-combobox__option"
+                    [class.person-combobox__option--selected]="form.personId === person.personId"
+                    (mousedown)="selectPerson(person)"
+                  >
+                    {{ person.personFirstName }} {{ person.personLastName }}
+                  </li>
+                }
+              </ul>
             }
-          </select>
+          </div>
         </c-col>
 
         <!-- Tipo de Reporte -->
         <c-col xs="12" md="6">
           <label class="form-label">Tipo de Reporte *</label>
           <select
-            cFormControl
-            [(ngModel)]="form().reportTypeId"
+            cSelect
+            [(ngModel)]="form.reportTypeId"
             name="reportTypeId"
             required
           >
             <option [value]="0">Seleccionar tipo...</option>
-            <option [value]="1">Evaluación Mensual</option>
-            <option [value]="2">Informe de Progreso</option>
-            <option [value]="3">Evaluación Trimestral</option>
-            <option [value]="4">Informe Anual</option>
+            @for (type of reportTypes; track type.id) {
+              <option [value]="type.id">{{ type.name }}</option>
+            }
           </select>
         </c-col>
       </c-row>
@@ -57,7 +79,7 @@
           <label class="form-label">Título *</label>
           <input
             cFormControl
-            [(ngModel)]="form().title"
+            [(ngModel)]="form.title"
             name="title"
             placeholder="Ej: Informe de progreso - Marzo 2026"
             required
@@ -71,7 +93,7 @@
           <label class="form-label">Contenido *</label>
           <textarea
             cFormControl
-            [(ngModel)]="form().content"
+            [(ngModel)]="form.content"
             name="content"
             rows="5"
             placeholder="Describe el contenido del reporte..."
@@ -87,7 +109,7 @@
           <input
             cFormControl
             type="date"
-            [(ngModel)]="form().periodStartDate"
+            [(ngModel)]="form.periodStartDate"
             name="periodStartDate"
           />
         </c-col>
@@ -96,7 +118,7 @@
           <input
             cFormControl
             type="date"
-            [(ngModel)]="form().periodEndDate"
+            [(ngModel)]="form.periodEndDate"
             name="periodEndDate"
           />
         </c-col>
@@ -108,7 +130,7 @@
           <label class="form-label">Objetivos alcanzados</label>
           <textarea
             cFormControl
-            [(ngModel)]="form().achievedGoals"
+            [(ngModel)]="form.achievedGoals"
             name="achievedGoals"
             rows="3"
             placeholder="Describe los objetivos alcanzados durante el período..."
@@ -122,7 +144,7 @@
           <label class="form-label">Áreas a reforzar</label>
           <textarea
             cFormControl
-            [(ngModel)]="form().areasToReinforce"
+            [(ngModel)]="form.areasToReinforce"
             name="areasToReinforce"
             rows="3"
             placeholder="Describe las áreas que requieren refuerzo..."
@@ -136,7 +158,7 @@
           <label class="form-label">Recomendaciones</label>
           <textarea
             cFormControl
-            [(ngModel)]="form().futureRecommendations"
+            [(ngModel)]="form.futureRecommendations"
             name="futureRecommendations"
             rows="3"
             placeholder="Sugiere recomendaciones para el futuro..."
@@ -150,7 +172,7 @@
           <label class="form-label">Próximos objetivos</label>
           <textarea
             cFormControl
-            [(ngModel)]="form().nextObjectives"
+            [(ngModel)]="form.nextObjectives"
             name="nextObjectives"
             rows="3"
             placeholder="Describe los próximos objetivos a trabajar..."
@@ -161,7 +183,7 @@
       <!-- Botones -->
       <c-row>
         <c-col xs="12">
-          <button cButton type="submit" color="primary" [disabled]="isLoading() || !isValid()">
+          <button cButton type="submit" color="primary" [disabled]="isLoading() || !isValid">
             @if (isLoading()) {
               <c-spinner size="sm"></c-spinner>
             }
@@ -175,3 +197,27 @@
     </form>
   </c-card-body>
 </c-card>
+
+<!-- Modal post-creación: ¿enviar ahora o revisar después? -->
+<c-modal [visible]="showSubmitModal()" [backdrop]="'static'" [keyboard]="false" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Reporte guardado</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p class="mb-1">El reporte fue creado exitosamente como <strong>borrador</strong>.</p>
+    <p class="text-body-secondary mb-0">
+      ¿Deseás enviarlo al administrador para revisión ahora, o preferís revisarlo antes?
+    </p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" variant="outline" [disabled]="isSubmitting()" (click)="reviewLater()">
+      Revisar después
+    </button>
+    <button cButton color="primary" [disabled]="isSubmitting()" (click)="submitNow()">
+      @if (isSubmitting()) {
+        <c-spinner size="sm" class="me-1"></c-spinner>
+      }
+      Enviar al administrador
+    </button>
+  </c-modal-footer>
+</c-modal>

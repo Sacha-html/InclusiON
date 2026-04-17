@@ -1,5 +1,5 @@
 <c-card>
-  <c-card-header><strong>Agregar Familiar</strong></c-card-header>
+  <c-card-header><strong>Registrar Familiar</strong></c-card-header>
   <c-card-body>
     @if (serverError) {
       <div class="alert alert-danger">{{ serverError }}</div>
@@ -10,24 +10,54 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel for="personId">Persona a cargo *</label>
-          <input cFormControl placeholder="Buscar por nombre o documento (mín. 3 caracteres)..."
-                 [value]="personSearch"
-                 (input)="filterPersons($any($event.target).value)"
-                 class="mb-1" />
-          @if (filteredPersons.length > 0) {
-            <select cSelect id="personId" formControlName="personId"
-                    [valid]="submitted ? f['personId'].valid : undefined">
-              <option value="">-- Seleccionar persona --</option>
-              @for (p of filteredPersons; track p.id) {
-                <option [value]="p.id">{{ p.fullName }} — {{ p.disabilityTypeName ?? 'Sin tipo' }}</option>
+          <label cLabel>Persona a cargo *</label>
+
+          <div class="person-combobox">
+            <div class="person-combobox__input-wrap">
+              <input
+                cFormControl
+                class="person-combobox__input"
+                [class.is-invalid]="submitted && f['personId'].errors"
+                [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre o documento...'"
+                [disabled]="isLoadingPersons()"
+                [value]="personSearch"
+                (focus)="onPersonInputFocus()"
+                (input)="onPersonSearch($any($event.target).value)"
+                autocomplete="off"
+              />
+              @if (isLoadingPersons()) {
+                <c-spinner size="sm" class="person-combobox__spinner"></c-spinner>
+              } @else if (selectedPerson()) {
+                <button
+                  type="button"
+                  class="person-combobox__clear"
+                  (click)="clearPerson()"
+                  title="Limpiar selección"
+                >✕</button>
               }
-            </select>
-          } @else if (personSearch.length >= 3) {
-            <small class="text-body-secondary">No se encontraron personas.</small>
-          } @else if (personSearch.length > 0) {
-            <small class="text-body-secondary">Escribí al menos 3 caracteres para buscar.</small>
-          }
+            </div>
+
+            @if (personDropdownOpen) {
+              <ul class="person-combobox__dropdown">
+                @if (filteredPersons().length === 0) {
+                  <li class="person-combobox__empty">Sin resultados</li>
+                }
+                @for (p of filteredPersons(); track p.id) {
+                  <li
+                    class="person-combobox__option"
+                    [class.person-combobox__option--selected]="f['personId'].value === p.id"
+                    (mousedown)="selectPerson(p)"
+                  >
+                    {{ p.fullName }}
+                    @if (p.disabilityTypeName) {
+                      <span class="text-body-secondary"> — {{ p.disabilityTypeName }}</span>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
           @if (submitted && f['personId'].errors) {
             <c-form-feedback [valid]="false">
               Debe seleccionar una persona.

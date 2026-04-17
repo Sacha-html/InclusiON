@@ -1,3 +1,10 @@
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep .toast {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 :host ::ng-deep .toast {
   min-width: 300px;
 
@@ -28,7 +35,7 @@
     .toast-header {
       background-color: inherit;
       color: inherit;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
 
       .btn-close {
         filter: var(--a11y-close-btn-filter, invert(1));

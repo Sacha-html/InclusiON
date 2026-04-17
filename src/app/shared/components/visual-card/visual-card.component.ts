@@ -5,145 +5,8 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-visual-card',
   standalone: true,
   imports: [IconDirective],
-  template: `
-    <article
-      class="visual-card"
-      [class.interactive]="interactive"
-      [style.--card-accent]="accentColor"
-      [attr.role]="interactive ? 'button' : 'article'"
-      [attr.tabindex]="interactive ? 0 : null"
-      [attr.aria-label]="ariaLabel || title"
-      (click)="handleClick()"
-      (keydown.enter)="handleClick()"
-      (keydown.space)="handleClick()">
-
-      <div class="card-visual">
-        @if (image) {
-          <img [src]="image" [alt]="title" class="card-image" />
-        } @else if (icon) {
-          <div class="card-icon" [style.background-color]="accentColor">
-            <svg cIcon [name]="icon" size="xxl"></svg>
-          </div>
-        }
-      </div>
-
-      <div class="card-content">
-        <h3 class="card-title">{{ title }}</h3>
-        @if (subtitle) {
-          <p class="card-subtitle">{{ subtitle }}</p>
-        }
-      </div>
-
-      @if (badge) {
-        <span class="card-badge" [style.background-color]="badgeColor">
-          {{ badge }}
-        </span>
-      }
-    </article>
-  `,
-  styles: [`
-    .visual-card {
-      display: flex;
-      flex-direction: column;
-      padding: 24px;
-      background: var(--a11y-surface, white);
-      border: 2px solid var(--a11y-border, #E0E0E0);
-      border-radius: 24px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .visual-card.interactive {
-      cursor: pointer;
-    }
-
-    .visual-card.interactive:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
-    }
-
-    .visual-card:focus {
-      outline: 4px solid var(--a11y-focus-accent, #0D47A1);
-      outline-offset: 4px;
-    }
-
-    .card-visual {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-
-    .card-image {
-      width: 88px;
-      height: 88px;
-      object-fit: contain;
-      border-radius: 20px;
-    }
-
-    .card-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
-      color: var(--a11y-primary-text, white);
-
-      svg {
-        width: 44px;
-        height: 44px;
-      }
-    }
-
-    .card-content {
-      text-align: center;
-    }
-
-    .card-title {
-      margin: 0 0 8px;
-      font-size: 22px;
-      font-weight: 600;
-      color: var(--a11y-text, #1a1a1a);
-    }
-
-    .card-subtitle {
-      margin: 0;
-      font-size: 16px;
-      color: var(--a11y-text-muted, #666);
-    }
-
-    .card-badge {
-      align-self: center;
-      margin-top: 12px;
-      padding: 6px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--a11y-primary-text, white);
-    }
-
-    :host-context([data-profile="high-contrast"]) .visual-card {
-      border: 3px solid var(--card-accent);
-      background: var(--a11y-bg, #000);
-    }
-
-    :host-context([data-profile="high-contrast"]) .card-title,
-    :host-context([data-profile="high-contrast"]) .card-subtitle {
-      color: var(--a11y-text, #FFF);
-    }
-
-    :host-context([data-color-mode="dark"]) .visual-card {
-      background: var(--a11y-surface, #2a2a3e);
-    }
-
-    :host-context([data-color-mode="dark"]) .card-title {
-      color: var(--a11y-text, #f5f5f5);
-    }
-
-    :host-context([data-color-mode="dark"]) .card-subtitle {
-      color: var(--a11y-text-muted, #aaa);
-    }
-  `],
+  templateUrl: './visual-card.component.html',
+  styleUrl: './visual-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VisualCardComponent {
@@ -163,5 +26,10 @@ export class VisualCardComponent {
     if (this.interactive) {
       this.cardClick.emit();
     }
+  }
+
+  handleSpaceKey(event: Event): void {
+    event.preventDefault();
+    this.handleClick();
   }
 }

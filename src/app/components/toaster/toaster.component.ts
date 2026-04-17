@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { ToastModule } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { Subscription } from 'rxjs';
@@ -15,7 +15,18 @@ export class ToasterComponent implements OnInit, OnDestroy {
   private readonly toastSvc = inject(ToastService);
   private subscription: Subscription | null = null;
 
+  @ViewChild('toasterRegion') toasterRegion!: ElementRef<HTMLElement>;
+
   toasts: Toast[] = [];
+
+  // WCAG 2.1.1 — permite descartar el toast más reciente con Escape
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.toasts.length > 0) {
+      const last = this.toasts[this.toasts.length - 1];
+      this.toasts = this.toasts.filter(t => t.id !== last.id);
+    }
+  }
 
   ngOnInit(): void {
     this.subscription = this.toastSvc.toasts$.subscribe((toast) => {

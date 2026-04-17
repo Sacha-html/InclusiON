@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, HostListener, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FamilyService, PersonsService } from '@services';
@@ -6,7 +6,7 @@ import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
-  FormSelectDirective, RowComponent,
+  FormSelectDirective, RowComponent, SpinnerComponent,
 } from '@coreui/angular';
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 
@@ -15,28 +15,40 @@ import { PasswordModalComponent } from '@shared/components/password-modal/passwo
   imports: [
     ReactiveFormsModule, CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
-    FormFeedbackComponent, FormSelectDirective, ButtonDirective,
+    FormFeedbackComponent, FormSelectDirective, ButtonDirective, SpinnerComponent,
     PasswordModalComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
 })
 export class NewComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
+  private readonly fb           = inject(FormBuilder);
+  private readonly router       = inject(Router);
   private readonly familyService = inject(FamilyService);
   private readonly personsService = inject(PersonsService);
+  private readonly elRef        = inject(ElementRef);
 
   submitted = false;
   serverError = '';
   showPasswordModal = false;
   createdFamily: FamilyResponse | null = null;
 
-  persons: PersonListItemResponse[] = [];
-  filteredPersons: PersonListItemResponse[] = [];
-  personSearch = '';
+  // Combobox de persona
+  persons           = signal<PersonListItemResponse[]>([]);
+  filteredPersons   = signal<PersonListItemResponse[]>([]);
+  isLoadingPersons  = signal(true);
+  selectedPerson    = signal<PersonListItemResponse | null>(null);
+  personSearch      = '';
+  personDropdownOpen = false;
 
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.elRef.nativeElement.contains(event.target)) {
+      this.closeDropdown();
+    }
+  }
 
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -55,24 +67,54 @@ export class NewComponent implements OnInit {
   loadPersons(): void {
     this.personsService.getPersons({ page: 1, pageSize: 200, isActive: true }).subscribe({
       next: (response) => {
-        this.persons = response.data;
-        this.filteredPersons = this.persons;
+        this.persons.set(response.data);
+        this.filteredPersons.set(response.data);
+        this.isLoadingPersons.set(false);
       },
+      error: () => this.isLoadingPersons.set(false),
     });
   }
 
-  filterPersons(search: string): void {
-    this.personSearch = search;
-    this.form.patchValue({ personId: '' });
-    if (search.length < 3) {
-      this.filteredPersons = [];
+  onPersonInputFocus(): void {
+    this.personSearch = '';
+    this.filteredPersons.set(this.persons());
+    this.personDropdownOpen = true;
+  }
+
+  onPersonSearch(term: string): void {
+    this.personSearch = term;
+    this.personDropdownOpen = true;
+    if (!term.trim()) {
+      this.filteredPersons.set(this.persons());
       return;
     }
-    const term = search.toLowerCase();
-    this.filteredPersons = this.persons.filter(p =>
-      p.fullName?.toLowerCase().includes(term) ||
-      p.documentNumber?.toLowerCase().includes(term)
+    const lower = term.toLowerCase();
+    this.filteredPersons.set(
+      this.persons().filter(p =>
+        p.fullName?.toLowerCase().includes(lower) ||
+        p.documentNumber?.toLowerCase().includes(lower)
+      )
     );
+  }
+
+  selectPerson(person: PersonListItemResponse): void {
+    this.selectedPerson.set(person);
+    this.form.patchValue({ personId: person.id });
+    this.personSearch = person.fullName ?? '';
+    this.personDropdownOpen = false;
+  }
+
+  clearPerson(): void {
+    this.selectedPerson.set(null);
+    this.form.patchValue({ personId: '' });
+    this.personSearch = '';
+    this.filteredPersons.set(this.persons());
+  }
+
+  closeDropdown(): void {
+    this.personDropdownOpen = false;
+    const sel = this.selectedPerson();
+    this.personSearch = sel ? (sel.fullName ?? '') : '';
   }
 
   get f() { return this.form.controls; }
