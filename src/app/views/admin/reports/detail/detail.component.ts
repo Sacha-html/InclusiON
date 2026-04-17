@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ReportsService, ToastService } from '@services';
-import { ReportResponse } from '@models/responses/reports/report.response';
+import { ReportResponse, ReportStatus } from '@models/responses/reports/report.response';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   AlertComponent,
@@ -41,6 +41,7 @@ export class DetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
+  readonly ReportStatus = ReportStatus;
   report = signal<ReportResponse | null>(null);
   isLoading = signal(true);
 
@@ -99,11 +100,23 @@ export class DetailComponent implements OnInit {
     this.showRejectModal = false;
   }
 
-  getStatusColor(status: string): string {
-    return { Draft: 'secondary', Submitted: 'warning', Approved: 'success', Rejected: 'danger' }[status] ?? 'secondary';
+  getStatusColor(status: ReportStatus): string {
+    const map: Record<ReportStatus, string> = {
+      [ReportStatus.Draft]: 'secondary',
+      [ReportStatus.Submitted]: 'warning',
+      [ReportStatus.Approved]: 'success',
+      [ReportStatus.Rejected]: 'danger',
+    };
+    return map[status] ?? 'secondary';
   }
 
-  getStatusLabel(status: string): string {
-    return { Draft: 'Borrador', Submitted: 'Pendiente', Approved: 'Aprobado', Rejected: 'Rechazado' }[status] ?? status;
+  getStatusLabel(status: ReportStatus): string {
+    const map: Record<ReportStatus, string> = {
+      [ReportStatus.Draft]: 'Borrador',
+      [ReportStatus.Submitted]: 'Pendiente',
+      [ReportStatus.Approved]: 'Aprobado',
+      [ReportStatus.Rejected]: 'Rechazado',
+    };
+    return map[status] ?? status.toString();
   }
 }

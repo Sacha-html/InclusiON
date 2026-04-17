@@ -9,7 +9,7 @@
           <c-badge [color]="getStatusColor(report()!.status)">
             {{ getStatusLabel(report()!.status) }}
           </c-badge>
-          @if (report()!.status === 'Submitted') {
+          @if (report()!.status === ReportStatus.Submitted) {
             <button cButton color="success" size="sm" (click)="showApproveModal = true">
               <svg cIcon name="cilCheckCircle" class="me-1" size="sm" aria-hidden="true"></svg>
               Aprobar
@@ -24,13 +24,13 @@
     </c-card-header>
     <c-card-body>
 
-      @if (report()!.status === 'Rejected' && report()!.adminComment) {
+      @if (report()!.status === ReportStatus.Rejected && report()!.adminComment) {
         <c-alert color="danger" class="mb-4">
           <strong>Motivo de rechazo:</strong> {{ report()!.adminComment }}
         </c-alert>
       }
 
-      @if (report()!.status === 'Approved') {
+      @if (report()!.status === ReportStatus.Approved) {
         <c-alert color="success" class="mb-4">
           Reporte aprobado.
           @if (report()!.approvedAt) { Fecha: {{ report()!.approvedAt | date:'dd/MM/yyyy' }}. }
