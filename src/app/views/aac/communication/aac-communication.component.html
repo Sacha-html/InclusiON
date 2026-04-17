@@ -26,7 +26,7 @@
             class="feeling-btn"
             [style.--feeling-color]="feeling.color"
             (click)="speak('Me siento ' + feeling.label)"
-            [attr.aria-label]="'Me siento ' + feeling.label">
+            [attr.aria-label]="'Decir: Me siento ' + feeling.label">
             <span class="feeling-emoji" aria-hidden="true">{{ feeling.emoji }}</span>
             <span class="feeling-label">{{ feeling.label }}</span>
           </button>

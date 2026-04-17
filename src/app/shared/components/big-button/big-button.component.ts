@@ -16,11 +16,11 @@ import { IconDirective } from '@coreui/icons-angular';
       (click)="handleClick()">
       @if (icon) {
         <div class="btn-icon">
-          <svg cIcon [name]="icon" size="xxl"></svg>
+          <svg cIcon [name]="icon" size="xxl" aria-hidden="true" focusable="false"></svg>
         </div>
       }
       @if (image) {
-        <img [src]="image" [alt]="label" class="btn-image" />
+        <img [src]="image" alt="" class="btn-image" />
       }
       <span class="btn-label">{{ label }}</span>
     </button>
@@ -44,6 +44,16 @@ import { IconDirective } from '@coreui/icons-angular';
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .big-button {
+        transition: none;
+      }
+      .big-button:hover:not(:disabled),
+      .big-button:active:not(:disabled) {
+        transform: none;
+      }
+    }
+
     .big-button:hover:not(:disabled) {
       transform: scale(1.03);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
@@ -53,7 +63,7 @@ import { IconDirective } from '@coreui/icons-angular';
       transform: scale(0.98);
     }
 
-    .big-button:focus {
+    .big-button:focus-visible {
       outline: 4px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 4px;
     }

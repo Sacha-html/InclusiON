@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { ShapeType } from '../../constants/login-color-shape-set';
+
+export type ShapeType = 'circle' | 'square' | 'triangle' | 'star';
 
 /**
  * Componente para renderizar formas geometricas para login visual.
@@ -24,8 +25,8 @@ import { ShapeType } from '../../constants/login-color-shape-set';
         [attr.width]="size"
         [attr.height]="size"
         [attr.viewBox]="'0 0 ' + size + ' ' + size"
-        role="img"
-        [attr.aria-hidden]="true">
+        aria-hidden="true"
+        focusable="false">
         @switch (type) {
           @case ('circle') {
             <circle
@@ -79,12 +80,22 @@ import { ShapeType } from '../../constants/login-color-shape-set';
       min-height: 44px;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .shape-button {
+        transition: none;
+      }
+      .shape-button:hover,
+      .shape-button:active {
+        transform: none;
+      }
+    }
+
     .shape-button:hover {
       background-color: rgba(0, 0, 0, 0.05);
       transform: scale(1.05);
     }
 
-    .shape-button:focus {
+    .shape-button:focus-visible {
       outline: 3px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 2px;
     }

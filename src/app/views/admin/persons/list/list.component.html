@@ -142,6 +142,7 @@
   messageSuffix="?"
   detail="Si el nuevo método requiere contraseña, se generará una temporal. Las sesiones activas serán revocadas."
   confirmLabel="Cambiar método"
+  confirmColor="warning"
   (confirm)="onLoginMethodSubmit(); showLoginMethodConfirm = false"
   (cancel)="showLoginMethodConfirm = false; showLoginMethodModal = true">
 </app-confirm-modal>

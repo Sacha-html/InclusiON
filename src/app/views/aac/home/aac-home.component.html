@@ -1,8 +1,8 @@
-<div class="aac-home">
-  <h1 class="home-greeting">{{ greeting }}</h1>
+<div class="aac-home" role="region" aria-labelledby="aac-home-title">
+  <h1 id="aac-home-title" class="home-greeting">{{ greeting }}</h1>
 
-  <section class="quick-actions">
-    <h2 class="section-title">Acciones rapidas</h2>
+  <section class="quick-actions" aria-labelledby="actions-title">
+    <h2 id="actions-title" class="section-title">Acciones rapidas</h2>
     <div class="actions-grid">
       <app-big-button
         label="Mis Actividades"
@@ -31,8 +31,8 @@
     </div>
   </section>
 
-  <section class="today-activities">
-    <h2 class="section-title">Hoy</h2>
+  <section class="today-activities" aria-labelledby="today-title">
+    <h2 id="today-title" class="section-title">Hoy</h2>
     <div class="cards-list">
       <app-visual-card
         title="Actividad de ejemplo"

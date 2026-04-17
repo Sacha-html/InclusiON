@@ -1,5 +1,5 @@
-<div class="aac-activities">
-  <h1 class="page-title">Mis Actividades</h1>
+<div class="aac-activities" role="region" aria-labelledby="aac-activities-title">
+  <h1 id="aac-activities-title" class="page-title">Mis Actividades</h1>
 
   <div class="activities-list" role="list">
     @for (activity of activities; track activity.id) {
@@ -11,6 +11,7 @@
           [accentColor]="activity.color"
           [badge]="activity.status"
           [badgeColor]="activity.statusColor"
+          [interactive]="false"
         />
       </div>
     }

@@ -38,6 +38,11 @@ export interface ActivityTemplateTypeItem {
   supportsAudio: boolean;
 }
 
+export interface AvatarColorItem {
+  hex: string;
+  name: string;
+}
+
 export interface LoginMethodItem {
   id: number;
   code: string;

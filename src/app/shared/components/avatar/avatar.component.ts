@@ -24,7 +24,7 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
         [style.height.px]="size"
         [style.background-color]="color"
         [style.font-size.px]="fontSize">
-        {{ initial }}
+        {{ displayInitial }}
       </div>
       @if (showName && name) {
         <span class="avatar-name">{{ name }}</span>
@@ -47,12 +47,22 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
       min-height: 44px;
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .avatar-button {
+        transition: none;
+      }
+      .avatar-button:hover,
+      .avatar-button:active {
+        transform: none;
+      }
+    }
+
     .avatar-button:hover {
       background-color: rgba(0, 0, 0, 0.05);
       transform: scale(1.05);
     }
 
-    .avatar-button:focus {
+    .avatar-button:focus-visible {
       outline: 3px solid var(--a11y-focus-accent, #0D47A1);
       outline-offset: 2px;
     }

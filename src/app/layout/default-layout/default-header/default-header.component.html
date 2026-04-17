@@ -75,7 +75,7 @@
         >
           {{
             currentUser != null
-              ? currentUser.surname + ", " + currentUser.name
+              ? currentUser.displayName || currentUser.name || "-"
               : "-"
           }}
         </h6>
