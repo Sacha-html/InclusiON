@@ -103,5 +103,19 @@ namespace InclusiON.Api.Controllers
             var result = await handler.HandleAsync(new GetLoginMethodsQuery(), cancellationToken);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Obtiene los colores disponibles para avatares de usuarios.
+        /// </summary>
+        [HttpGet("avatar-colors")]
+        [ProducesResponseType(typeof(ApiResponse<List<AvatarColorResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<AvatarColorResponse>>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<List<AvatarColorResponse>>>> GetAvatarColors(
+            [FromServices] IQueryHandler<GetAvatarColorsQuery, ApiResponse<List<AvatarColorResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetAvatarColorsQuery(), cancellationToken);
+            return Ok(result);
+        }
     }
 }

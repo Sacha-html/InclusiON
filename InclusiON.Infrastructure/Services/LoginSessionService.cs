@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Constants;
 
 namespace InclusiON.Infrastructure.Services
 {
@@ -159,7 +160,7 @@ namespace InclusiON.Infrastructure.Services
 
             return ApiResponse<VisualLoginResponse>.SuccessResult(
                 BuildVisualLoginResponse(user, session, person.FirstName, person.LastName,
-                    person.AvatarColor ?? "#2196F3", "Person", roles,
+                    person.AvatarColor ?? AvatarColors.DefaultPerson, "Person", roles,
                     new AccessibilityPreferences
                     {
                         RequiresLargeFont = person.RequiresLargeFont,
@@ -200,7 +201,7 @@ namespace InclusiON.Infrastructure.Services
 
             return ApiResponse<VisualLoginResponse>.SuccessResult(
                 BuildVisualLoginResponse(user, session, family.FirstName, family.LastName,
-                    "#9C27B0", "Family", roles, accessibility: null),
+                    AvatarColors.DefaultFamily, "Family", roles, accessibility: null),
                 successMessage);
         }
 

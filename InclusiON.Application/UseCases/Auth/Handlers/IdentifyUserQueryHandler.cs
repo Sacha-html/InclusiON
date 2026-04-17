@@ -5,6 +5,7 @@ using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Constants;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
@@ -105,7 +106,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         UserId = person.UserId,
                         DisplayName = displayName,
                         Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                        AvatarColor = person.AvatarColor ?? "#2196F3",
+                        AvatarColor = person.AvatarColor ?? AvatarColors.DefaultPerson,
                         LoginMethodCode = "DEPRECATED",
                         LoginMethodName = ErrorMessages.MethodNotAvailable,
                         IsTrustedDevice = false,
@@ -125,7 +126,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     UserId = person.UserId,
                     DisplayName = displayName,
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                    AvatarColor = person.AvatarColor ?? "#2196F3",
+                    AvatarColor = person.AvatarColor ?? AvatarColors.DefaultPerson,
                     LoginMethodCode = loginMethodCode,
                     LoginMethodName = loginMethod?.Name ?? "Contraseña",
                     IsTrustedDevice = isTrusted,
@@ -163,7 +164,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     UserId = professional.UserId,
                     DisplayName = displayName,
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                    AvatarColor = "#4CAF50",
+                    AvatarColor = AvatarColors.DefaultProfessional,
                     LoginMethodCode = "STANDARD",
                     LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,
@@ -201,7 +202,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     UserId = family.UserId,
                     DisplayName = displayName,
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                    AvatarColor = "#9C27B0",
+                    AvatarColor = AvatarColors.DefaultFamily,
                     LoginMethodCode = "STANDARD",
                     LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,

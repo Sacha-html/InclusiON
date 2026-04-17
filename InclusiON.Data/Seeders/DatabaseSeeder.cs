@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Constants;
 using System.Text.Json;
 
 namespace InclusiON.Data.Seeders
@@ -176,7 +177,7 @@ namespace InclusiON.Data.Seeders
                     Password = "Maria123!",
                     Pin = "1234",
                     LoginMethodId = 2, // PIN
-                    AvatarColor = "#4CAF50",
+                    AvatarColor = AvatarColors.DefaultProfessional,
                     SupervisorUserId = (Guid?)null,
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000100")
                 },
@@ -188,7 +189,7 @@ namespace InclusiON.Data.Seeders
                     Password = "Juan123!",
                     Pin = (string?)null,
                     LoginMethodId = 1, // STANDARD (password)
-                    AvatarColor = "#2196F3", 
+                    AvatarColor = AvatarColors.DefaultPerson,
                     SupervisorUserId = (Guid?)null,
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000101")
                 },
@@ -200,7 +201,7 @@ namespace InclusiON.Data.Seeders
                     Password = (string?)null,
                     Pin = (string?)null,
                     LoginMethodId = 3, // ASSISTED (requiere supervisor)
-                    AvatarColor = "#9C27B0",
+                    AvatarColor = AvatarColors.DefaultFamily,
                     SupervisorUserId = (Guid?)Guid.Parse("00000000-0000-0000-0000-000000000020"), // Supervisor
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000102")
                 },
@@ -212,7 +213,7 @@ namespace InclusiON.Data.Seeders
                     Password = "Carlos123!",
                     Pin = "5678",
                     LoginMethodId = 2, // PIN
-                    AvatarColor = "#FF9800",
+                    AvatarColor = "#FF9800", // Naranja del catalogo AvatarColors
                     SupervisorUserId = (Guid?)null,
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000103")
                 }
