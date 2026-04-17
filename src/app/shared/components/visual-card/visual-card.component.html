@@ -1,0 +1,38 @@
+<article
+  class="visual-card"
+  [class.interactive]="interactive"
+  [style.--card-accent]="accentColor"
+  [attr.role]="interactive ? 'button' : 'article'"
+  [attr.tabindex]="interactive ? 0 : null"
+  [attr.aria-label]="ariaLabel || title"
+  (click)="handleClick()"
+  (keydown.enter)="handleClick()"
+  (keydown.space)="handleSpaceKey($event)">
+
+  <div class="card-visual">
+    @if (image) {
+      <img [src]="image" [alt]="title" class="card-image" />
+    } @else if (icon) {
+      <div class="card-icon" [style.background-color]="accentColor">
+        <svg cIcon [name]="icon" size="xxl" aria-hidden="true" focusable="false"></svg>
+      </div>
+    }
+  </div>
+
+  <div class="card-content">
+    <h3 class="card-title">{{ title }}</h3>
+    @if (subtitle) {
+      <p class="card-subtitle">{{ subtitle }}</p>
+    }
+  </div>
+
+  @if (badge) {
+    <span
+      class="card-badge"
+      [style.background-color]="badgeColor"
+      [attr.aria-label]="'Estado: ' + badge"
+      role="status">
+      <span aria-hidden="true">{{ badge }}</span>
+    </span>
+  }
+</article>
