@@ -1,6 +1,6 @@
 # InclusiON — Estado de Historias de Usuario
 
-**Última actualización:** 2026-03-23
+**Última actualización:** 2026-04-17
 
 Leyenda de estados:
 - ✅ **HECHO** — Implementado y funcionando
@@ -13,8 +13,8 @@ Leyenda de estados:
 
 | Track | Hechas | Parciales | Pendientes | Total |
 |-------|--------|-----------|------------|-------|
-| Backend | 7 | 2 | 11 | 20 |
-| Frontend | 6 | 0 | 15 | 21 |
+| Backend | 9 | 2 | 9 | 20 |
+| Frontend | 8 | 0 | 13 | 21 |
 
 ---
 
@@ -51,7 +51,7 @@ Leyenda de estados:
 
 | ID | Historia | Estado | Notas |
 |----|----------|--------|-------|
-| BE-13 | Diagnósticos Funcionales | ⏳ PENDIENTE | Entidad `Diagnosis` existe. Sin handlers |
+| BE-13 | Diagnósticos Funcionales | ✅ HECHO | `DiagnosesController` + Create/Update commands + GetAll/GetById queries + `DiagnosesRepository`. Endpoints: GET /persons/{id}/diagnoses, GET /diagnoses/{id}, POST, PUT |
 | BE-14 | Reportes de Progreso | ✅ HECHO | Flujo completo: Draft→Submitted→Approved/Rejected. Endpoints: GET, POST, PUT, PATCH submit/approve/reject, GET /family. Emails a familiar (aprobación) y profesional (rechazo). Ver [Features/reportes-flujo-aprobacion.md](./Features/reportes-flujo-aprobacion.md) |
 | BE-15 | Mensajería Interna | ⏳ PENDIENTE | Entidad `Message` existe. Sin handlers |
 | BE-16 | Búsqueda Semántica de Actividades | 🔧 PARCIAL | Entidades `ActivityEmbedding`, `ActivityResult` con migración. Library `SemanticSearch` existe. Falta: interfaces en Application, handler, endpoint. Ver [Features/integracion-semantic-search.md](./Features/integracion-semantic-search.md) |
@@ -61,7 +61,7 @@ Leyenda de estados:
 
 | ID | Historia | Estado | Notas |
 |----|----------|--------|-------|
-| BE-18 | Gestión Centralizada de Usuarios | ⏳ PENDIENTE | Endpoints admin: listado, reset password, desactivar, reactivar, actividad. Proceso 17 |
+| BE-18 | Gestión Centralizada de Usuarios | ✅ HECHO | `AdminUsersController` + handlers: listado paginado (raw SQL), reset password, deactivate, reactivate. Proceso 17 |
 | BE-19 | Onboarding de Usuarios | ⏳ PENDIENTE | Completar perfil profesional, flags onboarding, endpoint completado. Proceso 18 |
 | BE-20 | Soporte y Ayuda | ⏳ PENDIENTE | FAQ CRUD, tickets CRUD, respuestas. Proceso 19 |
 
@@ -101,8 +101,8 @@ Leyenda de estados:
 
 | ID | Historia | Depende de (BE) | Estado | Notas |
 |----|----------|-----------------|--------|-------|
-| FE-14 | Timeline de Diagnósticos y Formulario | BE-13 | ⏳ PENDIENTE | |
-| FE-15 | Creación de Reportes y Vista Familia | BE-14 | ⏳ PENDIENTE | |
+| FE-14 | Timeline de Diagnósticos y Formulario | BE-13 | ⏳ PENDIENTE | Backend listo. Falta: vistas Angular en perfil de persona (formulario + timeline). Jira IN-86 |
+| FE-15 | Creación de Reportes y Vista Familia | BE-14 | ✅ HECHO | Profesional: lista + alta con modal + submit. Admin: lista global + tab en detalle profesional. Familiar: lista + detalle en `/family/reports`. Jira IN-138 |
 | FE-16 | Mensajería Interna — Inbox y Redactar | BE-15 | ⏳ PENDIENTE | |
 | FE-17 | Panel de Configuración del Motor Adaptativo | BE-17 | ⏳ PENDIENTE | Config de rangos para el profesional |
 | FE-18 | Timeline de Ajustes Adaptativos | BE-17 | ⏳ PENDIENTE | Gráficas de evolución |
@@ -111,7 +111,7 @@ Leyenda de estados:
 
 | ID | Historia | Depende de (BE) | Estado | Notas |
 |----|----------|-----------------|--------|-------|
-| FE-19 | Panel de Gestión de Usuarios (Admin) | BE-18 | ⏳ PENDIENTE | `/admin/users` listado + detalle + acciones (reset, desactivar, reactivar) |
+| FE-19 | Panel de Gestión de Usuarios (Admin) | BE-18 | ✅ HECHO | `/admin/users` listado paginado con filtros, sort, reset password, deactivate, reactivate |
 | FE-20 | Onboarding Wizard (Profesional y Familiar) | BE-19 | ⏳ PENDIENTE | `/pro/onboarding/profile`, `/family/onboarding/welcome`, tour guiado |
 | FE-21 | Centro de Ayuda y Tickets de Soporte | BE-20 | ⏳ PENDIENTE | `/help` FAQ, `/help/tickets` mis tickets, `/admin/support/*` gestión |
 
@@ -143,6 +143,8 @@ Funcionalidades implementadas que no estaban planificadas en las historias de us
 
 | Feature | Estado | Descripción |
 |---------|--------|-------------|
+| Auto-registro Profesional (IN-149) | ✅ | Formulario público de registro, validación async de email y matrícula, creación atómica User+Professional. Ver [HU/HU-IN-149-auto-registro-profesional.md](./HU/HU-IN-149-auto-registro-profesional.md) |
+| Validación por Administrador (IN-150) | ✅ | Tab "Pendientes" en lista de profesionales, flujo Pending→Approved/Rejected, emails de notificación. Ver [HU/HU-IN-150-validacion-admin.md](./HU/HU-IN-150-validacion-admin.md) |
 | CRUD Familiares | ✅ | `FamilyController` + admin UI completa (list/new/edit/detail) |
 | CRUD Instituciones Educativas | ✅ | `InstitutionsController` + admin UI completa |
 | ABM Catálogos (6 tipos) | ✅ | `CatalogAdminController` + UI con submenú por tipo |
@@ -161,6 +163,8 @@ Funcionalidades implementadas que no estaban planificadas en las historias de us
 | Sidebar Dinámico por Rol | ✅ | Admin global ve todo, institucional ve solo su scope |
 | Edición Perfil Funcional (Pro) | ✅ | Profesional edita datos y perfil funcional de sus personas |
 | Migraciones | ✅ | AddAdminInstitution, AddPersonSkillProfile |
+| IDateTimeProvider (Argentina) | ✅ | Abstracción del reloj del sistema. `ArgentinaDateTimeProvider` (UTC-3, sin DST) inyectado en todos los handlers. Singleton. `UtcNow` para DB, `Now` / `Today` para lógica de negocio local |
+| UtcDateTimeConverter | ✅ | Converter JSON global que normaliza `DateTime Kind=Unspecified` a UTC para Npgsql. Evita errores en campos fecha enviados desde el frontend |
 
 ---
 
@@ -176,6 +180,6 @@ Funcionalidades implementadas que no estaban planificadas en las historias de us
 5. **BE-12** — Radar y Dashboard (desbloquea FE-12)
 
 ### Tercer bloque
-6. **BE-13** a **BE-15** — Diagnósticos, Reportes, Mensajería
+6. **BE-15** — Mensajería Interna (BE-13 y BE-14 ya hechos)
 7. **BE-16** — Búsqueda Semántica
 8. **BE-17** — Motor Adaptativo (depende de BE-11)

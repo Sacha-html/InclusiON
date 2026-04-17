@@ -172,15 +172,28 @@ export class ActivitiesService {
 - `DefaultLayoutComponent` — Para admin
 
 ### Vistas implementadas
-- **Login visual completo:** identify-user, role-selection, login-method-selector, pin-login, visual-standard-login, assisted-login, family-login
-- **Dashboards:** admin, profesional (stub), familia (stub)
+- **Login visual completo:** identify-user (con multi-match por homónimos), role-selection, login-method-selector, pin-login, visual-standard-login, assisted-login, family-login
+- **Admin — Personas:** list (con modal cambiar método de login), detail, edit, new
+- **Admin — Profesionales:** list (tabs activos/pendientes, validación), detail (tabs personas/instituciones/reportes), edit, new
+- **Admin — Familiares:** list, detail, edit, new
+- **Admin — Instituciones:** list, detail, edit, new
+- **Admin — Reportes:** list, detail, new
+- **Admin — Usuarios:** list paginado con acciones (reset, desactivar, reactivar)
+- **Admin — Catálogos:** submenú por tipo (6 tipos) con CRUD
+- **Admin — Roles:** listado con checkboxes de permisos por módulo
+- **Portal Profesional:** dashboard con datos reales, Mi Aula (personas asignadas), lista de reportes, invitaciones
+- **Portal Familiar:** registro por invitación (/invite/:code), lista de reportes
+- **Dashboards:** admin, profesional con datos reales
 - **AAC:** home, activities, calendar, communication (stubs)
 
 ### Shared components
-- `AvatarComponent` — Avatar con colores
+- `AvatarComponent` — Avatar con colores de catálogo
 - `BigButtonComponent` — Botón accesible grande
 - `ShapeComponent` — Formas para login visual
 - `VisualCardComponent` — Tarjeta visual para login
+- `DataTableComponent` — Tabla paginada con sort, búsqueda, acciones y botones de header
+- `ConfirmModalComponent` — Modal de confirmación reutilizable
+- `InstitutionFilterComponent` — Selector de institución para admin global/institucional
 
 ---
 
