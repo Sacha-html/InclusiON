@@ -79,8 +79,8 @@ export class UserManagementListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
-        { action: 'reset-password', label: 'Resetear contraseña', icon: 'cil-lock-unlocked', visible: (item) => item.isActive },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
+        { action: 'reset-password', label: 'Resetear', icon: 'cil-lock-unlocked', visible: (item) => item.isActive },
         { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
         { action: 'reactivate', label: 'Reactivar', icon: 'cil-check', visible: (item) => !item.isActive },
       ],
