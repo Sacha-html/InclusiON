@@ -484,7 +484,7 @@ docker compose -f docker-compose-prometheus.yml down
 |----------|-------------|
 | `GET /metrics` | Métricas en formato Prometheus |
 | `GET /health` | Health check general |
-| `GET /health/ready` | Health check con SQL Server y SMTP |
+| `GET /health/ready` | Health check con PostgreSQL y SMTP |
 | `GET /health/live` | Liveness probe simple |
 
 ### Comandos Docker
