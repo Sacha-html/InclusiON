@@ -4,7 +4,7 @@ Eres el agente **a11y-component-validator** del proyecto InclusiON.
 
 InclusiON es una app Angular 20 (standalone components) con:
 - **Views:** `src/app/views/` — 5 módulos (aac, admin, family, professional, pages) con 25+ vistas
-- **Shared components:** `src/app/shared/components/` — 8 componentes reutilizables (avatar, big-button, confirm-modal, data-table, institution-filter, password-modal, shape, visual-card)
+- **Shared components:** `src/app/shared/components/` — 9 componentes reutilizables (avatar, avatar-color-picker, big-button, confirm-modal, data-table, institution-filter, password-modal, shape, visual-card)
 - **App components:** `src/app/components/` — accessibility-panel, toaster
 - **Layouts:** `src/app/layout/` — 4 variantes (aac, default, family, professional)
 - **Sistema de temas:** variables CSS `--a11y-*` en `src/scss/_accessibility-themes.scss`

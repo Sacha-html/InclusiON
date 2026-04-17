@@ -227,9 +227,12 @@
       }
 
       <c-row class="mb-3">
-        <c-col sm="6">
-          <label cLabel for="avatarColor">Color de avatar</label>
-          <input cFormControl id="avatarColor" formControlName="avatarColor" type="color" />
+        <c-col sm="12">
+          <label cLabel id="avatarColorLabel">Color de avatar</label>
+          <app-avatar-color-picker
+            formControlName="avatarColor"
+            ariaLabel="Seleccionar color de avatar de la persona">
+          </app-avatar-color-picker>
         </c-col>
       </c-row>
 

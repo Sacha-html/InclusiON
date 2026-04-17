@@ -50,17 +50,22 @@
           <c-spinner size="sm"></c-spinner>
         </div>
       }
-      <table cTable hover striped aria-label="Tabla de datos">
+      <table cTable hover striped aria-label="Tabla de datos" [attr.aria-busy]="loading">
       <thead>
         <tr>
           @for (col of columns; track col.key) {
-            <th scope="col" [class.cursor-pointer]="col.sortable" (click)="col.sortable && onSort(col)">
-              {{ col.label }}
+            <th scope="col" [attr.aria-sort]="getAriaSort(col)">
               @if (col.sortable) {
-                <span class="sort-arrows ms-1">
-                  <svg cIcon name="cil-caret-top" [class.active]="sortField === col.key && sortDirection === 'ASC'" size="sm" class="sort-arrow-up"></svg>
-                  <svg cIcon name="cil-caret-bottom" [class.active]="sortField === col.key && sortDirection === 'DESC'" size="sm" class="sort-arrow-down"></svg>
-                </span>
+                <button type="button" class="th-sort-btn" (click)="onSort(col)"
+                        [attr.aria-label]="'Ordenar por ' + col.label">
+                  {{ col.label }}
+                  <span class="sort-arrows ms-1" aria-hidden="true">
+                    <svg cIcon name="cil-caret-top" [class.active]="sortField === col.key && sortDirection === 'ASC'" size="sm" class="sort-arrow-up"></svg>
+                    <svg cIcon name="cil-caret-bottom" [class.active]="sortField === col.key && sortDirection === 'DESC'" size="sm" class="sort-arrow-down"></svg>
+                  </span>
+                </button>
+              } @else {
+                {{ col.label }}
               }
             </th>
           }
@@ -74,7 +79,6 @@
                 @switch (col.type) {
                   @case ('badge') {
                     <c-badge [color]="getBadgeColor(item[col.key], col)"
-                          role="status"
                           [attr.aria-label]="'Estado: ' + getBadgeLabel(item[col.key], col)">
                       {{ getBadgeLabel(item[col.key], col) }}
                     </c-badge>
@@ -114,7 +118,7 @@
         }
         @if (items.length === 0) {
           <tr>
-            <td [attr.colspan]="columns.length" class="text-center text-body-secondary py-4">
+            <td [attr.colspan]="columns.length" class="text-center text-body-secondary py-4" role="status" aria-live="polite">
               Sin registros
             </td>
           </tr>
@@ -133,23 +137,25 @@
           <nav aria-label="Paginacion de tabla">
             <c-pagination align="end" class="mb-0">
               <c-page-item [disabled]="currentPage === 1">
-                <a cPageLink (click)="pageChange.emit(currentPage - 1)" aria-label="Pagina anterior">&lsaquo;</a>
+                <button type="button" cPageLink (click)="pageChange.emit(currentPage - 1)"
+                        [disabled]="currentPage === 1" aria-label="Pagina anterior">&lsaquo;</button>
               </c-page-item>
               @for (page of pages; track $index) {
                 @if (page === '...') {
                   <c-page-item [disabled]="true">
-                    <a cPageLink>…</a>
+                    <span cPageLink aria-hidden="true">…</span>
                   </c-page-item>
                 } @else {
                   <c-page-item [active]="page === currentPage">
-                    <a cPageLink (click)="pageChange.emit(+page)"
-                       [attr.aria-label]="'Ir a pagina ' + page"
-                       [attr.aria-current]="page === currentPage ? 'page' : null">{{ page }}</a>
+                    <button type="button" cPageLink (click)="pageChange.emit(+page)"
+                            [attr.aria-label]="'Ir a pagina ' + page"
+                            [attr.aria-current]="page === currentPage ? 'page' : null">{{ page }}</button>
                   </c-page-item>
                 }
               }
               <c-page-item [disabled]="currentPage === totalPages">
-                <a cPageLink (click)="pageChange.emit(currentPage + 1)" aria-label="Pagina siguiente">&rsaquo;</a>
+                <button type="button" cPageLink (click)="pageChange.emit(currentPage + 1)"
+                        [disabled]="currentPage === totalPages" aria-label="Pagina siguiente">&rsaquo;</button>
               </c-page-item>
             </c-pagination>
           </nav>

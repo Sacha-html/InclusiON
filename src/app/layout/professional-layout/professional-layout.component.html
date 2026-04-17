@@ -28,11 +28,16 @@
     />
   </ng-scrollbar>
 
-  <c-sidebar-footer cSidebarToggle="sidebar" toggle="unfoldable" class="border-top d-none d-lg-flex">
-    <button type="button" cButton color="link" class="sidebar-toggler">
-      <svg cIcon name="cilMenu" size="lg"></svg>
-    </button>
+  @if (!sidebar.narrow) {
+  <c-sidebar-footer
+    cSidebarToggle="sidebar"
+    class="border-top d-none d-lg-flex"
+    toggle="unfoldable"
+    style="cursor: pointer"
+  >
+    <button cSidebarToggler aria-label="Toggle sidebar fold"></button>
   </c-sidebar-footer>
+  }
 </c-sidebar>
 
 <div class="wrapper d-flex flex-column min-vh-100">

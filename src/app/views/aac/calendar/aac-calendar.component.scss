@@ -5,7 +5,7 @@
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: var(--aac-text, #1a1a1a);
+  color: var(--a11y-text, #1a1a1a);
   margin: 0 0 24px;
   text-align: center;
 }
@@ -15,7 +15,7 @@
   flex-direction: column;
   align-items: center;
   padding: 24px;
-  background: linear-gradient(135deg, var(--a11y-success, #4CAF50), var(--a11y-success, #2E7D32));
+  background: linear-gradient(135deg, var(--a11y-success, #4CAF50), color-mix(in srgb, var(--a11y-success, #4CAF50) 70%, black));
   border: 2px solid var(--a11y-border, #E0E0E0);
   border-radius: 24px;
   color: var(--a11y-success-text, white);
@@ -36,7 +36,7 @@
 .section-title {
   font-size: 22px;
   font-weight: 600;
-  color: var(--aac-text, #1a1a1a);
+  color: var(--a11y-text, #1a1a1a);
   margin: 0 0 16px;
 }
 

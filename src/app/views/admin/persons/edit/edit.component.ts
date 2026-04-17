@@ -1,9 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CatalogsService, PersonsService } from '@services';
-import { CatalogItem, AutonomyLevelItem, LoginMethodItem, PersonResponse, UpdatePersonRequest } from '../../../../models';
+import { CatalogsService, PersonsService, ToastService } from '@services';
+import { CatalogItem, AutonomyLevelItem, LoginMethodItem, PersonResponse, UpdateLoginMethodResponse, UpdatePersonRequest } from '../../../../models';
 import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
+import { AvatarColorPickerComponent } from '@shared/components';
+import { ChangeLoginMethodModalComponent } from './change-login-method-modal.component';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -37,6 +39,8 @@ import {
     FormCheckLabelDirective,
     FormSelectDirective,
     ButtonDirective,
+    AvatarColorPickerComponent,
+    ChangeLoginMethodModalComponent,
   ],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.scss',
@@ -47,10 +51,12 @@ export class EditComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly personsService = inject(PersonsService);
   private readonly catalogsService = inject(CatalogsService);
+  private readonly toastService = inject(ToastService);
 
   person: PersonResponse | null = null;
   submitted = false;
   serverError = '';
+  showLoginMethodModal = false;
 
   disabilityTypes: CatalogItem[] = [];
   autonomyLevels: AutonomyLevelItem[] = [];
@@ -172,6 +178,28 @@ export class EditComponent implements OnInit {
         this.serverError = err?.error?.message || 'Error al actualizar la persona';
       },
     });
+  }
+
+  openLoginMethodModal(): void {
+    this.showLoginMethodModal = true;
+  }
+
+  closeLoginMethodModal(): void {
+    this.showLoginMethodModal = false;
+  }
+
+  onLoginMethodUpdated(response: UpdateLoginMethodResponse): void {
+    if (this.person) {
+      this.person = { ...this.person, loginMethodId: response.loginMethodId, loginMethodName: response.loginMethodName };
+    }
+    if (response.temporaryPassword) {
+      this.toastService.warning(
+        'Recordá compartir la contraseña temporal con la persona. Solo se muestra una vez.',
+        'Método actualizado'
+      );
+    } else {
+      this.toastService.success(`Ahora la persona ingresa con: ${response.loginMethodName}`);
+    }
   }
 
   goBack(): void {

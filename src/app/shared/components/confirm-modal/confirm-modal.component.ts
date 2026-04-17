@@ -30,13 +30,21 @@ import { FormsModule } from '@angular/forms';
           <div class="mt-3">
             <label cLabel for="obs">{{ observationLabel }}</label>
             <textarea cFormControl id="obs" [(ngModel)]="observation" rows="3"
-                      [placeholder]="observationPlaceholder"></textarea>
+                      [placeholder]="observationPlaceholder"
+                      [attr.aria-required]="showObservation"
+                      [attr.aria-describedby]="'obs-help'"
+                      [required]="showObservation"></textarea>
+            <small id="obs-help" class="text-body-secondary">
+              La observación es obligatoria para continuar.
+            </small>
           </div>
         }
       </c-modal-body>
       <c-modal-footer>
         <button cButton color="secondary" (click)="cancel.emit()" [disabled]="loading">Cancelar</button>
-        <button cButton [color]="confirmColor" (click)="onConfirm()" [disabled]="(showObservation && !observation.trim()) || loading">
+        <button cButton [color]="confirmColor" (click)="onConfirm()"
+                [disabled]="(showObservation && !observation.trim()) || loading"
+                [attr.aria-describedby]="(showObservation && !observation.trim()) ? 'obs-help' : null">
           @if (loading) {
             <c-spinner size="sm" class="me-1"></c-spinner>
           }

@@ -1,5 +1,17 @@
 import { ApiResponse } from './base/api.response';
 
+export interface UserMatchSummary {
+  userId: string;
+  displayName: string;
+  initial: string;
+  lastNameInitial?: string;
+  avatarColor: string;
+  loginMethodCode: string;
+  loginMethodName: string;
+  requiresSupervision: boolean;
+  isTrustedDevice: boolean;
+}
+
 export interface IdentifyUserData {
   userFound: boolean;
   userId?: string;
@@ -12,6 +24,8 @@ export interface IdentifyUserData {
   requiresSupervision: boolean;
   userType?: 'Person' | 'Professional' | 'Family';
   errorMessage?: string;
+  matches?: UserMatchSummary[];
+  requiresSelection?: boolean;
 }
 
 export interface VisualLoginUserInfo {

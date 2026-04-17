@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
   selector: 'app-visual-card',
   standalone: true,
-  imports: [IconDirective],
+  imports: [IconDirective, NgTemplateOutlet],
   templateUrl: './visual-card.component.html',
   styleUrl: './visual-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,10 +27,5 @@ export class VisualCardComponent {
     if (this.interactive) {
       this.cardClick.emit();
     }
-  }
-
-  handleSpaceKey(event: Event): void {
-    event.preventDefault();
-    this.handleClick();
   }
 }
