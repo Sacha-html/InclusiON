@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Interfaces.Telemetry;
@@ -21,6 +22,7 @@ namespace InclusiON.Infrastructure.Services
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly IPersonsRepository _personsRepository;
         private readonly ITelemetryService _telemetryService;
+        private readonly IDateTimeProvider _dateTime;
         private readonly ILogger<LoginSessionService> _logger;
 
         private const int TrustedDeviceExpiryDays = 90;
@@ -35,6 +37,7 @@ namespace InclusiON.Infrastructure.Services
             IAdminInstitutionRepository adminInstitutionRepository,
             IPersonsRepository personsRepository,
             ITelemetryService telemetryService,
+            IDateTimeProvider dateTime,
             ILogger<LoginSessionService> logger)
         {
             _identityService = identityService;
@@ -46,6 +49,7 @@ namespace InclusiON.Infrastructure.Services
             _adminInstitutionRepository = adminInstitutionRepository;
             _personsRepository = personsRepository;
             _telemetryService = telemetryService;
+            _dateTime = dateTime;
             _logger = logger;
         }
 
@@ -226,8 +230,8 @@ namespace InclusiON.Infrastructure.Services
             {
                 Id = Guid.NewGuid(),
                 Token = refreshToken,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays),
+                CreatedAt = _dateTime.UtcNow,
+                ExpiresAt = _dateTime.UtcNow.AddDays(refreshTokenExpiryDays),
                 UserId = user.Id,
                 IsActive = true,
                 CreatedByIp = ipAddress,
@@ -244,7 +248,7 @@ namespace InclusiON.Infrastructure.Services
                     _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
                 }
 
-                user.LastLoginDate = DateTime.UtcNow;
+                user.LastLoginDate = _dateTime.UtcNow;
                 user.LastLoginIpAddress = ipAddress;
                 user.LastLoginUserAgent = userAgent;
                 await _identityService.UpdateUserAsync(user);
@@ -259,8 +263,8 @@ namespace InclusiON.Infrastructure.Services
                         DeviceId = deviceId,
                         DeviceName = "Dispositivo registrado",
                         Browser = _httpContextService.ParseBrowserFromUserAgent(userAgent),
-                        RegisteredAt = DateTime.UtcNow,
-                        ExpiresAt = DateTime.UtcNow.AddDays(TrustedDeviceExpiryDays),
+                        RegisteredAt = _dateTime.UtcNow,
+                        ExpiresAt = _dateTime.UtcNow.AddDays(TrustedDeviceExpiryDays),
                         IsActive = true
                     };
                     await _visualLoginRepository.RegisterTrustedDeviceAsync(device, ct);
