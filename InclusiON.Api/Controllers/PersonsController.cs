@@ -301,6 +301,22 @@ namespace InclusiON.Api.Controllers
         #region Login Method
 
         /// <summary>
+        /// Lista los candidatos a supervisor (profesionales asignados + familiares vinculados activos).
+        /// Usado en el form de cambio de metodo de login cuando se elige ASSISTED.
+        /// </summary>
+        [HttpGet("{personId:guid}/supervisor-candidates")]
+        [Authorize(Policy = "persons:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<SupervisorCandidateResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<SupervisorCandidateResponse>>>> GetSupervisorCandidates(
+            Guid personId,
+            [FromServices] IQueryHandler<GetSupervisorCandidatesQuery, ApiResponse<List<SupervisorCandidateResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetSupervisorCandidatesQuery(personId), cancellationToken);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Actualiza el metodo de login de una persona con discapacidad.
         /// Solo el propio usuario o un supervisor autorizado puede realizar esta accion.
         /// </summary>

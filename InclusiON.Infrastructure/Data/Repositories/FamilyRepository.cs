@@ -78,12 +78,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var searchLower = search.ToLower();
+                var pattern = $"%{search}%";
                 query = query.Where(f =>
-                    f.FirstName.Contains(searchLower) ||
-                    f.LastName.Contains(searchLower) ||
-                    (f.DocumentNumber != null && f.DocumentNumber.Contains(search)) ||
-                    (f.Phone != null && f.Phone.Contains(search)));
+                    EF.Functions.ILike(f.FirstName, pattern) ||
+                    EF.Functions.ILike(f.LastName, pattern) ||
+                    (f.DocumentNumber != null && EF.Functions.ILike(f.DocumentNumber, pattern)) ||
+                    (f.Phone != null && EF.Functions.ILike(f.Phone, pattern)));
             }
 
             if (isActive.HasValue)
@@ -110,12 +110,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (!string.IsNullOrWhiteSpace(linkedPersonSearch))
             {
-                var linkedSearchLower = linkedPersonSearch.ToLower();
+                var linkedPattern = $"%{linkedPersonSearch}%";
                 query = query.Where(f =>
                     f.PersonRepresentatives.Any(pr => pr.IsActive &&
-                        (pr.Person.FirstName.Contains(linkedSearchLower) ||
-                         pr.Person.LastName.Contains(linkedSearchLower) ||
-                         (pr.Person.DocumentNumber != null && pr.Person.DocumentNumber.Contains(linkedPersonSearch)))));
+                        (EF.Functions.ILike(pr.Person.FirstName, linkedPattern) ||
+                         EF.Functions.ILike(pr.Person.LastName, linkedPattern) ||
+                         (pr.Person.DocumentNumber != null && EF.Functions.ILike(pr.Person.DocumentNumber, linkedPattern)))));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<FamilyRepresentative, object>>>

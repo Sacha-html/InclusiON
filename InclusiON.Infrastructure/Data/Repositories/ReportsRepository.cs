@@ -65,12 +65,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var s = search.ToLower();
+                var pattern = $"%{search}%";
                 query = query.Where(r =>
-                    r.Title.ToLower().Contains(s) ||
-                    r.Content.ToLower().Contains(s) ||
-                    (r.AchievedGoals != null && r.AchievedGoals.ToLower().Contains(s)) ||
-                    (r.AreasToReinforce != null && r.AreasToReinforce.ToLower().Contains(s)));
+                    EF.Functions.ILike(r.Title, pattern) ||
+                    EF.Functions.ILike(r.Content, pattern) ||
+                    (r.AchievedGoals != null && EF.Functions.ILike(r.AchievedGoals, pattern)) ||
+                    (r.AreasToReinforce != null && EF.Functions.ILike(r.AreasToReinforce, pattern)));
             }
 
             if (!string.IsNullOrWhiteSpace(personId) && Guid.TryParse(personId, out var parsedPersonId))

@@ -13,6 +13,12 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<PersonWithDisability?> FindPersonByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Busca hasta <paramref name="limit"/> personas que matchean el identificador.
+        /// Usado cuando hay homónimos para que el usuario elija visualmente.
+        /// </summary>
+        Task<IReadOnlyList<PersonWithDisability>> FindPersonsByIdentifierAsync(string identifier, int limit, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Busca un profesional por identificador.
         /// </summary>
         Task<Professional?> FindProfessionalByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);

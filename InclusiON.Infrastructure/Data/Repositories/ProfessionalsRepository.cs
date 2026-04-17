@@ -103,22 +103,22 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .AsNoTracking()
                 .Where(p => p.Status != ProfessionalStatusEnum.Pending && p.Status != ProfessionalStatusEnum.Rejected);
 
-            // Filtros
+            // Filtros (ILike para búsqueda case-insensitive en PostgreSQL)
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var searchLower = search.ToLower();
+                var pattern = $"%{search}%";
                 query = query.Where(p =>
-                    p.FirstName.Contains(searchLower) ||
-                    p.LastName.Contains(searchLower) ||
-                    (p.DocumentNumber != null && p.DocumentNumber.Contains(search)) ||
-                    (p.Phone != null && p.Phone.Contains(search)) ||
-                    (p.User.Email != null && p.User.Email.Contains(searchLower)));
+                    EF.Functions.ILike(p.FirstName, pattern) ||
+                    EF.Functions.ILike(p.LastName, pattern) ||
+                    (p.DocumentNumber != null && EF.Functions.ILike(p.DocumentNumber, pattern)) ||
+                    (p.Phone != null && EF.Functions.ILike(p.Phone, pattern)) ||
+                    (p.User.Email != null && EF.Functions.ILike(p.User.Email, pattern)));
             }
 
             if (!string.IsNullOrWhiteSpace(specialty))
             {
-                var specialtyLower = specialty.ToLower();
-                query = query.Where(p => p.Specialty != null && p.Specialty.Contains(specialtyLower));
+                var specialtyPattern = $"%{specialty}%";
+                query = query.Where(p => p.Specialty != null && EF.Functions.ILike(p.Specialty, specialtyPattern));
             }
 
             if (!string.IsNullOrWhiteSpace(status))
@@ -196,12 +196,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var searchLower = search.ToLower();
+                var pattern = $"%{search}%";
                 query = query.Where(p =>
-                    p.FirstName.Contains(searchLower) ||
-                    p.LastName.Contains(searchLower) ||
-                    (p.DocumentNumber != null && p.DocumentNumber.Contains(search)) ||
-                    (p.User.Email != null && p.User.Email.Contains(searchLower)));
+                    EF.Functions.ILike(p.FirstName, pattern) ||
+                    EF.Functions.ILike(p.LastName, pattern) ||
+                    (p.DocumentNumber != null && EF.Functions.ILike(p.DocumentNumber, pattern)) ||
+                    (p.User.Email != null && EF.Functions.ILike(p.User.Email, pattern)));
             }
 
             if (institutionIds is not null && institutionIds.Count > 0)
