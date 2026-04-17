@@ -9,5 +9,6 @@ namespace InclusiON.DTOs.Responses.Family
         public string FullName { get; set; } = string.Empty;
         public string? DisabilityType { get; set; }
         public bool IsPrimary { get; set; }
+        public string? Relationship { get; set; }
     }
 }
