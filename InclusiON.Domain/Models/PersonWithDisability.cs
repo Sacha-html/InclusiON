@@ -136,16 +136,6 @@ namespace InclusiON.Domain.Models
         public string? PinCodeHash { get; set; }
 
         /// <summary>
-        /// Secuencia de emojis para login visual. Formato JSON: ["🐶","🏠","🌻","🍎"].
-        /// </summary>
-        public string? EmojiSequence { get; set; }
-
-        /// <summary>
-        /// ID de la combinacion color-forma para login visual (1-24).
-        /// </summary>
-        public int? ColorShapeId { get; set; }
-
-        /// <summary>
         /// Color del avatar del usuario en formato hexadecimal.
         /// </summary>
         public string? AvatarColor { get; set; }

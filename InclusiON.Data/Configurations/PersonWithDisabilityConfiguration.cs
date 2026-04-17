@@ -45,11 +45,6 @@ namespace InclusiON.Data.Configurations
             builder.Property(p => p.PinCodeHash)
                 .HasMaxLength(255);
 
-            builder.Property(p => p.EmojiSequence)
-                .HasMaxLength(500);
-
-            builder.Property(p => p.ColorShapeId);
-
             builder.Property(p => p.AvatarColor)
                 .HasMaxLength(20);
 
