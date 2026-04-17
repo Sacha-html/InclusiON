@@ -37,8 +37,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null, CancellationToken ct = default)
         {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+
             var query = _context.EducationalInstitutions
-                .Where(i => i.Name.ToLower() == name.ToLower());
+                .Where(i => EF.Functions.ILike(i.Name, name));
 
             if (excludeId.HasValue)
             {
