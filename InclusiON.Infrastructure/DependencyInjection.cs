@@ -13,6 +13,7 @@ using InclusiON.Infrastructure.Authorization;
 using InclusiON.Infrastructure.Data;
 using InclusiON.Infrastructure.Data.Factories;
 using InclusiON.Infrastructure.Data.Repositories;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Infrastructure.Services;
 using System.Text;
 
@@ -72,6 +73,9 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IReadOnlyRepository<LoginMethod>, ReadOnlyRepository<LoginMethod>>();
             services.AddScoped<IReadOnlyRepository<SkillArea>, ReadOnlyRepository<SkillArea>>();
             services.AddScoped<IReadOnlyRepository<ActivityTemplateType>, ReadOnlyRepository<ActivityTemplateType>>();
+
+            // Proveedor de fecha/hora (zona horaria Argentina)
+            services.AddSingleton<IDateTimeProvider, ArgentinaDateTimeProvider>();
 
             // Servicio de contexto HTTP (IP, User-Agent, Browser)
             services.AddScoped<IHttpContextService, HttpContextService>();
