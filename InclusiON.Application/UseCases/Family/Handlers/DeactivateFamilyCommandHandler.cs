@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -16,17 +16,20 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<DeactivateFamilyCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public DeactivateFamilyCommandHandler(
             IFamilyRepository repository,
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
-            ILogger<DeactivateFamilyCommandHandler> logger)
+            ILogger<DeactivateFamilyCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<FamilyResponse>> HandleAsync(DeactivateFamilyCommand command, CancellationToken cancellationToken)
@@ -44,7 +47,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             }
 
             family.IsActive = false;
-            family.UpdatedAt = DateTime.UtcNow;
+            family.UpdatedAt = _dateTime.UtcNow;
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
