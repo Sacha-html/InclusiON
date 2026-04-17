@@ -1,0 +1,23 @@
+<div class="aac-calendar">
+  <h1 class="page-title">Mi Calendario</h1>
+
+  <div class="today-banner">
+    <span class="today-label">Hoy es</span>
+    <span class="today-date">{{ todayFormatted }}</span>
+  </div>
+
+  <section class="upcoming">
+    <h2 class="section-title">Proximos eventos</h2>
+    <div class="events-list">
+      @for (event of events; track event.id) {
+        <app-visual-card
+          [title]="event.title"
+          [subtitle]="event.date"
+          [icon]="event.icon"
+          [accentColor]="event.color"
+          [interactive]="false"
+        />
+      }
+    </div>
+  </section>
+</div>
