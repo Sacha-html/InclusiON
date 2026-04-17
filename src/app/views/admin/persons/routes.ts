@@ -10,6 +10,7 @@ export const personRoutes: Routes = [
     path: 'new',
     loadComponent: () =>
       import('./new/new.component').then((m) => m.NewComponent),
+    data: { title: 'Crear Persona' },
   },
   {
     path: ':id',
