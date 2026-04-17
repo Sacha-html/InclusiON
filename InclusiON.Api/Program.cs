@@ -33,6 +33,11 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
     options.Filters.Add<InclusiON.Api.Filters.InstitutionAccessFilter>();
+})
+.AddJsonOptions(options =>
+{
+    // Normalizar DateTime entrante a UTC — Npgsql rechaza Kind=Unspecified en timestamp with time zone
+    options.JsonSerializerOptions.Converters.Add(new InclusiON.Api.Converters.UtcDateTimeConverter());
 });
 
 builder.Services.AddPersistence(builder.Configuration);
