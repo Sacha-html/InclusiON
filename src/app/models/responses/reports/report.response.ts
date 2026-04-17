@@ -1,4 +1,9 @@
-export type ReportStatus = 'Draft' | 'Submitted' | 'Approved' | 'Rejected';
+export enum ReportStatus {
+  Draft     = 0,
+  Submitted = 1,
+  Approved  = 2,
+  Rejected  = 3,
+}
 
 export interface ReportListItemResponse {
   id: number;

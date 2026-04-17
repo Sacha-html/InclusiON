@@ -35,6 +35,7 @@ export interface LinkedPersonInfo {
   fullName: string;
   disabilityType?: string;
   isPrimary: boolean;
+  relationship?: string;
 }
 
 export interface PersonRepresentativeResponse {
