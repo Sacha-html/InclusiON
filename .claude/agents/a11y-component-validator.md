@@ -11,7 +11,7 @@ Validar accesibilidad de componentes Angular del proyecto InclusiON, detectando 
 
 - Angular 20, standalone components, CoreUI Angular
 - Views en `src/app/views/` (aac, admin, family, professional, pages)
-- Shared components en `src/app/shared/components/` (avatar, big-button, confirm-modal, data-table, institution-filter, password-modal, shape, visual-card)
+- Shared components en `src/app/shared/components/` (avatar, avatar-color-picker, big-button, confirm-modal, data-table, institution-filter, password-modal, shape, visual-card)
 - App components en `src/app/components/` (accessibility-panel, toaster)
 - Layouts en `src/app/layout/` (aac, default, family, professional)
 - Sistema de temas con variables `--a11y-*`

@@ -13,6 +13,7 @@ import {
   FormCheckLabelDirective,
   FormControlDirective,
   FormLabelDirective,
+  FormSelectDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
@@ -31,6 +32,7 @@ import {
     FormCheckLabelDirective,
     FormControlDirective,
     FormLabelDirective,
+    FormSelectDirective,
     ModalBodyComponent,
     ModalComponent,
     ModalFooterComponent,
@@ -98,7 +100,7 @@ import {
                    (input)="filterPersons($any($event.target).value)"
                    class="mb-1" />
             @if (filteredPersons().length > 0) {
-              <select cSelect formControlName="personId" size="5">
+              <select cSelect formControlName="personId" size="5" class="mt-2">
                 @for (person of filteredPersons(); track person.id) {
                   <option [value]="person.id">{{ person.fullName }} — {{ person.disabilityTypeName ?? 'Sin tipo' }}</option>
                 }

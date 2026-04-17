@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CatalogsService, PersonsService } from '@services';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '../../../../models';
 import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
+import { AvatarColorPickerComponent } from '@shared/components';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -37,6 +38,7 @@ import {
     FormCheckLabelDirective,
     FormSelectDirective,
     ButtonDirective,
+    AvatarColorPickerComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
