@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Mappers;
@@ -20,19 +20,22 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreatePersonCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public CreatePersonCommandHandler(
             IPersonsRepository repository,
             IIdentityService identityService,
             IPasswordHasher passwordHasher,
             IUnitOfWork unitOfWork,
-            ILogger<CreatePersonCommandHandler> logger)
+            ILogger<CreatePersonCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
             _passwordHasher = passwordHasher;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<PersonResponse>> HandleAsync(CreatePersonCommand command, CancellationToken cancellationToken)
@@ -64,7 +67,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     Name = command.FirstName,
                     Surname = command.LastName,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
                     LockoutEnabled = true
                 };
@@ -137,10 +140,10 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             }
         }
 
-        private static string GenerateUsername(string firstName, string lastName)
+        private string GenerateUsername(string firstName, string lastName)
         {
             var baseUsername = $"{firstName.ToLower().Replace(" ", "")}.{lastName.ToLower().Replace(" ", "")}";
-            var timestamp = DateTime.UtcNow.Ticks % 10000;
+            var timestamp = _dateTime.UtcNow.Ticks % 10000;
             return $"{baseUsername}{timestamp}";
         }
 

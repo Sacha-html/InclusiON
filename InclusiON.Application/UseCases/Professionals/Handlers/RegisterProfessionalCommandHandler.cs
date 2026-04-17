@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -26,19 +26,22 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RegisterProfessionalCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public RegisterProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IIdentityService identityService,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
-            ILogger<RegisterProfessionalCommandHandler> logger)
+            ILogger<RegisterProfessionalCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
             _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(RegisterProfessionalCommand command, CancellationToken cancellationToken)
@@ -76,7 +79,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     UserName = command.Email,
                     EmailConfirmed = false,
                     IsActive = false,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = _dateTime.UtcNow
                 };
 
                 var createUserResult = await _identityService.CreateUserAsync(user, tempPassword);
@@ -105,7 +108,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     Email = command.Email,
                     Status = ProfessionalStatusEnum.Pending,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = _dateTime.UtcNow
                 };
 
                 if (command.InstitutionId.HasValue)
@@ -114,7 +117,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     {
                         ProfessionalId = professional.Id,
                         InstitutionId = command.InstitutionId.Value,
-                        AssignedAt = DateTime.UtcNow,
+                        AssignedAt = _dateTime.UtcNow,
                         IsActive = true
                     });
                 }
@@ -137,7 +140,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         {
                             { "FirstName", command.FirstName },
                             { "LastName", command.LastName },
-                            { "Year", DateTime.UtcNow.Year.ToString() }
+                            { "Year", _dateTime.UtcNow.Year.ToString() }
                         },
                         cancellationToken);
                 }

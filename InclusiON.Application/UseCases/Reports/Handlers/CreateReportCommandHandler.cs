@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -18,19 +18,22 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateReportCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public CreateReportCommandHandler(
             IReportsRepository repository,
             IPersonsRepository personsRepository,
             IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
-            ILogger<CreateReportCommandHandler> logger)
+            ILogger<CreateReportCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _personsRepository = personsRepository;
             _professionalsRepository = professionalsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -69,8 +72,8 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 NextObjectives = command.NextObjectives,
                 Status = ReportStatus.Draft,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = _dateTime.UtcNow,
+                UpdatedAt = _dateTime.UtcNow
             };
 
             var created = await _repository.CreateAsync(report, cancellationToken);

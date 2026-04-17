@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
@@ -16,17 +16,20 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<SubmitReportCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public SubmitReportCommandHandler(
             IReportsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
-            ILogger<SubmitReportCommandHandler> logger)
+            ILogger<SubmitReportCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -46,7 +49,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.InvalidOperation, "Solo se pueden enviar reportes en estado Borrador.");
 
             report.Status = ReportStatus.Submitted;
-            report.UpdatedAt = DateTime.UtcNow;
+            report.UpdatedAt = _dateTime.UtcNow;
 
             await _repository.UpdateAsync(report, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);

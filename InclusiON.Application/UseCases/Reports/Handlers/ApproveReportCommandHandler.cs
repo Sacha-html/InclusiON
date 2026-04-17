@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
@@ -17,19 +17,22 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ApproveReportCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public ApproveReportCommandHandler(
             IReportsRepository repository,
             IFamilyRepository familyRepository,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
-            ILogger<ApproveReportCommandHandler> logger)
+            ILogger<ApproveReportCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _familyRepository = familyRepository;
             _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -44,9 +47,9 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.InvalidOperation, "Solo se pueden aprobar reportes en estado Enviado.");
 
             report.Status = ReportStatus.Approved;
-            report.ApprovedAt = DateTime.UtcNow;
+            report.ApprovedAt = _dateTime.UtcNow;
             report.ApprovedBy = command.AdminUserId;
-            report.UpdatedAt = DateTime.UtcNow;
+            report.UpdatedAt = _dateTime.UtcNow;
 
             await _repository.UpdateAsync(report, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -66,7 +69,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             var personName = report.Person != null
                 ? $"{report.Person.FirstName} {report.Person.LastName}"
                 : string.Empty;
-            var year = DateTime.UtcNow.Year.ToString();
+            var year = _dateTime.UtcNow.Year.ToString();
 
             _ = Task.Run(async () =>
             {
