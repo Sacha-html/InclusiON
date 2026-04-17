@@ -92,9 +92,9 @@ export class ListComponent {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
-        { action: 'login-method', label: 'Cambiar método de login', icon: 'cil-lock-locked', visible: (item) => item.isActive },
+        { action: 'login-method', label: 'Método login', icon: 'cil-lock-locked', visible: (item) => item.isActive },
       ],
     },
     { key: 'fullName', label: 'Nombre completo' },

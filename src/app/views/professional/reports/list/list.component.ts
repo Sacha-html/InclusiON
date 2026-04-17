@@ -72,14 +72,10 @@ export class ListComponent implements OnInit {
       key: 'actions',
       label: 'Acciones',
       type: 'actions',
-      actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
-        {
-          action: 'submit',
-          label: 'Enviar al admin',
-          icon: 'cil-send',
-          visible: (item: ReportListItemResponse) => item.status === 'Draft',
-        },
+actions: [
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
+        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === ReportStatus.Draft },
+        { action: 'submit', label: 'Enviar', icon: 'cil-send', visible: (item) => item.status === ReportStatus.Draft },
       ],
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
@@ -92,16 +88,16 @@ export class ListComponent implements OnInit {
       type: 'badge',
       sortable: true,
       badgeMap: {
-        Draft:     { color: 'secondary', label: 'Borrador' },
-        Submitted: { color: 'warning',   label: 'Enviado' },
-        Approved:  { color: 'success',   label: 'Aprobado' },
-        Rejected:  { color: 'danger',    label: 'Rechazado' },
+        [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador' },
+        [ReportStatus.Submitted]: { color: 'warning',   label: 'Enviado' },
+        [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado' },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
       },
     },
   ];
 
   headerButtons = [
-    { action: 'create', label: 'Nuevo borrador', icon: 'cilPlus', routerLink: '/pro/reports/new' },
+    { action: 'create', label: 'Agregar', icon: 'cilPlus', routerLink: '/pro/reports/new' },
   ];
 
   ngOnInit(): void {
