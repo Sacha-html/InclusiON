@@ -50,7 +50,7 @@ export class ListComponent {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
         { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
       ],

@@ -87,10 +87,10 @@ export class ListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
-        { action: 'reset-password', label: 'Resetear contraseña', icon: 'cil-reload', visible: (item) => item.status === 'Approved' },
-        { action: 'history', label: 'Historial de estados', icon: 'cilHistory' },
-        { action: 'persons', label: 'Personas a cargo', icon: 'cil-people' },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
+        { action: 'reset-password', label: 'Resetear', icon: 'cil-reload', visible: (item) => item.status === 'Approved' },
+        { action: 'history', label: 'Historial', icon: 'cilHistory' },
+        { action: 'persons', label: 'Personas', icon: 'cil-people' },
         { action: 'institutions', label: 'Instituciones', icon: 'cil-book' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === 'Approved' },
         { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.status === 'Approved' },
@@ -115,7 +115,7 @@ export class ListComponent implements OnInit {
     { key: 'email', label: 'Email', sortable: true },
     { key: 'specialty', label: 'Especialidad', sortable: true },
     { key: 'licenseNumber', label: 'Matrícula', sortable: true },
-    { key: 'createdAt', label: 'Fecha Solicitud', type: 'date', sortable: true },
+    { key: 'createdAt', label: 'Fecha de solicitud', type: 'date', sortable: true },
   ];
 
   ngOnInit(): void {

@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService } from '@services';
-import { ReportListItemResponse } from '@models/responses/reports/report.response';
+import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
@@ -67,18 +67,18 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
         {
           action: 'approve',
           label: 'Aprobar',
           icon: 'cil-check-circle',
-          visible: (item: ReportListItemResponse) => item.status === 'Submitted',
+          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
         },
         {
           action: 'reject',
           label: 'Rechazar',
           icon: 'cil-x-circle',
-          visible: (item: ReportListItemResponse) => item.status === 'Submitted',
+          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
         },
       ],
     },
@@ -92,10 +92,10 @@ export class ListComponent implements OnInit {
       label: 'Estado',
       type: 'badge',
       badgeMap: {
-        Draft:     { color: 'secondary', label: 'Borrador' },
-        Submitted: { color: 'warning',   label: 'Pendiente' },
-        Approved:  { color: 'success',   label: 'Aprobado' },
-        Rejected:  { color: 'danger',    label: 'Rechazado' },
+        [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador' },
+        [ReportStatus.Submitted]: { color: 'warning',   label: 'Pendiente' },
+        [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado' },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
       },
     },
   ];
