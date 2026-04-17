@@ -13,6 +13,7 @@ import { ProfessionalBasicInfoComponent } from './components/professional-basic-
 import { ProfessionalPersonsComponent } from './components/professional-persons.component';
 import { ProfessionalInstitutionsComponent } from './components/professional-institutions.component';
 import { ProfessionalUserComponent } from './components/professional-user.component';
+import { ProfessionalReportsComponent } from './components/professional-reports.component';
 import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent } from '@coreui/angular';
 
 @Component({
@@ -31,6 +32,7 @@ import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderCo
     ProfessionalPersonsComponent,
     ProfessionalInstitutionsComponent,
     ProfessionalUserComponent,
+    ProfessionalReportsComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
@@ -41,7 +43,7 @@ export class DetailComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly toastService = inject(ToastService);
 
-  activeTab: 'datos' | 'personas' | 'instituciones' | 'usuario' = 'datos';
+  activeTab: 'datos' | 'personas' | 'instituciones' | 'usuario' | 'reportes' = 'datos';
 
   professional: ProfessionalResponse | null = null;
   showConfirmModal = false;
@@ -51,8 +53,8 @@ export class DetailComponent implements OnInit {
 
   ngOnInit(): void {
     const tab = this.route.snapshot.queryParams['tab'];
-    if (tab && ['datos', 'personas', 'instituciones', 'usuario'].includes(tab)) {
-      this.activeTab = tab as 'datos' | 'personas' | 'instituciones' | 'usuario';
+    if (tab && ['datos', 'personas', 'instituciones', 'usuario', 'reportes'].includes(tab)) {
+      this.activeTab = tab as 'datos' | 'personas' | 'instituciones' | 'usuario' | 'reportes';
     }
 
     const id = this.route.snapshot.paramMap.get('id');

@@ -11,7 +11,7 @@
           <c-badge [color]="getStatusColor(report()!.status)">
             {{ getStatusLabel(report()!.status) }}
           </c-badge>
-          @if (report()!.status === 'Draft') {
+          @if (report()!.status === ReportStatus.Draft) {
             <button cButton color="primary" size="sm" (click)="onSubmitClick()">
               <svg cIcon name="cilSend" class="me-1" size="sm" aria-hidden="true"></svg>
               Enviar al admin
@@ -23,14 +23,14 @@
     <c-card-body>
 
       <!-- Alerta si fue rechazado -->
-      @if (report()!.status === 'Rejected' && report()!.adminComment) {
+      @if (report()!.status === ReportStatus.Rejected && report()!.adminComment) {
         <c-alert color="danger" class="mb-4">
           <strong>Motivo de rechazo:</strong> {{ report()!.adminComment }}
         </c-alert>
       }
 
       <!-- Alerta si fue aprobado -->
-      @if (report()!.status === 'Approved') {
+      @if (report()!.status === ReportStatus.Approved) {
         <c-alert color="success" class="mb-4">
           Reporte aprobado por el administrador.
           @if (report()!.approvedAt) {
