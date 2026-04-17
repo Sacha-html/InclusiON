@@ -42,6 +42,9 @@ export class ListComponent {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+  sortBy = 'lastName';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
+  loading = false;
 
   showConfirmModal = false;
   itemToDeactivate: FamilyListItemResponse | null = null;
@@ -55,11 +58,11 @@ export class ListComponent {
         { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
       ],
     },
-    { key: 'fullName', label: 'Nombre' },
-    { key: 'linkedPersonNames', label: 'Familiar de' },
-    { key: 'relationship', label: 'Parentesco' },
-    { key: 'phone', label: 'Telefono' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'fullName', label: 'Nombre', sortable: true },
+    { key: 'linkedPersonNames', label: 'Familiar de', sortable: true },
+    { key: 'relationship', label: 'Parentesco', sortable: true },
+    { key: 'phone', label: 'Telefono', sortable: true },
+    { key: 'isActive', label: 'Estado', type: 'badge', sortable: true },
   ];
 
   onInstitutionFilterChange(institutionId: number | undefined): void {
@@ -70,6 +73,20 @@ export class ListComponent {
 
   onPageChange(page: number): void {
     this.currentPage = page;
+    this.loadFamily();
+  }
+
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    const sortMap: Record<string, string> = {
+      'fullName': 'lastName',
+      'linkedPersonNames': 'linkedPersonNames',
+      'relationship': 'relationship',
+      'phone': 'phoneNumber',
+      'isActive': 'isActive',
+    };
+    this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
+    this.sortDirection = event.sortDirection;
+    this.currentPage = 1;
     this.loadFamily();
   }
 
@@ -139,6 +156,7 @@ export class ListComponent {
   }
 
   loadFamily(search?: string): void {
+    this.loading = true;
     const isActive = this.statusFilter === 'true' ? true
                    : this.statusFilter === 'false' ? false
                    : undefined;
@@ -148,6 +166,8 @@ export class ListComponent {
         page: this.currentPage,
         pageSize: this.pageSize,
         search,
+        sortBy: this.sortBy,
+        sortDirection: this.sortDirection,
         institutionId: this.selectedInstitutionId,
         linkedPersonSearch: this.linkedPersonSearch || undefined,
         isActive,
@@ -159,9 +179,11 @@ export class ListComponent {
             linkedPersonNames: f.linkedPersons?.map((p: any) => p.fullName).join(', ') || '—',
           }));
           this.totalItems = response.totalRecords;
+          this.loading = false;
         },
         error: () => {
           this.toastService.error('Error al obtener familiares');
+          this.loading = false;
         },
       });
   }

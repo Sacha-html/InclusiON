@@ -64,6 +64,8 @@ export class ListComponent implements OnInit {
   errorMessage = '';
   invitationForm!: FormGroup;
   createdInvitationCode = '';
+  sortBy = 'createdAt';
+  sortDirection: 'ASC' | 'DESC' = 'DESC';
 
   readonly relationships = [
     'Madre',
@@ -95,7 +97,17 @@ export class ListComponent implements OnInit {
     this.isLoading = true;
     this.invitationsService.getAll().subscribe({
       next: (data) => {
-        this.invitations = data;
+        const sorted = [...data].sort((a, b) => {
+          let aVal: any = a[this.sortBy as keyof InvitationResponse];
+          let bVal: any = b[this.sortBy as keyof InvitationResponse];
+          if (typeof aVal === 'string') aVal = aVal?.toLowerCase() || '';
+          if (typeof bVal === 'string') bVal = bVal?.toLowerCase() || '';
+          const direction = this.sortDirection === 'ASC' ? 1 : -1;
+          if (aVal < bVal) return -1 * direction;
+          if (aVal > bVal) return 1 * direction;
+          return 0;
+        });
+        this.invitations = sorted;
         this.isLoading = false;
       },
       error: () => {
@@ -103,6 +115,16 @@ export class ListComponent implements OnInit {
         this.toastService.error('Error al cargar invitaciones');
       },
     });
+  }
+
+  onSort(column: string): void {
+    if (this.sortBy === column) {
+      this.sortDirection = this.sortDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.sortBy = column;
+      this.sortDirection = 'DESC';
+    }
+    this.loadInvitations();
   }
 
   private loadPersons(): void {

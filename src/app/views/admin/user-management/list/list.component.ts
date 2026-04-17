@@ -57,6 +57,9 @@ export class UserManagementListComponent implements OnInit {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+  sortBy = 'fullName';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
+  loading = false;
 
   ngOnInit(): void {
     this.loadUsers();
@@ -85,11 +88,11 @@ export class UserManagementListComponent implements OnInit {
         { action: 'reactivate', label: 'Reactivar', icon: 'cil-check', visible: (item) => !item.isActive },
       ],
     },
-    { key: 'fullName', label: 'Nombre' },
-    { key: 'email', label: 'Email' },
-    { key: 'role', label: 'Rol', type: 'badge' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
-    { key: 'lastLoginDate', label: 'Último acceso', type: 'date' },
+    { key: 'fullName', label: 'Nombre', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
+    { key: 'role', label: 'Rol', type: 'badge', sortable: true },
+    { key: 'isActive', label: 'Estado', type: 'badge', sortable: true },
+    { key: 'lastLoginDate', label: 'Último acceso', type: 'date', sortable: true },
   ];
 
   onRoleFilterChange(): void {
@@ -111,6 +114,20 @@ export class UserManagementListComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage = page;
+    this.loadUsers();
+  }
+
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    const sortMap: Record<string, string> = {
+      'fullName': 'fullName',
+      'email': 'email',
+      'role': 'role',
+      'isActive': 'isActive',
+      'lastLoginDate': 'lastLoginDate',
+    };
+    this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
+    this.sortDirection = event.sortDirection;
+    this.currentPage = 1;
     this.loadUsers();
   }
 
@@ -213,6 +230,7 @@ export class UserManagementListComponent implements OnInit {
   }
 
   loadUsers(): void {
+    this.loading = true;
     this.userService
       .getUsers({
         page: this.currentPage,
@@ -220,14 +238,18 @@ export class UserManagementListComponent implements OnInit {
         search: this.searchTerm || undefined,
         role: this.selectedRole || undefined,
         isActive: this.selectedStatus === '' ? undefined : this.selectedStatus === 'true',
+        sortBy: this.sortBy,
+        sortDirection: this.sortDirection,
       })
       .subscribe({
         next: (response) => {
           this.users = [...response.data];
           this.totalItems = response.totalRecords;
+          this.loading = false;
         },
         error: () => {
           this.toastService.error('Error al obtener usuarios');
+          this.loading = false;
         },
       });
   }
