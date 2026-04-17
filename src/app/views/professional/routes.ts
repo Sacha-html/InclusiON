@@ -63,7 +63,7 @@ export const professionalRoutes: Routes = [
       import('./reports/new/new.component').then(
         (m) => m.NewComponent
       ),
-    data: { title: 'Nuevo Reporte' }
+    data: { title: 'Crear Reporte' }
   },
   {
     path: 'reports/:id',
