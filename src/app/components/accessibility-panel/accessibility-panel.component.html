@@ -263,7 +263,7 @@
       @if (a11y.textToSpeechEnabled()) {
         <!-- Velocidad de lectura -->
         <div class="a11y-tts-speed">
-          <label id="tts-speed-label">Velocidad: {{ a11y.textToSpeechRate() }}x</label>
+          <label id="tts-speed-label" for="tts-speed-input">Velocidad: {{ a11y.textToSpeechRate() }}x</label>
           <div class="a11y-size-controls" role="group" aria-labelledby="tts-speed-label">
             <button
               type="button"
@@ -275,6 +275,7 @@
               <svg cIcon name="cilMinus" size="sm" aria-hidden="true"></svg>
             </button>
             <input
+              id="tts-speed-input"
               type="range"
               min="0.5"
               max="2"
@@ -282,7 +283,6 @@
               [value]="a11y.textToSpeechRate()"
               (input)="setTTSRate($event)"
               class="a11y-slider"
-              aria-label="Velocidad de lectura"
               aria-valuemin="0.5"
               aria-valuemax="2"
               [attr.aria-valuenow]="a11y.textToSpeechRate()"
@@ -340,7 +340,7 @@
     <!-- Atajos -->
     <section class="a11y-section" aria-labelledby="shortcuts-title">
       <h3 id="shortcuts-title" class="a11y-section-title">Atajos de Teclado</h3>
-      <div class="a11y-shortcuts" role="list" aria-label="Lista de atajos de teclado">
+      <div class="a11y-shortcuts" role="list">
         <div class="a11y-shortcut" role="listitem">
           <kbd aria-label="Alt más A">Alt+A</kbd>
           <span>Abrir/Cerrar Menú</span>
