@@ -283,7 +283,7 @@ Orientada al equipo de desarrollo:
 | [Features/InclusiON_HUs_BEyFE.md](./Features/InclusiON_HUs_BEyFE.md) | Leer las especificaciones técnicas de cada funcionalidad |
 | [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) | Entender cómo funciona el motor de dificultad adaptativa |
 | [Features/CIF_ACCESIBILIDAD_ANGULAR.md](./Features/CIF_ACCESIBILIDAD_ANGULAR.md) | Consultar la referencia de accesibilidad CIF/ICF |
-| [CLAUDE_BACKEND.md](./CLAUDE_BACKEND.md) | Instrucciones para trabajar en el backend (.NET 8) |
+| [CLAUDE_BACKEND.md](./CLAUDE_BACKEND.md) | Instrucciones para trabajar en el backend (.NET 10) |
 | [CLAUDE_FRONTEND.md](./CLAUDE_FRONTEND.md) | Instrucciones para trabajar en el frontend (Angular 20) |
 
 ---

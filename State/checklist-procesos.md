@@ -1,6 +1,6 @@
 # Checklist de Procesos — InclusiON
 
-**Última actualización:** 2026-04-06
+**Última actualización:** 2026-04-17
 
 ---
 
@@ -26,6 +26,8 @@
 - [x] Consulta de catálogos (6 tipos)
 - [x] Alta de items en catálogo
 - [x] Edición de items en catálogo
+- [x] Catálogo de colores de avatar
+- [x] Catálogo de métodos de login
 
 ---
 
@@ -160,7 +162,9 @@
 ### 15 — Generación de Informes
 - [x] Consulta de reportes por profesional
 - [x] Consulta de reportes por familia
-- [ ] Creación de reporte de progreso (tipo, período, contenido)
+- [x] Creación de reporte de progreso (tipo, período, contenido)
+- [x] Envío a revisión (submit por profesional)
+- [x] Aprobación/rechazo por admin con email de notificación
 - [ ] Exportación de reporte a PDF
 
 ---
@@ -199,6 +203,7 @@
 - [x] Redirección por rol al portal correspondiente
 - [x] Validación de rol en login admin/profesional (allowedRoles)
 - [x] Autofocus en todos los formularios de login
+- [x] Multi-match en identificación (lista de candidatos si hay homónimos)
 
 ### Sistema
 - [x] Paginación con ordenamiento dinámico (elipsis + conteo de registros)
@@ -217,6 +222,7 @@
 - [x] Envío de email en alta de profesional y familiar
 - [x] Selectores de persona con búsqueda (mín. 3 caracteres)
 - [x] Campo Address eliminado de profesional (entidad + migración)
+- [x] Ordenamiento por columna en tablas (sort dinámico con SortField)
 
 ---
 
@@ -256,4 +262,4 @@
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| Items checkeados | 107 | 57 |
+| Items checkeados | 114 | 56 |

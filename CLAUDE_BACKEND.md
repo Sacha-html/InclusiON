@@ -1,4 +1,4 @@
-# CLAUDE.md — Backend (.NET 8)
+# CLAUDE.md — Backend (.NET 10)
 
 Instrucciones para agentes AI y desarrolladores trabajando en `InclusiON.Server/`.
 
@@ -6,9 +6,9 @@ Instrucciones para agentes AI y desarrolladores trabajando en `InclusiON.Server/
 
 ## Proyecto y Stack
 
-- **.NET 8** con Clean Architecture
-- **EF Core** (SQL Server) para persistencia
-- **Dapper** para consultas de solo lectura optimizadas
+- **.NET 10** con Clean Architecture
+- **EF Core** (PostgreSQL / Npgsql) para persistencia
+- **IRawDbExecutor** para consultas SQL raw optimizadas (usado en AdminUsers)
 - **JWT Bearer** para autenticación
 - **CQRS** con auto-registro por reflexión
 
@@ -97,7 +97,9 @@ query.WhereCreatedBy(userId)                 // Creado por usuario
 
 ### SortField enum
 
-Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthDate`, `Email`. Default: `SortField.Id`.
+Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthDate`, `Email`, `Title`, `ReportDate`, `Specialty`, `LicenseNumber`, `Status`. Default: `SortField.Id`.
+
+**Nota PostgreSQL:** usar siempre `EF.Functions.ILike()` para búsqueda case-insensitive, nunca `EF.Functions.Like()` ni `.ToLower()`.
 
 ---
 
@@ -116,10 +118,19 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 
 | Controller | Endpoints | HU |
 |-----------|-----------|-----|
-| `AuthController` | Login, PIN login, visual login, assisted, family, refresh, register | Transversal |
-| `CatalogsController` | GET disability-types, autonomy-levels, activity-categories, skill-areas, template-types | BE-01, BE-04, BE-05 |
-| `PersonsController` | CRUD personas, login methods | Transversal |
-| `ProfessionalsController` | CRUD profesionales, deactivate | BE-02 |
+| `AuthController` | identify, login (standard/PIN/assisted/family), refresh, register, change-login-method | Transversal |
+| `CatalogsController` | GET disability-types, autonomy-levels, activity-categories, skill-areas, template-types, login-methods, avatar-colors | BE-01 |
+| `CatalogAdminController` | CRUD de 6 tipos de catálogo (admin) | Extra |
+| `PersonsController` | CRUD personas, supervisor-candidates, professional-assignments, login methods | Transversal |
+| `ProfessionalsController` | CRUD profesionales, pending, validate, reactivate, deactivate, status-history, reset-password | BE-02 |
+| `FamilyController` | CRUD representantes familiares | Extra |
+| `InstitutionsController` | CRUD instituciones educativas, asignaciones profesional-institución | BE-03 |
+| `AssignmentsController` | Asignaciones profesional-persona | BE-03 |
+| `InvitationsController` | Crear invitación, aceptar, validar código | BE-08 |
+| `ReportsController` | CRUD informes, submit, approve, reject, GET /family | BE-14 |
+| `DiagnosesController` | GET /persons/{id}/diagnoses, GET /diagnoses/{id}, POST, PUT | BE-13 |
+| `AdminUsersController` | Listado paginado, reset-password, deactivate, reactivate | BE-18 |
+| `RolesController` | Listado de roles y permisos, asignar permisos | Extra |
 | `UsersController` | GetById, GetProfile | Transversal |
 
 ---
@@ -130,19 +141,55 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 - `LoginCommandHandler`, `PinLoginCommandHandler`, `VisualStandardLoginCommandHandler`
 - `AssistedLoginCommandHandler`, `FamilyLoginCommandHandler`
 - `RefreshTokenCommandHandler`, `RegisterUserCommandHandler`
+- `UpdateLoginMethodCommandHandler`
 - `IdentifyUserQueryHandler`, `GetLoginMethodsQueryHandler`
 
 ### Catalogs
 - `GetActivityCategoriesQueryHandler`, `GetActivityTemplateTypesQueryHandler`
 - `GetAutonomyLevelsQueryHandler`, `GetDisabilityTypesQueryHandler`, `GetSkillAreasQueryHandler`
+- `GetAvatarColorsQueryHandler`, `GetLoginMethodsQueryHandler`
 
 ### Persons
-- `CreatePersonCommandHandler`, `UpdatePersonCommandHandler`, `UpdateLoginMethodCommandHandler`
+- `CreatePersonCommandHandler`, `UpdatePersonCommandHandler`
 - `GetPersonsQueryHandler`, `GetPersonByIdQueryHandler`
+- `GetPersonProfessionalsQueryHandler`, `GetSupervisorCandidatesQueryHandler`
 
 ### Professionals
-- `CreateProfessionalCommandHandler`, `UpdateProfessionalCommandHandler`, `DeactivateProfessionalCommandHandler`
+- `CreateProfessionalCommandHandler`, `UpdateProfessionalCommandHandler`
+- `DeactivateProfessionalCommandHandler`, `ReactivateProfessionalCommandHandler`
+- `ValidateProfessionalCommandHandler`, `AdminResetPasswordCommandHandler`
 - `GetProfessionalsQueryHandler`, `GetProfessionalByIdQueryHandler`
+- `GetPendingProfessionalsQueryHandler`, `GetProfessionalStatusHistoryQueryHandler`
+
+### Family
+- `CreateFamilyCommandHandler`, `UpdateFamilyCommandHandler`, `DeactivateFamilyCommandHandler`
+- `GetFamilyQueryHandler`, `GetFamilyByIdQueryHandler`
+
+### Institutions
+- `CreateInstitutionCommandHandler`, `UpdateInstitutionCommandHandler`
+- `GetInstitutionsQueryHandler`, `GetInstitutionByIdQueryHandler`
+
+### Assignments
+- `AssignProfessionalToPersonCommandHandler`, `RemoveAssignmentCommandHandler`
+- `GetAssignmentsQueryHandler`
+
+### Invitations
+- `CreateInvitationCommandHandler`, `AcceptInvitationCommandHandler`
+- `ValidateInvitationCodeQueryHandler`
+
+### Reports
+- `CreateReportCommandHandler`, `UpdateReportCommandHandler`
+- `SubmitReportCommandHandler`, `ApproveReportCommandHandler`, `RejectReportCommandHandler`
+- `GetReportsQueryHandler`, `GetReportByIdQueryHandler`, `GetFamilyReportsQueryHandler`
+
+### Diagnoses
+- `CreateDiagnosisCommandHandler`, `UpdateDiagnosisCommandHandler`
+- `GetDiagnosesQueryHandler`, `GetDiagnosisByIdQueryHandler`
+
+### AdminUsers
+- `GetAdminUsersQueryHandler`, `GetAdminUserDetailQueryHandler`
+- `AdminDeactivateUserCommandHandler`, `AdminReactivateUserCommandHandler`
+- `AdminResetPasswordCommandHandler`
 
 ### Users
 - `GetUserProfileQueryHandler`
@@ -155,19 +202,23 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 |-----------|---------------|-------------------|
 | `IPersonsRepository` | `PersonsRepository` | `PersonWithDisability` |
 | `IProfessionalsRepository` | `ProfessionalsRepository` | `Professional` |
+| `IFamilyRepository` | `FamilyRepository` | `FamilyRepresentative` |
+| `IInstitutionsRepository` | `InstitutionsRepository` | `EducationalInstitution` |
+| `IReportsRepository` | `ReportsRepository` | `Report` |
+| `IDiagnosesRepository` | `DiagnosesRepository` | `Diagnosis` |
 | `IUsersRepository` | `UsersRepository` | `User` |
 | `IRefreshTokensRepository` | `RefreshTokensRepository` | `RefreshToken` |
-| `IVisualLoginRepository` | `VisualLoginRepository` | Login visual data |
+| `IVisualLoginRepository` | `VisualLoginRepository` | Login visual, TrustedDevice, LoginMethod |
 
 ---
 
 ## Entidades del Dominio (39 entidades)
 
 ### Implementadas con handlers
-`User`, `PersonWithDisability`, `Professional`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`
+`User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`
 
 ### Con migración pero sin handlers (pendientes)
-`Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `ActivityEmbedding`, `ActivityResult`, `ActivityCategory`, `ActivityTemplateType`, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`, `Diagnosis`, `DisabilityType`, `EducationalInstitution`, `FamilyRepresentative`, `Invitation`, `Message`, `PersonRepresentative`, `PersonRoadmap`, `PersonRoadmapActivity`, `PersonRoadmapArea`, `ProfessionalInstitution`, `ProfessionalPerson`, `Report`, `ReportType`, `SkillArea`
+`Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `ActivityEmbedding`, `ActivityResult`, `ActivityCategory`, `ActivityTemplateType`, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`, `DisabilityType`, `Message`, `PersonRoadmap`, `PersonRoadmapActivity`, `PersonRoadmapArea`, `ReportType`, `SkillArea`
 
 ---
 

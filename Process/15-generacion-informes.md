@@ -25,6 +25,14 @@ El profesional genera un reporte en estado `Draft`. Puede editarlo libremente en
 - **Campos:** `reportTypeId`, `title`, `reportDate`, `content`, `achievedGoals`, `areasToReinforce`, `futureRecommendations`, `nextObjectives`
 - **Estado resultante:** `Draft`
 
+### 1b. Modal post-creación: enviar o revisar
+
+Tras guardar exitosamente el borrador, el sistema muestra un modal con dos opciones:
+- **"Enviar al administrador"** — llama a `PATCH /api/reports/{id}/submit` de inmediato y navega al listado con el reporte en estado `Submitted`
+- **"Revisar después"** — navega al listado dejando el reporte en `Draft`
+
+El modal es `backdrop=static`: el profesional debe elegir una opción (no puede cerrarlo con Escape ni click fuera).
+
 ### 2. Edición del borrador
 
 El profesional puede modificar el reporte mientras esté en `Draft`. Cualquier otro estado devuelve `400 InvalidOperation`.
@@ -182,3 +190,16 @@ flowchart TD
 | Migración | `20260414034350_AddReportApprovalWorkflow.cs` |
 | Permisos | `Application/Constants/Permissions.cs` → `Reports.*` |
 | Documentación | `Features/reportes-flujo-aprobacion.md`, `HU/HU-IN-151-flujo-aprobacion-reportes.md` |
+| Frontend — Profesional | `views/professional/reports/list/` — Listado con submit, `views/professional/reports/new/` — Alta con modal post-creación |
+| Frontend — Admin | `views/admin/reports/list/` — Lista global con aprobar/rechazar, `views/admin/professionals/detail/components/professional-reports.component.ts` — Tab Reportes en detalle profesional |
+| Frontend — Enum | `models/responses/reports/report.response.ts` → `ReportStatus` enum numérico (0-3), badgeMap con claves numéricas |
+
+---
+
+## Decisiones técnicas
+
+| Decisión | Detalle |
+|----------|---------|
+| `ReportStatus` como enum numérico | El backend serializa el enum como entero (0,1,2,3). El frontend define `enum ReportStatus { Draft=0, Submitted=1, Approved=2, Rejected=3 }` y mapea con `badgeMap` usando claves numéricas computed (`[ReportStatus.Draft]`). No se usa `JsonStringEnumConverter`. |
+| `IDateTimeProvider` | Abstracción del reloj del sistema. `ArgentinaDateTimeProvider` (UTC-3) inyectado en todos los handlers. `UtcNow` para timestamps de DB, `Now` para lógica de negocio local. |
+| Filtro de institución en reportes | `GetReportsRequest` implementa `IInstitutionFilterable`. Admin global ve todos los reportes. Admin institucional solo ve reportes de profesionales de sus instituciones. |

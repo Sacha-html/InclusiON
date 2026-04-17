@@ -47,7 +47,7 @@ Visión general de la arquitectura y decisiones técnicas del proyecto.
 └──────────────┴──────────────┴───────────────────────────┘
                            │
                     ┌──────▼──────┐
-                    │  SQL Server │
+                    │ PostgreSQL  │
                     └─────────────┘
 ```
 
@@ -70,12 +70,12 @@ Controller recibe HTTP request
 ```csharp
 public interface ICommandHandler<TCommand, TResult>
 {
-    Task<TResult> Handle(TCommand command, CancellationToken ct);
+    Task<TResult> HandleAsync(TCommand command, CancellationToken ct);
 }
 
 public interface IQueryHandler<TQuery, TResult>
 {
-    Task<TResult> Handle(TQuery query, CancellationToken ct);
+    Task<TResult> HandleAsync(TQuery query, CancellationToken ct);
 }
 ```
 
@@ -215,10 +215,12 @@ SemanticSearch → (pendiente: Application para interfaces)
 
 ## Base de Datos
 
-- **13 migraciones** aplicadas (Enero-Marzo 2026)
+- **PostgreSQL** con Npgsql + EF Core 10
+- **13+ migraciones** aplicadas (Enero-Abril 2026)
 - **39 entidades** mapeadas con Fluent API
 - **DatabaseSeeder** con datos iniciales (roles, catálogos)
 - Auto-migración en `Program.cs` al iniciar la API
+- Usar `EF.Functions.ILike()` para búsquedas case-insensitive (no `Like()`)
 
 ### Entidades principales y sus relaciones
 

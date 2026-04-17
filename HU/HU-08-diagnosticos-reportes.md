@@ -71,6 +71,8 @@ Los reportes siguen un flujo de aprobación antes de quedar visibles para la fam
 - [x] Al aprobar: email a todos los familiares activos vinculados a la persona (background)
 - [x] Al rechazar: email al profesional autor con el motivo del rechazo (background)
 - [x] Filtros por `dateFrom`, `dateTo` y `reportTypeId` en la vista del familiar
+- [x] Al crear un reporte, se muestra un modal preguntando si enviarlo al admin de inmediato o revisarlo primero (backdrop estático, el usuario debe elegir)
+- [x] El admin puede ver los reportes de un profesional y aprobar/rechazar directamente desde el tab "Reportes" en el detalle del profesional
 - [ ] Los reportes se pueden exportar a PDF
 - [ ] Los reportes nuevos se marcan con indicador "Nuevo" que desaparece al abrirlo
 
