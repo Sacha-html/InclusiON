@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
@@ -17,19 +17,22 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RejectReportCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public RejectReportCommandHandler(
             IReportsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
-            ILogger<RejectReportCommandHandler> logger)
+            ILogger<RejectReportCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -48,7 +51,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             report.Status = ReportStatus.Rejected;
             report.AdminComment = command.Comment.Trim();
-            report.UpdatedAt = DateTime.UtcNow;
+            report.UpdatedAt = _dateTime.UtcNow;
 
             await _repository.UpdateAsync(report, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -66,7 +69,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 ? $"{report.Person.FirstName} {report.Person.LastName}"
                 : string.Empty;
             var professionalId = report.ProfessionalId;
-            var year = DateTime.UtcNow.Year.ToString();
+            var year = _dateTime.UtcNow.Year.ToString();
 
             _ = Task.Run(async () =>
             {

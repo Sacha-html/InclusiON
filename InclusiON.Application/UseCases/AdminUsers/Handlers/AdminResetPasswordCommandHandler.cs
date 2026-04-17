@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -18,6 +18,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly ILogger<AdminResetPasswordCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public AdminResetPasswordCommandHandler(
             IIdentityService identityService,
@@ -25,7 +26,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             IEmailService emailService,
             IUnitOfWork unitOfWork,
             IAdminInstitutionRepository adminInstitutionRepository,
-            ILogger<AdminResetPasswordCommandHandler> logger)
+            ILogger<AdminResetPasswordCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _identityService = identityService;
             _refreshTokensRepository = refreshTokensRepository;
@@ -33,6 +35,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             _unitOfWork = unitOfWork;
             _adminInstitutionRepository = adminInstitutionRepository;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ResetPasswordResultResponse>> HandleAsync(
@@ -108,7 +111,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                         {
                             { "UserName", user.Name ?? "Usuario" },
                             { "TemporaryPassword", tempPassword },
-                            { "Year", DateTime.UtcNow.Year.ToString() }
+                            { "Year", _dateTime.UtcNow.Year.ToString() }
                         },
                         cancellationToken);
                 }

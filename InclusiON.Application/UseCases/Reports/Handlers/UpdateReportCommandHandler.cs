@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
@@ -16,17 +16,20 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateReportCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public UpdateReportCommandHandler(
             IReportsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
-            ILogger<UpdateReportCommandHandler> logger)
+            ILogger<UpdateReportCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -58,7 +61,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             report.AreasToReinforce = command.AreasToReinforce;
             report.FutureRecommendations = command.FutureRecommendations;
             report.NextObjectives = command.NextObjectives;
-            report.UpdatedAt = DateTime.UtcNow;
+            report.UpdatedAt = _dateTime.UtcNow;
 
             await _repository.UpdateAsync(report, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
