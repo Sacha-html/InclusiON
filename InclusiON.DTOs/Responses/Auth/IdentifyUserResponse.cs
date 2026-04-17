@@ -60,5 +60,17 @@ namespace InclusiON.DTOs.Responses.Auth
         /// Mensaje de error si el usuario no fue encontrado.
         /// </summary>
         public string? ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Cuando hay más de una persona que matchea el identificador, contiene la lista
+        /// de candidatos para que el usuario elija visualmente. En ese caso UserFound=true,
+        /// RequiresSelection=true y los campos individuales (UserId, DisplayName, etc.) quedan vacíos.
+        /// </summary>
+        public List<UserMatchSummary>? Matches { get; set; }
+
+        /// <summary>
+        /// True cuando el frontend debe mostrar la lista <see cref="Matches"/> en vez de navegar al método de login.
+        /// </summary>
+        public bool RequiresSelection { get; set; }
     }
 }

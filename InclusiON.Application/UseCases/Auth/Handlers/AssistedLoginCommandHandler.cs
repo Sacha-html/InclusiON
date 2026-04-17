@@ -133,21 +133,24 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
 
             var roles = await _identityService.GetRolesAsync(supervisorUser);
 
-            // Paralelizar lookups independientes de profesional y familiar
-            var professionalTask = _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
-            var familyTask = _repository.GetFamilyByUserIdAsync(supervisorUserId, cancellationToken);
-            await Task.WhenAll(professionalTask, familyTask);
-
-            var professional = professionalTask.Result;
-            if (professional != null && roles.Contains("Professional"))
+            // DbContext no es thread-safe: consultar secuencialmente y solo la tabla
+            // correspondiente al rol detectado.
+            if (roles.Contains("Professional"))
             {
-                return true;
+                var professional = await _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
+                if (professional != null)
+                {
+                    return true;
+                }
             }
 
-            var family = familyTask.Result;
-            if (family != null && roles.Contains("Family"))
+            if (roles.Contains("Family"))
             {
-                return true;
+                var family = await _repository.GetFamilyByUserIdAsync(supervisorUserId, cancellationToken);
+                if (family != null)
+                {
+                    return true;
+                }
             }
 
             return false;

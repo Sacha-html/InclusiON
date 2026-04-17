@@ -34,6 +34,18 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task UpdateAsync(PersonWithDisability person, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Obtiene los profesionales asignados a una persona que pueden supervisar el login asistido.
+        /// Filtra por asignación activa + flag CanSuperviseLogin.
+        /// </summary>
+        Task<IReadOnlyList<Professional>> GetSupervisingProfessionalsAsync(Guid personId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Obtiene los representantes familiares activos vinculados a una persona.
+        /// Incluye el FamilyRepresentative y la relación (parentesco).
+        /// </summary>
+        Task<IReadOnlyList<PersonRepresentative>> GetActiveRepresentativesAsync(Guid personId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Obtiene lista paginada de personas con filtros.
         /// </summary>
         Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
