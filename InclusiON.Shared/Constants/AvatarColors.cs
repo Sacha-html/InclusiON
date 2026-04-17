@@ -33,6 +33,29 @@ namespace InclusiON.Shared.Constants
         /// Total de colores disponibles.
         /// </summary>
         public static int TotalCount => Items.Length;
+
+        /// <summary>
+        /// Color por defecto para una persona con discapacidad (Azul).
+        /// </summary>
+        public const string DefaultPerson = "#2196F3";
+
+        /// <summary>
+        /// Color por defecto para profesionales (Verde).
+        /// </summary>
+        public const string DefaultProfessional = "#4CAF50";
+
+        /// <summary>
+        /// Color por defecto para familiares (Violeta).
+        /// </summary>
+        public const string DefaultFamily = "#9C27B0";
+
+        /// <summary>
+        /// Devuelve un color aleatorio del catalogo.
+        /// </summary>
+        public static string Random()
+        {
+            return Items[System.Random.Shared.Next(Items.Length)].Hex;
+        }
     }
 
     /// <summary>

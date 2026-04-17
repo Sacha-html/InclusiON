@@ -9,6 +9,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Constants;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
@@ -101,7 +102,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     AutonomyLevelId = command.AutonomyLevelId,
                     LoginMethodId = command.LoginMethodId,
                     SupervisorUserId = command.SupervisorUserId,
-                    AvatarColor = command.AvatarColor ?? GenerateRandomColor()
+                    AvatarColor = command.AvatarColor ?? AvatarColors.Random()
                 };
 
                 // Hash del PIN si se proporciona
@@ -147,15 +148,5 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             return $"{baseUsername}{timestamp}";
         }
 
-        private static string GenerateRandomColor()
-        {
-            var colors = new[]
-            {
-                "#2196F3", "#4CAF50", "#FF9800", "#9C27B0",
-                "#F44336", "#00BCD4", "#795548", "#607D8B"
-            };
-            var random = new Random();
-            return colors[random.Next(colors.Length)];
-        }
     }
 }
