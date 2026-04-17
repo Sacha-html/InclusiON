@@ -1685,9 +1685,6 @@ namespace InclusiON.Data.Migrations
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("ColorShapeId")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("CommunicationLevel")
                         .HasColumnType("integer");
 
@@ -1703,10 +1700,6 @@ namespace InclusiON.Data.Migrations
                     b.Property<string>("DocumentNumber")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
-
-                    b.Property<string>("EmojiSequence")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
