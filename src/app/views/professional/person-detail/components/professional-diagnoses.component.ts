@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DiagnosesService } from '@services/diagnoses.service';
@@ -67,6 +67,20 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   currentDiagnoses = signal<DiagnosisListItemResponse[]>([]);
   submitted = false;
   form: CreateDiagnosisRequest = this.emptyForm();
+
+  filterFrom = signal('');
+  filterTo   = signal('');
+
+  filteredDiagnoses = computed(() => {
+    const from = this.filterFrom();
+    const to   = this.filterTo();
+    return this.currentDiagnoses().filter(d => {
+      const date = d.diagnosisDate.substring(0, 10);
+      if (from && date < from) return false;
+      if (to   && date > to)   return false;
+      return true;
+    });
+  });
 
   ngOnInit(): void {
     this.currentDiagnoses.set(this.diagnoses);
