@@ -4,12 +4,12 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end">
     <c-col sm="3">
-      <label cLabel>Persona a cargo</label>
-      <input cFormControl type="text" [(ngModel)]="linkedPersonSearch" (ngModelChange)="onLinkedPersonSearch()" placeholder="Nombre o documento de la persona">
+      <label cLabel for="filter-linked-person">Persona a cargo</label>
+      <input cFormControl id="filter-linked-person" type="text" [(ngModel)]="linkedPersonSearch" (ngModelChange)="onLinkedPersonSearch()" placeholder="Nombre o documento de la persona">
     </c-col>
     <c-col sm="3">
-      <label cLabel>Estado</label>
-      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+      <label cLabel for="filter-status">Estado</label>
+      <select cSelect id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="true">Activos</option>
         <option value="false">Inactivos</option>
@@ -31,6 +31,7 @@
   [headerButtons]="canCreate ? [{action: 'new', label: 'Agregar'}] : []"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
+  (sortAction)="onSort($event)"
   (rowAction)="onRowAction($event)"
   (headerAction)="onHeaderAction($event)">
 </app-data-table>
