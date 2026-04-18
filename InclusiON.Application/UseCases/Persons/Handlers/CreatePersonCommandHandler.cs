@@ -19,6 +19,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IPersonsRepository _repository;
         private readonly IIdentityService _identityService;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IPinHasher _pinHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreatePersonCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
@@ -27,6 +28,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             IPersonsRepository repository,
             IIdentityService identityService,
             IPasswordHasher passwordHasher,
+            IPinHasher pinHasher,
             IUnitOfWork unitOfWork,
             ILogger<CreatePersonCommandHandler> logger,
             IDateTimeProvider dateTime)
@@ -34,6 +36,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             _repository = repository;
             _identityService = identityService;
             _passwordHasher = passwordHasher;
+            _pinHasher = pinHasher;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
@@ -98,6 +101,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     RequiresHighContrast = command.RequiresHighContrast,
                     VisualNoiseSensitivity = command.VisualNoiseSensitivity,
                     SoundSensitivity = command.SoundSensitivity,
+                    ColorBlindnessType = command.ColorBlindnessType,
                     // Configuracion de acceso
                     AutonomyLevelId = command.AutonomyLevelId,
                     LoginMethodId = command.LoginMethodId,
@@ -108,7 +112,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 // Hash del PIN si se proporciona
                 if (!string.IsNullOrWhiteSpace(command.Pin))
                 {
-                    person.PinCodeHash = _passwordHasher.HashPassword(command.Pin);
+                    person.PinCodeHash = _pinHasher.Hash(command.Pin);
                 }
 
                 // Crear usuario, asignar rol y persona en transaccion

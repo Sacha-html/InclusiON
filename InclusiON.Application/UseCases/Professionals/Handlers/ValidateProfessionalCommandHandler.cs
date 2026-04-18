@@ -135,6 +135,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                             CreatedBy = adminUserId.Value
                         };
 
+                        await _repository.AddStatusHistoryAsync(history, ct);
                         await _unitOfWork.SaveChangesAsync(ct);
                     }, cancellationToken);
 
@@ -175,6 +176,13 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 }
                 else
                 {
+                    if (string.IsNullOrWhiteSpace(command.Observation))
+                    {
+                        return ApiResponse<ProfessionalResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            "El motivo del rechazo es obligatorio");
+                    }
+
                     professional.Status = ProfessionalStatusEnum.Rejected;
                     professional.ValidatedAt = _dateTime.UtcNow;
                     professional.ValidatedByUserId = adminUserId;
@@ -197,6 +205,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     };
 
                     await _repository.UpdateAsync(professional, cancellationToken);
+                    await _repository.AddStatusHistoryAsync(history, cancellationToken);
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                     _logger.LogInformation("Profesional rechazado: {ProfessionalId}", professional.Id);

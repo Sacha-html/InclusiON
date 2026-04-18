@@ -12,6 +12,7 @@ namespace InclusiON.Application.UseCases.Persons.Queries
         SortField? SortBy,
         string SortDirection,
         List<int>? InstitutionIds = null,
-        string? RepresentativeSearch = null
+        string? RepresentativeSearch = null,
+        IReadOnlyList<Guid>? AccessiblePersonIds = null
     );
 }
