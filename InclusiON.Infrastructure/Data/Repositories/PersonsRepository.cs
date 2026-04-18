@@ -101,6 +101,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string sortDirection,
             List<int>? institutionIds = null,
             string? representativeSearch = null,
+            IReadOnlyList<Guid>? accessiblePersonIds = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.PersonsWithDisability
@@ -145,6 +146,11 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     pr.IsActive &&
                     (EF.Functions.ILike(pr.Representative.FirstName, repPattern) ||
                      EF.Functions.ILike(pr.Representative.LastName, repPattern))));
+            }
+
+            if (accessiblePersonIds is not null)
+            {
+                query = query.Where(p => accessiblePersonIds.Contains(p.Id));
             }
 
             if (institutionIds is not null && institutionIds.Count > 0)
