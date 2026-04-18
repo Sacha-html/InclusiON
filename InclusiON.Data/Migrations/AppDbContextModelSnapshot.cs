@@ -35,7 +35,8 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<string>("ActionType")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("AffectedRecordId")
                         .HasMaxLength(50)
@@ -45,12 +46,25 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<string>("Details")
                         .HasColumnType("text");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(45)
                         .HasColumnType("character varying(45)");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
@@ -63,6 +77,10 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("AccessedPersonId");
 
                     b.HasIndex("ActionType");
+
+                    b.HasIndex("CorrelationId");
+
+                    b.HasIndex("Result");
 
                     b.HasIndex("Timestamp");
 
@@ -1684,6 +1702,9 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ColorBlindnessType")
+                        .HasColumnType("text");
 
                     b.Property<int?>("CommunicationLevel")
                         .HasColumnType("integer");
