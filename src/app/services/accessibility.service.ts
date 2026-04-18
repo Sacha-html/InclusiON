@@ -325,22 +325,27 @@ export class AccessibilityService {
     requiresHighContrast?: boolean;
     visualNoiseSensitivity?: boolean;
     soundSensitivity?: boolean;
+    colorBlindnessType?: 'deuteranopia' | 'protanopia' | 'tritanopia' | null;
   }): void {
-    const hasCustomSettings = !!this.storage.getAccessibilitySettings();
-    if (hasCustomSettings) return;
-
+    // Los flags del servidor son la "base": siempre se aplican en login.
+    // Los overrides manuales del panel persisten en localStorage, pero los flags
+    // del servidor los pisan si cambiaron (ej: admin activo requiresHighContrast
+    // o la persona usa otro dispositivo).
     const overrides: Partial<AccessibilitySettings> = {};
 
-    if (prefs.requiresHighContrast) {
+    // Daltonismo tiene prioridad sobre high-contrast porque es mas especifico
+    if (prefs.colorBlindnessType) {
+      overrides.profile = prefs.colorBlindnessType;
+    } else if (prefs.requiresHighContrast) {
       overrides.profile = 'high-contrast';
+    } else {
+      overrides.profile = 'default';
     }
 
-    if (prefs.requiresLargeFont) {
-      overrides.fontSize = 'large';
-    }
+    overrides.fontSize = prefs.requiresLargeFont ? 'large' : 'medium';
+    overrides.reducedMotion = !!prefs.visualNoiseSensitivity;
 
     if (prefs.visualNoiseSensitivity) {
-      overrides.reducedMotion = true;
       overrides.readingMode = false;
     }
 
@@ -348,10 +353,11 @@ export class AccessibilityService {
       overrides.textToSpeechEnabled = false;
     }
 
-    if (Object.keys(overrides).length > 0) {
-      this.settings.update(current => ({ ...current, ...overrides }));
-      this.saveSettings();
-    }
+    // Merge: flags del servidor + lo que ya tenia el usuario en localStorage
+    // (ej: letterSpacing manual persiste, pero profile/fontSize/reducedMotion
+    // se resetean a lo que dice el servidor en cada login)
+    this.settings.update(current => ({ ...current, ...overrides }));
+    this.saveSettings();
   }
 
   /**

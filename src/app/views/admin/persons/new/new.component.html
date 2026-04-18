@@ -184,6 +184,18 @@
         </c-col>
       </c-row>
 
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="colorBlindnessType">Tipo de daltonismo</label>
+          <select cSelect id="colorBlindnessType" formControlName="colorBlindnessType">
+            <option [ngValue]="null">Ninguno</option>
+            <option value="deuteranopia">Deuteranopia (rojo-verde)</option>
+            <option value="protanopia">Protanopia (rojo-verde)</option>
+            <option value="tritanopia">Tritanopia (azul-amarillo)</option>
+          </select>
+        </c-col>
+      </c-row>
+
       <!-- Configuración de Acceso -->
       <h5 class="mt-4 mb-3">Configuración de acceso</h5>
 

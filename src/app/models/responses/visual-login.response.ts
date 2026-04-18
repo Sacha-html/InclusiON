@@ -43,6 +43,7 @@ export interface AccessibilityPreferences {
   requiresHighContrast: boolean;
   visualNoiseSensitivity: boolean;
   soundSensitivity: boolean;
+  colorBlindnessType?: 'deuteranopia' | 'protanopia' | 'tritanopia' | null;
 }
 
 export interface VisualLoginData {

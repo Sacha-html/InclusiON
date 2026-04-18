@@ -9,6 +9,44 @@
   }
 </div>
 
+<!-- Filtro por fecha -->
+@if (!loading() && currentDiagnoses().length > 0) {
+  <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+    <small class="text-body-secondary">Filtrar por fecha:</small>
+    <div class="d-flex align-items-center gap-1">
+      <label for="filterFrom" class="visually-hidden">Desde</label>
+      <input type="date" id="filterFrom" class="form-control form-control-sm"
+             style="width:160px"
+             [value]="filterFrom()"
+             (change)="filterFrom.set($any($event.target).value)"
+             [max]="filterTo() || undefined"
+             aria-label="Desde" />
+    </div>
+    <small class="text-body-secondary">—</small>
+    <div class="d-flex align-items-center gap-1">
+      <label for="filterTo" class="visually-hidden">Hasta</label>
+      <input type="date" id="filterTo" class="form-control form-control-sm"
+             style="width:160px"
+             [value]="filterTo()"
+             (change)="filterTo.set($any($event.target).value)"
+             [min]="filterFrom() || undefined"
+             aria-label="Hasta" />
+    </div>
+    @if (filterFrom() || filterTo()) {
+      <button cButton color="link" size="sm" class="p-0 text-body-secondary"
+              (click)="filterFrom.set(''); filterTo.set('')"
+              aria-label="Limpiar filtros">
+        Limpiar
+      </button>
+    }
+    @if (filteredDiagnoses().length !== currentDiagnoses().length) {
+      <small class="text-body-secondary">
+        {{ filteredDiagnoses().length }} de {{ currentDiagnoses().length }}
+      </small>
+    }
+  </div>
+}
+
 <!-- Loading -->
 @if (loading()) {
   <div class="text-center py-4">
@@ -21,10 +59,15 @@
   <p class="text-body-secondary">No hay diagnósticos registrados para esta persona.</p>
 }
 
+<!-- Sin resultados para el filtro -->
+@else if (filteredDiagnoses().length === 0) {
+  <p class="text-body-secondary">Ningún diagnóstico coincide con el rango de fechas seleccionado.</p>
+}
+
 <!-- Timeline -->
 @else {
   <div class="diagnosis-timeline">
-    @for (diag of currentDiagnoses(); track diag.id; let last = $last) {
+    @for (diag of filteredDiagnoses(); track diag.id; let last = $last) {
       <div class="timeline-item" [class.timeline-last]="last">
         <div class="timeline-marker"></div>
         <div class="timeline-content">

@@ -1,13 +1,13 @@
 <div class="d-flex justify-content-end mb-3">
   <button cButton color="primary" size="sm" (click)="openAssignPersonModal()">
-    <svg cIcon name="cil-user-follow" class="me-1"></svg>
+    <svg cIcon name="cil-user-follow" class="me-1" aria-hidden="true"></svg>
     Asignar persona
   </button>
 </div>
 
 @if (persons.length === 0) {
   <div class="text-center text-body-secondary py-4">
-    <svg cIcon name="cil-people" size="3xl" class="mb-2 d-block mx-auto opacity-50"></svg>
+    <svg cIcon name="cil-people" size="3xl" class="mb-2 d-block mx-auto opacity-50" aria-hidden="true"></svg>
     <p class="mb-0">No hay personas asignadas.</p>
   </div>
 } @else {
@@ -43,7 +43,7 @@
           <td class="text-end align-middle">
             @if (person.isActive) {
               <button cButton color="danger" size="sm" variant="ghost" (click)="openDeactivatePersonModal(person)">
-                <svg cIcon name="cil-user-unfollow" class="me-1"></svg>
+                <svg cIcon name="cil-user-unfollow" class="me-1" aria-hidden="true"></svg>
                 Desasignar
               </button>
             }
@@ -58,7 +58,7 @@
 <c-modal [visible]="showAssignPersonModal()" (visibleChange)="showAssignPersonModal.set($event)" alignment="center" size="lg">
   <c-modal-header>
     <h5 cModalTitle>
-      <svg cIcon name="cil-user-follow" class="me-2"></svg>
+      <svg cIcon name="cil-user-follow" class="me-2" aria-hidden="true"></svg>
       Asignar persona
     </h5>
   </c-modal-header>
@@ -76,7 +76,7 @@
           loadingText="Cargando..."
           appendTo="body"
           aria-labelledby="persona-label"
-          ariaRequired="true"
+          aria-required="true"
         >
           <ng-template ng-label-tmp let-item="item">
             <strong>{{ item.fullName }}</strong>
