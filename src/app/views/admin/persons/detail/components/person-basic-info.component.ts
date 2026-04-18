@@ -154,6 +154,13 @@ import {
           </c-col>
         </c-row>
 
+        <c-row class="mb-3">
+          <c-col sm="6">
+            <label cLabel for="detail-colorBlindness">Daltonismo</label>
+            <input cFormControl id="detail-colorBlindness" [value]="formatColorBlindness(person.colorBlindnessType)" readonly />
+          </c-col>
+        </c-row>
+
         <h5 class="mt-4 mb-3">Configuración de acceso</h5>
 
         <c-row class="mb-3">
@@ -225,6 +232,15 @@ export class PersonBasicInfoComponent {
 
   formatBoolean(value: boolean): string {
     return value ? 'Si' : 'No';
+  }
+
+  formatColorBlindness(type?: 'deuteranopia' | 'protanopia' | 'tritanopia' | null): string {
+    switch (type) {
+      case 'deuteranopia': return 'Deuteranopía (rojo-verde)';
+      case 'protanopia':   return 'Protanopía (rojo)';
+      case 'tritanopia':   return 'Tritanopía (azul-amarillo)';
+      default:             return 'Sin especificar';
+    }
   }
 
   goBack(): void {
