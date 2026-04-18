@@ -1,4 +1,5 @@
 export { AdminInstitutionsService } from './admin-institutions.service';
+export { SpinnerService } from './spinner.service';
 export { AdminUsersService } from './admin-users.service';
 export { UserManagementService } from './user-management.service';
 export { AuthService } from './auth.service';
