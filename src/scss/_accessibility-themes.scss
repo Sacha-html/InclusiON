@@ -1530,6 +1530,86 @@ a {
   }
 }
 
+// =========================================
+// NG-SELECT
+// =========================================
+.ng-select {
+  font-family: var(--a11y-font-family) !important;
+
+  .ng-select-container {
+    background-color: var(--a11y-bg) !important;
+    border: 2px solid var(--a11y-border) !important;
+    color: var(--a11y-text) !important;
+
+    &:hover {
+      border-color: var(--a11y-text-secondary) !important;
+    }
+
+    &.ng-select-focused {
+      border-color: var(--a11y-primary) !important;
+      box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+    }
+  }
+
+  .ng-placeholder {
+    color: var(--a11y-text-muted) !important;
+  }
+
+  .ng-value {
+    color: var(--a11y-text) !important;
+  }
+
+  .ng-value-label {
+    color: var(--a11y-text) !important;
+  }
+
+  .ng-arrow-wrapper {
+    .ng-arrow {
+      border-color: var(--a11y-text-muted) transparent transparent !important;
+    }
+  }
+
+  &.ng-select-opened {
+    .ng-arrow-wrapper .ng-arrow {
+      border-color: transparent transparent var(--a11y-text-muted) !important;
+    }
+  }
+
+  .ng-dropdown-panel {
+    background-color: var(--a11y-bg) !important;
+    border: 2px solid var(--a11y-border) !important;
+
+    .ng-option {
+      color: var(--a11y-text) !important;
+      background-color: var(--a11y-bg) !important;
+
+      &:hover,
+      &.ng-option-marked {
+        background-color: var(--a11y-bg-secondary) !important;
+      }
+
+      &.ng-option-selected {
+        background-color: var(--a11y-primary) !important;
+        color: var(--a11y-primary-text) !important;
+      }
+    }
+
+    .ng-option-group-name {
+      color: var(--a11y-text-secondary) !important;
+      font-weight: 600;
+    }
+  }
+
+  &.ng-select-disabled {
+    .ng-select-container {
+      background-color: var(--a11y-bg-secondary) !important;
+      border-color: var(--a11y-text-muted) !important;
+      color: var(--a11y-text-muted) !important;
+      opacity: 0.7;
+    }
+  }
+}
+
 .form-label {
   color: var(--a11y-text) !important;
   font-weight: 500;
