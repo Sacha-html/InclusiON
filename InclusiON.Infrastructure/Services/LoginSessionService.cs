@@ -102,7 +102,8 @@ namespace InclusiON.Infrastructure.Services
                     RequiresLargeFont = person.RequiresLargeFont,
                     RequiresHighContrast = person.RequiresHighContrast,
                     VisualNoiseSensitivity = person.VisualNoiseSensitivity,
-                    SoundSensitivity = person.SoundSensitivity
+                    SoundSensitivity = person.SoundSensitivity,
+                    ColorBlindnessType = person.ColorBlindnessType
                 };
             }
 
@@ -166,7 +167,8 @@ namespace InclusiON.Infrastructure.Services
                         RequiresLargeFont = person.RequiresLargeFont,
                         RequiresHighContrast = person.RequiresHighContrast,
                         VisualNoiseSensitivity = person.VisualNoiseSensitivity,
-                        SoundSensitivity = person.SoundSensitivity
+                        SoundSensitivity = person.SoundSensitivity,
+                        ColorBlindnessType = person.ColorBlindnessType
                     }),
                 successMessage);
         }

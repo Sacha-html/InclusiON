@@ -108,6 +108,24 @@ namespace InclusiON.Infrastructure.Services
         }
 
         /// <inheritdoc />
+        public string? GetCurrentUserRole()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user is null)
+            {
+                return null;
+            }
+
+            return user.FindFirst(ClaimTypes.Role)?.Value;
+        }
+
+        /// <inheritdoc />
+        public string? GetCorrelationId()
+        {
+            return _httpContextAccessor.HttpContext?.TraceIdentifier;
+        }
+
+        /// <inheritdoc />
         public bool IsGlobalAdmin()
         {
             var user = _httpContextAccessor.HttpContext?.User;

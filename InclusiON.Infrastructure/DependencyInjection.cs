@@ -46,6 +46,7 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<InclusiON.Application.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IPinHasher, Argon2idPinHasher>();
             services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
             services.AddScoped<TokenServices>();
 
@@ -79,6 +80,13 @@ namespace InclusiON.Infrastructure
 
             // Servicio de contexto HTTP (IP, User-Agent, Browser)
             services.AddScoped<IHttpContextService, HttpContextService>();
+
+            // Auditoria de accesos a datos sensibles (HU-IN-172)
+            services.AddScoped<IAccessAuditLogger, AccessAuditLogger>();
+
+            // Autorizacion por recurso / row-level (HU-IN-172)
+            services.AddScoped<InclusiON.Application.Authorization.IResourceAuthorizationService,
+                               Authorization.ResourceAuthorizationService>();
 
             // Servicio de sesion de login (genera tokens, revoca sesiones, actualiza metadata)
             services.AddScoped<ILoginSessionService, LoginSessionService>();
