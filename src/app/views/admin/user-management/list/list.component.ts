@@ -57,7 +57,7 @@ export class UserManagementListComponent implements OnInit {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
-  sortBy = 'fullName';
+  sortBy = 'FirstName';
   sortDirection: 'ASC' | 'DESC' = 'ASC';
   loading = false;
 
@@ -90,9 +90,9 @@ export class UserManagementListComponent implements OnInit {
     },
     { key: 'fullName', label: 'Nombre', sortable: true },
     { key: 'email', label: 'Email', sortable: true },
-    { key: 'role', label: 'Rol', type: 'badge', sortable: true },
-    { key: 'isActive', label: 'Estado', type: 'badge', sortable: true },
-    { key: 'lastLoginDate', label: 'Último acceso', type: 'date', sortable: true },
+    { key: 'role', label: 'Rol', type: 'badge' },
+    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'lastLoginDate', label: 'Último acceso', type: 'date' },
   ];
 
   onRoleFilterChange(): void {
@@ -119,11 +119,8 @@ export class UserManagementListComponent implements OnInit {
 
   onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
     const sortMap: Record<string, string> = {
-      'fullName': 'fullName',
-      'email': 'email',
-      'role': 'role',
-      'isActive': 'isActive',
-      'lastLoginDate': 'lastLoginDate',
+      'fullName': 'FirstName',
+      'email': 'Email',
     };
     this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
     this.sortDirection = event.sortDirection;
