@@ -18,41 +18,7 @@ import { FormsModule } from '@angular/forms';
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
     ButtonDirective, FormControlDirective, FormLabelDirective, FormsModule, SpinnerComponent,
   ],
-  template: `
-    <c-modal [visible]="visible" (visibleChange)="onVisibleChange($event)" alignment="center">
-      <c-modal-header><h5 cModalTitle>{{ title }}</h5></c-modal-header>
-      <c-modal-body>
-        <p>{{ messagePrefix }}<strong>{{ itemName }}</strong>{{ messageSuffix }}</p>
-        @if (detail) {
-          <p class="text-body-secondary mb-0">{{ detail }}</p>
-        }
-        @if (showObservation) {
-          <div class="mt-3">
-            <label cLabel for="obs">{{ observationLabel }}</label>
-            <textarea cFormControl id="obs" [(ngModel)]="observation" rows="3"
-                      [placeholder]="observationPlaceholder"
-                      [attr.aria-required]="showObservation"
-                      [attr.aria-describedby]="'obs-help'"
-                      [required]="showObservation"></textarea>
-            <small id="obs-help" class="text-body-secondary">
-              La observación es obligatoria para continuar.
-            </small>
-          </div>
-        }
-      </c-modal-body>
-      <c-modal-footer>
-        <button cButton color="secondary" (click)="cancel.emit()" [disabled]="loading">Cancelar</button>
-        <button cButton [color]="confirmColor" (click)="onConfirm()"
-                [disabled]="(showObservation && !observation.trim()) || loading"
-                [attr.aria-describedby]="(showObservation && !observation.trim()) ? 'obs-help' : null">
-          @if (loading) {
-            <c-spinner size="sm" class="me-1"></c-spinner>
-          }
-          {{ confirmLabel }}
-        </button>
-      </c-modal-footer>
-    </c-modal>
-  `,
+  templateUrl: './confirm-modal.component.html',
 })
 export class ConfirmModalComponent {
   @Input() visible = false;
