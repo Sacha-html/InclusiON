@@ -1,34 +1,34 @@
 # InclusiON Backend
 
-.NET 8 Web API con Entity Framework Core para el sistema de gestión inclusiva.
+.NET 10 Web API con Entity Framework Core + PostgreSQL para el sistema de gestión inclusiva.
 
 ## Estructura del Proyecto
 
 ```
 InclusiON.Server/
-├── InclusiON.Api/              # API REST + Controllers
-├── InclusiON.Application/     # Use Cases, Queries, Commands (MediatR)
-├── InclusiON.Domain/         # Entidades y modelos de dominio
-├── InclusiON.Infrastructure/  # Repositorios, servicios externos
-├── InclusiON.Data/          # DbContext, Configurations, Migrations
-├── InclusiON.DTOs/            # Data Transfer Objects
-├── InclusiON.Shared/         # Recursos compartilhados
-└── InclusiON.SemanticSearch/ # Búsqueda semántica (opcional)
+├── InclusiON.Api/                    # API REST + Controllers
+├── InclusiON.Application/            # Use Cases, Queries, Commands (CQRS custom)
+├── InclusiON.Domain/                 # Entidades y modelos de dominio
+├── InclusiON.Infrastructure/         # Repositorios, servicios externos
+├── InclusiON.Infrastructure.Telemetry/ # OpenTelemetry, métricas
+├── InclusiON.Data/                   # DbContext, Configurations, Migrations
+├── InclusiON.DTOs/                   # Data Transfer Objects
+├── InclusiON.Shared/                 # Recursos compartidos
+└── InclusiON.SemanticSearch/         # Búsqueda semántica (opcional)
 ```
 
 ## Requisitos
 
-- .NET 8 SDK
-- SQL Server (local o Docker)
-- Node.js 18+ (para crear migraciones con EF Core)
+- .NET 10 SDK
+- PostgreSQL 14+ (local o Docker)
 
 ## Configuración
 
 ### Variables de Entorno
 
 ```bash
-# Connection String
-ConnectionStrings__DefaultConnection=Server=localhost;Database=InclusiON;Trusted_Connection=True;TrustServerCertificate=True
+# Connection String (Npgsql / PostgreSQL)
+ConnectionStrings__PostgreSqlConn=Host=localhost;Port=5432;Database=inclusion_dev;Username=postgres;Password=Tu_Password_Segura123!
 
 # JWT
 Jwt__Key=your-256-bit-secret-key-here
@@ -41,7 +41,7 @@ Smtp__Port=587
 Smtp__User=
 Smtp__Password=
 
-# Azure AI (opcional)
+# Azure AI (opcional, para búsqueda semántica)
 AzureAI__Endpoint=
 AzureAI__Key=
 ```
@@ -49,8 +49,8 @@ AzureAI__Key=
 ### Base de Datos
 
 ```bash
-# Crear migración inicial
-dotnet ef migrations add InitialCreate --project InclusiON.Data --startup-project InclusiON.Api
+# Crear migración
+dotnet ef migrations add NombreMigracion --project InclusiON.Data --startup-project InclusiON.Api
 
 # Aplicar migraciones
 dotnet ef database update --project InclusiON.Data --startup-project InclusiON.Api
@@ -64,7 +64,7 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 cd InclusiON.Api
 dotnet run
 # API disponible en http://localhost:5000
-# Swagger en http://localhost:5000/swagger
+# Documentación Scalar en http://localhost:5000/scalar
 ```
 
 ### Build
@@ -90,24 +90,26 @@ dotnet test InclusiON.Application.Tests
 ### Limpieza
 
 ```bash
-# Limpiar bin/obj
 dotnet clean
-
-# Restaurar paquetes
 dotnet restore
 ```
 
 ## Patrones de Código
 
-### CQRS con MediatR
+### CQRS (IQueryHandler / ICommandHandler)
+
+El proyecto usa un patrón CQRS custom — **no usa MediatR**. Los handlers se registran automáticamente por reflexión en `AddApplicationServices()`.
 
 ```csharp
 // Query
-public record GetPersonsQuery : IRequest<ApiResponse<List<PersonResponse>>>;
+public record GetPersonsQuery(int Page, int PageSize, string? Search)
+    : PagedRequest;
 
-public class GetPersonsQueryHandler : IRequestHandler<GetPersonsQuery, ApiResponse<List<PersonResponse>>>
+public class GetPersonsQueryHandler
+    : IQueryHandler<GetPersonsQuery, ApiResponse<PagedResponse<PersonListItemResponse>>>
 {
-    public async Task<ApiResponse<List<PersonResponse>>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<PagedResponse<PersonListItemResponse>>> HandleAsync(
+        GetPersonsQuery query, CancellationToken cancellationToken)
     {
         // Implementación
     }
@@ -116,15 +118,30 @@ public class GetPersonsQueryHandler : IRequestHandler<GetPersonsQuery, ApiRespon
 
 ```csharp
 // Command
-public record CreatePersonCommand : IRequest<ApiResponse<PersonResponse>>;
+public record CreatePersonCommand(CreatePersonRequest Request)
+    : ICommand<ApiResponse<PersonResponse>>;
 
-public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, ApiResponse<PersonResponse>>
+public class CreatePersonCommandHandler
+    : ICommandHandler<CreatePersonCommand, ApiResponse<PersonResponse>>
 {
-    public async Task<ApiResponse<PersonResponse>> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
+    public async Task<ApiResponse<PersonResponse>> HandleAsync(
+        CreatePersonCommand command, CancellationToken cancellationToken)
     {
         // Implementación
     }
 }
+```
+
+### Registro de Dependencias
+
+Los handlers se registran automáticamente — no hace falta registrar manualmente:
+
+```csharp
+// Program.cs
+builder.Services.AddApplicationServices(); // registra todos los handlers por reflexión
+
+// Para repositorios, sí se registran explícitamente:
+builder.Services.AddScoped<IPersonsRepository, PersonsRepository>();
 ```
 
 ### Repositorios
@@ -132,110 +149,75 @@ public class CreatePersonCommandHandler : IRequestHandler<CreatePersonCommand, A
 ```csharp
 public interface IPersonsRepository
 {
-    Task<Person?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<IQueryable<Person>> GetAllAsync();
-    Task<Person> CreateAsync(Person entity, CancellationToken cancellationToken = default);
-    Task UpdateAsync(Person entity, CancellationToken cancellationToken = default);
-    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<PersonWithDisability?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<PersonWithDisability> CreateAsync(PersonWithDisability person, CancellationToken ct = default);
+    Task UpdateAsync(PersonWithDisability person, CancellationToken ct = default);
+    Task<PagedResponse<PersonWithDisability>> GetPagedAsync(int page, int pageSize, ...);
+    Task<bool> ExistsDocumentAsync(string documentNumber, Guid? excludePersonId = null, CancellationToken ct = default);
 }
 ```
 
-### Optimización de Queries
+### Optimización de Queries (PostgreSQL)
 
 ```csharp
-// ✅ Con AsNoTracking al final
-var persons = await _context.Persons
-    .Include(p => p.User)
-    .Include(p => p.LoginMethod)
+// ✅ ILike para búsqueda case-insensitive en PostgreSQL
+var searchPattern = $"%{query}%";
+var results = await _context.Persons
+    .Where(p => EF.Functions.ILike(p.FirstName, searchPattern) ||
+                EF.Functions.ILike(p.LastName, searchPattern))
     .AsNoTracking()
     .ToListAsync(cancellationToken);
 
-// ✅ Contains sin ToLower (SQL Server es case-insensitive por defecto)
-var searchPattern = $"%{query}%";
-var results = await _context.Persons
-    .Where(p => EF.Functions.Like(p.Name, searchPattern))
+// ✅ Subqueries como IQueryable (se ejecutan en una sola query SQL)
+var personIdsInInstitution = _context.ProfessionalInstitutions
+    .Where(pi => pi.InstitutionId == id && pi.IsActive)
+    .Select(pi => pi.ProfessionalId);
+
+var professionals = await _context.Professionals
+    .Where(p => personIdsInInstitution.Contains(p.Id))
     .ToListAsync(cancellationToken);
-
-// ✅ Subqueries como IQueryable (ejecutar al final)
-var activeProfessionalIds = _context.Professionals
-    .Where(p => p.IsActive)
-    .Select(p => p.UserId);
-
-var persons = await _context.Persons
-    .Where(p => activeProfessionalIds.Contains(p.UserId))
-    .ToListAsync(cancellationToken);
-```
-
-### Inyección de Dependencias
-
-```csharp
-// Registrar repositorio
-builder.Services.AddScoped<IPersonsRepository, PersonsRepository>();
-
-// Registrar servicio
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-// Registrar handler
-builder.Services.AddTransient<IRequestHandler<GetPersonsQuery, ApiResponse<List<PersonResponse>>>, GetPersonsQueryHandler>();
 ```
 
 ## Seguridad
 
 ### Permisos
 
-Los permisos se gestionan en `Application.Constants.Permissions.cs`:
+Los permisos se gestionan en `InclusiON.Application/Constants/Permissions.cs`:
 
 ```csharp
 public static class Permissions
 {
     public static class Persons
     {
-        public const string View = "persons:view";
+        public const string View   = "persons:view";
         public const string Create = "persons:create";
-        public const string Edit = "persons:edit";
-        public const string Delete = "persons:delete";
+        public const string Edit   = "persons:edit";
     }
     // ... más permisos
 }
 ```
 
-### claim-based Authorization
+### Autorización por claim
 
 ```csharp
 [Authorize(Policy = "persons:view")]
 public async Task<ActionResult<ApiResponse<List<PersonResponse>>>> GetPersons(...)
 ```
 
-## Testing
-
-### Unit Tests
-
-```bash
-# Ejecutar todos los tests
-dotnet test
-
-# Con verbose
-dotnet test --verbosity detailed
-
-# Coverage
-dotnet test --collect:"XPlat Code Coverage" --settings:coverage.config
-```
-
 ## Errores Comunes
 
-### "The database is locked"
+### API no refleja cambios tras compilar
 
-El proceso del API está corriendo y tiene bloqueado el DLL. Matar el proceso:
+El proceso anterior sigue corriendo con el binario viejo:
 
 ```bash
 # Windows
 netstat -ano | findstr :5000
 taskkill /PID <PID> /F
+dotnet run
 ```
 
-### "There is already an object..."
-
-Eliminar la base de datos y recrear:
+### Migración falla por schema existente
 
 ```bash
 dotnet ef database drop --project InclusiON.Data --startup-project InclusiON.Api
@@ -248,31 +230,42 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 
 | Endpoint | Método | Descripción |
 |----------|--------|-------------|
-| `/api/auth/identify` | POST | Identificar usuario antes del login |
-| `/api/auth/login/visual-standard` | POST | Login con contraseña |
-| `/api/auth/login/visual-pin` | POST | Login con PIN |
-| `/api/auth/login/visual-assisted` | POST | Login asistido |
-| `/api/persons` | GET | Listar personas |
-| `/api/persons` | POST | Crear persona |
-| `/api/persons/{id}` | GET | Obtener persona |
-| `/api/persons/{id}` | PUT | Actualizar persona |
-| `/api/persons/{id}/professionals` | GET | Profesionales asignados |
-| `/api/professionals` | GET | Listar profesionales |
-| `/api/family` | GET | Listar representantes familiares |
-| `/api/reports` | GET | Generar reportes |
+| `/auth/identify` | POST | Identificar usuario (retorna candidatos si hay homónimos) |
+| `/auth/login/visual-standard` | POST | Login con contraseña |
+| `/auth/login/visual-pin` | POST | Login con PIN |
+| `/auth/login/visual-assisted` | POST | Login asistido por supervisor |
+| `/auth/refresh` | POST | Renovar token JWT |
+| `/auth/users/{userId}/login-method` | PUT | Cambiar método de login |
+| `/persons` | GET | Listar personas (paginado, filtros, sort) |
+| `/persons` | POST | Crear persona |
+| `/persons/{id}` | GET | Obtener persona |
+| `/persons/{id}` | PUT | Actualizar persona |
+| `/persons/{id}/professionals` | GET | Profesionales asignados |
+| `/persons/{id}/supervisor-candidates` | GET | Candidatos a supervisor de login |
+| `/professionals` | GET | Listar profesionales (paginado, filtros, sort) |
+| `/professionals/pending` | GET | Solicitudes pendientes de validación |
+| `/professionals/{id}` | GET/PUT | Obtener / actualizar profesional |
+| `/professionals/{id}/validate` | POST | Aprobar o rechazar profesional |
+| `/family` | GET | Listar representantes familiares (paginado, filtros, sort) |
+| `/family/{id}` | GET/PUT | Obtener / actualizar familiar |
+| `/reports` | GET | Listar informes (paginado, filtros, sort) |
+| `/reports/family` | GET | Informes accesibles por familiar |
+| `/institutions` | GET/POST | Listar / crear instituciones |
+| `/institutions/{id}` | GET/PUT | Obtener / actualizar institución |
+| `/admin/users` | GET | Listar usuarios del sistema |
+| `/catalogs/login-methods` | GET | Métodos de login activos |
+| `/catalogs/avatar-colors` | GET | Colores de avatar disponibles |
 
 ---
 
 ## Datos de Prueba (Seed)
 
-El proyecto incluye un seeder que crea usuarios de prueba:
-
-| Email | Tipo | Login Method | Password/PIN |
-|-------|------|-------------|--------------|
-| maria@test.com | Persona | PIN | PIN: 1234 |
-| juan@test.com | Persona | Estándar | Password: Juan123! |
+| Email | Tipo | Método login | Credencial |
+|-------|------|-------------|------------|
+| maria@test.com | Persona | PIN | 1234 |
+| juan@test.com | Persona | Estándar | Juan123! |
 | ana@test.com | Persona | Asistido | (supervisado) |
-| carlos@test.com | Persona | PIN | PIN: 5678 |
-| profesional@test.com | Profesional | Estándar | Password: Prof123! |
-| docente@test.com | Profesional | Estándar | Password: Doc123! |
-| admin@inclusion.com | Admin | Estándar | Password: Admin123! |
+| carlos@test.com | Persona | PIN | 5678 |
+| profesional@test.com | Profesional | Estándar | Prof123! |
+| docente@test.com | Profesional | Estándar | Doc123! |
+| admin@inclusion.com | Admin | Estándar | Admin123! |
