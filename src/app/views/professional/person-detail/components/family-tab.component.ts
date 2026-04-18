@@ -219,7 +219,7 @@ export class ProfessionalFamilyTabComponent {
     this.familyService.unlinkFamilyFromPersonAsProfessional(
       this.unlinkingRepresentative.representativeId,
       this.personId,
-      this.unlinkObservation
+      this.unlinkObservation.trim()
     ).subscribe({
       next: () => {
         this.toastService.success('Familiar desvinculado exitosamente');
