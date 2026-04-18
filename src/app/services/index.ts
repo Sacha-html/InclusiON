@@ -18,6 +18,7 @@ export { FamilyService } from './family.service';
 export { InstitutionsService } from './institutions.service';
 export { AssignmentsService } from './assignments.service';
 export { ReportsService } from './reports.service';
+export { DiagnosesService } from './diagnoses.service';
 
 export type { StorageKey } from './local-storage.service';
 export type {
