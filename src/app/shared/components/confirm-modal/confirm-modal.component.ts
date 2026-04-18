@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
 import {
   ButtonDirective,
   FormControlDirective,
@@ -36,6 +36,9 @@ export class ConfirmModalComponent {
   @Output() confirm = new EventEmitter<string>();
   @Output() cancel = new EventEmitter<void>();
 
+  @ViewChild('confirmBtn') confirmBtn!: ElementRef<HTMLButtonElement>;
+  private lastFocusedElement: HTMLElement | null = null;
+
   observation = '';
 
   onConfirm(): void {
@@ -44,9 +47,13 @@ export class ConfirmModalComponent {
 
   onVisibleChange(visible: boolean): void {
     this.visible = visible;
-    if (!visible) {
+    if (visible) {
+      this.lastFocusedElement = document.activeElement as HTMLElement;
+      setTimeout(() => this.confirmBtn?.nativeElement.focus(), 100);
+    } else {
       this.observation = '';
       this.cancel.emit();
+      this.lastFocusedElement?.focus();
     }
   }
 }
