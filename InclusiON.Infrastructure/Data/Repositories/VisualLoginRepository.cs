@@ -364,5 +364,31 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 throw new DataAccessException($"Error updating login method for user '{userId}'", nameof(PersonWithDisability), ex);
             }
         }
+
+        public Task<bool> CanProfessionalSupervisedLoginAsync(
+            Guid professionalId,
+            Guid personId,
+            CancellationToken cancellationToken = default)
+        {
+            return _context.ProfessionalPersons
+                .AnyAsync(pp => pp.ProfessionalId == professionalId
+                             && pp.PersonId == personId
+                             && pp.IsActive
+                             && pp.CanSuperviseLogin,
+                    cancellationToken);
+        }
+
+        public Task<bool> CanFamilySupervisedLoginAsync(
+            Guid familyRepresentativeId,
+            Guid personId,
+            CancellationToken cancellationToken = default)
+        {
+            return _context.PersonRepresentatives
+                .AnyAsync(pr => pr.RepresentativeId == familyRepresentativeId
+                             && pr.PersonId == personId
+                             && pr.IsActive
+                             && pr.CanSuperviseLogin,
+                    cancellationToken);
+        }
     }
 }
