@@ -18,7 +18,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
     {
         private readonly IVisualLoginRepository _repository;
         private readonly IIdentityService _identityService;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IPinHasher _pinHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateLoginMethodCommandHandler> _logger;
 
@@ -30,13 +30,13 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         public UpdateLoginMethodCommandHandler(
             IVisualLoginRepository repository,
             IIdentityService identityService,
-            IPasswordHasher passwordHasher,
+            IPinHasher pinHasher,
             IUnitOfWork unitOfWork,
             ILogger<UpdateLoginMethodCommandHandler> logger)
         {
             _repository = repository;
             _identityService = identityService;
-            _passwordHasher = passwordHasher;
+            _pinHasher = pinHasher;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -92,7 +92,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                             ErrorCode.InvalidFormat,
                             ErrorMessages.PinInvalidFormat);
                     }
-                    pinHash = _passwordHasher.HashPassword(command.Pin);
+                    pinHash = _pinHasher.Hash(command.Pin);
                     break;
 
                 case LoginMethodAssisted:
