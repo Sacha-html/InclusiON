@@ -37,8 +37,8 @@
   --a11y-link: #1565C0;                    // Contraste 7.2:1 (AAA)
   --a11y-link-hover: #0D47A1;             // Más oscuro en hover (=primary)
   --a11y-success: #1B5E20;                 // Contraste 8.5:1 (AAA)
-  --a11y-warning: #BF360C;                 // Contraste 6.3:1 (AA Large)
-  --a11y-danger: #B71C1C;                  // Contraste 6.7:1 (AA Large)
+  --a11y-warning: #A32E0A;                 // Contraste 7.1:1 (AAA) — antes #BF360C (5.6:1)
+  --a11y-danger: #AF1B1B;                  // Contraste 7.0:1 (AAA) — antes #B71C1C (6.6:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
@@ -82,7 +82,7 @@
   --a11y-nav-talk: #7B1FA2;
 
   // Role colors
-  --a11y-role-person: #256B29;            // WCAG AA (5.1:1) - antes #2E7D32 (4.56:1)
+  --a11y-role-person: #236426;            // WCAG AAA (7.2:1) — antes #256B29 (6.5:1)
   --a11y-role-person-bg: #E8F5E9;
   --a11y-role-professional: #1565C0;
   --a11y-role-professional-bg: #E3F2FD;
@@ -369,7 +369,7 @@
   --a11y-link-hover: #FFD600;
   --a11y-success: #00FF00;
   --a11y-warning: #FFA500;
-  --a11y-danger: #FF4444;
+  --a11y-danger: #FF5E5E;                  // WCAG AAA (7.0:1 sobre negro) — antes #FF4444 (6.2:1)
   --a11y-success-text: #000000;
   --a11y-warning-text: #000000;
   --a11y-danger-text: #000000;
@@ -431,16 +431,16 @@
   --a11y-bg-secondary: #F5EED6;
   --a11y-surface: #EEE8D5;
   --a11y-text: #073642;
-  --a11y-text-secondary: #4A5D63;         // WCAG AA (5.4:1 sobre surface) - antes #586E75 (4.39:1)
-  --a11y-text-muted: #556870;             // WCAG AA (5.4:1) - antes #657B83 (4.13:1)
-  --a11y-primary: #1A6FAF;                // WCAG AA (4.8:1 con texto blanco) - antes #268BD2 (3.68:1)
-  --a11y-primary-dark: #1A6091;
+  --a11y-text-secondary: #45565C;         // WCAG AAA (7.1:1) — antes #4A5D63 (6.4:1)
+  --a11y-text-muted: #46565D;             // WCAG AAA (7.1:1) — antes #556870 (5.4:1)
+  --a11y-primary: #14578A;                // WCAG AAA (7.1:1) — antes #1A6FAF (4.8:1)
+  --a11y-primary-dark: #104B78;          // Hover más oscuro que primary, AAA (8.7:1)
   --a11y-primary-text: #FFFFFF;
-  --a11y-link: #1A6091;                   // Azul más oscuro, legible sobre crema #FDF6E3
+  --a11y-link: #185784;                   // WCAG AAA (7.1:1) — antes #1A6091 (6.2:1)
   --a11y-link-hover: #0D47A1;
-  --a11y-success: #556400;                // WCAG AA (5.9:1) sobre crema #FDF6E3
-  --a11y-warning: #A13B10;                // WCAG AA (6.2:1) - antes #CB4B16 (4.27:1)
-  --a11y-danger: #B82520;                 // WCAG AA (6.1:1) - antes #DC322F (4.29:1)
+  --a11y-success: #4C5900;                // WCAG AAA (7.1:1) — antes #556400 (5.9:1)
+  --a11y-warning: #92360F;                // WCAG AAA (7.1:1) — antes #A13B10 (6.2:1)
+  --a11y-danger: #A1201C;                 // WCAG AAA (7.1:1) — antes #B82520 (5.9:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
@@ -477,12 +477,12 @@
   --a11y-nav-calendar: #CB4B16;
   --a11y-nav-talk: #6C71C4;
 
-  --a11y-role-person: #556400;            // WCAG AA (5.9:1) sobre crema #FDF6E3
-  --a11y-role-person-bg: rgba(85, 100, 0, 0.1);
-  --a11y-role-professional: #1A6FAF;      // WCAG AA (5.0:1) - antes #268BD2 (3.41:1)
-  --a11y-role-professional-bg: rgba(26, 111, 175, 0.1);
-  --a11y-role-family: #4F54A8;            // WCAG AA (6.2:1) - antes #6C71C4 (4.06:1)
-  --a11y-role-family-bg: rgba(79, 84, 168, 0.1);
+  --a11y-role-person: #4C5900;            // WCAG AAA (7.1:1) — antes #556400 (5.9:1)
+  --a11y-role-person-bg: rgba(76, 89, 0, 0.1);
+  --a11y-role-professional: #14578A;      // WCAG AAA (7.1:1) — antes #1A6FAF (5.0:1)
+  --a11y-role-professional-bg: rgba(20, 87, 138, 0.1);
+  --a11y-role-family: #484C99;            // WCAG AAA (7.0:1) — antes #4F54A8 (6.2:1)
+  --a11y-role-family-bg: rgba(72, 76, 153, 0.1);
 
   --a11y-spacing-base: 1.5rem;
 }
@@ -501,17 +501,17 @@
   --a11y-text: #FDF6E3;
   --a11y-text-secondary: #EEE8D5;
   --a11y-text-muted: #93A1A1;
-  --a11y-primary: #2AA198;
-  --a11y-primary-dark: #268BD2;
-  --a11y-primary-text: #000000;                    // Contraste 6.7:1 sobre #2AA198 (AA+) — era #002B36 (4.1:1 ❌)
+  --a11y-primary: #4DCBBF;                         // WCAG AAA (7.6:1 sobre bg) — era #2AA198 (techo matemático 6.7:1 ❌ AAA)
+  --a11y-primary-dark: #2AA198;                    // variante hover más oscura
+  --a11y-primary-text: #000000;                    // 10.6:1 AAA sobre #4DCBBF — era 6.7:1 ❌ AAA
   --a11y-link: #44E8D9;                   // WCAG AAA (7.1:1) - antes #2AA198 (4.12:1 sobre surface)
   --a11y-link-hover: #6EF0E3;
-  --a11y-success: #859900;
-  --a11y-warning: #F07B3F;                // WCAG AA (5.6:1) - antes #CB4B16 (3.26:1)
-  --a11y-danger: #FF6B68;                 // WCAG AA (5.5:1) - antes #DC322F (3.25:1)
-  --a11y-success-text: #FFFFFF;
-  --a11y-warning-text: #FFFFFF;
-  --a11y-danger-text: #FFFFFF;
+  --a11y-success: #ACE600;                // WCAG AAA (10.1:1 sobre bg, 8.7:1 sobre surface) — antes #9CB800 (6.6:1)
+  --a11y-warning: #F49C6F;                // WCAG AAA (7.0:1) — antes #F07B3F (5.4:1)
+  --a11y-danger: #FF9491;                 // WCAG AAA (7.1:1) — antes #FF6B68 (5.4:1)
+  --a11y-success-text: #000000;           // 14.1:1 sobre #ACE600 (AAA)
+  --a11y-warning-text: #000000;           // 9.8:1 sobre #F49C6F (AAA) — antes #FFFFFF (2.1:1 ❌)
+  --a11y-danger-text: #000000;            // 9.9:1 sobre #FF9491 (AAA) — antes #FFFFFF (2.1:1 ❌)
   --a11y-border: #586E75;
 
   --a11y-sidebar-bg: #001F27;
@@ -519,7 +519,7 @@
   --a11y-sidebar-text-muted: #93A1A1;
   --a11y-sidebar-nav-link: #EEE8D5;
   --a11y-sidebar-nav-link-hover-bg: rgba(238, 232, 213, 0.1);
-  --a11y-sidebar-nav-link-active-bg: rgba(42, 161, 152, 0.3);
+  --a11y-sidebar-nav-link-active-bg: rgba(77, 203, 191, 0.25);
   --a11y-sidebar-icon: #44E8D9;                    // Contraste 8.2:1 sobre #001F27 (AAA) — era #2AA198 (4.7:1)
 
   --a11y-header-bg: #002B36;
@@ -540,13 +540,13 @@
   --a11y-scrollbar-track: transparent;
   --a11y-scrollbar-thumb-hover: #93A1A1;
 
-  --a11y-nav-home: #859900;
+  --a11y-nav-home: #ACE600;               // Alineado con success AAA
   --a11y-nav-activities: #2AA198;
   --a11y-nav-calendar: #CB4B16;
   --a11y-nav-talk: #6C71C4;
 
-  --a11y-role-person: #859900;
-  --a11y-role-person-bg: rgba(133, 153, 0, 0.15);
+  --a11y-role-person: #ACE600;            // WCAG AAA (10.1:1 sobre bg) — antes #9CB800 (6.6:1)
+  --a11y-role-person-bg: rgba(172, 230, 0, 0.15);
   --a11y-role-professional: #2AA198;
   --a11y-role-professional-bg: rgba(42, 161, 152, 0.15);
   --a11y-role-family: #9BA0E0;            // WCAG AA (6.1:1) - antes #6C71C4 (3.43:1)
@@ -716,10 +716,10 @@
   --a11y-link: #005A8C;                   // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
   --a11y-link-hover: #003D66;
   --a11y-success: #005A8C;                 // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
-  --a11y-warning: #8F5A00;                 // Naranja oscuro WCAG AA (5.5:1) - antes #FFA500 fallaba (1.97:1)
-  --a11y-danger: #B71C1C;                  // WCAG AAA (6.6:1 AAA-level bold) - antes #D62828 (5.01:1)
+  --a11y-warning: #7D4F00;                 // WCAG AAA (7.0:1) — antes #8F5A00 (5.8:1)
+  --a11y-danger: #AF1B1B;                  // WCAG AAA (7.0:1) — antes #B71C1C (6.6:1)
   --a11y-success-text: #FFFFFF;
-  --a11y-warning-text: #3D2A00;            // 4.8:1 sobre #FFA500 (era #000000 → 1.9:1 ✗)
+  --a11y-warning-text: #FFFFFF;            // 7.0:1 sobre #7D4F00 (AAA) — antes #3D2A00 (1.96:1 ❌)
   --a11y-danger-text: #FFFFFF;
   --a11y-border: #9E9E9E;
 
@@ -856,11 +856,11 @@
   --a11y-link: #005A8C;                    // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
   --a11y-link-hover: #003D66;
   --a11y-success: #355E78;                 // WCAG AAA (6.7:1) - antes #457B9D (4.59:1)
-  --a11y-warning: #8C6A00;                 // Amarillo oscuro WCAG AA (5.6:1) - antes #E9C46A fallaba (1.67:1)
-  --a11y-danger: #9C4A00;                  // Naranja oscuro WCAG AA (5.7:1) - antes #F4A261 fallaba (2.06:1)
+  --a11y-warning: #705500;                 // WCAG AAA (7.0:1) — antes #8C6A00 (5.0:1)
+  --a11y-danger: #8F4400;                  // WCAG AAA (7.0:1) — antes #9C4A00 (6.2:1)
   --a11y-success-text: #FFFFFF;
-  --a11y-warning-text: #000000;
-  --a11y-danger-text: #000000;
+  --a11y-warning-text: #FFFFFF;            // 7.0:1 sobre #705500 (AAA) — antes #000000 (2.99:1 ❌)
+  --a11y-danger-text: #FFFFFF;             // 7.0:1 sobre #8F4400 (AAA) — antes #000000 (2.99:1 ❌)
   --a11y-border: #9E9E9E;
 
   --a11y-sidebar-bg: #1D3557;
