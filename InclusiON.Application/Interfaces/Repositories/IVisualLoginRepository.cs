@@ -77,5 +77,15 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Actualiza el metodo de login de una persona.
         /// </summary>
         Task UpdatePersonLoginMethodAsync(Guid userId, int loginMethodId, string? pinHash, Guid? supervisorUserId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Verifica si un profesional tiene asignacion activa a la persona con flag CanSuperviseLogin.
+        /// </summary>
+        Task<bool> CanProfessionalSupervisedLoginAsync(Guid professionalId, Guid personId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Verifica si un familiar tiene vinculo activo a la persona con flag CanSuperviseLogin.
+        /// </summary>
+        Task<bool> CanFamilySupervisedLoginAsync(Guid familyRepresentativeId, Guid personId, CancellationToken cancellationToken = default);
     }
 }
