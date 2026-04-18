@@ -16,3 +16,9 @@
 :global(.dark) .spinner-overlay {
   background: rgba(33, 37, 41, 0.7);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner-a11y {
+    animation: none;
+  }
+}

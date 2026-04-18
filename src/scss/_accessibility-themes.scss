@@ -1400,6 +1400,34 @@ a {
   &:focus {
     background-color: var(--a11y-border) !important;
   }
+
+  &:disabled,
+  &.disabled {
+    background-color: var(--a11y-bg-secondary) !important;
+    border-color: var(--a11y-text-muted) !important;
+    color: var(--a11y-text-muted) !important;
+    opacity: 1;
+  }
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled,
+.btn-success:disabled,
+.btn-success.disabled,
+.btn-danger:disabled,
+.btn-danger.disabled,
+.btn-warning:disabled,
+.btn-warning.disabled {
+  opacity: 0.6;
+  color: var(--a11y-text) !important;
+}
+
+.btn {
+  &:disabled,
+  &.disabled {
+    cursor: not-allowed;
+    pointer-events: auto;
+  }
 }
 
 .btn-success {
