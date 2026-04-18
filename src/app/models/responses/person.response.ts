@@ -28,6 +28,7 @@ export interface PersonResponse {
   requiresHighContrast: boolean;
   visualNoiseSensitivity: boolean;
   soundSensitivity: boolean;
+  colorBlindnessType?: 'deuteranopia' | 'protanopia' | 'tritanopia' | null;
 
   // Configuracion de Acceso
   autonomyLevelId?: number;

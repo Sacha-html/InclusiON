@@ -85,6 +85,7 @@ export class EditComponent implements OnInit {
     requiresHighContrast: [false],
     visualNoiseSensitivity: [false],
     soundSensitivity: [false],
+    colorBlindnessType: [null],
     // Configuración de acceso
     autonomyLevelId: [null],
     avatarColor: ['#2196F3'],
@@ -136,6 +137,7 @@ export class EditComponent implements OnInit {
       requiresHighContrast: p.requiresHighContrast,
       visualNoiseSensitivity: p.visualNoiseSensitivity,
       soundSensitivity: p.soundSensitivity,
+      colorBlindnessType: p.colorBlindnessType ?? null,
       autonomyLevelId: p.autonomyLevelId ?? null,
       avatarColor: p.avatarColor ?? '#2196F3',
     });
@@ -158,6 +160,7 @@ export class EditComponent implements OnInit {
       requiresHighContrast: raw.requiresHighContrast ?? false,
       visualNoiseSensitivity: raw.visualNoiseSensitivity ?? false,
       soundSensitivity: raw.soundSensitivity ?? false,
+      colorBlindnessType: raw.colorBlindnessType ?? null,
       ...(raw.disabilityTypeId && { disabilityTypeId: +raw.disabilityTypeId }),
       ...(raw.attentionLevel && { attentionLevel: +raw.attentionLevel }),
       ...(raw.communicationLevel && { communicationLevel: +raw.communicationLevel }),
