@@ -1,0 +1,156 @@
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h6 class="mb-0">Diagnósticos registrados</h6>
+  @if (canCreate) {
+    <button cButton color="primary" size="sm" (click)="openNew()" aria-label="Nuevo diagnóstico">
+      <svg cIcon name="cilPlus" class="me-1" size="sm"></svg>
+      Nuevo diagnóstico
+    </button>
+  }
+</div>
+
+<!-- Loading -->
+@if (loading()) {
+  <div class="text-center py-4">
+    <c-spinner aria-label="Cargando diagnósticos"></c-spinner>
+  </div>
+}
+
+<!-- Vacío -->
+@else if (currentDiagnoses().length === 0) {
+  <p class="text-body-secondary">No hay diagnósticos registrados para esta persona.</p>
+}
+
+<!-- Timeline -->
+@else {
+  <div class="diagnosis-timeline">
+    @for (diag of currentDiagnoses(); track diag.id; let last = $last) {
+      <div class="timeline-item" [class.timeline-last]="last">
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                <span class="timeline-date">{{ diag.diagnosisDate | date:'dd/MM/yyyy' }}</span>
+                <span class="text-body-secondary small">{{ diag.professionalName }}</span>
+                @if (!isCreator(diag)) {
+                  <c-badge color="secondary">Solo lectura</c-badge>
+                }
+              </div>
+              <p class="mb-0">{{ diag.primaryDiagnosis }}</p>
+            </div>
+            <button cButton color="link" size="sm" class="flex-shrink-0 p-0"
+                    (click)="openEdit(diag)"
+                    [attr.aria-label]="(canUpdate && isCreator(diag)) ? 'Editar diagnóstico' : 'Ver diagnóstico'">
+              {{ (canUpdate && isCreator(diag)) ? 'Editar' : 'Ver' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Modal -->
+<c-modal [visible]="showModal()" (visibleChange)="!$event && closeModal()" size="lg" [backdrop]="'static'">
+  <c-modal-header>
+    <strong>
+      @if (editing() && !editingIsCreator()) {
+        Ver Diagnóstico
+        <c-badge color="secondary" class="ms-2">Solo lectura</c-badge>
+      } @else {
+        {{ editing() ? 'Editar Diagnóstico' : 'Nuevo Diagnóstico' }}
+      }
+    </strong>
+  </c-modal-header>
+  <c-modal-body>
+    <c-row class="mb-3">
+      <c-col sm="6">
+        <label cLabel for="diagnosisDate">Fecha del diagnóstico *</label>
+        <input cFormControl id="diagnosisDate" type="date"
+               [(ngModel)]="form.diagnosisDate"
+               [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
+               [valid]="submitted && !form.diagnosisDate ? false : undefined" />
+        @if (submitted && !form.diagnosisDate) {
+          <c-form-feedback [valid]="false">La fecha es obligatoria.</c-form-feedback>
+        }
+      </c-col>
+    </c-row>
+
+    <c-row class="mb-3">
+      <c-col sm="12">
+        <label cLabel for="primaryDiagnosis">Diagnóstico principal *</label>
+        <textarea cFormControl id="primaryDiagnosis" rows="2"
+                  [(ngModel)]="form.primaryDiagnosis"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
+                  [valid]="submitted && !form.primaryDiagnosis.trim() ? false : undefined"></textarea>
+        @if (submitted && !form.primaryDiagnosis.trim()) {
+          <c-form-feedback [valid]="false">El diagnóstico principal es obligatorio.</c-form-feedback>
+        }
+      </c-col>
+    </c-row>
+
+    <c-row class="mb-3">
+      <c-col sm="12">
+        <label cLabel for="initialObservations">Observaciones iniciales</label>
+        <textarea cFormControl id="initialObservations" rows="2"
+                  [(ngModel)]="form.initialObservations"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+      </c-col>
+    </c-row>
+
+    <c-row class="mb-3">
+      <c-col sm="6">
+        <label cLabel for="identifiedCapabilities">Capacidades identificadas</label>
+        <textarea cFormControl id="identifiedCapabilities" rows="2"
+                  [(ngModel)]="form.identifiedCapabilities"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+      </c-col>
+      <c-col sm="6">
+        <label cLabel for="identifiedChallenges">Desafíos identificados</label>
+        <textarea cFormControl id="identifiedChallenges" rows="2"
+                  [(ngModel)]="form.identifiedChallenges"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+      </c-col>
+    </c-row>
+
+    <c-row class="mb-3">
+      <c-col sm="6">
+        <label cLabel for="requiredSupports">Apoyos requeridos</label>
+        <textarea cFormControl id="requiredSupports" rows="2"
+                  [(ngModel)]="form.requiredSupports"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+      </c-col>
+      <c-col sm="6">
+        <label cLabel for="pedagogicalObjectives">Objetivos pedagógicos</label>
+        <textarea cFormControl id="pedagogicalObjectives" rows="2"
+                  [(ngModel)]="form.pedagogicalObjectives"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+      </c-col>
+    </c-row>
+
+    <c-row class="mb-3">
+      <c-col sm="12">
+        <label cLabel for="recommendedStrategies">Estrategias recomendadas</label>
+        <textarea cFormControl id="recommendedStrategies" rows="2"
+                  [(ngModel)]="form.recommendedStrategies"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+      </c-col>
+    </c-row>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeModal()">
+      {{ editing() && !editingIsCreator() ? 'Cerrar' : 'Cancelar' }}
+    </button>
+    @if (!editing() || editingIsCreator()) {
+      <button cButton color="primary" (click)="save()"
+              [disabled]="saving()"
+              aria-label="Guardar diagnóstico">
+        @if (saving()) {
+          <c-spinner size="sm" class="me-2"></c-spinner>
+        }
+        {{ editing() ? 'Guardar cambios' : 'Crear diagnóstico' }}
+      </button>
+    }
+  </c-modal-footer>
+</c-modal>
