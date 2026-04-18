@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Api.Extensions;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Invitations.Commands;
 using InclusiON.Application.UseCases.Invitations.Queries;
 using InclusiON.Data;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Invitations;
 using InclusiON.DTOs.Responses;
@@ -23,13 +25,16 @@ namespace InclusiON.Api.Controllers
     {
         private readonly IHttpContextService _httpContextService;
         private readonly AppDbContext _context;
+        private readonly IResourceAuthorizationService _resourceAuthz;
 
         public InvitationsController(
             IHttpContextService httpContextService,
-            AppDbContext context)
+            AppDbContext context,
+            IResourceAuthorizationService resourceAuthz)
         {
             _httpContextService = httpContextService;
             _context = context;
+            _resourceAuthz = resourceAuthz;
         }
 
         #region Queries
@@ -126,6 +131,13 @@ namespace InclusiON.Api.Controllers
                 return NotFound(ApiResponse<InvitationResponse>.ErrorResult(
                     ErrorCode.ProfessionalNotFound,
                     ErrorMessages.ProfessionalNotFound));
+            }
+
+            // Si la invitacion apunta a una persona, verificar que el profesional la tiene asignada.
+            if (request.PersonId.HasValue
+                && !await _resourceAuthz.CanAccessPersonAsync(request.PersonId.Value, AccessMode.Write, cancellationToken))
+            {
+                return Forbid();
             }
 
             // Obtener la URL base del cliente para armar el link de invitacion

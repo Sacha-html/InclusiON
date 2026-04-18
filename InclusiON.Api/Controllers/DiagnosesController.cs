@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
+using InclusiON.Api.Filters;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -31,6 +33,7 @@ namespace InclusiON.Api.Controllers
         [HttpGet("persons/{personId:guid}/diagnoses")]
         [Authorize(Policy = "diagnoses:read")]
         [ProducesResponseType(typeof(ApiResponse<List<DiagnosisListItemResponse>>), StatusCodes.Status200OK)]
+        [PersonAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<List<DiagnosisListItemResponse>>>> GetDiagnoses(
             Guid personId,
             [FromServices] IQueryHandler<GetDiagnosesQuery, ApiResponse<List<DiagnosisListItemResponse>>> handler,
@@ -45,6 +48,7 @@ namespace InclusiON.Api.Controllers
         [Authorize(Policy = "diagnoses:read")]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
+        [DiagnosisAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> GetDiagnosisById(
             int id,
             [FromServices] IQueryHandler<GetDiagnosisByIdQuery, ApiResponse<DiagnosisResponse>> handler,
@@ -60,6 +64,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
+        [PersonAccess(AccessMode.Write)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> CreateDiagnosis(
             Guid personId,
             [FromBody] CreateDiagnosisRequest request,
@@ -93,6 +98,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
+        [DiagnosisAccess(AccessMode.Write)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> UpdateDiagnosis(
             int id,
             [FromBody] UpdateDiagnosisRequest request,
