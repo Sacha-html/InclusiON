@@ -137,8 +137,9 @@
   <c-modal-body>
     <p>¿Está seguro que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de esta persona?</p>
     <div class="mb-3">
-      <label cLabel for="observation">Motivo de desvinculación</label>
-      <textarea cFormControl id="observation" [(ngModel)]="unlinkObservation" rows="3"></textarea>
+      <label cLabel for="observation">Motivo de desvinculación *</label>
+      <textarea cFormControl id="observation" [(ngModel)]="unlinkObservation" rows="3" aria-required="true" aria-describedby="observation-help"></textarea>
+      <small id="observation-help" style="color: var(--a11y-text-muted)">El motivo es obligatorio para continuar.</small>
     </div>
   </c-modal-body>
   <c-modal-footer>
@@ -148,7 +149,7 @@
       cButton
       color="danger"
       (click)="confirmUnlink()"
-      [disabled]="!unlinkObservation || unlinking">
+      [disabled]="!unlinkObservation.trim() || unlinking">
       @if (unlinking) {
         <c-spinner size="sm"></c-spinner>
       }
