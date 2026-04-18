@@ -1,6 +1,7 @@
-import { Component, inject, OnInit, signal, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { FamilyService, PersonsService } from '@services';
 import {
   FamilyResponse, LinkedPersonInfo, UpdateFamilyRequest, PersonListItemResponse,
@@ -15,7 +16,8 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
 @Component({
   selector: 'app-family-edit',
   imports: [
-    ReactiveFormsModule, FormsModule, CardComponent, CardBodyComponent, CardHeaderComponent,
+    ReactiveFormsModule, FormsModule, NgSelectModule,
+    CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective, SpinnerComponent,
     BadgeComponent, ConfirmModalComponent,
@@ -24,18 +26,16 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
   styleUrl: './edit.component.scss',
 })
 export class EditComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly familyService = inject(FamilyService);
+  private readonly fb             = inject(FormBuilder);
+  private readonly route          = inject(ActivatedRoute);
+  private readonly router         = inject(Router);
+  private readonly familyService  = inject(FamilyService);
   private readonly personsService = inject(PersonsService);
-  private readonly elRef = inject(ElementRef);
 
   family: FamilyResponse | null = null;
   submitted = false;
   serverError = '';
 
-  // Form principal (datos del familiar)
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -46,31 +46,34 @@ export class EditComponent implements OnInit {
 
   get f() { return this.form.controls; }
 
-  // Combobox de persona
-  persons = signal<PersonListItemResponse[]>([]);
-  filteredPersons = signal<PersonListItemResponse[]>([]);
+  persons          = signal<PersonListItemResponse[]>([]);
   isLoadingPersons = signal(true);
-  selectedPerson = signal<PersonListItemResponse | null>(null);
-  personSearch = '';
-  personDropdownOpen = false;
 
-  // Vincular persona
+  // Selección para vincular
+  selectedPersonForLink: PersonListItemResponse | null = null;
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
   linkRelationship = '';
-  linkIsPrimary = false;
-  isLinking = false;
-  linkError = '';
+  linkIsPrimary    = false;
+  isLinking        = false;
+  linkError        = '';
 
-  // Desvincular persona
-  showUnlinkModal = false;
+  // Desvincular
+  showUnlinkModal  = false;
   unlinkingPerson: LinkedPersonInfo | null = null;
-  isUnlinking = false;
+  isUnlinking      = false;
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (!this.elRef.nativeElement.contains(event.target)) {
-      this.closeDropdown();
-    }
+  searchPersonFn = (term: string, item: PersonListItemResponse): boolean => {
+    const lower = term.toLowerCase();
+    return (
+      (item.fullName?.toLowerCase().includes(lower) ||
+        item.documentNumber?.toLowerCase().includes(lower)) ??
+      false
+    );
+  };
+
+  get availablePersons(): PersonListItemResponse[] {
+    const linkedIds = new Set(this.family?.linkedPersons?.map(lp => lp.personId) ?? []);
+    return this.persons().filter(p => !linkedIds.has(p.id));
   }
 
   ngOnInit(): void {
@@ -93,68 +96,20 @@ export class EditComponent implements OnInit {
     }
   }
 
-  // --- Combobox de persona ---
-
   loadPersons(): void {
     this.personsService.getPersons({ page: 1, pageSize: 200, isActive: true }).subscribe({
       next: (response) => {
         this.persons.set(response.data);
-        this.filterAvailablePersons();
         this.isLoadingPersons.set(false);
       },
       error: () => this.isLoadingPersons.set(false),
     });
   }
 
-  private filterAvailablePersons(searchTerm = ''): void {
-    const linkedIds = new Set(this.family?.linkedPersons?.map(lp => lp.personId) ?? []);
-    let available = this.persons().filter(p => !linkedIds.has(p.id));
-
-    if (searchTerm.trim()) {
-      const lower = searchTerm.toLowerCase();
-      available = available.filter(p =>
-        p.fullName?.toLowerCase().includes(lower) ||
-        p.documentNumber?.toLowerCase().includes(lower)
-      );
-    }
-
-    this.filteredPersons.set(available);
-  }
-
-  onPersonInputFocus(): void {
-    this.personSearch = '';
-    this.filterAvailablePersons();
-    this.personDropdownOpen = true;
-  }
-
-  onPersonSearch(term: string): void {
-    this.personSearch = term;
-    this.personDropdownOpen = true;
-    this.filterAvailablePersons(term);
-  }
-
-  selectPerson(person: PersonListItemResponse): void {
-    this.selectedPerson.set(person);
-    this.personSearch = person.fullName ?? '';
-    this.personDropdownOpen = false;
-  }
-
-  clearPerson(): void {
-    this.selectedPerson.set(null);
-    this.personSearch = '';
-    this.filterAvailablePersons();
-  }
-
-  closeDropdown(): void {
-    this.personDropdownOpen = false;
-    const sel = this.selectedPerson();
-    this.personSearch = sel ? (sel.fullName ?? '') : '';
-  }
-
   // --- Vincular persona ---
 
   linkPerson(): void {
-    const person = this.selectedPerson();
+    const person = this.selectedPersonForLink;
     if (!person || !this.linkRelationship || !this.family || this.isLinking) return;
 
     this.isLinking = true;
@@ -165,7 +120,7 @@ export class EditComponent implements OnInit {
       isPrimary: this.linkIsPrimary,
     }).subscribe({
       next: () => {
-        this.clearPerson();
+        this.selectedPersonForLink = null;
         this.linkRelationship = '';
         this.linkIsPrimary = false;
         this.isLinking = false;
@@ -244,10 +199,7 @@ export class EditComponent implements OnInit {
   private refreshFamily(): void {
     if (!this.family) return;
     this.familyService.getFamilyById(this.family.id).subscribe({
-      next: (data) => {
-        this.family = data;
-        this.filterAvailablePersons();
-      },
+      next: (data) => { this.family = data; },
     });
   }
 }
