@@ -238,7 +238,7 @@ namespace InclusiON.Data.Seeders
                         // Actualizar PIN si tiene
                         if (testUser.Pin != null)
                         {
-                            existingPerson.PinCodeHash = BCrypt.Net.BCrypt.HashPassword(testUser.Pin);
+                            existingPerson.PinCodeHash = PinHashAccessor.Hash(testUser.Pin);
                         }
                         else
                         {
@@ -287,7 +287,7 @@ namespace InclusiON.Data.Seeders
                     // Configurar PIN si tiene
                     if (testUser.Pin != null)
                     {
-                        person.PinCodeHash = BCrypt.Net.BCrypt.HashPassword(testUser.Pin);
+                        person.PinCodeHash = PinHashAccessor.Hash(testUser.Pin);
                     }
 
                     context.PersonsWithDisability.Add(person);
