@@ -3,7 +3,7 @@
     <c-card-header><strong>Editar Familiar</strong></c-card-header>
     <c-card-body>
       @if (serverError) {
-        <div class="alert alert-danger">{{ serverError }}</div>
+        <div class="alert alert-danger" role="alert">{{ serverError }}</div>
       }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -104,57 +104,30 @@
     <c-card-header><strong>Vincular persona</strong></c-card-header>
     <c-card-body>
       @if (linkError) {
-        <div class="alert alert-danger mb-3">{{ linkError }}</div>
+        <div class="alert alert-danger mb-3" role="alert">{{ linkError }}</div>
       }
 
       <c-row class="align-items-end">
         <c-col sm="4">
-          <label cLabel>Persona</label>
-          <div class="person-combobox">
-            <div class="person-combobox__input-wrap">
-              <input
-                cFormControl
-                class="person-combobox__input"
-                [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre o documento...'"
-                [disabled]="isLoadingPersons()"
-                [value]="personSearch"
-                (focus)="onPersonInputFocus()"
-                (input)="onPersonSearch($any($event.target).value)"
-                autocomplete="off"
-                aria-label="Buscar persona para vincular"
-              />
-              @if (isLoadingPersons()) {
-                <c-spinner size="sm" class="person-combobox__spinner"></c-spinner>
-              } @else if (selectedPerson()) {
-                <button
-                  type="button"
-                  class="person-combobox__clear"
-                  (click)="clearPerson()"
-                  aria-label="Limpiar seleccion"
-                >&#10005;</button>
+          <label cLabel for="link-person">Persona</label>
+          <ng-select
+            inputId="link-person"
+            [items]="availablePersons"
+            bindLabel="fullName"
+            [(ngModel)]="selectedPersonForLink"
+            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre o documento...'"
+            [loading]="isLoadingPersons()"
+            loadingText="Cargando..."
+            notFoundText="Sin resultados"
+            [searchFn]="searchPersonFn"
+          >
+            <ng-template ng-option-tmp let-item="item">
+              {{ item.fullName }}
+              @if (item.disabilityTypeName) {
+                <span class="text-body-secondary"> — {{ item.disabilityTypeName }}</span>
               }
-            </div>
-
-            @if (personDropdownOpen) {
-              <ul class="person-combobox__dropdown">
-                @if (filteredPersons().length === 0) {
-                  <li class="person-combobox__empty">Sin resultados</li>
-                }
-                @for (p of filteredPersons(); track p.id) {
-                  <li
-                    class="person-combobox__option"
-                    [class.person-combobox__option--selected]="selectedPerson()?.id === p.id"
-                    (mousedown)="selectPerson(p)"
-                  >
-                    {{ p.fullName }}
-                    @if (p.disabilityTypeName) {
-                      <span class="text-body-secondary"> — {{ p.disabilityTypeName }}</span>
-                    }
-                  </li>
-                }
-              </ul>
-            }
-          </div>
+            </ng-template>
+          </ng-select>
         </c-col>
 
         <c-col sm="3">
@@ -174,7 +147,7 @@
 
         <c-col sm="2">
           <button cButton color="primary" (click)="linkPerson()"
-                  [disabled]="!selectedPerson() || !linkRelationship || isLinking"
+                  [disabled]="!selectedPersonForLink || !linkRelationship || isLinking"
                   aria-label="Vincular persona seleccionada">
             @if (isLinking) { <c-spinner size="sm"></c-spinner> }
             Vincular
