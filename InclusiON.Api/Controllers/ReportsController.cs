@@ -1,9 +1,12 @@
 using InclusiON.Api.Extensions;
+using InclusiON.Api.Filters;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
 using InclusiON.Application.UseCases.Reports.Queries;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Reports;
 using InclusiON.DTOs.Responses;
@@ -21,15 +24,30 @@ namespace InclusiON.Api.Controllers
         private readonly IHttpContextService _httpContextService;
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IFamilyRepository _familyRepository;
+        private readonly IResourceAuthorizationService _resourceAuthz;
 
         public ReportsController(
             IHttpContextService httpContextService,
             IProfessionalsRepository professionalsRepository,
-            IFamilyRepository familyRepository)
+            IFamilyRepository familyRepository,
+            IResourceAuthorizationService resourceAuthz)
         {
             _httpContextService = httpContextService;
             _professionalsRepository = professionalsRepository;
             _familyRepository = familyRepository;
+            _resourceAuthz = resourceAuthz;
+        }
+
+        // Usado para checks donde el personId viene del body o query string, no de la ruta.
+        private ApiResponse<T> BuildDeniedResponse<T>(string resource = "Reporte") where T : class
+        {
+            var role = _httpContextService.GetCurrentUserRole();
+            return role switch
+            {
+                nameof(IdentityRoles.FamilyRepresentative) or nameof(IdentityRoles.PersonWithDisability)
+                    => ApiResponse<T>.NotFound(resource),
+                _ => ApiResponse<T>.Forbidden()
+            };
         }
 
         /// <summary>Lista paginada de reportes con filtros.</summary>
@@ -42,6 +60,13 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
             request.Validate();
+
+            // Si el caller filtra por persona, verificar que tiene acceso a esa persona.
+            if (Guid.TryParse(request.PersonId, out var filteredPersonId)
+                && !await _resourceAuthz.CanAccessPersonAsync(filteredPersonId, AccessMode.Read, cancellationToken))
+            {
+                return BuildDeniedResponse<PagedResponse<ReportsListItemReponse>>("Persona").ToActionResult();
+            }
 
             var query = new GetReportsQuery(
                 request.Page,
@@ -101,6 +126,7 @@ namespace InclusiON.Api.Controllers
         [Authorize(Policy = "reports:read")]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
+        [ReportAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> GetReportById(
             int reportId,
             [FromServices] IQueryHandler<GetReportByIdQuery, ApiResponse<ReportResponse>> handler,
@@ -122,6 +148,11 @@ namespace InclusiON.Api.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ReportResponse>.ErrorResult("Datos inválidos"));
+
+            if (!await _resourceAuthz.CanAccessPersonAsync(request.PersonId, AccessMode.Write, cancellationToken))
+            {
+                return BuildDeniedResponse<ReportResponse>().ToActionResult();
+            }
 
             var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
             var professional = await _professionalsRepository.GetByUserIdAsync(currentUserId, cancellationToken);
@@ -151,6 +182,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>Edita un reporte. Solo permitido cuando Status == Draft.</summary>
         [HttpPut("{reportId:int}")]
         [Authorize(Policy = "reports:create")]
+        [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
@@ -191,6 +223,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>Profesional envía el borrador al admin para revisión.</summary>
         [HttpPatch("{reportId:int}/submit")]
         [Authorize(Policy = "reports:submit")]
+        [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
