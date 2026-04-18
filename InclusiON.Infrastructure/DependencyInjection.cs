@@ -14,6 +14,8 @@ using InclusiON.Infrastructure.Data;
 using InclusiON.Infrastructure.Data.Factories;
 using InclusiON.Infrastructure.Data.Repositories;
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Data.Converters;
+using InclusiON.Data.Seeders;
 using InclusiON.Infrastructure.Services;
 using System.Text;
 
@@ -33,6 +35,14 @@ namespace InclusiON.Infrastructure
 
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+
+            var encryptionService = new AesGcmEncryptionService(configuration);
+            EncryptionAccessor.Initialize(encryptionService.Encrypt, encryptionService.Decrypt);
+            services.AddSingleton<IEncryptionService>(encryptionService);
+
+            var pinHasher = new Argon2idPinHasher(
+                Microsoft.Extensions.Logging.Abstractions.NullLogger<Argon2idPinHasher>.Instance);
+            PinHashAccessor.Initialize(pinHasher.Hash);
 
             var connectionString = configuration.GetConnectionString("PostgreSqlConn");
 

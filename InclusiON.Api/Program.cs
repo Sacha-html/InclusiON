@@ -10,6 +10,7 @@ using InclusiON.Data.Seeders;
 using InclusiON.Api.Middleware;
 using InclusiON.Api.Scalar;
 using InclusiON.Infrastructure;
+using InclusiON.Infrastructure.Seeders;
 using InclusiON.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -217,6 +218,8 @@ if (!app.Environment.IsEnvironment("IntegrationTests"))
             await context.Database.EnsureCreatedAsync();
         }
     }
+
+    await SensitiveDataEncryptor.EncryptAsync(app.Services);
 
     // Seed inicial de datos
     await DatabaseSeeder.SeedAsync(app.Services);
