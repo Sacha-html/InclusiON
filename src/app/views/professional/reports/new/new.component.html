@@ -9,7 +9,7 @@
       <c-row class="mb-4">
         <!-- Persona -->
         <c-col xs="12" md="6">
-          <label class="form-label" for="report-person">Persona con discapacidad *</label>
+          <label class="form-label" id="report-person-label">Persona con discapacidad *</label>
 
           <ng-select
             inputId="report-person"
@@ -20,6 +20,8 @@
             notFoundText="Sin resultados"
             [searchFn]="searchPersonFn"
             (change)="onPersonChange($event)"
+            aria-labelledby="report-person-label"
+            ariaRequired="true"
           >
             <ng-template ng-label-tmp let-item="item">
               {{ item.personFirstName }} {{ item.personLastName }}
