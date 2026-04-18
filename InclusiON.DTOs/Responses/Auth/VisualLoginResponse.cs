@@ -121,5 +121,10 @@
         /// Sensibilidad al sonido.
         /// </summary>
         public bool SoundSensitivity { get; set; }
+
+        /// <summary>
+        /// Tipo de daltonismo: deuteranopia, protanopia, tritanopia, o null.
+        /// </summary>
+        public string? ColorBlindnessType { get; set; }
     }
 }
