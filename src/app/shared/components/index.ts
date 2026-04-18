@@ -10,3 +10,4 @@ export * from './confirm-modal/confirm-modal.component';
 export * from './institution-filter/institution-filter.component';
 export * from './password-modal/password-modal.component';
 export * from './avatar-color-picker/avatar-color-picker.component';
+export * from './spinner-overlay/spinner-overlay.component';
