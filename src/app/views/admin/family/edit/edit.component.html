@@ -109,7 +109,7 @@
 
       <c-row class="align-items-end">
         <c-col sm="4">
-          <label cLabel for="link-person">Persona</label>
+          <label cLabel id="link-person-label">Persona</label>
           <ng-select
             inputId="link-person"
             [items]="availablePersons"
@@ -120,6 +120,8 @@
             loadingText="Cargando..."
             notFoundText="Sin resultados"
             [searchFn]="searchPersonFn"
+            aria-labelledby="link-person-label"
+            ariaRequired="true"
           >
             <ng-template ng-option-tmp let-item="item">
               {{ item.fullName }}
@@ -132,7 +134,7 @@
 
         <c-col sm="3">
           <label cLabel for="linkRelationship">Parentesco</label>
-          <select cSelect id="linkRelationship" [(ngModel)]="linkRelationship">
+          <select cSelect id="linkRelationship" [(ngModel)]="linkRelationship" aria-required="true">
             <option value="">-- Seleccionar --</option>
             @for (rel of relationships; track rel) {
               <option [value]="rel">{{ rel }}</option>

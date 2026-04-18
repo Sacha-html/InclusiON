@@ -10,7 +10,7 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel for="personId">Persona a cargo *</label>
+          <label cLabel id="persona-label">Persona a cargo *</label>
           <ng-select
             inputId="personId"
             [items]="persons()"
@@ -22,6 +22,9 @@
             notFoundText="No se encontraron personas"
             [searchFn]="searchPersonFn"
             [class.is-invalid]="submitted && f['personId'].errors"
+            aria-labelledby="persona-label"
+            ariaRequired="true"
+            ariaDescribedBy="personId-error"
           >
             <ng-template ng-label-tmp let-item="item">
               {{ item.fullName }}
@@ -34,7 +37,7 @@
             </ng-template>
           </ng-select>
           @if (submitted && f['personId'].errors) {
-            <c-form-feedback [valid]="false">
+            <c-form-feedback [valid]="false" id="personId-error">
               Debe seleccionar una persona.
             </c-form-feedback>
           }
