@@ -1,3 +1,4 @@
+using InclusiON.Domain.Attributes;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models.BaseEntities;
 
@@ -14,13 +15,18 @@ namespace InclusiON.Domain.Models
         public Guid ProfessionalId { get; set; }
         public int ReportTypeId { get; set; }
         public string Title { get; set; } = string.Empty;
+        [Encrypted]
         public string Content { get; set; } = string.Empty;
         public DateTime ReportDate { get; set; }
         public DateTime? PeriodStartDate { get; set; }
         public DateTime? PeriodEndDate { get; set; }
+        [Encrypted]
         public string? AchievedGoals { get; set; }
+        [Encrypted]
         public string? AreasToReinforce { get; set; }
+        [Encrypted]
         public string? FutureRecommendations { get; set; }
+        [Encrypted]
         public string? NextObjectives { get; set; }
 
         // ── Flujo de aprobación ──────────────────────────────────────────
