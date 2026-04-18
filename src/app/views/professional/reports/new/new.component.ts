@@ -1,6 +1,7 @@
-import { Component, inject, OnInit, signal, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { ReportsService, ProfessionalsService, AssignmentsService, ToastService } from '@services';
 import { CreateReportRequest } from '@models/requests/reports/create-report.request';
 import { ProfessionalPersonResponse } from '@models';
@@ -25,6 +26,7 @@ import {
   standalone: true,
   imports: [
     FormsModule,
+    NgSelectModule,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
@@ -43,22 +45,16 @@ import {
   styleUrl: './new.component.scss',
 })
 export class NewComponent implements OnInit {
-  private readonly reportsService      = inject(ReportsService);
+  private readonly reportsService       = inject(ReportsService);
   private readonly professionalsService = inject(ProfessionalsService);
-  private readonly assignmentsService  = inject(AssignmentsService);
-  private readonly toastService        = inject(ToastService);
-  private readonly router = inject(Router);
-  private readonly elRef  = inject(ElementRef);
+  private readonly assignmentsService   = inject(AssignmentsService);
+  private readonly toastService         = inject(ToastService);
+  private readonly router               = inject(Router);
 
-  persons           = signal<ProfessionalPersonResponse[]>([]);
-  filteredPersons   = signal<ProfessionalPersonResponse[]>([]);
-  isLoading         = signal(false);
-  isLoadingPersons  = signal(true);
-
-  // Combobox state
-  personSearch       = '';
-  personDropdownOpen = false;
-  selectedPerson     = signal<ProfessionalPersonResponse | null>(null);
+  persons          = signal<ProfessionalPersonResponse[]>([]);
+  isLoading        = signal(false);
+  isLoadingPersons = signal(true);
+  selectedPerson   = signal<ProfessionalPersonResponse | null>(null);
 
   // Modal post-creación
   showSubmitModal  = signal(false);
@@ -95,12 +91,14 @@ export class NewComponent implements OnInit {
     );
   }
 
-  // Cierra el dropdown al hacer click fuera del componente
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (!this.elRef.nativeElement.contains(event.target)) {
-      this.closeDropdown();
-    }
+  searchPersonFn = (term: string, item: ProfessionalPersonResponse): boolean => {
+    const fullName = `${item.personFirstName} ${item.personLastName}`.toLowerCase();
+    return fullName.includes(term.toLowerCase());
+  };
+
+  onPersonChange(person: ProfessionalPersonResponse | null): void {
+    this.form.personId = person?.personId ?? '';
+    this.selectedPerson.set(person);
   }
 
   ngOnInit(): void {
@@ -112,9 +110,7 @@ export class NewComponent implements OnInit {
       next: (prof) => {
         this.assignmentsService.getPersonsByProfessional(prof.id).subscribe({
           next: (persons) => {
-            const active = persons.filter(p => p.isActive);
-            this.persons.set(active);
-            this.filteredPersons.set(active);
+            this.persons.set(persons.filter(p => p.isActive));
             this.isLoadingPersons.set(false);
           },
           error: () => this.isLoadingPersons.set(false),
@@ -122,50 +118,6 @@ export class NewComponent implements OnInit {
       },
       error: () => this.isLoadingPersons.set(false),
     });
-  }
-
-  onPersonInputFocus(): void {
-    this.personSearch = '';
-    this.filteredPersons.set(this.persons());
-    this.personDropdownOpen = true;
-  }
-
-  onPersonSearch(term: string): void {
-    this.personSearch = term;
-    this.personDropdownOpen = true;
-    if (!term.trim()) {
-      this.filteredPersons.set(this.persons());
-    } else {
-      const lower = term.toLowerCase();
-      this.filteredPersons.set(
-        this.persons().filter(p =>
-          `${p.personFirstName} ${p.personLastName}`.toLowerCase().includes(lower)
-        )
-      );
-    }
-  }
-
-  selectPerson(person: ProfessionalPersonResponse): void {
-    this.selectedPerson.set(person);
-    this.form.personId = person.personId;
-    this.personSearch = `${person.personFirstName} ${person.personLastName}`;
-    this.personDropdownOpen = false;
-  }
-
-  clearPerson(): void {
-    this.selectedPerson.set(null);
-    this.form.personId = '';
-    this.personSearch = '';
-    this.filteredPersons.set(this.persons());
-  }
-
-  closeDropdown(): void {
-    this.personDropdownOpen = false;
-    // Si no hay selección, restaurar el texto al nombre del seleccionado (o vaciar)
-    const sel = this.selectedPerson();
-    this.personSearch = sel
-      ? `${sel.personFirstName} ${sel.personLastName}`
-      : '';
   }
 
   onSubmit(): void {
@@ -180,7 +132,6 @@ export class NewComponent implements OnInit {
     });
   }
 
-  /** El profesional elige enviar el reporte al admin de inmediato */
   submitNow(): void {
     if (!this.createdReportId) return;
     this.isSubmitting.set(true);
@@ -197,7 +148,6 @@ export class NewComponent implements OnInit {
     });
   }
 
-  /** El profesional prefiere revisar antes de enviar */
   reviewLater(): void {
     this.toastService.success('Reporte guardado como borrador.');
     this.router.navigate(['/pro/reports']);

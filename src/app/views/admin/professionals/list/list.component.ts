@@ -78,6 +78,10 @@ export class ListComponent implements OnInit {
   statusHistory: any[] = [];
   statusHistoryLoading = false;
 
+  // Reset password
+  showResetPasswordModal = false;
+  itemToResetPassword: ProfessionalListItemResponse | null = null;
+
   // Password modal
   showPasswordModal = false;
   tempPassword = '';
@@ -217,7 +221,8 @@ export class ListComponent implements OnInit {
         this.router.navigate(['/admin/professionals', event.item.id]);
         break;
       case 'reset-password':
-        this.resetPassword(event.item);
+        this.itemToResetPassword = event.item;
+        this.showResetPasswordModal = true;
         break;
       case 'persons':
         this.router.navigate(['/admin/professionals', event.item.id], { queryParams: { tab: 'personas' } });
@@ -398,22 +403,33 @@ export class ListComponent implements OnInit {
     });
   }
 
-  resetPassword(item: ProfessionalListItemResponse): void {
+  confirmResetPassword(): void {
+    const item = this.itemToResetPassword;
+    if (!item) return;
     if (!item.userId) {
       this.toastService.error('El profesional no tiene usuario asociado');
+      this.cancelResetPassword();
       return;
     }
     this.userService.resetPassword(item.userId).subscribe({
       next: (result) => {
         this.tempPassword = result.temporaryPassword;
         this.tempPasswordEmail = result.userEmail;
+        this.showResetPasswordModal = false;
+        this.itemToResetPassword = null;
         this.showPasswordModal = true;
         this.toastService.success('Contraseña reseteada exitosamente');
       },
       error: () => {
         this.toastService.error('Error al resetear la contraseña');
+        this.cancelResetPassword();
       },
     });
+  }
+
+  cancelResetPassword(): void {
+    this.showResetPasswordModal = false;
+    this.itemToResetPassword = null;
   }
 
   copyPassword(): void {

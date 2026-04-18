@@ -42,7 +42,7 @@ export class ListComponent {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
-  sortBy = 'lastName';
+  sortBy = 'LastName';
   sortDirection: 'ASC' | 'DESC' = 'ASC';
   loading = false;
 
@@ -59,10 +59,10 @@ export class ListComponent {
       ],
     },
     { key: 'fullName', label: 'Nombre', sortable: true },
-    { key: 'linkedPersonNames', label: 'Familiar de', sortable: true },
-    { key: 'relationship', label: 'Parentesco', sortable: true },
-    { key: 'phone', label: 'Telefono', sortable: true },
-    { key: 'isActive', label: 'Estado', type: 'badge', sortable: true },
+    { key: 'linkedPersonNames', label: 'Familiar de' },
+    { key: 'relationship', label: 'Parentesco' },
+    { key: 'phone', label: 'Telefono' },
+    { key: 'isActive', label: 'Estado', type: 'badge' },
   ];
 
   onInstitutionFilterChange(institutionId: number | undefined): void {
@@ -78,11 +78,7 @@ export class ListComponent {
 
   onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
     const sortMap: Record<string, string> = {
-      'fullName': 'lastName',
-      'linkedPersonNames': 'linkedPersonNames',
-      'relationship': 'relationship',
-      'phone': 'phoneNumber',
-      'isActive': 'isActive',
+      'fullName': 'LastName',
     };
     this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
     this.sortDirection = event.sortDirection;

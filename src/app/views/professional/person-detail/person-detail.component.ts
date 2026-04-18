@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PersonsService, ToastService } from '@services';
+import { DiagnosesService } from '@services/diagnoses.service';
 import {
   PersonResponse,
   PersonSkillProfileResponse,
@@ -46,6 +47,7 @@ export class PersonDetailComponent implements OnInit {
   private readonly personsService = inject(PersonsService);
   private readonly familyService = inject(FamilyService);
   private readonly toastService = inject(ToastService);
+  private readonly diagnosesService = inject(DiagnosesService);
 
   person: PersonResponse | null = null;
   activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' = 'datos';
@@ -77,7 +79,12 @@ export class PersonDetailComponent implements OnInit {
     });
   }
 
-  private loadDiagnoses(): void {}
+  private loadDiagnoses(): void {
+    if (!this.person) return;
+    this.diagnosesService.getByPerson(this.person.id).subscribe({
+      next: (data) => this.diagnoses.set(data),
+    });
+  }
 
   goBack(): void {
     this.router.navigate(['/pro/persons']);

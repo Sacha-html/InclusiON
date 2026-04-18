@@ -121,6 +121,20 @@
   (cancel)="cancelValidation()">
 </app-confirm-modal>
 
+<!-- Modal resetear contraseña -->
+<app-confirm-modal
+  [visible]="showResetPasswordModal"
+  title="Resetear contraseña"
+  messagePrefix="¿Desea resetear la contraseña de "
+  [itemName]="itemToResetPassword?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se generará una contraseña temporal que el profesional deberá cambiar en su próximo inicio de sesión."
+  confirmLabel="Resetear"
+  confirmColor="warning"
+  (confirm)="confirmResetPassword()"
+  (cancel)="cancelResetPassword()">
+</app-confirm-modal>
+
 <!-- Modal reactivar -->
 <app-confirm-modal
   [visible]="showReactivateModal"

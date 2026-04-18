@@ -9,58 +9,33 @@
       <c-row class="mb-4">
         <!-- Persona -->
         <c-col xs="12" md="6">
-          <label class="form-label">Persona con discapacidad *</label>
+          <label class="form-label" for="report-person">Persona con discapacidad *</label>
 
-          <div class="person-combobox">
-            <!-- Input de búsqueda -->
-            <div class="person-combobox__input-wrap">
-              <input
-                cFormControl
-                class="person-combobox__input"
-                [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre...'"
-                [disabled]="isLoadingPersons()"
-                [value]="personSearch"
-                (focus)="onPersonInputFocus()"
-                (input)="onPersonSearch($any($event.target).value)"
-                autocomplete="off"
-              />
-              @if (isLoadingPersons()) {
-                <c-spinner size="sm" class="person-combobox__spinner"></c-spinner>
-              } @else if (selectedPerson()) {
-                <button
-                  type="button"
-                  class="person-combobox__clear"
-                  (click)="clearPerson()"
-                  title="Limpiar selección"
-                >✕</button>
-              }
-            </div>
-
-            <!-- Dropdown -->
-            @if (personDropdownOpen) {
-              <ul class="person-combobox__dropdown">
-                @if (filteredPersons().length === 0) {
-                  <li class="person-combobox__empty">Sin resultados</li>
-                }
-                @for (person of filteredPersons(); track person.personId) {
-                  <li
-                    class="person-combobox__option"
-                    [class.person-combobox__option--selected]="form.personId === person.personId"
-                    (mousedown)="selectPerson(person)"
-                  >
-                    {{ person.personFirstName }} {{ person.personLastName }}
-                  </li>
-                }
-              </ul>
-            }
-          </div>
+          <ng-select
+            inputId="report-person"
+            [items]="persons()"
+            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre...'"
+            [loading]="isLoadingPersons()"
+            loadingText="Cargando..."
+            notFoundText="Sin resultados"
+            [searchFn]="searchPersonFn"
+            (change)="onPersonChange($event)"
+          >
+            <ng-template ng-label-tmp let-item="item">
+              {{ item.personFirstName }} {{ item.personLastName }}
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item">
+              {{ item.personFirstName }} {{ item.personLastName }}
+            </ng-template>
+          </ng-select>
         </c-col>
 
         <!-- Tipo de Reporte -->
         <c-col xs="12" md="6">
-          <label class="form-label">Tipo de Reporte *</label>
+          <label class="form-label" for="reportTypeId">Tipo de Reporte *</label>
           <select
             cSelect
+            id="reportTypeId"
             [(ngModel)]="form.reportTypeId"
             name="reportTypeId"
             required
@@ -76,9 +51,10 @@
       <!-- Título -->
       <c-row class="mb-4">
         <c-col xs="12">
-          <label class="form-label">Título *</label>
+          <label class="form-label" for="report-title">Título *</label>
           <input
             cFormControl
+            id="report-title"
             [(ngModel)]="form.title"
             name="title"
             placeholder="Ej: Informe de progreso - Marzo 2026"
@@ -90,9 +66,10 @@
       <!-- Contenido -->
       <c-row class="mb-4">
         <c-col xs="12">
-          <label class="form-label">Contenido *</label>
+          <label class="form-label" for="report-content">Contenido *</label>
           <textarea
             cFormControl
+            id="report-content"
             [(ngModel)]="form.content"
             name="content"
             rows="5"
@@ -105,18 +82,20 @@
       <!-- Período -->
       <c-row class="mb-4">
         <c-col xs="12" md="6">
-          <label class="form-label">Fecha inicio período</label>
+          <label class="form-label" for="period-start">Fecha inicio período</label>
           <input
             cFormControl
+            id="period-start"
             type="date"
             [(ngModel)]="form.periodStartDate"
             name="periodStartDate"
           />
         </c-col>
         <c-col xs="12" md="6">
-          <label class="form-label">Fecha fin período</label>
+          <label class="form-label" for="period-end">Fecha fin período</label>
           <input
             cFormControl
+            id="period-end"
             type="date"
             [(ngModel)]="form.periodEndDate"
             name="periodEndDate"
@@ -127,9 +106,10 @@
       <!-- Objetivos alcanzados -->
       <c-row class="mb-4">
         <c-col xs="12">
-          <label class="form-label">Objetivos alcanzados</label>
+          <label class="form-label" for="achieved-goals">Objetivos alcanzados</label>
           <textarea
             cFormControl
+            id="achieved-goals"
             [(ngModel)]="form.achievedGoals"
             name="achievedGoals"
             rows="3"
@@ -141,9 +121,10 @@
       <!-- Áreas a reforzar -->
       <c-row class="mb-4">
         <c-col xs="12">
-          <label class="form-label">Áreas a reforzar</label>
+          <label class="form-label" for="areas-to-reinforce">Áreas a reforzar</label>
           <textarea
             cFormControl
+            id="areas-to-reinforce"
             [(ngModel)]="form.areasToReinforce"
             name="areasToReinforce"
             rows="3"
@@ -155,9 +136,10 @@
       <!-- Recomendaciones -->
       <c-row class="mb-4">
         <c-col xs="12">
-          <label class="form-label">Recomendaciones</label>
+          <label class="form-label" for="future-recommendations">Recomendaciones</label>
           <textarea
             cFormControl
+            id="future-recommendations"
             [(ngModel)]="form.futureRecommendations"
             name="futureRecommendations"
             rows="3"
@@ -169,9 +151,10 @@
       <!-- Próximos objetivos -->
       <c-row class="mb-4">
         <c-col xs="12">
-          <label class="form-label">Próximos objetivos</label>
+          <label class="form-label" for="next-objectives">Próximos objetivos</label>
           <textarea
             cFormControl
+            id="next-objectives"
             [(ngModel)]="form.nextObjectives"
             name="nextObjectives"
             rows="3"
@@ -199,9 +182,10 @@
 </c-card>
 
 <!-- Modal post-creación: ¿enviar ahora o revisar después? -->
-<c-modal [visible]="showSubmitModal()" [backdrop]="'static'" [keyboard]="false" alignment="center">
+<c-modal [visible]="showSubmitModal()" [backdrop]="'static'" [keyboard]="false" alignment="center"
+         aria-labelledby="submit-modal-title">
   <c-modal-header>
-    <h5 cModalTitle>Reporte guardado</h5>
+    <h5 cModalTitle id="submit-modal-title">Reporte guardado</h5>
   </c-modal-header>
   <c-modal-body>
     <p class="mb-1">El reporte fue creado exitosamente como <strong>borrador</strong>.</p>

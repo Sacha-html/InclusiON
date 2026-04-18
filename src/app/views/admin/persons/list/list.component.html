@@ -4,12 +4,12 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end">
     <c-col sm="3">
-      <label cLabel>Responsable</label>
-      <input cFormControl type="text" [(ngModel)]="representativeSearch" (ngModelChange)="onRepresentativeSearch()" placeholder="Nombre del responsable">
+      <label cLabel for="filter-representative">Responsable</label>
+      <input cFormControl id="filter-representative" type="text" [(ngModel)]="representativeSearch" (ngModelChange)="onRepresentativeSearch()" placeholder="Nombre del responsable">
     </c-col>
     <c-col sm="3">
-      <label cLabel>Estado</label>
-      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+      <label cLabel for="filter-status">Estado</label>
+      <select cSelect id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="true">Activos</option>
         <option value="false">Inactivos</option>
@@ -31,6 +31,7 @@
   [headerButtons]="canCreate ? [{action: 'new', label: 'Agregar'}] : []"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
+  (sortAction)="onSort($event)"
   (rowAction)="onRowAction($event)"
   (headerAction)="onHeaderAction($event)">
 </app-data-table>
@@ -39,7 +40,7 @@
 <c-modal [visible]="showLoginMethodModal" (visibleChange)="onLoginMethodModalVisibleChange($event)"
          aria-labelledby="login-method-modal-title">
   <c-modal-header>
-    <h5 cModalTitle>Cambiar método de login</h5>
+    <h5 cModalTitle id="login-method-modal-title">Cambiar método de login</h5>
   </c-modal-header>
   <c-modal-body>
     @if (selectedPerson) {
@@ -89,7 +90,7 @@
             <div class="mb-3">
               <label cLabel for="lm-pin">PIN (4 dígitos) *</label>
               <input cFormControl id="lm-pin" formControlName="pin" type="password" maxlength="4"
-                     autofocus inputmode="numeric"
+                     inputmode="numeric"
                      [valid]="loginMethodSubmitted ? loginMethodForm.get('pin')?.valid : undefined" />
               @if (loginMethodSubmitted && loginMethodForm.get('pin')?.errors) {
                 <c-form-feedback [valid]="false">

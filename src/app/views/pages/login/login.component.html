@@ -16,7 +16,7 @@
 
               <!-- Error Alert -->
               @if (errorMessage) {
-                <c-alert color="danger" class="mb-3" dismissible>
+                <c-alert color="danger" class="mb-3" dismissible role="alert" aria-live="assertive">
                   {{ errorMessage }}
                 </c-alert>
               }
@@ -33,6 +33,7 @@
                   placeholder="Email"
                   autocomplete="username"
                   aria-label="Email"
+                  aria-required="true"
                   autofocus
                 />
               </c-input-group>
@@ -48,6 +49,8 @@
                   formControlName="password"
                   placeholder="Contraseña"
                   autocomplete="current-password"
+                  aria-label="Contraseña"
+                  aria-required="true"
                 />
                 <span
                   cInputGroupText

@@ -66,6 +66,8 @@ export class ListComponent {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+  sortBy = 'LastName';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
 
   // Modal login method
   showLoginMethodModal = false;
@@ -97,11 +99,11 @@ export class ListComponent {
         { action: 'login-method', label: 'Método login', icon: 'cil-lock-locked', visible: (item) => item.isActive },
       ],
     },
-    { key: 'fullName', label: 'Nombre completo' },
+    { key: 'fullName', label: 'Nombre completo', sortable: true },
     { key: 'representativeNames', label: 'Responsables' },
     { key: 'disabilityTypeName', label: 'Tipo de discapacidad' },
     { key: 'autonomyLevelName', label: 'Nivel de autonomía' },
-    { key: 'age', label: 'Edad', type: 'number' },
+    { key: 'age', label: 'Edad', type: 'number', sortable: true },
     { key: 'isActive', label: 'Estado', type: 'badge' },
   ];
 
@@ -125,6 +127,17 @@ export class ListComponent {
   onSearch(term: string): void {
     this.currentPage = 1;
     this.loadPersons(term);
+  }
+
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    const sortMap: Record<string, string> = {
+      'fullName': 'LastName',
+      'age': 'BirthDate',
+    };
+    this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
+    this.sortDirection = event.sortDirection;
+    this.currentPage = 1;
+    this.loadPersons();
   }
 
   onRepresentativeSearch(): void {
@@ -259,8 +272,8 @@ export class ListComponent {
         page: this.currentPage,
         pageSize: this.pageSize,
         search,
-        sortBy: 'lastName',
-        sortDirection: 'ASC',
+        sortBy: this.sortBy,
+        sortDirection: this.sortDirection,
         institutionId: this.selectedInstitutionId,
         isActive,
         representativeSearch: this.representativeSearch || undefined,

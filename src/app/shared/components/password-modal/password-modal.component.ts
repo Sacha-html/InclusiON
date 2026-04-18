@@ -15,7 +15,7 @@ import {
     ButtonDirective,
   ],
   template: `
-    <c-modal [visible]="visible" backdrop="static" [keyboard]="false" [attr.aria-labelledby]="'pwd-modal-title'">
+    <c-modal [visible]="visible" backdrop="static" [keyboard]="true" [attr.aria-labelledby]="'pwd-modal-title'" (visibleChange)="onVisibleChange($event)">
       <c-modal-header><h5 cModalTitle id="pwd-modal-title">{{ entityType }} creado exitosamente</h5></c-modal-header>
       <c-modal-body>
         @if (entityName) {
@@ -69,5 +69,11 @@ export class PasswordModalComponent implements OnChanges {
       this.copied = true;
       setTimeout(() => this.copied = false, 2000);
     });
+  }
+
+  onVisibleChange(visible: boolean): void {
+    if (!visible) {
+      this.close.emit();
+    }
   }
 }
