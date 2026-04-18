@@ -3,6 +3,7 @@ using System;
 using InclusiON.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InclusiON.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260418062012_ExtendAccessAuditResources")]
+    partial class ExtendAccessAuditResources
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1702,9 +1705,6 @@ namespace InclusiON.Data.Migrations
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ColorBlindnessType")
-                        .HasColumnType("text");
 
                     b.Property<int?>("CommunicationLevel")
                         .HasColumnType("integer");
