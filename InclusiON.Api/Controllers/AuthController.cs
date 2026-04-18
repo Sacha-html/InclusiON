@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -45,6 +46,7 @@ namespace InclusiON.Api.Controllers
         /// Inicia sesion con email y contraseña.
         /// </summary>
         [HttpPost("login")]
+        [EnableRateLimiting("auth-login")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
@@ -79,6 +81,7 @@ namespace InclusiON.Api.Controllers
         /// Identifica un usuario antes del login para obtener su metodo de autenticacion.
         /// </summary>
         [HttpPost("identify")]
+        [EnableRateLimiting("auth-login")]
         [ProducesResponseType(typeof(ApiResponse<IdentifyUserResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<IdentifyUserResponse>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse<IdentifyUserResponse>>> IdentifyUser(
@@ -96,6 +99,7 @@ namespace InclusiON.Api.Controllers
         /// Login visual estandar con contraseña para personas con discapacidad.
         /// </summary>
         [HttpPost("login/visual-standard")]
+        [EnableRateLimiting("auth-login")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
@@ -119,6 +123,7 @@ namespace InclusiON.Api.Controllers
         /// Login con PIN numerico para personas con discapacidad.
         /// </summary>
         [HttpPost("login/pin")]
+        [EnableRateLimiting("auth-pin")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
@@ -142,6 +147,7 @@ namespace InclusiON.Api.Controllers
         /// Login para familiares/tutores con contraseña.
         /// </summary>
         [HttpPost("login/family")]
+        [EnableRateLimiting("auth-login")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
@@ -165,6 +171,7 @@ namespace InclusiON.Api.Controllers
         /// Login asistido donde un familiar o profesional autoriza el acceso.
         /// </summary>
         [HttpPost("login/assisted")]
+        [EnableRateLimiting("auth-login")]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
@@ -220,6 +227,7 @@ namespace InclusiON.Api.Controllers
         /// Refresca el token de acceso usando un refresh token valido.
         /// </summary>
         [HttpPost("refresh")]
+        [EnableRateLimiting("auth-refresh")]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
