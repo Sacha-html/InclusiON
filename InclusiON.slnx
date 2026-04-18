@@ -13,4 +13,6 @@
   <Project Path="InclusiON.Infrastructure/InclusiON.Infrastructure.csproj" />
   <Project Path="InclusiON.SemanticSearch/InclusiON.SemanticSearch.csproj" />
   <Project Path="InclusiON.Shared/InclusiON.Shared.csproj" />
+  <Project Path="InclusiON.Tests/Unit/InclusiON.Tests.Unit.csproj" />
+  <Project Path="InclusiON.Tests/Integration/InclusiON.Tests.Integration.csproj" />
 </Solution>

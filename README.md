@@ -6,15 +6,18 @@
 
 ```
 InclusiON.Server/
-├── InclusiON.Api/                    # API REST + Controllers
+├── InclusiON.Api/                    # API REST + Controllers + Filters
 ├── InclusiON.Application/            # Use Cases, Queries, Commands (CQRS custom)
 ├── InclusiON.Domain/                 # Entidades y modelos de dominio
-├── InclusiON.Infrastructure/         # Repositorios, servicios externos
+├── InclusiON.Infrastructure/         # Repositorios, servicios externos, autorización
 ├── InclusiON.Infrastructure.Telemetry/ # OpenTelemetry, métricas
 ├── InclusiON.Data/                   # DbContext, Configurations, Migrations
 ├── InclusiON.DTOs/                   # Data Transfer Objects
 ├── InclusiON.Shared/                 # Recursos compartidos
-└── InclusiON.SemanticSearch/         # Búsqueda semántica (opcional)
+├── InclusiON.SemanticSearch/         # Búsqueda semántica (opcional)
+└── InclusiON.Tests/
+    ├── Unit/                         # Tests unitarios (xUnit + NSubstitute + FluentAssertions)
+    └── Integration/                  # Tests de integración (WebApplicationFactory + InMemory DB)
 ```
 
 ## Requisitos
@@ -80,12 +83,20 @@ dotnet build
 ### Testing
 
 ```bash
+# Todos los tests
+dotnet test
+
 # Con cobertura
 dotnet test --collect:"XPlat Code Coverage"
 
-# Un proyecto específico
-dotnet test InclusiON.Application.Tests
+# Solo unitarios
+dotnet test InclusiON.Tests/Unit/InclusiON.Tests.Unit.csproj
+
+# Solo integración
+dotnet test InclusiON.Tests/Integration/InclusiON.Tests.Integration.csproj
 ```
+
+Los tests de integración usan `WebApplicationFactory<Program>` con EF Core InMemory — no requieren PostgreSQL ni conexión externa.
 
 ### Limpieza
 
@@ -180,29 +191,68 @@ var professionals = await _context.Professionals
 
 ## Seguridad
 
-### Permisos
+La autorización opera en tres capas apiladas:
 
-Los permisos se gestionan en `InclusiON.Application/Constants/Permissions.cs`:
-
-```csharp
-public static class Permissions
-{
-    public static class Persons
-    {
-        public const string View   = "persons:view";
-        public const string Create = "persons:create";
-        public const string Edit   = "persons:edit";
-    }
-    // ... más permisos
-}
+```
+[1] Autenticación JWT          → ¿quién sos?
+[2] Política de rol/permiso    → ¿podés llegar a este endpoint?
+[3] Autorización por recurso   → ¿tenés vínculo con este dato específico?
 ```
 
-### Autorización por claim
+### Capa 1 y 2 — Políticas de rol/permiso
 
 ```csharp
-[Authorize(Policy = "persons:view")]
-public async Task<ActionResult<ApiResponse<List<PersonResponse>>>> GetPersons(...)
+[Authorize(Policy = "persons:read")]
+public async Task<ActionResult<...>> GetPersonById(Guid personId, ...)
 ```
+
+### Capa 3 — Row-Level Authorization (HU-IN-172)
+
+Implementada en `IResourceAuthorizationService` (Application) / `ResourceAuthorizationService` (Infrastructure).
+
+**Para endpoints con `personId` en la ruta** se usan atributos-filtro declarativos:
+
+```csharp
+[HttpGet("{personId:guid}")]
+[Authorize(Policy = "persons:read")]
+[PersonAccess(AccessMode.Read)]          // ← row-level check
+public async Task<ActionResult<...>> GetPersonById(Guid personId, ...)
+```
+
+Filtros disponibles en `InclusiON.Api/Filters/`:
+
+| Atributo | Parámetro de ruta | Recurso |
+|---|---|---|
+| `[PersonAccess(mode)]` | `{personId:guid}` | `PersonWithDisability` |
+| `[DiagnosisAccess(mode)]` | `{id:int}` | `Diagnosis` |
+| `[ReportAccess(mode)]` | `{reportId:int}` | `Report` |
+
+**Reglas por rol:**
+
+| Rol | Acceso permitido |
+|---|---|
+| GlobalAdmin | Todos los recursos (bypass, pero auditado) |
+| Professional | Solo personas con `ProfessionalPerson.IsActive = true` |
+| FamilyRepresentative | Solo personas con `PersonRepresentative.IsActive = true` |
+| Admin institucional | Solo personas de sus instituciones asignadas |
+| PersonWithDisability | Solo sus propios datos |
+
+**Política de respuesta (CA-17):**
+- `FamilyRepresentative` / `PersonWithDisability` → **404** (oculta existencia del recurso)
+- `Professional` / `Admin` → **403** (feedback claro para usuarios internos)
+
+**Auditoría:** cada acceso (permitido o denegado) queda registrado en la tabla `AccessAudit` con `UserId`, `Role`, `Result`, `ActionType`, `IpAddress` y `CorrelationId`.
+
+**Listados:** el scoping se aplica en el repositorio vía `GetAccessiblePersonIdsAsync()` — no hay post-filtrado en memoria.
+
+```csharp
+// PersonsController.GetPersons — GlobalAdmin no aplica filtro
+var accessibleIds = _httpContextService.IsGlobalAdmin()
+    ? null
+    : await _resourceAuthz.GetAccessiblePersonIdsAsync(cancellationToken);
+```
+
+**Reglas de negocio** (distinto de acceso): viven en los command handlers. Ej: solo el profesional autor puede editar un reporte en estado `Draft` — validado en `UpdateReportCommandHandler`, no en el filtro.
 
 ## Errores Comunes
 
