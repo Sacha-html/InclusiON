@@ -1,0 +1,22 @@
+<div class="picker" role="radiogroup" [attr.aria-label]="ariaLabel" (keydown)="onKeydown($event)">
+  @for (c of colors; track c.hex; let i = $index) {
+    <button
+      #swatch
+      type="button"
+      class="swatch"
+      role="radio"
+      [class.selected]="c.hex === value"
+      [attr.aria-checked]="c.hex === value"
+      [attr.aria-label]="'Color ' + (c.name || c.hex)"
+      [attr.title]="c.name || c.hex"
+      [attr.tabindex]="getTabindex(c.hex, i)"
+      [style.background-color]="c.hex"
+      [disabled]="disabled"
+      (click)="select(c.hex)"
+      (focus)="focusedIndex = i">
+      @if (c.hex === value) {
+        <span class="check" aria-hidden="true">&#10003;</span>
+      }
+    </button>
+  }
+</div>

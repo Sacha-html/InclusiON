@@ -1,0 +1,42 @@
+.shape-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape-button {
+    transition: none;
+  }
+  .shape-button:hover,
+  .shape-button:active {
+    transform: none;
+  }
+}
+
+.shape-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.05);
+}
+
+.shape-button:focus-visible {
+  outline: 3px solid var(--a11y-focus-accent, #0D47A1);
+  outline-offset: 2px;
+}
+
+.shape-button.selected {
+  border-color: var(--a11y-primary, #0066CC);
+  background-color: color-mix(in srgb, var(--a11y-primary, #0066CC) 10%, transparent);
+}
+
+.shape-button:active {
+  transform: scale(0.95);
+}

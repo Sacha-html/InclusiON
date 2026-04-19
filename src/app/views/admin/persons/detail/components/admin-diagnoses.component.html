@@ -1,0 +1,91 @@
+<h5 class="mb-3">Diagnósticos</h5>
+
+@if (loading) {
+  <div class="text-center py-4">
+    <c-spinner></c-spinner>
+  </div>
+} @else if (diagnoses.length === 0) {
+  <p class="text-body-secondary">No hay diagnósticos registrados para esta persona.</p>
+} @else {
+  <table cTable hover responsive>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Diagnóstico principal</th>
+        <th>Profesional</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (d of diagnoses; track d.id) {
+        <tr>
+          <td>{{ formatDate(d.diagnosisDate) }}</td>
+          <td>{{ truncate(d.primaryDiagnosis, 80) }}</td>
+          <td>{{ d.professionalName }}</td>
+          <td>
+            <button cButton color="primary" size="sm" variant="outline"
+                    (click)="openDetail(d.id)">
+              Ver
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+<!-- Modal detalle -->
+<c-modal [visible]="showModal" (visibleChange)="!$event && closeModal()"
+         aria-labelledby="diag-modal-title" size="lg">
+  <c-modal-header>
+    <strong id="diag-modal-title">Diagnóstico — {{ formatDate(selected?.diagnosisDate) }}</strong>
+  </c-modal-header>
+  <c-modal-body>
+    @if (loadingDetail) {
+      <div class="text-center py-3">
+        <c-spinner></c-spinner>
+      </div>
+    } @else if (selected) {
+      <dl class="row mb-0">
+        @if (person?.autonomyLevelName) {
+          <dt class="col-sm-4">Nivel de autonomía</dt>
+          <dd class="col-sm-8">{{ person!.autonomyLevelName }}</dd>
+        }
+
+        <dt class="col-sm-4">Profesional</dt>
+        <dd class="col-sm-8">{{ selected.professionalName }}</dd>
+
+        <dt class="col-sm-4">Diagnóstico principal</dt>
+        <dd class="col-sm-8">{{ selected.primaryDiagnosis }}</dd>
+
+        @if (selected.initialObservations) {
+          <dt class="col-sm-4">Observaciones iniciales</dt>
+          <dd class="col-sm-8">{{ selected.initialObservations }}</dd>
+        }
+        @if (selected.identifiedCapabilities) {
+          <dt class="col-sm-4">Capacidades identificadas</dt>
+          <dd class="col-sm-8">{{ selected.identifiedCapabilities }}</dd>
+        }
+        @if (selected.identifiedChallenges) {
+          <dt class="col-sm-4">Desafíos identificados</dt>
+          <dd class="col-sm-8">{{ selected.identifiedChallenges }}</dd>
+        }
+        @if (selected.requiredSupports) {
+          <dt class="col-sm-4">Apoyos requeridos</dt>
+          <dd class="col-sm-8">{{ selected.requiredSupports }}</dd>
+        }
+        @if (selected.pedagogicalObjectives) {
+          <dt class="col-sm-4">Objetivos pedagógicos</dt>
+          <dd class="col-sm-8">{{ selected.pedagogicalObjectives }}</dd>
+        }
+        @if (selected.recommendedStrategies) {
+          <dt class="col-sm-4">Estrategias recomendadas</dt>
+          <dd class="col-sm-8">{{ selected.recommendedStrategies }}</dd>
+        }
+      </dl>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeModal()">Cerrar</button>
+  </c-modal-footer>
+</c-modal>
