@@ -1,0 +1,52 @@
+<button
+  type="button"
+  class="shape-button"
+  [class.selected]="selected"
+  [attr.aria-label]="ariaLabel"
+  [attr.aria-pressed]="selected"
+  (click)="handleClick()"
+  (keydown.enter)="handleClick()"
+  (keydown.space)="handleClick()">
+  <svg
+    [attr.width]="size"
+    [attr.height]="size"
+    [attr.viewBox]="'0 0 ' + size + ' ' + size"
+    aria-hidden="true"
+    focusable="false">
+    @switch (type) {
+      @case ('circle') {
+        <circle
+          [attr.cx]="size / 2"
+          [attr.cy]="size / 2"
+          [attr.r]="size / 2 - strokeWidth"
+          [attr.fill]="color"
+          [attr.stroke]="selected ? strokeColor : 'none'"
+          [attr.stroke-width]="selected ? strokeWidth : 0" />
+      }
+      @case ('square') {
+        <rect
+          [attr.x]="strokeWidth"
+          [attr.y]="strokeWidth"
+          [attr.width]="size - strokeWidth * 2"
+          [attr.height]="size - strokeWidth * 2"
+          [attr.fill]="color"
+          [attr.stroke]="selected ? strokeColor : 'none'"
+          [attr.stroke-width]="selected ? strokeWidth : 0" />
+      }
+      @case ('triangle') {
+        <polygon
+          [attr.points]="trianglePoints"
+          [attr.fill]="color"
+          [attr.stroke]="selected ? strokeColor : 'none'"
+          [attr.stroke-width]="selected ? strokeWidth : 0" />
+      }
+      @case ('star') {
+        <polygon
+          [attr.points]="starPoints"
+          [attr.fill]="color"
+          [attr.stroke]="selected ? strokeColor : 'none'"
+          [attr.stroke-width]="selected ? strokeWidth : 0" />
+      }
+    }
+  </svg>
+</button>
