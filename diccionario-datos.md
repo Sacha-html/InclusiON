@@ -1,6 +1,6 @@
 # Diccionario de Datos — Sistema InclusiON
 
-**Última actualización:** 2026-03-23
+**Última actualización:** 2026-04-18
 
 Este documento describe las entidades de datos del sistema InclusiON, organizadas por área funcional. Para cada entidad se listan sus atributos, tipo de dato, obligatoriedad y descripción.
 
@@ -553,20 +553,29 @@ Mensajes internos entre profesionales y familiares.
 
 ## 11. Auditoría
 
-### Registro de Acceso
-Rastro de auditoría para accesos a datos sensibles.
+### Registro de Acceso (`AccessAudit`)
+Rastro de auditoría para accesos a datos sensibles. Generado por `ResourceAuthorizationService` en cada verificación de acceso por recurso (capa 3 de autorización — HU-IN-172). Escritura write-behind (fire-and-forget) para no impactar latencia.
 
 | Atributo | Tipo | Obligatorio | Descripción |
 |----------|------|:-----------:|-------------|
-| Id | Entero | Sí | Identificador único |
-| Usuario | Referencia | Sí | Quién accedió |
-| Persona accedida | Referencia | No | Datos de qué persona se consultaron |
-| Tipo de acción | Texto (50) | Sí | Lectura, Creación, Modificación, Eliminación |
-| Tabla afectada | Texto (100) | No | Qué entidad se accedió |
-| Registro afectado | Texto (50) | No | ID del registro accedido |
-| Dirección IP | Texto (45) | No | IP desde donde se accedió |
-| Fecha y hora | Fecha/hora | Sí | Cuándo ocurrió |
-| Detalles | Texto largo | No | Información adicional |
+| Id | UUID | Sí | Identificador único del registro |
+| UserId | UUID | Sí | ID del usuario que intentó el acceso |
+| Role | Texto (50) | Sí | Rol del usuario en el momento del acceso (Admin, Professional, FamilyRepresentative, PersonWithDisability) |
+| AccessedPersonId | UUID | No | ID de la persona cuyo dato se intentó acceder (null si el recurso no es una persona directa) |
+| ActionType | Texto (50) | Sí | Tipo de acción: `Read`, `Create`, `Update`, `Delete` |
+| Result | Texto (20) | Sí | Resultado: `Allowed` o `Denied` |
+| AffectedTable | Texto (100) | No | Entidad accedida: `Persons`, `Diagnoses`, `Reports`, etc. |
+| AffectedRecordId | Texto (50) | No | ID del registro específico accedido |
+| IpAddress | Texto (45) | No | Dirección IP del solicitante (IPv4 o IPv6) |
+| CorrelationId | Texto (100) | No | ID de correlación del request HTTP para trazabilidad |
+| Timestamp | Fecha/hora UTC | Sí | Cuándo ocurrió el acceso |
+| Details | Texto largo | No | Información adicional (motivo de denegación, contexto) |
+
+**Notas:**
+- Retención propuesta: 2 años para accesos a datos clínicos (Ley 25.326)
+- La tabla es append-only: no se actualiza ni elimina
+- GlobalAdmin: sus accesos se registran siempre aunque no estén restringidos (cumplimiento ante auditoría)
+- Migración: `20260418062012_ExtendAccessAuditResources`
 
 ---
 
