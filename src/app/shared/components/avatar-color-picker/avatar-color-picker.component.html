@@ -8,7 +8,6 @@
       [class.selected]="c.hex === value"
       [attr.aria-checked]="c.hex === value"
       [attr.aria-label]="'Color ' + (c.name || c.hex)"
-      [attr.title]="c.name || c.hex"
       [attr.tabindex]="getTabindex(c.hex, i)"
       [style.background-color]="c.hex"
       [disabled]="disabled"
