@@ -22,7 +22,7 @@
               </div>
               <h4 class="text-danger mb-3">Invitacion no valida</h4>
               <c-alert color="danger">{{ errorMessage }}</c-alert>
-              <button cButton color="primary" class="mt-3" (click)="router.navigate(['/login'])">
+              <button cButton color="primary" class="mt-3 a11y-btn-primary" (click)="router.navigate(['/login'])">
                 Ir al inicio
               </button>
             </c-card-body>
@@ -36,7 +36,7 @@
               <svg cIcon name="cil-check-circle" size="3xl" class="text-success mb-3"></svg>
               <h4 class="text-success mb-3">Registro completado</h4>
               <p>Tu cuenta fue creada exitosamente. Ya puedes iniciar sesión en la plataforma.</p>
-              <button cButton color="primary" class="mt-3" (click)="router.navigate(['/login'])">
+              <button cButton color="primary" class="mt-3 a11y-btn-primary" (click)="router.navigate(['/login'])">
                 Iniciar sesión
               </button>
             </c-card-body>
@@ -149,6 +149,7 @@
                     cButton
                     color="primary"
                     type="submit"
+                    class="a11y-btn-primary"
                     [disabled]="isSubmitting"
                   >
                     @if (isSubmitting) {
