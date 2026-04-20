@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit } from '@angular/core';
 /**
  * Componente de avatar para login visual con seleccion de perfil.
  * Muestra inicial del nombre con color de fondo configurable.
@@ -12,7 +12,7 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
   styleUrl: './avatar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AvatarComponent {
+export class AvatarComponent implements OnInit {
   /** Inicial a mostrar (si no se proporciona, se calcula del nombre) */
   @Input() initial: string = '';
 
