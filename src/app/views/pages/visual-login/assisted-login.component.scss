@@ -170,17 +170,17 @@
 
 @media (prefers-contrast: more) {
   .login-card {
-    border: 3px solid var(--a11y-border, #000) !important;
+    border: 3px solid var(--a11y-border) !important;
   }
 
   .form-input {
     border-width: 3px !important;
-    border-color: var(--a11y-border, #000) !important;
+    border-color: var(--a11y-border) !important;
   }
 
   .supervisor-info {
     border-width: 3px;
-    border-color: var(--a11y-border, #000);
+    border-color: var(--a11y-border);
   }
 }
 
