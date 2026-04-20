@@ -40,6 +40,12 @@
     background-color: var(--a11y-primary) !important;
     border-color: var(--a11y-primary) !important;
     color: var(--a11y-primary-text) !important;
+
+    svg,
+    span {
+      color: var(--a11y-primary-text) !important;
+    }
+
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 

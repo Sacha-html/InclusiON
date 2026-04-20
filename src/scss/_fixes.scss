@@ -88,8 +88,13 @@ button[color="secondary"] svg {
   border-color: var(--a11y-primary) !important;
   color: var(--a11y-primary-text) !important;
 
-  svg {
+  svg,
+  span,
+  p {
     color: var(--a11y-primary-text) !important;
+  }
+
+  svg {
     fill: var(--a11y-primary-text) !important;
   }
 
@@ -98,6 +103,12 @@ button[color="secondary"] svg {
     background-color: var(--a11y-primary-dark) !important;
     border-color: var(--a11y-primary-dark) !important;
     color: var(--a11y-primary-text) !important;
+
+    svg,
+    span,
+    p {
+      color: var(--a11y-primary-text) !important;
+    }
   }
 
   &:disabled {
