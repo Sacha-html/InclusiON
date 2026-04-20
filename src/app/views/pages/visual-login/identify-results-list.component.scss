@@ -12,9 +12,9 @@
   justify-content: center;
   gap: 12px;
   padding: 20px 12px;
-  border: 2px solid var(--a11y-border, #E0E0E0);
+  border: 2px solid var(--a11y-border);
   border-radius: 16px;
-  background: var(--a11y-bg, #ffffff);
+  background: var(--a11y-bg);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   min-height: 160px;
@@ -23,11 +23,11 @@
 .match-card:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border-color: var(--a11y-primary, #0066CC);
+  border-color: var(--a11y-primary);
 }
 
 .match-card:focus-visible {
-  outline: 3px solid var(--a11y-focus-accent, #0D47A1);
+  outline: 3px solid var(--a11y-focus-accent);
   outline-offset: 3px;
 }
 
@@ -60,12 +60,12 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  color: var(--a11y-text, #212121);
+  color: var(--a11y-text);
   font-weight: 600;
   font-size: 18px;
 }
 
 .last-initial {
-  color: var(--a11y-text-muted, #6c757d);
+  color: var(--a11y-text-muted);
   font-weight: 500;
 }
