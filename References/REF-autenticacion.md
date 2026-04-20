@@ -72,6 +72,50 @@ Si el usuario tiene contraseña temporal (`MustChangePassword = true`), se redir
 | `isGlobalAdmin` | true/false — determina acceso a funciones de admin global |
 | `institutionId` | IDs de instituciones asignadas (para admins institucionales) |
 
+## Autorización por Recurso — Política de Códigos de Respuesta (CA-17)
+
+La plataforma opera con **tres capas de autorización apiladas**:
+
+```
+[1] Autenticación JWT          → ¿quién sos?          → 401 si falla
+[2] Política de rol/permiso    → ¿podés llegar aquí?  → 403 si falla
+[3] Autorización por recurso   → ¿tenés vínculo?      → 403 o 404 según rol (ver abajo)
+```
+
+### Decisión 403 vs 404 en Capa 3
+
+La respuesta al denegar acceso a nivel de recurso depende del rol del solicitante:
+
+| Rol | Respuesta al denegar | Motivo |
+|-----|----------------------|--------|
+| `Professional` | **403 Forbidden** | Usuario interno — el feedback explícito es apropiado y útil |
+| `Admin` (global e institucional) | **403 Forbidden** | Usuario interno — ídem |
+| `FamilyRepresentative` | **404 Not Found** | Oculta la existencia del recurso para no exponer datos de terceros |
+| `PersonWithDisability` | **404 Not Found** | Ídem — mínima exposición de información |
+
+**Principio aplicado:** *security through obscurity* parcial para roles externos — un Familiar que intenta acceder a una persona que no tiene a cargo no sabe si la persona existe o simplemente no tiene acceso.
+
+### Fail-closed (CA-10)
+
+Si no se puede determinar el vínculo (falla de DB, usuario sin rol válido, recurso inexistente), la respuesta es siempre **deny**, nunca allow. Un recurso inexistente devuelve 403 (no 404) para no filtrar información de existencia a roles profesionales.
+
+### Manejo en el frontend
+
+El `authInterceptor` centraliza la respuesta al 403 HTTP:
+- Muestra toast: `"No tenés permiso para acceder a este recurso"`
+- Redirige al dashboard del rol del usuario (`RoleRoutes` en `shared/constants/roles.ts`)
+
+El 404 de acceso denegado (roles externos) no es interceptado globalmente — cada componente lo maneja como recurso no encontrado.
+
+### Implementación
+
+- **Servicio:** `IResourceAuthorizationService` / `ResourceAuthorizationService` (Infrastructure)
+- **Filtros declarativos:** `[PersonAccess(mode)]`, `[DiagnosisAccess(mode)]`, `[ReportAccess(mode)]` en `InclusiON.Api/Filters/`
+- **Auditoría:** cada acceso (permitido o denegado) queda registrado en `AccessAudit` (write-behind)
+- **HU de referencia:** [HU-IN-172](../HU/HU-IN-172-autorizacion-por-recurso.md)
+
+---
+
 ## Diagrama de flujo
 
 ```mermaid

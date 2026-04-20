@@ -37,7 +37,42 @@ El admin global crea usuarios admin y los vincula a instituciones. Se genera con
 - **Mis instituciones:** `GET /api/admin/institutions-assignments/me`
 - **Frontend:** `/admin/admins`
 
-### 5. Filtrado por Institución
+### 5. Autorización por Recurso — Capa 3 (HU-IN-172)
+
+Más allá de los permisos del rol, el acceso a entidades sensibles requiere un **vínculo explícito** entre el usuario y el recurso solicitado. Esta es la tercera capa de seguridad, aplicada después de verificar JWT y política de permiso.
+
+#### Fuentes de verdad por rol
+
+| Rol | Tabla de vínculo | Condición |
+|-----|-----------------|-----------|
+| Professional | `ProfessionalPersons` | `ProfessionalId` + `PersonId` + `IsActive = true` |
+| FamilyRepresentative | `PersonRepresentatives` | `RepresentativeId` + `PersonId` + `IsActive = true` |
+| Admin Institucional | `AdminInstitutions` | `AdminUserId` + `InstitutionId` |
+| GlobalAdmin | — | Bypass total (siempre permitido, pero auditado) |
+
+#### Entidades sensibles en scope
+
+`PersonWithDisability`, `PersonSkillProfile`, `Diagnosis`, `Report`, `ActivityResponse`, `PersonRoadmap`, `ActivityAssignment`, `Invitation`, `User` (consulta de terceros)
+
+#### Implementación técnica
+
+- **Interfaz:** `IResourceAuthorizationService` (Application)
+- **Implementación:** `ResourceAuthorizationService` (Infrastructure) — inyectado vía DI
+- **Filtros declarativos** en controllers (evitan lógica repetida en handlers):
+  - `[PersonAccess(AccessMode.Read/Write)]` — lee `{personId}` de la ruta
+  - `[DiagnosisAccess(AccessMode.Read/Write)]` — lee `{id}`, resuelve PersonId del diagnóstico
+  - `[ReportAccess(AccessMode.Read/Write)]` — lee `{reportId}`, resuelve PersonId del reporte
+- **Listados:** `GetAccessiblePersonIdsAsync()` filtra en el repositorio (no post-filtrado en memoria)
+- **Cache por request:** el resultado de `ProfessionalAssignments` se cachea en el scope del request para evitar consultas repetidas
+
+#### Política de respuesta
+
+- Roles internos (Professional, Admin) → **403 Forbidden**
+- Roles externos (FamilyRepresentative, PersonWithDisability) → **404 Not Found** (oculta existencia)
+
+Ver detalle completo en [References/REF-autenticacion.md](../References/REF-autenticacion.md).
+
+### 6. Filtrado por Institución
 Los admins institucionales solo ven datos de sus instituciones asignadas.
 ```
 Admin Institucional
