@@ -35,9 +35,9 @@
   padding: 1rem 2rem;
   min-height: 56px;
   border-radius: 1rem;
-  border: 3px solid var(--a11y-border, #9E9E9E) !important;
-  background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
-  color: var(--a11y-text, #1A1A1A) !important;
+  border: 3px solid var(--a11y-border) !important;
+  background-color: var(--a11y-bg-secondary) !important;
+  color: var(--a11y-text) !important;
 
   svg {
     width: 24px;
@@ -47,13 +47,13 @@
 
   &:hover,
   &:focus {
-    background-color: var(--a11y-primary, #0D47A1) !important;
-    border-color: var(--a11y-primary, #0D47A1) !important;
-    color: var(--a11y-primary-text, #FFFFFF) !important;
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
 
     svg,
     span {
-      color: var(--a11y-primary-text, #FFFFFF) !important;
+      color: var(--a11y-primary-text) !important;
     }
 
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -88,12 +88,12 @@
 
 .supervisor-info {
   padding: 1rem;
-  background-color: var(--a11y-bg-secondary, #E3F2FD);
+  background-color: var(--a11y-bg-secondary);
   border-radius: 1rem;
-  border: 2px solid var(--a11y-primary, #0D47A1);
+  border: 2px solid var(--a11y-primary);
 
   .supervisor-icon {
-    color: var(--a11y-primary, #0D47A1);
+    color: var(--a11y-primary);
 
     svg {
       width: 48px;
@@ -102,12 +102,12 @@
   }
 
   p {
-    color: var(--a11y-text, #1A1A1A);
+    color: var(--a11y-text);
   }
 }
 
 .form-section-title {
-  color: var(--a11y-text-secondary, #666666);
+  color: var(--a11y-text-secondary);
   font-size: 0.9rem;
 
   svg {
@@ -119,11 +119,11 @@
 .form-input {
   font-size: 1.1rem !important;
   padding: 0.875rem !important;
-  border: 3px solid var(--a11y-border, #9E9E9E) !important;
+  border: 3px solid var(--a11y-border) !important;
 
   &:focus {
-    border-color: var(--a11y-primary, #0D47A1) !important;
-    box-shadow: 0 0 0 4px rgba(13, 71, 161, 0.25) !important;
+    border-color: var(--a11y-primary) !important;
+    box-shadow: 0 0 0 4px var(--a11y-focus-color) !important;
   }
 }
 
@@ -133,19 +133,19 @@
   padding: 1rem 2rem;
   min-height: 60px;
   border-radius: 1rem;
-  background-color: var(--a11y-success, #1B5E20) !important;
-  border-color: var(--a11y-success, #1B5E20) !important;
-  color: var(--a11y-success-text, #FFFFFF) !important;
+  background-color: var(--a11y-success) !important;
+  border-color: var(--a11y-success) !important;
+  color: var(--a11y-success-text) !important;
 
   &:hover:not(:disabled) {
-    background-color: var(--a11y-success-hover, #2E7D32) !important;
-    border-color: var(--a11y-success-hover, #2E7D32) !important;
+    background-color: var(--a11y-success) !important;
+    border-color: var(--a11y-success) !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   &:focus-visible {
-    outline: 4px solid var(--a11y-focus-color, rgba(27, 94, 32, 0.5));
+    outline: 4px solid var(--a11y-focus-color);
     outline-offset: 2px;
   }
 
