@@ -274,7 +274,7 @@
   text-align: left;
   font-family: var(--a11y-font-family, inherit);
 
-  &:hover { border-color: var(--a11y-panel-accent); background: rgba(var(--a11y-panel-accent), 0.1); }
+  &:hover { border-color: var(--a11y-panel-accent); background: var(--a11y-panel-section-bg); }
 
   &.active {
     border-color: var(--a11y-panel-accent);
@@ -458,7 +458,7 @@
   font-weight: 500;
   font-family: var(--a11y-font-family, inherit);
 
-  &:hover { border-color: var(--a11y-panel-accent); background: rgba(var(--a11y-panel-accent), 0.1); }
+  &:hover { border-color: var(--a11y-panel-accent); background: var(--a11y-panel-section-bg); }
   svg { width: 20px; height: 20px; color: var(--a11y-panel-accent); }
 
   &.a11y-tts-stop {
@@ -513,7 +513,6 @@
 [data-profile="tritanopia"] {
   .a11y-panel-title,
   .a11y-section-title {
-    // Usar --a11y-panel-accent = #F48FB1 (7.8:1 sobre #4A148C, AAA) — era #E91E63 (2.8:1 ❌)
     color: var(--a11y-panel-accent) !important;
   }
 

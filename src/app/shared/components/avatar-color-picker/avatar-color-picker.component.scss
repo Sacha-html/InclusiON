@@ -10,7 +10,7 @@
   height: 36px;
   min-width: 36px;
   border-radius: 50%;
-  border: 2px solid var(--a11y-border, #E0E0E0);
+  border: 2px solid var(--a11y-border);
   cursor: pointer;
   padding: 0;
   display: inline-flex;
@@ -22,6 +22,20 @@
   line-height: 1;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+:global([data-color-mode="dark"]) .swatch {
+  color: var(--a11y-text);
+}
+
+.swatch:focus-visible {
+  outline: 3px solid var(--a11y-focus-accent);
+  outline-offset: 3px;
+}
+
+.swatch.selected {
+  border: 3px solid var(--a11y-text);
+  box-shadow: 0 0 0 2px var(--a11y-bg), 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 :global([data-color-mode="dark"]) .swatch {
