@@ -1,6 +1,6 @@
 # InclusiON — Estado de Historias de Usuario
 
-**Última actualización:** 2026-04-17
+**Última actualización:** 2026-04-18
 
 Leyenda de estados:
 - ✅ **HECHO** — Implementado y funcionando
@@ -14,7 +14,7 @@ Leyenda de estados:
 | Track | Hechas | Parciales | Pendientes | Total |
 |-------|--------|-----------|------------|-------|
 | Backend | 9 | 2 | 9 | 20 |
-| Frontend | 8 | 0 | 13 | 21 |
+| Frontend | 9 | 0 | 12 | 21 |
 
 ---
 
@@ -101,7 +101,7 @@ Leyenda de estados:
 
 | ID | Historia | Depende de (BE) | Estado | Notas |
 |----|----------|-----------------|--------|-------|
-| FE-14 | Timeline de Diagnósticos y Formulario | BE-13 | ⏳ PENDIENTE | Backend listo. Falta: vistas Angular en perfil de persona (formulario + timeline). Jira IN-86 |
+| FE-14 | Timeline de Diagnósticos y Formulario | BE-13 | ✅ HECHO | Timeline + formulario create/edit en tab del perfil de persona. Filtro por fecha (desde/hasta) con `computed()` client-side. Jira IN-86 |
 | FE-15 | Creación de Reportes y Vista Familia | BE-14 | ✅ HECHO | Profesional: lista + alta con modal + submit. Admin: lista global + tab en detalle profesional. Familiar: lista + detalle en `/family/reports`. Jira IN-138 |
 | FE-16 | Mensajería Interna — Inbox y Redactar | BE-15 | ⏳ PENDIENTE | |
 | FE-17 | Panel de Configuración del Motor Adaptativo | BE-17 | ⏳ PENDIENTE | Config de rangos para el profesional |
@@ -114,6 +114,19 @@ Leyenda de estados:
 | FE-19 | Panel de Gestión de Usuarios (Admin) | BE-18 | ✅ HECHO | `/admin/users` listado paginado con filtros, sort, reset password, deactivate, reactivate |
 | FE-20 | Onboarding Wizard (Profesional y Familiar) | BE-19 | ⏳ PENDIENTE | `/pro/onboarding/profile`, `/family/onboarding/welcome`, tour guiado |
 | FE-21 | Centro de Ayuda y Tickets de Soporte | BE-20 | ⏳ PENDIENTE | `/help` FAQ, `/help/tickets` mis tickets, `/admin/support/*` gestión |
+
+---
+
+---
+
+## Sprint 6 — En Curso (2026-04-18)
+
+### Features extras Sprint 6
+
+| ID | Historia | Estado | Notas |
+|----|----------|--------|-------|
+| IN-86 | Timeline de Diagnósticos en Perfil de Persona (Profesional) | ✅ HECHO | Timeline + formulario create/edit como tab en detalle de persona. Filtro por fecha (desde/hasta) con `computed()` client-side. Contador de resultados filtrados. Corresponde a FE-14. |
+| IN-173 | Hardening de Seguridad de Datos Sensibles | ✅ HECHO | Rate limiting auth (PIN 5/5min, login 10/min, refresh 20/min). Argon2id para PINs con migración lazy desde BCrypt. Cifrado AES-256-GCM en datos clínicos con `[Encrypted]` annotation automática (Diagnosis, Report, ActivityResponse, ActivityResult). `SensitiveDataEncryptor` al arranque. 21 unit tests. Ver [HU/HU-IN-173-hardening-seguridad.md](./HU/HU-IN-173-hardening-seguridad.md) |
 
 ---
 
@@ -145,6 +158,8 @@ Funcionalidades implementadas que no estaban planificadas en las historias de us
 |---------|--------|-------------|
 | Auto-registro Profesional (IN-149) | ✅ | Formulario público de registro, validación async de email y matrícula, creación atómica User+Professional. Ver [HU/HU-IN-149-auto-registro-profesional.md](./HU/HU-IN-149-auto-registro-profesional.md) |
 | Validación por Administrador (IN-150) | ✅ | Tab "Pendientes" en lista de profesionales, flujo Pending→Approved/Rejected, emails de notificación. Ver [HU/HU-IN-150-validacion-admin.md](./HU/HU-IN-150-validacion-admin.md) |
+| Autorización por Recurso (IN-172) | ✅ | Row-level authorization completo (4 fases): `IResourceAuthorizationService` + `AccessAudit` + filtros declarativos `[PersonAccess]` / `[DiagnosisAccess]` / `[ReportAccess]` + 28 tests (5 unit + 23 integración). Frontend: `authInterceptor` redirige al dashboard del rol en 403. Ver [HU/HU-IN-172-autorizacion-por-recurso.md](./HU/HU-IN-172-autorizacion-por-recurso.md) |
+| Hardening de Seguridad (IN-173) | ✅ | Rate limiting por IP en endpoints auth. Argon2id (OWASP) para PINs + migración lazy desde BCrypt legacy. AES-256-GCM para datos clínicos vía `[Encrypted]` annotation + EF Core value converter automático. `SensitiveDataEncryptor` idempotente al arranque. 21 unit tests nuevos. Ver [HU/HU-IN-173-hardening-seguridad.md](./HU/HU-IN-173-hardening-seguridad.md) |
 | CRUD Familiares | ✅ | `FamilyController` + admin UI completa (list/new/edit/detail) |
 | CRUD Instituciones Educativas | ✅ | `InstitutionsController` + admin UI completa |
 | ABM Catálogos (6 tipos) | ✅ | `CatalogAdminController` + UI con submenú por tipo |
