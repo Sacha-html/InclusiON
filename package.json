@@ -3,12 +3,10 @@
   "version": "0.1",
   "copyright": "Copyright 2025",
   "license": "MIT",
-  "author": "The CoreUI Team (https://github.com/orgs/coreui/people) and contributors",
-  "homepage": "https://coreui.io/angular",
+  "author": "InclusiON Team",
+  "homepage": "",
   "config": {
-    "theme": "default",
-    "coreui_library_short_version": "5.5",
-    "coreui_library_docs_url": "https://coreui.io/angular/docs/"
+    "theme": "default"
   },
   "scripts": {
     "ng": "ng",
