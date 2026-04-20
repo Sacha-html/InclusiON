@@ -129,8 +129,7 @@
   &:hover {
     background: var(--a11y-panel-accent);
     transform: scale(1.03);
-    // #000000 garantiza 21:1 sobre cualquier accent claro del sistema (mín. #90CAF9 → 15.3:1)
-    svg, .a11y-trigger-text { color: #000000 !important; }
+    svg, .a11y-trigger-text { color: var(--a11y-panel-active-text) !important; }
   }
 
   &:focus-visible { outline: 4px solid var(--a11y-panel-accent); outline-offset: 3px; }
