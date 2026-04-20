@@ -75,3 +75,34 @@ button[color="primary"] svg {
 button[color="secondary"] svg {
   color: inherit;
 }
+
+
+// ─────────────────────────────────────────────
+// BOTÓN PRIMARIO ACCESIBLE (a11y-btn-primary)
+// Asegura texto blanco sobre azul para contraste WCAG
+// Se usa en lugar de CoreUI .btn-primary cuando el
+// fondo no garantiza contraste adecuado
+// ─────────────────────────────────────────────
+.a11y-btn-primary {
+  background-color: var(--a11y-primary) !important;
+  border-color: var(--a11y-primary) !important;
+  color: var(--a11y-primary-text) !important;
+
+  svg {
+    color: var(--a11y-primary-text) !important;
+    fill: var(--a11y-primary-text) !important;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-primary-dark) !important;
+    border-color: var(--a11y-primary-dark) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  &:disabled {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+    opacity: 0.65;
+  }
+}

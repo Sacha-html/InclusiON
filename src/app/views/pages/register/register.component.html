@@ -139,6 +139,7 @@
                   placeholder="Repetir contraseña"
                   autocomplete="new-password"
                   aria-required="true"
+                  [attr.aria-invalid]="hasError('confirmPassword', 'required') || (!passwordsMatch && f['confirmPassword'].touched)"
                   [class.is-invalid]="hasError('confirmPassword', 'required') || (!passwordsMatch && f['confirmPassword'].touched)"
                 />
                 <span 

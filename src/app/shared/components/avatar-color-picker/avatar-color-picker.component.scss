@@ -16,7 +16,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #212121;
+  color: var(--a11y-text);
   font-size: 18px;
   font-weight: 700;
   line-height: 1;
@@ -25,7 +25,7 @@
 }
 
 :global([data-color-mode="dark"]) .swatch {
-  color: #ffffff;
+  color: var(--a11y-text-dark);
 }
 
 @media (prefers-reduced-motion: reduce) {

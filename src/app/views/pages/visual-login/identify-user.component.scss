@@ -184,29 +184,3 @@
     border-radius: 1rem !important;
   }
 }
-
-// Botón primario accesible - override absoluto
-.a11y-btn-primary {
-  background-color: var(--a11y-primary) !important;
-  border-color: var(--a11y-primary) !important;
-  color: var(--a11y-primary-text) !important;
-  font-weight: 600 !important;
-
-  svg {
-    color: var(--a11y-primary-text) !important;
-    fill: var(--a11y-primary-text) !important;
-  }
-
-  &:hover,
-  &:focus {
-    background-color: var(--a11y-primary-dark) !important;
-    border-color: var(--a11y-primary-dark) !important;
-    color: var(--a11y-primary-text) !important;
-  }
-
-  &:disabled {
-    background-color: var(--a11y-primary) !important;
-    color: var(--a11y-primary-text) !important;
-    opacity: 0.65;
-  }
-}
