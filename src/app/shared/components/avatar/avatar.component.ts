@@ -17,7 +17,7 @@ export class AvatarComponent {
   @Input() initial: string = '';
 
   /** Color de fondo del avatar en formato hexadecimal */
-  @Input() color: string = 'var(--a11y-primary, #2196F3)';
+  @Input() color: string = 'var(--a11y-primary, #0D47A1)';
 
   /** Tamanio del avatar en pixeles */
   @Input() size: number = 80;

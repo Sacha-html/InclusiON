@@ -75,7 +75,8 @@
   justify-content: center;
   font-size: 2.5rem;
   font-weight: bold;
-  color: white;
+  color: var(--a11y-primary-text);
+  background-color: var(--a11y-primary);
   text-transform: uppercase;
 }
 
@@ -167,30 +168,5 @@
     font-size: 1rem;
     padding: 0.875rem 1.5rem;
     min-height: 52px;
-  }
-}
-
-// Botón primario accesible
-.a11y-btn-primary {
-  background-color: var(--a11y-primary) !important;
-  border-color: var(--a11y-primary) !important;
-  color: var(--a11y-primary-text) !important;
-
-  svg {
-    color: var(--a11y-primary-text) !important;
-    fill: var(--a11y-primary-text) !important;
-  }
-
-  &:hover,
-  &:focus {
-    background-color: var(--a11y-primary-dark) !important;
-    border-color: var(--a11y-primary-dark) !important;
-    color: var(--a11y-primary-text) !important;
-  }
-
-  &:disabled {
-    background-color: var(--a11y-primary) !important;
-    color: var(--a11y-primary-text) !important;
-    opacity: 0.65;
   }
 }
