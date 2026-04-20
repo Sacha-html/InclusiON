@@ -47,7 +47,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--a11y-primary-text);
+  background-color: var(--a11y-primary);
   font-size: 28px;
   font-weight: 700;
   text-transform: uppercase;

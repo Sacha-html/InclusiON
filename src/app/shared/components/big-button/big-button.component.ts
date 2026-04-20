@@ -13,8 +13,8 @@ export class BigButtonComponent {
   @Input() label = '';
   @Input() icon?: string;
   @Input() image?: string;
-  @Input() color = '#2196F3';
-  @Input() bgColor = '#FFFFFF';
+  @Input() color = '';
+  @Input() bgColor = '';
   @Input() disabled = false;
   @Input() ariaLabel?: string;
 
