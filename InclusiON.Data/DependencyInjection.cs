@@ -36,6 +36,14 @@ namespace InclusiON.Data
                 options.Password.RequireUppercase = true;
                 options.Password.RequireLowercase = true;
                 options.User.RequireUniqueEmail = true;
+
+                // Bloqueo de cuenta tras intentos fallidos.
+                // 5 intentos / 15 min aplica a todos los tipos de usuario (profesional, familia, admin, persona).
+                // Cada handler visual llama AccessFailedAsync() manualmente al fallar credenciales;
+                // el login estándar delega en CheckPasswordAsync(lockoutOnFailure: true).
+                options.Lockout.AllowedForNewUsers    = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan  = TimeSpan.FromMinutes(15);
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<AppDbContext>()
