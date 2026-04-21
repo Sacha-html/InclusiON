@@ -1,8 +1,8 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using InclusiON.Application.Constants;
 using InclusiON.Domain.Enums;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace InclusiON.Tests.Integration.TestSupport
@@ -47,39 +47,53 @@ namespace InclusiON.Tests.Integration.TestSupport
             int[]? institutionIds,
             params string[] permissions)
         {
-            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Secret));
+            // Usamos JsonWebTokenHandler (el mismo handler que usa el middleware JWT bearer
+            // en .NET 8+) para garantizar compatibilidad de firma en Microsoft.IdentityModel 8.x.
+            // JwtSecurityTokenHandler y JsonWebTokenHandler pueden producir firmas incompatibles
+            // entre sí con las mismas claves en 8.0.x.
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Secret));
 
-            var claims = new List<Claim>
+            // JsonWebTokenHandler NO aplica InboundClaimTypeMap, por lo que los claim types
+            // se leen tal como se escriben en el JWT. Usamos los URIs completos de ClaimTypes
+            // para que el servidor los encuentre con FindFirst(ClaimTypes.XXX) sin mapping.
+            var claimsDict = new Dictionary<string, object>
             {
-                new(ClaimTypes.NameIdentifier, userId.ToString()),
-                new(ClaimTypes.Name, "Test User"),
-                new(ClaimTypes.Email, "test@test.com"),
-                new(ClaimTypes.Role, role),
-                new(Permissions.IsActiveClaimType, "true"),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                [ClaimTypes.NameIdentifier]         = userId.ToString(),
+                [ClaimTypes.Name]                   = "Test User",
+                [ClaimTypes.Email]                  = "test@test.com",
+                [ClaimTypes.Role]                   = role,
+                [Permissions.IsActiveClaimType]     = "true",
+                ["jti"]                             = Guid.NewGuid().ToString(),
             };
 
-            foreach (var perm in permissions)
-                claims.Add(new Claim(Permissions.ClaimType, perm));
+            // JsonWebTokenHandler serializa un string[] como JSON array → múltiples claims
+            // del mismo tipo cuando el token se valida. Esto garantiza que c.Value == perm
+            // funcione correctamente para cada permiso individual.
+            if (permissions.Length == 1)
+                claimsDict[Permissions.ClaimType] = permissions[0];
+            else if (permissions.Length > 1)
+                claimsDict[Permissions.ClaimType] = permissions;
 
             if (role == nameof(IdentityRoles.Admin))
             {
-                claims.Add(new Claim(Permissions.GlobalAdminClaimType, isGlobalAdmin ? "true" : "false"));
+                claimsDict[Permissions.GlobalAdminClaimType] = isGlobalAdmin ? "true" : "false";
 
                 if (!isGlobalAdmin && institutionIds is not null)
-                    foreach (var id in institutionIds)
-                        claims.Add(new Claim(Permissions.InstitutionIdClaimType, id.ToString()));
+                    claimsDict[Permissions.InstitutionIdClaimType] =
+                        institutionIds.Select(id => id.ToString()).ToArray();
             }
 
-            var token = new JwtSecurityToken(
-                issuer: Issuer,
-                audience: Audience,
-                claims: claims,
-                notBefore: DateTime.UtcNow,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature));
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Claims            = claimsDict,
+                Issuer            = Issuer,
+                Audience          = Audience,
+                NotBefore         = DateTime.UtcNow,
+                Expires           = DateTime.UtcNow.AddHours(1),
+                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+            };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JsonWebTokenHandler().CreateToken(descriptor);
         }
     }
 }

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="10.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
@@ -19,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\InclusiON.Api\InclusiON.Api.csproj" />
     <ProjectReference Include="..\..\InclusiON.Application\InclusiON.Application.csproj" />
     <ProjectReference Include="..\..\InclusiON.Data\InclusiON.Data.csproj" />
     <ProjectReference Include="..\..\InclusiON.Domain\InclusiON.Domain.csproj" />

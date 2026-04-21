@@ -1,8 +1,10 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using InclusiON.Data;
 
 namespace InclusiON.Tests.Integration.TestSupport
@@ -64,6 +66,20 @@ namespace InclusiON.Tests.Integration.TestSupport
                 {
                     options.UseInMemoryDatabase(_dbName);
                     options.UseInternalServiceProvider(efServiceProvider);
+                });
+
+                // PostConfigure garantiza que la clave de firma JWT usada para validar tokens
+                // coincida con la que usa TokenHelper — independientemente del orden en que
+                // AddInfrastructure leyó la IConfiguration en Program.cs.
+                // UseSetting afecta la configuración del host, no la app configuration en
+                // el modelo de hosting mínimo, por eso sobreescribimos directamente en options.
+                services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, opts =>
+                {
+                    var key = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes("this-is-a-test-only-jwt-secret-key-with-enough-length-for-hmac-256"));
+                    opts.TokenValidationParameters.IssuerSigningKey = key;
+                    opts.TokenValidationParameters.ValidIssuer      = "InclusiONTests";
+                    opts.TokenValidationParameters.ValidAudience     = "InclusiONTests";
                 });
             });
         }
