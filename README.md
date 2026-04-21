@@ -86,9 +86,6 @@ dotnet build
 # Todos los tests
 dotnet test
 
-# Con cobertura
-dotnet test --collect:"XPlat Code Coverage"
-
 # Solo unitarios
 dotnet test InclusiON.Tests/Unit/InclusiON.Tests.Unit.csproj
 
@@ -97,6 +94,22 @@ dotnet test InclusiON.Tests/Integration/InclusiON.Tests.Integration.csproj
 ```
 
 Los tests de integración usan `WebApplicationFactory<Program>` con EF Core InMemory — no requieren PostgreSQL ni conexión externa.
+
+### Cobertura de código
+
+El script `coverage.ps1` ejecuta los tests con cobertura, genera un reporte HTML y lo abre en el browser:
+
+```powershell
+.\coverage.ps1
+```
+
+**Prerequisito** — instalar `reportgenerator` como herramienta global (una sola vez):
+
+```bash
+dotnet tool install -g dotnet-reportgenerator-globaltool
+```
+
+El reporte se genera en `coverage-report/index.html`. Ambas carpetas (`coverage/` y `coverage-report/`) están en `.gitignore`.
 
 ### Limpieza
 
