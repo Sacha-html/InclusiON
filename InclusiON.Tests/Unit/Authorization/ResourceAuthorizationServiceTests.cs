@@ -210,5 +210,186 @@ namespace InclusiON.Tests.Authorization
             allowed.Should().BeTrue();
             await audit.Received(1).LogAsync(expectedEntry, Arg.Any<CancellationToken>());
         }
+
+        // ── EntityId optimization path (claim encriptado en JWT) ─────────────
+        // Estos tests verifican que cuando el entityId llega en el token (sin join extra),
+        // la autorización sigue funcionando correctamente.
+
+        private static IHttpContextService BuildHttpContextWithEntityId(
+            Guid userId, string role, Guid entityId, bool isGlobalAdmin = false)
+        {
+            var svc = Substitute.For<IHttpContextService>();
+            svc.GetCurrentUserId().Returns(userId);
+            svc.GetCurrentUserRole().Returns(role);
+            svc.IsGlobalAdmin().Returns(isGlobalAdmin);
+            svc.GetInstitutionIds().Returns(new List<int>());
+            svc.GetCurrentEntityId().Returns(entityId);
+            svc.GetClientIpAddress().Returns("127.0.0.1");
+            svc.GetCorrelationId().Returns("test-correlation");
+            return svc;
+        }
+
+        [Fact]
+        public async Task Professional_withEntityId_can_access_assigned_person()
+        {
+            // Arrange — professionalId conocido sin necesidad de join por UserId
+            var userId         = Guid.NewGuid();
+            var professionalId = Guid.NewGuid();
+            var personId       = Guid.NewGuid();
+
+            Db.Professionals.Add(new Professional { Id = professionalId, UserId = userId });
+            Db.ProfessionalPersons.Add(new ProfessionalPerson
+            {
+                ProfessionalId = professionalId,
+                PersonId       = personId,
+                IsActive       = true
+            });
+            await Db.SaveChangesAsync();
+
+            var http = BuildHttpContextWithEntityId(userId, nameof(IdentityRoles.Professional), professionalId);
+            var sut  = BuildSut(http, out _);
+
+            // Act
+            var allowed = await sut.CanAccessPersonAsync(personId, AccessMode.Read);
+
+            // Assert
+            allowed.Should().BeTrue("el entityId del JWT coincide con el profesional asignado");
+        }
+
+        [Fact]
+        public async Task Professional_withEntityId_cannot_access_unassigned_person()
+        {
+            // Arrange — entityId en JWT no tiene vínculo con la persona
+            var userId         = Guid.NewGuid();
+            var professionalId = Guid.NewGuid();
+            var otherPersonId  = Guid.NewGuid();
+
+            Db.Professionals.Add(new Professional { Id = professionalId, UserId = userId });
+            // No ProfessionalPerson row
+            await Db.SaveChangesAsync();
+
+            var http = BuildHttpContextWithEntityId(userId, nameof(IdentityRoles.Professional), professionalId);
+            var sut  = BuildSut(http, out _);
+
+            // Act
+            var allowed = await sut.CanAccessPersonAsync(otherPersonId, AccessMode.Read);
+
+            // Assert
+            allowed.Should().BeFalse("el profesional no tiene asignada esa persona");
+        }
+
+        [Fact]
+        public async Task Family_withEntityId_can_access_linked_person()
+        {
+            // Arrange — familyId conocido desde el JWT
+            var userId   = Guid.NewGuid();
+            var familyId = Guid.NewGuid();
+            var personId = Guid.NewGuid();
+
+            Db.FamilyRepresentatives.Add(new FamilyRepresentative
+            {
+                Id = familyId, UserId = userId, FirstName = "Ana", LastName = "Perez"
+            });
+            Db.PersonRepresentatives.Add(new PersonRepresentative
+            {
+                Id = Guid.NewGuid(), PersonId = personId, RepresentativeId = familyId, IsActive = true
+            });
+            await Db.SaveChangesAsync();
+
+            var http = BuildHttpContextWithEntityId(userId, nameof(IdentityRoles.FamilyRepresentative), familyId);
+            var sut  = BuildSut(http, out _);
+
+            // Act
+            var allowed = await sut.CanAccessPersonAsync(personId, AccessMode.Read);
+
+            // Assert
+            allowed.Should().BeTrue("el familyId del JWT tiene vínculo activo con la persona");
+        }
+
+        [Fact]
+        public async Task CanAccessInvitation_NoPerson_ProfessionalOwner_WithEntityId_Allowed()
+        {
+            // Invitación sin persona: solo el creador puede acceder.
+            // El entityId del JWT elimina el query extra a BD.
+            var userId         = Guid.NewGuid();
+            var professionalId = Guid.NewGuid();
+
+            var invitation = new Domain.Models.Invitation
+            {
+                Id                       = 1,
+                ForPersonId              = null,
+                CreatedByProfessionalId  = professionalId,
+                Code                     = "ABC123",
+                Email                    = "test@example.com",
+                ExpiresAt                = DateTime.UtcNow.AddDays(7),
+                CreatedByProfessional    = new Professional { Id = professionalId, UserId = userId }
+            };
+            Db.Invitations.Add(invitation);
+            await Db.SaveChangesAsync();
+
+            var http = BuildHttpContextWithEntityId(userId, nameof(IdentityRoles.Professional), professionalId);
+            var sut  = BuildSut(http, out _);
+
+            var allowed = await sut.CanAccessInvitationAsync(invitation.Id, AccessMode.Read);
+
+            allowed.Should().BeTrue("el creador de la invitación siempre puede acceder a ella");
+        }
+
+        [Fact]
+        public async Task CanAccessInvitation_NoPerson_OtherProfessional_WithEntityId_Denied()
+        {
+            // Invitación sin persona creada por otro profesional → denegado.
+            var creatorUserId     = Guid.NewGuid();
+            var creatorProfessId  = Guid.NewGuid();
+            var otherUserId       = Guid.NewGuid();
+            var otherProfessId    = Guid.NewGuid();
+
+            var invitation = new Domain.Models.Invitation
+            {
+                Id                       = 2,
+                ForPersonId              = null,
+                CreatedByProfessionalId  = creatorProfessId,
+                Code                     = "XYZ789",
+                Email                    = "other@example.com",
+                ExpiresAt                = DateTime.UtcNow.AddDays(7),
+                CreatedByProfessional    = new Professional { Id = creatorProfessId, UserId = creatorUserId }
+            };
+            Db.Invitations.Add(invitation);
+            await Db.SaveChangesAsync();
+
+            // El profesional que consulta es diferente al creador
+            var http = BuildHttpContextWithEntityId(otherUserId, nameof(IdentityRoles.Professional), otherProfessId);
+            var sut  = BuildSut(http, out _);
+
+            var allowed = await sut.CanAccessInvitationAsync(invitation.Id, AccessMode.Read);
+
+            allowed.Should().BeFalse("solo el profesional creador puede acceder a la invitación");
+        }
+
+        [Fact]
+        public async Task CanSuperviseLogin_Professional_WithEntityId_Allowed_WhenLinkExists()
+        {
+            // El profesional tiene permiso de supervisión de login para esa persona.
+            var userId         = Guid.NewGuid();
+            var professionalId = Guid.NewGuid();
+            var personId       = Guid.NewGuid();
+
+            Db.Professionals.Add(new Professional { Id = professionalId, UserId = userId });
+            Db.ProfessionalPersons.Add(new ProfessionalPerson
+            {
+                ProfessionalId    = professionalId,
+                PersonId          = personId,
+                IsActive          = true,
+                CanSuperviseLogin = true
+            });
+            await Db.SaveChangesAsync();
+
+            var http = BuildHttpContextWithEntityId(userId, nameof(IdentityRoles.Professional), professionalId);
+            var sut  = BuildSut(http, out _);
+
+            var allowed = await sut.CanSuperviseLoginAsync(personId);
+
+            allowed.Should().BeTrue("el vínculo tiene CanSuperviseLogin = true");
+        }
     }
 }
