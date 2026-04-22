@@ -57,10 +57,11 @@ namespace InclusiON.Data
             })
             .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddSignInManager<SignInManager<User>>();
 
-            // SignInManager<User> es registrado implícitamente por AddIdentityCore + AddEntityFrameworkStores.
-            // No se registra explícitamente para evitar duplicación.
+            // AddIdentityCore NO registra SignInManager automáticamente (a diferencia de AddIdentity).
+            // Se registra explícitamente mediante .AddSignInManager() en la cadena del builder.
             services.AddScoped<IUserClaimsPrincipalFactory<User>, UserClaimsPrincipalFactory<User>>();
 
             return services;
