@@ -118,6 +118,7 @@
           (click)="setProfile(profile.id)"
           [attr.aria-pressed]="a11y.profile() === profile.id"
           [attr.aria-label]="profile.name + ': ' + profile.description"
+          [attr.data-profile-id]="profile.id"
         >
           <svg cIcon [name]="profile.icon" size="xl" aria-hidden="true"></svg>
           <span class="a11y-theme-text">

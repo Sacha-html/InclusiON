@@ -202,11 +202,33 @@ export class AccessibilityService {
   // Referencia a la síntesis de voz
   private speechSynthesis: SpeechSynthesis | null = null;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private cachedSpanishVoice: SpeechSynthesisVoice | null = null;
 
   constructor() {
     // Inicializar síntesis de voz si está disponible
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.speechSynthesis = window.speechSynthesis;
+      // Las voces se cargan async en Chrome — cachear cuando estén listas
+      const loadVoices = () => {
+        const voices = this.speechSynthesis!.getVoices();
+        const spanish = voices.filter(v =>
+          v.lang.startsWith('es') ||
+          v.lang === 'es' ||
+          v.name.toLowerCase().includes('español') ||
+          v.name.toLowerCase().includes('spanish') ||
+          v.name.toLowerCase().includes('helena') ||  // Microsoft Helena (es-ES, Windows)
+          v.name.toLowerCase().includes('sabina') ||  // Microsoft Sabina (es-MX, Windows)
+          v.name.toLowerCase().includes('paulina')    // macOS es-MX
+        );
+        // Preferir voz femenina (más consistente entre navegadores)
+        const femaleHints = ['helena', 'monica', 'paulina', 'laura', 'luciana', 'sabina', 'female', 'mujer'];
+        this.cachedSpanishVoice =
+          spanish.find(v => femaleHints.some(h => v.name.toLowerCase().includes(h)))
+          ?? spanish[0]
+          ?? null;
+      };
+      this.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+      loadVoices(); // intento inicial (Firefox carga sync)
     }
 
     // Efecto que aplica todas las configuraciones cuando cambian
@@ -248,7 +270,14 @@ export class AccessibilityService {
    * Cambia el perfil de accesibilidad
    */
   setProfile(profile: AccessibilityProfile): void {
-    this.updateSetting('profile', profile);
+    const profileFontSize: Partial<Record<AccessibilityProfile, FontSize>> = {
+      'low-vision': 'large',
+    };
+    this.settings.update(current => ({
+      ...current,
+      profile,
+      ...(profileFontSize[profile] ? { fontSize: profileFontSize[profile] as FontSize } : {}),
+    }));
   }
 
   /**
@@ -604,10 +633,13 @@ export class AccessibilityService {
     utterance.pitch = 1;
     utterance.volume = 1;
 
-    // Intentar usar voz en español
-    const spanishVoices = this.getSpanishVoices();
-    if (spanishVoices.length > 0) {
-      utterance.voice = spanishVoices[0];
+    // Si el cache está vacío, reintentar en tiempo de habla
+    if (!this.cachedSpanishVoice) {
+      const voices = this.speechSynthesis?.getVoices() ?? [];
+      this.cachedSpanishVoice = voices.find(v => v.lang.startsWith('es')) ?? null;
+    }
+    if (this.cachedSpanishVoice) {
+      utterance.voice = this.cachedSpanishVoice;
     }
 
     utterance.onend = () => {

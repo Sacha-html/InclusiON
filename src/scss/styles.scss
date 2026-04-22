@@ -58,14 +58,17 @@
 // Skip link para navegación por teclado
 .skip-link {
   position: absolute;
-  top: -40px;
+  top: -44px;
   left: 0;
+  min-height: 44px;
   background: var(--a11y-primary);
   color: var(--a11y-primary-text);
   padding: 8px 16px;
   z-index: 10000;
   text-decoration: none;
   font-weight: 600;
+  display: flex;
+  align-items: center;
 
   &:focus {
     top: 0;

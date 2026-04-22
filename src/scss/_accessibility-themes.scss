@@ -24,7 +24,7 @@
   --a11y-surface: #FAFAFA;
   --a11y-text: #1A1A1A;                    // Contraste 17.4:1 (AAA)
   --a11y-text-secondary: #3D3D3D;          // Contraste 10.3:1 (AAA)
-  --a11y-text-muted: #595959;              // Contraste 7.0:1 (AAA)
+  --a11y-text-muted: #555555;              // Contraste 7.1:1 (AAA) sobre #fafafa — antes #595959 (6.71:1)
 
   // Color de acción (botones, foco, elementos interactivos)
   --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA) — solo para botones/fondos
@@ -32,9 +32,7 @@
   --a11y-primary-text: #FFFFFF;
 
   // Color de link/texto interactivo — más legible como texto inline
-  // #1565C0 = 7.2:1 sobre blanco (AAA) — perceptualmente más amigable que navy puro
-  // Se diferencia del texto cuerpo (#1A1A1A) por tono, no solo contraste
-  --a11y-link: #1565C0;                    // Contraste 7.2:1 (AAA)
+  --a11y-link: #1565C0;                    // Contraste 5.74:1 sobre blanco (AA)
   --a11y-link-hover: #0D47A1;             // Más oscuro en hover (=primary)
   --a11y-success: #1B5E20;                 // Contraste 8.5:1 (AAA)
   --a11y-warning: #A32E0A;                 // Contraste 7.1:1 (AAA) — antes #BF360C (5.6:1)
@@ -1376,6 +1374,12 @@ a {
 .btn {
   font-family: var(--a11y-font-family) !important;
   border-width: 2px !important;
+  min-height: 44px; // WCAG 2.5.5 - touch target mínimo 44px
+}
+
+.btn.small,
+.btn-sm {
+  min-height: 44px; // WCAG 2.5.5 - aplica también a botones pequeños
 }
 
 .btn-primary {
@@ -1466,6 +1470,12 @@ a {
   &:focus {
     color: var(--a11y-link-hover, var(--a11y-primary-dark)) !important;
   }
+}
+
+// Botones link pequeños (acciones secundarias) — AAA sobre cualquier fondo claro
+.btn-link.small,
+.btn-link.btn-sm {
+  color: var(--a11y-text-muted) !important;
 }
 
 // =========================================
@@ -2056,6 +2066,7 @@ a {
   position: absolute;
   top: -9999px;
   left: -9999px;
+  min-height: 44px;
   background: var(--a11y-primary);
   color: var(--a11y-primary-text) !important;
   padding: 12px 24px;
