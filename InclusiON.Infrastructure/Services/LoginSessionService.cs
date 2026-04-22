@@ -22,6 +22,7 @@ namespace InclusiON.Infrastructure.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly IPersonsRepository _personsRepository;
+        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly ITelemetryService _telemetryService;
         private readonly IDateTimeProvider _dateTime;
         private readonly ILogger<LoginSessionService> _logger;
@@ -37,6 +38,7 @@ namespace InclusiON.Infrastructure.Services
             IUnitOfWork unitOfWork,
             IAdminInstitutionRepository adminInstitutionRepository,
             IPersonsRepository personsRepository,
+            IProfessionalsRepository professionalsRepository,
             ITelemetryService telemetryService,
             IDateTimeProvider dateTime,
             ILogger<LoginSessionService> logger)
@@ -49,6 +51,7 @@ namespace InclusiON.Infrastructure.Services
             _unitOfWork = unitOfWork;
             _adminInstitutionRepository = adminInstitutionRepository;
             _personsRepository = personsRepository;
+            _professionalsRepository = professionalsRepository;
             _telemetryService = telemetryService;
             _dateTime = dateTime;
             _logger = logger;
@@ -75,6 +78,15 @@ namespace InclusiON.Infrastructure.Services
                 isGlobalAdmin = institutionIds.Count == 0;
             }
 
+            // Para profesionales: resolver el entityId una sola vez al crear el token.
+            // Los requests posteriores lo leen del claim sin consultar la BD.
+            Guid? entityId = null;
+            if (primaryRole == "Professional")
+            {
+                var professional = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
+                entityId = professional?.Id;
+            }
+
             var tokenUserData = new TokenUserData
             {
                 Id = user.Id,
@@ -84,7 +96,8 @@ namespace InclusiON.Infrastructure.Services
                 IsActive = user.IsActive,
                 Permissions = permissions,
                 IsGlobalAdmin = isGlobalAdmin,
-                InstitutionIds = institutionIds
+                InstitutionIds = institutionIds,
+                EntityId = entityId
             };
 
             var session = await CreateSessionCoreAsync(
@@ -151,7 +164,8 @@ namespace InclusiON.Infrastructure.Services
                 Name = $"{person.FirstName} {person.LastName}",
                 Role = roles.FirstOrDefault() ?? "Person",
                 IsActive = user.IsActive,
-                Permissions = permissions
+                Permissions = permissions,
+                EntityId = person.Id
             };
 
             var session = await CreateSessionCoreAsync(
@@ -193,7 +207,8 @@ namespace InclusiON.Infrastructure.Services
                 Name = $"{family.FirstName} {family.LastName}",
                 Role = roles.FirstOrDefault() ?? "Family",
                 IsActive = user.IsActive,
-                Permissions = permissions
+                Permissions = permissions,
+                EntityId = family.Id
             };
 
             var session = await CreateSessionCoreAsync(

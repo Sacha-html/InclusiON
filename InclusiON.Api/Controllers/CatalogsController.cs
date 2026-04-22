@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.UseCases.Auth.Queries;
 using InclusiON.Application.UseCases.Catalogs.Queries;
@@ -18,6 +19,7 @@ namespace InclusiON.Api.Controllers
     [Authorize]
     [Produces("application/json")]
     [ResponseCache(Duration = 300)]
+    [OutputCache(PolicyName = "catalogs")]
     public class CatalogsController : ControllerBase
     {
         /// <summary>

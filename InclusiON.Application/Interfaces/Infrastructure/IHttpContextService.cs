@@ -48,5 +48,12 @@ namespace InclusiON.Application.Interfaces.Infrastructure
         /// Retorna lista vacia si no tiene claims de institucion.
         /// </summary>
         List<int> GetInstitutionIds();
+
+        /// <summary>
+        /// Obtiene el ID del entity de dominio del usuario autenticado (professionalId,
+        /// familyRepresentativeId o personId según el rol) desencriptando el claim "eid" del JWT.
+        /// Retorna null para Admin, GlobalAdmin o si el claim no está presente.
+        /// </summary>
+        Guid? GetCurrentEntityId();
     }
 }
