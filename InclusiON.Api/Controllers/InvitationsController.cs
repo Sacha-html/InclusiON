@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Authorization;
@@ -77,6 +78,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet("{code}")]
         [AllowAnonymous]
+        [EnableRateLimiting("auth-sensitive")]
         [ProducesResponseType(typeof(ApiResponse<InvitationValidationResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InvitationValidationResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InvitationValidationResponse>), StatusCodes.Status404NotFound)]
@@ -160,6 +162,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("{code}/accept")]
         [AllowAnonymous]
+        [EnableRateLimiting("auth-sensitive")]
         [ProducesResponseType(typeof(ApiResponse<AcceptInvitationResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AcceptInvitationResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<AcceptInvitationResponse>), StatusCodes.Status404NotFound)]
