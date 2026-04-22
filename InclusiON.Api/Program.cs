@@ -56,7 +56,7 @@ builder.Services.AddControllers(options =>
     options.JsonSerializerOptions.Converters.Add(new InclusiON.Api.Converters.UtcDateTimeConverter());
 });
 
-builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddPersistence(builder.Configuration, builder.Environment.IsDevelopment());
 
 var connectionString = builder.Configuration.GetConnectionString("PostgreSqlConn")
     ?? throw new InvalidOperationException("Connection string 'PostgreSqlConn' not found.");
@@ -118,10 +118,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendClient", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+        var allowedOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>() ?? [];
+
+        if (allowedOrigins.Length > 0)
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        // Si AllowedOrigins está vacío no se llama a ningún método — CORS queda bloqueado.
     });
 });
 

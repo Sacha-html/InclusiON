@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
@@ -22,13 +23,16 @@ namespace InclusiON.Api.Controllers
     {
         private readonly IHttpContextService _httpContextService;
         private readonly IResourceAuthorizationService _resourceAuthz;
+        private readonly string[] _allowedOrigins;
 
         public InvitationsController(
             IHttpContextService httpContextService,
-            IResourceAuthorizationService resourceAuthz)
+            IResourceAuthorizationService resourceAuthz,
+            IConfiguration configuration)
         {
-            _httpContextService = httpContextService;
-            _resourceAuthz = resourceAuthz;
+            _httpContextService  = httpContextService;
+            _resourceAuthz       = resourceAuthz;
+            _allowedOrigins      = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
         }
 
         #region Queries
@@ -121,9 +125,13 @@ namespace InclusiON.Api.Controllers
                 return Forbid();
             }
 
-            // Obtener la URL base del cliente para armar el link de invitacion
-            var baseUrl = Request.Headers["Origin"].FirstOrDefault()
-                       ?? Request.Headers["Referer"].FirstOrDefault()?.TrimEnd('/');
+            // Armar la URL base del cliente para el link de invitación.
+            // Se valida contra la whitelist de CORS para evitar phishing por header injection:
+            // un atacante no puede redirigir el link a un dominio arbitrario manipulando Origin/Referer.
+            var requestOrigin = Request.Headers["Origin"].FirstOrDefault();
+            var baseUrl = _allowedOrigins.Contains(requestOrigin, StringComparer.OrdinalIgnoreCase)
+                ? requestOrigin
+                : _allowedOrigins.FirstOrDefault();
 
             var command = new CreateInvitationCommand(
                 professionalId.Value,
