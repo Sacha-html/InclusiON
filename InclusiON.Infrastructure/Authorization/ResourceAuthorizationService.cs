@@ -118,6 +118,18 @@ namespace InclusiON.Infrastructure.Authorization
 
         private async Task<IReadOnlyList<Guid>> GetPersonIdsForProfessionalAsync(Guid userId, CancellationToken ct)
         {
+            // Preferir entityId del JWT (evita el JOIN con la tabla Professionals).
+            var professionalId = _httpContext.GetCurrentEntityId();
+            if (professionalId.HasValue)
+            {
+                return await _context.ProfessionalPersons
+                    .Where(pp => pp.ProfessionalId == professionalId.Value && pp.IsActive)
+                    .Select(pp => pp.PersonId)
+                    .Distinct()
+                    .ToListAsync(ct);
+            }
+
+            // Fallback conservador: join por UserId.
             return await _context.ProfessionalPersons
                 .Where(pp => pp.Professional.UserId == userId && pp.IsActive)
                 .Select(pp => pp.PersonId)
@@ -127,6 +139,18 @@ namespace InclusiON.Infrastructure.Authorization
 
         private async Task<IReadOnlyList<Guid>> GetPersonIdsForFamilyAsync(Guid userId, CancellationToken ct)
         {
+            // Preferir entityId del JWT (evita el JOIN con la tabla FamilyRepresentatives).
+            var familyId = _httpContext.GetCurrentEntityId();
+            if (familyId.HasValue)
+            {
+                return await _context.PersonRepresentatives
+                    .Where(pr => pr.RepresentativeId == familyId.Value && pr.IsActive)
+                    .Select(pr => pr.PersonId)
+                    .Distinct()
+                    .ToListAsync(ct);
+            }
+
+            // Fallback conservador: join por UserId.
             return await _context.PersonRepresentatives
                 .Where(pr => pr.Representative.UserId == userId && pr.IsActive)
                 .Select(pr => pr.PersonId)
@@ -232,10 +256,8 @@ namespace InclusiON.Infrastructure.Authorization
                 return true;
             }
 
-            var currentProfessionalId = await _context.Professionals
-                .Where(p => p.UserId == _httpContext.GetCurrentUserId())
-                .Select(p => (Guid?)p.Id)
-                .FirstOrDefaultAsync(ct);
+            // El professionalId viene del JWT — sin consulta adicional a BD.
+            var currentProfessionalId = _httpContext.GetCurrentEntityId();
 
             return currentProfessionalId.HasValue
                 && currentProfessionalId.Value == invitation.CreatedByProfessionalId;
@@ -290,23 +312,38 @@ namespace InclusiON.Infrastructure.Authorization
             }
 
             var role = _httpContext.GetCurrentUserRole();
+            var entityId = _httpContext.GetCurrentEntityId();
 
             if (role == nameof(IdentityRoles.Professional))
             {
-                return await _context.ProfessionalPersons
-                    .AnyAsync(pp => pp.Professional.UserId == userId.Value
-                                 && pp.PersonId == personId
-                                 && pp.IsActive
-                                 && pp.CanSuperviseLogin, ct);
+                // Preferir entityId del JWT; fallback a UserId join si no está disponible.
+                return entityId.HasValue
+                    ? await _context.ProfessionalPersons
+                        .AnyAsync(pp => pp.ProfessionalId == entityId.Value
+                                     && pp.PersonId == personId
+                                     && pp.IsActive
+                                     && pp.CanSuperviseLogin, ct)
+                    : await _context.ProfessionalPersons
+                        .AnyAsync(pp => pp.Professional.UserId == userId.Value
+                                     && pp.PersonId == personId
+                                     && pp.IsActive
+                                     && pp.CanSuperviseLogin, ct);
             }
 
             if (role == nameof(IdentityRoles.FamilyRepresentative))
             {
-                return await _context.PersonRepresentatives
-                    .AnyAsync(pr => pr.Representative.UserId == userId.Value
-                                 && pr.PersonId == personId
-                                 && pr.IsActive
-                                 && pr.CanSuperviseLogin, ct);
+                // Preferir entityId del JWT; fallback a UserId join si no está disponible.
+                return entityId.HasValue
+                    ? await _context.PersonRepresentatives
+                        .AnyAsync(pr => pr.RepresentativeId == entityId.Value
+                                     && pr.PersonId == personId
+                                     && pr.IsActive
+                                     && pr.CanSuperviseLogin, ct)
+                    : await _context.PersonRepresentatives
+                        .AnyAsync(pr => pr.Representative.UserId == userId.Value
+                                     && pr.PersonId == personId
+                                     && pr.IsActive
+                                     && pr.CanSuperviseLogin, ct);
             }
 
             return false;

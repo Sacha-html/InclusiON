@@ -23,6 +23,7 @@ namespace InclusiON.Api.Controllers
         /// Registra un nuevo usuario en el sistema.
         /// </summary>
         [HttpPost("register")]
+        [EnableRateLimiting("auth-sensitive")]
         [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse<UserResponse>>> Register(
@@ -198,6 +199,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [Authorize]
         [HttpPut("change-password")]
+        [EnableRateLimiting("auth-sensitive")]
         [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status401Unauthorized)]

@@ -12,7 +12,7 @@ namespace InclusiON.Data
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<AppDbContext>(opt =>
+            services.AddDbContext<AppDbContext>((sp, opt) =>
             {
                 opt
                     .LogTo(Console.WriteLine,
@@ -26,6 +26,13 @@ namespace InclusiON.Data
                     {
                         npgsqlOptions.CommandTimeout(180);
                     });
+
+                // Registra cualquier IInterceptor registrado en el contenedor (ej: TelemetryCommandInterceptor).
+                // AddPersistence no necesita referenciar el ensamblado de telemetría directamente;
+                // cada capa registra sus interceptores y EF los levanta acá.
+                var interceptors = sp.GetServices<IInterceptor>().ToArray();
+                if (interceptors.Length > 0)
+                    opt.AddInterceptors(interceptors);
             });
 
             services.AddIdentityCore<User>(options =>
@@ -49,7 +56,8 @@ namespace InclusiON.Data
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-            services.AddScoped<SignInManager<User>>();
+            // SignInManager<User> es registrado implícitamente por AddIdentityCore + AddEntityFrameworkStores.
+            // No se registra explícitamente para evitar duplicación.
             services.AddScoped<IUserClaimsPrincipalFactory<User>, UserClaimsPrincipalFactory<User>>();
 
             return services;

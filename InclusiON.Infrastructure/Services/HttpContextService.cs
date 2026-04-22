@@ -11,10 +11,12 @@ namespace InclusiON.Infrastructure.Services
     public class HttpContextService : IHttpContextService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEncryptionService _encryption;
 
-        public HttpContextService(IHttpContextAccessor httpContextAccessor)
+        public HttpContextService(IHttpContextAccessor httpContextAccessor, IEncryptionService encryption)
         {
             _httpContextAccessor = httpContextAccessor;
+            _encryption = encryption;
         }
 
         /// <inheritdoc />
@@ -146,6 +148,27 @@ namespace InclusiON.Infrastructure.Services
                 .Where(id => id.HasValue)
                 .Select(id => id!.Value)
                 .ToList();
+        }
+
+        /// <inheritdoc />
+        public Guid? GetCurrentEntityId()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user is null) return null;
+
+            var raw = user.FindFirst(Permissions.EntityIdClaimType)?.Value;
+            if (string.IsNullOrEmpty(raw)) return null;
+
+            try
+            {
+                var decrypted = _encryption.Decrypt(raw);
+                return Guid.TryParse(decrypted, out var id) ? id : null;
+            }
+            catch
+            {
+                // Claim malformado o clave incorrecta — tratar como ausente.
+                return null;
+            }
         }
     }
 }
