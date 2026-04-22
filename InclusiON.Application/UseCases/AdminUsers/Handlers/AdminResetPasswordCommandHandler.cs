@@ -124,10 +124,9 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             return ApiResponse<ResetPasswordResultResponse>.SuccessResult(
                 new ResetPasswordResultResponse
                 {
-                    TemporaryPassword = tempPassword,
                     UserEmail = user.Email ?? string.Empty
                 },
-                "Contraseña reseteada exitosamente.");
+                "Contraseña reseteada exitosamente. Se envió un email al usuario con las instrucciones.");
         }
     }
 }

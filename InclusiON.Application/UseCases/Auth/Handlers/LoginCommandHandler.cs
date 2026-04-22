@@ -58,7 +58,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ? (int)Math.Ceiling((lockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes)
                     : 0;
 
-                _logger.LogWarning("Login attempt for locked account: {Email}", command.Email);
+                _logger.LogWarning("Login attempt for locked account: {UserId}", user.Id);
                 _telemetryService.RecordLogin("locked", null);
                 return ApiResponse<LoginResponse>.AccountLocked(minutesRemaining);
             }
