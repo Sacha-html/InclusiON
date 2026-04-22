@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using NSubstitute;
 using Xunit;
 using InclusiON.Api.Controllers;
@@ -30,7 +31,8 @@ namespace InclusiON.Tests.Unit.Controllers
 
         private static InvitationsController BuildSut(
             Guid?       entityId       = null,
-            List<int>?  institutionIds = null)
+            List<int>?  institutionIds = null,
+            string?     originHeader   = null)
         {
             var httpCtx = Substitute.For<IHttpContextService>();
             httpCtx.GetCurrentEntityId().Returns(entityId);
@@ -41,13 +43,20 @@ namespace InclusiON.Tests.Unit.Controllers
                     Arg.Any<Guid>(), Arg.Any<AccessMode>(), Arg.Any<CancellationToken>())
                  .Returns(true);
 
-            var controller = new InvitationsController(httpCtx, authz);
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Cors:AllowedOrigins:0"] = "http://localhost:4200"
+                })
+                .Build();
 
-            // DefaultHttpContext provee Request.Headers vacío — evita NPE en CreateInvitation.
-            controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext()
-            };
+            var controller = new InvitationsController(httpCtx, authz, config);
+
+            var httpContext = new DefaultHttpContext();
+            if (originHeader != null)
+                httpContext.Request.Headers["Origin"] = originHeader;
+
+            controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
             return controller;
         }
@@ -145,6 +154,63 @@ namespace InclusiON.Tests.Unit.Controllers
 
             await handler.Received(1).HandleAsync(
                 Arg.Is<CreateInvitationCommand>(c => c.ProfessionalId == professionalId),
+                Arg.Any<CancellationToken>());
+        }
+
+        // ── CreateInvitation — validación de Origin vs whitelist ─────────────
+        // Si el Origin no viene de un dominio conocido, el link de invitación no puede
+        // apuntar a un sitio de phishing controlado por el atacante.
+
+        [Fact]
+        public async Task CreateInvitation_OriginInWhitelist_UsesOriginAsBaseUrl()
+        {
+            var professionalId = Guid.NewGuid();
+            var handler        = FailingCreateHandler();
+            var sut            = BuildSut(entityId: professionalId, originHeader: "http://localhost:4200");
+
+            await sut.CreateInvitation(
+                new CreateInvitationRequest { Email = "inv@test.com" },
+                handler);
+
+            await handler.Received(1).HandleAsync(
+                Arg.Is<CreateInvitationCommand>(c => c.BaseUrl == "http://localhost:4200"),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CreateInvitation_OriginNotInWhitelist_UsesFallbackOrigin()
+        {
+            // Un atacante envía su propio dominio como Origin — debe ser ignorado.
+            var professionalId = Guid.NewGuid();
+            var handler        = FailingCreateHandler();
+            var sut            = BuildSut(entityId: professionalId, originHeader: "https://attacker.com");
+
+            await sut.CreateInvitation(
+                new CreateInvitationRequest { Email = "inv@test.com" },
+                handler);
+
+            // El BaseUrl debe ser el primero de la whitelist, nunca el del atacante.
+            await handler.Received(1).HandleAsync(
+                Arg.Is<CreateInvitationCommand>(c =>
+                    c.BaseUrl == "http://localhost:4200"
+                    && c.BaseUrl != "https://attacker.com"),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CreateInvitation_NoOriginHeader_UsesFallbackOrigin()
+        {
+            // Sin header Origin (ej: llamada directa desde Postman / otra API).
+            var professionalId = Guid.NewGuid();
+            var handler        = FailingCreateHandler();
+            var sut            = BuildSut(entityId: professionalId, originHeader: null);
+
+            await sut.CreateInvitation(
+                new CreateInvitationRequest { Email = "inv@test.com" },
+                handler);
+
+            await handler.Received(1).HandleAsync(
+                Arg.Is<CreateInvitationCommand>(c => c.BaseUrl == "http://localhost:4200"),
                 Arg.Any<CancellationToken>());
         }
     }
