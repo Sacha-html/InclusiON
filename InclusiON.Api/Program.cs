@@ -21,7 +21,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 
-builder.Services.AddApiRateLimiter();
+builder.Services.AddApiRateLimiter(builder.Configuration);
 builder.Services.AddApiOutputCache();
 
 builder.Services.AddResponseCompression(options =>

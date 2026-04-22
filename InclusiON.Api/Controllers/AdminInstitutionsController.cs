@@ -52,7 +52,9 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpGet("{adminUserId:guid}")]
+        [Authorize(Policy = "global-admin")]
         [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<List<AdminInstitutionResponse>>>> GetAdminInstitutions(
             Guid adminUserId,
             [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<List<AdminInstitutionResponse>>> handler,
