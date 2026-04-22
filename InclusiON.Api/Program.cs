@@ -1,12 +1,11 @@
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Serilog;
-using System.Threading.RateLimiting;
 using Scalar.AspNetCore;
 using InclusiON.Application;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
+using InclusiON.Api.Extensions;
 using InclusiON.Api.Middleware;
 using InclusiON.Api.Scalar;
 using InclusiON.Infrastructure;
@@ -15,9 +14,23 @@ using InclusiON.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// No revelar que el servidor es Kestrel ni su versión en el header "Server".
+builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
+
+builder.Services.AddApiRateLimiter();
+builder.Services.AddApiOutputCache();
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    options.MimeTypes = Microsoft.AspNetCore.ResponseCompression.ResponseCompressionDefaults.MimeTypes.Append("application/json");
+});
 
 builder.Host.UseSerilog((context, config) =>
 {
@@ -49,7 +62,7 @@ var connectionString = builder.Configuration.GetConnectionString("PostgreSqlConn
     ?? throw new InvalidOperationException("Connection string 'PostgreSqlConn' not found.");
 
 builder.Services.AddInfrastructureTelemetry(builder.Configuration, connectionString);
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplicationServices();
 
 builder.Services.AddTransient<OpenApiExamplesTransformer>();
@@ -100,56 +113,6 @@ builder.Services.AddOpenApi(options =>
     options.AddOperationTransformer<OpenApiExamplesTransformer>();
 });
 
-// ── Rate Limiting ────────────────────────────────────────────────────────────
-// Protege los endpoints de auth contra fuerza bruta por IP.
-// PIN: 5 intentos / 5 min (10 000 combinaciones — crítico).
-// Login estándar: 10 intentos / 1 min.
-// Refresh: 20 / 1 min (tokens de corta vida, flujo frecuente).
-builder.Services.AddRateLimiter(options =>
-{
-    options.OnRejected = async (ctx, token) =>
-    {
-        ctx.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-        await ctx.HttpContext.Response.WriteAsJsonAsync(
-            new { success = false, message = "Demasiados intentos. Esperá unos minutos antes de reintentar." },
-            token);
-    };
-
-    // PIN: ventana deslizante de 5 min, máx 5 intentos por IP
-    options.AddPolicy("auth-pin", ctx =>
-        RateLimitPartition.GetSlidingWindowLimiter(
-            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new SlidingWindowRateLimiterOptions
-            {
-                Window              = TimeSpan.FromMinutes(5),
-                SegmentsPerWindow   = 5,
-                PermitLimit         = 5,
-                QueueLimit          = 0
-            }));
-
-    // Login estándar / visual / familiar / asistido: 10 intentos / 1 min por IP
-    options.AddPolicy("auth-login", ctx =>
-        RateLimitPartition.GetSlidingWindowLimiter(
-            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new SlidingWindowRateLimiterOptions
-            {
-                Window              = TimeSpan.FromMinutes(1),
-                SegmentsPerWindow   = 6,
-                PermitLimit         = 10,
-                QueueLimit          = 0
-            }));
-
-    // Refresh token: 20 / 1 min por IP (flujo frecuente en SPAs)
-    options.AddPolicy("auth-refresh", ctx =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                Window      = TimeSpan.FromMinutes(1),
-                PermitLimit = 20,
-                QueueLimit  = 0
-            }));
-});
 
 builder.Services.AddCors(options =>
 {
@@ -179,12 +142,20 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseForwardedHeaders();
+app.UseResponseCompression();
+
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontendClient");
 
 app.UseRateLimiter();
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();

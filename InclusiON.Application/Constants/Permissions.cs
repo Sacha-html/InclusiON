@@ -9,7 +9,12 @@ namespace InclusiON.Application.Constants
         public const string ClaimType = "permission";
         public const string GlobalAdminClaimType = "isGlobalAdmin";
         public const string InstitutionIdClaimType = "institutionId";
-        public const string IsActiveClaimType = "isActive";
+        public const string IsActiveClaimType  = "isActive";
+        /// <summary>
+        /// ID del entity de dominio del usuario (professionalId, familyRepresentativeId o personId).
+        /// El valor viaja encriptado con AES-256-GCM — opaco para quien lea el JWT en crudo.
+        /// </summary>
+        public const string EntityIdClaimType   = "eid";
 
         // ═══════════════════════════════════════════════════════════════
         // USUARIOS

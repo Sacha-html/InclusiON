@@ -3,7 +3,6 @@ using InclusiON.Api.Filters;
 using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
-using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
 using InclusiON.Application.UseCases.Reports.Queries;
 using InclusiON.Domain.Enums;
@@ -22,19 +21,13 @@ namespace InclusiON.Api.Controllers
     public class ReportsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
-        private readonly IProfessionalsRepository _professionalsRepository;
-        private readonly IFamilyRepository _familyRepository;
         private readonly IResourceAuthorizationService _resourceAuthz;
 
         public ReportsController(
             IHttpContextService httpContextService,
-            IProfessionalsRepository professionalsRepository,
-            IFamilyRepository familyRepository,
             IResourceAuthorizationService resourceAuthz)
         {
             _httpContextService = httpContextService;
-            _professionalsRepository = professionalsRepository;
-            _familyRepository = familyRepository;
             _resourceAuthz = resourceAuthz;
         }
 
@@ -97,17 +90,14 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<GetFamilyReportsQuery, ApiResponse<PagedResponse<ReportsListItemReponse>>> handler,
             CancellationToken cancellationToken = default)
         {
-            var userId = _httpContextService.GetCurrentUserId();
-            if (userId is null) return Unauthorized();
-
-            var family = await _familyRepository.GetByUserIdAsync(userId.Value, cancellationToken);
-            if (family is null)
+            var familyId = _httpContextService.GetCurrentEntityId();
+            if (familyId is null)
                 return BadRequest(ApiResponse<PagedResponse<ReportsListItemReponse>>.ErrorResult("Solo los familiares pueden acceder a este endpoint."));
 
             request.Validate();
 
             var query = new GetFamilyReportsQuery(
-                family.Id,
+                familyId.Value,
                 request.Page,
                 request.PageSize,
                 request.ReportTypeId,
@@ -154,15 +144,13 @@ namespace InclusiON.Api.Controllers
                 return BuildDeniedResponse<ReportResponse>().ToActionResult();
             }
 
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var professional = await _professionalsRepository.GetByUserIdAsync(currentUserId, cancellationToken);
-
-            if (professional is null)
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
                 return BadRequest(ApiResponse<ReportResponse>.ErrorResult("Solo los profesionales pueden crear reportes."));
 
             var command = new CreateReportCommand(
                 request.PersonId,
-                professional.Id,
+                professionalId.Value,
                 request.Title,
                 request.Content,
                 request.ReportTypeId,
@@ -195,15 +183,13 @@ namespace InclusiON.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ReportResponse>.ErrorResult("Datos inválidos"));
 
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var professional = await _professionalsRepository.GetByUserIdAsync(currentUserId, cancellationToken);
-
-            if (professional is null)
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
                 return BadRequest(ApiResponse<ReportResponse>.ErrorResult("Solo los profesionales pueden editar reportes."));
 
             var command = new UpdateReportCommand(
                 reportId,
-                professional.Id,
+                professionalId.Value,
                 request.Title,
                 request.Content,
                 request.ReportTypeId,
@@ -232,13 +218,11 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<SubmitReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var professional = await _professionalsRepository.GetByUserIdAsync(currentUserId, cancellationToken);
-
-            if (professional is null)
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
                 return BadRequest(ApiResponse<ReportResponse>.ErrorResult("Solo los profesionales pueden enviar reportes."));
 
-            var result = await handler.HandleAsync(new SubmitReportCommand(reportId, professional.Id), cancellationToken);
+            var result = await handler.HandleAsync(new SubmitReportCommand(reportId, professionalId.Value), cancellationToken);
             return result.ToActionResult();
         }
 

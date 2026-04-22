@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -9,6 +10,9 @@ namespace InclusiON.Api.Scalar;
 /// Inyecta ejemplos de request en la documentación OpenAPI sin tocar los DTOs.
 /// Los ejemplos viven en <see cref="RequestExamples"/> y se asignan por controller + action.
 /// </summary>
+// Excluida de cobertura: es infraestructura de documentación (Scalar/OpenAPI), no lógica de negocio.
+// GetExamples es un switch exhaustivo de mapeos controller→ejemplos que no aporta valor testearse.
+[ExcludeFromCodeCoverage]
 public class OpenApiExamplesTransformer : IOpenApiOperationTransformer
 {
     public Task TransformAsync(
