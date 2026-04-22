@@ -106,10 +106,9 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             return ApiResponse<ResetPasswordResultResponse>.SuccessResult(
                 new ResetPasswordResultResponse
                 {
-                    TemporaryPassword = tempPassword,
                     UserEmail = user.Email ?? string.Empty
                 },
-                "Usuario reactivado exitosamente.");
+                "Usuario reactivado exitosamente. Se enviaron las credenciales por email.");
         }
 
         private async Task SetLinkedEntityActiveAsync(User user, bool isActive, CancellationToken cancellationToken)
