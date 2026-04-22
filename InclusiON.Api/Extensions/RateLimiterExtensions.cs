@@ -1,18 +1,34 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
+using System.Net;
 using System.Threading.RateLimiting;
 
 namespace InclusiON.Api.Extensions
 {
     public static class RateLimiterExtensions
     {
-        public static IServiceCollection AddApiRateLimiter(this IServiceCollection services)
+        public static IServiceCollection AddApiRateLimiter(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
                 options.KnownIPNetworks.Clear();
                 options.KnownProxies.Clear();
+
+                // Proxies/LBs confiables configurados por ambiente.
+                // Dev: vacío → conexión directa, RemoteIpAddress ya es el cliente real.
+                // Prod: incluir la IP del nginx/ALB para que X-Forwarded-For sea procesado
+                //       y el rate limiter parta por el IP real del cliente, no por la IP del LB.
+                var trustedProxies = configuration
+                    .GetSection("ForwardedHeaders:TrustedProxies")
+                    .Get<string[]>() ?? [];
+
+                foreach (var proxy in trustedProxies)
+                    if (IPAddress.TryParse(proxy, out var ip))
+                        options.KnownProxies.Add(ip);
             });
 
             services.AddRateLimiter(options =>
