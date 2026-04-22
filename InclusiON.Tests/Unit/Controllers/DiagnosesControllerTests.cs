@@ -61,23 +61,30 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task CreateDiagnosis_NullEntityId_ReturnsBadRequest()
         {
-            var sut    = BuildSut(entityId: null);
+            // Arrange
+            var sut = BuildSut(entityId: null);
+
+            // Act
             var result = await sut.CreateDiagnosis(
                 Guid.NewGuid(), ValidCreateRequest(), OkCreateHandler());
 
+            // Assert
             result.Result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         [Fact]
         public async Task CreateDiagnosis_ValidEntityId_PassesProfessionalIdToHandler()
         {
+            // Arrange
             var professionalId = Guid.NewGuid();
             var personId       = Guid.NewGuid();
             var handler        = OkCreateHandler();
             var sut            = BuildSut(entityId: professionalId);
 
+            // Act
             await sut.CreateDiagnosis(personId, ValidCreateRequest(), handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<CreateDiagnosisCommand>(c =>
                     c.ProfessionalId == professionalId && c.PersonId == personId),
@@ -89,23 +96,30 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task UpdateDiagnosis_NullEntityId_ReturnsBadRequest()
         {
-            var sut    = BuildSut(entityId: null);
+            // Arrange
+            var sut = BuildSut(entityId: null);
+
+            // Act
             var result = await sut.UpdateDiagnosis(
                 1, ValidUpdateRequest(), OkUpdateHandler());
 
+            // Assert
             result.Result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         [Fact]
         public async Task UpdateDiagnosis_ValidEntityId_PassesProfessionalIdToHandler()
         {
+            // Arrange
             var professionalId = Guid.NewGuid();
             var diagnosisId    = 42;
             var handler        = OkUpdateHandler();
             var sut            = BuildSut(entityId: professionalId);
 
+            // Act
             await sut.UpdateDiagnosis(diagnosisId, ValidUpdateRequest(), handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<UpdateDiagnosisCommand>(c =>
                     c.RequestedByProfessionalId == professionalId && c.DiagnosisId == diagnosisId),

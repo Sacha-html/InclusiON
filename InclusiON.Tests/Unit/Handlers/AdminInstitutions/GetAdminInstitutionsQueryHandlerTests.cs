@@ -16,12 +16,15 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_AdminWithNoAssignments_ReturnsEmptyList()
         {
+            // Arrange
             var adminId = Guid.NewGuid();
             _repository.GetInstitutionsByAdminAsync(adminId, Arg.Any<CancellationToken>())
                        .Returns([]);
 
+            // Act
             var result = await BuildSut().HandleAsync(new GetAdminInstitutionsQuery(adminId), default);
 
+            // Assert
             result.Success.Should().BeTrue();
             result.Data.Should().BeEmpty();
         }
@@ -29,6 +32,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_MapsAssignmentFieldsCorrectly()
         {
+            // Arrange
             var adminId     = Guid.NewGuid();
             var assignedAt  = new DateTime(2025, 1, 15, 0, 0, 0, DateTimeKind.Utc);
             var institution = new EducationalInstitution { Id = 5, Name = "Escuela Cervantes" };
@@ -44,8 +48,10 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
             _repository.GetInstitutionsByAdminAsync(adminId, Arg.Any<CancellationToken>())
                        .Returns([assignment]);
 
+            // Act
             var result = await BuildSut().HandleAsync(new GetAdminInstitutionsQuery(adminId), default);
 
+            // Assert
             var dto = result.Data!.Single();
             dto.AdminUserId.Should().Be(adminId);
             dto.InstitutionId.Should().Be(5);

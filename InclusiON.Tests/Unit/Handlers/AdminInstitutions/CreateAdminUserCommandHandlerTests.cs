@@ -34,11 +34,14 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_InstitutionNotFound_ReturnsNotFound()
         {
+            // Arrange
             _institutionRepo.GetByIdAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
                             .Returns((EducationalInstitution?)null);
 
+            // Act
             var result = await BuildSut().HandleAsync(ValidCommand(), default);
 
+            // Assert
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.NotFound);
         }
@@ -46,11 +49,14 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_EmailAlreadyExists_ReturnsConflict()
         {
+            // Arrange
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
             _identity.FindByEmailAsync(Arg.Any<string>()).Returns(new User());
 
+            // Act
             var result = await BuildSut().HandleAsync(ValidCommand(), default);
 
+            // Assert
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.EmailAlreadyExists);
         }
@@ -58,20 +64,24 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_CreateUserFails_ReturnsError()
         {
+            // Arrange
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
             _identity.FindByEmailAsync(Arg.Any<string>()).Returns((User?)null);
             _identity.CreateUserAsync(Arg.Any<User>(), Arg.Any<string>())
                      .Returns((false, (IEnumerable<string>)["Error de Identity"]));
             _dateTime.UtcNow.Returns(DateTime.UtcNow);
 
+            // Act
             var result = await BuildSut().HandleAsync(ValidCommand(), default);
 
+            // Assert
             result.Success.Should().BeFalse();
         }
 
         [Fact]
         public async Task HandleAsync_Success_DoesNotExposeTemporaryPasswordInResponse()
         {
+            // Arrange
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
             _identity.FindByEmailAsync(Arg.Any<string>()).Returns((User?)null);
             _identity.CreateUserAsync(Arg.Any<User>(), Arg.Any<string>())
@@ -80,8 +90,10 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
                      .Returns((true, Enumerable.Empty<string>()));
             _dateTime.UtcNow.Returns(DateTime.UtcNow);
 
+            // Act
             var result = await BuildSut().HandleAsync(ValidCommand(), default);
 
+            // Assert
             result.Success.Should().BeTrue();
             // El DTO no tiene la propiedad TemporaryPassword — garantizado en compile time.
             // Este test verifica que el response devuelve los datos correctos.
@@ -95,6 +107,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_Success_SendsWelcomeEmail()
         {
+            // Arrange
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
             _identity.FindByEmailAsync(Arg.Any<string>()).Returns((User?)null);
             _identity.CreateUserAsync(Arg.Any<User>(), Arg.Any<string>())
@@ -103,8 +116,10 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
                      .Returns((true, Enumerable.Empty<string>()));
             _dateTime.UtcNow.Returns(DateTime.UtcNow);
 
+            // Act
             await BuildSut().HandleAsync(ValidCommand(), default);
 
+            // Assert
             await _email.Received(1).SendTemplatedEmailAsync(
                 "nuevo@test.com",
                 Arg.Any<string>(),
@@ -116,6 +131,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_EmailFails_StillReturnsSuccess()
         {
+            // Arrange
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
             _identity.FindByEmailAsync(Arg.Any<string>()).Returns((User?)null);
             _identity.CreateUserAsync(Arg.Any<User>(), Arg.Any<string>())
@@ -127,8 +143,10 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
                   .Returns(Task.FromException<bool>(new Exception("SMTP down")));
             _dateTime.UtcNow.Returns(DateTime.UtcNow);
 
+            // Act
             var result = await BuildSut().HandleAsync(ValidCommand(), default);
 
+            // Assert
             // Un fallo de email no debe revertir la creación del usuario
             result.Success.Should().BeTrue();
         }
