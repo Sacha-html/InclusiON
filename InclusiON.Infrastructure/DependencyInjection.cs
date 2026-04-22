@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using InclusiON.Application.Constants;
 using Microsoft.IdentityModel.Tokens;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -23,7 +27,7 @@ namespace InclusiON.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
             var jwtSettings = configuration.GetSection("JwtSettings")
                 .Get<JwtSettings>();
@@ -119,12 +123,11 @@ namespace InclusiON.Infrastructure
             })
                 .AddJwtBearer(options =>
                 {
-                    options.RequireHttpsMetadata = false; // Set to true in production
-                    options.SaveToken = true;
+                    options.RequireHttpsMetadata = !environment.IsDevelopment();
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
                         ValidateIssuer = true,
                         ValidIssuer = jwtSettings.Issuer,
                         ValidateAudience = true,
@@ -132,10 +135,51 @@ namespace InclusiON.Infrastructure
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero,
                         RequireExpirationTime = true,
-                        RequireSignedTokens = true
+                        RequireSignedTokens = true,
+                        ValidAlgorithms = [SecurityAlgorithms.HmacSha256]
                     };
 
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = ctx =>
+                        {
+                            // Verifica el claim isActive embebido en el token.
+                            // Si el usuario fue desactivado después de emitir el token, este claim
+                            // sigue valiendo "True" (del momento del login) — esta check no cubre
+                            // desactivaciones en tiempo real. Para eso habría que consultar la DB,
+                            // lo que agrega latencia a cada request. Con ExpirationHours=1 el
+                            // margen de exposición post-desactivación es aceptable.
+                            // Lo que sí previene: tokens emitidos accidentalmente con isActive=false.
+                            var isActiveClaim = ctx.Principal?
+                                .FindFirst(Permissions.IsActiveClaimType)?.Value;
 
+                            if (!string.Equals(isActiveClaim, "True", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ctx.Fail("Cuenta inactiva.");
+                            }
+
+                            return Task.CompletedTask;
+                        },
+
+                        OnChallenge = ctx =>
+                        {
+                            // Reemplaza la respuesta 401 por defecto (vacía o HTML) con JSON uniforme.
+                            if (ctx.AuthenticateFailure != null)
+                            {
+                                ctx.HandleResponse();
+                                ctx.Response.StatusCode = 401;
+                                ctx.Response.ContentType = "application/json";
+                                var body = System.Text.Json.JsonSerializer.Serialize(new
+                                {
+                                    success = false,
+                                    message = "Token inválido o sesión expirada."
+                                });
+                                return ctx.Response.Body.WriteAsync(
+                                    System.Text.Encoding.UTF8.GetBytes(body)).AsTask();
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             // La autorizacion se resuelve dinamicamente via PermissionPolicyProvider.
