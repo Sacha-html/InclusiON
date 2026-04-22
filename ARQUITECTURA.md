@@ -228,20 +228,30 @@ SemanticSearch → (pendiente: Application para interfaces)
 User (1) ──── (0..1) PersonWithDisability
 User (1) ──── (0..1) Professional
 User (1) ──── (0..1) FamilyRepresentative
+User (1) ──── (N) RefreshToken
+User (1) ──── (N) TrustedDevice
 
 Professional (N) ── ProfessionalInstitution ── (N) EducationalInstitution
 Professional (N) ── ProfessionalPerson ── (N) PersonWithDisability
+Professional (1) ── (N) ProfessionalStatusHistory
 
 PersonWithDisability (1) ── (0..1) PersonRoadmap
+PersonWithDisability (N) ── PersonRepresentative ── (N) FamilyRepresentative
+PersonWithDisability (1) ── (N) PersonSkillProfile ── (N) SkillArea
+PersonRepresentative (1) ── (N) PersonRepresentativeHistory
+FamilyRepresentative (1) ── (N) FamilyStatusHistory
+
 PersonRoadmap (1) ── (N) PersonRoadmapArea
 PersonRoadmapArea (1) ── (N) PersonRoadmapActivity
 PersonRoadmapActivity (1) ── (0..1) AdaptiveEngineConfig
 PersonRoadmapActivity (1) ── (N) AdaptiveAdjustmentLog
+PersonRoadmapActivity (1) ── (N) ActivityResult
 
-Activity (1) ── (N) ActivityContent
+Activity (1) ── (0..1) ActivityContent
 Activity (1) ── (0..1) ActivityEmbedding
-Activity (N) ── ActivityAssignment ── (N) PersonRoadmapActivity
+Activity (1) ── (N) PersonRoadmapActivity
+Activity (1) ── (N) ActivityAssignment
 
 ActivityAssignment (1) ── (N) ActivityResponse
-ActivityResponse (1) ── (N) ActivityResult
+ActivityResponse (1) ── (N) AdaptiveAdjustmentLog
 ```

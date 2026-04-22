@@ -99,7 +99,7 @@
 - [x] Registro de diagnóstico funcional (BE + FE tab en detalle profesional)
 - [x] Consulta de historial de diagnósticos (lista por fecha desc)
 - [x] Edición de diagnóstico por su creador (validación server-side)
-- [ ] Timeline de diagnósticos en perfil de persona (vista admin readonly)
+- [x] Timeline de diagnósticos en perfil de persona (tab en detalle del profesional, filtro por fecha — IN-86)
 - [x] Permisos dedicados: diagnoses:read, diagnoses:create, diagnoses:update
 
 ### 10 — Gestión de Actividades
@@ -262,4 +262,4 @@
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| Items checkeados | 114 | 56 |
+| Items checkeados | 115 | 55 |
