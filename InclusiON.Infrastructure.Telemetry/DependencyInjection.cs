@@ -1,6 +1,7 @@
 using InclusiON.Infrastructure.Configuration;
 using InclusiON.Infrastructure.Telemetry.HealthChecks;
 using InclusiON.Application.Interfaces.Telemetry;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
@@ -21,9 +22,6 @@ public static class DependencyInjection
         
         var otlpSettings = configuration.GetSection("OpenTelemetry")
             .Get<OpenTelemetrySettings>() ?? new OpenTelemetrySettings();
-
-        services.Configure<TelemetrySettings>(configuration.GetSection("Telemetry"));
-        services.Configure<OpenTelemetrySettings>(configuration.GetSection("OpenTelemetry"));
 
         // [1] Métricas base (instrumentación automática + Prometheus endpoint)
         services.AddOpenTelemetryBaseMetrics(telemetrySettings.ServiceName ?? "InclusiON.Api");
@@ -67,6 +65,10 @@ public static class DependencyInjection
         services.AddSingleton(settings);
         services.AddSingleton<ITelemetryService, TelemetryService>();
 
+        // Interceptor de EF Core: registra duración y tipo de cada query como métrica.
+        // AddPersistence lo recoge automáticamente via sp.GetServices<IInterceptor>().
+        services.AddSingleton<IInterceptor, TelemetryCommandInterceptor>();
+
         return services;
     }
 
@@ -108,8 +110,10 @@ public static class DependencyInjection
 
         services.AddSingleton(smtpSettings);
         
+        // PostgresHealthCheck usa factory lambda porque connectionString viene como parámetro del método,
+        // no es un servicio registrado en DI. GrafanaCloudHealthCheck resuelve sus deps directamente del contenedor.
         services.AddSingleton(sp => new PostgresHealthCheck(connectionString));
-        
+
         var otlpSettings = configuration.GetSection("OpenTelemetry")
             .Get<OpenTelemetrySettings>();
         
