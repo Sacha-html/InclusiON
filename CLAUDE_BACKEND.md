@@ -138,7 +138,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 ## Handlers Existentes (Application/UseCases/)
 
 ### Auth
-- `LoginCommandHandler`, `PinLoginCommandHandler`, `VisualStandardLoginCommandHandler`
+- `LoginCommandHandler`, `PinLoginCommandHandler`, `VisualStandardLoginCommandHandler` (identifica por nombre + contraseña)
 - `AssistedLoginCommandHandler`, `FamilyLoginCommandHandler`
 - `RefreshTokenCommandHandler`, `RegisterUserCommandHandler`
 - `UpdateLoginMethodCommandHandler`
@@ -208,14 +208,14 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 | `IDiagnosesRepository` | `DiagnosesRepository` | `Diagnosis` |
 | `IUsersRepository` | `UsersRepository` | `User` |
 | `IRefreshTokensRepository` | `RefreshTokensRepository` | `RefreshToken` |
-| `IVisualLoginRepository` | `VisualLoginRepository` | Login visual, TrustedDevice, LoginMethod |
+| `IVisualLoginRepository` | `VisualLoginRepository` | `TrustedDevice`, `LoginMethod` (login visual estándar y PIN) |
 
 ---
 
 ## Entidades del Dominio (39 entidades)
 
 ### Implementadas con handlers
-`User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`
+`User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`, `PersonSkillProfile`, `ProfessionalStatusHistory`, `FamilyStatusHistory`, `PersonRepresentativeHistory`
 
 ### Con migración pero sin handlers (pendientes)
 `Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `ActivityEmbedding`, `ActivityResult`, `ActivityCategory`, `ActivityTemplateType`, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`, `DisabilityType`, `Message`, `PersonRoadmap`, `PersonRoadmapActivity`, `PersonRoadmapArea`, `ReportType`, `SkillArea`

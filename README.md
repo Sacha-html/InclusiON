@@ -86,7 +86,9 @@ InclusiON.Documents/
 ├── ARQUITECTURA.md              ← Arquitectura técnica del sistema
 ├── HU_ESTADO.md                 ← Estado de implementación BE/FE
 ├── CLAUDE_BACKEND.md            ← Instrucciones para desarrollo backend
-└── CLAUDE_FRONTEND.md           ← Instrucciones para desarrollo frontend
+├── CLAUDE_FRONTEND.md           ← Instrucciones para desarrollo frontend
+└── Test/                        ← Documentación del repositorio de tests E2E
+    └── README.md                    Setup, scripts, CI y estructura de InclusiON.Testing
 ```
 
 ### Dónde encontrar cada cosa
@@ -285,6 +287,7 @@ Orientada al equipo de desarrollo:
 | [Features/CIF_ACCESIBILIDAD_ANGULAR.md](./Features/CIF_ACCESIBILIDAD_ANGULAR.md) | Consultar la referencia de accesibilidad CIF/ICF |
 | [CLAUDE_BACKEND.md](./CLAUDE_BACKEND.md) | Instrucciones para trabajar en el backend (.NET 10) |
 | [CLAUDE_FRONTEND.md](./CLAUDE_FRONTEND.md) | Instrucciones para trabajar en el frontend (Angular 20) |
+| [Test/README.md](./Test/README.md) | Setup, scripts, CI y estructura de InclusiON.Testing |
 
 ---
 
