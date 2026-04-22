@@ -8,225 +8,306 @@
 
 ---
 
-## Contexto y decisiones de diseño
+## Estado del dominio (ya existe en el código)
 
-El sistema de actividades sigue el mismo patrón que ya existe en el proyecto:
-`SkillTemplate → SkillProfile` (blueprint → instancia por persona).
+Las entidades de dominio **ya están definidas** en `InclusiON.Domain/Models/`. El trabajo de BE-06 es implementar los repositorios, queries, commands y endpoints — no crear entidades nuevas.
 
-Para actividades la cadena es:
+### Entidades existentes
+
+| Entidad | Tabla | Descripción |
+|---------|-------|-------------|
+| `Activity` | `Activities` | Actividad pedagógica creada por un profesional |
+| `ActivityContent` | `ActivityContents` | Contenido interactivo 1:1 con Activity. Tiene `TemplateTypeId` + `ContentJson` (jsonb) |
+| `ActivityTemplateType` | `ActivityTemplateTypes` | Define la estructura del contenido. Vinculado a `SkillArea` |
+| `ActivityCategory` | `ActivityCategories` | Clasificación temática independiente del SkillArea |
+| `ActivityAssignment` | `ActivityAssignments` | Asignación de actividad a persona por un profesional |
+| `ActivityResponse` | `ActivityResponses` | Respuesta/intento de una persona en una actividad |
+| `ActivityEmbedding` | `ActivityEmbeddings` | Embedding semántico para búsqueda (BE-16) |
+| `PersonRoadmapActivity` | `PersonRoadmapActivities` | Actividad dentro de un roadmap (BE-09) |
+
+### DbSets registrados en AppDbContext
+
+```csharp
+DbSet<ActivityCategory>         ActivityCategories
+DbSet<ActivityTemplateType>     ActivityTemplateTypes
+DbSet<ActivityContent>          ActivityContents
+DbSet<ActivityAssignment>       ActivityAssignments
+DbSet<ActivityResponse>         ActivityResponses
+DbSet<ActivityEmbedding>        ActivityEmbeddings
+DbSet<PersonRoadmapActivity>    PersonRoadmapActivities
+```
+
+---
+
+## Datos de seed (ya en la base)
+
+### SkillAreas (3)
+
+| Id | Nombre | Color | Ícono |
+|----|--------|-------|-------|
+| — | Comunicación | `#2E5FA3` | `chat` |
+| — | Alfabetización | `#4CAF50` | `menu_book` |
+| — | Lógico-matemático | `#FF9800` | `calculate` |
+
+### ActivityTemplateTypes (8, agrupados por SkillArea)
+
+| SkillArea | Code | Nombre | Pictogramas | Audio |
+|-----------|------|--------|:-----------:|:-----:|
+| Comunicación | `PICTOGRAM_SELECT` | Seleccionar pictograma | ✓ | ✓ |
+| Comunicación | `OPTION_SELECT` | Selección de opciones | — | ✓ |
+| Alfabetización | `GLOBAL_READING` | Lectura global | — | ✓ |
+| Alfabetización | `SOUND_RECOGNITION` | Reconocer sonidos | — | ✓ |
+| Alfabetización | `BUILD_WORD` | Armar palabras | — | — |
+| Lógico-matemático | `CLASSIFY` | Clasificación | — | — |
+| Lógico-matemático | `ORDER_SEQUENCE` | Ordenamiento | — | — |
+| Lógico-matemático | `NUMERATION` | Numeración | — | — |
+
+> ⚠️ Los campos `ContentSchema` y `ComponentName` están vacíos en el seed. Completarlos es parte de BE-06.
+
+### ActivityCategories (8)
+
+| Id | Nombre | Descripción resumida |
+|----|--------|---------------------|
+| 1 | Lectoescritura | Lectura, escritura, conciencia fonológica |
+| 2 | Numeración y Matemática | Prenumeración, numeración, operaciones básicas |
+| 3 | Habilidades Socioemocionales | Conducta, hábitos, rutinas, normas, historias sociales |
+| 4 | Comunicación y Lenguaje | LSA, SAAC, sistemas aumentativos |
+| 5 | Motricidad y Coordinación | Fina, gruesa, óculo-manual, orientación espacial |
+| 6 | Creatividad y Expresión Artística | Música, plástica, dramatización |
+| 7 | Autonomía y Vida Diaria | Vestimenta, higiene, dinero, noción del tiempo |
+| 8 | Estimulación Cognitiva | Memoria, atención, percepción, resolución de problemas |
+
+---
+
+## Relaciones clave del modelo
 
 ```
-ActivityTemplateType   →   Activity (instancia)   →   ActivityResponse (respuesta del alumno)
-  (catálogo/sistema)       (creada por profesional,      (ejecución por persona,
-                            desde un type)                score, intentos)
+Activity (int Id)
+  ├── CategoryId → ActivityCategory       (clasificación temática)
+  ├── SkillAreaId? → SkillArea            (área pedagógica, opcional)
+  ├── ProfessionalId → Professional       (creador)
+  ├── Content → ActivityContent (1:1)
+  │     └── TemplateTypeId → ActivityTemplateType
+  │           └── SkillAreaId → SkillArea
+  ├── ActivityAssignments → ActivityAssignment[]
+  │     ├── PersonId → PersonWithDisability
+  │     └── Responses → ActivityResponse[]
+  ├── RoadmapActivities → PersonRoadmapActivity[]
+  └── Embedding → ActivityEmbedding (1:1, BE-16)
 ```
 
-**Decisión clave — contenido en JSON por tipo:**
-El contenido de cada actividad se almacena como `jsonb` (PostgreSQL). Cada `ActivityTemplateType` define su `ContentSchema` (estructura esperada). El frontend lo usa para generar el formulario dinámico del wizard. Esta es la misma estrategia que usan plataformas educativas similares (Moodle, Duolingo) y evita una tabla por tipo de actividad.
-
-**Visibilidad compartida:**
-Las actividades tienen tres niveles de visibilidad: `Private` (solo el creador), `Institution` (toda la institución del creador), `Public` (todos los profesionales). Las actividades del sistema (`IsSystem = true`) son visibles para todos pero no editables.
-
----
-
-## Dominio — Entidades nuevas
-
-### 1. `ActivityTemplateType` (catálogo del sistema)
-
-Define el tipo de template: qué formulario genera, qué componente lo renderiza.
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `Id` | `int` | PK |
-| `SkillAreaId` | `int` FK | Área de habilidad a la que pertenece |
-| `Code` | `string(50)` unique | `SELECT_FIGURE`, `VISUAL_SUM`, `MATCH_IMAGE_WORD`, `ORDER_SEQUENCE`, `FILL_LETTER`, `OPEN_TEXT` |
-| `Name` | `string(150)` | Nombre legible |
-| `Description` | `string(500)?` | Descripción del tipo |
-| `ContentSchema` | `string` (jsonb) | JSON Schema que describe los campos del contenido |
-| `ComponentName` | `string(100)` | Nombre del componente Angular que renderiza la actividad |
-| `UsesPictograms` | `bool` | Si el template integra ARASAAC |
-| `HasAudio` | `bool` | Si el template soporta audio |
-| `DisplayOrder` | `int` | Orden en el selector del wizard |
-| `IsActive` | `bool` | Estado lógico |
-
-**Tipos iniciales (primera iteración):**
-
-| Code | Área | Descripción |
-|------|------|-------------|
-| `SELECT_FIGURE` | Comunicación | Elegir la figura correcta entre opciones con pictogramas |
-| `MATCH_IMAGE_WORD` | Alfabetización | Emparejar imagen con su palabra escrita |
-| `ORDER_SEQUENCE` | Lógica-Matemática | Ordenar elementos en la secuencia correcta |
-| `VISUAL_SUM` | Lógica-Matemática | Sumar contando objetos visuales |
-| `FILL_LETTER` | Alfabetización | Completar la letra/palabra que falta |
-| `OPEN_TEXT` | Cualquiera | Respuesta de texto libre (sin corrección automática) |
+**Distinción CategoryId vs SkillAreaId:**
+- `SkillAreaId` en Activity (y en ActivityTemplateType) define el **área pedagógica** que orienta qué templates están disponibles.
+- `CategoryId` es la **clasificación temática** de la actividad (más granular, 8 opciones) y va en los metadatos del wizard.
+- Un profesional que trabaja "Comunicación y Lenguaje" (categoría) puede usar templates de "Comunicación" (SkillArea).
 
 ---
 
-### 2. `Activity` (actividad creada por un profesional)
+## Arquitectura — lo que falta implementar
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `Id` | `Guid` | PK |
-| `ActivityTemplateTypeId` | `int` FK | Tipo de template base |
-| `CreatedByProfessionalId` | `Guid` FK | Profesional creador |
-| `InstitutionId` | `int?` FK | Institución del creador al momento de crear (para visibilidad) |
-| `Title` | `string(200)` | Título de la actividad |
-| `Description` | `string(500)?` | Descripción opcional |
-| `Content` | `string` (jsonb) | Contenido concreto (preguntas, opciones, respuestas, imágenes) |
-| `ComplexityLevel` | `int (1-5)` | Nivel de dificultad |
-| `EstimatedMinutes` | `int?` | Duración estimada en minutos |
-| `RequiresSupervision` | `bool` | Si necesita que un profesional esté presente |
-| `Visibility` | `enum` | `Private`, `Institution`, `Public` |
-| `IsSystem` | `bool` | Actividad estándar del sistema (no editable) |
-| `IsActive` | `bool` | Estado lógico |
-| `CreatedAt` | `DateTime` | Fecha de creación |
-| `UpdatedAt` | `DateTime?` | Última modificación |
+### 1. ContentSchema en ActivityTemplateTypes
 
-**Regla de negocio:** no se puede desactivar una `Activity` que tenga asignaciones activas en un roadmap.
+El campo `ContentSchema` está vacío en el seed actual. Hay que completarlo con el JSON Schema de cada template. El frontend lo usará para generar el formulario del Paso 3.
 
----
-
-### `ContentSchema` por tipo — estructura JSON de referencia
-
-El `ContentSchema` del `ActivityTemplateType` define qué campos debe tener el `Content` de cada `Activity`. El frontend lee este schema para generar el formulario del wizard paso 3.
-
-**SELECT_FIGURE / MATCH_IMAGE_WORD:**
+**PICTOGRAM_SELECT / OPTION_SELECT:**
 ```json
 {
   "instruction": "string",
   "options": [
-    { "id": "string", "imageUrl": "string", "label": "string", "isCorrect": "bool" }
+    { "id": "string", "imageUrl": "string?", "label": "string", "isCorrect": "bool" }
   ],
   "maxSelections": "int"
 }
 ```
 
-**ORDER_SEQUENCE:**
-```json
-{
-  "instruction": "string",
-  "items": [
-    { "id": "string", "imageUrl": "string?", "label": "string", "correctPosition": "int" }
-  ]
-}
-```
-
-**VISUAL_SUM:**
-```json
-{
-  "instruction": "string",
-  "operandA": { "value": "int", "imageUrl": "string?" },
-  "operandB": { "value": "int", "imageUrl": "string?" },
-  "options": ["int"]
-}
-```
-
-**FILL_LETTER:**
+**GLOBAL_READING:**
 ```json
 {
   "word": "string",
-  "missingIndex": "int",
   "imageUrl": "string?",
-  "hint": "string?"
+  "options": ["string"],
+  "correctOption": "string"
 }
 ```
 
-**OPEN_TEXT:**
+**SOUND_RECOGNITION:**
 ```json
 {
-  "prompt": "string",
+  "audioUrl": "string",
+  "letter": "string",
+  "options": ["string"],
+  "correctOption": "string"
+}
+```
+
+**BUILD_WORD:**
+```json
+{
   "imageUrl": "string?",
-  "maxLength": "int?"
+  "word": "string",
+  "shuffledLetters": ["string"]
+}
+```
+
+**CLASSIFY:**
+```json
+{
+  "instruction": "string",
+  "criteria": "string",
+  "items": [{ "id": "string", "imageUrl": "string?", "label": "string", "group": "string" }],
+  "groups": ["string"]
+}
+```
+
+**ORDER_SEQUENCE / NUMERATION:**
+```json
+{
+  "instruction": "string",
+  "items": [{ "id": "string", "imageUrl": "string?", "label": "string", "correctPosition": "int" }]
 }
 ```
 
 ---
 
-## Backend — Plan de implementación (Clean Architecture)
+## Backend — plan de implementación
 
-### Capa Domain
+### Paso 1 — Migración: completar ContentSchema + ComponentName
+Crear migración de datos que actualice los 8 `ActivityTemplateTypes` con sus `ContentSchema` y `ComponentName`.
 
-```
-InclusiON.Domain/Models/
-  ActivityTemplateType.cs
-  Activity.cs
-```
+### Paso 2 — Repositorios
 
-Nada especial en la capa de dominio más allá de las propiedades. Las validaciones de negocio van en los command handlers.
-
-### Capa Application
-
-**Queries:**
-```
-GetActivityTemplateTypesQuery       → lista de types activos (filtrable por SkillAreaId)
-GetActivitiesPagedQuery             → catálogo paginado (search, templateTypeId, skillAreaId, visibility, complexityLevel)
-GetActivityByIdQuery                → detalle de una actividad
-```
-
-**Commands:**
-```
-CreateActivityCommand               → crea Activity desde un templateType
-UpdateActivityCommand               → edita una Activity propia
-DeactivateActivityCommand           → desactiva (valida que no tenga asignaciones activas)
-```
-
-**Interfaces:**
 ```
 IActivitiesRepository
-IActivityTemplateTypesRepository
+  GetPagedAsync(page, pageSize, search, categoryId?, skillAreaId?, complexityLevel?, isStandard?, professionalId?)
+  GetByIdAsync(int id)
+  CreateAsync(Activity activity)
+  UpdateAsync(Activity activity)
+  DeactivateAsync(int id) — valida que no tenga ActivityAssignments activas
+
+IActivityContentsRepository
+  GetByActivityIdAsync(int activityId)
+  CreateAsync(ActivityContent content)
+  UpdateAsync(ActivityContent content)
 ```
 
-### Capa Infrastructure
+### Paso 3 — Queries
 
 ```
-InclusiON.Infrastructure/Data/Repositories/
-  ActivitiesRepository.cs
-  ActivityTemplateTypesRepository.cs
+GetActivityTemplateTypesQuery     → lista activos, filtrable por skillAreaId
+GetActivityCategoriesQuery        → lista activos (catálogo estático)
+GetActivitiesPagedQuery           → catálogo paginado con filtros
+GetActivityByIdQuery              → detalle + content + templateType
 ```
 
-`Content` y `ContentSchema` se mapean como `string` en EF Core con conversión de tipo, almacenados como `jsonb` en PostgreSQL.
-
-**Configuración EF:**
-```csharp
-// En AppDbContext o IEntityTypeConfiguration<Activity>:
-builder.Property(a => a.Content).HasColumnType("jsonb");
-builder.Property(a => a.Visibility).HasConversion<string>();
-```
-
-**Migración:**
-```
-20260418_AddActivityTemplatesAndActivities
-```
-Incluye seed de los 6 `ActivityTemplateType` iniciales con sus `ContentSchema`.
-
-### Capa API
+### Paso 4 — Commands
 
 ```
-Controllers/ActivitiesController.cs
-  GET  /api/activity-template-types              → GetActivityTemplateTypesQuery
-  GET  /api/activity-template-types/{id}/schema  → schema JSON del tipo
+CreateActivityCommand
+  → crea Activity + ActivityContent en una sola transacción
+  → valida: categoryId existe, templateTypeId existe, ContentJson no vacío
 
-  GET  /api/activities                           → GetActivitiesPagedQuery (con filtros)
-  GET  /api/activities/{id}                      → GetActivityByIdQuery
-  POST /api/activities                           → CreateActivityCommand
-  PUT  /api/activities/{id}                      → UpdateActivityCommand
-  DELETE /api/activities/{id}                    → DeactivateActivityCommand
+UpdateActivityCommand
+  → solo el creador puede actualizar
+  → actualiza Activity + ActivityContent
+
+DeactivateActivityCommand
+  → solo el creador puede desactivar
+  → falla si hay ActivityAssignments con Status != Cancelada
+```
+
+### Paso 5 — Controller y DTOs
+
+```
+GET  /api/activity-template-types                → GetActivityTemplateTypesQuery
+GET  /api/activity-categories                    → GetActivityCategoriesQuery
+
+GET  /api/activities                             → GetActivitiesPagedQuery
+GET  /api/activities/{id}                        → GetActivityByIdQuery
+POST /api/activities                             → CreateActivityCommand
+PUT  /api/activities/{id}                        → UpdateActivityCommand
+DELETE /api/activities/{id}                      → DeactivateActivityCommand
+```
+
+**DTOs:**
+```
+ActivityTemplateTypeResponse  { Id, Code, Name, Description, SkillAreaId, SkillAreaName, SkillAreaColor, ContentSchema, ComponentName, UsesPictograms, HasAudio }
+ActivityCategoryResponse      { Id, Name, Description }
+
+ActivityListItemResponse      { Id, Title, CategoryId, CategoryName, SkillAreaId, SkillAreaName, SkillAreaColor, TemplateTypeCode, ComplexityLevel, EstimatedDurationMinutes, IsStandardActivity, ProfessionalName, CreatedAt }
+ActivityDetailResponse        { ...ListItem, Description, Instructions, Content: { TemplateTypeId, ContentJson }, HasVisualSupport, HasAudioSupport, UsesEasyReading, UsesPictograms, RequiresSupervision, ResourcesUrl }
+
+CreateActivityRequest         { Title, Description?, Instructions?, CategoryId, SkillAreaId?, ContentTemplateTypeId, ContentJson, ComplexityLevel?, EstimatedDurationMinutes?, RequiresSupervision, HasVisualSupport, HasAudioSupport, UsesEasyReading, UsesPictograms, ResourcesUrl?, IsStandardActivity }
+UpdateActivityRequest         { Title, Description?, Instructions?, CategoryId, ContentJson, ComplexityLevel?, EstimatedDurationMinutes?, RequiresSupervision, HasVisualSupport, HasAudioSupport, UsesEasyReading, UsesPictograms, ResourcesUrl? }
 ```
 
 **Permisos:**
 - `activity-templates:read` → cualquier profesional autenticado
-- `activities:read` → profesional (ve propias + institución + públicas según visibilidad)
+- `activities:read` → profesional autenticado (ve propias + estándar del sistema)
 - `activities:create` → profesional
-- `activities:update` → profesional (solo las propias)
-- `activities:delete` → profesional (solo las propias, sin asignaciones activas)
+- `activities:update` → profesional (solo las propias, no las `IsStandardActivity`)
+- `activities:delete` → profesional (solo las propias sin asignaciones activas)
 
-**DTOs nuevos:**
+---
+
+## Frontend — Wizard (FE-04/05)
+
+### Flujo de 4 pasos
+
 ```
-ActivityTemplateTypeResponse        { Id, Code, Name, Description, SkillAreaId, SkillAreaName, ContentSchema, ComponentName, UsesPictograms, HasAudio }
-ActivityListItemResponse            { Id, Title, TemplateTypeCode, TemplateTypeName, SkillAreaName, SkillAreaColor, ComplexityLevel, EstimatedMinutes, Visibility, IsSystem, CreatedByName }
-ActivityDetailResponse              { ...ListItem, Description, Content, RequiresSupervision, CreatedAt, UpdatedAt }
-CreateActivityRequest               { ActivityTemplateTypeId, Title, Description?, Content, ComplexityLevel, EstimatedMinutes?, RequiresSupervision, Visibility }
-UpdateActivityRequest               { Title, Description?, Content, ComplexityLevel, EstimatedMinutes?, RequiresSupervision, Visibility }
+Paso 1 — Área de habilidad (SkillArea)
+  3 cards: Comunicación (#2E5FA3), Alfabetización (#4CAF50), Lógico-matemático (#FF9800)
+
+Paso 2 — Tipo de template (ActivityTemplateType)
+  Cards filtradas por SkillArea seleccionada
+  Comunicación:      PICTOGRAM_SELECT, OPTION_SELECT
+  Alfabetización:    GLOBAL_READING, SOUND_RECOGNITION, BUILD_WORD
+  Lógico-matemático: CLASSIFY, ORDER_SEQUENCE, NUMERATION
+
+Paso 3 — Contenido (ActivityContent.ContentJson)
+  Formulario dinámico generado del ContentSchema del template seleccionado
+  Componentes por template code:
+    pictogram-select-form, option-select-form, global-reading-form,
+    sound-recognition-form, build-word-form, classify-form,
+    order-sequence-form, numeration-form
+
+Paso 4 — Metadatos
+  Título *, Instrucciones (textarea)
+  Categoría * (dropdown 8 opciones de ActivityCategory)
+  Complejidad 1-5 (estrellas)
+  Duración estimada (minutos)
+  Requiere supervisión (checkbox)
+  Flags de accesibilidad:
+    □ Soporte visual (imágenes/video)
+    □ Soporte auditivo (audio/narración)
+    □ Lectura fácil
+    □ Pictogramas
+```
+
+### Estructura de componentes
+
+```
+activities/
+  wizard/
+    activity-wizard.component.ts
+    steps/
+      step-skill-area.component.ts
+      step-template-type.component.ts
+      step-content/
+        activity-content-form.component.ts   ← dispatcher por code
+        forms/
+          pictogram-select-form.component.ts
+          option-select-form.component.ts
+          global-reading-form.component.ts
+          sound-recognition-form.component.ts
+          build-word-form.component.ts
+          classify-form.component.ts
+          order-sequence-form.component.ts
+          numeration-form.component.ts
+      step-metadata.component.ts
+  list/
+    activities-list.component.ts
+  detail/
+    activity-detail.component.ts
 ```
 
 ---
@@ -234,74 +315,13 @@ UpdateActivityRequest               { Title, Description?, Content, ComplexityLe
 ## Orden de implementación
 
 ```
-[ ] 1. Entidades Domain + configuración EF (Activity, ActivityTemplateType)
-[ ] 2. Migración + seed de ActivityTemplateTypes con ContentSchema
-[ ] 3. Repositorios (IActivitiesRepository, IActivityTemplateTypesRepository)
-[ ] 4. Query: GetActivityTemplateTypesQuery
-[ ] 5. Query: GetActivitiesPagedQuery + GetActivityByIdQuery
-[ ] 6. Command: CreateActivityCommand (con validación de ContentSchema opcional en v1)
-[ ] 7. Command: UpdateActivityCommand + DeactivateActivityCommand
-[ ] 8. Controller + DTOs + permisos
-[ ] 9. Registro DI en InfrastructureDependencyInjection.cs
+[ ] 1. Migración de datos: completar ContentSchema + ComponentName en los 8 templates
+[ ] 2. IActivitiesRepository + IActivityContentsRepository (interfaces)
+[ ] 3. ActivitiesRepository + ActivityContentsRepository (implementaciones)
+[ ] 4. GetActivityTemplateTypesQuery + GetActivityCategoriesQuery
+[ ] 5. GetActivitiesPagedQuery + GetActivityByIdQuery
+[ ] 6. CreateActivityCommand (Activity + ActivityContent en transacción)
+[ ] 7. UpdateActivityCommand + DeactivateActivityCommand
+[ ] 8. ActivitiesController + DTOs + registro en DI
+[ ] 9. FE: wizard 4 pasos + catálogo
 ```
-
----
-
-## Frontend — Plan de implementación (FE-04/05, IN-105..109)
-
-### Wizard de alta (IN-105)
-
-4 pasos siguiendo la HU-02:
-
-```
-Paso 1 — Área de habilidad
-  Grilla de cards con ícono y color por área (datos del catálogo /api/skill-areas)
-
-Paso 2 — Tipo de template
-  Cards filtradas por área, con nombre, descripción, íconos UsesPictograms/HasAudio
-
-Paso 3 — Contenido
-  Formulario dinámico generado a partir del ContentSchema del type seleccionado.
-  Campos: texto, opciones con imágenes, buscador ARASAAC (integración futura IN-106).
-
-Paso 4 — Metadatos
-  Título, descripción, complejidad (1-5 estrellas), duración estimada,
-  requiere supervisión, visibilidad (Privada / Institución / Pública)
-```
-
-**Componentes:**
-```
-activities/
-  wizard/
-    activity-wizard.component.ts          ← stepper principal
-    steps/
-      step-skill-area.component.ts
-      step-template-type.component.ts
-      step-content/
-        activity-content-form.component.ts  ← dispatcher por type code
-        forms/
-          select-figure-form.component.ts
-          match-image-word-form.component.ts
-          order-sequence-form.component.ts
-          visual-sum-form.component.ts
-          fill-letter-form.component.ts
-          open-text-form.component.ts
-      step-metadata.component.ts
-  list/
-    activities-list.component.ts          ← catálogo con filtros
-  detail/
-    activity-detail.component.ts
-```
-
-### Catálogo (IN-107)
-
-Tabla/grilla paginada con filtros: área de habilidad, tipo de template, nivel de complejidad, visibilidad. Badge de área con el color del catálogo. Estrellas para complejidad. Indicador "Sistema" para actividades no editables.
-
----
-
-## Notas de arquitectura
-
-- **Validación de Content en v1:** no se valida el JSON contra el schema en el backend (demasiada complejidad sin beneficio inmediato). El frontend garantiza la estructura mediante los formularios tipados por type. En v2 se puede agregar un `IContentValidator` por estrategia.
-- **ARASAAC:** la integración de pictogramas (IN-106) va en un sprint posterior. En v1 se soporta `imageUrl` como campo de texto libre (URL externa o base64).
-- **Seed de ActivityTemplateTypes:** va hardcodeado en una migración de datos (no en `HasData` de EF, para poder usar `jsonb` limpiamente).
-- **RoadmapActivity** (BE-09): cuando se implemente el roadmap, agrega la tabla `RoadmapActivities` con FK a `Activity.Id`. La restricción de "no desactivar con asignaciones activas" se amplía para incluir esa tabla.

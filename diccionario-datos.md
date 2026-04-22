@@ -581,6 +581,8 @@ Rastro de auditoría para accesos a datos sensibles. Generado por `ResourceAutho
 
 ## 12. Soporte y Ayuda
 
+> **Estado:** Planificado — estas entidades **no están en el DbContext ni tienen migraciones**. Se documentan como diseño para implementación futura (HU-13).
+
 ### Entrada de FAQ
 Pregunta frecuente del centro de ayuda, gestionada por el administrador.
 
@@ -626,40 +628,46 @@ Respuesta del administrador a un ticket de soporte.
 
 ## Resumen de Entidades
 
-| # | Entidad | Área | Relaciones principales |
-|---|---------|------|------------------------|
-| 1 | Tipo de Discapacidad | Catálogo | → Persona |
-| 2 | Nivel de Autonomía | Catálogo | → Persona |
-| 3 | Categoría de Actividad | Catálogo | → Actividad |
-| 4 | Área de Habilidad | Catálogo | → Perfil de Habilidades, Actividad, Roadmap |
-| 5 | Tipo de Template | Catálogo | → Contenido de Actividad |
-| 6 | Método de Login | Catálogo | → Persona |
-| 7 | Tipo de Reporte | Catálogo | → Reporte |
-| 8 | Usuario | Usuarios | → Profesional / Persona / Familiar (1:1) |
-| 9 | Profesional | Usuarios | → Instituciones, Personas, Actividades |
-| 9b | Historial de Estados | Usuarios | → Profesional |
-| 10 | Persona con Discapacidad | Usuarios | → Profesionales, Familiares, Roadmap |
-| 11 | Representante Familiar | Usuarios | → Personas |
-| 12 | Institución Educativa | Instituciones | → Profesionales, Admins |
-| 13 | Admin ↔ Institución | Relaciones | Admin → Institución |
-| 14 | Profesional ↔ Institución | Relaciones | Profesional → Institución |
-| 15 | Profesional ↔ Persona | Relaciones | Profesional → Persona |
-| 16 | Persona ↔ Familiar | Relaciones | Persona → Familiar |
-| 17 | Perfil de Habilidades | Relaciones | Persona → Área |
-| 18 | Invitación | Invitaciones | Profesional → Familiar |
-| 19 | Actividad | Actividades | Profesional, Categoría, Área |
-| 20 | Contenido de Actividad | Actividades | Actividad (1:1), Template |
-| 21 | Roadmap | Plan de Trabajo | Persona (1:1), Profesional |
-| 22 | Área del Roadmap | Plan de Trabajo | Roadmap, Área de Habilidad |
-| 23 | Actividad del Roadmap | Plan de Trabajo | Área del Roadmap, Actividad |
-| 24 | Asignación de Actividad | Ejecución | Actividad, Persona, Profesional |
-| 25 | Respuesta de Actividad | Ejecución | Asignación |
-| 26 | Configuración Adaptativa | MDA | Actividad del Roadmap (1:1) |
-| 27 | Registro de Ajuste | MDA | Actividad del Roadmap, Respuesta |
-| 28 | Diagnóstico Funcional | Clínico | Persona, Profesional |
-| 29 | Reporte de Progreso | Reportes | Persona, Profesional, Tipo |
-| 30 | Mensaje | Comunicación | Remitente, Destinatario, Persona |
-| 31 | Registro de Acceso | Auditoría | Usuario, Persona |
-| 32 | Entrada de FAQ | Soporte | — |
-| 33 | Ticket de Soporte | Soporte | Usuario creador |
-| 34 | Respuesta de Ticket | Soporte | Ticket, Usuario respondedor |
+| # | Entidad (`DbSet`) | Área | Relaciones principales |
+|---|-------------------|------|------------------------|
+| 1 | `DisabilityType` | Catálogo | → Persona |
+| 2 | `AutonomyLevel` | Catálogo | → Persona |
+| 3 | `ActivityCategory` | Catálogo | → Actividad |
+| 4 | `SkillArea` | Catálogo | → PerfilHabilidades, Actividad, Roadmap |
+| 5 | `ActivityTemplateType` | Catálogo | → ContenidoActividad |
+| 6 | `LoginMethod` | Catálogo | → Persona |
+| 7 | `ReportType` | Catálogo | → Reporte |
+| 8 | `User` | Auth | → Professional / PersonWithDisability / FamilyRepresentative (1:1) |
+| 9 | `RefreshToken` | Auth | → User |
+| 10 | `TrustedDevice` | Auth | → User |
+| 11 | `Professional` | Perfiles | → Instituciones, Personas, Actividades |
+| 12 | `ProfessionalStatusHistory` | Perfiles | → Professional |
+| 13 | `PersonWithDisability` | Perfiles | → Profesionales, Familiares, Roadmap |
+| 14 | `FamilyRepresentative` | Perfiles | → Personas |
+| 15 | `FamilyStatusHistory` | Perfiles | → FamilyRepresentative |
+| 16 | `EducationalInstitution` | Instituciones | → Profesionales, Admins |
+| 17 | `AdminInstitution` | Instituciones | Admin → Institución |
+| 18 | `ProfessionalInstitution` | Instituciones | Professional → Institución |
+| 19 | `ProfessionalPerson` | Relaciones | Professional → PersonWithDisability |
+| 20 | `PersonRepresentative` | Relaciones | PersonWithDisability → FamilyRepresentative |
+| 21 | `PersonRepresentativeHistory` | Relaciones | → PersonRepresentative |
+| 22 | `PersonSkillProfile` | Relaciones | PersonWithDisability → SkillArea |
+| 23 | `Invitation` | Invitaciones | Professional → FamilyRepresentative |
+| 24 | `Activity` | Actividades | Professional, Category, SkillArea |
+| 25 | `ActivityContent` | Actividades | Activity (1:1), TemplateType |
+| 26 | `ActivityEmbedding` | Actividades | Activity (1:1) — búsqueda semántica |
+| 27 | `PersonRoadmap` | Plan de Trabajo | PersonWithDisability (1:1), Professional |
+| 28 | `PersonRoadmapArea` | Plan de Trabajo | PersonRoadmap, SkillArea |
+| 29 | `PersonRoadmapActivity` | Plan de Trabajo | PersonRoadmapArea, Activity |
+| 30 | `ActivityAssignment` | Ejecución | Activity, PersonWithDisability, Professional |
+| 31 | `ActivityResponse` | Ejecución | → ActivityAssignment |
+| 32 | `ActivityResult` | Ejecución | → PersonRoadmapActivity |
+| 33 | `AdaptiveEngineConfig` | MDA | PersonRoadmapActivity (1:1) |
+| 34 | `AdaptiveAdjustmentLog` | MDA | PersonRoadmapActivity, ActivityResponse |
+| 35 | `Diagnosis` | Clínico | PersonWithDisability, Professional |
+| 36 | `Report` | Reportes | PersonWithDisability, Professional, ReportType |
+| 37 | `Message` | Comunicación | User (sender/receiver), PersonWithDisability |
+| 38 | `AccessAudit` | Auditoría | User, PersonWithDisability |
+| — | ~~EntradaFAQ~~ | Soporte *(planificado)* | No implementado — HU-13 |
+| — | ~~TicketSoporte~~ | Soporte *(planificado)* | No implementado — HU-13 |
+| — | ~~RespuestaTicket~~ | Soporte *(planificado)* | No implementado — HU-13 |
