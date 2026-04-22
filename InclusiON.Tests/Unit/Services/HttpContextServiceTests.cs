@@ -38,40 +38,60 @@ namespace InclusiON.Tests.Unit.Services
         [Fact]
         public void GetCurrentUserId_ValidClaim_ReturnsGuid()
         {
+            // Arrange
             var userId    = Guid.NewGuid();
             var principal = BuildPrincipal(
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
-
             var sut = BuildSut(principal);
 
-            sut.GetCurrentUserId().Should().Be(userId);
+            // Act
+            var result = sut.GetCurrentUserId();
+
+            // Assert
+            result.Should().Be(userId);
         }
 
         [Fact]
         public void GetCurrentUserId_NoClaim_ReturnsNull()
         {
+            // Arrange
             var sut = BuildSut(BuildPrincipal());
-            sut.GetCurrentUserId().Should().BeNull();
+
+            // Act
+            var result = sut.GetCurrentUserId();
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void GetCurrentUserId_NoHttpContext_ReturnsNull()
         {
+            // Arrange
             var accessor = Substitute.For<IHttpContextAccessor>();
             accessor.HttpContext.Returns((HttpContext?)null);
             var sut = new HttpContextService(accessor, Substitute.For<IEncryptionService>());
 
-            sut.GetCurrentUserId().Should().BeNull();
+            // Act
+            var result = sut.GetCurrentUserId();
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void GetCurrentUserId_InvalidGuidValue_ReturnsNull()
         {
+            // Arrange
             var principal = BuildPrincipal(
                 new Claim(ClaimTypes.NameIdentifier, "not-a-guid"));
-
             var sut = BuildSut(principal);
-            sut.GetCurrentUserId().Should().BeNull();
+
+            // Act
+            var result = sut.GetCurrentUserId();
+
+            // Assert
+            result.Should().BeNull();
         }
 
         // ── GetCurrentUserRole ───────────────────────────────────────────────
@@ -79,17 +99,28 @@ namespace InclusiON.Tests.Unit.Services
         [Fact]
         public void GetCurrentUserRole_ValidClaim_ReturnsRole()
         {
+            // Arrange
             var principal = BuildPrincipal(new Claim(ClaimTypes.Role, "Professional"));
             var sut       = BuildSut(principal);
 
-            sut.GetCurrentUserRole().Should().Be("Professional");
+            // Act
+            var result = sut.GetCurrentUserRole();
+
+            // Assert
+            result.Should().Be("Professional");
         }
 
         [Fact]
         public void GetCurrentUserRole_NoClaim_ReturnsNull()
         {
+            // Arrange
             var sut = BuildSut(BuildPrincipal());
-            sut.GetCurrentUserRole().Should().BeNull();
+
+            // Act
+            var result = sut.GetCurrentUserRole();
+
+            // Assert
+            result.Should().BeNull();
         }
 
         // ── IsGlobalAdmin ───────────────────────────────────────────────────
@@ -97,25 +128,42 @@ namespace InclusiON.Tests.Unit.Services
         [Fact]
         public void IsGlobalAdmin_ClaimTrue_ReturnsTrue()
         {
+            // Arrange
             var principal = BuildPrincipal(
                 new Claim(Permissions.GlobalAdminClaimType, "true"));
 
-            BuildSut(principal).IsGlobalAdmin().Should().BeTrue();
+            // Act
+            var result = BuildSut(principal).IsGlobalAdmin();
+
+            // Assert
+            result.Should().BeTrue();
         }
 
         [Fact]
         public void IsGlobalAdmin_ClaimFalse_ReturnsFalse()
         {
+            // Arrange
             var principal = BuildPrincipal(
                 new Claim(Permissions.GlobalAdminClaimType, "false"));
 
-            BuildSut(principal).IsGlobalAdmin().Should().BeFalse();
+            // Act
+            var result = BuildSut(principal).IsGlobalAdmin();
+
+            // Assert
+            result.Should().BeFalse();
         }
 
         [Fact]
         public void IsGlobalAdmin_NoClaim_ReturnsFalse()
         {
-            BuildSut(BuildPrincipal()).IsGlobalAdmin().Should().BeFalse();
+            // Arrange
+            var sut = BuildSut(BuildPrincipal());
+
+            // Act
+            var result = sut.IsGlobalAdmin();
+
+            // Assert
+            result.Should().BeFalse();
         }
 
         // ── GetInstitutionIds ───────────────────────────────────────────────
@@ -123,30 +171,46 @@ namespace InclusiON.Tests.Unit.Services
         [Fact]
         public void GetInstitutionIds_MultipleIds_ReturnsAll()
         {
+            // Arrange
             var principal = BuildPrincipal(
                 new Claim(Permissions.InstitutionIdClaimType, "1"),
                 new Claim(Permissions.InstitutionIdClaimType, "3"),
                 new Claim(Permissions.InstitutionIdClaimType, "7"));
-
             var sut = BuildSut(principal);
 
-            sut.GetInstitutionIds().Should().BeEquivalentTo([1, 3, 7]);
+            // Act
+            var result = sut.GetInstitutionIds();
+
+            // Assert
+            result.Should().BeEquivalentTo([1, 3, 7]);
         }
 
         [Fact]
         public void GetInstitutionIds_NoClaims_ReturnsEmptyList()
         {
-            BuildSut(BuildPrincipal()).GetInstitutionIds().Should().BeEmpty();
+            // Arrange
+            var sut = BuildSut(BuildPrincipal());
+
+            // Act
+            var result = sut.GetInstitutionIds();
+
+            // Assert
+            result.Should().BeEmpty();
         }
 
         [Fact]
         public void GetInstitutionIds_InvalidValue_IsSkipped()
         {
+            // Arrange
             var principal = BuildPrincipal(
                 new Claim(Permissions.InstitutionIdClaimType, "5"),
                 new Claim(Permissions.InstitutionIdClaimType, "invalid"));
 
-            BuildSut(principal).GetInstitutionIds().Should().BeEquivalentTo([5]);
+            // Act
+            var result = BuildSut(principal).GetInstitutionIds();
+
+            // Assert
+            result.Should().BeEquivalentTo([5]);
         }
 
         // ── GetCurrentEntityId ──────────────────────────────────────────────
@@ -154,6 +218,7 @@ namespace InclusiON.Tests.Unit.Services
         [Fact]
         public void GetCurrentEntityId_ValidEncryptedClaim_ReturnsDecryptedGuid()
         {
+            // Arrange
             var entityId   = Guid.NewGuid();
             var encrypted  = "ENC:some_encrypted_value";
 
@@ -165,19 +230,30 @@ namespace InclusiON.Tests.Unit.Services
 
             var sut = BuildSut(principal, encryption);
 
-            sut.GetCurrentEntityId().Should().Be(entityId);
+            // Act
+            var result = sut.GetCurrentEntityId();
+
+            // Assert
+            result.Should().Be(entityId);
         }
 
         [Fact]
         public void GetCurrentEntityId_NoClaim_ReturnsNull()
         {
+            // Arrange
             var sut = BuildSut(BuildPrincipal());
-            sut.GetCurrentEntityId().Should().BeNull();
+
+            // Act
+            var result = sut.GetCurrentEntityId();
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void GetCurrentEntityId_DecryptReturnsInvalidGuid_ReturnsNull()
         {
+            // Arrange
             var encrypted  = "ENC:garbage";
             var principal  = BuildPrincipal(
                 new Claim(Permissions.EntityIdClaimType, encrypted));
@@ -187,12 +263,17 @@ namespace InclusiON.Tests.Unit.Services
 
             var sut = BuildSut(principal, encryption);
 
-            sut.GetCurrentEntityId().Should().BeNull();
+            // Act
+            var result = sut.GetCurrentEntityId();
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void GetCurrentEntityId_DecryptThrows_ReturnsNull()
         {
+            // Arrange
             // Claim malformado o clave de encriptación incorrecta — no debe explotar
             var encrypted  = "ENC:tampered";
             var principal  = BuildPrincipal(
@@ -203,12 +284,17 @@ namespace InclusiON.Tests.Unit.Services
 
             var sut = BuildSut(principal, encryption);
 
-            sut.GetCurrentEntityId().Should().BeNull();
+            // Act
+            var result = sut.GetCurrentEntityId();
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void GetCurrentEntityId_CallsDecryptWithExactClaimValue()
         {
+            // Arrange
             var encrypted  = "ENC:exact_value";
             var entityId   = Guid.NewGuid();
             var principal  = BuildPrincipal(
@@ -218,8 +304,11 @@ namespace InclusiON.Tests.Unit.Services
             encryption.Decrypt(encrypted).Returns(entityId.ToString());
 
             var sut = BuildSut(principal, encryption);
+
+            // Act
             sut.GetCurrentEntityId();
 
+            // Assert
             encryption.Received(1).Decrypt(encrypted);
         }
     }

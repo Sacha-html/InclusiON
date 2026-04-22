@@ -31,11 +31,14 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_UserNotFound_ReturnsNotFound()
         {
+            // Arrange
             _identity.FindByIdAsync(Arg.Any<Guid>()).Returns((User?)null);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new AssignInstitutionToAdminCommand(Guid.NewGuid(), 1), default);
 
+            // Assert
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.NotFound);
         }
@@ -43,13 +46,16 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_InstitutionNotFound_ReturnsNotFound()
         {
+            // Arrange
             _identity.FindByIdAsync(Arg.Any<Guid>()).Returns(AUser());
             _institutionRepo.GetByIdAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
                             .Returns((EducationalInstitution?)null);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new AssignInstitutionToAdminCommand(Guid.NewGuid(), 99), default);
 
+            // Assert
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.NotFound);
         }
@@ -57,6 +63,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_NewAssignment_AddsAndSaves()
         {
+            // Arrange
             var adminId = Guid.NewGuid();
             _identity.FindByIdAsync(adminId).Returns(AUser(adminId));
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
@@ -64,9 +71,11 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
                       .Returns((AdminInstitution?)null);
             _dateTime.UtcNow.Returns(DateTime.UtcNow);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new AssignInstitutionToAdminCommand(adminId, 1), default);
 
+            // Assert
             result.Success.Should().BeTrue();
             await _adminRepo.Received(1).AddAsync(
                 Arg.Is<AdminInstitution>(ai => ai.AdminUserId == adminId && ai.InstitutionId == 1 && ai.IsActive),
@@ -77,15 +86,18 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_ExistingActiveAssignment_DoesNotSaveAgain()
         {
+            // Arrange
             var adminId    = Guid.NewGuid();
             var existing   = new AdminInstitution { AdminUserId = adminId, InstitutionId = 1, IsActive = true, Institution = AnInstitution() };
             _identity.FindByIdAsync(adminId).Returns(AUser(adminId));
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
             _adminRepo.FindAssignmentAsync(adminId, 1, Arg.Any<CancellationToken>()).Returns(existing);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new AssignInstitutionToAdminCommand(adminId, 1), default);
 
+            // Assert
             result.Success.Should().BeTrue();
             await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         }
@@ -93,6 +105,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_ExistingInactiveAssignment_ReactivatesAndSaves()
         {
+            // Arrange
             var adminId  = Guid.NewGuid();
             var existing = new AdminInstitution { AdminUserId = adminId, InstitutionId = 1, IsActive = false, Institution = AnInstitution() };
             _identity.FindByIdAsync(adminId).Returns(AUser(adminId));
@@ -100,9 +113,11 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
             _adminRepo.FindAssignmentAsync(adminId, 1, Arg.Any<CancellationToken>()).Returns(existing);
             _dateTime.UtcNow.Returns(DateTime.UtcNow);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new AssignInstitutionToAdminCommand(adminId, 1), default);
 
+            // Assert
             result.Success.Should().BeTrue();
             existing.IsActive.Should().BeTrue();
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());

@@ -60,12 +60,15 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void GenerateAccessToken_ValidData_ContainsStandardClaims()
         {
+            // Arrange
             var sut  = BuildSut();
             var data = BuildUserData();
 
+            // Act
             var raw  = sut.GenerateAccessToken(data);
             var jwt  = Decode(raw);
 
+            // Assert
             // JwtSecurityTokenHandler mapea ClaimTypes.NameIdentifier → "nameid" (short claim type)
             jwt.Claims.Should().Contain(c => c.Type == "nameid" && c.Value == data.Id.ToString());
             jwt.Issuer.Should().Be(ValidIssuer);
@@ -77,25 +80,31 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void GenerateAccessToken_ValidData_ExpiresInConfiguredHours()
         {
+            // Arrange
             var sut  = BuildSut();
             var data = BuildUserData();
             var before = DateTime.UtcNow.AddHours(0.9);
             var after  = DateTime.UtcNow.AddHours(1.1);
 
+            // Act
             var raw = sut.GenerateAccessToken(data);
             var jwt = Decode(raw);
 
+            // Assert
             jwt.ValidTo.Should().BeAfter(before).And.BeBefore(after);
         }
 
         [Fact]
         public void GenerateAccessToken_IsActiveTrue_EmbeddsIsActiveClaim()
         {
+            // Arrange
             var sut  = BuildSut();
             var data = BuildUserData(isActive: true);
 
+            // Act
             var jwt  = Decode(sut.GenerateAccessToken(data));
 
+            // Assert
             jwt.Claims.Should().Contain(c =>
                 c.Type == Permissions.IsActiveClaimType && c.Value == "True");
         }
@@ -103,30 +112,36 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void GenerateAccessToken_WithPermissions_IncludesPermissionClaims()
         {
+            // Arrange
             var perms = new List<string> { "persons:read", "reports:create" };
             var sut   = BuildSut();
             var data  = BuildUserData(permissions: perms);
 
+            // Act
             var jwt   = Decode(sut.GenerateAccessToken(data));
             var permClaims = jwt.Claims
                 .Where(c => c.Type == Permissions.ClaimType)
                 .Select(c => c.Value);
 
+            // Assert
             permClaims.Should().BeEquivalentTo(perms);
         }
 
         [Fact]
         public void GenerateAccessToken_AdminRole_IncludesInstitutionIdClaims()
         {
+            // Arrange
             var ids  = new List<int> { 1, 3 };
             var sut  = BuildSut();
             var data = BuildUserData(role: "Admin", institutionIds: ids);
 
+            // Act
             var jwt  = Decode(sut.GenerateAccessToken(data));
             var instClaims = jwt.Claims
                 .Where(c => c.Type == Permissions.InstitutionIdClaimType)
                 .Select(c => c.Value);
 
+            // Assert
             instClaims.Should().BeEquivalentTo(["1", "3"]);
         }
 
@@ -135,6 +150,7 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void GenerateAccessToken_WithEntityId_EncryptsAndEmbedsEidClaim()
         {
+            // Arrange
             var entityId   = Guid.NewGuid();
             var encryption = Substitute.For<IEncryptionService>();
             encryption.Encrypt(entityId.ToString()).Returns("ENC:fake_encrypted");
@@ -142,8 +158,10 @@ namespace InclusiON.Tests.Unit.Authentication
             var sut  = BuildSut(encryption);
             var data = BuildUserData(entityId: entityId);
 
+            // Act
             var jwt  = Decode(sut.GenerateAccessToken(data));
 
+            // Assert
             encryption.Received(1).Encrypt(entityId.ToString());
             jwt.Claims.Should().Contain(c =>
                 c.Type == Permissions.EntityIdClaimType && c.Value == "ENC:fake_encrypted");
@@ -152,24 +170,31 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void GenerateAccessToken_WithoutEntityId_NoEidClaim()
         {
+            // Arrange
             var sut  = BuildSut();
             var data = BuildUserData(entityId: null);
 
+            // Act
             var jwt  = Decode(sut.GenerateAccessToken(data));
 
+            // Assert
             jwt.Claims.Should().NotContain(c => c.Type == Permissions.EntityIdClaimType);
         }
 
         [Fact]
         public void GenerateAccessToken_WithEntityId_DoesNotLeakPlaintextId()
         {
+            // Arrange
             var entityId   = Guid.NewGuid();
             var encryption = Substitute.For<IEncryptionService>();
             encryption.Encrypt(Arg.Any<string>()).Returns("ENC:opaque_value");
 
             var sut = BuildSut(encryption);
+
+            // Act
             var raw = sut.GenerateAccessToken(BuildUserData(entityId: entityId));
 
+            // Assert
             // El ID en texto plano no debe aparecer en el token raw (incluye header.payload.sig)
             raw.Should().NotContain(entityId.ToString());
         }
@@ -179,12 +204,15 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void ValidateToken_ValidToken_ReturnsPrincipalWithSubject()
         {
+            // Arrange
             var sut  = BuildSut();
             var data = BuildUserData();
             var raw  = sut.GenerateAccessToken(data);
 
+            // Act
             var principal = sut.ValidateToken(raw);
 
+            // Assert
             principal.Should().NotBeNull();
             principal!.FindFirst(ClaimTypes.NameIdentifier)!.Value
                       .Should().Be(data.Id.ToString());
@@ -193,6 +221,7 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void ValidateToken_TamperedPayload_ReturnsNull()
         {
+            // Arrange
             var sut = BuildSut();
             var raw = sut.GenerateAccessToken(BuildUserData());
 
@@ -200,19 +229,30 @@ namespace InclusiON.Tests.Unit.Authentication
             var parts    = raw.Split('.');
             var tampered = $"{parts[0]}.{Convert.ToBase64String(new byte[32])}.{parts[2]}";
 
-            sut.ValidateToken(tampered).Should().BeNull();
+            // Act
+            var result = sut.ValidateToken(tampered);
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void ValidateToken_EmptyToken_ReturnsNull()
         {
+            // Arrange
             var sut = BuildSut();
-            sut.ValidateToken(string.Empty).Should().BeNull();
+
+            // Act
+            var result = sut.ValidateToken(string.Empty);
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void ValidateToken_TokenSignedWithDifferentSecret_ReturnsNull()
         {
+            // Arrange
             var otherSettings = Options.Create(new JwtSettings
             {
                 Secret          = "OtherSecretKeyForTestingAtLeast32Characters!",
@@ -222,15 +262,19 @@ namespace InclusiON.Tests.Unit.Authentication
             });
             var other = new JwtTokenService(otherSettings, Substitute.For<IEncryptionService>());
             var sut   = BuildSut();
-
             var raw = other.GenerateAccessToken(BuildUserData());
 
-            sut.ValidateToken(raw).Should().BeNull();
+            // Act
+            var result = sut.ValidateToken(raw);
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void ValidateToken_ExpiredToken_ReturnsNull()
         {
+            // Arrange
             // Construir un JWT con exp en el pasado usando el handler directamente
             var key = new SymmetricSecurityKey(
                 System.Text.Encoding.UTF8.GetBytes(ValidSecret));
@@ -245,14 +289,19 @@ namespace InclusiON.Tests.Unit.Authentication
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             };
             var expiredRaw = handler.WriteToken(handler.CreateToken(descriptor));
-
             var sut = BuildSut();
-            sut.ValidateToken(expiredRaw).Should().BeNull();
+
+            // Act
+            var result = sut.ValidateToken(expiredRaw);
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void ValidateToken_AlgorithmNone_ReturnsNull()
         {
+            // Arrange
             // Construir manualmente un JWT con alg:none — ataque de confusión de algoritmo
             var payload = Convert.ToBase64String(
                 System.Text.Encoding.UTF8.GetBytes(
@@ -262,9 +311,13 @@ namespace InclusiON.Tests.Unit.Authentication
                 System.Text.Encoding.UTF8.GetBytes("{\"alg\":\"none\",\"typ\":\"JWT\"}"))
                 .TrimEnd('=').Replace('+', '-').Replace('/', '_');
             var noneToken = $"{header}.{payload}.";
-
             var sut = BuildSut();
-            sut.ValidateToken(noneToken).Should().BeNull();
+
+            // Act
+            var result = sut.ValidateToken(noneToken);
+
+            // Assert
+            result.Should().BeNull();
         }
 
         // ── GenerateRefreshToken ─────────────────────────────────────────────
@@ -272,20 +325,26 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void GenerateRefreshToken_ReturnsDifferentValuesEachCall()
         {
-            var sut    = BuildSut();
+            // Arrange
+            var sut = BuildSut();
+
+            // Act
             var first  = sut.GenerateRefreshToken();
             var second = sut.GenerateRefreshToken();
 
+            // Assert
             first.Should().NotBe(second);
         }
 
         [Fact]
         public void GenerateRefreshToken_IsBase64Encoded()
         {
-            var sut    = BuildSut();
-            var token  = sut.GenerateRefreshToken();
-            var act    = () => Convert.FromBase64String(token);
+            // Arrange
+            var sut   = BuildSut();
+            var token = sut.GenerateRefreshToken();
+            var act   = () => Convert.FromBase64String(token);
 
+            // Assert
             act.Should().NotThrow();
             Convert.FromBase64String(token).Should().HaveCount(64); // 64 bytes
         }
@@ -295,44 +354,56 @@ namespace InclusiON.Tests.Unit.Authentication
         [Fact]
         public void Constructor_EmptySecret_Throws()
         {
+            // Arrange
             var settings = Options.Create(new JwtSettings
             {
                 Secret = string.Empty, Issuer = ValidIssuer, Audience = ValidAudience
             });
             var act = () => new JwtTokenService(settings, Substitute.For<IEncryptionService>());
+
+            // Assert
             act.Should().Throw<ArgumentException>().WithMessage("*Secret*");
         }
 
         [Fact]
         public void Constructor_SecretTooShort_Throws()
         {
+            // Arrange
             var settings = Options.Create(new JwtSettings
             {
                 Secret = "short", Issuer = ValidIssuer, Audience = ValidAudience
             });
             var act = () => new JwtTokenService(settings, Substitute.For<IEncryptionService>());
+
+            // Assert
             act.Should().Throw<ArgumentException>().WithMessage("*32*");
         }
 
         [Fact]
         public void Constructor_EmptyIssuer_Throws()
         {
+            // Arrange
             var settings = Options.Create(new JwtSettings
             {
                 Secret = ValidSecret, Issuer = string.Empty, Audience = ValidAudience
             });
             var act = () => new JwtTokenService(settings, Substitute.For<IEncryptionService>());
+
+            // Assert
             act.Should().Throw<ArgumentException>().WithMessage("*Issuer*");
         }
 
         [Fact]
         public void Constructor_NullEncryptionService_Throws()
         {
+            // Arrange
             var settings = Options.Create(new JwtSettings
             {
                 Secret = ValidSecret, Issuer = ValidIssuer, Audience = ValidAudience
             });
             var act = () => new JwtTokenService(settings, null!);
+
+            // Assert
             act.Should().Throw<ArgumentNullException>();
         }
     }

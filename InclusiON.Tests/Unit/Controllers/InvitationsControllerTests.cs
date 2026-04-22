@@ -1,8 +1,10 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
+using System.Reflection;
 using Xunit;
 using InclusiON.Api.Controllers;
 using InclusiON.Application.Authorization;
@@ -84,12 +86,15 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task GetInvitations_WithEntityId_FiltersToOwnInvitations()
         {
+            // Arrange
             var professionalId = Guid.NewGuid();
             var handler        = OkListHandler();
             var sut            = BuildSut(entityId: professionalId);
 
+            // Act
             await sut.GetInvitations(handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<GetInvitationsQuery>(q => q.ProfessionalId == professionalId),
                 Arg.Any<CancellationToken>());
@@ -98,12 +103,15 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task GetInvitations_WithoutEntityId_WithInstitutionIds_FiltersToInstitutions()
         {
+            // Arrange
             var institutionIds = new List<int> { 2, 5 };
             var handler        = OkListHandler();
             var sut            = BuildSut(entityId: null, institutionIds: institutionIds);
 
+            // Act
             await sut.GetInvitations(handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<GetInvitationsQuery>(q =>
                     q.ProfessionalId == null
@@ -115,12 +123,15 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task GetInvitations_GlobalAdmin_NoFilter()
         {
+            // Arrange
             // Sin entityId y sin institutionIds → GlobalAdmin
             var handler = OkListHandler();
             var sut     = BuildSut(entityId: null, institutionIds: []);
 
+            // Act
             await sut.GetInvitations(handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<GetInvitationsQuery>(q =>
                     q.ProfessionalId == null
@@ -133,25 +144,32 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task CreateInvitation_NullEntityId_ReturnsNotFound()
         {
+            // Arrange
             var sut = BuildSut(entityId: null);
+
+            // Act
             var result = await sut.CreateInvitation(
                 new CreateInvitationRequest { Email = "test@test.com" },
                 FailingCreateHandler());
 
+            // Assert
             result.Result.Should().BeOfType<NotFoundObjectResult>();
         }
 
         [Fact]
         public async Task CreateInvitation_ValidEntityId_PassesProfessionalIdToHandler()
         {
+            // Arrange
             var professionalId = Guid.NewGuid();
             var handler        = FailingCreateHandler();
             var sut            = BuildSut(entityId: professionalId);
 
+            // Act
             await sut.CreateInvitation(
                 new CreateInvitationRequest { Email = "test@test.com" },
                 handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<CreateInvitationCommand>(c => c.ProfessionalId == professionalId),
                 Arg.Any<CancellationToken>());
@@ -164,14 +182,17 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task CreateInvitation_OriginInWhitelist_UsesOriginAsBaseUrl()
         {
+            // Arrange
             var professionalId = Guid.NewGuid();
             var handler        = FailingCreateHandler();
             var sut            = BuildSut(entityId: professionalId, originHeader: "http://localhost:4200");
 
+            // Act
             await sut.CreateInvitation(
                 new CreateInvitationRequest { Email = "inv@test.com" },
                 handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<CreateInvitationCommand>(c => c.BaseUrl == "http://localhost:4200"),
                 Arg.Any<CancellationToken>());
@@ -180,15 +201,18 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task CreateInvitation_OriginNotInWhitelist_UsesFallbackOrigin()
         {
+            // Arrange
             // Un atacante envía su propio dominio como Origin — debe ser ignorado.
             var professionalId = Guid.NewGuid();
             var handler        = FailingCreateHandler();
             var sut            = BuildSut(entityId: professionalId, originHeader: "https://attacker.com");
 
+            // Act
             await sut.CreateInvitation(
                 new CreateInvitationRequest { Email = "inv@test.com" },
                 handler);
 
+            // Assert
             // El BaseUrl debe ser el primero de la whitelist, nunca el del atacante.
             await handler.Received(1).HandleAsync(
                 Arg.Is<CreateInvitationCommand>(c =>
@@ -200,18 +224,51 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task CreateInvitation_NoOriginHeader_UsesFallbackOrigin()
         {
+            // Arrange
             // Sin header Origin (ej: llamada directa desde Postman / otra API).
             var professionalId = Guid.NewGuid();
             var handler        = FailingCreateHandler();
             var sut            = BuildSut(entityId: professionalId, originHeader: null);
 
+            // Act
             await sut.CreateInvitation(
                 new CreateInvitationRequest { Email = "inv@test.com" },
                 handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<CreateInvitationCommand>(c => c.BaseUrl == "http://localhost:4200"),
                 Arg.Any<CancellationToken>());
+        }
+
+        // ── Rate limiting — endpoints públicos de invitaciones ────────────────
+        // Estos endpoints son [AllowAnonymous]; sin rate limiting propio solo tienen
+        // el global de 100 req/min, insuficiente para prevenir brute-force de códigos.
+
+        [Fact]
+        public void ValidateInvitation_HasRateLimitingPolicy()
+        {
+            // Arrange
+            var method = typeof(InvitationsController)
+                .GetMethod(nameof(InvitationsController.ValidateInvitation));
+
+            // Assert
+            method.Should().BeDecoratedWith<EnableRateLimitingAttribute>(
+                a => a.PolicyName == "auth-sensitive",
+                because: "un atacante podría enumerar códigos de invitación sin rate limiting");
+        }
+
+        [Fact]
+        public void AcceptInvitation_HasRateLimitingPolicy()
+        {
+            // Arrange
+            var method = typeof(InvitationsController)
+                .GetMethod(nameof(InvitationsController.AcceptInvitation));
+
+            // Assert
+            method.Should().BeDecoratedWith<EnableRateLimitingAttribute>(
+                a => a.PolicyName == "auth-sensitive",
+                because: "el endpoint de registro anónimo requiere el mismo límite que signup");
         }
     }
 }

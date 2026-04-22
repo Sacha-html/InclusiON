@@ -40,21 +40,28 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task GetMyProfile_NullEntityId_ReturnsNotFound()
         {
-            var sut    = BuildSut(entityId: null);
+            // Arrange
+            var sut = BuildSut(entityId: null);
+
+            // Act
             var result = await sut.GetMyProfile(OkHandler());
 
+            // Assert
             result.Result.Should().BeOfType<NotFoundObjectResult>();
         }
 
         [Fact]
         public async Task GetMyProfile_ValidEntityId_PassesProfessionalIdToHandler()
         {
+            // Arrange
             var professionalId = Guid.NewGuid();
             var handler        = OkHandler();
             var sut            = BuildSut(entityId: professionalId);
 
+            // Act
             await sut.GetMyProfile(handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<GetProfessionalByIdQuery>(q => q.ProfessionalId == professionalId),
                 Arg.Any<CancellationToken>());

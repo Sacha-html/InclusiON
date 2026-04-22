@@ -19,7 +19,11 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public void Controller_HasAuthorizeAttribute()
         {
-            ControllerType.Should().BeDecoratedWith<AuthorizeAttribute>(
+            // Arrange
+            var type = ControllerType;
+
+            // Assert
+            type.Should().BeDecoratedWith<AuthorizeAttribute>(
                 because: "el endpoint expone información de unicidad de emails y matrículas " +
                           "y solo debe ser accesible por usuarios autenticados");
         }
@@ -27,7 +31,11 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public void Controller_DoesNotHaveAllowAnonymousAttribute()
         {
-            ControllerType.Should().NotBeDecoratedWith<AllowAnonymousAttribute>(
+            // Arrange
+            var type = ControllerType;
+
+            // Assert
+            type.Should().NotBeDecoratedWith<AllowAnonymousAttribute>(
                 because: "un [AllowAnonymous] a nivel de clase permitiría enumeración " +
                           "de emails y matrículas sin autenticación");
         }

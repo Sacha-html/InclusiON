@@ -14,15 +14,27 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Hash_ProducesArgon2idFormat()
         {
+            // Arrange
+            // (sut built in field initializer)
+
+            // Act
             var hash = _sut.Hash("1234");
+
+            // Assert
             hash.Should().StartWith("$argon2");
         }
 
         [Fact]
         public void Hash_SamePin_DifferentHashEachCall()
         {
+            // Arrange
+            // (sut built in field initializer)
+
+            // Act
             var first  = _sut.Hash("1234");
             var second = _sut.Hash("1234");
+
+            // Assert
             first.Should().NotBe(second); // salts aleatorios distintos
         }
 
@@ -31,8 +43,13 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Verify_CorrectPin_ReturnsTrue_NeedsRehashFalse()
         {
-            var hash  = _sut.Hash("5678");
+            // Arrange
+            var hash = _sut.Hash("5678");
+
+            // Act
             var valid = _sut.Verify(hash, "5678", out var needsRehash);
+
+            // Assert
             valid.Should().BeTrue();
             needsRehash.Should().BeFalse();
         }
@@ -40,8 +57,13 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Verify_WrongPin_ReturnsFalse()
         {
-            var hash  = _sut.Hash("5678");
+            // Arrange
+            var hash = _sut.Hash("5678");
+
+            // Act
             var valid = _sut.Verify(hash, "9999", out var needsRehash);
+
+            // Assert
             valid.Should().BeFalse();
             needsRehash.Should().BeFalse();
         }
@@ -51,9 +73,14 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Verify_BCryptHash_CorrectPin_ReturnsTrue_NeedsRehashTrue()
         {
+            // Arrange
             // workFactor bajo para que el test no tarde
             var bcryptHash = BCrypt.Net.BCrypt.HashPassword("1234", workFactor: 4);
-            var valid      = _sut.Verify(bcryptHash, "1234", out var needsRehash);
+
+            // Act
+            var valid = _sut.Verify(bcryptHash, "1234", out var needsRehash);
+
+            // Assert
             valid.Should().BeTrue();
             needsRehash.Should().BeTrue(); // debe migrarse a Argon2id
         }
@@ -61,8 +88,13 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Verify_BCryptHash_WrongPin_ReturnsFalse_NeedsRehashFalse()
         {
+            // Arrange
             var bcryptHash = BCrypt.Net.BCrypt.HashPassword("1234", workFactor: 4);
-            var valid      = _sut.Verify(bcryptHash, "0000", out var needsRehash);
+
+            // Act
+            var valid = _sut.Verify(bcryptHash, "0000", out var needsRehash);
+
+            // Assert
             valid.Should().BeFalse();
             needsRehash.Should().BeFalse(); // no hay login exitoso, no se migra
         }
@@ -72,13 +104,27 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Verify_EmptyHash_ReturnsFalse()
         {
-            _sut.Verify(string.Empty, "1234", out _).Should().BeFalse();
+            // Arrange
+            // (sut built in field initializer)
+
+            // Act
+            var result = _sut.Verify(string.Empty, "1234", out _);
+
+            // Assert
+            result.Should().BeFalse();
         }
 
         [Fact]
         public void Verify_NullHash_ReturnsFalse()
         {
-            _sut.Verify(null!, "1234", out _).Should().BeFalse();
+            // Arrange
+            // (sut built in field initializer)
+
+            // Act
+            var result = _sut.Verify(null!, "1234", out _);
+
+            // Assert
+            result.Should().BeFalse();
         }
     }
 }

@@ -23,17 +23,27 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Encrypt_Returns_EncPrefix()
         {
-            var sut    = BuildSut();
+            // Arrange
+            var sut = BuildSut();
+
+            // Act
             var result = sut.Encrypt("dato sensible");
+
+            // Assert
             result.Should().StartWith("ENC:");
         }
 
         [Fact]
         public void Encrypt_SamePlaintext_DifferentCiphertextEachCall()
         {
-            var sut    = BuildSut();
+            // Arrange
+            var sut = BuildSut();
+
+            // Act
             var first  = sut.Encrypt("mismo texto");
             var second = sut.Encrypt("mismo texto");
+
+            // Assert
             first.Should().NotBe(second); // nonces aleatorios distintos
         }
 
@@ -42,33 +52,57 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Encrypt_Then_Decrypt_ReturnsOriginal()
         {
+            // Arrange
             var sut       = BuildSut();
             var plaintext = "diagnóstico TEA moderado";
             var encrypted = sut.Encrypt(plaintext);
-            sut.Decrypt(encrypted).Should().Be(plaintext);
+
+            // Act
+            var result = sut.Decrypt(encrypted);
+
+            // Assert
+            result.Should().Be(plaintext);
         }
 
         [Fact]
         public void Decrypt_PlaintextWithoutPrefix_ReturnsAsIs()
         {
+            // Arrange
             var sut   = BuildSut();
             var plain = "texto sin cifrar";
-            sut.Decrypt(plain).Should().Be(plain);
+
+            // Act
+            var result = sut.Decrypt(plain);
+
+            // Assert
+            result.Should().Be(plain);
         }
 
         [Fact]
         public void Decrypt_EmptyString_ReturnsEmptyString()
         {
+            // Arrange
             var sut = BuildSut();
-            sut.Decrypt(string.Empty).Should().BeEmpty();
+
+            // Act
+            var result = sut.Decrypt(string.Empty);
+
+            // Assert
+            result.Should().BeEmpty();
         }
 
         [Fact]
         public void Decrypt_Unicode_RoundtripPreservesContent()
         {
+            // Arrange
             var sut       = BuildSut();
             var plaintext = "Observación: niño con TEA, nivel 2. ¡Avances notables!";
-            sut.Decrypt(sut.Encrypt(plaintext)).Should().Be(plaintext);
+
+            // Act
+            var result = sut.Decrypt(sut.Encrypt(plaintext));
+
+            // Assert
+            result.Should().Be(plaintext);
         }
 
         // ── Constructor ─────────────────────────────────────────────────────
@@ -76,8 +110,11 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Constructor_MissingKey_Throws()
         {
+            // Arrange
             var config = new ConfigurationBuilder().Build(); // sin clave
             var act    = () => new AesGcmEncryptionService(config);
+
+            // Assert
             act.Should().Throw<InvalidOperationException>()
                .WithMessage("*EncryptionSettings:Key*");
         }
@@ -85,9 +122,12 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void Constructor_KeyNot32Bytes_Throws()
         {
+            // Arrange
             // 16 bytes en base64 = clave AES-128, no AES-256
             var shortKey = Convert.ToBase64String(new byte[16]);
             var act      = () => BuildSut(shortKey);
+
+            // Assert
             act.Should().Throw<InvalidOperationException>()
                .WithMessage("*32-byte*");
         }

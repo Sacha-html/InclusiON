@@ -309,6 +309,7 @@ namespace InclusiON.Tests.Authorization
         [Fact]
         public async Task CanAccessInvitation_NoPerson_ProfessionalOwner_WithEntityId_Allowed()
         {
+            // Arrange
             // Invitación sin persona: solo el creador puede acceder.
             // El entityId del JWT elimina el query extra a BD.
             var userId         = Guid.NewGuid();
@@ -330,14 +331,17 @@ namespace InclusiON.Tests.Authorization
             var http = BuildHttpContextWithEntityId(userId, nameof(IdentityRoles.Professional), professionalId);
             var sut  = BuildSut(http, out _);
 
+            // Act
             var allowed = await sut.CanAccessInvitationAsync(invitation.Id, AccessMode.Read);
 
+            // Assert
             allowed.Should().BeTrue("el creador de la invitación siempre puede acceder a ella");
         }
 
         [Fact]
         public async Task CanAccessInvitation_NoPerson_OtherProfessional_WithEntityId_Denied()
         {
+            // Arrange
             // Invitación sin persona creada por otro profesional → denegado.
             var creatorUserId     = Guid.NewGuid();
             var creatorProfessId  = Guid.NewGuid();
@@ -361,14 +365,17 @@ namespace InclusiON.Tests.Authorization
             var http = BuildHttpContextWithEntityId(otherUserId, nameof(IdentityRoles.Professional), otherProfessId);
             var sut  = BuildSut(http, out _);
 
+            // Act
             var allowed = await sut.CanAccessInvitationAsync(invitation.Id, AccessMode.Read);
 
+            // Assert
             allowed.Should().BeFalse("solo el profesional creador puede acceder a la invitación");
         }
 
         [Fact]
         public async Task CanSuperviseLogin_Professional_WithEntityId_Allowed_WhenLinkExists()
         {
+            // Arrange
             // El profesional tiene permiso de supervisión de login para esa persona.
             var userId         = Guid.NewGuid();
             var professionalId = Guid.NewGuid();
@@ -387,8 +394,10 @@ namespace InclusiON.Tests.Authorization
             var http = BuildHttpContextWithEntityId(userId, nameof(IdentityRoles.Professional), professionalId);
             var sut  = BuildSut(http, out _);
 
+            // Act
             var allowed = await sut.CanSuperviseLoginAsync(personId);
 
+            // Assert
             allowed.Should().BeTrue("el vínculo tiene CanSuperviseLogin = true");
         }
     }

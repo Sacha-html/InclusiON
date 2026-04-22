@@ -32,39 +32,68 @@ namespace InclusiON.Tests.Unit.Encryption
         [Fact]
         public void ConvertToProvider_EncryptsValue()
         {
+            // Arrange
             var encrypt = _sut.ConvertToProviderExpression.Compile();
-            var result  = encrypt("dato sensible");
+
+            // Act
+            var result = encrypt("dato sensible");
+
+            // Assert
             result.Should().StartWith("ENC:");
         }
 
         [Fact]
         public void ConvertFromProvider_DecryptsValue()
         {
+            // Arrange
             var encrypt = _sut.ConvertToProviderExpression.Compile();
             var decrypt = _sut.ConvertFromProviderExpression.Compile();
             var plain   = "observación clínica";
-            decrypt(encrypt(plain)).Should().Be(plain);
+
+            // Act
+            var result = decrypt(encrypt(plain));
+
+            // Assert
+            result.Should().Be(plain);
         }
 
         [Fact]
         public void ConvertFromProvider_PlaintextWithoutPrefix_ReturnsAsIs()
         {
+            // Arrange
             var decrypt = _sut.ConvertFromProviderExpression.Compile();
-            decrypt("texto plano antiguo").Should().Be("texto plano antiguo");
+
+            // Act
+            var result = decrypt("texto plano antiguo");
+
+            // Assert
+            result.Should().Be("texto plano antiguo");
         }
 
         [Fact]
         public void ConvertToProvider_Null_ReturnsNull()
         {
+            // Arrange
             var encrypt = _sut.ConvertToProviderExpression.Compile();
-            encrypt(null).Should().BeNull();
+
+            // Act
+            var result = encrypt(null);
+
+            // Assert
+            result.Should().BeNull();
         }
 
         [Fact]
         public void ConvertFromProvider_Null_ReturnsNull()
         {
+            // Arrange
             var decrypt = _sut.ConvertFromProviderExpression.Compile();
-            decrypt(null).Should().BeNull();
+
+            // Act
+            var result = decrypt(null);
+
+            // Assert
+            result.Should().BeNull();
         }
     }
 }
