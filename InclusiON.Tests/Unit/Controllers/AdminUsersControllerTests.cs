@@ -54,22 +54,29 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task ResetPassword_NullCurrentUser_Returns401()
         {
-            var sut    = BuildSut(userId: null);
+            // Arrange
+            var sut = BuildSut(userId: null);
+
+            // Act
             var result = await sut.ResetPassword(Guid.NewGuid(), OkResetHandler());
 
+            // Assert
             result.Result.Should().BeOfType<UnauthorizedObjectResult>();
         }
 
         [Fact]
         public async Task ResetPassword_ValidCurrentUser_PassesUserIdsToHandler()
         {
+            // Arrange
             var currentUserId = Guid.NewGuid();
             var targetUserId  = Guid.NewGuid();
             var handler       = OkResetHandler();
             var sut           = BuildSut(userId: currentUserId);
 
+            // Act
             await sut.ResetPassword(targetUserId, handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<AdminResetPasswordCommand>(c =>
                     c.UserId == targetUserId && c.RequestedByUserId == currentUserId),
@@ -81,22 +88,29 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task DeactivateUser_NullCurrentUser_Returns401()
         {
-            var sut    = BuildSut(userId: null);
+            // Arrange
+            var sut = BuildSut(userId: null);
+
+            // Act
             var result = await sut.DeactivateUser(Guid.NewGuid(), OkDeactivateHandler());
 
+            // Assert
             result.Result.Should().BeOfType<UnauthorizedObjectResult>();
         }
 
         [Fact]
         public async Task DeactivateUser_ValidCurrentUser_PassesUserIdsToHandler()
         {
+            // Arrange
             var currentUserId = Guid.NewGuid();
             var targetUserId  = Guid.NewGuid();
             var handler       = OkDeactivateHandler();
             var sut           = BuildSut(userId: currentUserId);
 
+            // Act
             await sut.DeactivateUser(targetUserId, handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<AdminDeactivateUserCommand>(c =>
                     c.UserId == targetUserId && c.RequestedByUserId == currentUserId),
@@ -108,22 +122,29 @@ namespace InclusiON.Tests.Unit.Controllers
         [Fact]
         public async Task ReactivateUser_NullCurrentUser_Returns401()
         {
-            var sut    = BuildSut(userId: null);
+            // Arrange
+            var sut = BuildSut(userId: null);
+
+            // Act
             var result = await sut.ReactivateUser(Guid.NewGuid(), OkReactivateHandler());
 
+            // Assert
             result.Result.Should().BeOfType<UnauthorizedObjectResult>();
         }
 
         [Fact]
         public async Task ReactivateUser_ValidCurrentUser_PassesUserIdsToHandler()
         {
+            // Arrange
             var currentUserId = Guid.NewGuid();
             var targetUserId  = Guid.NewGuid();
             var handler       = OkReactivateHandler();
             var sut           = BuildSut(userId: currentUserId);
 
+            // Act
             await sut.ReactivateUser(targetUserId, handler);
 
+            // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<AdminReactivateUserCommand>(c =>
                     c.UserId == targetUserId && c.RequestedByUserId == currentUserId),

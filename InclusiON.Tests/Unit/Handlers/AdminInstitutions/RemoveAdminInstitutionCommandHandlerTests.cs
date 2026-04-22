@@ -20,12 +20,15 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_AssignmentNotFound_ReturnsNotFound()
         {
+            // Arrange
             _repository.FindAssignmentAsync(Arg.Any<Guid>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
                        .Returns((AdminInstitution?)null);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new RemoveAdminInstitutionCommand(Guid.NewGuid(), 1), default);
 
+            // Assert
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.NotFound);
             _repository.DidNotReceive().Remove(Arg.Any<AdminInstitution>());
@@ -34,6 +37,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_AssignmentExists_RemovesAndSaves()
         {
+            // Arrange
             var adminId    = Guid.NewGuid();
             var assignment = new AdminInstitution
             {
@@ -47,9 +51,11 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
             _repository.FindAssignmentAsync(adminId, 3, Arg.Any<CancellationToken>())
                        .Returns(assignment);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new RemoveAdminInstitutionCommand(adminId, 3), default);
 
+            // Assert
             result.Success.Should().BeTrue();
             _repository.Received(1).Remove(assignment);
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -58,6 +64,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         [Fact]
         public async Task HandleAsync_Success_ResponseMapsAssignmentData()
         {
+            // Arrange
             var adminId    = Guid.NewGuid();
             var assignedAt = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc);
             var assignment = new AdminInstitution
@@ -72,9 +79,11 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
             _repository.FindAssignmentAsync(adminId, 7, Arg.Any<CancellationToken>())
                        .Returns(assignment);
 
+            // Act
             var result = await BuildSut().HandleAsync(
                 new RemoveAdminInstitutionCommand(adminId, 7), default);
 
+            // Assert
             result.Data!.AdminUserId.Should().Be(adminId);
             result.Data.InstitutionId.Should().Be(7);
             result.Data.InstitutionName.Should().Be("Escuela Centro");
