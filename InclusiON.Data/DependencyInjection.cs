@@ -10,7 +10,7 @@ namespace InclusiON.Data
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
         {
             services.AddDbContext<AppDbContext>((sp, opt) =>
             {
@@ -18,8 +18,11 @@ namespace InclusiON.Data
                     .LogTo(Console.WriteLine,
                         new[] { DbLoggerCategory.Database.Command.Name },
                         LogLevel.Information)
-                    .EnableSensitiveDataLogging()
                     .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
+
+                // Solo en desarrollo: loguea valores de parámetros SQL (passwords, emails, etc.)
+                if (isDevelopment)
+                    opt.EnableSensitiveDataLogging();
                 opt
                     .UseNpgsql(configuration
                     .GetConnectionString("PostgreSqlConn"), npgsqlOptions =>
