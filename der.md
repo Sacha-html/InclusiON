@@ -1,394 +1,509 @@
 # DER — InclusiON
 
-**Última actualización:** 2026-04-22  
+**Última actualización:** 2026-04-23  
 **Fuente:** `InclusiON.Data/AppDbContext.cs` + `InclusiON.Domain/Models/`
 
 ```mermaid
 erDiagram
 
     %% ─── IDENTITY / AUTH ────────────────────────────────────────────────────
+
+    %% Identidad base de todos los actores del sistema. Contiene credenciales
+    %% (ASP.NET Identity) y datos de sesión. Cada User tiene exactamente un
+    %% perfil de rol (Professional, PersonWithDisability o FamilyRepresentative).
     User {
-        Guid     Id                PK
-        string   Email
-        string   Name
-        string   Surname
-        bool     IsActive
-        bool     MustChangePassword
-        datetime CreatedAt
-        datetime LastLoginDate
+        uuid        Id                  PK  "NOT NULL"
+        varchar256  Email               UK  "NOT NULL"
+        varchar100  Name                    "NOT NULL"
+        varchar100  Surname                 "NOT NULL"
+        bool        IsActive                "NOT NULL"
+        bool        MustChangePassword      "NOT NULL"
+        timestamptz CreatedAt               "NOT NULL"
+        timestamptz LastLoginDate           "nullable"
     }
+
+    %% Tokens de renovación de sesión JWT. Cada token tiene vida útil y puede
+    %% revocarse individualmente, permitiendo logout desde múltiples dispositivos.
     RefreshToken {
-        Guid     Id           PK
-        Guid     UserId       FK
-        string   Token
-        datetime ExpiresAt
-        datetime CreatedAt
-        datetime RevokedAt
-        bool     IsActive
+        uuid        Id          PK  "NOT NULL"
+        uuid        UserId      FK  "NOT NULL"
+        varchar512  Token           "NOT NULL"
+        timestamptz ExpiresAt       "NOT NULL"
+        timestamptz CreatedAt       "NOT NULL"
+        timestamptz RevokedAt       "nullable"
+        bool        IsActive        "NOT NULL"
     }
+
+    %% Dispositivos autorizados para login asistido. Un supervisor puede autorizar
+    %% un dispositivo para que la persona inicie sesión sin credenciales propias.
     TrustedDevice {
-        int      Id                  PK
-        Guid     UserId              FK
-        Guid     AuthorizedByUserId  FK
-        string   DeviceId
-        string   DeviceName
-        string   Browser
-        datetime RegisteredAt
-        datetime LastUsedAt
+        int         Id                  PK  "NOT NULL"
+        uuid        UserId              FK  "NOT NULL"
+        uuid        AuthorizedByUserId  FK  "nullable"
+        varchar256  DeviceId                "NOT NULL"
+        varchar100  DeviceName              "nullable"
+        varchar100  Browser                 "nullable"
+        timestamptz RegisteredAt            "NOT NULL"
+        timestamptz LastUsedAt             "nullable"
     }
 
     %% ─── CATÁLOGOS ──────────────────────────────────────────────────────────
+
+    %% Catálogo de tipos de discapacidad reconocidos. Valores de referencia
+    %% usados en el perfil de la persona y en filtros de actividades.
     DisabilityType {
-        int    Id          PK
-        string Name
-        string Description
-        bool   IsActive
+        int     Id          PK  "NOT NULL"
+        varchar100 Name         "NOT NULL"
+        text    Description     "nullable"
+        bool    IsActive        "NOT NULL"
     }
+
+    %% Catálogo de niveles de autonomía. Determina si la persona requiere
+    %% supervisión durante el login y la ejecución de actividades.
     AutonomyLevel {
-        int    Id                  PK
-        string Name
-        bool   RequiresSupervision
-        int    DisplayOrder
-        bool   IsActive
+        int     Id                  PK  "NOT NULL"
+        varchar100 Name                 "NOT NULL"
+        bool    RequiresSupervision     "NOT NULL"
+        int     DisplayOrder            "NOT NULL"
+        bool    IsActive                "NOT NULL"
     }
+
+    %% Catálogo de métodos de autenticación disponibles (STANDARD, PIN,
+    %% ASSISTED, FAMILY). Define qué credenciales requiere cada método.
     LoginMethod {
-        int    Id                  PK
-        string Code
-        string Name
-        bool   RequiresEmail
-        bool   RequiresPassword
-        bool   RequiresPin
-        bool   RequiresSupervisor
-        bool   IsActive
+        int    Id                  PK  "NOT NULL"
+        varchar20 Code             UK  "NOT NULL"
+        varchar100 Name                "NOT NULL"
+        bool   RequiresEmail           "NOT NULL"
+        bool   RequiresPassword        "NOT NULL"
+        bool   RequiresPin             "NOT NULL"
+        bool   RequiresSupervisor      "NOT NULL"
+        bool   IsActive                "NOT NULL"
     }
+
+    %% Categorías temáticas de actividades. Usadas para organizar el catálogo
+    %% de actividades del profesional y como filtro de búsqueda.
     ActivityCategory {
-        int    Id          PK
-        string Name
-        string Description
-        bool   IsActive
+        int    Id           PK  "NOT NULL"
+        varchar100 Name         "NOT NULL"
+        text   Description      "nullable"
+        bool   IsActive         "NOT NULL"
     }
+
+    %% Tipos de reporte de progreso disponibles. Define la estructura
+    %% y propósito de los reportes clínicos generados por el profesional.
     ReportType {
-        int    Id          PK
-        string Name
-        string Description
-        bool   IsActive
+        int    Id           PK  "NOT NULL"
+        varchar100 Name         "NOT NULL"
+        text   Description      "nullable"
+        bool   IsActive         "NOT NULL"
     }
+
+    %% Áreas de habilidad del sistema (Comunicación, Alfabetización, etc.).
+    %% Eje central del radar chart y de la organización del roadmap.
     SkillArea {
-        int    Id           PK
-        string Name
-        string Icon
-        string Color
-        int    DisplayOrder
-        bool   IsActive
+        int    Id           PK  "NOT NULL"
+        varchar100 Name         "NOT NULL"
+        varchar50 Icon           "NOT NULL"
+        varchar7  Color          "NOT NULL - formato #RRGGBB"
+        int    DisplayOrder      "NOT NULL"
+        bool   IsActive          "NOT NULL"
     }
+
+    %% Tipos de template con su estructura JSON y componente Angular asociado.
+    %% Define qué campos contiene el ContentJson de cada actividad según su tipo.
     ActivityTemplateType {
-        int    Id            PK
-        int    SkillAreaId   FK
-        string Name
-        string Code
-        string ContentSchema
-        string ComponentName
-        bool   UsesPictograms
-        bool   HasAudio
-        int    DisplayOrder
-        bool   IsActive
+        int    Id             PK  "NOT NULL"
+        int    SkillAreaId    FK  "NOT NULL"
+        varchar100 Name           "NOT NULL"
+        varchar50 Code        UK  "NOT NULL"
+        text   ContentSchema      "NOT NULL - JSON Schema"
+        varchar100 ComponentName  "NOT NULL"
+        bool   UsesPictograms     "NOT NULL"
+        bool   HasAudio           "NOT NULL"
+        int    DisplayOrder       "NOT NULL"
+        bool   IsActive           "NOT NULL"
     }
 
     %% ─── INSTITUCIONES ───────────────────────────────────────────────────────
+
+    %% Instituciones educativas registradas en el sistema. Los profesionales
+    %% se vinculan a instituciones; los admins institucionales filtran su scope.
     EducationalInstitution {
-        int    Id      PK
-        string Name
-        string Address
-        string Phone
-        string Email
-        bool   IsActive
+        int    Id       PK  "NOT NULL"
+        varchar200 Name     "NOT NULL"
+        varchar300 Address  "nullable"
+        varchar20 Phone     "nullable"
+        varchar256 Email    "nullable"
+        bool   IsActive     "NOT NULL"
     }
+
+    %% Relación entre admins y las instituciones que gestionan.
+    %% Un admin institucional solo ve datos de sus instituciones asignadas.
     AdminInstitution {
-        Guid     AdminUserId    FK
-        int      InstitutionId  FK
-        datetime AssignedAt
-        bool     IsActive
+        uuid        AdminUserId     FK  "NOT NULL - PK compuesto"
+        int         InstitutionId   FK  "NOT NULL - PK compuesto"
+        timestamptz AssignedAt          "NOT NULL"
+        bool        IsActive            "NOT NULL"
     }
 
     %% ─── PERFILES DE USUARIO ─────────────────────────────────────────────────
+
+    %% Perfil extendido del usuario con rol profesional. Incluye datos académicos
+    %% y el estado de validación (Pending → Approved / Rejected).
     Professional {
-        Guid     Id                 PK
-        Guid     UserId             FK
-        string   FirstName
-        string   LastName
-        string   DocumentNumber
-        string   Specialty
-        string   LicenseNumber
-        string   Status
-        datetime ValidatedAt
-        bool     IsActive
+        uuid        Id              PK  "NOT NULL"
+        uuid        UserId          FK  "NOT NULL - UK"
+        varchar100  FirstName           "NOT NULL"
+        varchar100  LastName            "NOT NULL"
+        varchar20   DocumentNumber  UK  "NOT NULL"
+        varchar200  Specialty           "nullable"
+        varchar50   LicenseNumber       "nullable"
+        varchar20   Status              "NOT NULL - Pending/Approved/Rejected"
+        timestamptz ValidatedAt         "nullable"
+        bool        IsActive            "NOT NULL"
     }
+
+    %% Auditoría de cambios de estado del profesional. Registra quién realizó
+    %% el cambio (Pending → Approved, etc.) y con qué observación.
     ProfessionalStatusHistory {
-        Guid   Id              PK
-        Guid   ProfessionalId  FK
-        string OldStatus
-        string NewStatus
-        string Observation
-        Guid   ChangedByUserId FK
+        uuid   Id              PK  "NOT NULL"
+        uuid   ProfessionalId  FK  "NOT NULL"
+        varchar20 OldStatus        "NOT NULL"
+        varchar20 NewStatus        "NOT NULL"
+        text   Observation         "nullable"
+        uuid   ChangedByUserId FK  "NOT NULL"
     }
+
+    %% Perfil central de la persona atendida. Concentra identidad, discapacidad,
+    %% autonomía, preferencias de accesibilidad y método de autenticación.
     PersonWithDisability {
-        Guid   Id               PK
-        Guid   UserId           FK
-        int    DisabilityTypeId FK
-        int    AutonomyLevelId  FK
-        int    LoginMethodId    FK
-        Guid   SupervisorUserId FK
-        string FirstName
-        string LastName
-        string DocumentNumber
-        date   BirthDate
-        string AvatarColor
-        bool   UsesAAC
-        bool   UsesSignLanguage
-        bool   RequiresHighContrast
-        bool   RequiresLargeFont
-        bool   IsActive
+        uuid   Id               PK  "NOT NULL"
+        uuid   UserId           FK  "NOT NULL - UK"
+        int    DisabilityTypeId FK  "NOT NULL"
+        int    AutonomyLevelId  FK  "NOT NULL"
+        int    LoginMethodId    FK  "NOT NULL"
+        uuid   SupervisorUserId FK  "nullable"
+        varchar100 FirstName        "NOT NULL"
+        varchar100 LastName         "NOT NULL"
+        varchar20 DocumentNumber UK "NOT NULL"
+        date   BirthDate            "nullable"
+        varchar7 AvatarColor        "NOT NULL - formato #RRGGBB"
+        bool   UsesAAC              "NOT NULL"
+        bool   UsesSignLanguage     "NOT NULL"
+        bool   RequiresHighContrast "NOT NULL"
+        bool   RequiresLargeFont    "NOT NULL"
+        bool   IsActive             "NOT NULL"
     }
+
+    %% Perfil del familiar/tutor. Se vincula a una o más personas con discapacidad
+    %% y accede al portal familiar para ver reportes y progreso.
     FamilyRepresentative {
-        Guid   Id             PK
-        Guid   UserId         FK
-        string FirstName
-        string LastName
-        string DocumentNumber
-        string Phone
-        string Relationship
-        string Status
-        bool   IsActive
+        uuid   Id              PK  "NOT NULL"
+        uuid   UserId          FK  "NOT NULL - UK"
+        varchar100 FirstName       "NOT NULL"
+        varchar100 LastName        "NOT NULL"
+        varchar20 DocumentNumber UK "NOT NULL"
+        varchar20 Phone             "nullable"
+        varchar50 Relationship      "NOT NULL"
+        varchar20 Status            "NOT NULL"
+        bool   IsActive             "NOT NULL"
     }
+
+    %% Auditoría de cambios de estado del familiar. Flujo análogo al del
+    %% profesional (Pending → Approved / Rejected).
     FamilyStatusHistory {
-        Guid   Id              PK
-        Guid   FamilyId        FK
-        string OldStatus
-        string NewStatus
-        string Observation
-        Guid   ChangedByUserId FK
+        uuid   Id              PK  "NOT NULL"
+        uuid   FamilyId        FK  "NOT NULL"
+        varchar20 OldStatus        "NOT NULL"
+        varchar20 NewStatus        "NOT NULL"
+        text   Observation         "nullable"
+        uuid   ChangedByUserId FK  "NOT NULL"
     }
 
     %% ─── RELACIONES ENTRE PERFILES ───────────────────────────────────────────
+
+    %% Relación entre profesionales e instituciones donde trabajan.
+    %% Un profesional puede pertenecer a múltiples instituciones.
     ProfessionalInstitution {
-        Guid     ProfessionalId  FK
-        int      InstitutionId   FK
-        datetime AssignedAt
-        bool     IsActive
+        uuid        ProfessionalId  FK  "NOT NULL - PK compuesto"
+        int         InstitutionId   FK  "NOT NULL - PK compuesto"
+        timestamptz AssignedAt          "NOT NULL"
+        bool        IsActive            "NOT NULL"
     }
+
+    %% Relación de atención entre un profesional y una persona con discapacidad.
+    %% Indica si es el profesional principal y si puede supervisar el login.
     ProfessionalPerson {
-        Guid     ProfessionalId       FK
-        Guid     PersonId             FK
-        bool     IsPrimaryProfessional
-        bool     CanSuperviseLogin
-        datetime AssignedAt
-        bool     IsActive
+        uuid        ProfessionalId          FK  "NOT NULL - PK compuesto"
+        uuid        PersonId                FK  "NOT NULL - PK compuesto"
+        bool        IsPrimaryProfessional       "NOT NULL"
+        bool        CanSuperviseLogin           "NOT NULL"
+        timestamptz AssignedAt                  "NOT NULL"
+        bool        IsActive                    "NOT NULL"
     }
+
+    %% Vínculo activo entre persona con discapacidad y su familiar/representante.
+    %% Registra tipo de relación, consentimiento informado y fecha de vigencia.
     PersonRepresentative {
-        Guid     Id               PK
-        Guid     PersonId         FK
-        Guid     RepresentativeId FK
-        string   Relationship
-        bool     IsPrimary
-        bool     HasInformedConsent
-        bool     CanSuperviseLogin
-        datetime CreatedAt
-        datetime EndedAt
-        bool     IsActive
+        uuid        Id               PK  "NOT NULL"
+        uuid        PersonId         FK  "NOT NULL"
+        uuid        RepresentativeId FK  "NOT NULL"
+        varchar50   Relationship         "NOT NULL"
+        bool        IsPrimary            "NOT NULL"
+        bool        HasInformedConsent   "NOT NULL"
+        bool        CanSuperviseLogin    "NOT NULL"
+        timestamptz CreatedAt            "NOT NULL"
+        timestamptz EndedAt              "nullable"
+        bool        IsActive             "NOT NULL"
     }
+
+    %% Historial de cambios en el vínculo persona-familiar. Permite auditar
+    %% altas, bajas y modificaciones de la relación a lo largo del tiempo.
     PersonRepresentativeHistory {
-        Guid   Id                    PK
-        Guid   PersonRepresentativeId FK
-        Guid   PersonId              FK
-        Guid   RepresentativeId      FK
-        string ChangeType
-        string Relationship
-        bool   WasPrimary
-        Guid   ChangedByUserId       FK
+        uuid   Id                       PK  "NOT NULL"
+        uuid   PersonRepresentativeId   FK  "NOT NULL"
+        uuid   PersonId                 FK  "NOT NULL"
+        uuid   RepresentativeId         FK  "NOT NULL"
+        varchar50 ChangeType                "NOT NULL"
+        varchar50 Relationship              "NOT NULL"
+        bool   WasPrimary                   "NOT NULL"
+        uuid   ChangedByUserId          FK  "NOT NULL"
     }
+
+    %% Áreas de habilidad activas para una persona. Determina qué secciones
+    %% del radar chart se muestran y qué áreas tiene disponibles en el roadmap.
     PersonSkillProfile {
-        Guid     PersonId      FK
-        int      SkillAreaId   FK
-        datetime AssignedAt
-        bool     IsActive
+        uuid        PersonId    FK  "NOT NULL - PK compuesto"
+        int         SkillAreaId FK  "NOT NULL - PK compuesto"
+        timestamptz AssignedAt      "NOT NULL"
+        bool        IsActive        "NOT NULL"
     }
 
     %% ─── INVITACIONES ────────────────────────────────────────────────────────
+
+    %% Código generado por el profesional para que un familiar se registre y
+    %% quede vinculado automáticamente a una persona. De un solo uso, con vencimiento.
     Invitation {
-        int      Id                       PK
-        Guid     CreatedByProfessionalId  FK
-        Guid     ForPersonId              FK
-        Guid     UsedByUserId             FK
-        string   Email
-        string   Code
-        string   Relationship
-        datetime ExpiresAt
-        bool     IsUsed
-        bool     IsActive
+        int         Id                      PK  "NOT NULL"
+        uuid        CreatedByProfessionalId FK  "NOT NULL"
+        uuid        ForPersonId             FK  "NOT NULL"
+        uuid        UsedByUserId            FK  "nullable"
+        varchar256  Email                       "NOT NULL"
+        varchar64   Code                    UK  "NOT NULL"
+        varchar50   Relationship                "NOT NULL"
+        timestamptz ExpiresAt                   "NOT NULL"
+        bool        IsUsed                      "NOT NULL"
+        bool        IsActive                    "NOT NULL"
     }
 
     %% ─── ACTIVIDADES ─────────────────────────────────────────────────────────
+
+    %% Actividad educativa creada por un profesional. Define área de habilidad,
+    %% nivel de complejidad, template y configuración de accesibilidad (AAC, audio).
     Activity {
-        int    Id                 PK
-        Guid   ProfessionalId     FK
-        int    CategoryId         FK
-        int    SkillAreaId        FK
-        string Title
-        int    ComplexityLevel
-        bool   RequiresSupervision
-        bool   IsStandardActivity
-        bool   HasVisualSupport
-        bool   HasAudioSupport
-        bool   UsesPictograms
-        bool   IsActive
+        int    Id                   PK  "NOT NULL"
+        uuid   ProfessionalId       FK  "NOT NULL"
+        int    CategoryId           FK  "NOT NULL"
+        int    SkillAreaId          FK  "NOT NULL"
+        varchar200 Title                "NOT NULL"
+        int    ComplexityLevel          "NOT NULL - 1 a 5"
+        bool   RequiresSupervision      "NOT NULL"
+        bool   IsStandardActivity       "NOT NULL"
+        bool   HasVisualSupport         "NOT NULL"
+        bool   HasAudioSupport          "NOT NULL"
+        bool   UsesPictograms           "NOT NULL"
+        bool   IsActive                 "NOT NULL"
     }
+
+    %% Contenido dinámico de la actividad almacenado como JSON. La estructura
+    %% varía según el TemplateType (opciones de selección, pares imagen-palabra, etc.).
     ActivityContent {
-        int    Id             PK
-        int    ActivityId     FK
-        int    TemplateTypeId FK
-        string ContentJson
-        bool   IsActive
+        int    Id             PK  "NOT NULL"
+        int    ActivityId     FK  "NOT NULL - UK (1:1)"
+        int    TemplateTypeId FK  "NOT NULL"
+        jsonb  ContentJson        "NOT NULL"
+        bool   IsActive           "NOT NULL"
     }
+
+    %% Vector semántico de la actividad para búsqueda por similaridad (pgvector).
+    %% Se genera al crear o editar la actividad si el módulo semántico está activo.
     ActivityEmbedding {
-        int    ActivityId     PK "FK 1:1"
-        string Model
-        int    Dimensions
-        string EmbeddingJson
+        int    ActivityId     PK  "NOT NULL - FK 1:1"
+        varchar100 Model          "NOT NULL"
+        int    Dimensions         "NOT NULL"
+        text   EmbeddingJson      "NOT NULL - vector serializado"
     }
 
     %% ─── ROADMAP ─────────────────────────────────────────────────────────────
+
+    %% Plan de aprendizaje personalizado de una persona. Cada persona tiene
+    %% exactamente un roadmap activo, organizado por áreas de habilidad.
     PersonRoadmap {
-        int  Id                      PK
-        Guid PersonId                FK
-        Guid CreatedByProfessionalId FK
-        bool IsActive
+        int  Id                         PK  "NOT NULL"
+        uuid PersonId                   FK  "NOT NULL - UK (1:1)"
+        uuid CreatedByProfessionalId    FK  "NOT NULL"
+        bool IsActive                       "NOT NULL"
     }
+
+    %% Sección del roadmap correspondiente a un área de habilidad. Agrupa
+    %% las actividades que la persona debe completar en esa área.
     PersonRoadmapArea {
-        int  Id             PK
-        int  PersonRoadmapId FK
-        int  SkillAreaId    FK
-        int  DisplayOrder
-        bool IsActive
+        int  Id             PK  "NOT NULL"
+        int  PersonRoadmapId FK "NOT NULL"
+        int  SkillAreaId    FK  "NOT NULL"
+        int  DisplayOrder       "NOT NULL"
+        bool IsActive           "NOT NULL"
     }
+
+    %% Actividad dentro del roadmap con configuración propia de dificultad,
+    %% umbral de desbloqueo y límites de tiempo e intentos.
     PersonRoadmapActivity {
-        int      Id                    PK
-        int      PersonRoadmapAreaId   FK
-        int      ActivityId            FK
-        int      SequenceOrder
-        bool     IsUnlocked
-        int      UnlockThresholdPercent
-        int      DifficultyLevel
-        bool     ShowHints
-        int      TimeLimitSeconds
-        int      MaxAttempts
-        datetime UnlockedAt
-        bool     IsActive
+        int         Id                      PK  "NOT NULL"
+        int         PersonRoadmapAreaId     FK  "NOT NULL"
+        int         ActivityId              FK  "NOT NULL"
+        int         SequenceOrder               "NOT NULL"
+        bool        IsUnlocked                  "NOT NULL"
+        int         UnlockThresholdPercent      "NOT NULL - 0 a 100"
+        int         DifficultyLevel             "NOT NULL - 1 a 5"
+        bool        ShowHints                   "NOT NULL"
+        int         TimeLimitSeconds            "nullable"
+        int         MaxAttempts                 "nullable"
+        timestamptz UnlockedAt                  "nullable"
+        bool        IsActive                    "NOT NULL"
     }
 
     %% ─── ASIGNACIONES Y RESPUESTAS ───────────────────────────────────────────
+
+    %% Asignación directa de una actividad a una persona por parte del profesional.
+    %% Independiente del roadmap; permite asignar actividades puntuales o de evaluación.
     ActivityAssignment {
-        int      Id                       PK
-        int      ActivityId               FK
-        Guid     PersonId                 FK
-        Guid     AssignedByProfessionalId FK
-        string   Status
-        bool     IsEvaluationActivity
-        datetime AssignedAt
-        datetime DueDate
-        bool     IsActive
+        int         Id                          PK  "NOT NULL"
+        int         ActivityId                  FK  "NOT NULL"
+        uuid        PersonId                    FK  "NOT NULL"
+        uuid        AssignedByProfessionalId    FK  "NOT NULL"
+        varchar20   Status                          "NOT NULL - Pending/InProgress/Completed"
+        bool        IsEvaluationActivity            "NOT NULL"
+        timestamptz AssignedAt                      "NOT NULL"
+        timestamptz DueDate                         "nullable"
+        bool        IsActive                        "NOT NULL"
     }
+
+    %% Resultado de una ejecución de actividad asignada. Almacena éxito, porcentaje,
+    %% intentos y nivel de frustración. Datos clínicos cifrados con AES-256-GCM.
     ActivityResponse {
-        int      Id                PK
-        int      AssignmentId      FK
-        string   Result
-        decimal  SuccessPercentage
-        int      AttemptCount
-        bool     RequiredSupport
-        int      FrustrationLevel
-        datetime StartedAt
-        datetime CompletedAt
-        bool     IsActive
+        int         Id                  PK  "NOT NULL"
+        int         AssignmentId        FK  "NOT NULL"
+        varchar20   Result                  "NOT NULL - cifrado: Correct/Incorrect/Partial"
+        numeric5_2  SuccessPercentage       "NOT NULL - 0.00 a 100.00"
+        int         AttemptCount            "NOT NULL"
+        bool        RequiredSupport         "NOT NULL"
+        int         FrustrationLevel        "NOT NULL - 0 a 5"
+        timestamptz StartedAt               "NOT NULL"
+        timestamptz CompletedAt             "nullable"
+        bool        IsActive                "NOT NULL"
     }
+
+    %% Resultado detallado de un intento sobre una actividad del roadmap.
+    %% Alimenta el radar chart y es el input principal del motor adaptativo.
     ActivityResult {
-        int      Id                       PK
-        int      PersonRoadmapActivityId  FK
-        int      AttemptNumber
-        float    ScorePercent
-        int      TimeSpentSeconds
-        datetime CompletedAt
+        int         Id                      PK  "NOT NULL"
+        int         PersonRoadmapActivityId FK  "NOT NULL"
+        int         AttemptNumber               "NOT NULL"
+        float4      ScorePercent                "NOT NULL - 0.0 a 1.0"
+        int         TimeSpentSeconds            "NOT NULL"
+        timestamptz CompletedAt                 "NOT NULL"
     }
 
     %% ─── MDA ─────────────────────────────────────────────────────────────────
+
+    %% Configuración del motor de dificultad adaptativa para una actividad del roadmap.
+    %% Define rangos y umbrales para ajustar la dificultad automáticamente.
     AdaptiveEngineConfig {
-        int  Id                          PK
-        int  PersonRoadmapActivityId     FK
-        bool IsEnabled
-        int  MinDifficultyLevel
-        int  MaxDifficultyLevel
-        int  ConsecutiveSuccessToUpgrade
-        int  ConsecutiveFailuresToDowngrade
-        int  SuccessThresholdPercent
-        int  FrustrationThreshold
-        bool IsActive
+        int  Id                             PK  "NOT NULL"
+        int  PersonRoadmapActivityId        FK  "NOT NULL - UK (1:1)"
+        bool IsEnabled                          "NOT NULL"
+        int  MinDifficultyLevel                 "NOT NULL"
+        int  MaxDifficultyLevel                 "NOT NULL"
+        int  ConsecutiveSuccessToUpgrade        "NOT NULL"
+        int  ConsecutiveFailuresToDowngrade     "NOT NULL"
+        int  SuccessThresholdPercent            "NOT NULL - 0 a 100"
+        int  FrustrationThreshold               "NOT NULL - 0 a 5"
+        bool IsActive                           "NOT NULL"
     }
+
+    %% Registro de cada ajuste realizado por el motor adaptativo. Permite trazar
+    %% el historial de cambios de dificultad para auditoría y visualización.
     AdaptiveAdjustmentLog {
-        int      Id                       PK
-        int      PersonRoadmapActivityId  FK
-        int      ActivityResponseId       FK
-        string   AdjustmentType
-        string   PreviousValue
-        string   NewValue
-        string   Reason
-        datetime AdjustedAt
-        bool     IsActive
+        int         Id                      PK  "NOT NULL"
+        int         PersonRoadmapActivityId FK  "NOT NULL"
+        int         ActivityResponseId      FK  "NOT NULL"
+        varchar50   AdjustmentType              "NOT NULL"
+        text        PreviousValue               "NOT NULL"
+        text        NewValue                    "NOT NULL"
+        text        Reason                      "NOT NULL"
+        timestamptz AdjustedAt                  "NOT NULL"
+        bool        IsActive                    "NOT NULL"
     }
 
     %% ─── CLÍNICO ─────────────────────────────────────────────────────────────
+
+    %% Diagnóstico funcional registrado por el profesional. El texto clínico
+    %% se cifra automáticamente con AES-256-GCM vía la annotation [Encrypted].
     Diagnosis {
-        int      Id               PK
-        Guid     PersonId         FK
-        Guid     ProfessionalId   FK
-        date     DiagnosisDate
-        string   PrimaryDiagnosis
-        bool     IsActive
+        int  Id             PK  "NOT NULL"
+        uuid PersonId       FK  "NOT NULL"
+        uuid ProfessionalId FK  "NOT NULL"
+        date DiagnosisDate      "NOT NULL"
+        text PrimaryDiagnosis   "NOT NULL - cifrado AES-256-GCM"
+        bool IsActive           "NOT NULL"
     }
+
+    %% Reporte de progreso con flujo de aprobación (Draft → Submitted → Approved/Rejected).
+    %% El familiar recibe email al aprobarse; el profesional al rechazarse.
     Report {
-        int    Id              PK
-        Guid   PersonId        FK
-        Guid   ProfessionalId  FK
-        int    ReportTypeId    FK
-        string Title
-        string Status
-        date   ReportDate
-        date   PeriodStartDate
-        date   PeriodEndDate
-        Guid   ApprovedBy      FK
-        bool   IsActive
+        int    Id               PK  "NOT NULL"
+        uuid   PersonId         FK  "NOT NULL"
+        uuid   ProfessionalId   FK  "NOT NULL"
+        int    ReportTypeId     FK  "NOT NULL"
+        varchar200 Title            "NOT NULL"
+        varchar20 Status            "NOT NULL - Draft/Submitted/Approved/Rejected"
+        date   ReportDate           "NOT NULL"
+        date   PeriodStartDate      "NOT NULL"
+        date   PeriodEndDate        "NOT NULL"
+        uuid   ApprovedBy       FK  "nullable"
+        bool   IsActive             "NOT NULL"
     }
 
     %% ─── COMUNICACIÓN ────────────────────────────────────────────────────────
+
+    %% Mensaje interno entre usuarios del sistema. Soporta hilos mediante
+    %% ParentMessageId y puede estar relacionado a una persona como contexto.
     Message {
-        int      Id               PK
-        Guid     SenderId         FK
-        Guid     ReceiverId       FK
-        Guid     RelatedPersonId  FK
-        int      ParentMessageId  FK
-        string   Subject
-        bool     IsRead
-        datetime SentAt
-        bool     IsActive
+        int         Id              PK  "NOT NULL"
+        uuid        SenderId        FK  "NOT NULL"
+        uuid        ReceiverId      FK  "NOT NULL"
+        uuid        RelatedPersonId FK  "nullable"
+        int         ParentMessageId FK  "nullable - hilo"
+        varchar200  Subject             "NOT NULL"
+        bool        IsRead              "NOT NULL"
+        timestamptz SentAt              "NOT NULL"
+        bool        IsActive            "NOT NULL"
     }
 
     %% ─── AUDITORÍA ───────────────────────────────────────────────────────────
+
+    %% Registro de auditoría de acceso a recursos (IN-172). Detecta accesos
+    %% indebidos y permite trazar quién accedió a datos de qué persona y cuándo.
     AccessAudit {
-        int      Id               PK
-        Guid     UserId           FK
-        Guid     AccessedPersonId FK
-        string   Role
-        string   ActionType
-        string   Result
-        string   AffectedTable
-        datetime Timestamp
+        int         Id              PK  "NOT NULL"
+        uuid        UserId          FK  "NOT NULL"
+        uuid        AccessedPersonId FK "nullable"
+        varchar50   Role                "NOT NULL"
+        varchar50   ActionType          "NOT NULL"
+        varchar20   Result              "NOT NULL - Allowed/Denied"
+        varchar100  AffectedTable       "nullable"
+        timestamptz Timestamp           "NOT NULL"
     }
 
 
@@ -487,6 +602,23 @@ erDiagram
     User                 ||--o{ AccessAudit : "genera"
     PersonWithDisability ||--o{ AccessAudit : "accedida en"
 ```
+
+---
+
+## Convención de tipos
+
+| Tipo en diagrama | Tipo PostgreSQL real | Notas |
+|---|---|---|
+| `uuid` | `uuid` | PKs y FKs de entidades de dominio |
+| `int` | `integer` | PKs de catálogos y entidades de ejecución |
+| `varchar(n)` | `character varying(n)` | Strings acotados; el `n` indica límite |
+| `text` | `text` | Strings sin límite (JSON, contenido clínico) |
+| `jsonb` | `jsonb` | Contenido dinámico de actividades |
+| `bool` | `boolean` | Flags y soft-delete |
+| `timestamptz` | `timestamp with time zone` | Fechas con zona horaria (UTC en DB) |
+| `date` | `date` | Fechas sin hora (diagnósticos, reportes) |
+| `numeric5_2` | `numeric(5,2)` | Porcentajes de éxito (0.00–100.00) |
+| `float4` | `real` | Scores normalizados (0.0–1.0) |
 
 ---
 
