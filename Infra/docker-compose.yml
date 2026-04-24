@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: inclusion_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inclusion_db
+      POSTGRES_USER: inclusion_user
+      POSTGRES_PASSWORD: inclusion_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - inclusion_pgdata:/var/lib/postgresql/data
+
+volumes:
+  inclusion_pgdata:
