@@ -1,6 +1,10 @@
 # Checklist de Procesos — InclusiON
 
-**Última actualización:** 2026-04-17
+**Última actualización:** 2026-04-23
+
+---
+
+# MVP — Práctica II
 
 ---
 
@@ -99,14 +103,13 @@
 - [x] Registro de diagnóstico funcional (BE + FE tab en detalle profesional)
 - [x] Consulta de historial de diagnósticos (lista por fecha desc)
 - [x] Edición de diagnóstico por su creador (validación server-side)
-- [x] Timeline de diagnósticos en perfil de persona (tab en detalle del profesional, filtro por fecha — IN-86)
+- [x] Timeline de diagnósticos en perfil de persona (tab en detalle del profesional, filtro por fecha)
 - [x] Permisos dedicados: diagnoses:read, diagnoses:create, diagnoses:update
 
 ### 10 — Gestión de Actividades
 - [x] Consulta de tipos de template (catálogo)
 - [x] Consulta de categorías de actividad (catálogo)
 - [ ] Creación de actividad con wizard (área → template → contenido → metadatos)
-- [ ] Integración de pictogramas ARASAAC
 - [ ] Consulta del catálogo de actividades (propias + estándar)
 - [ ] Edición de actividad propia
 - [ ] Desactivación de actividad
@@ -118,7 +121,6 @@
 - [ ] Reordenamiento de actividades (drag-drop)
 - [ ] Desbloqueo manual de actividad
 - [ ] Eliminación de actividad del roadmap
-- [ ] Configuración del motor adaptativo por actividad
 
 ---
 
@@ -135,50 +137,35 @@
 - [ ] Player: Completar letra
 - [ ] Registro de progreso durante ejecución (intentos, frustración)
 - [ ] Completar actividad y evaluar resultado
-- [ ] Desbloqueo automático de siguiente actividad si supera umbral
-- [ ] Monitoreo de frustración (pausa tras 3+ intentos)
-
-### 13 — Dificultad Adaptativa (MDA)
-- [ ] Evaluación automática de rendimiento tras cada actividad
-- [ ] Cálculo de ajuste según estado (Estable/Progresando/Dificultad/Frustración)
-- [ ] Aplicación de ajuste dentro de rangos configurados
-- [ ] Registro de cada ajuste en historial de auditoría
-- [ ] Alerta al profesional en estado de frustración
-- [ ] Consulta del historial de ajustes (timeline)
-- [ ] Búsqueda semántica de actividades por lenguaje natural
+- [ ] Ver respuestas por asignación (panel profesional)
 
 ---
 
 ## Monitoreo y Reportes
 
-### 14 — Seguimiento de Avances
+### 13 — Seguimiento de Avances
 - [x] Dashboard del profesional (contadores reales)
 - [x] Mi Aula (cards de personas asignadas)
 - [x] Detalle de persona con edición inline
-- [ ] Radar chart de habilidades (promedio de éxito por área)
-- [ ] Dashboard familiar (últimas actividades, mensajes, reportes)
-- [ ] Portal familia con progreso completo
 
-### 15 — Generación de Informes
+### 14 — Generación de Informes
 - [x] Consulta de reportes por profesional
 - [x] Consulta de reportes por familia
 - [x] Creación de reporte de progreso (tipo, período, contenido)
 - [x] Envío a revisión (submit por profesional)
 - [x] Aprobación/rechazo por admin con email de notificación
-- [ ] Exportación de reporte a PDF
 
 ---
 
-## Comunicación
+## Administración de Cuentas
 
-### 16 — Comunicación entre Actores
-- [x] Invitaciones por email (ver Proceso 07)
-- [ ] Bandeja de entrada de mensajes
-- [ ] Envío de mensajes con asunto y contenido
-- [ ] Hilos de conversación (respuestas)
-- [ ] Indicador de mensajes no leídos en sidebar
-- [ ] Marcado automático como leído al abrir
-- [ ] Notificaciones automáticas de eventos del sistema
+### 15 — Gestión de Usuarios
+- [x] Listado centralizado de usuarios con filtros (rol, estado, institución)
+- [x] Detalle de usuario con entidad asociada
+- [x] Reseteo de contraseña (genera temporal + revoca sesiones + envío email)
+- [x] Desactivación de cuenta (soft-delete + revocación de tokens)
+- [x] Reactivación de cuenta (genera temporal + envío email)
+- [ ] Consulta de actividad reciente del usuario
 
 ---
 
@@ -224,30 +211,63 @@
 - [x] Campo Address eliminado de profesional (entidad + migración)
 - [x] Ordenamiento por columna en tablas (sort dinámico con SortField)
 
+### Seguridad
+- [x] Autorización por recurso row-level (IN-172)
+- [x] Rate limiting en endpoints de autenticación (IN-173)
+- [x] Argon2id para PINs con migración lazy desde BCrypt (IN-173)
+- [x] Cifrado AES-256-GCM en datos clínicos con annotation [Encrypted] (IN-173)
+
 ---
 
-## Administración de Cuentas
+# Post-MVP — Práctica III
 
-### 17 — Gestión de Usuarios
-- [x] Listado centralizado de usuarios con filtros (rol, estado, institución)
-- [x] Detalle de usuario con entidad asociada
-- [x] Reseteo de contraseña (genera temporal + revoca sesiones + envío email)
-- [x] Desactivación de cuenta (soft-delete + revocación de tokens)
-- [x] Reactivación de cuenta (genera temporal + envío email)
-- [ ] Consulta de actividad reciente del usuario
+---
 
-### 18 — Onboarding
-- [x] Cambio obligatorio de contraseña en primer login
+## Motor Adaptativo (MDA)
+
+- [ ] Configuración del motor adaptativo por actividad
+- [ ] Desbloqueo automático de siguiente actividad si supera umbral
+- [ ] Monitoreo de frustración (pausa tras 3+ intentos)
+- [ ] Evaluación automática de rendimiento tras cada actividad
+- [ ] Cálculo de ajuste según estado (Estable/Progresando/Dificultad/Frustración)
+- [ ] Aplicación de ajuste dentro de rangos configurados
+- [ ] Registro de cada ajuste en historial de auditoría
+- [ ] Alerta al profesional en estado de frustración
+- [ ] Consulta del historial de ajustes (timeline)
+
+## Radar Chart y Métricas
+
+- [ ] Radar chart de habilidades (promedio de éxito por área)
+- [ ] Dashboard familiar (últimas actividades, mensajes, reportes)
+- [ ] Portal familia con progreso completo
+
+## Búsqueda Semántica y Pictogramas
+
+- [ ] Búsqueda semántica de actividades por lenguaje natural
+- [ ] Integración de pictogramas ARASAAC
+
+## Mensajería Interna
+
+- [ ] Bandeja de entrada de mensajes
+- [ ] Envío de mensajes con asunto y contenido
+- [ ] Hilos de conversación (respuestas)
+- [ ] Indicador de mensajes no leídos en sidebar
+- [ ] Marcado automático como leído al abrir
+- [ ] Notificaciones automáticas de eventos del sistema
+
+## Onboarding
+
 - [ ] Wizard de completado de perfil (profesional)
 - [ ] Tour guiado del portal (profesional)
 - [ ] Pantalla de bienvenida (familiar)
 - [ ] Pantalla de bienvenida (persona con discapacidad)
 
----
+## Reportes
 
-## Soporte
+- [ ] Exportación de reporte a PDF
 
-### 19 — Soporte y Ayuda
+## Soporte y Ayuda
+
 - [ ] Centro de ayuda (FAQ) con categorías y búsqueda
 - [ ] ABM de FAQ por admin
 - [ ] Botón flotante para reportar problema
@@ -256,10 +276,16 @@
 - [ ] Gestión de tickets por admin (listar, responder, cambiar estado)
 - [ ] Cierre automático de tickets inactivos (30 días)
 
+## Administración de Cuentas
+
+- [ ] Consulta de actividad reciente del usuario
+
 ---
 
 ## Resumen
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| Items checkeados | 115 | 55 |
+| MVP | 115 | 22 |
+| Post-MVP | — | 32 |
+| **Total** | **115** | **54** |
