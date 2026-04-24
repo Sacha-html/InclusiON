@@ -38,11 +38,15 @@ InclusiON.Documents/
 │
 ├── README.md                    ← Este archivo: guía general del proyecto
 │
-├── Docs/                        ← Documento original del proyecto final
-│   └── InclusiON Final (...).docx
+├── Docs/                        ← Documentos del proyecto
+│   ├── InclusiON Final (...).docx   Documento original entregado
+│   ├── proyecto-final-actualizado.md
+│   ├── story-map.md                 Story map (backbone → tareas → HUs, MVP marcado)
+│   └── ui-patterns.md
 │
-├── Estado/                      ← Checklist de avance del proyecto
-│   └── checklist-procesos.md        Qué está hecho y qué falta, por proceso
+├── State/                       ← Estado de avance del proyecto
+│   ├── checklist-procesos.md        Qué está hecho y qué falta, por proceso
+│   └── progreso-hu.md               Detalle por HU con código Jira y estado
 │
 ├── Process/                     ← Procesos del sistema de información (19 procesos)
 │   ├── 00-mapa-global-procesos.md    Mapa global con fases y relaciones
@@ -82,6 +86,7 @@ InclusiON.Documents/
 │
 ├── diagrama-contexto.md         ← Diagrama de contexto: actores, flujos y límites del sistema
 ├── diccionario-datos.md         ← Diccionario de datos (31 entidades del sistema)
+├── der.md                       ← DER: tipos de datos, nulabilidad y responsabilidades por entidad
 ├── glosario.md                  ← Definición de todos los términos del dominio
 ├── ARQUITECTURA.md              ← Arquitectura técnica del sistema
 ├── HU_ESTADO.md                 ← Estado de implementación BE/FE
@@ -96,11 +101,14 @@ InclusiON.Documents/
 | Necesito... | Ir a... |
 |-------------|---------|
 | Entender de qué se trata el proyecto | Este README |
+| Ver el story map (backbone, tareas, HUs del MVP) | `Docs/story-map.md` |
+| Ver qué está hecho y qué falta (por proceso) | `State/checklist-procesos.md` |
+| Ver el detalle de avance por HU con código Jira | `State/progreso-hu.md` |
 | Ver cómo funcionan los procesos del sistema | `Process/00-mapa-global-procesos.md` |
 | Ver un proceso específico (ej: cómo se registra un familiar) | `Process/07-gestion-invitaciones.md` |
-| Ver qué está hecho y qué falta | `Estado/checklist-procesos.md` |
 | Entender qué funcionalidad hace falta desarrollar | Sección "Historias de Usuario" de este README |
 | Leer los criterios de aceptación de una funcionalidad | `HU/HU-XX-nombre.md` |
+| Ver el DER con tipos de datos y nulabilidad | `der.md` |
 | Conocer las entidades y datos que maneja el sistema | `diccionario-datos.md` |
 | Ver el sistema desde afuera (actores, flujos, límites) | `diagrama-contexto.md` |
 | Entender un término que no conozco | `glosario.md` |
@@ -230,7 +238,7 @@ Cada proceso describe **qué hace el sistema, quién lo usa y cómo funciona**. 
 |---|---------|--------------|
 | 19 | [Soporte y Ayuda](./Process/19-soporte.md) | Que los usuarios consulten ayuda y reporten problemas desde la plataforma |
 
-El avance de implementación de cada proceso se puede consultar en el [checklist de procesos](./Estado/checklist-procesos.md).
+El avance de implementación de cada proceso se puede consultar en el [checklist de procesos](./State/checklist-procesos.md).
 
 ---
 
@@ -281,10 +289,14 @@ Orientada al equipo de desarrollo:
 | Documento | Para qué sirve |
 |-----------|-----------------|
 | [ARQUITECTURA.md](./ARQUITECTURA.md) | Entender cómo está construido el sistema |
-| [HU_ESTADO.md](./HU_ESTADO.md) | Ver qué está hecho y qué falta por implementar |
-| [Features/InclusiON_HUs_BEyFE.md](./Features/InclusiON_HUs_BEyFE.md) | Leer las especificaciones técnicas de cada funcionalidad |
-| [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) | Entender cómo funciona el motor de dificultad adaptativa |
-| [Features/CIF_ACCESIBILIDAD_ANGULAR.md](./Features/CIF_ACCESIBILIDAD_ANGULAR.md) | Consultar la referencia de accesibilidad CIF/ICF |
+| [HU_ESTADO.md](./HU_ESTADO.md) | Ver qué está hecho y qué falta por implementar (BE/FE) |
+| [State/checklist-procesos.md](./State/checklist-procesos.md) | Checklist de avance por proceso (MVP vs Post-MVP) |
+| [State/progreso-hu.md](./State/progreso-hu.md) | Progreso detallado por HU con código Jira y estado |
+| [Docs/story-map.md](./Docs/story-map.md) | Story map: backbone, tareas y HUs del MVP |
+| [der.md](./der.md) | DER con tipos PostgreSQL, nulabilidad y responsabilidades |
+| [Features/InclusiON_HUs_BEyFE.md](./Features/InclusiON_HUs_BEyFE.md) | Especificaciones técnicas de cada funcionalidad |
+| [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) | Motor de dificultad adaptativa |
+| [Features/CIF_ACCESIBILIDAD_ANGULAR.md](./Features/CIF_ACCESIBILIDAD_ANGULAR.md) | Referencia de accesibilidad CIF/ICF |
 | [CLAUDE_BACKEND.md](./CLAUDE_BACKEND.md) | Instrucciones para trabajar en el backend (.NET 10) |
 | [CLAUDE_FRONTEND.md](./CLAUDE_FRONTEND.md) | Instrucciones para trabajar en el frontend (Angular 20) |
 | [Test/README.md](./Test/README.md) | Setup, scripts, CI y estructura de InclusiON.Testing |
