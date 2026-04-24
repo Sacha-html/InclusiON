@@ -4,9 +4,17 @@
 
 ---
 
-## Actividades
+## Nivel 1 — Actividades (Backbone)
 
-| Gestionar Sistema | Gestionar Usuarios | Acceder al Sistema | Crear Actividad | Planificar Roadmap | Asignar Actividad | Ejecutar Actividad | Registrar Respuesta | Ver Resultado | Reportar Progreso |
+| Configurar Sistema | Gestionar Usuarios | Acceder al Sistema | Crear Actividad | Planificar Roadmap | Asignar Actividad | Ejecutar Actividad | Registrar Respuesta | Ver Resultado | Reportar Progreso |
+|---|---|---|---|---|---|---|---|---|---|
+| Instituciones, catálogos, roles y permisos | Profesionales, personas, familiares e invitaciones | Login, sesión y accesibilidad | Contenido educativo (Profesional) | Roadmap de aprendizaje por persona (Profesional) | Actividad asignada a persona (Profesional) | Roadmap y players (Persona) | Resultado de la actividad (Persona) | Respuestas y dashboard (Profesional) | Diagnósticos y reportes (Profesional / Familiar) |
+
+---
+
+## Nivel 2 — Tareas (Walking Skeleton)
+
+| Configurar Sistema | Gestionar Usuarios | Acceder al Sistema | Crear Actividad | Planificar Roadmap | Asignar Actividad | Ejecutar Actividad | Registrar Respuesta | Ver Resultado | Reportar Progreso |
 |---|---|---|---|---|---|---|---|---|---|
 | Gestionar instituciones | Registrar profesional | Iniciar sesión | Definir área y template | Crear roadmap | Seleccionar persona | Ver roadmap propio | Resolver actividad | Consultar respuestas | Registrar diagnóstico |
 | Gestionar catálogos | Registrar persona | Mantener sesión | Cargar contenido | Organizar actividades | Confirmar asignación | Iniciar actividad | Enviar resultado | Ver dashboard | Crear reporte |
@@ -14,6 +22,8 @@
 | | Gestionar asignaciones | | | | | | | | |
 
 ---
+
+## Nivel 3 — Historias de Usuario
 
 ## ▼ MVP — Práctica II ▼
 

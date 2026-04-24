@@ -17,19 +17,24 @@
 
 ---
 
+# MVP — Práctica II
+
+---
+
 ## Configurar Sistema
+*Instituciones, catálogos, roles y permisos*
 
 | Historia | Jira | Estado |
 |---|---|---|
 | Registrar institución educativa | IN-21 | 🔵 |
 | Consultar instituciones | IN-22 | 🔵 |
 | Editar institución | IN-23 | 🔵 |
-| Consultar roles del sistema | IN-24 | 🔵 |
-| Asignar permisos por módulo | IN-25 | 🔵 |
 | Crear administrador institucional | IN-26 | 🔵 |
 | Asignar institución a administrador | IN-27 | 🔵 |
 | Filtrar datos por institución | IN-28 | 🔵 |
 | Enforcement de aislamiento por institución | IN-29 | 🔵 |
+| Consultar roles del sistema | IN-24 | 🔵 |
+| Asignar permisos por módulo | IN-25 | 🔵 |
 | Confirmar cambios de permisos con aviso de cierre de sesiones | IN-30 | 🔵 |
 | Consultar catálogos del sistema (6 tipos) | IN-33 | 🔵 |
 | Registrar ítem en catálogo | IN-34 | 🔵 |
@@ -40,6 +45,7 @@
 ---
 
 ## Gestionar Usuarios
+*Profesionales, personas, familiares e invitaciones*
 
 | Historia | Jira | Estado |
 |---|---|---|
@@ -77,6 +83,7 @@
 ---
 
 ## Acceder al Sistema
+*Login, sesión y accesibilidad*
 
 | Historia | Jira | Estado |
 |---|---|---|
@@ -100,6 +107,7 @@
 ---
 
 ## Crear Actividad
+*Contenido educativo (Profesional)*
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
@@ -111,6 +119,7 @@
 ---
 
 ## Planificar Roadmap
+*Roadmap de aprendizaje por persona (Profesional)*
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
@@ -124,6 +133,7 @@
 ---
 
 ## Asignar Actividad
+*Actividad asignada a persona (Profesional)*
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
@@ -132,6 +142,7 @@
 ---
 
 ## Ejecutar Actividad
+*Roadmap y players (Persona)*
 
 | Historia | Jira | Estado |
 |---|---|---|
@@ -146,6 +157,7 @@
 ---
 
 ## Registrar Respuesta
+*Resultado de la actividad (Persona)*
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
@@ -154,16 +166,18 @@
 ---
 
 ## Ver Resultado
+*Respuestas y dashboard (Profesional)*
 
 | Historia | Jira | Estado |
 |---|---|---|
 | Dashboard del profesional con contadores reales | IN-87 | 🔵 |
 | Mi Aula — cards de personas asignadas | IN-88 | 🔵 |
-| Ver respuestas por asignación (panel profesional) | — | ⏳ sin ticket |
+| Ver respuestas por asignación | — | ⏳ sin ticket |
 
 ---
 
 ## Reportar Progreso
+*Diagnósticos y reportes (Profesional / Familiar)*
 
 | Historia | Jira | Estado |
 |---|---|---|
@@ -176,45 +190,59 @@
 
 ---
 
-## Backlog — Práctica III
+# Post-MVP — Práctica III
 
-### Radar Chart y Métricas
+---
+
+## Crear Actividad — Post-MVP
+*Contenido educativo avanzado*
+
+| Historia | Jira | Estado |
+|---|---|---|
+| Integración de pictogramas ARASAAC | IN-106 | ⏳ |
+| Búsqueda semántica por lenguaje natural | IN-135 | 🔧 ⏳ |
+
+---
+
+## Planificar Roadmap — Post-MVP
+*Motor de dificultad adaptativa*
+
+| Historia | Jira | Estado | Nota |
+|---|---|---|---|
+| Configurar motor adaptativo por actividad | IN-116 | ⏳ | |
+| Desbloqueo automático por umbral de rendimiento | IN-127 | ⏳ | |
+| Monitoreo de frustración (pausa tras 3+ intentos) | IN-128 | ⏳ | |
+| Evaluación automática de rendimiento | IN-129 | ⏳ | |
+| Cálculo y aplicación de ajuste de dificultad | IN-130, IN-131 | 🔧 ⏳ | Entidades + migraciones listas |
+| Registro de ajustes en historial de auditoría | IN-132 | 🔧 ⏳ | Entidades + migraciones listas |
+| Alerta al profesional en estado de frustración | IN-133 | ⏳ | |
+| Timeline de historial de ajustes | IN-134 | ⏳ | |
+
+---
+
+## Ver Resultado — Post-MVP
+*Métricas y radar chart*
 
 | Historia | Jira | Estado |
 |---|---|---|
 | Radar chart de habilidades por área | IN-90 | ⏳ |
 | Timeline de diagnósticos en perfil | IN-86 | ⏳ |
+| Dashboard familiar (actividades, mensajes, reportes) | IN-92 | ⏳ |
+| Panel de visualización de progreso (familiar) | IN-153 | ⏳ |
 
-### Motor Adaptativo
+---
 
-| Historia | Jira | Estado | Nota |
-|---|---|---|---|
-| Configurar motor adaptativo por actividad | IN-116 | ⏳ | |
-| Desbloqueo automático por umbral | IN-127 | ⏳ | |
-| Monitoreo de frustración | IN-128 | ⏳ | |
-| Evaluación automática de rendimiento | IN-129 | ⏳ | |
-| Cálculo y aplicación de ajuste de dificultad | IN-130, IN-131 | 🔧 ⏳ | Entidades + migraciones listas |
-| Registro de ajustes en historial | IN-132 | 🔧 ⏳ | Entidades + migraciones listas |
-| Alerta al profesional en frustración | IN-133 | ⏳ | |
-| Timeline de historial de ajustes | IN-134 | ⏳ | |
-
-### Mensajería Interna
+## Reportar Progreso — Post-MVP
+*Exportación*
 
 | Historia | Jira | Estado |
 |---|---|---|
-| Bandeja de entrada de mensajes | IN-140 | ⏳ |
-| Envío de mensajes | IN-141 | ⏳ |
-| Hilos de conversación | IN-142 | ⏳ |
-| Indicador de mensajes no leídos | IN-143 | ⏳ |
+| Exportación de reporte a PDF | IN-139 | ⏳ |
 
-### Portal Familiar
+---
 
-| Historia | Jira | Estado |
-|---|---|---|
-| Portal familia con progreso completo | IN-92 | ⏳ |
-| Panel de visualización de progreso y reportes | IN-153 | ⏳ |
-
-### Onboarding
+## Acceder al Sistema — Post-MVP
+*Onboarding*
 
 | Historia | Jira | Estado |
 |---|---|---|
@@ -223,21 +251,39 @@
 | Pantalla de bienvenida (familiar) | IN-101 | ⏳ |
 | Pantalla de bienvenida (persona con discapacidad) | IN-102 | ⏳ |
 
-### Búsqueda Semántica y Pictogramas
+---
 
-| Historia | Jira | Estado | Nota |
-|---|---|---|---|
-| Búsqueda semántica por lenguaje natural | IN-135 | 🔧 ⏳ | Entidades + migraciones listas |
-| Integración de pictogramas ARASAAC | IN-106 | ⏳ | |
+## Gestionar Usuarios — Post-MVP
+*Comunicación interna*
+
+| Historia | Jira | Estado |
+|---|---|---|
+| Bandeja de entrada de mensajes | IN-140 | ⏳ |
+| Envío de mensajes con asunto y contenido | IN-141 | ⏳ |
+| Hilos de conversación | IN-142 | ⏳ |
+| Indicador de mensajes no leídos en sidebar | IN-143 | ⏳ |
+| Marcado automático como leído al abrir | IN-144 | ⏳ |
+| Consulta de actividad reciente del usuario | IN-98 | ⏳ |
 
 ---
 
 ## Resumen
 
+### MVP
+
 | Estado | Cantidad |
-|---|---|
+|---|:---:|
 | ✅ Hecho | 2 |
-| 🔵 En revisión | ~55 |
+| 🔵 En revisión | 64 |
 | 🔄 En curso | 1 |
-| 🔧 Base lista, sin handlers | 8 |
-| ⏳ Pendiente | ~30 |
+| 🔧 Base lista, sin handlers | 4 |
+| ⏳ Pendiente | 16 |
+| **Total MVP** | **87** |
+
+### Post-MVP
+
+| Estado | Cantidad |
+|---|:---:|
+| 🔧 Base lista, sin handlers | 3 |
+| ⏳ Pendiente | 29 |
+| **Total Post-MVP** | **32** |
