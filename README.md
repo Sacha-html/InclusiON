@@ -42,6 +42,7 @@ InclusiON.Documents/
 │   ├── InclusiON Final (...).docx   Documento original entregado
 │   ├── proyecto-final-actualizado.md
 │   ├── story-map.md                 Story map (backbone → tareas → HUs, MVP marcado)
+│   ├── der.md                       DER: tipos de datos, nulabilidad y responsabilidades por entidad
 │   └── ui-patterns.md
 │
 ├── State/                       ← Estado de avance del proyecto
@@ -81,12 +82,15 @@ InclusiON.Documents/
 │   ├── CIF_ACCESIBILIDAD_ANGULAR.md Referencia de accesibilidad CIF/ICF
 │   └── integracion-semantic-search.md Búsqueda semántica con ONNX
 │
+├── Infra/                       ← Infraestructura local
+│   ├── docker-compose.yml           PostgreSQL con Docker
+│   └── README.md                    Cómo levantar la DB y conectarla a la API
+│
 ├── Templates/                   ← Plantillas para documentación
 │   └── InclusiON_HU_Plantilla.docx  Plantilla para nuevas HU
 │
 ├── diagrama-contexto.md         ← Diagrama de contexto: actores, flujos y límites del sistema
 ├── diccionario-datos.md         ← Diccionario de datos (31 entidades del sistema)
-├── der.md                       ← DER: tipos de datos, nulabilidad y responsabilidades por entidad
 ├── glosario.md                  ← Definición de todos los términos del dominio
 ├── ARQUITECTURA.md              ← Arquitectura técnica del sistema
 ├── HU_ESTADO.md                 ← Estado de implementación BE/FE
@@ -108,7 +112,7 @@ InclusiON.Documents/
 | Ver un proceso específico (ej: cómo se registra un familiar) | `Process/07-gestion-invitaciones.md` |
 | Entender qué funcionalidad hace falta desarrollar | Sección "Historias de Usuario" de este README |
 | Leer los criterios de aceptación de una funcionalidad | `HU/HU-XX-nombre.md` |
-| Ver el DER con tipos de datos y nulabilidad | `der.md` |
+| Ver el DER con tipos de datos y nulabilidad | `Docs/der.md` |
 | Conocer las entidades y datos que maneja el sistema | `diccionario-datos.md` |
 | Ver el sistema desde afuera (actores, flujos, límites) | `diagrama-contexto.md` |
 | Entender un término que no conozco | `glosario.md` |
@@ -293,13 +297,14 @@ Orientada al equipo de desarrollo:
 | [State/checklist-procesos.md](./State/checklist-procesos.md) | Checklist de avance por proceso (MVP vs Post-MVP) |
 | [State/progreso-hu.md](./State/progreso-hu.md) | Progreso detallado por HU con código Jira y estado |
 | [Docs/story-map.md](./Docs/story-map.md) | Story map: backbone, tareas y HUs del MVP |
-| [der.md](./der.md) | DER con tipos PostgreSQL, nulabilidad y responsabilidades |
+| [Docs/der.md](./Docs/der.md) | DER con tipos PostgreSQL, nulabilidad y responsabilidades |
 | [Features/InclusiON_HUs_BEyFE.md](./Features/InclusiON_HUs_BEyFE.md) | Especificaciones técnicas de cada funcionalidad |
 | [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) | Motor de dificultad adaptativa |
 | [Features/CIF_ACCESIBILIDAD_ANGULAR.md](./Features/CIF_ACCESIBILIDAD_ANGULAR.md) | Referencia de accesibilidad CIF/ICF |
 | [CLAUDE_BACKEND.md](./CLAUDE_BACKEND.md) | Instrucciones para trabajar en el backend (.NET 10) |
 | [CLAUDE_FRONTEND.md](./CLAUDE_FRONTEND.md) | Instrucciones para trabajar en el frontend (Angular 20) |
 | [Test/README.md](./Test/README.md) | Setup, scripts, CI y estructura de InclusiON.Testing |
+| [Infra/README.md](./Infra/README.md) | Levantar PostgreSQL con Docker y conectar a la API |
 
 ---
 
