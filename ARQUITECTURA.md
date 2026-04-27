@@ -152,7 +152,7 @@ Ver detalle completo en `CLAUDE_FRONTEND.md`.
 
 ## Features Complejos
 
-### Búsqueda Semántica (BE-16)
+### Búsqueda Semántica
 
 ```
 Texto de búsqueda → ONNX (all-MiniLM-L6-v2) → Embedding 384D
@@ -167,7 +167,7 @@ Texto de búsqueda → ONNX (all-MiniLM-L6-v2) → Embedding 384D
 - Estado: library existe, falta integración con CQRS
 - Doc: `Documentacion/Features/integracion-semantic-search.md`
 
-### Motor de Dificultad Adaptativa — MDA (BE-17)
+### Motor de Dificultad Adaptativa — MDA
 
 ```
 Estudiante completa actividad

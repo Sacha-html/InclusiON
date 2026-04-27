@@ -57,8 +57,8 @@ Items en To Do sin sprint — bloque más urgente según dependencias:
 | IN-112 | Definir orden secuencial y umbral de desbloqueo | IN-110 |
 | IN-113 | Reordenamiento drag-drop | IN-110 |
 | IN-117 | Visualización del roadmap (vista estudiante, estilo Duolingo) | IN-110 |
-| IN-86 | Timeline de diagnósticos en perfil de persona (vista admin) | BE-13 ✅ listo |
-| IN-136 | Creación de reporte de progreso | BE-14 ✅ listo — cerrar en Jira |
+| IN-86 | Timeline de diagnósticos en perfil de persona (vista admin) | ✅ listo |
+| IN-136 | Creación de reporte de progreso | ✅ listo — cerrar en Jira |
 
 ---
 

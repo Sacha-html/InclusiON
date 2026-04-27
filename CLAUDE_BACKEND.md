@@ -116,22 +116,22 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 
 ## Controllers Existentes
 
-| Controller | Endpoints | HU |
-|-----------|-----------|-----|
-| `AuthController` | identify, login (standard/PIN/assisted/family), refresh, register, change-login-method | Transversal |
-| `CatalogsController` | GET disability-types, autonomy-levels, activity-categories, skill-areas, template-types, login-methods, avatar-colors | BE-01 |
-| `CatalogAdminController` | CRUD de 6 tipos de catálogo (admin) | Extra |
-| `PersonsController` | CRUD personas, supervisor-candidates, professional-assignments, login methods | Transversal |
-| `ProfessionalsController` | CRUD profesionales, pending, validate, reactivate, deactivate, status-history, reset-password | BE-02 |
-| `FamilyController` | CRUD representantes familiares | Extra |
-| `InstitutionsController` | CRUD instituciones educativas, asignaciones profesional-institución | BE-03 |
-| `AssignmentsController` | Asignaciones profesional-persona | BE-03 |
-| `InvitationsController` | Crear invitación, aceptar, validar código | BE-08 |
-| `ReportsController` | CRUD informes, submit, approve, reject, GET /family | BE-14 |
-| `DiagnosesController` | GET /persons/{id}/diagnoses, GET /diagnoses/{id}, POST, PUT | BE-13 |
-| `AdminUsersController` | Listado paginado, reset-password, deactivate, reactivate | BE-18 |
-| `RolesController` | Listado de roles y permisos, asignar permisos | Extra |
-| `UsersController` | GetById, GetProfile | Transversal |
+| Controller | Endpoints |
+|-----------|-----------|
+| `AuthController` | identify, login (standard/PIN/assisted/family), refresh, register, change-login-method |
+| `CatalogsController` | GET disability-types, autonomy-levels, activity-categories, skill-areas, template-types, login-methods, avatar-colors |
+| `CatalogAdminController` | CRUD de 6 tipos de catálogo (admin) |
+| `PersonsController` | CRUD personas, supervisor-candidates, professional-assignments, login methods |
+| `ProfessionalsController` | CRUD profesionales, pending, validate, reactivate, deactivate, status-history, reset-password |
+| `FamilyController` | CRUD representantes familiares |
+| `InstitutionsController` | CRUD instituciones educativas, asignaciones profesional-institución |
+| `AssignmentsController` | Asignaciones profesional-persona |
+| `InvitationsController` | Crear invitación, aceptar, validar código |
+| `ReportsController` | CRUD informes, submit, approve, reject, GET /family |
+| `DiagnosesController` | GET /persons/{id}/diagnoses, GET /diagnoses/{id}, POST, PUT |
+| `AdminUsersController` | Listado paginado, reset-password, deactivate, reactivate |
+| `RolesController` | Listado de roles y permisos, asignar permisos |
+| `UsersController` | GetById, GetProfile |
 
 ---
 

@@ -26,17 +26,17 @@ El profesional accede al detalle completo: datos personales, tipo de discapacida
 - **Endpoint:** `GET /api/persons/{id}`, `GET /api/persons/{id}/skill-profile`
 - **Frontend:** `/pro/persons/{id}` con edición inline
 
-### 4. Radar Chart de Habilidades (BE-12, FE-12)
+### 4. Radar Chart de Habilidades
 Visualización gráfica tipo radar/spider del nivel de cada área de habilidad, calculado como promedio de `successPercentage` de las respuestas de actividades.
 - **Endpoint previsto:** `GET /api/persons/{id}/radar`
 - **Frontend previsto:** Chart.js radar chart en detalle de persona
 
-### 5. Dashboard Familia (BE-12, FE-13)
+### 5. Dashboard Familia
 La familia verá: nombre de la persona, últimas 3 actividades, mensajes no leídos y nuevos reportes.
 - **Endpoint previsto:** `GET /api/dashboard/family`
 - **Frontend previsto:** `/family/dashboard`
 
-### 6. Portal Familia (FE-15)
+### 6. Portal Familia
 La familia consultará el progreso completo de su familiar.
 - El portal familia (`/family`) tiene layout y rutas pero el contenido es placeholder.
 
@@ -52,7 +52,7 @@ flowchart TD
     CARDS -->|Click| DET[Detalle Persona]
     DET -->|GET /api/persons/id| DATOS[Datos + Skill Profile]
 
-    DATOS -.->|BE-12| RADAR[Radar Chart]
+    DATOS -.-> RADAR[Radar Chart]
 
     FAM[Familia] -.->|Pendiente| DASH_F[Dashboard Familia]
     FAM -.->|Pendiente| PORTAL[Portal Familia /family]

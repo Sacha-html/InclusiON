@@ -24,14 +24,14 @@ El profesional edita los datos funcionales de la persona: tipo de discapacidad, 
 - **Método de login:** `PUT /api/persons/{id}/login-method`
 - **Frontend:** `/pro/persons/{id}` (edición inline)
 
-### 3. Diagnóstico Funcional (BE-13, FE-14)
+### 3. Diagnóstico Funcional
 El profesional registrará diagnósticos formales con fecha, diagnóstico principal, observaciones, capacidades, desafíos, apoyos, objetivos y estrategias.
 - **Endpoints previstos:**
   - `GET /api/persons/{id}/diagnoses` (lista por fecha desc)
   - `GET /api/diagnoses/{id}` (detalle)
   - `POST /api/persons/{id}/diagnoses` (crear)
   - `PUT /api/diagnoses/{id}` (editar, solo por el creador)
-- **Frontend previsto:** Timeline de diagnósticos en detalle de persona (FE-14)
+- **Frontend:** Timeline de diagnósticos en detalle de persona (IN-86)
 
 ## Diagrama de flujo
 
@@ -43,9 +43,9 @@ flowchart TD
     PROF -->|PUT /api/persons/id| PF[Perfil Funcional]
     PF -->|Tipo discapacidad, autonomía, login| PCD[Persona con Discapacidad]
 
-    PROF -.->|BE-13| DIAG[Diagnóstico Funcional]
+    PROF -.-> DIAG[Diagnóstico Funcional]
     DIAG -.->|Observaciones, capacidades, desafíos| PCD
-    DIAG -.->|FE-14| TIMELINE[Timeline de Diagnósticos]
+    DIAG -.-> TIMELINE[Timeline de Diagnósticos]
 
 ```
 

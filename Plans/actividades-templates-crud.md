@@ -1,16 +1,15 @@
-# Plan — BE-06: Sistema de Templates y Alta de Actividades
+# Plan — Actividades: Sistema de Templates y Alta de Actividades
 
 **Sprint:** 7 (próximo)
 **Épica:** IN-9 Gestión de Actividades
-**HU de referencia:** HU-02 — Sistema de Actividades con Templates Dinámicos
 **Bloqueado por:** nada (es el bloqueante principal del flujo educativo)
-**Desbloquea:** BE-09 Roadmap, FE-04/05 Wizard de alta, IN-105..IN-113
+**Desbloquea:** Roadmap, Wizard de alta de actividad, IN-105..IN-113
 
 ---
 
 ## Estado del dominio (ya existe en el código)
 
-Las entidades de dominio **ya están definidas** en `InclusiON.Domain/Models/`. El trabajo de BE-06 es implementar los repositorios, queries, commands y endpoints — no crear entidades nuevas.
+Las entidades de dominio **ya están definidas** en `InclusiON.Domain/Models/`. El trabajo pendiente es implementar los repositorios, queries, commands y endpoints — no crear entidades nuevas.
 
 ### Entidades existentes
 
@@ -22,8 +21,8 @@ Las entidades de dominio **ya están definidas** en `InclusiON.Domain/Models/`. 
 | `ActivityCategory` | `ActivityCategories` | Clasificación temática independiente del SkillArea |
 | `ActivityAssignment` | `ActivityAssignments` | Asignación de actividad a persona por un profesional |
 | `ActivityResponse` | `ActivityResponses` | Respuesta/intento de una persona en una actividad |
-| `ActivityEmbedding` | `ActivityEmbeddings` | Embedding semántico para búsqueda (BE-16) |
-| `PersonRoadmapActivity` | `PersonRoadmapActivities` | Actividad dentro de un roadmap (BE-09) |
+| `ActivityEmbedding` | `ActivityEmbeddings` | Embedding semántico para búsqueda semántica |
+| `PersonRoadmapActivity` | `PersonRoadmapActivities` | Actividad dentro de un roadmap |
 
 ### DbSets registrados en AppDbContext
 
@@ -62,7 +61,7 @@ DbSet<PersonRoadmapActivity>    PersonRoadmapActivities
 | Lógico-matemático | `ORDER_SEQUENCE` | Ordenamiento | — | — |
 | Lógico-matemático | `NUMERATION` | Numeración | — | — |
 
-> ⚠️ Los campos `ContentSchema` y `ComponentName` están vacíos en el seed. Completarlos es parte de BE-06.
+> ⚠️ Los campos `ContentSchema` y `ComponentName` están vacíos en el seed. Completarlos es el primer paso de implementación.
 
 ### ActivityCategories (8)
 
@@ -93,7 +92,7 @@ Activity (int Id)
   │     ├── PersonId → PersonWithDisability
   │     └── Responses → ActivityResponse[]
   ├── RoadmapActivities → PersonRoadmapActivity[]
-  └── Embedding → ActivityEmbedding (1:1, BE-16)
+  └── Embedding → ActivityEmbedding (1:1, búsqueda semántica)
 ```
 
 **Distinción CategoryId vs SkillAreaId:**
@@ -249,7 +248,7 @@ UpdateActivityRequest         { Title, Description?, Instructions?, CategoryId, 
 
 ---
 
-## Frontend — Wizard (FE-04/05)
+## Frontend — Wizard (IN-105, IN-107)
 
 ### Flujo de 4 pasos
 
