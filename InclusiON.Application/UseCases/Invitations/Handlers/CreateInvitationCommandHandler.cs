@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -20,6 +20,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
         private readonly ILogger<CreateInvitationCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public CreateInvitationCommandHandler(
             IInvitationsRepository repository,
@@ -27,7 +28,8 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
             IEmailService emailService,
-            ILogger<CreateInvitationCommandHandler> logger)
+            ILogger<CreateInvitationCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
@@ -35,6 +37,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             _unitOfWork = unitOfWork;
             _emailService = emailService;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<InvitationResponse>> HandleAsync(CreateInvitationCommand command, CancellationToken cancellationToken)
@@ -74,7 +77,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     FirstName = command.FirstName,
                     LastName = command.LastName,
                     Relationship = command.Relationship,
-                    ExpiresAt = DateTime.UtcNow.AddDays(7),
+                    ExpiresAt = _dateTime.UtcNow.AddDays(7),
                     IsUsed = false
                 };
 
@@ -116,9 +119,11 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         ? $"{invitation.ForPerson.FirstName} {invitation.ForPerson.LastName}".Trim()
                         : null,
                     ["Relationship"] = invitation.Relationship,
-                    ["Year"] = DateTime.UtcNow.Year.ToString()
+                    ["Year"] = _dateTime.UtcNow.Year.ToString()
                 };
 
+                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                 await _emailService.SendTemplatedEmailAsync(
                     invitation.Email,
                     "InclusiON - Invitacion para registro familiar",

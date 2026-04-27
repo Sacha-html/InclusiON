@@ -19,6 +19,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await _context.Set<Diagnosis>()
                 .Include(d => d.Professional)
                 .Include(d => d.Person)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.Id == id && d.IsActive, cancellationToken);
         }
 
@@ -26,6 +27,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.Set<Diagnosis>()
                 .Include(d => d.Professional)
+                .AsNoTracking()
                 .Where(d => d.PersonId == personId && d.IsActive)
                 .OrderByDescending(d => d.DiagnosisDate)
                 .ToListAsync(cancellationToken);

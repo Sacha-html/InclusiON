@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -20,6 +20,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AdminReactivateUserCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public AdminReactivateUserCommandHandler(
             IIdentityService identityService,
@@ -28,7 +29,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             IFamilyRepository familyRepository,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
-            ILogger<AdminReactivateUserCommandHandler> logger)
+            ILogger<AdminReactivateUserCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _identityService = identityService;
             _professionalsRepository = professionalsRepository;
@@ -37,6 +39,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ResetPasswordResultResponse>> HandleAsync(
@@ -75,6 +78,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 "User {UserId} ({Email}) reactivated by admin {AdminId}",
                 user.Id, user.Email, command.RequestedByUserId);
 
+            // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+            // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
             // Enviar email de reactivación (si el usuario tiene email)
             if (!string.IsNullOrEmpty(user.Email))
             {
@@ -88,7 +93,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                         {
                             { "UserName", user.Name ?? "Usuario" },
                             { "TemporaryPassword", tempPassword },
-                            { "Year", DateTime.UtcNow.Year.ToString() }
+                            { "Year", _dateTime.UtcNow.Year.ToString() }
                         },
                         cancellationToken);
                 }
@@ -101,10 +106,9 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             return ApiResponse<ResetPasswordResultResponse>.SuccessResult(
                 new ResetPasswordResultResponse
                 {
-                    TemporaryPassword = tempPassword,
                     UserEmail = user.Email ?? string.Empty
                 },
-                "Usuario reactivado exitosamente.");
+                "Usuario reactivado exitosamente. Se enviaron las credenciales por email.");
         }
 
         private async Task SetLinkedEntityActiveAsync(User user, bool isActive, CancellationToken cancellationToken)

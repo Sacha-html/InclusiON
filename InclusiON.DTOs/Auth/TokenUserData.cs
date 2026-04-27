@@ -10,6 +10,12 @@
         public List<string> Permissions { get; set; } = new();
         public bool IsGlobalAdmin { get; set; }
         public List<int> InstitutionIds { get; set; } = new();
+        /// <summary>
+        /// ID del entity de dominio: professionalId, familyRepresentativeId o personId según el rol.
+        /// Null para Admin (usa InstitutionIds) y GlobalAdmin.
+        /// Se embebe en el JWT encriptado con AES-GCM bajo el claim "eid".
+        /// </summary>
+        public Guid? EntityId { get; set; }
 
         public TokenUserData()
         {

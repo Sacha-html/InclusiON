@@ -1,14 +1,14 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace InclusiON.Application.Helpers
 {
     /// <summary>
-    /// Generador de contrasenas temporales para nuevos usuarios.
+    /// Generador de contraseñs temporales para nuevos usuarios.
     /// </summary>
     public static class PasswordGenerator
     {
         /// <summary>
-        /// Genera una contrasena temporal segura que cumple con los requisitos de Identity.
+        /// Genera una contraseña temporal segura que cumple con los requisitos de Identity.
         /// Formato: 12 caracteres con mayusculas, minusculas, digitos y caracteres especiales.
         /// </summary>
         public static string GenerateTemporary()

@@ -24,14 +24,12 @@ namespace InclusiON.Data.Configurations
             builder.Property(r => r.AttemptCount)
                 .HasDefaultValue(1);
 
-            builder.Property(r => r.ResponsePattern)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(r => r.ResponsePattern);
 
             builder.Property(r => r.RequiredSupport)
                 .HasDefaultValue(false);
 
-            builder.Property(r => r.Observations)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(r => r.Observations);
 
             builder.Property(r => r.CreatedAt)
                 .IsRequired();

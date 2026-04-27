@@ -1,3 +1,4 @@
+using InclusiON.Domain.Attributes;
 using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
@@ -51,6 +52,7 @@ namespace InclusiON.Domain.Models
         /// <summary>
         /// Patron de respuestas en formato JSON para analisis.
         /// </summary>
+        [Encrypted]
         public string? ResponsePattern { get; set; }
 
         /// <summary>
@@ -66,6 +68,7 @@ namespace InclusiON.Domain.Models
         /// <summary>
         /// Observaciones del profesional o sistema sobre el intento.
         /// </summary>
+        [Encrypted]
         public string? Observations { get; set; }
 
         /// <summary>

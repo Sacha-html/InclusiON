@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -16,15 +16,18 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IFamilyRepository _familyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UnlinkFamilyFromPersonCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public UnlinkFamilyFromPersonCommandHandler(
             IFamilyRepository familyRepository,
             IUnitOfWork unitOfWork,
-            ILogger<UnlinkFamilyFromPersonCommandHandler> logger)
+            ILogger<UnlinkFamilyFromPersonCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _familyRepository = familyRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<PersonRepresentativeResponse>> HandleAsync(UnlinkFamilyFromPersonCommand command, CancellationToken cancellationToken)
@@ -60,9 +63,9 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 await _unitOfWork.ExecuteInTransactionAsync(async ct =>
                 {
                     link.IsActive = false;
-                    link.EndedAt = DateTime.UtcNow;
+                    link.EndedAt = _dateTime.UtcNow;
                     link.UnlinkObservation = command.Observation;
-                    link.UpdatedAt = DateTime.UtcNow;
+                    link.UpdatedAt = _dateTime.UtcNow;
 
                     await _familyRepository.UpdatePersonRepresentativeAsync(link, ct);
 
@@ -76,7 +79,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         WasPrimary = link.IsPrimary,
                         Observation = command.Observation,
                         ChangedByUserId = command.ChangedByUserId,
-                        CreatedAt = DateTime.UtcNow
+                        CreatedAt = _dateTime.UtcNow
                     };
                     await _familyRepository.CreatePersonRepresentativeHistoryAsync(history, ct);
 
@@ -93,7 +96,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     link.Relationship!,
                     link.IsPrimary,
                     false,
-                    DateTime.UtcNow,
+                    _dateTime.UtcNow,
                     command.Observation);
 
                 return ApiResponse<PersonRepresentativeResponse>.SuccessResult(response, "Familiar desvinculado exitosamente");

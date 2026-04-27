@@ -17,8 +17,7 @@ namespace InclusiON.Data.Configurations
                 .HasMaxLength(100);
 
             builder.Property(p => p.EmbeddingJson)
-                .IsRequired()
-                .HasColumnType("nvarchar(max)");
+                .IsRequired();
 
             builder.HasOne(p => p.Activity)
                 .WithOne(a => a.Embedding)

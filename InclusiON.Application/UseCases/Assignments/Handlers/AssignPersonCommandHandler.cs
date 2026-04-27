@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
@@ -19,17 +19,20 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDateTimeProvider _dateTime;
 
         public AssignPersonCommandHandler(
             IAssignmentsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IPersonsRepository personsRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _personsRepository = personsRepository;
             _unitOfWork = unitOfWork;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ProfessionalPersonResponse>> HandleAsync(
@@ -76,7 +79,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 existing.IsActive = true;
                 existing.IsPrimaryProfessional = command.IsPrimaryProfessional;
                 existing.CanSuperviseLogin = command.CanSuperviseLogin;
-                existing.AssignedAt = DateTime.UtcNow;
+                existing.AssignedAt = _dateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 existing.Person = person;
@@ -90,7 +93,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 PersonId = command.PersonId,
                 IsPrimaryProfessional = command.IsPrimaryProfessional,
                 CanSuperviseLogin = command.CanSuperviseLogin,
-                AssignedAt = DateTime.UtcNow,
+                AssignedAt = _dateTime.UtcNow,
                 IsActive = true
             };
 

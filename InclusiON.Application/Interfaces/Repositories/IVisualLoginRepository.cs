@@ -13,6 +13,12 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<PersonWithDisability?> FindPersonByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Busca hasta <paramref name="limit"/> personas que matchean el identificador.
+        /// Usado cuando hay homónimos para que el usuario elija visualmente.
+        /// </summary>
+        Task<IReadOnlyList<PersonWithDisability>> FindPersonsByIdentifierAsync(string identifier, int limit, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Busca un profesional por identificador.
         /// </summary>
         Task<Professional?> FindProfessionalByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
@@ -71,5 +77,15 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Actualiza el metodo de login de una persona.
         /// </summary>
         Task UpdatePersonLoginMethodAsync(Guid userId, int loginMethodId, string? pinHash, Guid? supervisorUserId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Verifica si un profesional tiene asignacion activa a la persona con flag CanSuperviseLogin.
+        /// </summary>
+        Task<bool> CanProfessionalSupervisedLoginAsync(Guid professionalId, Guid personId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Verifica si un familiar tiene vinculo activo a la persona con flag CanSuperviseLogin.
+        /// </summary>
+        Task<bool> CanFamilySupervisedLoginAsync(Guid familyRepresentativeId, Guid personId, CancellationToken cancellationToken = default);
     }
 }

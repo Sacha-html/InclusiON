@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
@@ -24,10 +25,12 @@ namespace InclusiON.Api.Controllers
     public class CatalogAdminController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IOutputCacheStore _cacheStore;
 
-        public CatalogAdminController(AppDbContext context)
+        public CatalogAdminController(AppDbContext context, IOutputCacheStore cacheStore)
         {
             _context = context;
+            _cacheStore = cacheStore;
         }
 
         #region Disability Types
@@ -393,6 +396,7 @@ namespace InclusiON.Api.Controllers
             var entity = createEntity();
             _context.Set<TEntity>().Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
+            await _cacheStore.EvictByTagAsync("catalogs", cancellationToken);
 
             return StatusCode(StatusCodes.Status201Created,
                 ApiResponse<TResponse>.SuccessResult(toResponse(entity), $"{entityDisplayName} creado(a) exitosamente"));
@@ -422,6 +426,7 @@ namespace InclusiON.Api.Controllers
 
             updateEntity(entity);
             await _context.SaveChangesAsync(cancellationToken);
+            await _cacheStore.EvictByTagAsync("catalogs", cancellationToken);
 
             return Ok(ApiResponse<TResponse>.SuccessResult(toResponse(entity), $"{entityDisplayName} actualizado(a) exitosamente"));
         }
