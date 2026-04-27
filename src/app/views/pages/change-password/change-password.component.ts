@@ -39,6 +39,7 @@ import { IconDirective } from '@coreui/icons-angular';
     IconDirective,
   ],
   templateUrl: './change-password.component.html',
+  styleUrl: './change-password.component.scss',
 })
 export class ChangePasswordComponent {
   private readonly fb = inject(FormBuilder);

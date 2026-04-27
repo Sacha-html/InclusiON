@@ -12,62 +12,86 @@
     <c-card-body>
 
       <!-- Tabs -->
-      <ul class="nav nav-tabs mb-3">
-        <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'datos'" (click)="activeTab = 'datos'" role="button">Datos</a>
+      <ul class="nav nav-tabs mb-3" role="tablist" aria-label="Secciones de persona">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-datos" [class.active]="activeTab === 'datos'" 
+                  role="tab" [attr.aria-selected]="activeTab === 'datos'" 
+                  aria-controls="panel-datos" (click)="activeTab = 'datos'">
+            Datos
+          </button>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'funcional'" (click)="activeTab = 'funcional'" role="button">Perfil Funcional</a>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-funcional" [class.active]="activeTab === 'funcional'" 
+                  role="tab" [attr.aria-selected]="activeTab === 'funcional'" 
+                  aria-controls="panel-funcional" (click)="activeTab = 'funcional'">
+            Perfil Funcional
+          </button>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'habilidades'" (click)="activeTab = 'habilidades'" role="button">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-habilidades" [class.active]="activeTab === 'habilidades'" 
+                  role="tab" [attr.aria-selected]="activeTab === 'habilidades'" 
+                  aria-controls="panel-habilidades" (click)="activeTab = 'habilidades'">
             Habilidades
             @if (skillProfile().length > 0) {
-              <c-badge color="primary" class="ms-1">{{ skillProfile().length }}</c-badge>
+              <c-badge color="primary" class="ms-1" [attr.aria-label]="skillProfile().length + ' habilidades'">{{ skillProfile().length }}</c-badge>
             }
-          </a>
+          </button>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'diagnosticos'" (click)="activeTab = 'diagnosticos'" role="button">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-diagnosticos" [class.active]="activeTab === 'diagnosticos'" 
+                  role="tab" [attr.aria-selected]="activeTab === 'diagnosticos'" 
+                  aria-controls="panel-diagnosticos" (click)="activeTab = 'diagnosticos'">
             Diagnósticos
             @if (diagnoses().length > 0) {
-              <c-badge color="info" class="ms-1">{{ diagnoses().length }}</c-badge>
+              <c-badge color="info" class="ms-1" [attr.aria-label]="diagnoses().length + ' diagnósticos'">{{ diagnoses().length }}</c-badge>
             }
-          </a>
+          </button>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'familiares'" (click)="activeTab = 'familiares'; loadRepresentatives()" role="button">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-familiares" [class.active]="activeTab === 'familiares'" 
+                  role="tab" [attr.aria-selected]="activeTab === 'familiares'" 
+                  aria-controls="panel-familiares" (click)="activeTab = 'familiares'; loadRepresentatives()">
             Familiares
             @if (representatives.length > 0) {
-              <c-badge color="success" class="ms-1">{{ representatives.length }}</c-badge>
+              <c-badge color="success" class="ms-1" [attr.aria-label]="representatives.length + ' familiares'">{{ representatives.length }}</c-badge>
             }
-          </a>
+          </button>
         </li>
       </ul>
 
       @if (activeTab === 'datos') {
-        <app-professional-person-data [person]="person" (personChange)="onPersonChange($event)" />
+        <div role="tabpanel" id="panel-datos" aria-labelledby="tab-datos">
+          <app-professional-person-data [person]="person" (personChange)="onPersonChange($event)" />
+        </div>
       }
 
       @if (activeTab === 'funcional') {
-        <app-professional-functional-profile [person]="person" (personChange)="onPersonChange($event)" />
+        <div role="tabpanel" id="panel-funcional" aria-labelledby="tab-funcional">
+          <app-professional-functional-profile [person]="person" (personChange)="onPersonChange($event)" />
+        </div>
       }
 
       @if (activeTab === 'habilidades') {
-        <app-professional-skills [personId]="person.id" [skillProfile]="skillProfile()" (skillProfileChange)="onSkillProfileChange($event)" />
+        <div role="tabpanel" id="panel-habilidades" aria-labelledby="tab-habilidades">
+          <app-professional-skills [personId]="person.id" [skillProfile]="skillProfile()" (skillProfileChange)="onSkillProfileChange($event)" />
+        </div>
       }
 
       @if (activeTab === 'diagnosticos') {
-        <app-professional-diagnoses [personId]="person.id" [diagnoses]="diagnoses()" (diagnosesChange)="onDiagnosesChange($event)" />
+        <div role="tabpanel" id="panel-diagnosticos" aria-labelledby="tab-diagnosticos">
+          <app-professional-diagnoses [personId]="person.id" [diagnoses]="diagnoses()" (diagnosesChange)="onDiagnosesChange($event)" />
+        </div>
       }
 
       @if (activeTab === 'familiares') {
-        <app-professional-family-tab
-          [personId]="person.id"
-          [representatives]="representatives"
-          [loading]="loadingRepresentatives"
-          (refresh)="onRefreshFamily()">
-        </app-professional-family-tab>
+        <div role="tabpanel" id="panel-familiares" aria-labelledby="tab-familiares">
+          <app-professional-family-tab
+            [personId]="person.id"
+            [representatives]="representatives"
+            [loading]="loadingRepresentatives"
+            (refresh)="onRefreshFamily()">
+          </app-professional-family-tab>
+        </div>
       }
 
     </c-card-body>

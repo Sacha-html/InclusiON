@@ -1,0 +1,150 @@
+@if (isLoading()) {
+  <div class="text-center py-4"><c-spinner></c-spinner></div>
+} @else if (report()) {
+  <c-card>
+    <c-card-header>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 cCardTitle class="mb-0">{{ report()!.title }}</h5>
+        <div class="d-flex align-items-center gap-2">
+          <c-badge [color]="getStatusColor(report()!.status)">
+            {{ getStatusLabel(report()!.status) }}
+          </c-badge>
+          @if (report()!.status === ReportStatus.Submitted) {
+            <button cButton color="success" size="sm" (click)="showApproveModal = true">
+              <svg cIcon name="cilCheckCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+              Aprobar
+            </button>
+            <button cButton color="danger" size="sm" (click)="showRejectModal = true">
+              <svg cIcon name="cilXCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+              Rechazar
+            </button>
+          }
+        </div>
+      </div>
+    </c-card-header>
+    <c-card-body>
+
+      @if (report()!.status === ReportStatus.Rejected && report()!.adminComment) {
+        <c-alert color="danger" class="mb-4">
+          <strong>Motivo de rechazo:</strong> {{ report()!.adminComment }}
+        </c-alert>
+      }
+
+      @if (report()!.status === ReportStatus.Approved) {
+        <c-alert color="success" class="mb-4">
+          Reporte aprobado.
+          @if (report()!.approvedAt) { Fecha: {{ report()!.approvedAt | date:'dd/MM/yyyy' }}. }
+        </c-alert>
+      }
+
+      <c-row class="mb-3">
+        <c-col xs="12" md="6">
+          <label class="text-muted">Fecha del reporte</label>
+          <p>{{ report()!.reportDate | date:'dd/MM/yyyy' }}</p>
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="text-muted">Tipo</label>
+          <p>{{ report()!.reportTypeName }}</p>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col xs="12" md="6">
+          <label class="text-muted">Persona</label>
+          <p>{{ report()!.personName }}</p>
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="text-muted">Profesional</label>
+          <p>{{ report()!.professionalName }}</p>
+        </c-col>
+      </c-row>
+
+      @if (report()!.periodStartDate || report()!.periodEndDate) {
+        <c-row class="mb-3">
+          <c-col xs="12" md="6">
+            <label class="text-muted">Período desde</label>
+            <p>{{ report()!.periodStartDate | date:'dd/MM/yyyy' }}</p>
+          </c-col>
+          <c-col xs="12" md="6">
+            <label class="text-muted">Período hasta</label>
+            <p>{{ report()!.periodEndDate | date:'dd/MM/yyyy' }}</p>
+          </c-col>
+        </c-row>
+      }
+
+      <hr />
+
+      <c-row class="mb-3">
+        <c-col xs="12">
+          <label class="text-muted">Contenido</label>
+          <p class="mb-0">{{ report()!.content }}</p>
+        </c-col>
+      </c-row>
+
+      @if (report()!.achievedGoals) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Objetivos alcanzados</label>
+            <p class="mb-0">{{ report()!.achievedGoals }}</p>
+          </c-col>
+        </c-row>
+      }
+      @if (report()!.areasToReinforce) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Áreas a reforzar</label>
+            <p class="mb-0">{{ report()!.areasToReinforce }}</p>
+          </c-col>
+        </c-row>
+      }
+      @if (report()!.futureRecommendations) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Recomendaciones</label>
+            <p class="mb-0">{{ report()!.futureRecommendations }}</p>
+          </c-col>
+        </c-row>
+      }
+      @if (report()!.nextObjectives) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Próximos objetivos</label>
+            <p class="mb-0">{{ report()!.nextObjectives }}</p>
+          </c-col>
+        </c-row>
+      }
+
+      <hr />
+      <button cButton color="secondary" (click)="onBack()">Volver a la lista</button>
+    </c-card-body>
+  </c-card>
+
+  <app-confirm-modal
+    [visible]="showApproveModal"
+    title="Aprobar reporte"
+    messagePrefix="¿Confirmás la aprobación del reporte &quot;"
+    [itemName]="report()!.title"
+    messageSuffix="&quot;? El familiar podrá consultarlo a partir de ahora."
+    confirmLabel="Aprobar"
+    confirmColor="success"
+    [loading]="isActioning"
+    (confirm)="confirmApprove()"
+    (cancel)="cancelAction()">
+  </app-confirm-modal>
+
+  <app-confirm-modal
+    [visible]="showRejectModal"
+    title="Rechazar reporte"
+    messagePrefix="Estás rechazando el reporte &quot;"
+    [itemName]="report()!.title"
+    messageSuffix="&quot;. Indicá el motivo para el profesional."
+    confirmLabel="Rechazar"
+    confirmColor="danger"
+    [showObservation]="true"
+    observationLabel="Motivo del rechazo *"
+    observationPlaceholder="Indicá el motivo del rechazo..."
+    [loading]="isActioning"
+    (confirm)="confirmReject($event)"
+    (cancel)="cancelAction()">
+  </app-confirm-modal>
+}

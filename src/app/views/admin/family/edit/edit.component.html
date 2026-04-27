@@ -3,7 +3,7 @@
     <c-card-header><strong>Editar Familiar</strong></c-card-header>
     <c-card-body>
       @if (serverError) {
-        <div class="alert alert-danger">{{ serverError }}</div>
+        <div class="alert alert-danger" role="alert">{{ serverError }}</div>
       }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -55,38 +55,124 @@
             <label cLabel for="phone">Telefono</label>
             <input cFormControl id="phone" formControlName="phone" />
           </c-col>
-          <c-col sm="6">
-            <label cLabel for="relationship">Parentesco</label>
-            <select cSelect id="relationship" formControlName="relationship">
-              <option value="">-- Seleccionar --</option>
-              @for (rel of relationships; track rel) {
-                <option [value]="rel">{{ rel }}</option>
-              }
-            </select>
-          </c-col>
         </c-row>
-
-        @if (family.linkedPersons && family.linkedPersons.length > 0) {
-          <c-row class="mb-3">
-            <c-col sm="12">
-              <label cLabel>Persona(s) a cargo</label>
-              <div class="d-flex flex-wrap gap-2 mt-1">
-                @for (person of family.linkedPersons; track person.personId) {
-                  <span class="badge bg-info text-dark">
-                    {{ person.fullName }}
-                    @if (person.disabilityType) { — {{ person.disabilityType }} }
-                  </span>
-                }
-              </div>
-            </c-col>
-          </c-row>
-        }
 
         <div class="mt-3 d-flex gap-2">
           <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Guardar cambios">Guardar</button>
-          <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edición">Cancelar</button>
+          <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edicion">Cancelar</button>
         </div>
       </form>
     </c-card-body>
   </c-card>
+
+  <!-- Personas vinculadas -->
+  <c-card class="mt-3">
+    <c-card-header><strong>Personas vinculadas</strong></c-card-header>
+    <c-card-body>
+      @if (family.linkedPersons && family.linkedPersons.length > 0) {
+        @for (person of family.linkedPersons; track person.personId) {
+          <c-row class="mb-2 align-items-center linked-person-row">
+            <c-col sm="4">
+              <strong>{{ person.fullName }}</strong>
+              @if (person.isPrimary) {
+                <c-badge color="primary" class="ms-2">Principal</c-badge>
+              }
+            </c-col>
+            <c-col sm="3" class="text-body-secondary">
+              {{ person.relationship ?? 'Sin parentesco' }}
+            </c-col>
+            <c-col sm="3" class="text-body-secondary">
+              @if (person.disabilityType) { {{ person.disabilityType }} }
+            </c-col>
+            <c-col sm="2" class="text-end">
+              <button cButton color="danger" variant="outline" size="sm"
+                      (click)="openUnlinkModal(person)"
+                      [attr.aria-label]="'Desvincular ' + person.fullName">
+                Desvincular
+              </button>
+            </c-col>
+          </c-row>
+        }
+      } @else {
+        <p class="text-body-secondary mb-0">No hay personas vinculadas.</p>
+      }
+    </c-card-body>
+  </c-card>
+
+  <!-- Vincular nueva persona -->
+  <c-card class="mt-3">
+    <c-card-header><strong>Vincular persona</strong></c-card-header>
+    <c-card-body>
+      @if (linkError) {
+        <div class="alert alert-danger mb-3" role="alert">{{ linkError }}</div>
+      }
+
+      <c-row class="align-items-end">
+        <c-col sm="4">
+          <label cLabel id="link-person-label">Persona</label>
+          <ng-select
+            inputId="link-person"
+            [items]="availablePersons"
+            bindLabel="fullName"
+            [(ngModel)]="selectedPersonForLink"
+            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre o documento...'"
+            [loading]="isLoadingPersons()"
+            loadingText="Cargando..."
+            notFoundText="Sin resultados"
+            [searchFn]="searchPersonFn"
+            aria-labelledby="link-person-label"
+            aria-required="true"
+          >
+            <ng-template ng-option-tmp let-item="item">
+              {{ item.fullName }}
+              @if (item.disabilityTypeName) {
+                <span class="text-body-secondary"> — {{ item.disabilityTypeName }}</span>
+              }
+            </ng-template>
+          </ng-select>
+        </c-col>
+
+        <c-col sm="3">
+          <label cLabel for="linkRelationship">Parentesco</label>
+          <select cSelect id="linkRelationship" [(ngModel)]="linkRelationship" aria-required="true">
+            <option value="">-- Seleccionar --</option>
+            @for (rel of relationships; track rel) {
+              <option [value]="rel">{{ rel }}</option>
+            }
+          </select>
+        </c-col>
+
+        <c-col sm="3" class="d-flex align-items-center pt-4">
+          <input type="checkbox" id="linkIsPrimary" [(ngModel)]="linkIsPrimary" class="form-check-input me-2" />
+          <label for="linkIsPrimary" class="form-check-label">Familiar principal</label>
+        </c-col>
+
+        <c-col sm="2">
+          <button cButton color="primary" (click)="linkPerson()"
+                  [disabled]="!selectedPersonForLink || !linkRelationship || isLinking"
+                  aria-label="Vincular persona seleccionada">
+            @if (isLinking) { <c-spinner size="sm"></c-spinner> }
+            Vincular
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
 }
+
+<!-- Modal de confirmacion para desvincular -->
+<app-confirm-modal
+  [visible]="showUnlinkModal"
+  title="Desvincular persona"
+  messagePrefix="¿Esta seguro de que desea desvincular a "
+  [itemName]="unlinkingPerson?.fullName ?? ''"
+  messageSuffix="?"
+  confirmLabel="Desvincular"
+  confirmColor="danger"
+  [showObservation]="true"
+  observationLabel="Motivo de desvinculacion"
+  observationPlaceholder="Ingrese el motivo..."
+  [loading]="isUnlinking"
+  (confirm)="confirmUnlink($event)"
+  (cancel)="showUnlinkModal = false">
+</app-confirm-modal>

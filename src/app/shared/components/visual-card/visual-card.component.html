@@ -1,0 +1,45 @@
+@if (interactive) {
+  <button
+    type="button"
+    class="visual-card interactive"
+    [style.--card-accent]="accentColor"
+    [attr.aria-label]="ariaLabel || title"
+    (click)="handleClick()">
+    <ng-container *ngTemplateOutlet="cardContent" />
+  </button>
+} @else {
+  <article
+    class="visual-card"
+    [style.--card-accent]="accentColor"
+    [attr.aria-label]="ariaLabel || title">
+    <ng-container *ngTemplateOutlet="cardContent" />
+  </article>
+}
+
+<ng-template #cardContent>
+  <div class="card-visual">
+    @if (image) {
+      <img [src]="image" alt="" class="card-image" />
+    } @else if (icon) {
+      <div class="card-icon" [style.background-color]="accentColor">
+        <svg cIcon [name]="icon" size="xxl" aria-hidden="true" focusable="false"></svg>
+      </div>
+    }
+  </div>
+
+  <div class="card-content">
+    <h3 class="card-title">{{ title }}</h3>
+    @if (subtitle) {
+      <p class="card-subtitle">{{ subtitle }}</p>
+    }
+  </div>
+
+  @if (badge) {
+    <span
+      class="card-badge"
+      [style.background-color]="badgeColor"
+      [attr.aria-label]="'Estado: ' + badge">
+      <span aria-hidden="true">{{ badge }}</span>
+    </span>
+  }
+</ng-template>

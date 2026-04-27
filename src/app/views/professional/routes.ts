@@ -4,16 +4,16 @@ export const professionalRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./dashboard/detail/detail.component').then(
+        (m) => m.DetailComponent
       ),
     data: { title: 'Dashboard Profesional' }
   },
   {
     path: 'persons',
     loadComponent: () =>
-      import('./classroom/classroom.component').then(
-        (m) => m.ClassroomComponent
+      import('./classroom/list/list.component').then(
+        (m) => m.ListComponent
       ),
     data: { title: 'Mi Aula' }
   },
@@ -28,56 +28,72 @@ export const professionalRoutes: Routes = [
   {
     path: 'activities',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./dashboard/detail/detail.component').then(
+        (m) => m.DetailComponent
       ),
     data: { title: 'Actividades' }
   },
   {
     path: 'goals',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./dashboard/detail/detail.component').then(
+        (m) => m.DetailComponent
       ),
     data: { title: 'Objetivos' }
   },
   {
     path: 'evaluations',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./dashboard/detail/detail.component').then(
+        (m) => m.DetailComponent
       ),
     data: { title: 'Evaluaciones' }
   },
   {
     path: 'reports',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./reports/list/list.component').then(
+        (m) => m.ListComponent
       ),
     data: { title: 'Reportes' }
   },
   {
+    path: 'reports/new',
+    loadComponent: () =>
+      import('./reports/new/new.component').then(
+        (m) => m.NewComponent
+      ),
+    data: { title: 'Crear Reporte' }
+  },
+  {
+    path: 'reports/:id',
+    loadComponent: () =>
+      import('./reports/detail/detail.component').then(
+        (m) => m.DetailComponent
+      ),
+    data: { title: 'Detalle de Reporte' }
+  },
+  {
     path: 'messages',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./dashboard/detail/detail.component').then(
+        (m) => m.DetailComponent
       ),
     data: { title: 'Mensajes' }
   },
   {
     path: 'calendar',
     loadComponent: () =>
-      import('./dashboard/pro-dashboard.component').then(
-        (m) => m.ProDashboardComponent
+      import('./dashboard/detail/detail.component').then(
+        (m) => m.DetailComponent
       ),
     data: { title: 'Calendario' }
   },
   {
     path: 'invitations',
     loadComponent: () =>
-      import('./invitations/invitation-list.component').then(
-        (m) => m.InvitationListComponent
+      import('./invitations/list/list.component').then(
+        (m) => m.ListComponent
       ),
     data: { title: 'Invitaciones' }
   }
