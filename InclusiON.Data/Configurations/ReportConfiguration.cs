@@ -1,3 +1,4 @@
+using InclusiON.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using InclusiON.Domain.Models;
@@ -20,26 +21,36 @@ namespace InclusiON.Data.Configurations
                 .HasMaxLength(200);
 
             builder.Property(r => r.Content)
-                .IsRequired()
-                .HasColumnType("NVARCHAR(MAX)");
+                .IsRequired();
 
             builder.Property(r => r.ReportDate)
                 .IsRequired();
 
-            builder.Property(r => r.AchievedGoals)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(r => r.AchievedGoals);
 
-            builder.Property(r => r.AreasToReinforce)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(r => r.AreasToReinforce);
 
-            builder.Property(r => r.FutureRecommendations)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(r => r.FutureRecommendations);
 
-            builder.Property(r => r.NextObjectives)
-                .HasColumnType("NVARCHAR(MAX)");
+            builder.Property(r => r.NextObjectives);
 
             builder.Property(r => r.IsActive)
                 .HasDefaultValue(true);
+
+            builder.Property(r => r.Status)
+                .IsRequired()
+                .HasDefaultValue(ReportStatus.Draft)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            builder.Property(r => r.AdminComment)
+                .HasMaxLength(1000);
+
+            builder.Property(r => r.ApprovedAt);
+
+            builder.Property(r => r.ApprovedBy);
+
+            builder.HasIndex(r => r.Status);
 
             builder.Property(r => r.CreatedAt)
                 .IsRequired();

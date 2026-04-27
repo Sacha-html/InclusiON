@@ -28,6 +28,11 @@ namespace InclusiON.DTOs.Requests.Persons
         public bool? IsActive { get; set; }
 
         /// <summary>
+        /// Filtro por nombre del representante familiar vinculado.
+        /// </summary>
+        public string? RepresentativeSearch { get; set; }
+
+        /// <summary>
         /// Filtro por institucion educativa.
         /// </summary>
         public int? InstitutionId { get; set; }

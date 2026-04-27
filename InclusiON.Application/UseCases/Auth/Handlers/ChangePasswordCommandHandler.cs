@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Auth.Commands;
@@ -26,7 +26,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Validar que las contrasenas nuevas coincidan
+            // Validar que las contraseñs nuevas coincidan
             if (command.NewPassword != command.ConfirmNewPassword)
             {
                 return ApiResponse<ChangePasswordResponse>.ErrorResult(
@@ -43,7 +43,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.UserNotFound);
             }
 
-            // Cambiar contrasena via Identity
+            // Cambiar contraseña via Identity
             var (succeeded, errors) = await _identityService.ChangePasswordAsync(
                 user,
                 command.CurrentPassword,
@@ -53,7 +53,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             {
                 var errorList = errors.ToList();
 
-                // Si el error es por contrasena actual incorrecta
+                // Si el error es por contraseña actual incorrecta
                 if (errorList.Any(e => e.Contains("Incorrect password", StringComparison.OrdinalIgnoreCase)))
                 {
                     return ApiResponse<ChangePasswordResponse>.ErrorResult(
@@ -70,7 +70,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             user.MustChangePassword = false;
             await _identityService.UpdateUserAsync(user);
 
-            _logger.LogInformation("Contrasena cambiada exitosamente para usuario: {UserId}", command.UserId);
+            _logger.LogInformation("contraseña cambiada exitosamente para usuario: {UserId}", command.UserId);
 
             var response = new ChangePasswordResponse { Success = true };
             return ApiResponse<ChangePasswordResponse>.SuccessResult(response, SuccessMessages.PasswordChanged);

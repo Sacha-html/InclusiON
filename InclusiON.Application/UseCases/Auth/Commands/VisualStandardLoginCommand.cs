@@ -1,8 +1,8 @@
-namespace InclusiON.Application.UseCases.Auth.Commands
+﻿namespace InclusiON.Application.UseCases.Auth.Commands
 {
     /// <summary>
     /// Comando para login visual estandar.
-    /// La persona con discapacidad se identifica por nombre y luego ingresa su contrasena.
+    /// La persona con discapacidad se identifica por nombre y luego ingresa su contraseña.
     /// </summary>
     public record VisualStandardLoginCommand(
         Guid UserId,

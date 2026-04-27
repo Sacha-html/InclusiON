@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -20,19 +20,22 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateProfessionalCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public CreateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IIdentityService identityService,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
-            ILogger<CreateProfessionalCommandHandler> logger)
+            ILogger<CreateProfessionalCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
             _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(CreateProfessionalCommand command, CancellationToken cancellationToken)
@@ -60,7 +63,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         ErrorMessages.EmailAlreadyRegistered);
                 }
 
-                // Generar contrasena temporal
+                // Generar contraseña temporal
                 var password = PasswordGenerator.GenerateTemporary();
 
                 // Crear usuario
@@ -71,7 +74,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     Name = command.FirstName,
                     Surname = command.LastName,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
                     LockoutEnabled = true,
                     MustChangePassword = true,
@@ -112,7 +115,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                             {
                                 ProfessionalId = professional.Id,
                                 InstitutionId = instId,
-                                AssignedAt = DateTime.UtcNow,
+                                AssignedAt = _dateTime.UtcNow,
                                 IsActive = true
                             });
                         }
@@ -124,6 +127,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
                 _logger.LogInformation("Profesional creado: {ProfessionalId}, Usuario: {UserId}", professional.Id, user.Id);
 
+                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                 // Enviar email con contraseña temporal
                 try
                 {
@@ -135,7 +140,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         {
                             { "UserName", command.FirstName },
                             { "TemporaryPassword", password },
-                            { "Year", DateTime.UtcNow.Year.ToString() }
+                            { "Year", _dateTime.UtcNow.Year.ToString() }
                         },
                         cancellationToken);
                 }

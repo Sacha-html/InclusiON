@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -19,17 +19,20 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IHttpContextService _httpContextService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReactivateProfessionalCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public ReactivateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IHttpContextService httpContextService,
             IUnitOfWork unitOfWork,
-            ILogger<ReactivateProfessionalCommandHandler> logger)
+            ILogger<ReactivateProfessionalCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _httpContextService = httpContextService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(ReactivateProfessionalCommand command, CancellationToken cancellationToken)
@@ -72,7 +75,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 NewStatus = ProfessionalStatusEnum.Approved,
                 Observation = command.Observation,
                 ChangedByUserId = adminUserId,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = _dateTime.UtcNow,
                 CreatedBy = adminUserId.Value
             }, cancellationToken);
 

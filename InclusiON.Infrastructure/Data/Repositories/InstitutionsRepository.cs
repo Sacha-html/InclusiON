@@ -17,6 +17,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<List<EducationalInstitution>> GetAllAsync(CancellationToken ct = default)
         {
             return await _context.EducationalInstitutions
+                .AsNoTracking()
                 .OrderBy(i => i.Name)
                 .ToListAsync(ct);
         }
@@ -24,6 +25,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<EducationalInstitution?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.EducationalInstitutions
+                .AsNoTracking()
                 .FirstOrDefaultAsync(i => i.Id == id, ct);
         }
 
@@ -35,8 +37,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null, CancellationToken ct = default)
         {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+
             var query = _context.EducationalInstitutions
-                .Where(i => i.Name.ToLower() == name.ToLower());
+                .Where(i => EF.Functions.ILike(i.Name, name));
 
             if (excludeId.HasValue)
             {

@@ -1,3 +1,4 @@
+using InclusiON.Domain.Attributes;
 using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
@@ -31,36 +32,43 @@ namespace InclusiON.Domain.Models
         /// <summary>
         /// Diagnostico primario o principal.
         /// </summary>
+        [Encrypted]
         public string PrimaryDiagnosis { get; set; } = string.Empty;
 
         /// <summary>
         /// Observaciones iniciales sobre la persona.
         /// </summary>
+        [Encrypted]
         public string? InitialObservations { get; set; }
 
         /// <summary>
         /// Capacidades y fortalezas identificadas.
         /// </summary>
+        [Encrypted]
         public string? IdentifiedCapabilities { get; set; }
 
         /// <summary>
         /// Desafios y areas de mejora identificadas.
         /// </summary>
+        [Encrypted]
         public string? IdentifiedChallenges { get; set; }
 
         /// <summary>
         /// Apoyos requeridos para el desarrollo.
         /// </summary>
+        [Encrypted]
         public string? RequiredSupports { get; set; }
 
         /// <summary>
         /// Objetivos pedagogicos propuestos.
         /// </summary>
+        [Encrypted]
         public string? PedagogicalObjectives { get; set; }
 
         /// <summary>
         /// Estrategias de intervencion recomendadas.
         /// </summary>
+        [Encrypted]
         public string? RecommendedStrategies { get; set; }
 
         /// <summary>

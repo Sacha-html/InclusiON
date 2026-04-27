@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
+using InclusiON.Api.Filters;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
-using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Diagnoses.Commands;
 using InclusiON.Application.UseCases.Diagnoses.Queries;
 using InclusiON.DTOs.Requests.Diagnoses;
@@ -18,19 +19,16 @@ namespace InclusiON.Api.Controllers
     public class DiagnosesController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
-        private readonly IProfessionalsRepository _professionalsRepository;
 
-        public DiagnosesController(
-            IHttpContextService httpContextService,
-            IProfessionalsRepository professionalsRepository)
+        public DiagnosesController(IHttpContextService httpContextService)
         {
             _httpContextService = httpContextService;
-            _professionalsRepository = professionalsRepository;
         }
 
         [HttpGet("persons/{personId:guid}/diagnoses")]
         [Authorize(Policy = "diagnoses:read")]
         [ProducesResponseType(typeof(ApiResponse<List<DiagnosisListItemResponse>>), StatusCodes.Status200OK)]
+        [PersonAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<List<DiagnosisListItemResponse>>>> GetDiagnoses(
             Guid personId,
             [FromServices] IQueryHandler<GetDiagnosesQuery, ApiResponse<List<DiagnosisListItemResponse>>> handler,
@@ -45,6 +43,7 @@ namespace InclusiON.Api.Controllers
         [Authorize(Policy = "diagnoses:read")]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
+        [DiagnosisAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> GetDiagnosisById(
             int id,
             [FromServices] IQueryHandler<GetDiagnosisByIdQuery, ApiResponse<DiagnosisResponse>> handler,
@@ -60,21 +59,20 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
+        [PersonAccess(AccessMode.Write)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> CreateDiagnosis(
             Guid personId,
             [FromBody] CreateDiagnosisRequest request,
             [FromServices] ICommandHandler<CreateDiagnosisCommand, ApiResponse<DiagnosisResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var professional = await _professionalsRepository.GetByUserIdAsync(currentUserId, cancellationToken);
-
-            if (professional is null)
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
                 return BadRequest(ApiResponse<DiagnosisResponse>.ErrorResult("Solo los profesionales pueden crear diagnósticos."));
 
             var command = new CreateDiagnosisCommand(
                 personId,
-                professional.Id,
+                professionalId.Value,
                 request.DiagnosisDate,
                 request.PrimaryDiagnosis,
                 request.InitialObservations,
@@ -93,21 +91,20 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
+        [DiagnosisAccess(AccessMode.Write)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> UpdateDiagnosis(
             int id,
             [FromBody] UpdateDiagnosisRequest request,
             [FromServices] ICommandHandler<UpdateDiagnosisCommand, ApiResponse<DiagnosisResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var professional = await _professionalsRepository.GetByUserIdAsync(currentUserId, cancellationToken);
-
-            if (professional is null)
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
                 return BadRequest(ApiResponse<DiagnosisResponse>.ErrorResult("Solo los profesionales pueden editar diagnósticos."));
 
             var command = new UpdateDiagnosisCommand(
                 id,
-                professional.Id,
+                professionalId.Value,
                 request.DiagnosisDate,
                 request.PrimaryDiagnosis,
                 request.InitialObservations,

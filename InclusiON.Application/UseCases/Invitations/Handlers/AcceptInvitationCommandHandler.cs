@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -17,17 +17,20 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AcceptInvitationCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public AcceptInvitationCommandHandler(
             IInvitationsRepository invitationsRepository,
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
-            ILogger<AcceptInvitationCommandHandler> logger)
+            ILogger<AcceptInvitationCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _invitationsRepository = invitationsRepository;
             _identityService = identityService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<AcceptInvitationResponse>> HandleAsync(AcceptInvitationCommand command, CancellationToken cancellationToken)
@@ -51,14 +54,14 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         ErrorMessages.InvitationAlreadyUsed);
                 }
 
-                if (invitation.ExpiresAt < DateTime.UtcNow)
+                if (invitation.ExpiresAt < _dateTime.UtcNow)
                 {
                     return ApiResponse<AcceptInvitationResponse>.ErrorResult(
                         ErrorCode.InvitationExpired,
                         ErrorMessages.InvitationExpired);
                 }
 
-                // Validar contrasenas
+                // Validar contraseñs
                 if (command.Password != command.ConfirmPassword)
                 {
                     return ApiResponse<AcceptInvitationResponse>.ErrorResult(
@@ -83,7 +86,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     Name = invitation.FirstName ?? string.Empty,
                     Surname = invitation.LastName ?? string.Empty,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
                     LockoutEnabled = true,
                     MustChangePassword = false
@@ -124,14 +127,14 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                             HasInformedConsent = false,
                             CanSuperviseLogin = true,
                             IsActive = true,
-                            CreatedAt = DateTime.UtcNow
+                            CreatedAt = _dateTime.UtcNow
                         };
                         await _invitationsRepository.CreatePersonRepresentativeAsync(personRep, ct);
                     }
 
                     // Marcar invitacion como usada
                     invitation.IsUsed = true;
-                    invitation.UsedAt = DateTime.UtcNow;
+                    invitation.UsedAt = _dateTime.UtcNow;
                     invitation.UsedByUserId = user.Id;
                     await _invitationsRepository.UpdateAsync(invitation, ct);
 

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Mappers;
@@ -9,6 +9,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Constants;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
@@ -18,21 +19,27 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IPersonsRepository _repository;
         private readonly IIdentityService _identityService;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IPinHasher _pinHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreatePersonCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public CreatePersonCommandHandler(
             IPersonsRepository repository,
             IIdentityService identityService,
             IPasswordHasher passwordHasher,
+            IPinHasher pinHasher,
             IUnitOfWork unitOfWork,
-            ILogger<CreatePersonCommandHandler> logger)
+            ILogger<CreatePersonCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
             _passwordHasher = passwordHasher;
+            _pinHasher = pinHasher;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<PersonResponse>> HandleAsync(CreatePersonCommand command, CancellationToken cancellationToken)
@@ -64,7 +71,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     Name = command.FirstName,
                     Surname = command.LastName,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
                     LockoutEnabled = true
                 };
@@ -94,17 +101,18 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     RequiresHighContrast = command.RequiresHighContrast,
                     VisualNoiseSensitivity = command.VisualNoiseSensitivity,
                     SoundSensitivity = command.SoundSensitivity,
+                    ColorBlindnessType = command.ColorBlindnessType,
                     // Configuracion de acceso
                     AutonomyLevelId = command.AutonomyLevelId,
                     LoginMethodId = command.LoginMethodId,
                     SupervisorUserId = command.SupervisorUserId,
-                    AvatarColor = command.AvatarColor ?? GenerateRandomColor()
+                    AvatarColor = command.AvatarColor ?? AvatarColors.Random()
                 };
 
                 // Hash del PIN si se proporciona
                 if (!string.IsNullOrWhiteSpace(command.Pin))
                 {
-                    person.PinCodeHash = _passwordHasher.HashPassword(command.Pin);
+                    person.PinCodeHash = _pinHasher.Hash(command.Pin);
                 }
 
                 // Crear usuario, asignar rol y persona en transaccion
@@ -137,22 +145,12 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             }
         }
 
-        private static string GenerateUsername(string firstName, string lastName)
+        private string GenerateUsername(string firstName, string lastName)
         {
             var baseUsername = $"{firstName.ToLower().Replace(" ", "")}.{lastName.ToLower().Replace(" ", "")}";
-            var timestamp = DateTime.UtcNow.Ticks % 10000;
+            var timestamp = _dateTime.UtcNow.Ticks % 10000;
             return $"{baseUsername}{timestamp}";
         }
 
-        private static string GenerateRandomColor()
-        {
-            var colors = new[]
-            {
-                "#2196F3", "#4CAF50", "#FF9800", "#9C27B0",
-                "#F44336", "#00BCD4", "#795548", "#607D8B"
-            };
-            var random = new Random();
-            return colors[random.Next(colors.Length)];
-        }
     }
 }

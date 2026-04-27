@@ -11,6 +11,5 @@ namespace InclusiON.DTOs.Responses
         public string LastName { get; set; } = string.Empty;
         public int InstitutionId { get; set; }
         public string InstitutionName { get; set; } = string.Empty;
-        public string TemporaryPassword { get; set; } = string.Empty;
     }
 }

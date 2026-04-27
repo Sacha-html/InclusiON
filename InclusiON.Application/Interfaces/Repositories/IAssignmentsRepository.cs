@@ -9,6 +9,7 @@ namespace InclusiON.Application.Interfaces.Repositories
     {
         // Professional-Person
         Task<List<ProfessionalPerson>> GetPersonsByProfessionalIdAsync(Guid professionalId, CancellationToken ct = default);
+        Task<List<ProfessionalPerson>> GetProfessionalsByPersonIdAsync(Guid personId, CancellationToken ct = default);
         Task<ProfessionalPerson?> GetAssignmentAsync(Guid professionalId, Guid personId, CancellationToken ct = default);
         Task<ProfessionalPerson> CreateAssignmentAsync(ProfessionalPerson assignment, CancellationToken ct = default);
 

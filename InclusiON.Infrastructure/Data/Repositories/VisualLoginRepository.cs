@@ -25,20 +25,22 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string identifier,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(identifier)) return null;
+
             try
             {
-                // Usar patrón LIKE para búsqueda eficiente (case-insensitive en SQL Server por defecto)
+                // ILike para búsqueda case-insensitive en PostgreSQL.
                 var searchPattern = $"%{identifier}%";
                 return await _context.PersonsWithDisability
                     .Include(p => p.User)
                     .Include(p => p.LoginMethod)
                     .Include(p => p.SupervisorUser)
-                    .Where(p => p.IsActive &&
-                        (EF.Functions.Like(p.FirstName, searchPattern) ||
-                         EF.Functions.Like(p.LastName, searchPattern) ||
-                         EF.Functions.Like(p.FirstName + " " + p.LastName, searchPattern) ||
-                         EF.Functions.Like(p.User.UserName!, identifier) ||
-                         EF.Functions.Like(p.User.Email!, identifier)))
+                    .Where(p => p.IsActive && p.User.IsActive &&
+                        (EF.Functions.ILike(p.FirstName, searchPattern) ||
+                         EF.Functions.ILike(p.LastName, searchPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, searchPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, searchPattern) ||
+                         EF.Functions.ILike(p.User.Email!, searchPattern)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -49,23 +51,58 @@ namespace InclusiON.Infrastructure.Data.Repositories
             }
         }
 
+        public async Task<IReadOnlyList<PersonWithDisability>> FindPersonsByIdentifierAsync(
+            string identifier,
+            int limit,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(identifier)) return Array.Empty<PersonWithDisability>();
+
+            try
+            {
+                var searchPattern = $"%{identifier}%";
+                return await _context.PersonsWithDisability
+                    .Include(p => p.User)
+                    .Include(p => p.LoginMethod)
+                    .Include(p => p.SupervisorUser)
+                    .Where(p => p.IsActive && p.User.IsActive &&
+                        (EF.Functions.ILike(p.FirstName, searchPattern) ||
+                         EF.Functions.ILike(p.LastName, searchPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, searchPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, searchPattern) ||
+                         EF.Functions.ILike(p.User.Email!, searchPattern)))
+                    .OrderBy(p => p.FirstName)
+                    .ThenBy(p => p.LastName)
+                    .Take(limit)
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error finding persons by identifier: {Identifier}", identifier);
+                throw new DataAccessException($"Error searching for persons with identifier '{identifier}'", nameof(PersonWithDisability), ex);
+            }
+        }
+
         public async Task<Professional?> FindProfessionalByIdentifierAsync(
             string identifier,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(identifier)) return null;
+
             try
             {
-                // Usar patrón LIKE para búsqueda eficiente (case-insensitive en SQL Server por defecto)
+                // ILike para búsqueda case-insensitive en PostgreSQL.
                 var searchPattern = $"%{identifier}%";
                 return await _context.Professionals
                     .Include(p => p.User)
                     .Where(p => p.IsActive &&
-                        (EF.Functions.Like(p.FirstName, searchPattern) ||
-                         EF.Functions.Like(p.LastName, searchPattern) ||
-                         EF.Functions.Like(p.FirstName + " " + p.LastName, searchPattern) ||
-                         EF.Functions.Like(p.User.UserName!, identifier) ||
-                         EF.Functions.Like(p.User.Email!, identifier) ||
-                         EF.Functions.Like(p.LicenseNumber!, identifier)))
+                        (EF.Functions.ILike(p.FirstName, searchPattern) ||
+                         EF.Functions.ILike(p.LastName, searchPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, searchPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, searchPattern) ||
+                         EF.Functions.ILike(p.User.Email!, searchPattern) ||
+                         EF.Functions.ILike(p.LicenseNumber!, searchPattern)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -80,18 +117,20 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string identifier,
             CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(identifier)) return null;
+
             try
             {
-                // Usar patrón LIKE para búsqueda eficiente (case-insensitive en SQL Server por defecto)
+                // ILike para búsqueda case-insensitive en PostgreSQL.
                 var searchPattern = $"%{identifier}%";
                 return await _context.FamilyRepresentatives
                     .Include(f => f.User)
                     .Where(f => f.IsActive &&
-                        (EF.Functions.Like(f.FirstName, searchPattern) ||
-                         EF.Functions.Like(f.LastName, searchPattern) ||
-                         EF.Functions.Like(f.FirstName + " " + f.LastName, searchPattern) ||
-                         EF.Functions.Like(f.User.UserName!, identifier) ||
-                         EF.Functions.Like(f.User.Email!, identifier)))
+                        (EF.Functions.ILike(f.FirstName, searchPattern) ||
+                         EF.Functions.ILike(f.LastName, searchPattern) ||
+                         EF.Functions.ILike(f.FirstName + " " + f.LastName, searchPattern) ||
+                         EF.Functions.ILike(f.User.UserName!, searchPattern) ||
+                         EF.Functions.ILike(f.User.Email!, searchPattern)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -324,6 +363,32 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 _logger.LogError(ex, "Error updating login method for user: {UserId}", userId);
                 throw new DataAccessException($"Error updating login method for user '{userId}'", nameof(PersonWithDisability), ex);
             }
+        }
+
+        public Task<bool> CanProfessionalSupervisedLoginAsync(
+            Guid professionalId,
+            Guid personId,
+            CancellationToken cancellationToken = default)
+        {
+            return _context.ProfessionalPersons
+                .AnyAsync(pp => pp.ProfessionalId == professionalId
+                             && pp.PersonId == personId
+                             && pp.IsActive
+                             && pp.CanSuperviseLogin,
+                    cancellationToken);
+        }
+
+        public Task<bool> CanFamilySupervisedLoginAsync(
+            Guid familyRepresentativeId,
+            Guid personId,
+            CancellationToken cancellationToken = default)
+        {
+            return _context.PersonRepresentatives
+                .AnyAsync(pr => pr.RepresentativeId == familyRepresentativeId
+                             && pr.PersonId == personId
+                             && pr.IsActive
+                             && pr.CanSuperviseLogin,
+                    cancellationToken);
         }
     }
 }

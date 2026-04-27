@@ -23,6 +23,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IHttpContextService _httpContextService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ValidateProfessionalCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public ValidateProfessionalCommandHandler(
             IProfessionalsRepository repository,
@@ -31,7 +32,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             IAdminInstitutionRepository adminInstitutionRepository,
             IHttpContextService httpContextService,
             IUnitOfWork unitOfWork,
-            ILogger<ValidateProfessionalCommandHandler> logger)
+            ILogger<ValidateProfessionalCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
@@ -40,6 +42,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             _httpContextService = httpContextService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(ValidateProfessionalCommand command, CancellationToken cancellationToken)
@@ -116,7 +119,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         }
 
                         professional.Status = ProfessionalStatusEnum.Approved;
-                        professional.ValidatedAt = DateTime.UtcNow;
+                        professional.ValidatedAt = _dateTime.UtcNow;
                         professional.ValidatedByUserId = adminUserId;
 
                         await _repository.UpdateAsync(professional, ct);
@@ -128,10 +131,11 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                             NewStatus = newStatus,
                             Observation = command.Observation,
                             ChangedByUserId = adminUserId,
-                            CreatedAt = DateTime.UtcNow,
+                            CreatedAt = _dateTime.UtcNow,
                             CreatedBy = adminUserId.Value
                         };
 
+                        await _repository.AddStatusHistoryAsync(history, ct);
                         await _unitOfWork.SaveChangesAsync(ct);
                     }, cancellationToken);
 
@@ -144,6 +148,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     var tempPassword = password;
                     if (!string.IsNullOrEmpty(email))
                     {
+                        // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                        // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                         _ = Task.Run(async () =>
                         {
                             try
@@ -158,7 +164,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                                         { "Email", email },
                                         { "TemporaryPassword", tempPassword },
                                         { "LoginUrl", "https://inclusion.app/login" },
-                                        { "Year", DateTime.UtcNow.Year.ToString() }
+                                        { "Year", _dateTime.UtcNow.Year.ToString() }
                                     });
                             }
                             catch (Exception ex)
@@ -170,8 +176,15 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 }
                 else
                 {
+                    if (string.IsNullOrWhiteSpace(command.Observation))
+                    {
+                        return ApiResponse<ProfessionalResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            "El motivo del rechazo es obligatorio");
+                    }
+
                     professional.Status = ProfessionalStatusEnum.Rejected;
-                    professional.ValidatedAt = DateTime.UtcNow;
+                    professional.ValidatedAt = _dateTime.UtcNow;
                     professional.ValidatedByUserId = adminUserId;
 
                     // Desactivar relaciones con instituciones
@@ -187,15 +200,18 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         NewStatus = newStatus,
                         Observation = command.Observation,
                         ChangedByUserId = adminUserId,
-                        CreatedAt = DateTime.UtcNow,
+                        CreatedAt = _dateTime.UtcNow,
                         CreatedBy = adminUserId.Value
                     };
 
                     await _repository.UpdateAsync(professional, cancellationToken);
+                    await _repository.AddStatusHistoryAsync(history, cancellationToken);
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                     _logger.LogInformation("Profesional rechazado: {ProfessionalId}", professional.Id);
 
+                    // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                    // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                     // Enviar email de rechazo sin bloquear la respuesta
                     var rejectEmail = professional.Email ?? $"{professional.FirstName.ToLower()}.{professional.LastName.ToLower()}@inclusion.app";
                     var rejectFirstName = professional.FirstName;
@@ -212,7 +228,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                                 {
                                     { "UserName", rejectFirstName },
                                     { "Observation", rejectObservation },
-                                    { "Year", DateTime.UtcNow.Year.ToString() }
+                                    { "Year", _dateTime.UtcNow.Year.ToString() }
                                 });
                         }
                         catch (Exception ex)

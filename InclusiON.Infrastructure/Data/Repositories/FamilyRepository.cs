@@ -24,6 +24,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(f => f.PersonRepresentatives)
                     .ThenInclude(pr => pr.Person)
                         .ThenInclude(p => p.DisabilityType)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
         }
 
@@ -31,6 +32,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.FamilyRepresentatives
                 .Include(f => f.User)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(f => f.UserId == userId, cancellationToken);
         }
 
@@ -71,16 +73,17 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(f => f.PersonRepresentatives.Where(pr => pr.IsActive))
                     .ThenInclude(pr => pr.Person)
                         .ThenInclude(p => p.DisabilityType)
+                .AsNoTracking()
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var searchLower = search.ToLower();
+                var pattern = $"%{search}%";
                 query = query.Where(f =>
-                    f.FirstName.ToLower().Contains(searchLower) ||
-                    f.LastName.ToLower().Contains(searchLower) ||
-                    (f.DocumentNumber != null && f.DocumentNumber.Contains(search)) ||
-                    (f.Phone != null && f.Phone.Contains(search)));
+                    EF.Functions.ILike(f.FirstName, pattern) ||
+                    EF.Functions.ILike(f.LastName, pattern) ||
+                    (f.DocumentNumber != null && EF.Functions.ILike(f.DocumentNumber, pattern)) ||
+                    (f.Phone != null && EF.Functions.ILike(f.Phone, pattern)));
             }
 
             if (isActive.HasValue)
@@ -107,12 +110,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (!string.IsNullOrWhiteSpace(linkedPersonSearch))
             {
-                var linkedSearchLower = linkedPersonSearch.ToLower();
+                var linkedPattern = $"%{linkedPersonSearch}%";
                 query = query.Where(f =>
                     f.PersonRepresentatives.Any(pr => pr.IsActive &&
-                        (pr.Person.FirstName.ToLower().Contains(linkedSearchLower) ||
-                         pr.Person.LastName.ToLower().Contains(linkedSearchLower) ||
-                         (pr.Person.DocumentNumber != null && pr.Person.DocumentNumber.Contains(linkedPersonSearch)))));
+                        (EF.Functions.ILike(pr.Person.FirstName, linkedPattern) ||
+                         EF.Functions.ILike(pr.Person.LastName, linkedPattern) ||
+                         (pr.Person.DocumentNumber != null && EF.Functions.ILike(pr.Person.DocumentNumber, linkedPattern)))));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<FamilyRepresentative, object>>>
@@ -137,6 +140,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(f => f.PersonRepresentatives)
                     .ThenInclude(pr => pr.Person)
                         .ThenInclude(p => p.DisabilityType)
+                .AsNoTracking()
                 .Where(f => f.User.IsActive && f.Status == Domain.Enums.FamilyStatusEnum.Active)
                 .AsQueryable();
 
@@ -144,9 +148,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 var searchLower = search.ToLower();
                 query = query.Where(f =>
-                    (f.FirstName + " " + f.LastName).ToLower().Contains(searchLower) ||
-                    f.FirstName.ToLower().Contains(searchLower) ||
-                    f.LastName.ToLower().Contains(searchLower));
+                    (f.FirstName + " " + f.LastName).Contains(searchLower) ||
+                    f.FirstName.Contains(searchLower) ||
+                    f.LastName.Contains(searchLower));
             }
 
             var families = await query.OrderBy(f => f.FirstName).ThenBy(f => f.LastName).ToListAsync(cancellationToken);
@@ -181,6 +185,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await _context.PersonRepresentatives
                 .Include(pr => pr.Representative)
                     .ThenInclude(r => r.User)
+                .AsNoTracking()
                 .Where(pr => pr.PersonId == personId)
                 .OrderByDescending(pr => pr.IsPrimary)
                 .ThenBy(pr => pr.CreatedAt)
@@ -192,6 +197,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await _context.PersonRepresentatives
                 .Include(pr => pr.Person)
                     .ThenInclude(p => p.DisabilityType)
+                .AsNoTracking()
                 .Where(pr => pr.RepresentativeId == familyId)
                 .ToListAsync(cancellationToken);
         }
@@ -227,6 +233,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<List<FamilyStatusHistory>> GetFamilyStatusHistoryAsync(Guid familyId, CancellationToken cancellationToken = default)
         {
             return await _context.FamilyStatusHistories
+                .AsNoTracking()
                 .Where(h => h.FamilyId == familyId)
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync(cancellationToken);
@@ -241,6 +248,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.PersonRepresentativeHistories
                 .Include(h => h.Representative)
+                .AsNoTracking()
                 .Where(h => h.PersonId == personId)
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync(cancellationToken);
@@ -250,6 +258,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.PersonRepresentativeHistories
                 .Include(h => h.Person)
+                .AsNoTracking()
                 .Where(h => h.RepresentativeId == familyId)
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync(cancellationToken);

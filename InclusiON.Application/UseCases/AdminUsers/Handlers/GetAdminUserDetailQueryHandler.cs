@@ -34,13 +34,9 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             if (user is null)
                 return ApiResponse<AdminUserDetailResponse>.NotFound("Usuario");
 
-            var rolesTask = _identityService.GetRolesAsync(user);
-            var linkedEntityTask = LoadLinkedEntityAsync(user.Id, cancellationToken);
-            
-            await Task.WhenAll(rolesTask, linkedEntityTask);
-            
-            var roles = await rolesTask;
-            var (entityType, linkedEntity) = await linkedEntityTask;
+            // DbContext no es thread-safe: consultas secuenciales.
+            var roles = await _identityService.GetRolesAsync(user);
+            var (entityType, linkedEntity) = await LoadLinkedEntityAsync(user.Id, cancellationToken);
             var primaryRole = roles.FirstOrDefault() ?? "Unknown";
 
             var response = new AdminUserDetailResponse
@@ -97,19 +93,15 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private async Task<(string? EntityType, LinkedEntityData?)> LoadLinkedEntityAsync(
             Guid userId, CancellationToken cancellationToken)
         {
-            var proTask = _professionalsRepository.GetByUserIdAsync(userId, cancellationToken);
-            var personTask = _personsRepository.GetByUserIdAsync(userId, cancellationToken);
-            var familyTask = _familyRepository.GetByUserIdAsync(userId, cancellationToken);
-
-            await Task.WhenAll(proTask, personTask, familyTask);
-
-            if (await proTask is { } pro)
+            // DbContext no es thread-safe: secuencial con short-circuit (la mayoria de los
+            // usuarios tiene un solo tipo de entidad vinculada).
+            if (await _professionalsRepository.GetByUserIdAsync(userId, cancellationToken) is { } pro)
                 return ("Professional", new LinkedEntityData(pro.Id, pro.FirstName, pro.LastName, pro.Specialty, pro.LicenseNumber, pro.DocumentNumber, pro.Phone, null));
 
-            if (await personTask is { } person)
+            if (await _personsRepository.GetByUserIdAsync(userId, cancellationToken) is { } person)
                 return ("PersonWithDisability", new LinkedEntityData(person.Id, person.FirstName, person.LastName, null, null, person.DocumentNumber, null, null));
 
-            if (await familyTask is { } family)
+            if (await _familyRepository.GetByUserIdAsync(userId, cancellationToken) is { } family)
                 return ("FamilyRepresentative", new LinkedEntityData(family.Id, family.FirstName, family.LastName, null, null, family.DocumentNumber, family.Phone, family.Relationship));
 
             return (null, null);
