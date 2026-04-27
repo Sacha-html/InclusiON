@@ -1,21 +1,26 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, CatalogsService, PersonsService, ToastService } from '@services';
-import { LoginMethodItem, PersonListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
+import { AuthService, CatalogsService, PersonsService, ProfessionalsService, ToastService } from '@services';
+import { LoginMethodItem, PersonListItemResponse, ProfessionalListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { FormsModule } from '@angular/forms';
 import {
+  AlertComponent,
+  ButtonDirective,
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
   FormSelectDirective,
+  GridModule,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
+  ModalTitleDirective,
 } from '@coreui/angular';
 
 @Component({
@@ -24,44 +29,56 @@ import {
     DataTableComponent,
     InstitutionFilterComponent,
     ReactiveFormsModule,
+    FormsModule,
     FormControlDirective,
     FormFeedbackComponent,
     FormLabelDirective,
     FormSelectDirective,
+    GridModule,
     ModalComponent,
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
     ConfirmModalComponent,
+    AlertComponent,
+    ButtonDirective,
+    ModalTitleDirective,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
 export class ListComponent {
-  private readonly personsService = inject(PersonsService);
-  private readonly authService = inject(AuthService);
-  private readonly catalogsService = inject(CatalogsService);
-  private readonly toastService = inject(ToastService);
-  private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
+  readonly #personsService = inject(PersonsService);
+  readonly #authService = inject(AuthService);
+  readonly #catalogsService = inject(CatalogsService);
+  readonly #professionalsService = inject(ProfessionalsService);
+  readonly #toastService = inject(ToastService);
+  readonly #fb = inject(FormBuilder);
+  readonly #router = inject(Router);
 
-  canCreate = this.authService.hasPermission('persons:create');
+  canCreate = this.#authService.hasPermission('persons:create');
 
   selectedInstitutionId: number | undefined;
+  representativeSearch = '';
+  statusFilter = '';
 
   persons: PersonListItemResponse[] = [];
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+  sortBy = 'LastName';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
 
   // Modal login method
   showLoginMethodModal = false;
   showLoginMethodConfirm = false;
   selectedPerson: PersonListItemResponse | null = null;
   loginMethods: LoginMethodItem[] = [];
-  loginMethodForm: FormGroup = this.fb.group({
+  supervisors: ProfessionalListItemResponse[] = [];
+  loginMethodForm: FormGroup = this.#fb.group({
     loginMethodId: [null, Validators.required],
     pin: ['', [Validators.pattern(/^\d{4}$/)]],
+    supervisorUserId: [null],
   });
   loginMethodSubmitted = false;
   loginMethodError = '';
@@ -77,20 +94,21 @@ export class ListComponent {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
-        { action: 'login-method', label: 'Cambiar método de login', icon: 'cil-lock-locked', visible: (item) => item.isActive },
+        { action: 'login-method', label: 'Método login', icon: 'cil-lock-locked', visible: (item) => item.isActive },
       ],
     },
-    { key: 'fullName', label: 'Nombre completo' },
+    { key: 'fullName', label: 'Nombre completo', sortable: true },
+    { key: 'representativeNames', label: 'Responsables' },
     { key: 'disabilityTypeName', label: 'Tipo de discapacidad' },
     { key: 'autonomyLevelName', label: 'Nivel de autonomía' },
-    { key: 'age', label: 'Edad', type: 'number' },
+    { key: 'age', label: 'Edad', type: 'number', sortable: true },
     { key: 'isActive', label: 'Estado', type: 'badge' },
   ];
 
   constructor() {
-    this.catalogsService.getLoginMethods().subscribe({
+    this.#catalogsService.getLoginMethods().subscribe({
       next: (data) => this.loginMethods = data,
     });
   }
@@ -111,19 +129,47 @@ export class ListComponent {
     this.loadPersons(term);
   }
 
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    const sortMap: Record<string, string> = {
+      'fullName': 'LastName',
+      'age': 'BirthDate',
+    };
+    this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
+    this.sortDirection = event.sortDirection;
+    this.currentPage = 1;
+    this.loadPersons();
+  }
+
+  onRepresentativeSearch(): void {
+    this.currentPage = 1;
+    this.loadPersons();
+  }
+
+  onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.loadPersons();
+  }
+
+  clearFilters(): void {
+    this.representativeSearch = '';
+    this.statusFilter = '';
+    this.currentPage = 1;
+    this.loadPersons();
+  }
+
   onHeaderAction(action: string): void {
     if (action === 'new') {
-      this.router.navigate(['/admin/persons/new']);
+      this.#router.navigate(['/admin/persons/new']);
     }
   }
 
   onRowAction(event: { action: string; item: any }): void {
     switch (event.action) {
       case 'view':
-        this.router.navigate(['/admin/persons', event.item.id]);
+        this.#router.navigate(['/admin/persons', event.item.id]);
         break;
       case 'edit':
-        this.router.navigate(['/admin/persons', event.item.id, 'edit']);
+        this.#router.navigate(['/admin/persons', event.item.id, 'edit']);
         break;
       case 'login-method':
         this.openLoginMethodModal(event.item);
@@ -139,10 +185,47 @@ export class ListComponent {
     this.temporaryPassword = '';
     this.loginMethodForm.reset();
     this.showLoginMethodModal = true;
+
+    // Si la persona tiene discapacidad, cargar solo profesionales asignados a ella
+    // que pueden supervisar login
+    if (person.disabilityTypeId) {
+      this.#personsService.getProfessionalsByPerson(person.id).subscribe({
+        next: (assignments) => {
+          this.supervisors = assignments
+            .filter(a => a.canSuperviseLogin && a.isActive)
+            .map(a => ({
+              id: a.professionalId,
+              userId: a.professionalId,
+              firstName: a.personFirstName.split(' ')[0],
+              lastName: a.personLastName,
+              fullName: a.personFullName,
+              email: '',
+              specialty: '',
+              isActive: true,
+              status: 'Active',
+            }));
+        },
+      });
+    } else {
+      // Cargar lista de profesionales como posibles supervisores
+      if (this.supervisors.length === 0) {
+        this.#professionalsService.getProfessionals({ pageSize: 200 }).subscribe({
+          next: (data) => this.supervisors = data.data,
+        });
+      }
+    }
+  }
+
+  onLoginMethodModalVisibleChange(visible: boolean): void {
+    // Solo cerrar si no estamos transitando hacia el modal de confirmación
+    if (!visible && !this.showLoginMethodConfirm) {
+      this.closeLoginMethodModal();
+    }
   }
 
   closeLoginMethodModal(): void {
     this.showLoginMethodModal = false;
+    this.showLoginMethodConfirm = false;
     this.selectedPerson = null;
   }
 
@@ -153,34 +236,55 @@ export class ListComponent {
 
     if (this.loginMethodForm.invalid || !this.selectedPerson) return;
 
+    // Validacion extra: supervisor requerido para metodo Asistido
+    if (this.selectedLoginMethod?.requiresSupervisor && !this.loginMethodForm.value.supervisorUserId) {
+      return;
+    }
+
     const raw = this.loginMethodForm.value;
     const request: UpdateLoginMethodRequest = {
       loginMethodId: +raw.loginMethodId,
       ...(raw.pin && { pin: raw.pin }),
+      ...(raw.supervisorUserId && { supervisorUserId: raw.supervisorUserId }),
     };
 
-    this.authService.updateUserLoginMethod(this.selectedPerson.userId, request).subscribe({
+    this.#authService.updateUserLoginMethod(this.selectedPerson.userId, request).subscribe({
       next: (response) => {
         this.loginMethodSuccess = 'Método de login actualizado correctamente.';
         this.temporaryPassword = response.data?.temporaryPassword ?? '';
+        this.showLoginMethodModal = true; // Reabrir para mostrar el resultado
         this.loadPersons();
       },
       error: (err) => {
         this.loginMethodError = err?.error?.message || 'Error al actualizar el método de login.';
+        this.showLoginMethodModal = true; // Reabrir para mostrar el error
       },
     });
   }
 
   loadPersons(search?: string): void {
-    this.personsService
-      .getPersons({ page: this.currentPage, pageSize: this.pageSize, search, sortBy: 'lastName', sortDirection: 'ASC', institutionId: this.selectedInstitutionId })
+    const isActive = this.statusFilter === 'true' ? true
+                   : this.statusFilter === 'false' ? false
+                   : undefined;
+
+    this.#personsService
+      .getPersons({
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        search,
+        sortBy: this.sortBy,
+        sortDirection: this.sortDirection,
+        institutionId: this.selectedInstitutionId,
+        isActive,
+        representativeSearch: this.representativeSearch || undefined,
+      })
       .subscribe({
         next: (response) => {
           this.persons = response.data;
           this.totalItems = response.totalRecords;
         },
         error: () => {
-          this.toastService.error('Error al obtener personas');
+          this.#toastService.error('Error al obtener personas');
         },
       });
   }

@@ -151,6 +151,12 @@ export class DataTableComponent implements OnInit, OnDestroy {
     this.sortAction.emit({ sortBy: this.sortField, sortDirection: this.sortDirection });
   }
 
+  getAriaSort(col: TableColumn): 'ascending' | 'descending' | 'none' | null {
+    if (!col.sortable) return null;
+    if (this.sortField !== col.key) return 'none';
+    return this.sortDirection === 'ASC' ? 'ascending' : 'descending';
+  }
+
   getBadgeColor(value: any, col?: TableColumn): string {
     if (col?.badgeMap) {
       const key = String(value);

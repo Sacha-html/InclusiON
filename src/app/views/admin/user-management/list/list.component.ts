@@ -10,14 +10,14 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
 import {
   ColComponent,
   RowComponent,
+  FormLabelDirective,
   FormSelectDirective,
-  CardComponent,
-  CardBodyComponent,
   AlertComponent,
   ModalComponent,
   ModalHeaderComponent,
   ModalBodyComponent,
   ModalFooterComponent,
+  ModalTitleDirective,
   ButtonDirective,
   GridModule,
 } from '@coreui/angular';
@@ -30,12 +30,14 @@ import {
     ConfirmModalComponent,
     ColComponent,
     RowComponent,
+    FormLabelDirective,
     FormSelectDirective,
     AlertComponent,
     ModalComponent,
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
+    ModalTitleDirective,
     ButtonDirective,
     GridModule,
   ],
@@ -55,6 +57,9 @@ export class UserManagementListComponent implements OnInit {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+  sortBy = 'FirstName';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
+  loading = false;
 
   ngOnInit(): void {
     this.loadUsers();
@@ -64,7 +69,11 @@ export class UserManagementListComponent implements OnInit {
   showConfirmModal = false;
   itemToDeactivate: AdminUserListItemResponse | null = null;
 
-  // Password modal
+  // Reset password modal
+  showResetPasswordModal = false;
+  itemToReset: AdminUserListItemResponse | null = null;
+
+  // Password result modal
   showPasswordModal = false;
   tempPassword = '';
   tempPasswordEmail = '';
@@ -73,14 +82,14 @@ export class UserManagementListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
-        { action: 'reset-password', label: 'Resetear contraseña', icon: 'cil-lock-unlocked', visible: (item) => item.isActive },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
+        { action: 'reset-password', label: 'Resetear', icon: 'cil-lock-unlocked', visible: (item) => item.isActive },
         { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
         { action: 'reactivate', label: 'Reactivar', icon: 'cil-check', visible: (item) => !item.isActive },
       ],
     },
-    { key: 'fullName', label: 'Nombre' },
-    { key: 'email', label: 'Email' },
+    { key: 'fullName', label: 'Nombre', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
     { key: 'role', label: 'Rol', type: 'badge' },
     { key: 'isActive', label: 'Estado', type: 'badge' },
     { key: 'lastLoginDate', label: 'Último acceso', type: 'date' },
@@ -96,8 +105,26 @@ export class UserManagementListComponent implements OnInit {
     this.loadUsers();
   }
 
+  clearFilters(): void {
+    this.selectedRole = '';
+    this.selectedStatus = '';
+    this.currentPage = 1;
+    this.loadUsers();
+  }
+
   onPageChange(page: number): void {
     this.currentPage = page;
+    this.loadUsers();
+  }
+
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    const sortMap: Record<string, string> = {
+      'fullName': 'FirstName',
+      'email': 'Email',
+    };
+    this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
+    this.sortDirection = event.sortDirection;
+    this.currentPage = 1;
     this.loadUsers();
   }
 
@@ -114,7 +141,8 @@ export class UserManagementListComponent implements OnInit {
         this.router.navigate(['/admin/users', user.userId]);
         break;
       case 'reset-password':
-        this.resetPassword(user);
+        this.itemToReset = user;
+        this.showResetPasswordModal = true;
         break;
       case 'deactivate':
         this.itemToDeactivate = user;
@@ -126,7 +154,11 @@ export class UserManagementListComponent implements OnInit {
     }
   }
 
-  resetPassword(user: AdminUserListItemResponse): void {
+  confirmResetPassword(): void {
+    if (!this.itemToReset) return;
+    const user = this.itemToReset;
+    this.showResetPasswordModal = false;
+    this.itemToReset = null;
     this.userService.resetPassword(user.userId).subscribe({
       next: (result) => {
         this.tempPassword = result.temporaryPassword;
@@ -138,6 +170,11 @@ export class UserManagementListComponent implements OnInit {
         this.toastService.error('Error al resetear la contraseña');
       },
     });
+  }
+
+  cancelResetPassword(): void {
+    this.showResetPasswordModal = false;
+    this.itemToReset = null;
   }
 
   confirmDeactivate(): void {
@@ -190,6 +227,7 @@ export class UserManagementListComponent implements OnInit {
   }
 
   loadUsers(): void {
+    this.loading = true;
     this.userService
       .getUsers({
         page: this.currentPage,
@@ -197,14 +235,18 @@ export class UserManagementListComponent implements OnInit {
         search: this.searchTerm || undefined,
         role: this.selectedRole || undefined,
         isActive: this.selectedStatus === '' ? undefined : this.selectedStatus === 'true',
+        sortBy: this.sortBy,
+        sortDirection: this.sortDirection,
       })
       .subscribe({
         next: (response) => {
           this.users = [...response.data];
           this.totalItems = response.totalRecords;
+          this.loading = false;
         },
         error: () => {
           this.toastService.error('Error al obtener usuarios');
+          this.loading = false;
         },
       });
   }

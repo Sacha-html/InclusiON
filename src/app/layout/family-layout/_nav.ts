@@ -31,6 +31,11 @@ export const familyNavItems: INavData[] = [
     iconComponent: { name: 'cil-chart-line' }
   },
   {
+    name: 'Reportes',
+    url: '/family/reports',
+    iconComponent: { name: 'cil-description' }
+  },
+  {
     title: true,
     name: 'Comunicacion'
   },

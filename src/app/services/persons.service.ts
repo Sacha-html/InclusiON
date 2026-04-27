@@ -10,6 +10,10 @@ import {
   CreatePersonRequest,
   UpdatePersonRequest,
   GetPersonsRequest,
+  ProfessionalPersonResponse,
+  UpdateLoginMethodRequest,
+  UpdateLoginMethodResponse,
+  SupervisorCandidate,
 } from '@models';
 import { environment } from '@env';
 import { unwrapResponse, handleApiError } from '@shared/utils';
@@ -66,6 +70,9 @@ export class PersonsService {
       }
       if (request.institutionId) {
         params = params.set('institutionId', request.institutionId.toString());
+      }
+      if (request.representativeSearch) {
+        params = params.set('representativeSearch', request.representativeSearch);
       }
     }
 
@@ -185,6 +192,34 @@ export class PersonsService {
         `${this.apiUrl}/${personId}/skill-profile/${areaId}`,
         {}
       )
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Obtiene los profesionales asignados a una persona.
+   */
+  getProfessionalsByPerson(personId: string): Observable<ProfessionalPersonResponse[]> {
+    return this.http
+      .get<ApiResponse<ProfessionalPersonResponse[]>>(`${this.apiUrl}/${personId}/professionals`)
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Lista candidatos a supervisor (profesionales asignados + familiares vinculados).
+   */
+  getSupervisorCandidates(personId: string): Observable<SupervisorCandidate[]> {
+    return this.http
+      .get<ApiResponse<SupervisorCandidate[]>>(`${this.apiUrl}/${personId}/supervisor-candidates`)
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Cambia el método de login de una persona. Si el método nuevo es STANDARD,
+   * la respuesta incluye una contraseña temporal de un solo uso.
+   */
+  updateLoginMethod(userId: string, request: UpdateLoginMethodRequest): Observable<UpdateLoginMethodResponse> {
+    return this.http
+      .put<ApiResponse<UpdateLoginMethodResponse>>(`${this.apiUrl}/${userId}/login-method`, request)
       .pipe(unwrapResponse());
   }
 }

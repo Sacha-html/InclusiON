@@ -8,22 +8,23 @@
   transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 
   &:focus-visible {
-    outline: 2px solid var(--cui-primary, #0d6efd);
+    outline: 3px solid var(--a11y-focus-color, rgba(13, 71, 161, 0.5));
     outline-offset: -2px;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 3px var(--a11y-focus-color, rgba(13, 71, 161, 0.25));
   }
 
   &.active {
-    background-color: var(--cui-primary, #0d6efd);
-    color: #fff;
-    border-color: var(--cui-primary, #0d6efd);
+    background-color: var(--a11y-primary, #0D47A1);
+    color: var(--a11y-primary-text, #FFFFFF);
+    border-color: var(--a11y-primary, #0D47A1);
 
     .text-body-secondary {
-      color: rgba(255, 255, 255, 0.75) !important;
+      color: var(--a11y-primary-text, #FFFFFF) !important;
+      opacity: 0.85;
     }
   }
 
   &.family-previously-linked {
-    border-left: 3px solid var(--cui-warning, #ffc107);
+    border-left: 3px solid var(--a11y-warning, #BF360C);
   }
 }

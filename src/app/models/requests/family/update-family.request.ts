@@ -4,5 +4,4 @@ export interface UpdateFamilyRequest {
   email: string;
   documentNumber?: string;
   phone?: string;
-  relationship?: string;
 }

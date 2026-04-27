@@ -25,6 +25,16 @@
             }
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'diagnosticos'" (click)="activeTab = 'diagnosticos'" role="button">
+            Diagnósticos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'reportes'" (click)="activeTab = 'reportes'" role="button">
+            Reportes
+          </a>
+        </li>
       </ul>
 
       <!-- Tab: Datos Personales -->
@@ -49,6 +59,16 @@
           (closeModal)="closeAddSkillAreaModal()"
           (confirmAdd)="confirmAddSkillAreasFromChild($event)">
         </app-person-skills>
+      }
+
+      <!-- Tab: Reportes -->
+      @if (activeTab === 'reportes') {
+        <app-admin-person-reports [personId]="person.id"></app-admin-person-reports>
+      }
+
+      <!-- Tab: Diagnósticos -->
+      @if (activeTab === 'diagnosticos') {
+        <app-admin-diagnoses [personId]="person.id" [person]="person"></app-admin-diagnoses>
       }
 
       <!-- Tab: Vinculos -->

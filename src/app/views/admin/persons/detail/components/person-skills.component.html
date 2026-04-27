@@ -1,0 +1,68 @@
+<h5 class="mb-3">Perfil de Habilidades</h5>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+  @for (sp of skillProfile; track sp.skillAreaId) {
+    <span class="skill-chip d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
+          [style.background-color]="sp.color ?? '#6c757d'"
+          [style.color]="'#fff'">
+      @if (sp.icon) {
+        <span class="material-icons skill-chip-icon">{{ sp.icon }}</span>
+      }
+      {{ sp.skillAreaName }}
+      @if (person.isActive) {
+        <button cButtonClose (click)="removeSkillArea.emit(sp.skillAreaId)"
+                [attr.aria-label]="'Quitar ' + sp.skillAreaName">
+        </button>
+      }
+    </span>
+  }
+  @if (skillProfile.length === 0) {
+    <span class="text-body-secondary">Sin areas de habilidad asignadas.</span>
+  }
+</div>
+
+@if (person.isActive) {
+  <button cButton color="primary" size="sm" (click)="openAddModal.emit()"
+          aria-label="Agregar area de habilidad">
+    Agregar Area
+  </button>
+}
+
+<!-- Modal Agregar Áreas de Habilidad -->
+<c-modal [visible]="showAddModal" (visibleChange)="!$event && closeModal.emit()"
+         aria-labelledby="add-skill-area-modal-title">
+  <c-modal-header>
+    <strong id="add-skill-area-modal-title">Agregar Áreas de Habilidad</strong>
+  </c-modal-header>
+  <c-modal-body>
+    @if (error) {
+      <div class="alert alert-danger">{{ error }}</div>
+    }
+    @if (availableSkillAreas.length === 0) {
+      <p class="text-body-secondary">No hay áreas disponibles para agregar.</p>
+    } @else {
+      <p class="text-body-secondary mb-3">Seleccioná las áreas que deseas agregar:</p>
+      @for (area of availableSkillAreas; track area.id) {
+        <c-form-check class="mb-2">
+          <input cFormCheckInput type="checkbox" [id]="'admin-skill-' + area.id"
+                 [checked]="selectedIds.has(area.id)"
+                 (change)="toggleSkillArea(area.id)" />
+          <label cFormCheckLabel [for]="'admin-skill-' + area.id">
+            <strong>{{ area.name }}</strong>
+            @if (area.description) {
+              <br /><small class="text-body-secondary">{{ area.description }}</small>
+            }
+          </label>
+        </c-form-check>
+      }
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeModal.emit()">Cancelar</button>
+    <button cButton color="primary" (click)="confirmAdd.emit(getSelectedIds())"
+            [disabled]="selectedIds.size === 0 || loading">
+      @if (loading) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      Agregar ({{ selectedIds.size }})
+    </button>
+  </c-modal-footer>
+</c-modal>

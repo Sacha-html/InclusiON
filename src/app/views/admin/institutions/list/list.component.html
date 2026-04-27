@@ -2,18 +2,21 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end">
     <c-col sm="3">
-      <label class="form-label">Estado</label>
+      <label cLabel>Estado</label>
       <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="active">Activas</option>
         <option value="inactive">Inactivas</option>
       </select>
     </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
   </c-row>
 </fieldset>
 
 <app-data-table
-  title="Gestión de Instituciones"
+  title="Gestionar Instituciones"
   [columns]="cols"
   [items]="filteredInstitutions"
   [totalItems]="totalItems"

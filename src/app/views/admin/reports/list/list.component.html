@@ -1,0 +1,88 @@
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end g-2">
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="Draft">Borrador</option>
+        <option value="Submitted">Pendientes de revisión</option>
+        <option value="Approved">Aprobados</option>
+        <option value="Rejected">Rechazados</option>
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Tipo</label>
+      <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
+        <option value="">Todos</option>
+        @for (t of reportTypes; track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="2">
+      <label cLabel>Desde</label>
+      <input cFormControl type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateChange()" />
+    </c-col>
+    <c-col sm="2">
+      <label cLabel>Hasta</label>
+      <input cFormControl type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Reportes"
+  [columns]="columns"
+  [items]="reports()"
+  [totalItems]="totalRecords()"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  [sortable]="true"
+  [loading]="isLoading()"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (sortAction)="onSort($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>
+
+@if (!reports().length && !isLoading()) {
+  <div class="text-center text-body-secondary py-5">
+    <svg cIcon name="cilNotes" size="3xl" class="mb-2"></svg>
+    <p class="mb-0">No hay reportes que coincidan con los filtros.</p>
+  </div>
+}
+
+<!-- Modal: Aprobar -->
+<app-confirm-modal
+  [visible]="showApproveModal"
+  title="Aprobar reporte"
+  messagePrefix="¿Confirmás la aprobación del reporte &quot;"
+  [itemName]="selectedReport?.title ?? ''"
+  messageSuffix="&quot;? El familiar podrá consultarlo a partir de ese momento."
+  confirmLabel="Aprobar"
+  confirmColor="success"
+  [loading]="isActioning"
+  (confirm)="confirmApprove()"
+  (cancel)="cancelAction()">
+</app-confirm-modal>
+
+<!-- Modal: Rechazar -->
+<app-confirm-modal
+  [visible]="showRejectModal"
+  title="Rechazar reporte"
+  messagePrefix="Estás rechazando el reporte &quot;"
+  [itemName]="selectedReport?.title ?? ''"
+  messageSuffix="&quot;. El profesional recibirá el motivo."
+  confirmLabel="Rechazar"
+  confirmColor="danger"
+  [showObservation]="true"
+  observationLabel="Motivo del rechazo *"
+  observationPlaceholder="Indicá el motivo del rechazo para que el profesional pueda corregirlo..."
+  [loading]="isActioning"
+  (confirm)="confirmReject($event)"
+  (cancel)="cancelAction()">
+</app-confirm-modal>

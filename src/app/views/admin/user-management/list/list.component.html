@@ -2,7 +2,7 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end">
     <c-col sm="3">
-      <label class="form-label">Rol</label>
+      <label cLabel>Rol</label>
       <select cSelect [(ngModel)]="selectedRole" (ngModelChange)="onRoleFilterChange()">
         <option value="">Todos los roles</option>
         <option value="Admin">Administrador</option>
@@ -12,18 +12,21 @@
       </select>
     </c-col>
     <c-col sm="3">
-      <label class="form-label">Estado</label>
+      <label cLabel>Estado</label>
       <select cSelect [(ngModel)]="selectedStatus" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="true">Activos</option>
         <option value="false">Inactivos</option>
       </select>
     </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
   </c-row>
 </fieldset>
 
 <app-data-table
-  title="Gestión de Usuarios"
+  title="Gestionar Usuarios"
   [columns]="cols"
   [items]="users"
   [totalItems]="totalItems"
@@ -34,6 +37,19 @@
   (searchAction)="onSearch($event)"
   (rowAction)="onRowAction($event)">
 </app-data-table>
+
+<app-confirm-modal
+  [visible]="showResetPasswordModal"
+  title="Confirmar reseteo de contraseña"
+  messagePrefix="¿Está seguro de que desea resetear la contraseña de "
+  [itemName]="itemToReset?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se generará una contraseña temporal y se revocarán todas las sesiones activas del usuario."
+  confirmLabel="Resetear contraseña"
+  confirmColor="warning"
+  (confirm)="confirmResetPassword()"
+  (cancel)="cancelResetPassword()">
+</app-confirm-modal>
 
 <app-confirm-modal
   [visible]="showConfirmModal"

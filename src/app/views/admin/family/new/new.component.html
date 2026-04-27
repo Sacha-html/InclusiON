@@ -1,5 +1,5 @@
 <c-card>
-  <c-card-header><strong>Nuevo Familiar</strong></c-card-header>
+  <c-card-header><strong>Registrar Familiar</strong></c-card-header>
   <c-card-body>
     @if (serverError) {
       <div class="alert alert-danger">{{ serverError }}</div>
@@ -10,26 +10,34 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel for="personId">Persona a cargo *</label>
-          <input cFormControl placeholder="Buscar por nombre o documento (mín. 3 caracteres)..."
-                 [value]="personSearch"
-                 (input)="filterPersons($any($event.target).value)"
-                 class="mb-1" />
-          @if (filteredPersons.length > 0) {
-            <select cSelect id="personId" formControlName="personId"
-                    [valid]="submitted ? f['personId'].valid : undefined">
-              <option value="">-- Seleccionar persona --</option>
-              @for (p of filteredPersons; track p.id) {
-                <option [value]="p.id">{{ p.fullName }} — {{ p.disabilityTypeName ?? 'Sin tipo' }}</option>
+          <label cLabel id="persona-label">Persona a cargo *</label>
+          <ng-select
+            inputId="personId"
+            [items]="persons()"
+            bindValue="id"
+            formControlName="personId"
+            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre o documento...'"
+            [loading]="isLoadingPersons()"
+            loadingText="Cargando..."
+            notFoundText="No se encontraron personas"
+            [searchFn]="searchPersonFn"
+            [class.is-invalid]="submitted && f['personId'].errors"
+            aria-labelledby="persona-label"
+            aria-required="true"
+            ariaDescribedBy="personId-error"
+          >
+            <ng-template ng-label-tmp let-item="item">
+              {{ item.fullName }}
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item">
+              {{ item.fullName }}
+              @if (item.disabilityTypeName) {
+                <span class="text-body-secondary"> — {{ item.disabilityTypeName }}</span>
               }
-            </select>
-          } @else if (personSearch.length >= 3) {
-            <small class="text-body-secondary">No se encontraron personas.</small>
-          } @else if (personSearch.length > 0) {
-            <small class="text-body-secondary">Escribí al menos 3 caracteres para buscar.</small>
-          }
+            </ng-template>
+          </ng-select>
           @if (submitted && f['personId'].errors) {
-            <c-form-feedback [valid]="false">
+            <c-form-feedback [valid]="false" id="personId-error">
               Debe seleccionar una persona.
             </c-form-feedback>
           }
@@ -96,7 +104,7 @@
       </c-row>
 
       <div class="mt-3 d-flex gap-2">
-        <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Crear familiar">Guardar</button>
+        <button cButton color="primary" type="submit" [disabled]="form.invalid">Guardar</button>
         <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar y volver">Cancelar</button>
       </div>
     </form>

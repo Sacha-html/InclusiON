@@ -43,6 +43,11 @@
             }
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 'reportes'" (click)="activeTab = 'reportes'" role="button">
+            Reportes
+          </a>
+        </li>
       </ul>
 
       @if (activeTab === 'datos') {
@@ -62,11 +67,15 @@
       }
 
       @if (activeTab === 'instituciones') {
-        <app-professional-institutions 
-          [professionalId]="professional.id" 
+        <app-professional-institutions
+          [professionalId]="professional.id"
           [institutions]="assignedInstitutions"
-          (institutionsChange)="onInstitutionsChange($event)" 
+          (institutionsChange)="onInstitutionsChange($event)"
         />
+      }
+
+      @if (activeTab === 'reportes') {
+        <app-professional-reports [professionalId]="professional.id" />
       }
 
     </c-card-body>

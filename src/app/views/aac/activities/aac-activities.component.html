@@ -1,0 +1,25 @@
+<div class="aac-activities" role="region" aria-labelledby="aac-activities-title">
+  <h1 id="aac-activities-title" class="page-title">Mis Actividades</h1>
+
+  <div class="activities-list" role="list">
+    @for (activity of activities; track activity.id) {
+      <div role="listitem">
+        <app-visual-card
+          [title]="activity.title"
+          [subtitle]="activity.time"
+          [icon]="activity.icon"
+          [accentColor]="activity.color"
+          [badge]="activity.status"
+          [badgeColor]="activity.statusColor"
+          [interactive]="false"
+        />
+      </div>
+    }
+
+    @empty {
+      <div class="empty-state" role="status" aria-live="polite">
+        <p>No hay actividades programadas</p>
+      </div>
+    }
+  </div>
+</div>

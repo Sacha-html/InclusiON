@@ -6,6 +6,7 @@
     <!-- Back Button -->
     <div class="mb-4">
       <button
+        type="button"
         cButton
         color="light"
         class="back-button"
@@ -30,8 +31,8 @@
           >
             {{ initial }}
           </div>
-          <h1 class="h4 fw-bold mb-1">{{ displayName }}</h1>
-          <p class="text-muted mb-0">necesita ayuda para entrar</p>
+          <h1 class="h4 fw-bold mb-1" style="color: var(--a11y-text)">{{ displayName }}</h1>
+          <p class="mb-0" style="color: var(--a11y-text-muted)">necesita ayuda para entrar</p>
         </header>
 
         <!-- Supervisor Info -->
@@ -146,7 +147,7 @@
 
         <!-- Help -->
         <footer class="text-center mt-4">
-          <p class="text-muted small mb-0">
+          <p class="small mb-0" style="color: var(--a11y-text-muted)">
             <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
             Solo familiares y profesionales autorizados pueden dar acceso
           </p>

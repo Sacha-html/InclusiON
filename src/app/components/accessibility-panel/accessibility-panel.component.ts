@@ -28,6 +28,7 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
   private readingGuideElement: HTMLElement | null = null;
   private mouseMoveHandler: ((e: MouseEvent) => void) | null = null;
   private focusHandler: ((e: FocusEvent) => void) | null = null;
+  private previouslyFocusedElement: HTMLElement | null = null;
 
   @ViewChild('panelContainer') panelContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('closeButton') closeButton!: ElementRef<HTMLButtonElement>;
@@ -46,12 +47,22 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
   // Atajos de teclado globales
   @HostListener('document:keydown', ['$event'])
   handleKeyboardShortcut(event: KeyboardEvent): void {
+    // Focus trap: Tab y Shift+Tab no deben salir del panel cuando está abierto (WCAG 2.1.2)
+    if (this.a11y.panelOpen() && event.key === 'Tab') {
+      this.trapFocus(event);
+    }
+
     // Alt + A para toggle del panel de accesibilidad
     if (event.altKey && event.key.toLowerCase() === 'a') {
       event.preventDefault();
+      if (!this.a11y.panelOpen()) {
+        this.previouslyFocusedElement = document.activeElement as HTMLElement;
+      }
       this.a11y.togglePanel();
       if (this.a11y.panelOpen()) {
         setTimeout(() => this.focusFirstElement(), 100);
+      } else {
+        setTimeout(() => this.previouslyFocusedElement?.focus(), 50);
       }
     }
 
@@ -71,13 +82,38 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    // Escape: primero cierra el panel, luego sale del modo lectura
+    // Escape: primero cierra el panel restaurando foco, luego sale del modo lectura
     if (event.key === 'Escape') {
       if (this.a11y.panelOpen()) {
         this.a11y.closePanel();
+        setTimeout(() => this.previouslyFocusedElement?.focus(), 50);
       } else if (this.a11y.readingMode()) {
         event.preventDefault();
         this.a11y.updateSetting('readingMode', false);
+      }
+    }
+  }
+
+  private trapFocus(event: KeyboardEvent): void {
+    const panel = this.elementRef.nativeElement.querySelector('.a11y-panel') as HTMLElement;
+    if (!panel) return;
+
+    const focusableSelectors = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const elements = Array.from(panel.querySelectorAll<HTMLElement>(focusableSelectors));
+    if (elements.length === 0) return;
+
+    const first = elements[0];
+    const last = elements[elements.length - 1];
+
+    if (event.shiftKey) {
+      if (document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     }
   }
@@ -153,18 +189,25 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   openPanel(): void {
+    this.previouslyFocusedElement = document.activeElement as HTMLElement;
     this.a11y.openPanel();
     setTimeout(() => this.focusFirstElement(), 100);
   }
 
   closePanel(): void {
     this.a11y.closePanel();
+    setTimeout(() => this.previouslyFocusedElement?.focus(), 50);
   }
 
   togglePanel(): void {
+    if (!this.a11y.panelOpen()) {
+      this.previouslyFocusedElement = document.activeElement as HTMLElement;
+    }
     this.a11y.togglePanel();
     if (this.a11y.panelOpen()) {
       setTimeout(() => this.focusFirstElement(), 100);
+    } else {
+      setTimeout(() => this.previouslyFocusedElement?.focus(), 50);
     }
   }
 

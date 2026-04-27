@@ -2,14 +2,16 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
-import { ErrorCodeService, ToastService, LocalStorageService } from '@services';
+import { AuthService, ErrorCodeService, ToastService, LocalStorageService } from '@services';
 import { ErrorCode } from '@models';
+import { RoleRoutes } from '@shared/constants/roles';
 
 /** URLs públicas que no requieren autenticación */
 const PUBLIC_URLS = ['/admin-login', '/register', '/visual-login', '/invite'];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
+  const authService = inject(AuthService);
   const errorCodeService = inject(ErrorCodeService);
   const toastService = inject(ToastService);
   const storageService = inject(LocalStorageService);
@@ -34,9 +36,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Manejar según el código de error del backend o HTTP status
       if (errorCode !== undefined) {
-        handleErrorCode(errorCode, errorCodeService, toastService, router, storageService);
+        handleErrorCode(errorCode, errorCodeService, toastService, router, storageService, authService);
       } else {
-        handleHttpStatus(error.status, router, toastService, storageService);
+        handleHttpStatus(error.status, router, toastService, storageService, authService);
       }
 
       // Enriquecer el error con información adicional
@@ -62,7 +64,8 @@ function handleErrorCode(
   errorCodeService: ErrorCodeService,
   toastService: ToastService,
   router: Router,
-  storageService: LocalStorageService
+  storageService: LocalStorageService,
+  authService: AuthService
 ): void {
   // Si requiere re-autenticación, limpiar sesión y redirigir
   if (errorCodeService.requiresReauth(errorCode)) {
@@ -94,9 +97,10 @@ function handleErrorCode(
     }
   }
 
-  // Redirigir en casos específicos
+  // Redirigir al dashboard del rol (CA-17)
   if (errorCode === ErrorCode.Forbidden || errorCode === ErrorCode.InsufficientPermissions) {
-    router.navigate(['/403']);
+    const dashboard = RoleRoutes[authService.getUserRole() ?? ''] ?? '/login';
+    router.navigate([dashboard]);
   }
 }
 
@@ -107,7 +111,8 @@ function handleHttpStatus(
   status: number,
   router: Router,
   toastService: ToastService,
-  storageService: LocalStorageService
+  storageService: LocalStorageService,
+  authService: AuthService
 ): void {
   switch (status) {
     case 401:
@@ -120,10 +125,12 @@ function handleHttpStatus(
       }
       break;
 
-    case 403:
-      toastService.error('Sin permisos para acceder a este recurso');
-      router.navigate(['/403']);
+    case 403: {
+      toastService.error('No tenés permiso para acceder a este recurso');
+      const dashboard = RoleRoutes[authService.getUserRole() ?? ''] ?? '/login';
+      router.navigate([dashboard]);
       break;
+    }
 
     case 500:
       toastService.error('Error interno del servidor');

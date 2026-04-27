@@ -1,11 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InvitationsService, ToastService, ProfessionalsService, AssignmentsService } from '@services';
 import { getInvitationStatusColor } from '@shared/utils';
 import {
@@ -32,8 +27,7 @@ import {
 } from '@coreui/angular';
 
 @Component({
-  selector: 'app-invitation-list',
-  standalone: true,
+  selector: 'app-invitations-list',
   imports: [
     DatePipe,
     ReactiveFormsModule,
@@ -52,14 +46,14 @@ import {
     AlertComponent,
     SpinnerComponent,
   ],
-  templateUrl: './invitation-list.component.html',
-  styleUrl: './invitation-list.component.scss',
+  templateUrl: './list.component.html',
+  styleUrl: './list.component.scss',
 })
-export class InvitationListComponent implements OnInit {
+export class ListComponent implements OnInit {
   private readonly invitationsService = inject(InvitationsService);
+  private readonly toastService = inject(ToastService);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
-  private readonly toastService = inject(ToastService);
   private readonly fb = inject(FormBuilder);
 
   invitations: InvitationResponse[] = [];
@@ -70,6 +64,8 @@ export class InvitationListComponent implements OnInit {
   errorMessage = '';
   invitationForm!: FormGroup;
   createdInvitationCode = '';
+  sortBy = 'createdAt';
+  sortDirection: 'ASC' | 'DESC' = 'DESC';
 
   readonly relationships = [
     'Madre',
@@ -101,7 +97,17 @@ export class InvitationListComponent implements OnInit {
     this.isLoading = true;
     this.invitationsService.getAll().subscribe({
       next: (data) => {
-        this.invitations = data;
+        const sorted = [...data].sort((a, b) => {
+          let aVal: any = a[this.sortBy as keyof InvitationResponse];
+          let bVal: any = b[this.sortBy as keyof InvitationResponse];
+          if (typeof aVal === 'string') aVal = aVal?.toLowerCase() || '';
+          if (typeof bVal === 'string') bVal = bVal?.toLowerCase() || '';
+          const direction = this.sortDirection === 'ASC' ? 1 : -1;
+          if (aVal < bVal) return -1 * direction;
+          if (aVal > bVal) return 1 * direction;
+          return 0;
+        });
+        this.invitations = sorted;
         this.isLoading = false;
       },
       error: () => {
@@ -109,6 +115,16 @@ export class InvitationListComponent implements OnInit {
         this.toastService.error('Error al cargar invitaciones');
       },
     });
+  }
+
+  onSort(column: string): void {
+    if (this.sortBy === column) {
+      this.sortDirection = this.sortDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.sortBy = column;
+      this.sortDirection = 'DESC';
+    }
+    this.loadInvitations();
   }
 
   private loadPersons(): void {

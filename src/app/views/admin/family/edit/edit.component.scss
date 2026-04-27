@@ -1,1 +1,12 @@
-:host { display: block; }
+:host {
+  display: block;
+}
+
+.linked-person-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--a11y-border, #dee2e6);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
