@@ -2,10 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
-import { IdentifyUserRequest, IdentifyUserData } from '@models';
+import { IdentifyUserRequest, IdentifyUserData, UserMatchSummary } from '@models';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
+import { IdentifyResultsListComponent } from './identify-results-list.component';
+
+const MIN_IDENTIFIER_LENGTH = 3;
 
 @Component({
   selector: 'app-identify-user',
@@ -15,6 +18,7 @@ import { IconDirective } from '@coreui/icons-angular';
     ButtonDirective,
     IconDirective,
     AccessibilityPanelComponent,
+    IdentifyResultsListComponent,
   ],
   templateUrl: './identify-user.component.html',
   styleUrl: './identify-user.component.scss',
@@ -29,6 +33,7 @@ export class IdentifyUserComponent implements OnInit {
   identifier = '';
   isLoading = false;
   errorMessage = '';
+  matches: UserMatchSummary[] | null = null;
 
   userTypeLabels: Record<string, string> = {
     PERSON: 'Persona',
@@ -61,16 +66,22 @@ export class IdentifyUserComponent implements OnInit {
   }
 
   onIdentify(): void {
-    if (!this.identifier.trim()) {
+    const trimmed = this.identifier.trim();
+    if (!trimmed) {
       this.errorMessage = 'Por favor, escribe tu nombre';
+      return;
+    }
+    if (trimmed.length < MIN_IDENTIFIER_LENGTH) {
+      this.errorMessage = `Escribe al menos ${MIN_IDENTIFIER_LENGTH} letras.`;
       return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
+    this.matches = null;
 
     const request: IdentifyUserRequest = {
-      identifier: this.identifier.trim(),
+      identifier: trimmed,
       deviceId: this.authService.getDeviceId(),
       userType: this.userType,
     };
@@ -78,6 +89,11 @@ export class IdentifyUserComponent implements OnInit {
     this.authService.identifyUser(request).subscribe({
       next: (response) => {
         if (response.success && response.data?.userFound) {
+          if (response.data.requiresSelection && response.data.matches?.length) {
+            this.matches = response.data.matches;
+            this.isLoading = false;
+            return;
+          }
           this.navigateToLoginMethod(response.data);
         } else {
           this.errorMessage =
@@ -95,6 +111,27 @@ export class IdentifyUserComponent implements OnInit {
         }
       },
     });
+  }
+
+  onMatchSelected(match: UserMatchSummary): void {
+    this.navigateToLoginMethod({
+      userFound: true,
+      userId: match.userId,
+      displayName: match.displayName + (match.lastNameInitial ? ' ' + match.lastNameInitial + '.' : ''),
+      initial: match.initial,
+      avatarColor: match.avatarColor,
+      loginMethodCode: match.loginMethodCode,
+      loginMethodName: match.loginMethodName,
+      isTrustedDevice: match.isTrustedDevice,
+      requiresSupervision: match.requiresSupervision,
+      userType: 'Person',
+    });
+  }
+
+  searchAgain(): void {
+    this.matches = null;
+    this.identifier = '';
+    this.errorMessage = '';
   }
 
   private navigateToLoginMethod(userData: IdentifyUserData): void {

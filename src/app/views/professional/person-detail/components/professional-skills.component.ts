@@ -25,57 +25,7 @@ import {
     FormCheckInputDirective,
     FormCheckLabelDirective,
   ],
-  template: `
-    <div class="d-flex flex-wrap gap-2 mb-3">
-      @for (sp of currentSkillProfile(); track sp.skillAreaId) {
-        <span class="skill-chip d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
-              [style.background-color]="sp.color ?? '#6c757d'" style="color: #fff;">
-          @if (sp.icon) {
-            <span class="skill-chip-icon">{{ sp.icon }}</span>
-          }
-          <span>{{ sp.skillAreaName }}</span>
-          <button type="button" class="btn-close btn-close-white ms-1 skill-chip-close"
-                  (click)="deactivate(sp.skillAreaId)"
-                  [attr.aria-label]="'Quitar ' + sp.skillAreaName"></button>
-        </span>
-      }
-      @if (currentSkillProfile().length === 0) {
-        <span class="text-body-secondary">Sin areas de habilidad asignadas.</span>
-      }
-    </div>
-    <button cButton color="primary" size="sm" (click)="openModal()">Agregar Area</button>
-
-    <c-modal [visible]="showModal()" (visibleChange)="showModal.set($event)" (visibleChange)="!$event && closeModal()">
-      <c-modal-header><strong>Agregar Áreas de Habilidad</strong></c-modal-header>
-      <c-modal-body>
-        @if (allSkillAreas().length === 0) {
-          <p class="text-body-secondary">No hay áreas disponibles para agregar.</p>
-        } @else {
-          <p class="text-body-secondary mb-3">Seleccioná las áreas que deseas agregar:</p>
-          @for (area of allSkillAreas(); track area.id) {
-            <c-form-check class="mb-2">
-              <input cFormCheckInput type="checkbox" [id]="'skill-' + area.id"
-                     [checked]="selectedIds.has(area.id)"
-                     (change)="toggle(area.id)" />
-              <label cFormCheckLabel [for]="'skill-' + area.id">
-                <strong>{{ area.name }}</strong>
-                @if (area.description) {
-                  <br /><small class="text-body-secondary">{{ area.description }}</small>
-                }
-              </label>
-            </c-form-check>
-          }
-        }
-      </c-modal-body>
-      <c-modal-footer>
-        <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
-        <button cButton color="primary" (click)="confirm()" [disabled]="selectedIds.size === 0 || loading()">
-          @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
-          Agregar ({{ selectedIds.size }})
-        </button>
-      </c-modal-footer>
-    </c-modal>
-  `,
+  templateUrl: './professional-skills.component.html',
 })
 export class ProfessionalSkillsComponent implements OnInit {
   @Input({ required: true }) personId!: string;

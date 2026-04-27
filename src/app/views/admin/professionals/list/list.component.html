@@ -20,7 +20,7 @@
     <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
     <c-row class="align-items-end">
       <c-col sm="3">
-        <label class="form-label">Estado</label>
+        <label cLabel>Estado</label>
         <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
           <option value="">Todos</option>
           <option value="active">Activos</option>
@@ -28,10 +28,13 @@
           <option value="terminated">Dados de baja</option>
         </select>
       </c-col>
+      <c-col sm="auto">
+        <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
+      </c-col>
     </c-row>
   </fieldset>
   <app-data-table
-    title="Gestión de Profesionales"
+    title="Gestionar Profesionales"
     [columns]="cols"
     [items]="professionals"
     [totalItems]="totalItems"
@@ -87,13 +90,13 @@
 <app-confirm-modal
   [visible]="showConfirmModal"
   [loading]="isDeactivateLoading"
-  title="Confirmar desactivacion"
-  messagePrefix="¿Esta seguro de que desea desactivar al profesional "
+  title="Confirmar desactivación"
+  messagePrefix="¿Está seguro de que desea desactivar al profesional "
   [itemName]="itemToDeactivate?.fullName ?? ''"
   messageSuffix="?"
   [showObservation]="true"
-  observationLabel="Motivo de la desactivacion"
-  observationPlaceholder="Indique el motivo de la desactivacion..."
+  observationLabel="Motivo de la desactivación"
+  observationPlaceholder="Indique el motivo de la desactivación..."
   confirmLabel="Desactivar"
   confirmColor="danger"
   (confirm)="confirmDeactivate($event)"
@@ -108,7 +111,7 @@
   [messagePrefix]="isApproveAction ? '¿Desea aprobar la solicitud de ' : '¿Desea rechazar la solicitud de '"
   [itemName]="itemToValidate?.fullName ?? ''"
   messageSuffix="?"
-  [detail]="!isApproveAction ? 'Se notificara al solicitante con el motivo del rechazo.' : 'Se activara el usuario y se enviaran las credenciales por email.'"
+  [detail]="!isApproveAction ? 'Se notificará al solicitante con el motivo del rechazo.' : 'Se activará el usuario y se enviarán las credenciales por email.'"
   [confirmLabel]="isApproveAction ? 'Aprobar' : 'Rechazar'"
   [confirmColor]="isApproveAction ? 'success' : 'danger'"
   [showObservation]="!isApproveAction"
@@ -116,6 +119,20 @@
   observationPlaceholder="Indique el motivo del rechazo..."
   (confirm)="onValidationConfirm($event)"
   (cancel)="cancelValidation()">
+</app-confirm-modal>
+
+<!-- Modal resetear contraseña -->
+<app-confirm-modal
+  [visible]="showResetPasswordModal"
+  title="Resetear contraseña"
+  messagePrefix="¿Desea resetear la contraseña de "
+  [itemName]="itemToResetPassword?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se generará una contraseña temporal que el profesional deberá cambiar en su próximo inicio de sesión."
+  confirmLabel="Resetear"
+  confirmColor="warning"
+  (confirm)="confirmResetPassword()"
+  (cancel)="cancelResetPassword()">
 </app-confirm-modal>
 
 <!-- Modal reactivar -->
@@ -126,7 +143,7 @@
   [messagePrefix]="'¿Desea reactivar al profesional '"
   [itemName]="itemToReactivate?.fullName ?? ''"
   messageSuffix="?"
-  detail="Se restablecera el acceso del profesional al sistema."
+  detail="Se restablecerá el acceso del profesional al sistema."
   confirmLabel="Reactivar"
   confirmColor="success"
   (confirm)="confirmReactivate()"
@@ -154,7 +171,7 @@
             <th>Fecha</th>
             <th>De</th>
             <th>A</th>
-            <th>Observacion</th>
+            <th>Observación</th>
           </tr>
         </thead>
         <tbody>

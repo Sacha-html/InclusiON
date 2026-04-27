@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { GridModule } from '@coreui/angular';
+import { ButtonDirective, FormControlDirective, FormLabelDirective, FormSelectDirective, GridModule } from '@coreui/angular';
 import { AuthService, FamilyService, ToastService } from '@services';
 import { FamilyListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -14,6 +14,10 @@ import { InstitutionFilterComponent } from '@shared/components/institution-filte
   imports: [
     FormsModule,
     GridModule,
+    ButtonDirective,
+    FormControlDirective,
+    FormLabelDirective,
+    FormSelectDirective,
     DataTableComponent,
     ConfirmModalComponent,
     InstitutionFilterComponent,
@@ -32,11 +36,15 @@ export class ListComponent {
   selectedInstitutionId: number | undefined;
 
   linkedPersonSearch = '';
+  statusFilter = '';
 
   families: FamilyListItemResponse[] = [];
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+  sortBy = 'LastName';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
+  loading = false;
 
   showConfirmModal = false;
   itemToDeactivate: FamilyListItemResponse | null = null;
@@ -45,12 +53,12 @@ export class ListComponent {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
         { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
       ],
     },
-    { key: 'fullName', label: 'Nombre' },
+    { key: 'fullName', label: 'Nombre', sortable: true },
     { key: 'linkedPersonNames', label: 'Familiar de' },
     { key: 'relationship', label: 'Parentesco' },
     { key: 'phone', label: 'Telefono' },
@@ -68,13 +76,29 @@ export class ListComponent {
     this.loadFamily();
   }
 
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    const sortMap: Record<string, string> = {
+      'fullName': 'LastName',
+    };
+    this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
+    this.sortDirection = event.sortDirection;
+    this.currentPage = 1;
+    this.loadFamily();
+  }
+
   onLinkedPersonSearch(): void {
     this.currentPage = 1;
     this.loadFamily();
   }
 
-  clearLinkedPersonSearch(): void {
+  onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.loadFamily();
+  }
+
+  clearFilters(): void {
     this.linkedPersonSearch = '';
+    this.statusFilter = '';
     this.currentPage = 1;
     this.loadFamily();
   }
@@ -128,13 +152,21 @@ export class ListComponent {
   }
 
   loadFamily(search?: string): void {
+    this.loading = true;
+    const isActive = this.statusFilter === 'true' ? true
+                   : this.statusFilter === 'false' ? false
+                   : undefined;
+
     this.familyService
-      .getFamily({ 
-        page: this.currentPage, 
-        pageSize: this.pageSize, 
-        search, 
+      .getFamily({
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        search,
+        sortBy: this.sortBy,
+        sortDirection: this.sortDirection,
         institutionId: this.selectedInstitutionId,
-        linkedPersonSearch: this.linkedPersonSearch || undefined
+        linkedPersonSearch: this.linkedPersonSearch || undefined,
+        isActive,
       })
       .subscribe({
         next: (response) => {
@@ -143,9 +175,11 @@ export class ListComponent {
             linkedPersonNames: f.linkedPersons?.map((p: any) => p.fullName).join(', ') || '—',
           }));
           this.totalItems = response.totalRecords;
+          this.loading = false;
         },
         error: () => {
           this.toastService.error('Error al obtener familiares');
+          this.loading = false;
         },
       });
   }

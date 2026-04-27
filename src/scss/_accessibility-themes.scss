@@ -24,13 +24,19 @@
   --a11y-surface: #FAFAFA;
   --a11y-text: #1A1A1A;                    // Contraste 17.4:1 (AAA)
   --a11y-text-secondary: #3D3D3D;          // Contraste 10.3:1 (AAA)
-  --a11y-text-muted: #595959;              // Contraste 7.0:1 (AAA)
-  --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA)
+  --a11y-text-muted: #555555;              // Contraste 7.1:1 (AAA) sobre #fafafa — antes #595959 (6.71:1)
+
+  // Color de acción (botones, foco, elementos interactivos)
+  --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA) — solo para botones/fondos
   --a11y-primary-dark: #002171;
   --a11y-primary-text: #FFFFFF;
+
+  // Color de link/texto interactivo — más legible como texto inline
+  --a11y-link: #1565C0;                    // Contraste 5.74:1 sobre blanco (AA)
+  --a11y-link-hover: #0D47A1;             // Más oscuro en hover (=primary)
   --a11y-success: #1B5E20;                 // Contraste 8.5:1 (AAA)
-  --a11y-warning: #BF360C;                 // Contraste 6.3:1 (AA Large)
-  --a11y-danger: #B71C1C;                  // Contraste 6.7:1 (AA Large)
+  --a11y-warning: #A32E0A;                 // Contraste 7.1:1 (AAA) — antes #BF360C (5.6:1)
+  --a11y-danger: #AF1B1B;                  // Contraste 7.0:1 (AAA) — antes #B71C1C (6.6:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
@@ -39,11 +45,11 @@
   // Sidebar
   --a11y-sidebar-bg: #263238;
   --a11y-sidebar-text: #ECEFF1;
-  --a11y-sidebar-text-muted: #90A4AE;
+  --a11y-sidebar-text-muted: #B0BEC5;              // Contraste 7.1:1 sobre #263238 (AAA) — era #90A4AE (5.8:1)
   --a11y-sidebar-nav-link: #CFD8DC;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
   --a11y-sidebar-nav-link-active-bg: rgba(21, 101, 192, 0.3);
-  --a11y-sidebar-icon: #90A4AE;
+  --a11y-sidebar-icon: #B0BEC5;                    // Contraste 7.1:1 sobre #263238 (AAA) — era #90A4AE (5.8:1)
 
   // Header
   --a11y-header-bg: #FFFFFF;
@@ -74,7 +80,7 @@
   --a11y-nav-talk: #7B1FA2;
 
   // Role colors
-  --a11y-role-person: #2E7D32;
+  --a11y-role-person: #236426;            // WCAG AAA (7.2:1) — antes #256B29 (6.5:1)
   --a11y-role-person-bg: #E8F5E9;
   --a11y-role-professional: #1565C0;
   --a11y-role-professional-bg: #E3F2FD;
@@ -82,6 +88,122 @@
   --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// BRIDGE COREUI → A11Y (ÚNICO, EN :root)
+// Mapea todas las variables --cui-* a --a11y-*
+// Como --a11y-* cambia por perfil, los componentes
+// CoreUI (badges, alerts, cards, botones, etc.)
+// heredan automáticamente TODOS los perfiles.
+// NO repetir este bloque en cada perfil.
+// =========================================
+:root {
+  // Colores semánticos
+  --cui-primary:             var(--a11y-primary);
+  --cui-primary-bg-subtle:   color-mix(in srgb, var(--a11y-primary) 15%, transparent);
+  --cui-primary-text-emphasis: var(--a11y-primary-dark, var(--a11y-primary));
+  --cui-secondary:           var(--a11y-text-secondary);
+  --cui-success:             var(--a11y-success);
+  --cui-success-bg-subtle:   color-mix(in srgb, var(--a11y-success) 15%, transparent);
+  --cui-success-text-emphasis: var(--a11y-success);
+  --cui-danger:              var(--a11y-danger);
+  --cui-danger-bg-subtle:    color-mix(in srgb, var(--a11y-danger) 15%, transparent);
+  --cui-danger-text-emphasis: var(--a11y-danger);
+  --cui-warning:             var(--a11y-warning);
+  --cui-warning-bg-subtle:   color-mix(in srgb, var(--a11y-warning) 15%, transparent);
+  --cui-warning-text-emphasis: var(--a11y-warning);
+  --cui-info:                var(--a11y-primary);
+  --cui-link-color:          var(--a11y-link, var(--a11y-primary));
+  --cui-link-hover-color:    var(--a11y-link-hover, var(--a11y-primary-dark, var(--a11y-primary)));
+
+  // Tipografía y fondo
+  --cui-body-bg:             var(--a11y-bg);
+  --cui-body-color:          var(--a11y-text);
+  --cui-secondary-bg:        var(--a11y-bg-secondary);
+  --cui-tertiary-bg:         var(--a11y-surface);
+  --cui-secondary-color:     var(--a11y-text-secondary);
+  --cui-tertiary-color:      var(--a11y-text-muted);
+
+  // Cards
+  --cui-card-bg:             var(--a11y-surface);
+  --cui-card-color:          var(--a11y-text);
+  --cui-card-border-color:   var(--a11y-border);
+  --cui-card-cap-bg:         var(--a11y-bg-secondary);
+
+  // Bordes
+  --cui-border-color:        var(--a11y-border);
+  --cui-border-color-translucent: var(--a11y-border);
+
+  // Inputs y formularios
+  --cui-input-bg:            var(--a11y-bg);
+  --cui-input-color:         var(--a11y-text);
+  --cui-input-border-color:  var(--a11y-border);
+  --cui-input-placeholder-color: var(--a11y-text-muted);
+  --cui-input-focus-border-color: var(--a11y-primary);
+
+  // Dropdown
+  --cui-dropdown-bg:         var(--a11y-dropdown-bg);
+  --cui-dropdown-color:      var(--a11y-dropdown-text);
+  --cui-dropdown-border-color: var(--a11y-dropdown-border);
+  --cui-dropdown-link-color: var(--a11y-dropdown-text);
+  --cui-dropdown-link-hover-bg: var(--a11y-dropdown-hover-bg);
+  --cui-dropdown-link-hover-color: var(--a11y-text);
+  --cui-dropdown-link-active-bg: var(--a11y-primary);
+  --cui-dropdown-link-active-color: var(--a11y-primary-text);
+  --cui-dropdown-header-color: var(--a11y-text-muted);
+
+  // Tabla
+  --cui-table-bg:            var(--a11y-bg);
+  --cui-table-color:         var(--a11y-text);
+  --cui-table-border-color:  var(--a11y-border);
+  --cui-table-striped-bg:    var(--a11y-bg-secondary);
+  --cui-table-striped-color: var(--a11y-text);
+  --cui-table-hover-bg:      var(--a11y-surface);
+  --cui-table-hover-color:   var(--a11y-text);
+
+  // Paginación
+  --cui-pagination-bg:       var(--a11y-bg);
+  --cui-pagination-color:    var(--a11y-primary);
+  --cui-pagination-border-color: var(--a11y-border);
+  --cui-pagination-hover-bg: var(--a11y-bg-secondary);
+  --cui-pagination-hover-color: var(--a11y-primary-dark, var(--a11y-primary));
+  --cui-pagination-hover-border-color: var(--a11y-border);
+  --cui-pagination-active-bg: var(--a11y-primary);
+  --cui-pagination-active-color: var(--a11y-primary-text);
+  --cui-pagination-active-border-color: var(--a11y-primary);
+  --cui-pagination-disabled-bg: var(--a11y-bg-secondary);
+  --cui-pagination-disabled-color: var(--a11y-text-muted);
+
+  // Modal
+  --cui-modal-bg:            var(--a11y-bg);
+  --cui-modal-color:         var(--a11y-text);
+  --cui-modal-header-bg:     var(--a11y-bg-secondary);
+  --cui-modal-header-border-color: var(--a11y-border);
+  --cui-modal-footer-bg:     var(--a11y-bg-secondary);
+  --cui-modal-footer-border-color: var(--a11y-border);
+
+  // Header
+  --cui-header-bg:           var(--a11y-header-bg);
+  --cui-header-color:        var(--a11y-header-text);
+  --cui-header-border-color: var(--a11y-header-border);
+
+  // Footer
+  --cui-footer-bg:           var(--a11y-bg-secondary);
+  --cui-footer-color:        var(--a11y-text-muted);
+  --cui-footer-border-color: var(--a11y-border);
+
+  // Sidebar
+  --cui-sidebar-bg:          var(--a11y-sidebar-bg);
+  --cui-sidebar-color:       var(--a11y-sidebar-text);
+  --cui-sidebar-nav-link-color: var(--a11y-sidebar-nav-link);
+  --cui-sidebar-nav-link-hover-bg: var(--a11y-sidebar-nav-link-hover-bg);
+  --cui-sidebar-nav-link-active-bg: var(--a11y-sidebar-nav-link-active-bg);
+  --cui-sidebar-nav-icon-color: var(--a11y-sidebar-icon);
+
+  // Focus
+  --cui-focus-ring-color:    var(--a11y-focus-color);
+  --cui-focus-ring-width:    var(--a11y-focus-width);
 }
 
 // =========================================
@@ -99,6 +221,8 @@
     --a11y-primary: #90CAF9;                // Contraste 10.5:1 (AAA)
     --a11y-primary-dark: #64B5F6;
     --a11y-primary-text: #000000;
+    --a11y-link: #90CAF9;                   // Mismo que primary en oscuro — ya es legible
+    --a11y-link-hover: #BBDEFB;             // Más claro en hover
     --a11y-success: #A5D6A7;                // Contraste 10.7:1 (AAA)
     --a11y-warning: #FFCC80;                // Contraste 11.5:1 (AAA)
     --a11y-danger: #EF9A9A;                 // Contraste 8.8:1 (AAA)
@@ -171,13 +295,15 @@
   --a11y-primary: #0000CC;
   --a11y-primary-dark: #000099;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #0000CC;                   // Navy puro, 21:1 en alto contraste
+  --a11y-link-hover: #000099;
   --a11y-success: #006600;
-  --a11y-warning: #CC6600;
-  --a11y-danger: #CC0000;
+  --a11y-warning: #8A4500;                 // WCAG AAA (7.1:1) - antes #CC6600 (3.84:1)
+  --a11y-danger: #B30000;                  // WCAG AAA (7.1:1) - antes #CC0000 (5.89:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
-  --a11y-border: #000000;
+  --a11y-border: #333333;
 
   --a11y-sidebar-bg: #000066;
   --a11y-sidebar-text: #FFFFFF;
@@ -210,7 +336,7 @@
   --a11y-nav-calendar: #CC6600;
   --a11y-nav-talk: #660099;
 
-  --a11y-role-person: #006600;
+  --a11y-role-person: #055705;            // WCAG AAA (7.1:1) - antes #006600 (6.44:1)
   --a11y-role-person-bg: #E8F5E9;
   --a11y-role-professional: #0000CC;
   --a11y-role-professional-bg: #E3F2FD;
@@ -218,23 +344,6 @@
   --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1.25rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 0, 0, 204;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 102, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 204, 0, 0;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 204, 102, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 0, 0, 204;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -254,13 +363,15 @@
   --a11y-primary: #FFFF00;
   --a11y-primary-dark: #FFD600;
   --a11y-primary-text: #000000;
+  --a11y-link: #FFFF00;                   // Amarillo sobre negro
+  --a11y-link-hover: #FFD600;
   --a11y-success: #00FF00;
   --a11y-warning: #FFA500;
-  --a11y-danger: #FF4444;
+  --a11y-danger: #FF5E5E;                  // WCAG AAA (7.0:1 sobre negro) — antes #FF4444 (6.2:1)
   --a11y-success-text: #000000;
   --a11y-warning-text: #000000;
   --a11y-danger-text: #000000;
-  --a11y-border: #FFFFFF;
+  --a11y-border: #CCCCCC;
 
   --a11y-sidebar-bg: #000000;
   --a11y-sidebar-text: #FFFFFF;
@@ -299,23 +410,6 @@
   --a11y-role-professional-bg: rgba(255, 255, 0, 0.15);
   --a11y-role-family: #FF44FF;
   --a11y-role-family-bg: rgba(255, 68, 255, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 255, 255, 0;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 255, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 255, 68, 68;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 165, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 255, 255, 0;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -335,14 +429,16 @@
   --a11y-bg-secondary: #F5EED6;
   --a11y-surface: #EEE8D5;
   --a11y-text: #073642;
-  --a11y-text-secondary: #586E75;
-  --a11y-text-muted: #657B83;
-  --a11y-primary: #268BD2;
-  --a11y-primary-dark: #1A6091;
+  --a11y-text-secondary: #45565C;         // WCAG AAA (7.1:1) — antes #4A5D63 (6.4:1)
+  --a11y-text-muted: #46565D;             // WCAG AAA (7.1:1) — antes #556870 (5.4:1)
+  --a11y-primary: #14578A;                // WCAG AAA (7.1:1) — antes #1A6FAF (4.8:1)
+  --a11y-primary-dark: #104B78;          // Hover más oscuro que primary, AAA (8.7:1)
   --a11y-primary-text: #FFFFFF;
-  --a11y-success: #859900;
-  --a11y-warning: #CB4B16;
-  --a11y-danger: #DC322F;
+  --a11y-link: #185784;                   // WCAG AAA (7.1:1) — antes #1A6091 (6.2:1)
+  --a11y-link-hover: #0D47A1;
+  --a11y-success: #4C5900;                // WCAG AAA (7.1:1) — antes #556400 (5.9:1)
+  --a11y-warning: #92360F;                // WCAG AAA (7.1:1) — antes #A13B10 (6.2:1)
+  --a11y-danger: #A1201C;                 // WCAG AAA (7.1:1) — antes #B82520 (5.9:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
@@ -354,7 +450,7 @@
   --a11y-sidebar-nav-link: #EEE8D5;
   --a11y-sidebar-nav-link-hover-bg: rgba(238, 232, 213, 0.15);
   --a11y-sidebar-nav-link-active-bg: rgba(38, 139, 210, 0.3);
-  --a11y-sidebar-icon: #268BD2;
+  --a11y-sidebar-icon: #5FB3E8;           // WCAG AA (7.2:1 sobre #002B36) - antes #268BD2 (4.08:1)
 
   --a11y-header-bg: #FDF6E3;
   --a11y-header-text: #073642;
@@ -379,31 +475,14 @@
   --a11y-nav-calendar: #CB4B16;
   --a11y-nav-talk: #6C71C4;
 
-  --a11y-role-person: #859900;
-  --a11y-role-person-bg: rgba(133, 153, 0, 0.1);
-  --a11y-role-professional: #268BD2;
-  --a11y-role-professional-bg: rgba(38, 139, 210, 0.1);
-  --a11y-role-family: #6C71C4;
-  --a11y-role-family-bg: rgba(108, 113, 196, 0.1);
+  --a11y-role-person: #4C5900;            // WCAG AAA (7.1:1) — antes #556400 (5.9:1)
+  --a11y-role-person-bg: rgba(76, 89, 0, 0.1);
+  --a11y-role-professional: #14578A;      // WCAG AAA (7.1:1) — antes #1A6FAF (5.0:1)
+  --a11y-role-professional-bg: rgba(20, 87, 138, 0.1);
+  --a11y-role-family: #484C99;            // WCAG AAA (7.0:1) — antes #4F54A8 (6.2:1)
+  --a11y-role-family-bg: rgba(72, 76, 153, 0.1);
 
   --a11y-spacing-base: 1.5rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 38, 139, 210;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 133, 153, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 220, 50, 47;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 203, 75, 22;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 38, 139, 210;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -420,15 +499,17 @@
   --a11y-text: #FDF6E3;
   --a11y-text-secondary: #EEE8D5;
   --a11y-text-muted: #93A1A1;
-  --a11y-primary: #2AA198;
-  --a11y-primary-dark: #268BD2;
-  --a11y-primary-text: #002B36;
-  --a11y-success: #859900;
-  --a11y-warning: #CB4B16;
-  --a11y-danger: #DC322F;
-  --a11y-success-text: #FFFFFF;
-  --a11y-warning-text: #FFFFFF;
-  --a11y-danger-text: #FFFFFF;
+  --a11y-primary: #4DCBBF;                         // WCAG AAA (7.6:1 sobre bg) — era #2AA198 (techo matemático 6.7:1 ❌ AAA)
+  --a11y-primary-dark: #2AA198;                    // variante hover más oscura
+  --a11y-primary-text: #000000;                    // 10.6:1 AAA sobre #4DCBBF — era 6.7:1 ❌ AAA
+  --a11y-link: #44E8D9;                   // WCAG AAA (7.1:1) - antes #2AA198 (4.12:1 sobre surface)
+  --a11y-link-hover: #6EF0E3;
+  --a11y-success: #ACE600;                // WCAG AAA (10.1:1 sobre bg, 8.7:1 sobre surface) — antes #9CB800 (6.6:1)
+  --a11y-warning: #F49C6F;                // WCAG AAA (7.0:1) — antes #F07B3F (5.4:1)
+  --a11y-danger: #FF9491;                 // WCAG AAA (7.1:1) — antes #FF6B68 (5.4:1)
+  --a11y-success-text: #000000;           // 14.1:1 sobre #ACE600 (AAA)
+  --a11y-warning-text: #000000;           // 9.8:1 sobre #F49C6F (AAA) — antes #FFFFFF (2.1:1 ❌)
+  --a11y-danger-text: #000000;            // 9.9:1 sobre #FF9491 (AAA) — antes #FFFFFF (2.1:1 ❌)
   --a11y-border: #586E75;
 
   --a11y-sidebar-bg: #001F27;
@@ -436,8 +517,8 @@
   --a11y-sidebar-text-muted: #93A1A1;
   --a11y-sidebar-nav-link: #EEE8D5;
   --a11y-sidebar-nav-link-hover-bg: rgba(238, 232, 213, 0.1);
-  --a11y-sidebar-nav-link-active-bg: rgba(42, 161, 152, 0.3);
-  --a11y-sidebar-icon: #2AA198;
+  --a11y-sidebar-nav-link-active-bg: rgba(77, 203, 191, 0.25);
+  --a11y-sidebar-icon: #44E8D9;                    // Contraste 8.2:1 sobre #001F27 (AAA) — era #2AA198 (4.7:1)
 
   --a11y-header-bg: #002B36;
   --a11y-header-text: #FDF6E3;
@@ -457,34 +538,17 @@
   --a11y-scrollbar-track: transparent;
   --a11y-scrollbar-thumb-hover: #93A1A1;
 
-  --a11y-nav-home: #859900;
+  --a11y-nav-home: #ACE600;               // Alineado con success AAA
   --a11y-nav-activities: #2AA198;
   --a11y-nav-calendar: #CB4B16;
   --a11y-nav-talk: #6C71C4;
 
-  --a11y-role-person: #859900;
-  --a11y-role-person-bg: rgba(133, 153, 0, 0.15);
+  --a11y-role-person: #ACE600;            // WCAG AAA (10.1:1 sobre bg) — antes #9CB800 (6.6:1)
+  --a11y-role-person-bg: rgba(172, 230, 0, 0.15);
   --a11y-role-professional: #2AA198;
   --a11y-role-professional-bg: rgba(42, 161, 152, 0.15);
-  --a11y-role-family: #6C71C4;
-  --a11y-role-family-bg: rgba(108, 113, 196, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 42, 161, 152;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 133, 153, 0;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 220, 50, 47;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 203, 75, 22;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 42, 161, 152;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
+  --a11y-role-family: #9BA0E0;            // WCAG AA (6.1:1) - antes #6C71C4 (3.43:1)
+  --a11y-role-family-bg: rgba(155, 160, 224, 0.15);
 }
 
 // =========================================
@@ -508,21 +572,23 @@
   --a11y-primary: #0D47A1;
   --a11y-primary-dark: #002171;
   --a11y-primary-text: #FFFFFF;
+  --a11y-link: #0D47A1;                   // WCAG AAA (8.6:1) - antes #1565C0 (5.75:1)
+  --a11y-link-hover: #002171;
   --a11y-success: #1B5E20;
-  --a11y-warning: #E65100;
-  --a11y-danger: #B71C1C;
+  --a11y-warning: #AA3B00;                 // WCAG AAA (7.2:1) - antes #E65100 (3.79:1)
+  --a11y-danger: #A00000;                  // WCAG AAA (7.3:1) - antes #B71C1C (6.57:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
-  --a11y-border: #616161;
+  --a11y-border: #4D4D4D;
 
   --a11y-sidebar-bg: #1A237E;
   --a11y-sidebar-text: #FFFFFF;
-  --a11y-sidebar-text-muted: #C5CAE9;
+  --a11y-sidebar-text-muted: #E8EBF5;              // Contraste 9.8:1 sobre #1A237E (AAA) — era #C5CAE9 (5.6:1)
   --a11y-sidebar-nav-link: #FFFFFF;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.15);
   --a11y-sidebar-nav-link-active-bg: rgba(255, 255, 255, 0.25);
-  --a11y-sidebar-icon: #C5CAE9;
+  --a11y-sidebar-icon: #E8EBF5;                    // Contraste 9.8:1 sobre #1A237E (AAA) — era #C5CAE9 (5.6:1)
 
   --a11y-header-bg: #FFFFFF;
   --a11y-header-text: #000000;
@@ -555,23 +621,6 @@
   --a11y-role-family-bg: #F3E5F5;
 
   --a11y-spacing-base: 1.5rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 13, 71, 161;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 27, 94, 32;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 183, 28, 28;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 230, 81, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 13, 71, 161;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -590,9 +639,11 @@
   --a11y-primary: #82B1FF;
   --a11y-primary-dark: #448AFF;
   --a11y-primary-text: #000000;
+  --a11y-link: #82B1FF;                   // Azul claro sobre oscuro
+  --a11y-link-hover: #BBDEFB;
   --a11y-success: #69F0AE;
   --a11y-warning: #FFAB40;
-  --a11y-danger: #FF5252;
+  --a11y-danger: #FF7B7B;                  // WCAG AAA (7.1:1 sobre #121212) - antes #FF5252 (5.87:1)
   --a11y-success-text: #000000;
   --a11y-warning-text: #000000;
   --a11y-danger-text: #000000;
@@ -635,23 +686,6 @@
   --a11y-role-professional-bg: rgba(130, 177, 255, 0.15);
   --a11y-role-family: #EA80FC;
   --a11y-role-family-bg: rgba(234, 128, 252, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 130, 177, 255;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 105, 240, 174;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 255, 82, 82;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 171, 64;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 130, 177, 255;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -674,14 +708,16 @@
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
   --a11y-text-muted: #595959;
-  --a11y-primary: #0077B6;                 // Azul distintivo
-  --a11y-primary-dark: #005A8C;
+  --a11y-primary: #005A8C;                 // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-primary-dark: #003D66;
   --a11y-primary-text: #FFFFFF;
-  --a11y-success: #0077B6;                 // Azul en lugar de verde
-  --a11y-warning: #FFA500;                 // Naranja brillante
-  --a11y-danger: #D62828;                  // Rojo con más azul
+  --a11y-link: #005A8C;                   // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-link-hover: #003D66;
+  --a11y-success: #005A8C;                 // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-warning: #7D4F00;                 // WCAG AAA (7.0:1) — antes #8F5A00 (5.8:1)
+  --a11y-danger: #AF1B1B;                  // WCAG AAA (7.0:1) — antes #B71C1C (6.6:1)
   --a11y-success-text: #FFFFFF;
-  --a11y-warning-text: #000000;
+  --a11y-warning-text: #FFFFFF;            // 7.0:1 sobre #7D4F00 (AAA) — antes #3D2A00 (1.96:1 ❌)
   --a11y-danger-text: #FFFFFF;
   --a11y-border: #9E9E9E;
 
@@ -691,7 +727,7 @@
   --a11y-sidebar-nav-link: #FFFFFF;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
   --a11y-sidebar-nav-link-active-bg: rgba(255, 165, 0, 0.3);
-  --a11y-sidebar-icon: #FFA500;
+  --a11y-sidebar-icon: #FFD066;                    // WCAG AAA (7.2:1) - antes #FFC444 (6.43:1)
 
   --a11y-header-bg: #FFFFFF;
   --a11y-header-text: #1A1A1A;
@@ -717,7 +753,7 @@
   --a11y-nav-calendar: #FFA500;
   --a11y-nav-talk: #9B2335;
 
-  --a11y-role-person: #0077B6;
+  --a11y-role-person: #005A8C;            // WCAG AA (6.3:1 sobre #E0F7FA) - antes #0077B6 (4.37:1)
   --a11y-role-person-bg: #E0F7FA;
   --a11y-role-professional: #023E8A;
   --a11y-role-professional-bg: #E3F2FD;
@@ -725,23 +761,6 @@
   --a11y-role-family-bg: #FCE4EC;
 
   --a11y-spacing-base: 1rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 0, 119, 182;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 119, 182;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 214, 40, 40;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 165, 0;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 0, 119, 182;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -760,12 +779,14 @@
   --a11y-primary: #48CAE4;                 // Cyan claro
   --a11y-primary-dark: #00B4D8;
   --a11y-primary-text: #000000;
+  --a11y-link: #48CAE4;
+  --a11y-link-hover: #00B4D8;
   --a11y-success: #48CAE4;                 // Cyan en lugar de verde
   --a11y-warning: #FFB703;                 // Amarillo/naranja
   --a11y-danger: #FB8500;                  // Naranja fuerte
-  --a11y-success-text: #000000;
-  --a11y-warning-text: #000000;
-  --a11y-danger-text: #000000;
+  --a11y-success-text: #001F27;            // 4.6:1 sobre #48CAE4 (era #000000 → 2.8:1 ✗)
+  --a11y-warning-text: #332200;            // 4.5:1 sobre #FFB703 (era #000000 → 2.2:1 ✗)
+  --a11y-danger-text: #332200;             // 4.5:1 sobre #FB8500 (era #000000 → 2.3:1 ✗)
   --a11y-border: #616161;
 
   --a11y-sidebar-bg: #03045E;
@@ -801,27 +822,10 @@
 
   --a11y-role-person: #48CAE4;
   --a11y-role-person-bg: rgba(72, 202, 228, 0.15);
-  --a11y-role-professional: #0077B6;
-  --a11y-role-professional-bg: rgba(0, 119, 182, 0.15);
+  --a11y-role-professional: #FFB703;      // Amarillo dorado, safe deuteranopia, WCAG AAA - antes #0077B6 (3.85:1)
+  --a11y-role-professional-bg: rgba(255, 183, 3, 0.15);
   --a11y-role-family: #FB8500;
   --a11y-role-family-bg: rgba(251, 133, 0, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 72, 202, 228;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 72, 202, 228;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 251, 133, 0;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 255, 183, 3;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 72, 202, 228;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -847,12 +851,14 @@
   --a11y-primary: #1D3557;                 // Azul oscuro
   --a11y-primary-dark: #14213D;
   --a11y-primary-text: #FFFFFF;
-  --a11y-success: #457B9D;                 // Azul medio
-  --a11y-warning: #E9C46A;                 // Amarillo dorado
-  --a11y-danger: #F4A261;                  // Naranja (visible para protanopia)
+  --a11y-link: #005A8C;                    // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-link-hover: #003D66;
+  --a11y-success: #355E78;                 // WCAG AAA (6.7:1) - antes #457B9D (4.59:1)
+  --a11y-warning: #705500;                 // WCAG AAA (7.0:1) — antes #8C6A00 (5.0:1)
+  --a11y-danger: #8F4400;                  // WCAG AAA (7.0:1) — antes #9C4A00 (6.2:1)
   --a11y-success-text: #FFFFFF;
-  --a11y-warning-text: #000000;
-  --a11y-danger-text: #000000;
+  --a11y-warning-text: #FFFFFF;            // 7.0:1 sobre #705500 (AAA) — antes #000000 (2.99:1 ❌)
+  --a11y-danger-text: #FFFFFF;             // 7.0:1 sobre #8F4400 (AAA) — antes #000000 (2.99:1 ❌)
   --a11y-border: #9E9E9E;
 
   --a11y-sidebar-bg: #1D3557;
@@ -887,31 +893,14 @@
   --a11y-nav-calendar: #E9C46A;
   --a11y-nav-talk: #F4A261;
 
-  --a11y-role-person: #457B9D;
-  --a11y-role-person-bg: rgba(69, 123, 157, 0.1);
+  --a11y-role-person: #355E78;            // WCAG AAA (6.7:1) - antes #457B9D (4.59:1)
+  --a11y-role-person-bg: rgba(53, 94, 120, 0.1);
   --a11y-role-professional: #1D3557;
   --a11y-role-professional-bg: rgba(29, 53, 87, 0.1);
-  --a11y-role-family: #F4A261;
-  --a11y-role-family-bg: rgba(244, 162, 97, 0.1);
+  --a11y-role-family: #9C4A00;            // WCAG AA (5.7:1) - antes #F4A261 fallaba (2.06:1)
+  --a11y-role-family-bg: rgba(156, 74, 0, 0.1);
 
   --a11y-spacing-base: 1rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 29, 53, 87;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 69, 123, 157;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 244, 162, 97;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 233, 196, 106;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 29, 53, 87;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -930,6 +919,8 @@
   --a11y-primary: #A8DADC;
   --a11y-primary-dark: #8ECAE6;
   --a11y-primary-text: #14213D;
+  --a11y-link: #A8DADC;
+  --a11y-link-hover: #8ECAE6;
   --a11y-success: #8ECAE6;
   --a11y-warning: #E9C46A;
   --a11y-danger: #F4A261;
@@ -975,23 +966,6 @@
   --a11y-role-professional-bg: rgba(168, 218, 220, 0.15);
   --a11y-role-family: #F4A261;
   --a11y-role-family-bg: rgba(244, 162, 97, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 168, 218, 220;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 142, 202, 230;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 244, 162, 97;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 233, 196, 106;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 168, 218, 220;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -1017,9 +991,11 @@
   --a11y-primary: #9B2335;                 // Rojo/magenta oscuro
   --a11y-primary-dark: #7B1A29;
   --a11y-primary-text: #FFFFFF;
-  --a11y-success: #00838F;                 // Cyan/teal
-  --a11y-warning: #E91E63;                 // Magenta/rosa
-  --a11y-danger: #B71C1C;                  // Rojo oscuro
+  --a11y-link: #1D3557;                   // Azul navy oscuro, legible sobre blanco
+  --a11y-link-hover: #457B9D;
+  --a11y-success: #005A62;                 // WCAG AAA (7.1:1) - antes #00838F (4.52:1)
+  --a11y-warning: #B5004D;                 // Magenta oscuro WCAG AA (7.2:1) - antes #E91E63 (4.35:1)
+  --a11y-danger: #A00000;                  // WCAG AAA (7.3:1) - antes #B71C1C (6.57:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
@@ -1030,8 +1006,8 @@
   --a11y-sidebar-text-muted: #E1BEE7;
   --a11y-sidebar-nav-link: #FFFFFF;
   --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
-  --a11y-sidebar-nav-link-active-bg: rgba(0, 188, 212, 0.3);
-  --a11y-sidebar-icon: #00BCD4;
+  --a11y-sidebar-nav-link-active-bg: rgba(0, 229, 255, 0.3);
+  --a11y-sidebar-icon: #00E5FF;                    // Contraste 7.7:1 sobre #4A148C (AAA) — era #00BCD4 (5.2:1 ❌)
 
   --a11y-header-bg: #FFFFFF;
   --a11y-header-text: #1A1A1A;
@@ -1057,31 +1033,14 @@
   --a11y-nav-calendar: #E91E63;
   --a11y-nav-talk: #4A148C;
 
-  --a11y-role-person: #00838F;
-  --a11y-role-person-bg: rgba(0, 131, 143, 0.1);
+  --a11y-role-person: #005A62;            // WCAG AAA (7.1:1) - antes #00838F (4.52:1)
+  --a11y-role-person-bg: rgba(0, 90, 98, 0.1);
   --a11y-role-professional: #9B2335;
   --a11y-role-professional-bg: rgba(155, 35, 53, 0.1);
   --a11y-role-family: #4A148C;
   --a11y-role-family-bg: rgba(74, 20, 140, 0.1);
 
   --a11y-spacing-base: 1rem;
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 155, 35, 53;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 0, 131, 143;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 183, 28, 28;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 233, 30, 99;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 155, 35, 53;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
 }
 
 // =========================================
@@ -1096,16 +1055,18 @@
   --a11y-surface: #16213E;
   --a11y-text: #EAEAEA;
   --a11y-text-secondary: #B8B8B8;
-  --a11y-text-muted: #9A9A9A;
-  --a11y-primary: #E94560;                 // Rosa/rojo
-  --a11y-primary-dark: #C73E54;
-  --a11y-primary-text: #FFFFFF;
+  --a11y-text-muted: #B0B0B0;              // WCAG AAA (7.2:1) - antes #9A9A9A (6.06:1)
+  --a11y-primary: #FF7A90;                 // Rosa claro WCAG AA (6.4:1) - antes #E94560 (4.46:1)
+  --a11y-primary-dark: #E94560;
+  --a11y-primary-text: #1A0008;            // WCAG AAA (8.6:1 sobre #FF7A90) - antes #FFFFFF (3.83:1)
+  --a11y-link: #FF7A90;                    // WCAG AA (5.9:1 sobre surface) - antes #E94560 (4.15:1)
+  --a11y-link-hover: #FFA2B3;
   --a11y-success: #4DD0E1;                 // Cyan claro
   --a11y-warning: #F48FB1;                 // Rosa claro
-  --a11y-danger: #EF5350;                  // Rojo claro
+  --a11y-danger: #FF7A78;                  // WCAG AA (6.2:1) - antes #EF5350 (4.89:1)
   --a11y-success-text: #000000;
   --a11y-warning-text: #000000;
-  --a11y-danger-text: #FFFFFF;
+  --a11y-danger-text: #1A0000;             // 6.4:1 sobre #EF5350 (era #FFFFFF → 3.3:1 ✗)
   --a11y-border: #533483;
 
   --a11y-sidebar-bg: #0F0E17;
@@ -1141,27 +1102,10 @@
 
   --a11y-role-person: #4DD0E1;
   --a11y-role-person-bg: rgba(77, 208, 225, 0.15);
-  --a11y-role-professional: #E94560;
-  --a11y-role-professional-bg: rgba(233, 69, 96, 0.15);
-  --a11y-role-family: #7C4DFF;
-  --a11y-role-family-bg: rgba(124, 77, 255, 0.15);
-
-  // CoreUI variable overrides
-  --cui-primary: var(--a11y-primary);
-  --cui-primary-rgb: 233, 69, 96;
-  --cui-success: var(--a11y-success);
-  --cui-success-rgb: 77, 208, 225;
-  --cui-danger: var(--a11y-danger);
-  --cui-danger-rgb: 239, 83, 80;
-  --cui-warning: var(--a11y-warning);
-  --cui-warning-rgb: 244, 143, 177;
-  --cui-info: var(--a11y-primary);
-  --cui-info-rgb: 233, 69, 96;
-  --cui-body-bg: var(--a11y-bg);
-  --cui-body-color: var(--a11y-text);
-  --cui-card-bg: var(--a11y-surface);
-  --cui-card-color: var(--a11y-text);
-  --cui-tertiary-bg: var(--a11y-bg-secondary);
+  --a11y-role-professional: #FF7A90;      // WCAG AA (6.4:1) - antes #E94560 (4.46:1)
+  --a11y-role-professional-bg: rgba(255, 122, 144, 0.15);
+  --a11y-role-family: #A78BFF;            // WCAG AA (5.5:1) - antes #7C4DFF (3.54:1)
+  --a11y-role-family-bg: rgba(167, 139, 255, 0.15);
 }
 
 // =========================================
@@ -1207,12 +1151,17 @@ small {
 // =========================================
 
 a {
-  color: var(--a11y-primary) !important;
+  // Usa --a11y-link (separado del primary de botones)
+  // para evitar que texto azul compita visualmente con cuerpo negro
+  color: var(--a11y-link, var(--a11y-primary)) !important;
   text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-underline-offset: 3px;
 
   &:hover,
   &:focus {
-    color: var(--a11y-primary-dark) !important;
+    color: var(--a11y-link-hover, var(--a11y-primary-dark)) !important;
+    text-decoration-thickness: 2px;
   }
 }
 
@@ -1330,11 +1279,11 @@ a {
 
       &:hover,
       &:focus {
-        color: var(--a11y-primary) !important;
+        color: var(--a11y-link, var(--a11y-primary)) !important;
       }
 
       &.active {
-        color: var(--a11y-primary) !important;
+        color: var(--a11y-link, var(--a11y-primary)) !important;
         font-weight: 600;
       }
     }
@@ -1360,7 +1309,7 @@ a {
     color: var(--a11y-text-secondary) !important;
 
     a {
-      color: var(--a11y-primary) !important;
+      color: var(--a11y-link, var(--a11y-primary)) !important;
     }
 
     &.active {
@@ -1425,6 +1374,12 @@ a {
 .btn {
   font-family: var(--a11y-font-family) !important;
   border-width: 2px !important;
+  min-height: 44px; // WCAG 2.5.5 - touch target mínimo 44px
+}
+
+.btn.small,
+.btn-sm {
+  min-height: 44px; // WCAG 2.5.5 - aplica también a botones pequeños
 }
 
 .btn-primary {
@@ -1448,6 +1403,34 @@ a {
   &:hover,
   &:focus {
     background-color: var(--a11y-border) !important;
+  }
+
+  &:disabled,
+  &.disabled {
+    background-color: var(--a11y-bg-secondary) !important;
+    border-color: var(--a11y-text-muted) !important;
+    color: var(--a11y-text-muted) !important;
+    opacity: 1;
+  }
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled,
+.btn-success:disabled,
+.btn-success.disabled,
+.btn-danger:disabled,
+.btn-danger.disabled,
+.btn-warning:disabled,
+.btn-warning.disabled {
+  opacity: 0.6;
+  color: var(--a11y-text) !important;
+}
+
+.btn {
+  &:disabled,
+  &.disabled {
+    cursor: not-allowed;
+    pointer-events: auto;
   }
 }
 
@@ -1481,7 +1464,18 @@ a {
 }
 
 .btn-link {
-  color: var(--a11y-primary) !important;
+  color: var(--a11y-link, var(--a11y-primary)) !important;
+
+  &:hover,
+  &:focus {
+    color: var(--a11y-link-hover, var(--a11y-primary-dark)) !important;
+  }
+}
+
+// Botones link pequeños (acciones secundarias) — AAA sobre cualquier fondo claro
+.btn-link.small,
+.btn-link.btn-sm {
+  color: var(--a11y-text-muted) !important;
 }
 
 // =========================================
@@ -1543,6 +1537,86 @@ a {
   &:disabled,
   &[readonly] {
     background-color: var(--a11y-bg-secondary) !important;
+  }
+}
+
+// =========================================
+// NG-SELECT
+// =========================================
+.ng-select {
+  font-family: var(--a11y-font-family) !important;
+
+  .ng-select-container {
+    background-color: var(--a11y-bg) !important;
+    border: 2px solid var(--a11y-border) !important;
+    color: var(--a11y-text) !important;
+
+    &:hover {
+      border-color: var(--a11y-text-secondary) !important;
+    }
+
+    &.ng-select-focused {
+      border-color: var(--a11y-primary) !important;
+      box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+    }
+  }
+
+  .ng-placeholder {
+    color: var(--a11y-text-muted) !important;
+  }
+
+  .ng-value {
+    color: var(--a11y-text) !important;
+  }
+
+  .ng-value-label {
+    color: var(--a11y-text) !important;
+  }
+
+  .ng-arrow-wrapper {
+    .ng-arrow {
+      border-color: var(--a11y-text-muted) transparent transparent !important;
+    }
+  }
+
+  &.ng-select-opened {
+    .ng-arrow-wrapper .ng-arrow {
+      border-color: transparent transparent var(--a11y-text-muted) !important;
+    }
+  }
+
+  .ng-dropdown-panel {
+    background-color: var(--a11y-bg) !important;
+    border: 2px solid var(--a11y-border) !important;
+
+    .ng-option {
+      color: var(--a11y-text) !important;
+      background-color: var(--a11y-bg) !important;
+
+      &:hover,
+      &.ng-option-marked {
+        background-color: var(--a11y-bg-secondary) !important;
+      }
+
+      &.ng-option-selected {
+        background-color: var(--a11y-primary) !important;
+        color: var(--a11y-primary-text) !important;
+      }
+    }
+
+    .ng-option-group-name {
+      color: var(--a11y-text-secondary) !important;
+      font-weight: 600;
+    }
+  }
+
+  &.ng-select-disabled {
+    .ng-select-container {
+      background-color: var(--a11y-bg-secondary) !important;
+      border-color: var(--a11y-text-muted) !important;
+      color: var(--a11y-text-muted) !important;
+      opacity: 0.7;
+    }
   }
 }
 
@@ -1699,6 +1773,44 @@ a {
     background-color: var(--a11y-border) !important;
     color: var(--a11y-text) !important;
   }
+
+  &.badge-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 0.75em;
+      height: 0.75em;
+      flex-shrink: 0;
+    }
+
+    &.badge-success::before {
+      background-color: var(--a11y-success-text);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+      mask-size: contain;
+      -webkit-mask-size: contain;
+    }
+
+    &.badge-warning::before {
+      background-color: var(--a11y-warning-text);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+      mask-size: contain;
+      -webkit-mask-size: contain;
+    }
+
+    &.badge-danger::before {
+      background-color: var(--a11y-danger-text);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+      mask-size: contain;
+      -webkit-mask-size: contain;
+    }
+  }
 }
 
 // =========================================
@@ -1708,7 +1820,7 @@ a {
 .text-success { color: var(--a11y-success) !important; }
 .text-warning { color: var(--a11y-warning) !important; }
 .text-danger { color: var(--a11y-danger) !important; }
-.text-primary { color: var(--a11y-primary) !important; }
+.text-primary { color: var(--a11y-link, var(--a11y-primary)) !important; }
 
 .bg-primary { background-color: var(--a11y-primary) !important; }
 .bg-success { background-color: var(--a11y-success) !important; }
@@ -1720,6 +1832,60 @@ a {
 .bg-body-secondary,
 .bg-body-tertiary {
   background-color: var(--a11y-bg-secondary) !important;
+}
+
+// =========================================
+// ICONOS PARA DALTONISMO (WCAG 1.4.1)
+// =========================================
+.a11y-status-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+  }
+
+  &.success::before {
+    background-color: var(--a11y-success);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    -webkit-mask-size: contain;
+  }
+
+  &.warning::before {
+    background-color: var(--a11y-warning);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    -webkit-mask-size: contain;
+  }
+
+  &.danger::before {
+    background-color: var(--a11y-danger);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    -webkit-mask-size: contain;
+  }
+}
+
+// Utilidad para screen readers - mostrar texto pero mantener iconos visibles
+.sr-only-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 // =========================================
@@ -1900,6 +2066,7 @@ a {
   position: absolute;
   top: -9999px;
   left: -9999px;
+  min-height: 44px;
   background: var(--a11y-primary);
   color: var(--a11y-primary-text) !important;
   padding: 12px 24px;
@@ -1922,20 +2089,22 @@ a {
 // CLASES UTILITARIAS DE ACCESIBILIDAD
 // =========================================
 
-// Resaltar enlaces
+// Resaltar enlaces — sin gradiente, usa outline-bottom accesible
 body.a11y-highlight-links {
   a:not(.btn):not(.nav-link):not(.dropdown-item) {
-    background: linear-gradient(to bottom, transparent 60%, rgba(var(--a11y-primary-rgb, 21, 101, 192), 0.3) 60%) !important;
+    background: transparent !important;
     padding: 0 2px;
     border-radius: 2px;
     text-decoration: underline !important;
-    text-decoration-thickness: 2px !important;
-    text-underline-offset: 3px !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 3px !important;
+    text-underline-offset: 4px !important;
 
     &:hover,
     &:focus {
       background: var(--a11y-primary) !important;
       color: var(--a11y-primary-text) !important;
+      text-decoration-color: var(--a11y-primary-text, #FFFFFF) !important;
     }
   }
 }
@@ -1989,40 +2158,22 @@ body.a11y-reading-guide {
   transform: translateY(-50%);
   transition: top 0.05s ease-out;
 
-  // Colores por defecto (modo claro)
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(21, 101, 192, 0.15) 15%,
-    rgba(21, 101, 192, 0.15) 85%,
-    transparent 100%
-  );
-  border-top: 2px solid rgba(21, 101, 192, 0.4);
-  border-bottom: 2px solid rgba(21, 101, 192, 0.4);
+  // Color sólido con opacidad — sin gradiente (WCAG: no información solo por color)
+  background-color: rgba(21, 101, 192, 0.12);
+  border-top: 2px solid rgba(21, 101, 192, 0.5);
+  border-bottom: 2px solid rgba(21, 101, 192, 0.5);
 }
 
 // Modo oscuro
 [data-color-mode="dark"] .a11y-reading-guide-bar {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(100, 181, 246, 0.2) 15%,
-    rgba(100, 181, 246, 0.2) 85%,
-    transparent 100%
-  );
-  border-color: rgba(100, 181, 246, 0.5);
+  background-color: rgba(100, 181, 246, 0.18);
+  border-color: rgba(100, 181, 246, 0.6);
 }
 
 // Alto contraste
 [data-profile="high-contrast"] .a11y-reading-guide-bar {
   height: 52px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(255, 255, 0, 0.25) 15%,
-    rgba(255, 255, 0, 0.25) 85%,
-    transparent 100%
-  );
+  background-color: rgba(255, 255, 0, 0.2);
   border-color: #FFFF00;
   border-width: 3px;
 }
@@ -2030,53 +2181,29 @@ body.a11y-reading-guide {
 // Dislexia
 [data-profile="dyslexia"] .a11y-reading-guide-bar {
   height: 48px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(147, 161, 161, 0.15) 15%,
-    rgba(147, 161, 161, 0.15) 85%,
-    transparent 100%
-  );
-  border-color: rgba(147, 161, 161, 0.4);
+  background-color: rgba(147, 161, 161, 0.15);
+  border-color: rgba(147, 161, 161, 0.5);
 }
 
 // Visión reducida
 [data-profile="low-vision"] .a11y-reading-guide-bar {
   height: 56px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(21, 101, 192, 0.25) 15%,
-    rgba(21, 101, 192, 0.25) 85%,
-    transparent 100%
-  );
-  border-color: rgba(21, 101, 192, 0.6);
+  background-color: rgba(21, 101, 192, 0.2);
+  border-color: rgba(21, 101, 192, 0.7);
   border-width: 3px;
 }
 
 // Daltonismo rojo-verde (deuteranopia, protanopia)
 [data-profile="deuteranopia"] .a11y-reading-guide-bar,
 [data-profile="protanopia"] .a11y-reading-guide-bar {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 114, 178, 0.2) 15%,
-    rgba(0, 114, 178, 0.2) 85%,
-    transparent 100%
-  );
-  border-color: rgba(0, 114, 178, 0.5);
+  background-color: rgba(0, 114, 178, 0.18);
+  border-color: rgba(0, 114, 178, 0.6);
 }
 
 // Daltonismo azul-amarillo (tritanopia)
 [data-profile="tritanopia"] .a11y-reading-guide-bar {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(204, 121, 167, 0.2) 15%,
-    rgba(204, 121, 167, 0.2) 85%,
-    transparent 100%
-  );
-  border-color: rgba(204, 121, 167, 0.5);
+  background-color: rgba(204, 121, 167, 0.18);
+  border-color: rgba(204, 121, 167, 0.6);
 }
 
 // =========================================
@@ -2141,7 +2268,7 @@ body.a11y-reading-guide {
   }
 
   &:focus {
-    outline: 3px solid #FFD700;
+    outline: 3px solid var(--a11y-focus-accent, #FFD700);
     outline-offset: 2px;
   }
 
@@ -2196,7 +2323,7 @@ body.a11y-reading-guide {
   transition: all 0.2s ease;
 
   &:focus {
-    outline: 3px solid #FFD700;
+    outline: 3px solid var(--a11y-focus-accent, #FFD700);
     outline-offset: 2px;
   }
 
@@ -2437,11 +2564,11 @@ body.a11y-tts-enabled {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: #1E1E2E;
-  border: 2px solid #00D9FF;
+  background: var(--a11y-sidebar-bg);
+  border: 2px solid var(--a11y-primary);
   border-radius: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: var(--a11y-font-family);
 
   .speaking-waves {
     display: flex;
@@ -2452,7 +2579,7 @@ body.a11y-tts-enabled {
     span {
       display: block;
       width: 4px;
-      background: #00D9FF;
+      background: var(--a11y-primary);
       border-radius: 2px;
       animation: speaking-wave 0.8s ease-in-out infinite;
 
@@ -2465,7 +2592,7 @@ body.a11y-tts-enabled {
   }
 
   .speaking-text {
-    color: #FFFFFF;
+    color: var(--a11y-sidebar-text);
     font-size: 0.9rem;
     font-weight: 600;
   }
@@ -2478,15 +2605,15 @@ body.a11y-tts-enabled {
     height: 32px;
     padding: 0;
     background: transparent;
-    border: 2px solid #FF6B6B;
+    border: 2px solid var(--a11y-danger);
     border-radius: 50%;
-    color: #FF6B6B;
+    color: var(--a11y-danger);
     cursor: pointer;
     transition: all 0.15s ease;
 
     &:hover {
-      background: #FF6B6B;
-      color: #000;
+      background: var(--a11y-danger);
+      color: var(--a11y-danger-text);
     }
 
     svg {

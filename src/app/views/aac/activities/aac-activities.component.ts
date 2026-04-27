@@ -5,74 +5,8 @@ import { VisualCardComponent } from '../../../shared/components/visual-card/visu
   selector: 'app-aac-activities',
   standalone: true,
   imports: [VisualCardComponent],
-  template: `
-    <div class="aac-activities">
-      <h1 class="page-title">Mis Actividades</h1>
-
-      <div class="activities-list">
-        @for (activity of activities; track activity.id) {
-          <app-visual-card
-            [title]="activity.title"
-            [subtitle]="activity.time"
-            [icon]="activity.icon"
-            [accentColor]="activity.color"
-            [badge]="activity.status"
-            [badgeColor]="activity.statusColor"
-          />
-        }
-
-        @empty {
-          <div class="empty-state">
-            <p>No hay actividades programadas</p>
-          </div>
-        }
-      </div>
-    </div>
-  `,
-  styles: [`
-    .aac-activities {
-      padding: 8px;
-    }
-
-    .page-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--aac-text, #1a1a1a);
-      margin: 0 0 24px;
-      text-align: center;
-    }
-
-    .activities-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 48px 24px;
-      background: var(--a11y-surface, white);
-      border: 2px solid var(--a11y-border, #E0E0E0);
-      border-radius: 24px;
-      color: var(--a11y-text-muted, #666);
-      font-size: 20px;
-    }
-
-    :host-context([data-profile="high-contrast"]) .page-title {
-      color: var(--a11y-text, #fff);
-    }
-
-    :host-context([data-color-mode="dark"]) {
-      .page-title {
-        color: var(--a11y-text, #f5f5f5);
-      }
-
-      .empty-state {
-        background: var(--a11y-surface, #2a2a3e);
-        color: var(--a11y-text-muted, #aaa);
-      }
-    }
-  `]
+  templateUrl: './aac-activities.component.html',
+  styleUrl: './aac-activities.component.scss'
 })
 export class AacActivitiesComponent {
   activities = [
