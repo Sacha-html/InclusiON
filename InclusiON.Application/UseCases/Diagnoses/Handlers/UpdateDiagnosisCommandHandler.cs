@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -18,17 +18,20 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateDiagnosisCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public UpdateDiagnosisCommandHandler(
             IDiagnosesRepository repository,
             IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
-            ILogger<UpdateDiagnosisCommandHandler> logger)
+            ILogger<UpdateDiagnosisCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<DiagnosisResponse>> HandleAsync(
@@ -69,7 +72,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             diagnosis.RequiredSupports = command.RequiredSupports;
             diagnosis.PedagogicalObjectives = command.PedagogicalObjectives;
             diagnosis.RecommendedStrategies = command.RecommendedStrategies;
-            diagnosis.UpdatedAt = DateTime.UtcNow;
+            diagnosis.UpdatedAt = _dateTime.UtcNow;
             diagnosis.UpdatedBy = command.RequestedByProfessionalId;
 
             await _repository.UpdateAsync(diagnosis, cancellationToken);

@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
@@ -19,17 +19,20 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IInstitutionsRepository _institutionsRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDateTimeProvider _dateTime;
 
         public AssignInstitutionCommandHandler(
             IAssignmentsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IInstitutionsRepository institutionsRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _institutionsRepository = institutionsRepository;
             _unitOfWork = unitOfWork;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ProfessionalInstitutionResponse>> HandleAsync(
@@ -72,7 +75,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             if (existing != null && !existing.IsActive)
             {
                 existing.IsActive = true;
-                existing.AssignedAt = DateTime.UtcNow;
+                existing.AssignedAt = _dateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 existing.Institution = institution;
@@ -84,7 +87,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             {
                 ProfessionalId = command.ProfessionalId,
                 InstitutionId = command.InstitutionId,
-                AssignedAt = DateTime.UtcNow,
+                AssignedAt = _dateTime.UtcNow,
                 IsActive = true
             };
 

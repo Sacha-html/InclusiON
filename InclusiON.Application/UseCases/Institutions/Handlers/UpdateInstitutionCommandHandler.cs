@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Institutions.Commands;
@@ -14,13 +14,16 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
     {
         private readonly IInstitutionsRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDateTimeProvider _dateTime;
 
         public UpdateInstitutionCommandHandler(
             IInstitutionsRepository repository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<InstitutionResponse>> HandleAsync(
@@ -45,7 +48,7 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
             institution.Address = command.Address;
             institution.Phone = command.Phone;
             institution.Email = command.Email;
-            institution.UpdatedAt = DateTime.UtcNow;
+            institution.UpdatedAt = _dateTime.UtcNow;
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

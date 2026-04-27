@@ -26,6 +26,19 @@ namespace InclusiON.Application.Interfaces.Infrastructure
         Guid? GetCurrentUserId();
 
         /// <summary>
+        /// Obtiene el rol del usuario autenticado desde el claim <see cref="System.Security.Claims.ClaimTypes.Role"/>.
+        /// Retorna null si no hay usuario autenticado o si el claim no esta presente.
+        /// Valores esperados: "Admin", "Professional", "FamilyRepresentative", "PersonWithDisability".
+        /// </summary>
+        string? GetCurrentUserRole();
+
+        /// <summary>
+        /// Obtiene el identificador de correlacion de la request actual (HTTP trace id).
+        /// Util para agrupar eventos de auditoria que ocurren dentro de una misma request.
+        /// </summary>
+        string? GetCorrelationId();
+
+        /// <summary>
         /// Indica si el usuario autenticado es administrador global.
         /// </summary>
         bool IsGlobalAdmin();
@@ -35,5 +48,12 @@ namespace InclusiON.Application.Interfaces.Infrastructure
         /// Retorna lista vacia si no tiene claims de institucion.
         /// </summary>
         List<int> GetInstitutionIds();
+
+        /// <summary>
+        /// Obtiene el ID del entity de dominio del usuario autenticado (professionalId,
+        /// familyRepresentativeId o personId según el rol) desencriptando el claim "eid" del JWT.
+        /// Retorna null para Admin, GlobalAdmin o si el claim no está presente.
+        /// </summary>
+        Guid? GetCurrentEntityId();
     }
 }

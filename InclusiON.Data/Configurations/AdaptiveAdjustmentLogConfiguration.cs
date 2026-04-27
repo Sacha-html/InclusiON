@@ -20,12 +20,10 @@ namespace InclusiON.Data.Configurations
                 .HasMaxLength(50);
 
             builder.Property(x => x.PreviousValue)
-                .IsRequired()
-                .HasColumnType("NVARCHAR(MAX)");
+                .IsRequired();
 
             builder.Property(x => x.NewValue)
-                .IsRequired()
-                .HasColumnType("NVARCHAR(MAX)");
+                .IsRequired();
 
             builder.Property(x => x.Reason)
                 .IsRequired()

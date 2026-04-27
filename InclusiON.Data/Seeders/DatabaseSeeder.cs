@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Constants;
 using System.Text.Json;
 
 namespace InclusiON.Data.Seeders
@@ -55,9 +56,6 @@ namespace InclusiON.Data.Seeders
 
         private static async Task SeedRolePermissionsAsync(AppDbContext context)
         {
-            if (await context.RoleClaims.AnyAsync())
-                return;
-
             var adminRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var professionalRoleId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var familyRoleId = Guid.Parse("33333333-3333-3333-3333-333333333333");
@@ -93,6 +91,8 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "diagnoses:update" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:read" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:approve" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:reject" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "reports:export" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "messages:create" },
@@ -117,6 +117,8 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:update" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "reports:read" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "reports:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "reports:submit" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "reports:export" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "messages:create" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "invitations:read" },
@@ -134,6 +136,7 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
                 new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "diagnoses:read" },
                 new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "reports:read" },
+                new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "reports:export" },
                 new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
                 new() { RoleId = familyRoleId, ClaimType = "permission", ClaimValue = "messages:create" },
 
@@ -143,8 +146,22 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
             };
 
-            context.RoleClaims.AddRange(claims);
-            await context.SaveChangesAsync();
+            // Upsert: solo agregar los claims que no existen aun
+            var existingClaims = await context.RoleClaims
+                .Select(c => new { c.RoleId, c.ClaimType, c.ClaimValue })
+                .ToListAsync();
+
+            var newClaims = claims.Where(c => !existingClaims.Any(e =>
+                e.RoleId == c.RoleId &&
+                e.ClaimType == c.ClaimType &&
+                e.ClaimValue == c.ClaimValue))
+                .ToList();
+
+            if (newClaims.Count > 0)
+            {
+                context.RoleClaims.AddRange(newClaims);
+                await context.SaveChangesAsync();
+            }
         }
 
         private static async Task SeedVisualLoginTestUsersAsync(UserManager<User> userManager, AppDbContext context)
@@ -160,7 +177,7 @@ namespace InclusiON.Data.Seeders
                     Password = "Maria123!",
                     Pin = "1234",
                     LoginMethodId = 2, // PIN
-                    AvatarColor = "#4CAF50",
+                    AvatarColor = AvatarColors.DefaultProfessional,
                     SupervisorUserId = (Guid?)null,
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000100")
                 },
@@ -172,7 +189,7 @@ namespace InclusiON.Data.Seeders
                     Password = "Juan123!",
                     Pin = (string?)null,
                     LoginMethodId = 1, // STANDARD (password)
-                    AvatarColor = "#2196F3", 
+                    AvatarColor = AvatarColors.DefaultPerson,
                     SupervisorUserId = (Guid?)null,
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000101")
                 },
@@ -184,7 +201,7 @@ namespace InclusiON.Data.Seeders
                     Password = (string?)null,
                     Pin = (string?)null,
                     LoginMethodId = 3, // ASSISTED (requiere supervisor)
-                    AvatarColor = "#9C27B0",
+                    AvatarColor = AvatarColors.DefaultFamily,
                     SupervisorUserId = (Guid?)Guid.Parse("00000000-0000-0000-0000-000000000020"), // Supervisor
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000102")
                 },
@@ -196,7 +213,7 @@ namespace InclusiON.Data.Seeders
                     Password = "Carlos123!",
                     Pin = "5678",
                     LoginMethodId = 2, // PIN
-                    AvatarColor = "#FF9800",
+                    AvatarColor = "#FF9800", // Naranja del catalogo AvatarColors
                     SupervisorUserId = (Guid?)null,
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000103")
                 }
@@ -221,7 +238,7 @@ namespace InclusiON.Data.Seeders
                         // Actualizar PIN si tiene
                         if (testUser.Pin != null)
                         {
-                            existingPerson.PinCodeHash = BCrypt.Net.BCrypt.HashPassword(testUser.Pin);
+                            existingPerson.PinCodeHash = PinHashAccessor.Hash(testUser.Pin);
                         }
                         else
                         {
@@ -270,7 +287,7 @@ namespace InclusiON.Data.Seeders
                     // Configurar PIN si tiene
                     if (testUser.Pin != null)
                     {
-                        person.PinCodeHash = BCrypt.Net.BCrypt.HashPassword(testUser.Pin);
+                        person.PinCodeHash = PinHashAccessor.Hash(testUser.Pin);
                     }
 
                     context.PersonsWithDisability.Add(person);

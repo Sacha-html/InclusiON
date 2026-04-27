@@ -25,6 +25,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.AutonomyLevel)
                 .Include(p => p.LoginMethod)
                 .Include(p => p.SupervisorUser)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == personId, cancellationToken);
         }
 
@@ -36,6 +37,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.AutonomyLevel)
                 .Include(p => p.LoginMethod)
                 .Include(p => p.SupervisorUser)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
         }
 
@@ -65,6 +67,29 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return Task.CompletedTask;
         }
 
+        public async Task<IReadOnlyList<Professional>> GetSupervisingProfessionalsAsync(Guid personId, CancellationToken cancellationToken = default)
+        {
+            return await _context.ProfessionalPersons
+                .Include(pp => pp.Professional)
+                    .ThenInclude(p => p.User)
+                .Where(pp => pp.PersonId == personId && pp.IsActive && pp.CanSuperviseLogin)
+                .Select(pp => pp.Professional)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IReadOnlyList<PersonRepresentative>> GetActiveRepresentativesAsync(Guid personId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonRepresentatives
+                .Include(pr => pr.Representative)
+                    .ThenInclude(r => r.User)
+                .Where(pr => pr.PersonId == personId && pr.IsActive)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         public async Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
             int page,
             int pageSize,
@@ -75,6 +100,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             SortField? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
+            string? representativeSearch = null,
+            IReadOnlyList<Guid>? accessiblePersonIds = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.PersonsWithDisability
@@ -82,16 +109,19 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.DisabilityType)
                 .Include(p => p.AutonomyLevel)
                 .Include(p => p.LoginMethod)
+                .Include(p => p.PersonRepresentatives.Where(pr => pr.IsActive))
+                    .ThenInclude(pr => pr.Representative)
+                .AsNoTracking()
                 .AsQueryable();
 
-            // Filtros
+            // Filtros (ILike para búsqueda case-insensitive en PostgreSQL)
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var searchLower = search.ToLower();
+                var pattern = $"%{search}%";
                 query = query.Where(p =>
-                    p.FirstName.ToLower().Contains(searchLower) ||
-                    p.LastName.ToLower().Contains(searchLower) ||
-                    (p.DocumentNumber != null && p.DocumentNumber.Contains(search)));
+                    EF.Functions.ILike(p.FirstName, pattern) ||
+                    EF.Functions.ILike(p.LastName, pattern) ||
+                    (p.DocumentNumber != null && EF.Functions.ILike(p.DocumentNumber, pattern)));
             }
 
             if (disabilityTypeId.HasValue)
@@ -107,6 +137,20 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (isActive.HasValue)
             {
                 query = query.Where(p => p.User.IsActive == isActive.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(representativeSearch))
+            {
+                var repPattern = $"%{representativeSearch}%";
+                query = query.Where(p => p.PersonRepresentatives.Any(pr =>
+                    pr.IsActive &&
+                    (EF.Functions.ILike(pr.Representative.FirstName, repPattern) ||
+                     EF.Functions.ILike(pr.Representative.LastName, repPattern))));
+            }
+
+            if (accessiblePersonIds is not null)
+            {
+                query = query.Where(p => accessiblePersonIds.Contains(p.Id));
             }
 
             if (institutionIds is not null && institutionIds.Count > 0)

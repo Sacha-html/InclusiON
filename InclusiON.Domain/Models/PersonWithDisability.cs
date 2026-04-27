@@ -117,6 +117,11 @@ namespace InclusiON.Domain.Models
         /// Sensibilidad al sonido.
         /// </summary>
         public bool SoundSensitivity { get; set; }
+
+        /// <summary>
+        /// Tipo de daltonismo: deuteranopia, protanopia, tritanopia, o null si no aplica.
+        /// </summary>
+        public string? ColorBlindnessType { get; set; }
         #endregion
 
         #region Configuracion de Acceso
@@ -134,16 +139,6 @@ namespace InclusiON.Domain.Models
         /// Hash del PIN numerico (4-6 digitos) para login simplificado.
         /// </summary>
         public string? PinCodeHash { get; set; }
-
-        /// <summary>
-        /// Secuencia de emojis para login visual. Formato JSON: ["🐶","🏠","🌻","🍎"].
-        /// </summary>
-        public string? EmojiSequence { get; set; }
-
-        /// <summary>
-        /// ID de la combinacion color-forma para login visual (1-24).
-        /// </summary>
-        public int? ColorShapeId { get; set; }
 
         /// <summary>
         /// Color del avatar del usuario en formato hexadecimal.

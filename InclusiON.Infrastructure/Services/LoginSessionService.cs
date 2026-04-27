@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Interfaces.Telemetry;
@@ -7,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Shared.Constants;
 
 namespace InclusiON.Infrastructure.Services
 {
@@ -20,7 +22,9 @@ namespace InclusiON.Infrastructure.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly IPersonsRepository _personsRepository;
+        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly ITelemetryService _telemetryService;
+        private readonly IDateTimeProvider _dateTime;
         private readonly ILogger<LoginSessionService> _logger;
 
         private const int TrustedDeviceExpiryDays = 90;
@@ -34,7 +38,9 @@ namespace InclusiON.Infrastructure.Services
             IUnitOfWork unitOfWork,
             IAdminInstitutionRepository adminInstitutionRepository,
             IPersonsRepository personsRepository,
+            IProfessionalsRepository professionalsRepository,
             ITelemetryService telemetryService,
+            IDateTimeProvider dateTime,
             ILogger<LoginSessionService> logger)
         {
             _identityService = identityService;
@@ -45,7 +51,9 @@ namespace InclusiON.Infrastructure.Services
             _unitOfWork = unitOfWork;
             _adminInstitutionRepository = adminInstitutionRepository;
             _personsRepository = personsRepository;
+            _professionalsRepository = professionalsRepository;
             _telemetryService = telemetryService;
+            _dateTime = dateTime;
             _logger = logger;
         }
 
@@ -70,6 +78,15 @@ namespace InclusiON.Infrastructure.Services
                 isGlobalAdmin = institutionIds.Count == 0;
             }
 
+            // Para profesionales: resolver el entityId una sola vez al crear el token.
+            // Los requests posteriores lo leen del claim sin consultar la BD.
+            Guid? entityId = null;
+            if (primaryRole == "Professional")
+            {
+                var professional = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
+                entityId = professional?.Id;
+            }
+
             var tokenUserData = new TokenUserData
             {
                 Id = user.Id,
@@ -79,7 +96,8 @@ namespace InclusiON.Infrastructure.Services
                 IsActive = user.IsActive,
                 Permissions = permissions,
                 IsGlobalAdmin = isGlobalAdmin,
-                InstitutionIds = institutionIds
+                InstitutionIds = institutionIds,
+                EntityId = entityId
             };
 
             var session = await CreateSessionCoreAsync(
@@ -97,7 +115,8 @@ namespace InclusiON.Infrastructure.Services
                     RequiresLargeFont = person.RequiresLargeFont,
                     RequiresHighContrast = person.RequiresHighContrast,
                     VisualNoiseSensitivity = person.VisualNoiseSensitivity,
-                    SoundSensitivity = person.SoundSensitivity
+                    SoundSensitivity = person.SoundSensitivity,
+                    ColorBlindnessType = person.ColorBlindnessType
                 };
             }
 
@@ -145,7 +164,8 @@ namespace InclusiON.Infrastructure.Services
                 Name = $"{person.FirstName} {person.LastName}",
                 Role = roles.FirstOrDefault() ?? "Person",
                 IsActive = user.IsActive,
-                Permissions = permissions
+                Permissions = permissions,
+                EntityId = person.Id
             };
 
             var session = await CreateSessionCoreAsync(
@@ -155,13 +175,14 @@ namespace InclusiON.Infrastructure.Services
 
             return ApiResponse<VisualLoginResponse>.SuccessResult(
                 BuildVisualLoginResponse(user, session, person.FirstName, person.LastName,
-                    person.AvatarColor ?? "#2196F3", "Person", roles,
+                    person.AvatarColor ?? AvatarColors.DefaultPerson, "Person", roles,
                     new AccessibilityPreferences
                     {
                         RequiresLargeFont = person.RequiresLargeFont,
                         RequiresHighContrast = person.RequiresHighContrast,
                         VisualNoiseSensitivity = person.VisualNoiseSensitivity,
-                        SoundSensitivity = person.SoundSensitivity
+                        SoundSensitivity = person.SoundSensitivity,
+                        ColorBlindnessType = person.ColorBlindnessType
                     }),
                 successMessage);
         }
@@ -186,7 +207,8 @@ namespace InclusiON.Infrastructure.Services
                 Name = $"{family.FirstName} {family.LastName}",
                 Role = roles.FirstOrDefault() ?? "Family",
                 IsActive = user.IsActive,
-                Permissions = permissions
+                Permissions = permissions,
+                EntityId = family.Id
             };
 
             var session = await CreateSessionCoreAsync(
@@ -196,7 +218,7 @@ namespace InclusiON.Infrastructure.Services
 
             return ApiResponse<VisualLoginResponse>.SuccessResult(
                 BuildVisualLoginResponse(user, session, family.FirstName, family.LastName,
-                    "#9C27B0", "Family", roles, accessibility: null),
+                    AvatarColors.DefaultFamily, "Family", roles, accessibility: null),
                 successMessage);
         }
 
@@ -226,8 +248,8 @@ namespace InclusiON.Infrastructure.Services
             {
                 Id = Guid.NewGuid(),
                 Token = refreshToken,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(refreshTokenExpiryDays),
+                CreatedAt = _dateTime.UtcNow,
+                ExpiresAt = _dateTime.UtcNow.AddDays(refreshTokenExpiryDays),
                 UserId = user.Id,
                 IsActive = true,
                 CreatedByIp = ipAddress,
@@ -244,7 +266,7 @@ namespace InclusiON.Infrastructure.Services
                     _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
                 }
 
-                user.LastLoginDate = DateTime.UtcNow;
+                user.LastLoginDate = _dateTime.UtcNow;
                 user.LastLoginIpAddress = ipAddress;
                 user.LastLoginUserAgent = userAgent;
                 await _identityService.UpdateUserAsync(user);
@@ -259,8 +281,8 @@ namespace InclusiON.Infrastructure.Services
                         DeviceId = deviceId,
                         DeviceName = "Dispositivo registrado",
                         Browser = _httpContextService.ParseBrowserFromUserAgent(userAgent),
-                        RegisteredAt = DateTime.UtcNow,
-                        ExpiresAt = DateTime.UtcNow.AddDays(TrustedDeviceExpiryDays),
+                        RegisteredAt = _dateTime.UtcNow,
+                        ExpiresAt = _dateTime.UtcNow.AddDays(TrustedDeviceExpiryDays),
                         IsActive = true
                     };
                     await _visualLoginRepository.RegisterTrustedDeviceAsync(device, ct);

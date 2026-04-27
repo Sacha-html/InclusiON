@@ -1,21 +1,36 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Serilog;
-using Swashbuckle.AspNetCore.Filters;
+using Scalar.AspNetCore;
 using InclusiON.Application;
-using InclusiON.Application.Interfaces.Telemetry;
 using InclusiON.Data;
 using InclusiON.Data.Seeders;
+using InclusiON.Api.Extensions;
 using InclusiON.Api.Middleware;
+using InclusiON.Api.Scalar;
 using InclusiON.Infrastructure;
-using InclusiON.Infrastructure.Configuration;
+using InclusiON.Infrastructure.Seeders;
 using InclusiON.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// No revelar que el servidor es Kestrel ni su versión en el header "Server".
+builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
+
+builder.Services.AddApiRateLimiter(builder.Configuration);
+builder.Services.AddApiOutputCache();
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    options.MimeTypes = Microsoft.AspNetCore.ResponseCompression.ResponseCompressionDefaults.MimeTypes.Append("application/json");
+});
 
 builder.Host.UseSerilog((context, config) =>
 {
@@ -34,80 +49,119 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
     options.Filters.Add<InclusiON.Api.Filters.InstitutionAccessFilter>();
+})
+.AddJsonOptions(options =>
+{
+    // Normalizar DateTime entrante a UTC — Npgsql rechaza Kind=Unspecified en timestamp with time zone
+    options.JsonSerializerOptions.Converters.Add(new InclusiON.Api.Converters.UtcDateTimeConverter());
 });
 
-builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddPersistence(builder.Configuration, builder.Environment.IsDevelopment());
 
-var connectionString = builder.Configuration.GetConnectionString("SqlServerConn") 
-    ?? throw new InvalidOperationException("Connection string 'SqlServerConn' not found.");
+var connectionString = builder.Configuration.GetConnectionString("PostgreSqlConn")
+    ?? throw new InvalidOperationException("Connection string 'PostgreSqlConn' not found.");
 
 builder.Services.AddInfrastructureTelemetry(builder.Configuration, connectionString);
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplicationServices();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(p =>
+builder.Services.AddTransient<OpenApiExamplesTransformer>();
+
+builder.Services.AddOpenApi(options =>
 {
-    p.SwaggerDoc("v1", new OpenApiInfo
+    options.AddDocumentTransformer((document, context, ct) =>
     {
-        Title = "InclusiON API",
-        Version = "v1",
-        Description = "InclusiON - API Template",
-        Contact = new OpenApiContact
+        document.Info = new OpenApiInfo
         {
-            Name = "Your Name",
-            Email = "your@email.com"
-        }
+            Title = "InclusiON API",
+            Version = "v1",
+            Description = "InclusiON - Sistema de gestión para instituciones de educación especial",
+            Contact = new OpenApiContact
+            {
+                Name = "InclusiON",
+                Email = "contacto@inclusion.edu.ar"
+            }   
+        };
+
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+        {
+            ["Bearer"] = new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization. Ingresá 'Bearer' seguido de tu token. Ejemplo: 'Bearer eyJhbGci...'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                BearerFormat = "JWT",
+                Scheme = "bearer"
+            }
+        };
+
+        return Task.CompletedTask;
     });
 
-    p.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddOperationTransformer((operation, context, ct) =>
     {
-        Description = @"JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token. Example: 'Bearer 12345abcdef'",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
+        operation.Security ??= [];
+        operation.Security.Add(new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer")] = []
+        });
+        return Task.CompletedTask;
     });
 
-    p.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-    {
-        [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
-    });
-
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    p.IncludeXmlComments(xmlPath);
-
-    p.ExampleFilters();
+    options.AddOperationTransformer<OpenApiExamplesTransformer>();
 });
 
-builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontendClient", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+        var allowedOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>() ?? [];
+
+        if (allowedOrigins.Length > 0)
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        // Si AllowedOrigins está vacío no se llama a ningún método — CORS queda bloqueado.
     });
 });
 
 var app = builder.Build();
 
-app.MapSwagger();
-app.UseSwaggerUI(p =>
+if (app.Environment.IsDevelopment())
 {
-    p.SwaggerEndpoint("/swagger/v1/swagger.json", "InclusiON API V1");
-    p.RoutePrefix = string.Empty;
-});
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("InclusiON API")
+               .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+               .AddPreferredSecuritySchemes(["Bearer"])
+               .AddHttpAuthentication("Bearer", scheme =>
+               {
+                   scheme.Token = string.Empty;
+               });
+    });
+}
 
+app.UseForwardedHeaders();
+app.UseResponseCompression();
+
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontendClient");
+
+app.UseRateLimiter();
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -125,16 +179,33 @@ app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthC
     Predicate = _ => false
 });
 
-using (var scope = app.Services.CreateScope())
+// Skip migration/seed en el entorno de integration tests — cada suite arma su propio DbContext
+// y no comparte estado con el runtime normal.
+if (!app.Environment.IsEnvironment("IntegrationTests"))
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await context.Database.MigrateAsync();
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        if (context.Database.IsRelational())
+        {
+            await context.Database.MigrateAsync();
+        }
+        else
+        {
+            await context.Database.EnsureCreatedAsync();
+        }
+    }
+
+    await SensitiveDataEncryptor.EncryptAsync(app.Services);
+
+    // Seed inicial de datos
+    await DatabaseSeeder.SeedAsync(app.Services);
 }
 
-// Seed inicial de datos
-await DatabaseSeeder.SeedAsync(app.Services);
-
 Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
-Log.Information("Swagger UI: {SwaggerUrl}/swagger", app.Urls.FirstOrDefault());
+Log.Information("API Docs: {Url}/scalar/v1", app.Urls.FirstOrDefault());
 
 app.Run();
+
+// Expuesto para WebApplicationFactory<Program> en los integration tests (InclusiON.Tests.Integration).
+public partial class Program;

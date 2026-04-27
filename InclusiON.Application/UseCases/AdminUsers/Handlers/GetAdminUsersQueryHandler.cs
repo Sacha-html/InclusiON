@@ -26,37 +26,44 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             var orderColumn = query.SortBy switch
             {
-                SortField.Email => "u.Email",
-                SortField.Name or SortField.FirstName => "FullName",
-                _ => "u.CreatedAt"
+                SortField.Email    => "u.\"Email\"",
+                SortField.Name or
+                SortField.FirstName => "FullName",
+                _                  => "u.\"CreatedAt\""
             };
             var orderDirection = query.SortDirection?.ToUpper() == "ASC" ? "ASC" : "DESC";
-            var skip = (query.Page - 1) * query.PageSize;
+            var skip    = (query.Page - 1) * query.PageSize;
 
             var baseSql = $@"
-                FROM Users u
-                INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId
-                INNER JOIN AspNetRoles r ON ur.RoleId = r.Id
-                LEFT JOIN Professionals p ON u.Id = p.UserId
-                LEFT JOIN PersonsWithDisability pwd ON u.Id = pwd.UserId
-                LEFT JOIN FamilyRepresentatives fr ON u.Id = fr.UserId
+                FROM ""Users"" u
+                INNER JOIN ""AspNetUserRoles"" ur ON u.""Id"" = ur.""UserId""
+                INNER JOIN ""AspNetRoles""     r  ON ur.""RoleId"" = r.""Id""
+                LEFT JOIN  ""Professionals""          p   ON u.""Id"" = p.""UserId""
+                LEFT JOIN  ""PersonsWithDisability""  pwd ON u.""Id"" = pwd.""UserId""
+                LEFT JOIN  ""FamilyRepresentatives""  fr  ON u.""Id"" = fr.""UserId""
                 {whereClause}";
 
             // Count
             var countSql = $"SELECT COUNT(*) {baseSql}";
-            var totalRecords = (int)(await _db.ExecuteScalarAsync<int>(countSql, sqlParams, cancellationToken))!;
+            var totalRecords = await _db.ExecuteScalarAsync<int>(countSql, sqlParams, cancellationToken);
 
             // Data
             var dataSql = $@"
-                SELECT u.Id AS UserId, u.Email, u.IsActive, u.LastLoginDate, u.CreatedAt, u.MustChangePassword,
-                       r.Name AS Role,
-                       LTRIM(RTRIM(
-                           COALESCE(p.FirstName, pwd.FirstName, fr.FirstName, u.Name, '') + ' ' +
-                           COALESCE(p.LastName, pwd.LastName, fr.LastName, u.Surname, '')
-                       )) AS FullName
+                SELECT
+                    u.""Id""            AS UserId,
+                    u.""Email""         AS Email,
+                    u.""IsActive""      AS IsActive,
+                    u.""LastLoginDate"" AS LastLoginDate,
+                    u.""CreatedAt""     AS CreatedAt,
+                    u.""MustChangePassword"" AS MustChangePassword,
+                    r.""Name""          AS Role,
+                    TRIM(
+                        COALESCE(p.""FirstName"",   pwd.""FirstName"",   fr.""FirstName"",   u.""Name"",    '') || ' ' ||
+                        COALESCE(p.""LastName"",    pwd.""LastName"",    fr.""LastName"",    u.""Surname"", '')
+                    ) AS FullName
                 {baseSql}
                 ORDER BY {orderColumn} {orderDirection}
-                OFFSET {skip} ROWS FETCH NEXT {query.PageSize} ROWS ONLY";
+                LIMIT {query.PageSize} OFFSET {skip}";
 
             var items = await _db.QueryAsync(dataSql, AdminUserListItemResponse.FromReader, sqlParams,
                 cancellationToken);
@@ -65,12 +72,12 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             var response = new PagedResponse<AdminUserListItemResponse>
             {
-                Data = items.ToList(),
-                TotalRecords = totalRecords,
-                TotalPages = totalPages,
-                CurrentPage = query.Page,
-                PageSize = query.PageSize,
-                HasNextPage = query.Page < totalPages,
+                Data            = items.ToList(),
+                TotalRecords    = totalRecords,
+                TotalPages      = totalPages,
+                CurrentPage     = query.Page,
+                PageSize        = query.PageSize,
+                HasNextPage     = query.Page < totalPages,
                 HasPreviousPage = query.Page > 1
             };
 
@@ -80,29 +87,31 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private static (string whereClause, Action<IDbCommand> configureParams) BuildFilters(GetAdminUsersQuery query)
         {
             var whereClauses = new List<string>();
-            var parameters = new List<(string Name, object Value)>();
+            var parameters   = new List<(string Name, object Value)>();
 
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
-                whereClauses.Add(@"(u.Email LIKE @Search
-                    OR COALESCE(p.FirstName, pwd.FirstName, fr.FirstName, u.Name, '') LIKE @Search
-                    OR COALESCE(p.LastName, pwd.LastName, fr.LastName, u.Surname, '') LIKE @Search)");
+                whereClauses.Add(@"(
+                    u.""Email"" ILIKE @Search
+                    OR COALESCE(p.""FirstName"",   pwd.""FirstName"",   fr.""FirstName"",   u.""Name"",    '') ILIKE @Search
+                    OR COALESCE(p.""LastName"",    pwd.""LastName"",    fr.""LastName"",    u.""Surname"", '') ILIKE @Search
+                )");
                 parameters.Add(("@Search", $"%{query.Search}%"));
             }
 
             if (!string.IsNullOrWhiteSpace(query.Role))
             {
-                whereClauses.Add("r.Name = @Role");
+                whereClauses.Add(@"r.""Name"" = @Role");
                 parameters.Add(("@Role", query.Role));
             }
 
             if (query.IsActive.HasValue)
             {
-                whereClauses.Add("u.IsActive = @IsActive");
+                whereClauses.Add(@"u.""IsActive"" = @IsActive");
                 parameters.Add(("@IsActive", query.IsActive.Value));
             }
 
-            if (query.InstitutionIds is not null && query.InstitutionIds.Count > 0)
+            if (query.InstitutionIds is { Count: > 0 })
             {
                 var paramNames = new List<string>();
                 for (int i = 0; i < query.InstitutionIds.Count; i++)
@@ -115,20 +124,20 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 var inClause = string.Join(", ", paramNames);
 
                 whereClauses.Add($@"EXISTS (
-                    SELECT 1 FROM ProfessionalInstitutions pi
-                    WHERE pi.ProfessionalId = p.Id AND pi.InstitutionId IN ({inClause}) AND pi.IsActive = 1
+                    SELECT 1 FROM ""ProfessionalInstitutions"" pi
+                    WHERE pi.""ProfessionalId"" = p.""Id"" AND pi.""InstitutionId"" IN ({inClause}) AND pi.""IsActive"" = true
                     UNION ALL
-                    SELECT 1 FROM ProfessionalInstitutions pi2
-                    INNER JOIN ProfessionalPersons pp2 ON pi2.ProfessionalId = pp2.ProfessionalId AND pp2.IsActive = 1
-                    WHERE pp2.PersonId = pwd.Id AND pi2.InstitutionId IN ({inClause}) AND pi2.IsActive = 1
+                    SELECT 1 FROM ""ProfessionalInstitutions"" pi2
+                    INNER JOIN ""ProfessionalPersons"" pp2 ON pi2.""ProfessionalId"" = pp2.""ProfessionalId"" AND pp2.""IsActive"" = true
+                    WHERE pp2.""PersonId"" = pwd.""Id"" AND pi2.""InstitutionId"" IN ({inClause}) AND pi2.""IsActive"" = true
                     UNION ALL
-                    SELECT 1 FROM AdminInstitutions ai
-                    WHERE ai.AdminUserId = u.Id AND ai.InstitutionId IN ({inClause}) AND ai.IsActive = 1
+                    SELECT 1 FROM ""AdminInstitutions"" ai
+                    WHERE ai.""AdminUserId"" = u.""Id"" AND ai.""InstitutionId"" IN ({inClause}) AND ai.""IsActive"" = true
                     UNION ALL
-                    SELECT 1 FROM ProfessionalInstitutions pi3
-                    INNER JOIN ProfessionalPersons pp3 ON pi3.ProfessionalId = pp3.ProfessionalId AND pp3.IsActive = 1
-                    INNER JOIN PersonRepresentatives pr ON pp3.PersonId = pr.PersonId AND pr.IsActive = 1
-                    WHERE pr.RepresentativeId = fr.Id AND pi3.InstitutionId IN ({inClause}) AND pi3.IsActive = 1
+                    SELECT 1 FROM ""ProfessionalInstitutions"" pi3
+                    INNER JOIN ""ProfessionalPersons"" pp3 ON pi3.""ProfessionalId"" = pp3.""ProfessionalId"" AND pp3.""IsActive"" = true
+                    INNER JOIN ""PersonRepresentatives"" pr ON pp3.""PersonId"" = pr.""PersonId"" AND pr.""IsActive"" = true
+                    WHERE pr.""RepresentativeId"" = fr.""Id"" AND pi3.""InstitutionId"" IN ({inClause}) AND pi3.""IsActive"" = true
                 )");
             }
 
@@ -142,7 +151,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 {
                     var param = cmd.CreateParameter();
                     param.ParameterName = name;
-                    param.Value = value;
+                    param.Value         = value;
                     cmd.Parameters.Add(param);
                 }
             });

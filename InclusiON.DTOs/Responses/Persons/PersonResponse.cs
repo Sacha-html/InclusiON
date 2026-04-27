@@ -36,6 +36,7 @@ namespace InclusiON.DTOs.Responses.Persons
         public bool RequiresHighContrast { get; set; }
         public bool VisualNoiseSensitivity { get; set; }
         public bool SoundSensitivity { get; set; }
+        public string? ColorBlindnessType { get; set; }
         #endregion
 
         #region Configuracion de Acceso

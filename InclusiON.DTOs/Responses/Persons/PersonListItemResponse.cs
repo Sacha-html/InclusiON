@@ -28,6 +28,8 @@ namespace InclusiON.DTOs.Responses.Persons
 
         public bool IsActive { get; set; }
 
+        public string? RepresentativeNames { get; set; }
+
         private static int CalculateAge(DateTime birthDate)
         {
             var today = DateTime.Today;
@@ -53,7 +55,12 @@ namespace InclusiON.DTOs.Responses.Persons
                 AutonomyLevelId = p.AutonomyLevelId,
                 AutonomyLevelName = p.AutonomyLevel?.Name,
                 LoginMethodName = p.LoginMethod?.Name,
-                IsActive = p.User?.IsActive ?? false
+                IsActive = p.User?.IsActive ?? false,
+                RepresentativeNames = p.PersonRepresentatives != null && p.PersonRepresentatives.Any(pr => pr.IsActive)
+                    ? string.Join(", ", p.PersonRepresentatives
+                        .Where(pr => pr.IsActive)
+                        .Select(pr => $"{pr.Representative.LastName}, {pr.Representative.FirstName}".Trim()))
+                    : null
             };
         }
     }

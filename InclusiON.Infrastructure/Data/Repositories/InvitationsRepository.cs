@@ -27,6 +27,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await _context.Invitations
                 .Include(i => i.ForPerson)
                 .Include(i => i.CreatedByProfessional)
+                .AsNoTracking()
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync(cancellationToken);
         }
@@ -35,6 +36,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.Invitations
                 .Include(i => i.ForPerson)
+                .AsNoTracking()
                 .Where(i => i.CreatedByProfessionalId == professionalId)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync(cancellationToken);
@@ -45,6 +47,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await _context.Invitations
                 .Include(i => i.ForPerson)
                 .Include(i => i.CreatedByProfessional)
+                .AsNoTracking()
                 .Where(i => _context.ProfessionalInstitutions.Any(pi =>
                     pi.ProfessionalId == i.CreatedByProfessionalId &&
                     institutionIds.Contains(pi.InstitutionId) &&

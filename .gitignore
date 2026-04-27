@@ -147,6 +147,10 @@ coverage*.json
 coverage*.xml
 coverage*.info
 
+# Directorios generados por coverage.ps1
+/coverage/
+/coverage-report/
+
 # Visual Studio code coverage results
 *.coverage
 *.coveragexml

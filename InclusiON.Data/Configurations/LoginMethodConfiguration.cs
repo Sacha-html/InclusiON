@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using InclusiON.Domain.Models;
 
@@ -37,8 +37,8 @@ namespace InclusiON.Data.Configurations
                 {
                     Id = 1,
                     Code = "STANDARD",
-                    Name = "Email y Contrasena",
-                    Description = "Login visual con nombre de usuario y contrasena",
+                    Name = "Email y contraseña",
+                    Description = "Login visual con nombre de usuario y contraseña",
                     MinAutonomyLevel = 1,
                     RequiresEmail = false,
                     RequiresPassword = true,

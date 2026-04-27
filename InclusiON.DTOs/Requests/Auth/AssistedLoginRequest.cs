@@ -1,11 +1,11 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace InclusiON.DTOs.Requests.Auth
 {
     /// <summary>
     /// Request para login asistido.
     /// Un profesional o familiar autoriza el acceso de la persona con discapacidad
-    /// usando sus credenciales de email y contrasena.
+    /// usando sus credenciales de email y contraseña.
     /// </summary>
     public class AssistedLoginRequest
     {
@@ -23,9 +23,9 @@ namespace InclusiON.DTOs.Requests.Auth
         public string SupervisorEmail { get; set; } = string.Empty;
 
         /// <summary>
-        /// Contrasena del supervisor para validar la autorizacion.
+        /// contraseña del supervisor para validar la autorizacion.
         /// </summary>
-        [Required(ErrorMessage = "La contrasena del supervisor es requerida")]
+        [Required(ErrorMessage = "La contraseña del supervisor es requerida")]
         public string SupervisorPassword { get; set; } = string.Empty;
 
         /// <summary>

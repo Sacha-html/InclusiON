@@ -1,4 +1,4 @@
-using InclusiON.Application.Interfaces.Common;
+﻿using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Auth.Commands;
 using InclusiON.DTOs.Common;
@@ -11,10 +11,12 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
     public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, ApiResponse<UserResponse>>
     {
         private readonly IIdentityService _identityService;
+        private readonly IDateTimeProvider _dateTime;
 
-        public RegisterUserCommandHandler(IIdentityService identityService)
+        public RegisterUserCommandHandler(IIdentityService identityService, IDateTimeProvider dateTime)
         {
             _identityService = identityService;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<UserResponse>> HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken)
@@ -45,7 +47,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 Email = command.Email.ToLower().Trim(),
                 UserName = command.Email.ToLower().Trim(),
                 PhoneNumber = command.PhoneNumber?.Trim(),
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = _dateTime.UtcNow,
                 IsActive = true,
                 EmailConfirmed = true
             };

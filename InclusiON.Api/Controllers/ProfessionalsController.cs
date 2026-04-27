@@ -117,16 +117,18 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<GetProfessionalByIdQuery, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var userId = _httpContextService.GetCurrentUserId();
-            if (userId == null)
+            // El professionalId viene encriptado en el JWT — sin consulta adicional a BD.
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
             {
-                return Unauthorized(ApiResponse<ProfessionalResponse>.Unauthorized());
+                return NotFound(ApiResponse<ProfessionalResponse>.ErrorResult(
+                    ErrorCode.ProfessionalNotFound,
+                    ErrorMessages.ProfessionalNotFound));
             }
 
-            // Usamos un query especial: buscamos por UserId, no por ProfessionalId
-            // Para reutilizar el handler, necesitamos buscar primero el professional
-            // Inyectamos el repository directamente para /me
-            return await GetProfessionalByUserId(userId.Value, handler, cancellationToken);
+            var query = new GetProfessionalByIdQuery(professionalId.Value);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return result.ToActionResult();
         }
 
         #endregion
@@ -348,30 +350,5 @@ namespace InclusiON.Api.Controllers
 
         #endregion
 
-        #region Private Methods
-
-        private async Task<ActionResult<ApiResponse<ProfessionalResponse>>> GetProfessionalByUserId(
-            Guid userId,
-            IQueryHandler<GetProfessionalByIdQuery, ApiResponse<ProfessionalResponse>> handler,
-            CancellationToken cancellationToken)
-        {
-            // Para /me necesitamos buscar por UserId, pero el handler busca por ProfessionalId.
-            // Inyectamos el repositorio para esta operacion especifica.
-            var repository = HttpContext.RequestServices.GetRequiredService<InclusiON.Application.Interfaces.Repositories.IProfessionalsRepository>();
-            var professional = await repository.GetByUserIdAsync(userId, cancellationToken);
-
-            if (professional == null)
-            {
-                return NotFound(ApiResponse<ProfessionalResponse>.ErrorResult(
-                    ErrorCode.ProfessionalNotFound,
-                    ErrorMessages.ProfessionalNotFound));
-            }
-
-            var query = new GetProfessionalByIdQuery(professional.Id);
-            var result = await handler.HandleAsync(query, cancellationToken);
-            return result.ToActionResult();
-        }
-
-        #endregion
     }
 }

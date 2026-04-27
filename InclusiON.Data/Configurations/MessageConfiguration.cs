@@ -19,8 +19,7 @@ namespace InclusiON.Data.Configurations
                 .HasMaxLength(200);
 
             builder.Property(m => m.Content)
-                .IsRequired()
-                .HasColumnType("NVARCHAR(MAX)");
+                .IsRequired();
 
             builder.Property(m => m.SentAt)
                 .IsRequired();
