@@ -200,25 +200,20 @@ export class ActivitiesService {
 ## Lo que FALTA construir (por portal)
 
 ### Portal Profesional (`/pro/`)
-- Listado y CRUD de actividades (FE-04, FE-05)
-- Perfil de habilidades del estudiante (FE-06)
-- Gestor de roadmap drag-and-drop (FE-07)
-- Radar chart (FE-12)
-- Dashboard con datos reales (FE-13)
-- Timeline de diagnósticos (FE-14)
-- Reportes (FE-15)
-- Mensajería inbox (FE-16)
-- Panel config MDA (FE-17)
-- Timeline ajustes adaptativos (FE-18)
+- Listado y CRUD de actividades
+- Perfil de habilidades del estudiante
+- Gestor de roadmap drag-and-drop
+- Radar chart de habilidades
+- Mensajería inbox
+- Panel config MDA
+- Timeline ajustes adaptativos
 
 ### Portal Estudiante AAC (`/app/`)
-- Roadmap visual estilo Duolingo (FE-09)
-- ActivityPlayerShell + 5 players (FE-10, FE-11)
+- Roadmap visual estilo Duolingo
+- ActivityPlayerShell + 5 players
 
 ### Portal Familia (`/family/`)
-- Registro por invitación (FE-08)
-- Vista de reportes (FE-15)
-- Dashboard con datos (FE-13)
+- Dashboard con datos de progreso
 
 ---
 

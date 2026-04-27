@@ -16,7 +16,7 @@ Los tipos de template definen la estructura del contenido dinámico de cada tipo
 - **Endpoint:** `GET /api/catalogs/activity-template-types`
 - No existe controller dedicado de templates; los tipos se gestionan desde el catálogo
 
-### 2. Creación de Actividad (BE-06, FE-04)
+### 2. Creación de Actividad
 El profesional creará actividades con un wizard multi-paso:
 1. Seleccionar área de habilidad
 2. Seleccionar template de actividad
@@ -32,7 +32,7 @@ El profesional creará actividades con un wizard multi-paso:
   - `PUT /api/activities/{id}/deactivate`
 - **Catálogos de soporte:** `GET /api/catalogs/activity-categories`, `GET /api/catalogs/activity-template-types`
 
-### 3. Catálogo de Actividades del Profesional (FE-05)
+### 3. Catálogo de Actividades del Profesional
 Vista donde el profesional puede navegar sus actividades creadas y las actividades estándar, filtrar por área de habilidad y gestionar su catálogo personal.
 
 ## Diagrama de flujo
@@ -41,14 +41,14 @@ Vista donde el profesional puede navegar sus actividades creadas y las actividad
 flowchart TD
     PROF[Profesional] -->|GET /api/catalogs/activity-template-types| TMPL[Tipos de Template]
 
-    PROF -.->|BE-06| WIZARD[Wizard de Creación]
+    PROF -.-> WIZARD[Wizard de Creación]
     WIZARD -.->|Paso 1| AREA[Seleccionar Área de Habilidad]
     WIZARD -.->|Paso 2| SEL_T[Seleccionar Template]
     WIZARD -.->|Paso 3| FORM[Formulario Dinámico]
     FORM -.->|ARASAAC API| PICTO[Pictogramas]
     WIZARD -.->|Paso 4| SAVE[POST /api/activities]
 
-    PROF -.->|FE-05| CAT[Catálogo de Actividades]
+    PROF -.-> CAT[Catálogo de Actividades]
     CAT -.->|Filtrar por área| LIST[Mis actividades + Estándar]
     LIST -.->|Editar/Desactivar| EDIT[PUT /api/activities/id]
 

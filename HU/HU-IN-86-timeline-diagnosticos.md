@@ -1,4 +1,4 @@
-# FE-14 — Implementación: Timeline de Diagnósticos
+# IN-86 — Implementación: Timeline de Diagnósticos
 
 **Jira:** IN-86  
 **Fecha:** 2026-04-17  
