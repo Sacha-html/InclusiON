@@ -15,17 +15,17 @@ import {
 import { forkJoin } from 'rxjs';
 
 @Component({
-  selector: 'app-pro-dashboard',
+  selector: 'app-professional-dashboard',
   standalone: true,
   imports: [
     CardComponent, CardBodyComponent, RowComponent, ColComponent,
     SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
     IconDirective,
   ],
-  templateUrl: './pro-dashboard.component.html',
-  styleUrl: './pro-dashboard.component.scss',
+  templateUrl: './detail.component.html',
+  styleUrl: './detail.component.scss',
 })
-export class ProDashboardComponent implements OnInit {
+export class DetailComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly invitationsService = inject(InvitationsService);

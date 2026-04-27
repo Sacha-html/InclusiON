@@ -21,5 +21,6 @@ export interface DiagnosisListItemResponse {
   primaryDiagnosis: string;
   professionalName: string;
   professionalId: string;
+  createdByUserId: string;
   createdAt: string;
 }

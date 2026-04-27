@@ -8,18 +8,7 @@ import { AdminInstitutionResponse } from '@models';
   selector: 'app-institution-filter',
   standalone: true,
   imports: [FormsModule, FormSelectDirective],
-  template: `
-    @if (!isGlobalAdmin && institutions.length > 1) {
-      <div class="mb-3">
-        <label for="institutionFilter" class="form-label">Filtrar por institucion</label>
-        <select cSelect id="institutionFilter" [(ngModel)]="selectedId" (ngModelChange)="onFilterChange()">
-          @for (inst of institutions; track inst.institutionId) {
-            <option [ngValue]="inst.institutionId">{{ inst.institutionName }}</option>
-          }
-        </select>
-      </div>
-    }
-  `,
+  templateUrl: './institution-filter.component.html',
 })
 export class InstitutionFilterComponent implements OnInit {
   private readonly adminInstitutionsService = inject(AdminInstitutionsService);

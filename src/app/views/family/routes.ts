@@ -48,5 +48,11 @@ export const familyRoutes: Routes = [
         (m) => m.FamilyDashboardComponent
       ),
     data: { title: 'Profesionales' }
+  },
+  {
+    path: 'reports',
+    loadChildren: () =>
+      import('./reports/routes').then((m) => m.familyReportRoutes),
+    data: { title: 'Reportes' }
   }
 ];

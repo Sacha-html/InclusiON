@@ -51,6 +51,7 @@ export class UserManagementDetailComponent implements OnInit {
   isLoading = true;
 
   showDeactivateModal = false;
+  showResetPasswordModal = false;
   showPasswordModal = false;
   tempPassword = '';
   tempPasswordEmail = '';
@@ -108,6 +109,12 @@ export class UserManagementDetailComponent implements OnInit {
 
   resetPassword(): void {
     if (!this.user) return;
+    this.showResetPasswordModal = true;
+  }
+
+  confirmResetPassword(): void {
+    if (!this.user) return;
+    this.showResetPasswordModal = false;
     this.userService.resetPassword(this.user.userId).subscribe({
       next: (result) => {
         this.tempPassword = result.temporaryPassword;

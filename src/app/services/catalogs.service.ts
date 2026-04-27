@@ -9,6 +9,7 @@ import {
   ActivityCategoryItem,
   SkillAreaItem,
   ActivityTemplateTypeItem,
+  AvatarColorItem,
 } from '@models';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
@@ -48,6 +49,10 @@ export class CatalogsService {
 
   getActivityTemplateTypes(): Observable<ActivityTemplateTypeItem[]> {
     return this.cached('activity-template-types');
+  }
+
+  getAvatarColors(): Observable<AvatarColorItem[]> {
+    return this.cached('avatar-colors');
   }
 
   clearCache(): void {

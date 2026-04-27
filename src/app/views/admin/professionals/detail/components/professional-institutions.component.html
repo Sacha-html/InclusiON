@@ -1,0 +1,61 @@
+<div class="d-flex justify-content-end mb-3">
+  <button cButton color="primary" size="sm" (click)="openAssignInstitutionModal()">Agregar institucion</button>
+</div>
+@if (institutions.length === 0) {
+  <p class="text-body-secondary text-center py-3">No hay instituciones asignadas.</p>
+} @else {
+  <table cTable hover>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Fecha asignacion</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (inst of institutions; track inst.institutionId) {
+        <tr>
+          <td>{{ inst.institutionName }}</td>
+          <td>{{ inst.assignedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <button cButton color="danger" size="sm" variant="ghost" (click)="openRemoveInstitutionModal(inst)">Remover</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+<!-- Modal agregar institucion -->
+<c-modal [visible]="showAssignInstitutionModal()" (visibleChange)="showAssignInstitutionModal.set($event)" alignment="center">
+  <c-modal-header><h5 cModalTitle>Agregar institucion</h5></c-modal-header>
+  <c-modal-body>
+    <div class="mb-3">
+      <label cLabel>Institucion</label>
+      <select cSelect (change)="selectedInstitutionId = $any($event.target).value ? +$any($event.target).value : null">
+        <option value="">Seleccione una institucion...</option>
+        @for (inst of availableInstitutions; track inst.id) {
+          <option [value]="inst.id">{{ inst.name }}</option>
+        }
+      </select>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelAssignInstitution()">Cancelar</button>
+    <button cButton color="primary" (click)="confirmAssignInstitution()" [disabled]="!selectedInstitutionId">Agregar</button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal remover institucion -->
+<c-modal [visible]="showRemoveInstitutionModal()" (visibleChange)="showRemoveInstitutionModal.set($event)" alignment="center">
+  <c-modal-header><h5 cModalTitle>Confirmar remocion</h5></c-modal-header>
+  <c-modal-body>
+    @if (institutionToRemove()) {
+      <p>¿Esta seguro de que desea remover la institucion <strong>{{ institutionToRemove()!.institutionName }}</strong>?</p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelRemoveInstitution()">Cancelar</button>
+    <button cButton color="danger" (click)="confirmRemoveInstitution()">Remover</button>
+  </c-modal-footer>
+</c-modal>

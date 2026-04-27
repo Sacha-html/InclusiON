@@ -5,11 +5,11 @@ import { InstitutionsService, ToastService } from '@services';
 import { InstitutionResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
-import { FormSelectDirective, GridModule } from '@coreui/angular';
+import { ButtonDirective, FormLabelDirective, FormSelectDirective, GridModule } from '@coreui/angular';
 
 @Component({
   selector: 'app-list',
-  imports: [DataTableComponent, FormsModule, FormSelectDirective, GridModule],
+  imports: [DataTableComponent, FormsModule, ButtonDirective, FormLabelDirective, FormSelectDirective, GridModule],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
 })
@@ -25,6 +25,9 @@ export class ListComponent implements OnInit {
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
+  sortBy = 'name';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
+  loading = false;
 
   public cols: TableColumn[] = [
     {
@@ -33,10 +36,10 @@ export class ListComponent implements OnInit {
         { action: 'edit', label: 'Editar', icon: 'cil-notes' },
       ],
     },
-    { key: 'name', label: 'Nombre' },
-    { key: 'address', label: 'Direccion' },
-    { key: 'phone', label: 'Telefono' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'name', label: 'Nombre', sortable: true },
+    { key: 'address', label: 'Direccion', sortable: true },
+    { key: 'phone', label: 'Telefono', sortable: true },
+    { key: 'isActive', label: 'Estado', type: 'badge', sortable: true },
   ];
 
   ngOnInit(): void {
@@ -48,12 +51,25 @@ export class ListComponent implements OnInit {
     this.applyFilter();
   }
 
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    this.sortBy = event.sortBy;
+    this.sortDirection = event.sortDirection;
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
   onSearch(term: string): void {
     this.currentPage = 1;
     this.applyFilter(term);
   }
 
   onStatusFilterChange(): void {
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
     this.currentPage = 1;
     this.applyFilter();
   }
@@ -85,7 +101,7 @@ export class ListComponent implements OnInit {
   }
 
   private applyFilter(search?: string): void {
-    let filtered = this.institutions;
+    let filtered = [...this.institutions];
 
     if (this.statusFilter) {
       const isActive = this.statusFilter === 'active';
@@ -100,6 +116,14 @@ export class ListComponent implements OnInit {
           (i.address && i.address.toLowerCase().includes(term)),
       );
     }
+
+    filtered.sort((a, b) => {
+      const aVal = (a[this.sortBy as keyof InstitutionResponse] ?? '').toString().toLowerCase();
+      const bVal = (b[this.sortBy as keyof InstitutionResponse] ?? '').toString().toLowerCase();
+      const direction = this.sortDirection === 'ASC' ? 1 : -1;
+      return aVal.localeCompare(bVal) * direction;
+    });
+
     this.totalItems = filtered.length;
     const start = (this.currentPage - 1) * this.pageSize;
     this.filteredInstitutions = filtered.slice(start, start + this.pageSize);
