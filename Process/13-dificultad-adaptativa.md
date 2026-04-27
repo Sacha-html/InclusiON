@@ -20,7 +20,7 @@ Proceso automático del Motor de Dificultad Adaptativa que ajusta los parámetro
 
 ## Pasos del proceso
 
-### 1. Evaluación de Rendimiento (BE-17)
+### 1. Evaluación de Rendimiento
 Tras cada actividad completada, el sistema analiza:
 - Porcentaje de éxito actual
 - Éxitos/fracasos consecutivos
@@ -28,21 +28,21 @@ Tras cada actividad completada, el sistema analiza:
 - Tiempo empleado vs. tiempo límite
 - Número de intentos vs. máximo
 
-### 2. Cálculo de Ajuste (BE-17)
+### 2. Cálculo de Ajuste
 El sistema determina el nuevo estado y calcula ajustes dentro de los rangos configurados:
 - **Dificultad:** Nivel numérico dentro del rango min-max
 - **Tiempo límite:** Segundos permitidos para completar
 - **Pistas:** Cantidad de ayudas disponibles
 - **Intentos:** Número máximo de intentos
 
-### 3. Aplicación de Ajuste (BE-17)
+### 3. Aplicación de Ajuste
 Se persisten los nuevos parámetros y se aplican a la siguiente actividad del roadmap.
 - **Pipeline:** Persist → Adapt → Unlock → Alert
 
-### 4. Registro de Auditoría (BE-17)
+### 4. Registro de Auditoría
 Cada ajuste se registra en `AdaptiveAdjustmentLog` para trazabilidad y análisis posterior.
 - **Endpoint previsto:** `GET /api/persons/{id}/adaptive-log` (historial de ajustes)
-- **Frontend previsto:** Timeline de ajustes adaptativos (FE-18)
+- **Frontend previsto:** Timeline de ajustes adaptativos
 
 ## Entidades de dominio (existentes)
 - `AdaptiveEngineConfig` — Rangos y umbrales configurados por el profesional (1:0..1 con PersonRoadmapActivity)

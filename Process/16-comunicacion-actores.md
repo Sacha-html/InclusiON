@@ -15,7 +15,7 @@ Procesos de comunicación entre los distintos actores del sistema. Abarca la men
 ### 1. Invitaciones por Email
 Canal de comunicación unidireccional para el registro de familiares. Documentado en detalle en el **Proceso 07 — Gestión de Invitaciones**.
 
-### 2. Mensajería Interna (BE-15, FE-16)
+### 2. Mensajería Interna
 Sistema de mensajes dentro de la plataforma entre profesional y familia, con bandeja de entrada, mensajes enviados y estado de lectura.
 
 **Endpoints previstos:**
@@ -44,11 +44,11 @@ Alertas automáticas del sistema ante eventos relevantes:
 
 ```mermaid
 flowchart TD
-    PROF[Profesional] -.->|BE-15| MSG_OUT[Enviar Mensaje]
+    PROF[Profesional] -.-> MSG_OUT[Enviar Mensaje]
     MSG_OUT -.->|POST /api/messages| SERVER[Servidor]
     SERVER -.->|SignalR / Poll| FAM_IN[Familiar recibe]
 
-    FAM[Familiar] -.->|BE-15| MSG_BACK[Responder]
+    FAM[Familiar] -.-> MSG_BACK[Responder]
     MSG_BACK -.->|POST /api/messages| SERVER
     SERVER -.->|SignalR / Poll| PROF_IN[Profesional recibe]
 
