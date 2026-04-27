@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CatalogsService, PersonsService } from '@services';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '../../../../models';
 import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
+import { AvatarColorPickerComponent } from '@shared/components';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -37,6 +38,7 @@ import {
     FormCheckLabelDirective,
     FormSelectDirective,
     ButtonDirective,
+    AvatarColorPickerComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
@@ -78,6 +80,7 @@ export class NewComponent implements OnInit {
     requiresHighContrast: [false],
     visualNoiseSensitivity: [false],
     soundSensitivity: [false],
+    colorBlindnessType: [null],
     // Configuración de acceso
     autonomyLevelId: [null],
     loginMethodId: [null],
@@ -123,6 +126,7 @@ export class NewComponent implements OnInit {
       requiresHighContrast: raw.requiresHighContrast ?? false,
       visualNoiseSensitivity: raw.visualNoiseSensitivity ?? false,
       soundSensitivity: raw.soundSensitivity ?? false,
+      ...(raw.colorBlindnessType && { colorBlindnessType: raw.colorBlindnessType }),
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       ...(raw.disabilityTypeId && { disabilityTypeId: +raw.disabilityTypeId }),
       ...(raw.attentionLevel && { attentionLevel: +raw.attentionLevel }),

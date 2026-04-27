@@ -10,4 +10,5 @@ export interface GetPersonsRequest {
   autonomyLevelId?: number;
   isActive?: boolean;
   institutionId?: number;
+  representativeSearch?: string;
 }

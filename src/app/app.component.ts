@@ -7,11 +7,12 @@ import { delay, filter, map, tap } from 'rxjs/operators';
 import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
 import { AccessibilityService, ColorMode } from '@services';
+import { SpinnerOverlayComponent } from '@shared/components';
 
 @Component({
     selector: 'app-root',
-    template: '<router-outlet />',
-    imports: [RouterOutlet]
+    templateUrl: './app.component.html',
+    imports: [RouterOutlet, SpinnerOverlayComponent]
 })
 export class AppComponent implements OnInit {
   title = 'InclusiON';

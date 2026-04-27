@@ -17,7 +17,7 @@
       <div class="text-center text-body-secondary p-4">
         <p>No hay invitaciones creadas aun.</p>
         <button cButton color="primary" (click)="openModal()">
-          Crear primera invitacion
+          Agregar invitación
         </button>
       </div>
     }
@@ -26,12 +26,12 @@
       <table cTable hover responsive>
         <thead>
           <tr>
-            <th>Email</th>
-            <th>Nombre</th>
-            <th>Parentesco</th>
-            <th>Persona</th>
-            <th>Estado</th>
-            <th>Fecha</th>
+            <th (click)="onSort('email')" [class]="sortBy === 'email' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Email</th>
+            <th (click)="onSort('firstName')" [class]="sortBy === 'firstName' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Nombre</th>
+            <th (click)="onSort('relationship')" [class]="sortBy === 'relationship' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Parentesco</th>
+            <th (click)="onSort('personName')" [class]="sortBy === 'personName' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Persona</th>
+            <th (click)="onSort('status')" [class]="sortBy === 'status' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Estado</th>
+            <th (click)="onSort('createdAt')" [class]="sortBy === 'createdAt' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Fecha</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -54,7 +54,6 @@
                     cButton
                     color="light"
                     size="sm"
-                    title="Copiar link"
                     (click)="copyToClipboard(inv.code)"
                   >
                     Copiar link
@@ -75,9 +74,9 @@
   <c-modal-header>
     <h5 cModalTitle>
       @if (createdInvitationCode) {
-        Invitacion Creada
+        Invitación Creada
       } @else {
-        Nueva Invitacion
+        Agregar Invitación
       }
     </h5>
   </c-modal-header>
@@ -86,7 +85,7 @@
     @if (createdInvitationCode) {
       <!-- Success state -->
       <c-alert color="success">
-        Invitacion creada exitosamente. Comparte el siguiente link con el familiar:
+        Invitación creada exitosamente. Compartí el siguiente link con el familiar:
       </c-alert>
       <div class="input-group mb-3">
         <input
@@ -178,7 +177,7 @@
         @if (isSubmitting) {
           <c-spinner size="sm" class="me-1"></c-spinner>
         }
-        Crear Invitacion
+        Guardar
       </button>
     }
   </c-modal-footer>

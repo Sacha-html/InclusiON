@@ -1,7 +1,7 @@
 <!-- Panel de Accesibilidad -->
 <app-accessibility-panel></app-accessibility-panel>
 
-<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center login-layout">
+<div class="min-vh-100 d-flex flex-row align-items-center login-layout" style="background-color: var(--a11y-bg-secondary)">
   <c-container>
     <c-row class="justify-content-center">
       <c-col md="6" lg="5">
@@ -9,14 +9,14 @@
           <c-card-body>
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
               <div class="text-center mb-4">
-                <svg cIcon name="cilLockLocked" size="3xl" class="text-primary mb-3"></svg>
-                <h1 class="h3">{{ pageTitle }}</h1>
-                <p class="text-body-secondary">{{ pageSubtitle }}</p>
+                <svg cIcon name="cilLockLocked" size="3xl" class="mb-3" style="color: var(--a11y-text-secondary)" aria-hidden="true"></svg>
+                <h1 class="h3" style="color: var(--a11y-text)">{{ pageTitle }}</h1>
+                <p class="mb-0" style="color: var(--a11y-text-muted)">{{ pageSubtitle }}</p>
               </div>
 
               <!-- Error Alert -->
               @if (errorMessage) {
-                <c-alert color="danger" class="mb-3" dismissible>
+                <c-alert color="danger" class="mb-3" dismissible role="alert" aria-live="assertive">
                   {{ errorMessage }}
                 </c-alert>
               }
@@ -32,6 +32,8 @@
                   formControlName="email"
                   placeholder="Email"
                   autocomplete="username"
+                  aria-label="Email"
+                  aria-required="true"
                   autofocus
                 />
               </c-input-group>
@@ -47,6 +49,8 @@
                   formControlName="password"
                   placeholder="Contraseña"
                   autocomplete="current-password"
+                  aria-label="Contraseña"
+                  aria-required="true"
                 />
                 <span
                   cInputGroupText
@@ -106,7 +110,7 @@
               <!-- Registro de profesionales -->
               <hr class="my-4" />
               <div class="text-center">
-                <p class="text-body-secondary mb-2">¿Eres profesional y aún no tienes cuenta?</p>
+                <p class="mb-2" style="color: var(--a11y-text-muted)">¿Eres profesional y aún no tienes cuenta?</p>
                 <a
                   cButton
                   color="outline-primary"

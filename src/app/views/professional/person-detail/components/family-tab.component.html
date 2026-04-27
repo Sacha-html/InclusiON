@@ -23,7 +23,7 @@
       <label cFormLabel for="search-family">Buscar familiar</label>
       <div class="d-flex gap-2">
         <input cFormControl id="search-family" [(ngModel)]="searchFamily" placeholder="Buscar por nombre..." />
-        <button cButton color="secondary" (click)="onSearchFamily()">Buscar</button>
+        <button type="button" cButton color="secondary" (click)="onSearchFamily()">Buscar</button>
       </div>
     </div>
 
@@ -94,11 +94,12 @@
     }
   </c-modal-body>
   <c-modal-footer>
-    <button cButton color="secondary" (click)="closeLinkModal()">Cancelar</button>
-    <button 
-      cButton 
-      color="primary" 
-      (click)="confirmLink()" 
+    <button type="button" cButton color="secondary" (click)="closeLinkModal()">Cancelar</button>
+    <button
+      type="button"
+      cButton
+      color="primary"
+      (click)="confirmLink()"
       [disabled]="!selectedFamilyId || !linkRelationship || confirmingLink">
       @if (confirmingLink) {
         <c-spinner size="sm"></c-spinner>
@@ -118,8 +119,8 @@
     <p class="text-muted">Esta acción restaurará el vínculo anterior con esta persona.</p>
   </c-modal-body>
   <c-modal-footer>
-    <button cButton color="secondary" (click)="showConfirmLinkModal = false">Cancelar</button>
-    <button cButton color="primary" (click)="doLink()" [disabled]="confirmingLink">
+    <button type="button" cButton color="secondary" (click)="showConfirmLinkModal = false">Cancelar</button>
+    <button type="button" cButton color="primary" (click)="doLink()" [disabled]="confirmingLink">
       @if (confirmingLink) {
         <c-spinner size="sm"></c-spinner>
       }
@@ -136,17 +137,19 @@
   <c-modal-body>
     <p>¿Está seguro que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de esta persona?</p>
     <div class="mb-3">
-      <label cLabel for="observation">Motivo de desvinculación</label>
-      <textarea cFormControl id="observation" [(ngModel)]="unlinkObservation" rows="3"></textarea>
+      <label cLabel for="observation">Motivo de desvinculación *</label>
+      <textarea cFormControl id="observation" [(ngModel)]="unlinkObservation" rows="3" aria-required="true" aria-describedby="observation-help"></textarea>
+      <small id="observation-help" style="color: var(--a11y-text-muted)">El motivo es obligatorio para continuar.</small>
     </div>
   </c-modal-body>
   <c-modal-footer>
-    <button cButton color="secondary" (click)="closeUnlinkModal()">Cancelar</button>
-    <button 
-      cButton 
-      color="danger" 
-      (click)="confirmUnlink()" 
-      [disabled]="!unlinkObservation || unlinking">
+    <button type="button" cButton color="secondary" (click)="closeUnlinkModal()">Cancelar</button>
+    <button
+      type="button"
+      cButton
+      color="danger"
+      (click)="confirmUnlink()"
+      [disabled]="!unlinkObservation.trim() || unlinking">
       @if (unlinking) {
         <c-spinner size="sm"></c-spinner>
       }

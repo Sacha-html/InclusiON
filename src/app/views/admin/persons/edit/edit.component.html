@@ -186,6 +186,18 @@
           </c-col>
         </c-row>
 
+        <c-row class="mb-3">
+          <c-col sm="6">
+            <label cLabel for="colorBlindnessType">Tipo de daltonismo</label>
+            <select cSelect id="colorBlindnessType" formControlName="colorBlindnessType">
+              <option [ngValue]="null">Ninguno</option>
+              <option value="deuteranopia">Deuteranopia (rojo-verde)</option>
+              <option value="protanopia">Protanopia (rojo-verde)</option>
+              <option value="tritanopia">Tritanopia (azul-amarillo)</option>
+            </select>
+          </c-col>
+        </c-row>
+
         <!-- Configuración de Acceso -->
         <h5 class="mt-4 mb-3">Configuración de acceso</h5>
 
@@ -202,15 +214,24 @@
           </c-col>
           <c-col sm="6">
             <label cLabel>Método de login actual</label>
-            <input cFormControl [value]="person.loginMethodName ?? 'Sin especificar'" readonly
-                   aria-label="Método de login (no editable desde aquí)" />
+            <div class="d-flex gap-2">
+              <input cFormControl [value]="person.loginMethodName ?? 'Sin especificar'" readonly
+                     aria-label="Método de login actual (no editable desde este formulario)" />
+              <button cButton color="secondary" type="button" (click)="openLoginMethodModal()"
+                      aria-label="Abrir el wizard para cambiar el método de acceso">
+                Cambiar...
+              </button>
+            </div>
           </c-col>
         </c-row>
 
         <c-row class="mb-3">
-          <c-col sm="6">
-            <label cLabel for="avatarColor">Color de avatar</label>
-            <input cFormControl id="avatarColor" formControlName="avatarColor" type="color" />
+          <c-col sm="12">
+            <label cLabel id="avatarColorLabel">Color de avatar</label>
+            <app-avatar-color-picker
+              formControlName="avatarColor"
+              ariaLabel="Seleccionar color de avatar de la persona">
+            </app-avatar-color-picker>
           </c-col>
         </c-row>
 
@@ -221,4 +242,14 @@
       </form>
     </c-card-body>
   </c-card>
+
+  <app-change-login-method-modal
+    [visible]="showLoginMethodModal"
+    [userId]="person.userId"
+    [personId]="person.id"
+    [currentLoginMethodId]="person.loginMethodId ?? null"
+    [loginMethods]="loginMethods"
+    (closed)="closeLoginMethodModal()"
+    (updated)="onLoginMethodUpdated($event)">
+  </app-change-login-method-modal>
 }

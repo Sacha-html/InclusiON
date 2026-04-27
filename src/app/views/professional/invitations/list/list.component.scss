@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+table th.sortable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: var(--cui-table-hover-bg, var(--cui-body-bg));
+  }
+}
+
+table th.sortable::after {
+  content: '';
+  display: inline-block;
+  margin-left: 0.5rem;
+  opacity: 0.3;
+}
+
+table th.sortable.asc::after {
+  content: '\2191';
+  opacity: 1;
+}
+
+table th.sortable.desc::after {
+  content: '\2193';
+  opacity: 1;
+}

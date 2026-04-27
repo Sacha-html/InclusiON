@@ -6,6 +6,8 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
 import { PersonBasicInfoComponent } from './components/person-basic-info.component';
 import { PersonSkillsComponent } from './components/person-skills.component';
 import { PersonLinksComponent } from './components/person-links.component';
+import { AdminDiagnosesComponent } from './components/admin-diagnoses.component';
+import { AdminPersonReportsComponent } from './components/admin-person-reports.component';
 import { BadgeComponent, CardBodyComponent, CardComponent, CardHeaderComponent } from '@coreui/angular';
 
 @Component({
@@ -20,6 +22,8 @@ import { BadgeComponent, CardBodyComponent, CardComponent, CardHeaderComponent }
     PersonBasicInfoComponent,
     PersonSkillsComponent,
     PersonLinksComponent,
+    AdminDiagnosesComponent,
+    AdminPersonReportsComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',

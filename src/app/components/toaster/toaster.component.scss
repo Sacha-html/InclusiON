@@ -1,3 +1,10 @@
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep .toast {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 :host ::ng-deep .toast {
   min-width: 300px;
 
@@ -28,10 +35,27 @@
     .toast-header {
       background-color: inherit;
       color: inherit;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
 
+      // Reemplaza la X de Bootstrap (SVG background) por un mask con currentColor,
+      // para que siempre matchee el text color del tema (evita casos donde invert(1)
+      // hace la X invisible sobre fondos claros con texto oscuro).
       .btn-close {
-        filter: var(--a11y-close-btn-filter, invert(1));
+        background: transparent !important;
+        background-color: currentColor !important;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3E%3Cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3E%3C/svg%3E") center/1em auto no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3E%3Cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3E%3C/svg%3E") center/1em auto no-repeat;
+        opacity: 1 !important;
+
+        &:hover {
+          opacity: 0.85 !important;
+        }
+
+        &:focus-visible {
+          outline: 2px solid currentColor;
+          outline-offset: 2px;
+          opacity: 1 !important;
+        }
       }
     }
 
