@@ -1,10 +1,13 @@
+using System.Reflection;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using InclusiON.Data.Converters;
+using InclusiON.Domain.Attributes;
 using InclusiON.Domain.Models;
 using InclusiON.Domain.Models.BaseEntities;
-using System.Security.Claims;
 
 namespace InclusiON.Data
 {
@@ -78,6 +81,24 @@ namespace InclusiON.Data
         {
             base.OnModelCreating(builder);
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+            ApplyEncryptedConverters(builder);
+        }
+
+        private static void ApplyEncryptedConverters(ModelBuilder builder)
+        {
+            var converter = new EncryptedStringConverter();
+
+            foreach (var entityType in builder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.ClrType.GetProperties()
+                    .Where(p => p.GetCustomAttribute<EncryptedAttribute>() != null
+                             && p.PropertyType == typeof(string)))
+                {
+                    builder.Entity(entityType.ClrType)
+                           .Property(property.Name)
+                           .HasConversion(converter);
+                }
+            }
         }
 
         public override int SaveChanges()

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -17,15 +17,18 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IProfessionalsRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateProfessionalCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public UpdateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IUnitOfWork unitOfWork,
-            ILogger<UpdateProfessionalCommandHandler> logger)
+            ILogger<UpdateProfessionalCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(UpdateProfessionalCommand command, CancellationToken cancellationToken)
@@ -86,7 +89,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         {
                             ProfessionalId = professional.Id,
                             InstitutionId = instId,
-                            AssignedAt = DateTime.UtcNow,
+                            AssignedAt = _dateTime.UtcNow,
                             IsActive = true
                         });
                     }

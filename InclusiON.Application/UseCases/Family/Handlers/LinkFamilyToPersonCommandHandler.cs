@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -17,15 +17,18 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IFamilyRepository _familyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<LinkFamilyToPersonCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public LinkFamilyToPersonCommandHandler(
             IFamilyRepository familyRepository,
             IUnitOfWork unitOfWork,
-            ILogger<LinkFamilyToPersonCommandHandler> logger)
+            ILogger<LinkFamilyToPersonCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _familyRepository = familyRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<PersonRepresentativeResponse>> HandleAsync(LinkFamilyToPersonCommand command, CancellationToken cancellationToken)
@@ -73,7 +76,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         foreach (var pr in currentPrimary.Where(p => p.IsActive))
                         {
                             pr.IsPrimary = false;
-                            pr.UpdatedAt = DateTime.UtcNow;
+                            pr.UpdatedAt = _dateTime.UtcNow;
                             await _familyRepository.UpdatePersonRepresentativeAsync(pr, ct);
                         }
                     }
@@ -85,7 +88,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         existingLink.IsActive = true;
                         existingLink.Relationship = command.Relationship;
                         existingLink.IsPrimary = command.IsPrimary;
-                        existingLink.UpdatedAt = DateTime.UtcNow;
+                        existingLink.UpdatedAt = _dateTime.UtcNow;
                         existingLink.EndedAt = null;
                         existingLink.UnlinkObservation = null;
                         personRepresentative = existingLink;
@@ -102,7 +105,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                             IsActive = true,
                             HasInformedConsent = false,
                             CanSuperviseLogin = true,
-                            CreatedAt = DateTime.UtcNow
+                            CreatedAt = _dateTime.UtcNow
                         };
 
                         await _familyRepository.CreatePersonRepresentativeAsync(personRepresentative, ct);
@@ -117,7 +120,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         Relationship = command.Relationship,
                         WasPrimary = command.IsPrimary,
                         ChangedByUserId = command.ChangedByUserId,
-                        CreatedAt = DateTime.UtcNow
+                        CreatedAt = _dateTime.UtcNow
                     };
                     await _familyRepository.CreatePersonRepresentativeHistoryAsync(history, ct);
 

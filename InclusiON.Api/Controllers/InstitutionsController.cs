@@ -42,7 +42,7 @@ namespace InclusiON.Api.Controllers
         /// Crea una nueva institucion educativa.
         /// </summary>
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize(Policy = "global-admin")]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status409Conflict)]

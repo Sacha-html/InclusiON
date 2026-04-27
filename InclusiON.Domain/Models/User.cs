@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace InclusiON.Domain.Models
 {
@@ -44,8 +44,8 @@ namespace InclusiON.Domain.Models
         public string? LastLoginUserAgent { get; set; }
 
         /// <summary>
-        /// Indica si el usuario debe cambiar su contrasena en el proximo inicio de sesion.
-        /// Usado para contrasenas temporales.
+        /// Indica si el usuario debe cambiar su contraseña en el proximo inicio de sesion.
+        /// Usado para contraseñs temporales.
         /// </summary>
         public bool MustChangePassword { get; set; }
 

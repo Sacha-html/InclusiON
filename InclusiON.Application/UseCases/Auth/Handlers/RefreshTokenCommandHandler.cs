@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -18,19 +18,22 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         private readonly ILoginSessionService _loginSessionService;
         private readonly ITelemetryService _telemetryService;
         private readonly ILogger<RefreshTokenCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public RefreshTokenCommandHandler(
             IIdentityService identityService,
             IRefreshTokensRepository refreshTokensRepository,
             ILoginSessionService loginSessionService,
             ITelemetryService telemetryService,
-            ILogger<RefreshTokenCommandHandler> logger)
+            ILogger<RefreshTokenCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _identityService = identityService;
             _refreshTokensRepository = refreshTokensRepository;
             _loginSessionService = loginSessionService;
             _telemetryService = telemetryService;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<LoginResponse>> HandleAsync(RefreshTokenCommand command, CancellationToken cancellationToken)
@@ -65,7 +68,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.TokenRevoked);
             }
 
-            if (storedToken.ExpiresAt < DateTime.UtcNow)
+            if (storedToken.ExpiresAt < _dateTime.UtcNow)
             {
                 _logger.LogWarning("Attempted to use expired refresh token for user {UserId}", storedToken.UserId);
                 await _refreshTokensRepository.RevokeAsync(command.RefreshToken, "Token expired", cancellationToken);
@@ -97,7 +100,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.UserInactive);
             }
 
-            var remainingDays = (storedToken.ExpiresAt - DateTime.UtcNow).TotalDays;
+            var remainingDays = (storedToken.ExpiresAt - _dateTime.UtcNow).TotalDays;
             var refreshTokenExpiryDays = Math.Max(1, (int)Math.Ceiling(remainingDays));
 
             _logger.LogDebug("Successfully refreshed token for user {UserId}", user.Id);

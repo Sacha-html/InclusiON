@@ -15,11 +15,13 @@ namespace InclusiON.Infrastructure.Authentication
     public class JwtTokenService : IJwtTokenService
     {
         private readonly JwtSettings _jwtSettings;
+        private readonly IEncryptionService _encryption;
         private readonly JwtSecurityTokenHandler _tokenHandler;
 
-        public JwtTokenService(IOptions<JwtSettings> jwtSettings)
+        public JwtTokenService(IOptions<JwtSettings> jwtSettings, IEncryptionService encryption)
         {
             _jwtSettings = jwtSettings?.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
+            _encryption  = encryption ?? throw new ArgumentNullException(nameof(encryption));
             _tokenHandler = new JwtSecurityTokenHandler();
 
             ValidateSettings();
@@ -34,7 +36,7 @@ namespace InclusiON.Infrastructure.Authentication
                     throw new ArgumentNullException(nameof(userData));
                 }
 
-                var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
+                var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
                 var utcNow = DateTime.UtcNow;
 
                 var claims = new List<Claim>
@@ -48,6 +50,15 @@ namespace InclusiON.Infrastructure.Authentication
                 new Claim(JwtRegisteredClaimNames.Iat,
                     DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
                 };
+
+                if (userData.EntityId.HasValue)
+                {
+                    // El ID de dominio (professionalId / familyId / personId) viaja encriptado.
+                    // Nombre de claim opaco ("eid") para no revelar su semántica al leer el JWT en crudo.
+                    claims.Add(new Claim(
+                        Permissions.EntityIdClaimType,
+                        _encryption.Encrypt(userData.EntityId.Value.ToString())));
+                }
 
                 if (userData.Permissions is not null && userData.Permissions.Any())
                 {
@@ -80,7 +91,7 @@ namespace InclusiON.Infrastructure.Authentication
                     NotBefore = utcNow,
                     SigningCredentials = new SigningCredentials(
                             new SymmetricSecurityKey(key),
-                            SecurityAlgorithms.HmacSha256Signature
+                            SecurityAlgorithms.HmacSha256
                         )
                 };
 
@@ -177,7 +188,7 @@ namespace InclusiON.Infrastructure.Authentication
 
             try
             {
-                var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
+                var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
 
                 var tokenValidationParameters = new TokenValidationParameters
                 {
@@ -190,14 +201,15 @@ namespace InclusiON.Infrastructure.Authentication
                     ValidateLifetime = true,
                     RequireExpirationTime = true,
                     RequireSignedTokens = true,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256]
                 };
 
                 var main = _tokenHandler
                     .ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
 
                 if (validatedToken is not JwtSecurityToken jwtToken ||
-                     !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
+                     !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
                 {
                     return null!;
                 }

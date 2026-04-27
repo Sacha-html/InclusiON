@@ -1,4 +1,4 @@
-using InclusiON.Domain.Models.BaseEntities;
+﻿using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
 {
@@ -37,7 +37,7 @@ namespace InclusiON.Domain.Models
         public bool RequiresEmail { get; set; }
 
         /// <summary>
-        /// Indica si requiere contrasena tradicional.
+        /// Indica si requiere contraseña tradicional.
         /// </summary>
         public bool RequiresPassword { get; set; }
 

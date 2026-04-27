@@ -71,8 +71,9 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<AdminResetPasswordCommand, ApiResponse<ResetPasswordResultResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var command = new AdminResetPasswordCommand(userId, currentUserId);
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            if (currentUserId is null) return Unauthorized(ApiResponse<ResetPasswordResultResponse>.Unauthorized());
+            var command = new AdminResetPasswordCommand(userId, currentUserId.Value);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }
@@ -87,8 +88,9 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<AdminDeactivateUserCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
         {
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var command = new AdminDeactivateUserCommand(userId, currentUserId);
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            if (currentUserId is null) return Unauthorized(ApiResponse<object>.Unauthorized());
+            var command = new AdminDeactivateUserCommand(userId, currentUserId.Value);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }
@@ -103,8 +105,9 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<AdminReactivateUserCommand, ApiResponse<ResetPasswordResultResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var currentUserId = _httpContextService.GetCurrentUserId()!.Value;
-            var command = new AdminReactivateUserCommand(userId, currentUserId);
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            if (currentUserId is null) return Unauthorized(ApiResponse<ResetPasswordResultResponse>.Unauthorized());
+            var command = new AdminReactivateUserCommand(userId, currentUserId.Value);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }

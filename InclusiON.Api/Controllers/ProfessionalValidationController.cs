@@ -8,7 +8,7 @@ namespace InclusiON.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize]   // Solo usuarios autenticados (admin/profesional) pueden verificar unicidad.
     public class ProfessionalValidationController : ControllerBase
     {
         private readonly IProfessionalsRepository _repository;

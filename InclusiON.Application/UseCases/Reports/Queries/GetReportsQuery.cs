@@ -1,9 +1,4 @@
-﻿using InclusiON.DTOs.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Application.UseCases.Reports.Queries
 {
@@ -15,9 +10,11 @@ namespace InclusiON.Application.UseCases.Reports.Queries
         string? ProfessionalId,
         string? ReportTypeId,
         bool? IsActive,
+        string? Status,
+        DateTime? DateFrom,
+        DateTime? DateTo,
         SortField? SortBy,
         string SortDirection,
         List<int>? InstitutionIds = null
     );
-    
 }

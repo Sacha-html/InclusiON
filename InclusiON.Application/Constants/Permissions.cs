@@ -9,7 +9,12 @@ namespace InclusiON.Application.Constants
         public const string ClaimType = "permission";
         public const string GlobalAdminClaimType = "isGlobalAdmin";
         public const string InstitutionIdClaimType = "institutionId";
-        public const string IsActiveClaimType = "isActive";
+        public const string IsActiveClaimType  = "isActive";
+        /// <summary>
+        /// ID del entity de dominio del usuario (professionalId, familyRepresentativeId o personId).
+        /// El valor viaja encriptado con AES-256-GCM — opaco para quien lea el JWT en crudo.
+        /// </summary>
+        public const string EntityIdClaimType   = "eid";
 
         // ═══════════════════════════════════════════════════════════════
         // USUARIOS
@@ -76,9 +81,12 @@ namespace InclusiON.Application.Constants
         // ═══════════════════════════════════════════════════════════════
         public static class Reports
         {
-            public const string Read = "reports:read";
+            public const string Read   = "reports:read";
             public const string Create = "reports:create";
-            public const string Export = "reports:export";
+            public const string Submit = "reports:submit";   // Profesional envía borrador al admin
+            public const string Approve = "reports:approve"; // Admin aprueba
+            public const string Reject  = "reports:reject";  // Admin rechaza
+            public const string Export  = "reports:export";  // Descargar PDF
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -128,7 +136,7 @@ namespace InclusiON.Application.Constants
             Family.Read, Family.Create, Family.Update, Family.Delete, Family.Link, Family.Unlink,
             Activities.Read, Activities.Create, Activities.Update, Activities.Delete, Activities.Respond,
             Diagnoses.Read, Diagnoses.Create, Diagnoses.Update,
-            Reports.Read, Reports.Create, Reports.Export,
+            Reports.Read, Reports.Create, Reports.Submit, Reports.Approve, Reports.Reject, Reports.Export,
             Messages.Read, Messages.Create,
             Settings.Read, Settings.Update,
             Audit.Read

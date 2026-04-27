@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Api.Extensions;
+using InclusiON.Api.Filters;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Persons.Commands;
@@ -28,13 +30,16 @@ namespace InclusiON.Api.Controllers
     {
         private readonly IHttpContextService _httpContextService;
         private readonly AppDbContext _context;
+        private readonly IResourceAuthorizationService _resourceAuthz;
 
         public PersonsController(
             IHttpContextService httpContextService,
-            AppDbContext context)
+            AppDbContext context,
+            IResourceAuthorizationService resourceAuthz)
         {
             _httpContextService = httpContextService;
             _context = context;
+            _resourceAuthz = resourceAuthz;
         }
 
         #region Queries
@@ -54,6 +59,11 @@ namespace InclusiON.Api.Controllers
         {
             request.Validate();
 
+            // HU-IN-172: scoping por rol. GlobalAdmin ve todo; los demás sólo sus personas asignadas.
+            var accessibleIds = _httpContextService.IsGlobalAdmin()
+                ? null
+                : await _resourceAuthz.GetAccessiblePersonIdsAsync(cancellationToken);
+
             var query = new GetPersonsQuery(
                 request.Page,
                 request.PageSize,
@@ -63,7 +73,9 @@ namespace InclusiON.Api.Controllers
                 request.IsActive,
                 request.SortBy,
                 request.SortDirection,
-                request.InstitutionIds);
+                request.InstitutionIds,
+                request.RepresentativeSearch,
+                accessibleIds);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
@@ -74,6 +86,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet("{personId:guid}")]
         [Authorize(Policy = "persons:read")]
+        [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
@@ -89,10 +102,45 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Obtiene los profesionales asignados a una persona con discapacidad.
+        /// </summary>
+        [HttpGet("{personId:guid}/professionals")]
+        [Authorize(Policy = "persons:read")]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonProfessionalResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<PersonProfessionalResponse>>>> GetPersonProfessionals(
+            Guid personId,
+            CancellationToken cancellationToken = default)
+        {
+            var assignments = await _context.ProfessionalPersons
+                .Include(pp => pp.Professional)
+                .Where(pp => pp.PersonId == personId && pp.IsActive)
+                .OrderByDescending(pp => pp.IsPrimaryProfessional)
+                .ThenByDescending(pp => pp.AssignedAt)
+                .ToListAsync(cancellationToken);
+
+            var response = assignments.Select(pp => new PersonProfessionalResponse
+            {
+                ProfessionalId = pp.ProfessionalId,
+                PersonId = pp.PersonId,
+                PersonFirstName = pp.Professional.FirstName,
+                PersonLastName = pp.Professional.LastName,
+                PersonFullName = $"{pp.Professional.FirstName} {pp.Professional.LastName}",
+                IsPrimaryProfessional = pp.IsPrimaryProfessional,
+                CanSuperviseLogin = pp.CanSuperviseLogin,
+                IsActive = pp.IsActive,
+                AssignedAt = pp.AssignedAt
+            }).ToList();
+
+            return Ok(ApiResponse<List<PersonProfessionalResponse>>.SuccessResult(response));
+        }
+
+        /// <summary>
         /// Obtiene los familiares vinculados a una persona.
         /// </summary>
         [HttpGet("{personId:guid}/representatives")]
         [Authorize(Policy = "persons:read")]
+        [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<PersonRepresentativeResponse>>>> GetPersonRepresentatives(
             Guid personId,
@@ -128,6 +176,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet("{personId:guid}/link-history")]
         [Authorize(Policy = "family:read")]
+        [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeHistoryResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<PersonRepresentativeHistoryResponse>>>> GetPersonLinkHistory(
             Guid personId,
@@ -178,6 +227,7 @@ namespace InclusiON.Api.Controllers
                 request.RequiresHighContrast,
                 request.VisualNoiseSensitivity,
                 request.SoundSensitivity,
+                request.ColorBlindnessType,
                 request.AutonomyLevelId,
                 request.LoginMethodId,
                 request.Pin,
@@ -202,6 +252,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPut("{personId:guid}")]
         [Authorize(Policy = "persons:update")]
+        [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
@@ -213,7 +264,6 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdatePersonCommand, ApiResponse<PersonResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-
             var command = new UpdatePersonCommand(
                 personId,
                 request.FirstName,
@@ -235,6 +285,7 @@ namespace InclusiON.Api.Controllers
                 request.RequiresHighContrast,
                 request.VisualNoiseSensitivity,
                 request.SoundSensitivity,
+                request.ColorBlindnessType,
                 request.AutonomyLevelId,
                 request.SupervisorUserId,
                 request.AvatarColor);
@@ -248,6 +299,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPut("{personId:guid}/deactivate")]
         [Authorize(Policy = "persons:delete")]
+        [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
@@ -265,6 +317,23 @@ namespace InclusiON.Api.Controllers
         #endregion
 
         #region Login Method
+
+        /// <summary>
+        /// Lista los candidatos a supervisor (profesionales asignados + familiares vinculados activos).
+        /// Usado en el form de cambio de metodo de login cuando se elige ASSISTED.
+        /// </summary>
+        [HttpGet("{personId:guid}/supervisor-candidates")]
+        [Authorize(Policy = "persons:read")]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<SupervisorCandidateResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<SupervisorCandidateResponse>>>> GetSupervisorCandidates(
+            Guid personId,
+            [FromServices] IQueryHandler<GetSupervisorCandidatesQuery, ApiResponse<List<SupervisorCandidateResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetSupervisorCandidatesQuery(personId), cancellationToken);
+            return Ok(result);
+        }
 
         /// <summary>
         /// Actualiza el metodo de login de una persona con discapacidad.
@@ -333,6 +402,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet("{personId:guid}/skill-profile")]
         [Authorize(Policy = "persons:read")]
+        [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<PersonSkillProfileResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<PersonSkillProfileResponse>>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<List<PersonSkillProfileResponse>>>> GetSkillProfile(
@@ -340,14 +410,6 @@ namespace InclusiON.Api.Controllers
             [FromQuery] bool all = false,
             CancellationToken cancellationToken = default)
         {
-            var personExists = await _context.PersonsWithDisability
-                .AnyAsync(p => p.Id == personId, cancellationToken);
-
-            if (!personExists)
-            {
-                return NotFound(ApiResponse<List<PersonSkillProfileResponse>>.NotFound("Persona"));
-            }
-
             var query = _context.PersonSkillProfiles
                 .Where(psp => psp.PersonId == personId);
 
@@ -378,6 +440,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("{personId:guid}/skill-profile")]
         [Authorize(Policy = "persons:update")]
+        [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status409Conflict)]
@@ -386,14 +449,6 @@ namespace InclusiON.Api.Controllers
             [FromBody] AddSkillAreaRequest request,
             CancellationToken cancellationToken = default)
         {
-            var personExists = await _context.PersonsWithDisability
-                .AnyAsync(p => p.Id == personId, cancellationToken);
-
-            if (!personExists)
-            {
-                return NotFound(ApiResponse<PersonSkillProfileResponse>.NotFound("Persona"));
-            }
-
             var skillArea = await _context.SkillAreas
                 .FirstOrDefaultAsync(sa => sa.Id == request.SkillAreaId, cancellationToken);
 
@@ -461,6 +516,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPut("{personId:guid}/skill-profile/{areaId:int}")]
         [Authorize(Policy = "persons:update")]
+        [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonSkillProfileResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<PersonSkillProfileResponse>>> DeactivateSkillArea(

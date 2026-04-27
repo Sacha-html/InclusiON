@@ -76,6 +76,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             if (command.RequiresHighContrast.HasValue) person.RequiresHighContrast = command.RequiresHighContrast.Value;
             if (command.VisualNoiseSensitivity.HasValue) person.VisualNoiseSensitivity = command.VisualNoiseSensitivity.Value;
             if (command.SoundSensitivity.HasValue) person.SoundSensitivity = command.SoundSensitivity.Value;
+            if (command.ColorBlindnessType != null) person.ColorBlindnessType = command.ColorBlindnessType;
 
             // Configuracion de acceso
             if (command.AutonomyLevelId.HasValue) person.AutonomyLevelId = command.AutonomyLevelId;

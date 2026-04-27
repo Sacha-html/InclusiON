@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -21,6 +21,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateFamilyCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
 
         public CreateFamilyCommandHandler(
             IFamilyRepository repository,
@@ -28,7 +29,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             IIdentityService identityService,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
-            ILogger<CreateFamilyCommandHandler> logger)
+            ILogger<CreateFamilyCommandHandler> logger,
+            IDateTimeProvider dateTime)
         {
             _repository = repository;
             _personsRepository = personsRepository;
@@ -36,6 +38,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             _emailService = emailService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<FamilyResponse>> HandleAsync(CreateFamilyCommand command, CancellationToken cancellationToken)
@@ -78,7 +81,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     Name = command.FirstName,
                     Surname = command.LastName,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
                     LockoutEnabled = true,
                     MustChangePassword = true
@@ -114,13 +117,15 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         RepresentativeId = family.Id,
                         IsPrimary = true,
                         IsActive = true,
-                        CreatedAt = DateTime.UtcNow
+                        CreatedAt = _dateTime.UtcNow
                     });
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
                 _logger.LogInformation("Familiar creado: {FamilyId}, Usuario: {UserId}", family.Id, user.Id);
 
+                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
                 // Enviar email con contraseña temporal
                 try
                 {
@@ -132,7 +137,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         {
                             { "UserName", command.FirstName },
                             { "TemporaryPassword", password },
-                            { "Year", DateTime.UtcNow.Year.ToString() }
+                            { "Year", _dateTime.UtcNow.Year.ToString() }
                         },
                         cancellationToken);
                 }
