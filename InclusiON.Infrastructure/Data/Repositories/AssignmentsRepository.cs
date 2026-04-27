@@ -21,8 +21,21 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await _context.ProfessionalPersons
                 .Include(pp => pp.Person)
                     .ThenInclude(p => p.DisabilityType)
+                .AsNoTracking()
                 .Where(pp => pp.ProfessionalId == professionalId)
                 .OrderByDescending(pp => pp.AssignedAt)
+                .ToListAsync(ct);
+        }
+
+        public async Task<List<ProfessionalPerson>> GetProfessionalsByPersonIdAsync(Guid personId, CancellationToken ct = default)
+        {
+            return await _context.ProfessionalPersons
+                .Include(pp => pp.Professional)
+                    .ThenInclude(p => p.User)
+                .AsNoTracking()
+                .Where(pp => pp.PersonId == personId && pp.IsActive)
+                .OrderByDescending(pp => pp.IsPrimaryProfessional)
+                .ThenByDescending(pp => pp.AssignedAt)
                 .ToListAsync(ct);
         }
 
@@ -30,6 +43,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.ProfessionalPersons
                 .Include(pp => pp.Person)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(pp => pp.ProfessionalId == professionalId && pp.PersonId == personId, ct);
         }
 
@@ -45,6 +59,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.ProfessionalInstitutions
                 .Include(pi => pi.Institution)
+                .AsNoTracking()
                 .Where(pi => pi.ProfessionalId == professionalId)
                 .OrderByDescending(pi => pi.AssignedAt)
                 .ToListAsync(ct);
@@ -54,6 +69,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.ProfessionalInstitutions
                 .Include(pi => pi.Institution)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(pi => pi.ProfessionalId == professionalId && pi.InstitutionId == institutionId, ct);
         }
 

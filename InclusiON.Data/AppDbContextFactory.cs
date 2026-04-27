@@ -11,7 +11,7 @@ namespace InclusiON.Data
         {
             var services = new ServiceCollection();
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer("Server=localhost;Database=InclusiON;Trusted_Connection=true;TrustServerCertificate=true"));
+                options.UseNpgsql("Host=localhost;Port=5432;Database=inclusion_dev;Username=postgres;Password=Tu_Password_Segura123!"));
 
             var serviceProvider = services.BuildServiceProvider();
             return serviceProvider.GetRequiredService<AppDbContext>();

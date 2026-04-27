@@ -46,11 +46,6 @@ namespace InclusiON.Domain.Models
         public string? Relationship { get; set; }
 
         /// <summary>
-        /// Indica si el familiar esta activo.
-        /// </summary>
-        public bool IsActive { get; set; } = true;
-
-        /// <summary>
         /// Estado del familiar en el sistema.
         /// </summary>
         public FamilyStatusEnum Status { get; set; } = FamilyStatusEnum.Active;

@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace InclusiON.DTOs.Requests.Auth
 {
     /// <summary>
     /// Request para login visual estandar.
-    /// La persona con discapacidad se identifica por nombre y luego ingresa su contrasena.
+    /// La persona con discapacidad se identifica por nombre y luego ingresa su contraseña.
     /// </summary>
     public class VisualStandardLoginRequest
     {
@@ -15,9 +15,9 @@ namespace InclusiON.DTOs.Requests.Auth
         public Guid UserId { get; set; }
 
         /// <summary>
-        /// Contrasena del usuario.
+        /// contraseña del usuario.
         /// </summary>
-        [Required(ErrorMessage = "La contrasena es requerida")]
+        [Required(ErrorMessage = "La contraseña es requerida")]
         public string Password { get; set; } = string.Empty;
 
         /// <summary>

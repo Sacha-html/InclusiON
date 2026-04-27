@@ -1,10 +1,12 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Auth.Queries;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Constants;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
@@ -15,6 +17,9 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
     /// </summary>
     public class IdentifyUserQueryHandler : IQueryHandler<IdentifyUserQuery, ApiResponse<IdentifyUserResponse>>
     {
+        private const int MinIdentifierLength = 3;
+        private const int MaxMatchesShown = 5;
+
         private readonly IVisualLoginRepository _repository;
         private readonly ILogger<IdentifyUserQueryHandler> _logger;
 
@@ -33,6 +38,16 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             cancellationToken.ThrowIfCancellationRequested();
 
             var identifier = query.Identifier.Trim();
+
+            if (identifier.Length < MinIdentifierLength)
+            {
+                return ApiResponse<IdentifyUserResponse>.SuccessResult(
+                    new IdentifyUserResponse
+                    {
+                        UserFound = false,
+                        ErrorMessage = $"Escribe al menos {MinIdentifierLength} letras."
+                    });
+            }
 
             // Buscar segun tipo de usuario
             switch (query.UserType?.ToUpper())
@@ -74,14 +89,55 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             string? deviceId,
             CancellationToken cancellationToken)
         {
-            var person = await _repository.FindPersonByIdentifierAsync(identifier, cancellationToken);
+            var persons = await _repository.FindPersonsByIdentifierAsync(identifier, MaxMatchesShown, cancellationToken);
 
-            if (person == null)
+            if (persons.Count == 0)
             {
                 return ApiResponse<IdentifyUserResponse>.SuccessResult(
-                    new IdentifyUserResponse { UserFound = false });
+                    new IdentifyUserResponse { UserFound = false, ErrorMessage = ErrorMessages.UserNotFound });
             }
 
+            if (persons.Count == 1)
+            {
+                return await BuildSinglePersonResponseAsync(persons[0], deviceId, cancellationToken);
+            }
+
+            // Multi-match: devolvemos la lista para que el usuario elija visualmente.
+            // No exponemos apellido completo (privacidad), solo inicial.
+            var matches = persons.Select(p =>
+            {
+                var loginMethod = p.LoginMethod;
+                var isDeprecated = loginMethod != null && !loginMethod.IsActive;
+                return new UserMatchSummary
+                {
+                    UserId = p.UserId,
+                    DisplayName = p.FirstName,
+                    Initial = p.FirstName.Length > 0 ? p.FirstName[0].ToString().ToUpper() : "?",
+                    LastNameInitial = p.LastName.Length > 0 ? p.LastName[0].ToString().ToUpper() : null,
+                    AvatarColor = p.AvatarColor ?? AvatarColors.DefaultPerson,
+                    LoginMethodCode = isDeprecated ? "DEPRECATED" : (loginMethod?.Code ?? "STANDARD"),
+                    LoginMethodName = isDeprecated ? ErrorMessages.MethodNotAvailable : (loginMethod?.Name ?? "Contraseña"),
+                    RequiresSupervision = loginMethod?.RequiresSupervisor ?? false,
+                    IsTrustedDevice = false
+                };
+            }).ToList();
+
+            return ApiResponse<IdentifyUserResponse>.SuccessResult(
+                new IdentifyUserResponse
+                {
+                    UserFound = true,
+                    RequiresSelection = true,
+                    Matches = matches,
+                    UserType = "Person"
+                },
+                SuccessMessages.UserIdentified);
+        }
+
+        private async Task<ApiResponse<IdentifyUserResponse>> BuildSinglePersonResponseAsync(
+            PersonWithDisability person,
+            string? deviceId,
+            CancellationToken cancellationToken)
+        {
             var isTrusted = false;
             if (!string.IsNullOrEmpty(deviceId))
             {
@@ -91,7 +147,6 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             var displayName = $"{person.FirstName} {person.LastName}".Trim();
             var loginMethod = person.LoginMethod;
 
-            // Verificar si el metodo de login esta deprecado
             if (loginMethod != null && !loginMethod.IsActive)
             {
                 _logger.LogWarning(
@@ -105,7 +160,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                         UserId = person.UserId,
                         DisplayName = displayName,
                         Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                        AvatarColor = person.AvatarColor ?? "#2196F3",
+                        AvatarColor = person.AvatarColor ?? AvatarColors.DefaultPerson,
                         LoginMethodCode = "DEPRECATED",
                         LoginMethodName = ErrorMessages.MethodNotAvailable,
                         IsTrustedDevice = false,
@@ -125,9 +180,9 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     UserId = person.UserId,
                     DisplayName = displayName,
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                    AvatarColor = person.AvatarColor ?? "#2196F3",
+                    AvatarColor = person.AvatarColor ?? AvatarColors.DefaultPerson,
                     LoginMethodCode = loginMethodCode,
-                    LoginMethodName = loginMethod?.Name ?? "Contrasena",
+                    LoginMethodName = loginMethod?.Name ?? "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = loginMethod?.RequiresSupervisor ?? false,
                     UserType = "Person"
@@ -163,9 +218,9 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     UserId = professional.UserId,
                     DisplayName = displayName,
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                    AvatarColor = "#4CAF50",
+                    AvatarColor = AvatarColors.DefaultProfessional,
                     LoginMethodCode = "STANDARD",
-                    LoginMethodName = "Contrasena",
+                    LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = false,
                     UserType = "Professional"
@@ -201,9 +256,9 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     UserId = family.UserId,
                     DisplayName = displayName,
                     Initial = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "?",
-                    AvatarColor = "#9C27B0",
+                    AvatarColor = AvatarColors.DefaultFamily,
                     LoginMethodCode = "STANDARD",
-                    LoginMethodName = "Contrasena",
+                    LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = false,
                     UserType = "Family"

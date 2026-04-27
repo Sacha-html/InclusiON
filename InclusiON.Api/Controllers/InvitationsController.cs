@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
 using InclusiON.Api.Extensions;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
-using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Invitations.Commands;
 using InclusiON.Application.UseCases.Invitations.Queries;
-using InclusiON.Data;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Invitations;
 using InclusiON.DTOs.Responses;
@@ -22,14 +23,17 @@ namespace InclusiON.Api.Controllers
     public class InvitationsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
-        private readonly AppDbContext _context;
+        private readonly IResourceAuthorizationService _resourceAuthz;
+        private readonly string[] _allowedOrigins;
 
         public InvitationsController(
             IHttpContextService httpContextService,
-            AppDbContext context)
+            IResourceAuthorizationService resourceAuthz,
+            IConfiguration configuration)
         {
-            _httpContextService = httpContextService;
-            _context = context;
+            _httpContextService  = httpContextService;
+            _resourceAuthz       = resourceAuthz;
+            _allowedOrigins      = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
         }
 
         #region Queries
@@ -46,36 +50,23 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<GetInvitationsQuery, ApiResponse<List<InvitationResponse>>> handler,
             CancellationToken cancellationToken = default)
         {
-            // Si es profesional, filtrar por sus invitaciones.
-            var professionalId = await GetCurrentProfessionalId(cancellationToken);
+            // Profesional: filtra por sus propias invitaciones (entityId = professionalId en el JWT).
+            // Admin institucional: filtra por sus instituciones (institutionIds en el JWT).
+            // GlobalAdmin: sin filtros.
+            var professionalId = _httpContextService.GetCurrentEntityId();
 
             GetInvitationsQuery query;
             if (professionalId != null)
             {
-                // Professional: only their invitations
+                // Professional: solo sus invitaciones
                 query = new GetInvitationsQuery(professionalId);
             }
             else
             {
-                // Admin: check if institutional
-                var userId = _httpContextService.GetCurrentUserId();
-                var adminInstitutions = userId.HasValue
-                    ? await _context.AdminInstitutions
-                        .Where(ai => ai.AdminUserId == userId.Value && ai.IsActive)
-                        .Select(ai => ai.InstitutionId)
-                        .ToListAsync(cancellationToken)
-                    : new List<int>();
-
-                if (adminInstitutions.Any())
-                {
-                    // Institutional admin: filter by their institutions
-                    query = new GetInvitationsQuery(null, adminInstitutions);
-                }
-                else
-                {
-                    // Global admin: all invitations
-                    query = new GetInvitationsQuery(null);
-                }
+                var institutionIds = _httpContextService.GetInstitutionIds();
+                query = institutionIds.Count > 0
+                    ? new GetInvitationsQuery(null, institutionIds)   // Admin institucional
+                    : new GetInvitationsQuery(null);                  // GlobalAdmin
             }
 
             var result = await handler.HandleAsync(query, cancellationToken);
@@ -87,6 +78,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet("{code}")]
         [AllowAnonymous]
+        [EnableRateLimiting("auth-sensitive")]
         [ProducesResponseType(typeof(ApiResponse<InvitationValidationResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InvitationValidationResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InvitationValidationResponse>), StatusCodes.Status404NotFound)]
@@ -120,7 +112,7 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
 
-            var professionalId = await GetCurrentProfessionalId(cancellationToken);
+            var professionalId = _httpContextService.GetCurrentEntityId();
             if (professionalId == null)
             {
                 return NotFound(ApiResponse<InvitationResponse>.ErrorResult(
@@ -128,9 +120,20 @@ namespace InclusiON.Api.Controllers
                     ErrorMessages.ProfessionalNotFound));
             }
 
-            // Obtener la URL base del cliente para armar el link de invitacion
-            var baseUrl = Request.Headers["Origin"].FirstOrDefault()
-                       ?? Request.Headers["Referer"].FirstOrDefault()?.TrimEnd('/');
+            // Si la invitacion apunta a una persona, verificar que el profesional la tiene asignada.
+            if (request.PersonId.HasValue
+                && !await _resourceAuthz.CanAccessPersonAsync(request.PersonId.Value, AccessMode.Write, cancellationToken))
+            {
+                return Forbid();
+            }
+
+            // Armar la URL base del cliente para el link de invitación.
+            // Se valida contra la whitelist de CORS para evitar phishing por header injection:
+            // un atacante no puede redirigir el link a un dominio arbitrario manipulando Origin/Referer.
+            var requestOrigin = Request.Headers["Origin"].FirstOrDefault();
+            var baseUrl = _allowedOrigins.Contains(requestOrigin, StringComparer.OrdinalIgnoreCase)
+                ? requestOrigin
+                : _allowedOrigins.FirstOrDefault();
 
             var command = new CreateInvitationCommand(
                 professionalId.Value,
@@ -159,6 +162,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpPost("{code}/accept")]
         [AllowAnonymous]
+        [EnableRateLimiting("auth-sensitive")]
         [ProducesResponseType(typeof(ApiResponse<AcceptInvitationResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AcceptInvitationResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<AcceptInvitationResponse>), StatusCodes.Status404NotFound)]
@@ -181,18 +185,5 @@ namespace InclusiON.Api.Controllers
 
         #endregion
 
-        #region Private Methods
-
-        private async Task<Guid?> GetCurrentProfessionalId(CancellationToken cancellationToken)
-        {
-            var userId = _httpContextService.GetCurrentUserId();
-            if (userId == null) return null;
-
-            var repository = HttpContext.RequestServices.GetRequiredService<IProfessionalsRepository>();
-            var professional = await repository.GetByUserIdAsync(userId.Value, cancellationToken);
-            return professional?.Id;
-        }
-
-        #endregion
     }
 }

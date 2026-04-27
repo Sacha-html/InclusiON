@@ -9,6 +9,7 @@ namespace InclusiON.DTOs.Responses.Diagnoses
         public string PrimaryDiagnosis { get; set; } = string.Empty;
         public string ProfessionalName { get; set; } = string.Empty;
         public Guid ProfessionalId { get; set; }
+        public Guid CreatedByUserId { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public static DiagnosisListItemResponse MapToResponse(Diagnosis d)
@@ -20,6 +21,7 @@ namespace InclusiON.DTOs.Responses.Diagnoses
                 PrimaryDiagnosis = d.PrimaryDiagnosis,
                 ProfessionalName = $"{d.Professional.FirstName} {d.Professional.LastName}".Trim(),
                 ProfessionalId = d.ProfessionalId,
+                CreatedByUserId = d.Professional.UserId,
                 CreatedAt = d.CreatedAt
             };
         }

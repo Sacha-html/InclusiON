@@ -13,7 +13,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
     {
         private readonly IVisualLoginRepository _repository;
         private readonly IIdentityService _identityService;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IPinHasher _pinHasher;
         private readonly ILoginSessionService _loginSessionService;
 
         private const int MaxFailedAttempts = 5;
@@ -21,12 +21,12 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         public PinLoginCommandHandler(
             IVisualLoginRepository repository,
             IIdentityService identityService,
-            IPasswordHasher passwordHasher,
+            IPinHasher pinHasher,
             ILoginSessionService loginSessionService)
         {
             _repository = repository;
             _identityService = identityService;
-            _passwordHasher = passwordHasher;
+            _pinHasher = pinHasher;
             _loginSessionService = loginSessionService;
         }
 
@@ -71,7 +71,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.PinNotConfigured);
             }
 
-            var pinValid = _passwordHasher.VerifyPassword(person.PinCodeHash, command.Pin);
+            var pinValid = _pinHasher.Verify(person.PinCodeHash, command.Pin, out var needsRehash);
             if (!pinValid)
             {
                 await _identityService.AccessFailedAsync(user);
@@ -88,6 +88,18 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             }
 
             await _identityService.ResetAccessFailedCountAsync(user);
+
+            // Migración lazy BCrypt → Argon2id: rehashear en background sin bloquear el login
+            if (needsRehash)
+            {
+                var newHash = _pinHasher.Hash(command.Pin);
+                _ = _repository.UpdatePersonLoginMethodAsync(
+                    user.Id,
+                    person.LoginMethodId!.Value,
+                    newHash,
+                    person.SupervisorUserId,
+                    CancellationToken.None);
+            }
 
             var refreshTokenExpiryDays = command.RememberDevice ? 30 : 1;
 

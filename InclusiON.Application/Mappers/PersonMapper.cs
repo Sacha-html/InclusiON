@@ -36,6 +36,7 @@ namespace InclusiON.Application.Mappers
                 RequiresHighContrast = person.RequiresHighContrast,
                 VisualNoiseSensitivity = person.VisualNoiseSensitivity,
                 SoundSensitivity = person.SoundSensitivity,
+                ColorBlindnessType = person.ColorBlindnessType,
                 // Configuracion de acceso
                 AutonomyLevelId = person.AutonomyLevelId,
                 AutonomyLevelName = person.AutonomyLevel?.Name,

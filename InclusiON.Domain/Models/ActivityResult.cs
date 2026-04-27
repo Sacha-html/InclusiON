@@ -1,4 +1,5 @@
-﻿using InclusiON.Domain.Models.BaseEntities;
+﻿using InclusiON.Domain.Attributes;
+using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
 {
@@ -8,6 +9,7 @@ namespace InclusiON.Domain.Models
         public int PersonRoadmapActivityId { get; set; }
         public virtual PersonRoadmapActivity PersonRoadmapActivity { get; set; } = null!;
         public int AttemptNumber { get; set; }
+        [Encrypted]
         public string? JsonResponse { get; set; }
         public float ScorePercent { get; set; }
         public int TimeSpentSeconds { get; set; }

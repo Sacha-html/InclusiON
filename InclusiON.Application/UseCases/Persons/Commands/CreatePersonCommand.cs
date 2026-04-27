@@ -23,6 +23,7 @@ namespace InclusiON.Application.UseCases.Persons.Commands
         bool RequiresHighContrast,
         bool VisualNoiseSensitivity,
         bool SoundSensitivity,
+        string? ColorBlindnessType,
         // Configuracion de acceso
         int? AutonomyLevelId,
         int? LoginMethodId,
