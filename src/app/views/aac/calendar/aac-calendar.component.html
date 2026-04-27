@@ -1,0 +1,23 @@
+<div class="aac-calendar" role="region" aria-labelledby="aac-calendar-title">
+  <h1 id="aac-calendar-title" class="page-title">Mi Calendario</h1>
+
+  <div class="today-banner" [attr.aria-label]="'Hoy es ' + todayFormatted">
+    <span class="today-label" aria-hidden="true">Hoy es</span>
+    <span class="today-date" aria-hidden="true">{{ todayFormatted }}</span>
+  </div>
+
+  <section class="upcoming" aria-labelledby="upcoming-title">
+    <h2 id="upcoming-title" class="section-title">Proximos eventos</h2>
+    <div class="events-list">
+      @for (event of events; track event.id) {
+        <app-visual-card
+          [title]="event.title"
+          [subtitle]="event.date"
+          [icon]="event.icon"
+          [accentColor]="event.color"
+          [interactive]="false"
+        />
+      }
+    </div>
+  </section>
+</div>

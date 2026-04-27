@@ -1,125 +1,50 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit, signal, effect } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { DiagnosesService } from '@services/diagnoses.service';
+import { AuthService, ToastService } from '@services';
 import { CreateDiagnosisRequest } from '@models/requests/diagnoses/create-diagnosis.request';
 import { DiagnosisListItemResponse, DiagnosisResponse } from '@models/responses/diagnosis.response';
 import {
+  BadgeComponent,
   ButtonDirective,
   CardBodyComponent,
   CardComponent,
   ColComponent,
   FormControlDirective,
+  FormFeedbackComponent,
   FormLabelDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
   RowComponent,
+  SpinnerComponent,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
   selector: 'app-professional-diagnoses',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
+    BadgeComponent,
     ButtonDirective,
-    CardBodyComponent,
-    CardComponent,
     ColComponent,
     FormControlDirective,
+    FormFeedbackComponent,
     FormLabelDirective,
     ModalBodyComponent,
     ModalComponent,
     ModalFooterComponent,
     ModalHeaderComponent,
     RowComponent,
-    FormsModule,
+    SpinnerComponent,
+    IconDirective,
   ],
-  template: `
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h6 class="mb-0">Diagnósticos registrados</h6>
-      <button cButton color="primary" size="sm" (click)="openNew()" aria-label="Nuevo diagnóstico">Nuevo diagnóstico</button>
-    </div>
-
-    @if (currentDiagnoses().length === 0) {
-      <p class="text-body-secondary">No hay diagnósticos registrados para esta persona.</p>
-    }
-
-    @for (diag of currentDiagnoses(); track diag.id) {
-      <c-card class="mb-2">
-        <c-card-body class="py-2 px-3">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <strong>{{ diag.diagnosisDate | date:'dd/MM/yyyy' }}</strong>
-              <span class="text-body-secondary ms-2">— {{ diag.professionalName }}</span>
-              <p class="mb-0 mt-1">{{ diag.primaryDiagnosis }}</p>
-            </div>
-            <button cButton color="link" size="sm" (click)="openEdit(diag)"
-                    aria-label="Ver/editar diagnóstico">Ver</button>
-          </div>
-        </c-card-body>
-      </c-card>
-    }
-
-    <c-modal [visible]="showModal()" (visibleChange)="showModal.set($event)" (visibleChange)="!$event && closeModal()" size="lg">
-      <c-modal-header>
-        <strong>{{ editing() ? 'Editar Diagnóstico' : 'Nuevo Diagnóstico' }}</strong>
-      </c-modal-header>
-      <c-modal-body>
-        <c-row class="mb-3">
-          <c-col sm="6">
-            <label cLabel>Fecha del diagnóstico *</label>
-            <input cFormControl type="date" [(ngModel)]="form.diagnosisDate" />
-          </c-col>
-        </c-row>
-        <c-row class="mb-3">
-          <c-col sm="12">
-            <label cLabel>Diagnóstico principal *</label>
-            <textarea cFormControl rows="2" [(ngModel)]="form.primaryDiagnosis"></textarea>
-          </c-col>
-        </c-row>
-        <c-row class="mb-3">
-          <c-col sm="12">
-            <label cLabel>Observaciones iniciales</label>
-            <textarea cFormControl rows="2" [(ngModel)]="form.initialObservations"></textarea>
-          </c-col>
-        </c-row>
-        <c-row class="mb-3">
-          <c-col sm="6">
-            <label cLabel>Capacidades identificadas</label>
-            <textarea cFormControl rows="2" [(ngModel)]="form.identifiedCapabilities"></textarea>
-          </c-col>
-          <c-col sm="6">
-            <label cLabel>Desafíos identificados</label>
-            <textarea cFormControl rows="2" [(ngModel)]="form.identifiedChallenges"></textarea>
-          </c-col>
-        </c-row>
-        <c-row class="mb-3">
-          <c-col sm="6">
-            <label cLabel>Apoyos requeridos</label>
-            <textarea cFormControl rows="2" [(ngModel)]="form.requiredSupports"></textarea>
-          </c-col>
-          <c-col sm="6">
-            <label cLabel>Objetivos pedagógicos</label>
-            <textarea cFormControl rows="2" [(ngModel)]="form.pedagogicalObjectives"></textarea>
-          </c-col>
-        </c-row>
-        <c-row class="mb-3">
-          <c-col sm="12">
-            <label cLabel>Estrategias recomendadas</label>
-            <textarea cFormControl rows="2" [(ngModel)]="form.recommendedStrategies"></textarea>
-          </c-col>
-        </c-row>
-      </c-modal-body>
-      <c-modal-footer>
-        <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
-        <button cButton color="primary" (click)="save()" [disabled]="!form.primaryDiagnosis" aria-label="Guardar diagnóstico">
-          {{ editing() ? 'Guardar cambios' : 'Crear diagnóstico' }}
-        </button>
-      </c-modal-footer>
-    </c-modal>
-  `,
+  templateUrl: './professional-diagnoses.component.html',
+  styleUrl: './professional-diagnoses.component.scss',
 })
 export class ProfessionalDiagnosesComponent implements OnInit {
   @Input({ required: true }) personId!: string;
@@ -127,35 +52,76 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   @Output() diagnosesChange = new EventEmitter<DiagnosisListItemResponse[]>();
 
   private readonly diagnosesService = inject(DiagnosesService);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
+  canCreate = this.authService.hasPermission('diagnoses:create');
+  canUpdate = this.authService.hasPermission('diagnoses:update');
+  private readonly currentUserId = this.authService.getCurrentUser()?.id ?? '';
+
+  loading = signal(false);
+  saving = signal(false);
   showModal = signal(false);
   editing = signal<DiagnosisResponse | null>(null);
+  editingIsCreator = signal(false);
   currentDiagnoses = signal<DiagnosisListItemResponse[]>([]);
+  submitted = false;
   form: CreateDiagnosisRequest = this.emptyForm();
+
+  filterFrom = signal('');
+  filterTo   = signal('');
+
+  filteredDiagnoses = computed(() => {
+    const from = this.filterFrom();
+    const to   = this.filterTo();
+    return this.currentDiagnoses().filter(d => {
+      const date = d.diagnosisDate.substring(0, 10);
+      if (from && date < from) return false;
+      if (to   && date > to)   return false;
+      return true;
+    });
+  });
 
   ngOnInit(): void {
     this.currentDiagnoses.set(this.diagnoses);
+    if (this.diagnoses.length === 0) {
+      this.loadDiagnoses();
+    }
+  }
+
+  isCreator(diag: DiagnosisListItemResponse): boolean {
+    return diag.createdByUserId === this.currentUserId;
   }
 
   private loadDiagnoses(): void {
+    this.loading.set(true);
     this.diagnosesService.getByPerson(this.personId).subscribe({
       next: (data) => {
         this.currentDiagnoses.set(data);
         this.diagnosesChange.emit(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.toastService.error('Error al cargar los diagnósticos');
       },
     });
   }
 
   openNew(): void {
     this.editing.set(null);
+    this.editingIsCreator.set(true);
+    this.submitted = false;
     this.form = this.emptyForm();
     this.showModal.set(true);
   }
 
   openEdit(item: DiagnosisListItemResponse): void {
+    this.editingIsCreator.set(this.isCreator(item));
     this.diagnosesService.getById(item.id).subscribe({
       next: (d) => {
         this.editing.set(d);
+        this.submitted = false;
         this.form = {
           diagnosisDate: d.diagnosisDate.substring(0, 10),
           primaryDiagnosis: d.primaryDiagnosis,
@@ -168,32 +134,40 @@ export class ProfessionalDiagnosesComponent implements OnInit {
         };
         this.showModal.set(true);
       },
+      error: () => this.toastService.error('Error al cargar el diagnóstico'),
     });
   }
 
   closeModal(): void {
     this.showModal.set(false);
     this.editing.set(null);
+    this.submitted = false;
   }
 
   save(): void {
-    if (!this.form.primaryDiagnosis) return;
+    this.submitted = true;
+    if (!this.form.primaryDiagnosis?.trim()) return;
+    this.saving.set(true);
 
-    if (this.editing()) {
-      this.diagnosesService.update(this.editing()!.id, this.form).subscribe({
-        next: () => {
-          this.showModal.set(false);
-          this.loadDiagnoses();
-        },
-      });
-    } else {
-      this.diagnosesService.create(this.personId, this.form).subscribe({
-        next: () => {
-          this.showModal.set(false);
-          this.loadDiagnoses();
-        },
-      });
-    }
+    const op = this.editing()
+      ? this.diagnosesService.update(this.editing()!.id, this.form)
+      : this.diagnosesService.create(this.personId, this.form);
+
+    op.subscribe({
+      next: () => {
+        this.toastService.success(
+          this.editing() ? 'Diagnóstico actualizado' : 'Diagnóstico creado'
+        );
+        this.saving.set(false);
+        this.showModal.set(false);
+        this.loadDiagnoses();
+      },
+      error: (err) => {
+        this.saving.set(false);
+        const msg = err?.error?.message ?? 'Error al guardar el diagnóstico';
+        this.toastService.error(msg);
+      },
+    });
   }
 
   private emptyForm(): CreateDiagnosisRequest {

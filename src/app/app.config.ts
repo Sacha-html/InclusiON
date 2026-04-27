@@ -13,6 +13,7 @@ import { IconSetService } from '@coreui/icons-angular';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { spinnerInterceptor } from './interceptors/spinner.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,7 +29,7 @@ export const appConfig: ApplicationConfig = {
       withViewTransitions(),
       withHashLocation()
     ),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([spinnerInterceptor, authInterceptor])),
     importProvidersFrom(SidebarModule, DropdownModule),
     IconSetService,
     provideAnimationsAsync(),

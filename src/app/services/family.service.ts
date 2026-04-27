@@ -37,6 +37,7 @@ export class FamilyService {
       if (request.search) params = params.set('search', request.search);
       if (request.institutionId) params = params.set('institutionId', request.institutionId.toString());
       if (request.linkedPersonSearch) params = params.set('linkedPersonSearch', request.linkedPersonSearch);
+      if (request.isActive !== undefined) params = params.set('isActive', request.isActive.toString());
     }
 
     return this.http

@@ -1,14 +1,14 @@
 <c-card class="login-method-selector">
   <c-card-header>
-    <h4>Selecciona tu metodo de acceso</h4>
-    <p class="text-medium-emphasis mb-0">Elige como quieres iniciar sesion en la aplicacion</p>
+    <h4>Seleccioná tu método de acceso</h4>
+    <p class="text-medium-emphasis mb-0">Elegí cómo querés iniciar sesión en la aplicación</p>
   </c-card-header>
 
   <c-card-body>
     <!-- Loading State -->
     <div *ngIf="isLoading" class="text-center py-4">
       <c-spinner color="primary"></c-spinner>
-      <p class="mt-2">Cargando metodos de login...</p>
+      <p class="mt-2">Cargando métodos de login...</p>
     </div>
 
     <!-- Error Message -->
@@ -43,9 +43,9 @@
               <p class="method-description text-medium-emphasis small">
                 {{ method.description }}
               </p>
-              <span *ngIf="currentLoginMethodId === method.id" class="badge bg-info">
-                Actual
-              </span>
+              @if (currentLoginMethodId === method.id) {
+                <c-badge color="info">Actual</c-badge>
+              }
             </c-card-body>
           </c-card>
         </c-col>
@@ -55,7 +55,7 @@
     <!-- Configuration Form -->
     <div *ngIf="selectedMethod && !isLoading" class="config-section mt-4">
       <hr>
-      <h5>Configuracion para: {{ selectedMethod.name }}</h5>
+      <h5>Configuración para: {{ selectedMethod.name }}</h5>
 
       <form [formGroup]="configForm">
         <!-- PIN Configuration -->
@@ -93,14 +93,14 @@
             </c-col>
           </c-row>
           <c-alert color="info" class="small">
-            <strong>Consejo:</strong> Usa un PIN que puedas recordar facilmente pero que no sea obvio (evita 1234, tu fecha de nacimiento, etc.)
+            <strong>Consejo:</strong> Usá un PIN que puedas recordar fácilmente pero que no sea obvio (evitá 1234, tu fecha de nacimiento, etc.)
           </c-alert>
         </div>
 
         <!-- Assisted Login Configuration -->
         <div *ngIf="selectedMethod.id === LOGIN_ASSISTED" class="assisted-config">
           <c-alert color="info" class="mb-3">
-            Con el login asistido, un familiar o profesional autorizado podra iniciar sesion en tu nombre usando sus propias credenciales.
+            Con el login asistido, un familiar o profesional autorizado podrá iniciar sesión en tu nombre usando sus propias credenciales.
           </c-alert>
           <div class="mb-3">
             <label cLabel for="supervisorUserId">ID del Supervisor</label>
@@ -136,7 +136,8 @@
       cButton
       color="primary"
       [disabled]="!selectedMethod || isSaving"
-      (click)="validateAndSave()">
+      (click)="validateAndSave()"
+      class="a11y-btn-primary">
       <c-spinner *ngIf="isSaving" size="sm" class="me-2"></c-spinner>
       {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
     </button>

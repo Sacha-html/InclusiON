@@ -1,6 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { FamilyService, PersonsService } from '@services';
 import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../../../../models';
 import {
@@ -13,7 +14,8 @@ import { PasswordModalComponent } from '@shared/components/password-modal/passwo
 @Component({
   selector: 'app-family-new',
   imports: [
-    ReactiveFormsModule, CardComponent, CardBodyComponent, CardHeaderComponent,
+    ReactiveFormsModule, NgSelectModule,
+    CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective,
     PasswordModalComponent,
@@ -22,8 +24,8 @@ import { PasswordModalComponent } from '@shared/components/password-modal/passwo
   styleUrl: './new.component.scss',
 })
 export class NewComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
+  private readonly fb            = inject(FormBuilder);
+  private readonly router        = inject(Router);
   private readonly familyService = inject(FamilyService);
   private readonly personsService = inject(PersonsService);
 
@@ -32,9 +34,8 @@ export class NewComponent implements OnInit {
   showPasswordModal = false;
   createdFamily: FamilyResponse | null = null;
 
-  persons: PersonListItemResponse[] = [];
-  filteredPersons: PersonListItemResponse[] = [];
-  personSearch = '';
+  persons          = signal<PersonListItemResponse[]>([]);
+  isLoadingPersons = signal(true);
 
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
 
@@ -45,8 +46,17 @@ export class NewComponent implements OnInit {
     documentNumber: ['', [Validators.maxLength(20)]],
     phone: ['', [Validators.maxLength(20)]],
     relationship: [''],
-    personId: ['', [Validators.required]],
+    personId: [null, [Validators.required]],
   });
+
+  searchPersonFn = (term: string, item: PersonListItemResponse): boolean => {
+    const lower = term.toLowerCase();
+    return (
+      (item.fullName?.toLowerCase().includes(lower) ||
+        item.documentNumber?.toLowerCase().includes(lower)) ??
+      false
+    );
+  };
 
   ngOnInit(): void {
     this.loadPersons();
@@ -55,24 +65,11 @@ export class NewComponent implements OnInit {
   loadPersons(): void {
     this.personsService.getPersons({ page: 1, pageSize: 200, isActive: true }).subscribe({
       next: (response) => {
-        this.persons = response.data;
-        this.filteredPersons = this.persons;
+        this.persons.set(response.data);
+        this.isLoadingPersons.set(false);
       },
+      error: () => this.isLoadingPersons.set(false),
     });
-  }
-
-  filterPersons(search: string): void {
-    this.personSearch = search;
-    this.form.patchValue({ personId: '' });
-    if (search.length < 3) {
-      this.filteredPersons = [];
-      return;
-    }
-    const term = search.toLowerCase();
-    this.filteredPersons = this.persons.filter(p =>
-      p.fullName?.toLowerCase().includes(term) ||
-      p.documentNumber?.toLowerCase().includes(term)
-    );
   }
 
   get f() { return this.form.controls; }

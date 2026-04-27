@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { ShapeType } from '../../constants/login-color-shape-set';
+
+export type ShapeType = 'circle' | 'square' | 'triangle' | 'star';
 
 /**
  * Componente para renderizar formas geometricas para login visual.
@@ -10,94 +11,8 @@ import { ShapeType } from '../../constants/login-color-shape-set';
   selector: 'app-shape',
   standalone: true,
   imports: [],
-  template: `
-    <button
-      type="button"
-      class="shape-button"
-      [class.selected]="selected"
-      [attr.aria-label]="ariaLabel"
-      [attr.aria-pressed]="selected"
-      (click)="handleClick()"
-      (keydown.enter)="handleClick()"
-      (keydown.space)="handleClick()">
-      <svg
-        [attr.width]="size"
-        [attr.height]="size"
-        [attr.viewBox]="'0 0 ' + size + ' ' + size"
-        role="img"
-        [attr.aria-hidden]="true">
-        @switch (type) {
-          @case ('circle') {
-            <circle
-              [attr.cx]="size / 2"
-              [attr.cy]="size / 2"
-              [attr.r]="size / 2 - strokeWidth"
-              [attr.fill]="color"
-              [attr.stroke]="selected ? strokeColor : 'none'"
-              [attr.stroke-width]="selected ? strokeWidth : 0" />
-          }
-          @case ('square') {
-            <rect
-              [attr.x]="strokeWidth"
-              [attr.y]="strokeWidth"
-              [attr.width]="size - strokeWidth * 2"
-              [attr.height]="size - strokeWidth * 2"
-              [attr.fill]="color"
-              [attr.stroke]="selected ? strokeColor : 'none'"
-              [attr.stroke-width]="selected ? strokeWidth : 0" />
-          }
-          @case ('triangle') {
-            <polygon
-              [attr.points]="trianglePoints"
-              [attr.fill]="color"
-              [attr.stroke]="selected ? strokeColor : 'none'"
-              [attr.stroke-width]="selected ? strokeWidth : 0" />
-          }
-          @case ('star') {
-            <polygon
-              [attr.points]="starPoints"
-              [attr.fill]="color"
-              [attr.stroke]="selected ? strokeColor : 'none'"
-              [attr.stroke-width]="selected ? strokeWidth : 0" />
-          }
-        }
-      </svg>
-    </button>
-  `,
-  styles: [`
-    .shape-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
-      border: 2px solid transparent;
-      border-radius: 8px;
-      background: transparent;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      min-width: 44px;
-      min-height: 44px;
-    }
-
-    .shape-button:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-      transform: scale(1.05);
-    }
-
-    .shape-button:focus {
-      outline: 3px solid var(--a11y-focus-accent, #0D47A1);
-      outline-offset: 2px;
-    }
-
-    .shape-button.selected {
-      border-color: var(--a11y-primary, #0066CC);
-      background-color: color-mix(in srgb, var(--a11y-primary, #0066CC) 10%, transparent);
-    }
-
-    .shape-button:active {
-      transform: scale(0.95);
-    }
-  `],
+  templateUrl: './shape.component.html',
+  styleUrl: './shape.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShapeComponent {

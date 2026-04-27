@@ -8,16 +8,16 @@ import {
 } from '@coreui/angular';
 
 @Component({
-  selector: 'app-classroom',
+  selector: 'app-classroom-list',
   standalone: true,
   imports: [
     CardComponent, CardBodyComponent, CardHeaderComponent,
     ColComponent, RowComponent, SpinnerComponent, BadgeComponent,
   ],
-  templateUrl: './classroom.component.html',
-  styleUrl: './classroom.component.scss',
+  templateUrl: './list.component.html',
+  styleUrl: './list.component.scss',
 })
-export class ClassroomComponent implements OnInit {
+export class ListComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly router = inject(Router);

@@ -1,4 +1,5 @@
 export { AdminInstitutionsService } from './admin-institutions.service';
+export { SpinnerService } from './spinner.service';
 export { AdminUsersService } from './admin-users.service';
 export { UserManagementService } from './user-management.service';
 export { AuthService } from './auth.service';
@@ -16,6 +17,8 @@ export { RolesService } from './roles.service';
 export { FamilyService } from './family.service';
 export { InstitutionsService } from './institutions.service';
 export { AssignmentsService } from './assignments.service';
+export { ReportsService } from './reports.service';
+export { DiagnosesService } from './diagnoses.service';
 
 export type { StorageKey } from './local-storage.service';
 export type {

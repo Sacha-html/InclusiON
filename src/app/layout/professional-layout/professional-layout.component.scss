@@ -1,7 +1,7 @@
 .sidebar-brand-full {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--cui-sidebar-brand-color);
+  color: var(--a11y-sidebar-text);
 }
 
 .sidebar-brand-narrow {
@@ -17,6 +17,6 @@
   cursor: pointer;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--a11y-sidebar-nav-link-hover-bg);
   }
 }

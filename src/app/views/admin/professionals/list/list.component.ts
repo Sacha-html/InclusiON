@@ -6,7 +6,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
-import { NavModule, ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
+import { NavModule, ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormLabelDirective, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -26,6 +26,7 @@ import { CommonModule, DatePipe } from '@angular/common';
     ModalBodyComponent,
     ModalFooterComponent,
     FormsModule,
+    FormLabelDirective,
     FormSelectDirective,
     ButtonDirective,
     SpinnerComponent,
@@ -77,6 +78,10 @@ export class ListComponent implements OnInit {
   statusHistory: any[] = [];
   statusHistoryLoading = false;
 
+  // Reset password
+  showResetPasswordModal = false;
+  itemToResetPassword: ProfessionalListItemResponse | null = null;
+
   // Password modal
   showPasswordModal = false;
   tempPassword = '';
@@ -86,10 +91,10 @@ export class ListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver detalle', icon: 'cil-search' },
-        { action: 'reset-password', label: 'Resetear contraseña', icon: 'cil-reload', visible: (item) => item.status === 'Approved' },
-        { action: 'history', label: 'Historial de estados', icon: 'cilHistory' },
-        { action: 'persons', label: 'Personas a cargo', icon: 'cil-people' },
+        { action: 'view', label: 'Ver', icon: 'cil-search' },
+        { action: 'reset-password', label: 'Resetear', icon: 'cil-reload', visible: (item) => item.status === 'Approved' },
+        { action: 'history', label: 'Historial', icon: 'cilHistory' },
+        { action: 'persons', label: 'Personas', icon: 'cil-people' },
         { action: 'institutions', label: 'Instituciones', icon: 'cil-book' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === 'Approved' },
         { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.status === 'Approved' },
@@ -114,7 +119,7 @@ export class ListComponent implements OnInit {
     { key: 'email', label: 'Email', sortable: true },
     { key: 'specialty', label: 'Especialidad', sortable: true },
     { key: 'licenseNumber', label: 'Matrícula', sortable: true },
-    { key: 'createdAt', label: 'Fecha Solicitud', type: 'date', sortable: true },
+    { key: 'createdAt', label: 'Fecha de solicitud', type: 'date', sortable: true },
   ];
 
   ngOnInit(): void {
@@ -148,6 +153,12 @@ export class ListComponent implements OnInit {
 
   onStatusFilterChange(status: string): void {
     this.statusFilter = status;
+    this.currentPage = 1;
+    this.loadProfessionals();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
     this.currentPage = 1;
     this.loadProfessionals();
   }
@@ -210,7 +221,8 @@ export class ListComponent implements OnInit {
         this.router.navigate(['/admin/professionals', event.item.id]);
         break;
       case 'reset-password':
-        this.resetPassword(event.item);
+        this.itemToResetPassword = event.item;
+        this.showResetPasswordModal = true;
         break;
       case 'persons':
         this.router.navigate(['/admin/professionals', event.item.id], { queryParams: { tab: 'personas' } });
@@ -391,22 +403,33 @@ export class ListComponent implements OnInit {
     });
   }
 
-  resetPassword(item: ProfessionalListItemResponse): void {
+  confirmResetPassword(): void {
+    const item = this.itemToResetPassword;
+    if (!item) return;
     if (!item.userId) {
       this.toastService.error('El profesional no tiene usuario asociado');
+      this.cancelResetPassword();
       return;
     }
     this.userService.resetPassword(item.userId).subscribe({
       next: (result) => {
         this.tempPassword = result.temporaryPassword;
         this.tempPasswordEmail = result.userEmail;
+        this.showResetPasswordModal = false;
+        this.itemToResetPassword = null;
         this.showPasswordModal = true;
         this.toastService.success('Contraseña reseteada exitosamente');
       },
       error: () => {
         this.toastService.error('Error al resetear la contraseña');
+        this.cancelResetPassword();
       },
     });
+  }
+
+  cancelResetPassword(): void {
+    this.showResetPasswordModal = false;
+    this.itemToResetPassword = null;
   }
 
   copyPassword(): void {

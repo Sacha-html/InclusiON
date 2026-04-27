@@ -107,6 +107,19 @@
 }
 
 <app-confirm-modal
+  [visible]="showResetPasswordModal"
+  title="Confirmar reseteo de contraseña"
+  messagePrefix="¿Está seguro de que desea resetear la contraseña de "
+  [itemName]="user?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se generará una contraseña temporal y se revocarán todas las sesiones activas del usuario."
+  confirmLabel="Resetear contraseña"
+  confirmColor="warning"
+  (confirm)="confirmResetPassword()"
+  (cancel)="showResetPasswordModal = false">
+</app-confirm-modal>
+
+<app-confirm-modal
   [visible]="showDeactivateModal"
   title="Confirmar desactivación"
   messagePrefix="¿Está seguro de que desea desactivar al usuario "

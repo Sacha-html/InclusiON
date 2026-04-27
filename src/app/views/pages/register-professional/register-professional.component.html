@@ -1,16 +1,16 @@
 <!-- Panel de Accesibilidad -->
 <app-accessibility-panel></app-accessibility-panel>
 
-<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center py-4">
+<div class="min-vh-100 d-flex flex-row align-items-center py-4" style="background-color: var(--a11y-bg-secondary)">
   <c-container>
     <c-row class="justify-content-center">
       <c-col md="8" lg="7">
         <c-card class="p-4 shadow">
           <c-card-body>
             <div class="text-center mb-4">
-              <svg cIcon name="cilUserPlus" size="3xl" class="text-primary mb-3"></svg>
-              <h1 class="h3">Registro de Profesional</h1>
-              <p class="text-body-secondary">Completa el formulario para solicitar tu alta en el sistema</p>
+              <svg cIcon name="cilUserPlus" size="3xl" class="mb-3" style="color: var(--a11y-text-secondary)" aria-hidden="true"></svg>
+              <h1 class="h3" style="color: var(--a11y-text)">Registro de Profesional</h1>
+              <p class="mb-0" style="color: var(--a11y-text-muted)">Completa el formulario para solicitar tu alta en el sistema</p>
             </div>
 
             @if (serverError) {
@@ -19,7 +19,7 @@
               </c-alert>
             }
 
-            <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
+            <p class="mb-3" style="color: var(--a11y-text-muted)">Los campos marcados con (*) son obligatorios.</p>
 
             <form [formGroup]="form" (ngSubmit)="onSubmit()">
               <c-row class="mb-3">
@@ -60,7 +60,7 @@
                     </c-form-feedback>
                   }
                   @if (f['email'].pending) {
-                    <small class="text-body-secondary">Verificando email...</small>
+                    <small style="color: var(--a11y-text-muted)">Verificando email...</small>
                   }
                 </c-col>
                 <c-col sm="6">
@@ -90,7 +90,7 @@
                     </c-form-feedback>
                   }
                   @if (f['licenseNumber'].pending) {
-                    <small class="text-body-secondary">Verificando matrícula...</small>
+                    <small style="color: var(--a11y-text-muted)">Verificando matrícula...</small>
                   }
                 </c-col>
               </c-row>
@@ -125,12 +125,12 @@
                       <option [value]="inst.id">{{ inst.name }}</option>
                     }
                   </select>
-                  <small class="text-body-secondary">Si trabajas en una institución, selecciónala.</small>
+                  <small style="color: var(--a11y-text-muted)">Si trabajas en una institución, selecciónala.</small>
                 </c-col>
               </c-row>
 
               <div class="mt-4 d-flex gap-2">
-                <button cButton color="primary" type="submit" [disabled]="isLoading || form.invalid" aria-label="Enviar solicitud de registro">
+                <button cButton color="primary" type="submit" class="a11y-btn-primary" [disabled]="isLoading || form.invalid || form.pending" aria-label="Enviar solicitud de registro">
                   @if (!isLoading) {
                     <svg cIcon name="cilPaperPlane" class="me-2"></svg>
                     Enviar Solicitud
@@ -158,16 +158,16 @@
   </c-modal-header>
   <c-modal-body class="text-center pt-0">
     <div class="mb-3">
-      <svg cIcon name="cilCheckCircle" size="5xl" class="text-success"></svg>
+      <svg cIcon name="cilCheckCircle" size="5xl" style="color: var(--a11y-success)"></svg>
     </div>
-    <h4 class="mb-2">¡Registro exitoso!</h4>
-    <p class="text-body-secondary mb-0">
+    <h4 class="mb-2" style="color: var(--a11y-text)">¡Registro exitoso!</h4>
+    <p class="mb-0" style="color: var(--a11y-text-muted)">
       Tu solicitud de registro ha sido enviada correctamente.<br>
       Un administrador revisará tu solicitud y te contactará por email.
     </p>
   </c-modal-body>
   <c-modal-footer class="border-0 pt-0 justify-content-center">
-    <button cButton color="primary" class="px-4" (click)="goToLogin()">
+    <button cButton color="primary" class="px-4 a11y-btn-primary" (click)="goToLogin()">
       Aceptar
     </button>
   </c-modal-footer>

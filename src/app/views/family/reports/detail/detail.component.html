@@ -1,0 +1,94 @@
+@if (isLoading()) {
+  <div class="text-center py-4"><c-spinner></c-spinner></div>
+} @else if (report()) {
+  <c-card>
+    <c-card-header>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 cCardTitle class="mb-0">{{ report()!.title }}</h5>
+        <c-badge color="success" class="badge-with-icon badge-success">Aprobado</c-badge>
+      </div>
+    </c-card-header>
+    <c-card-body>
+
+      <c-row class="mb-3">
+        <c-col xs="12" md="6">
+          <label class="text-muted">Fecha del reporte</label>
+          <p>{{ report()!.reportDate | date:'dd/MM/yyyy' }}</p>
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="text-muted">Tipo de reporte</label>
+          <p>{{ report()!.reportTypeName }}</p>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col xs="12" md="6">
+          <label class="text-muted">Persona</label>
+          <p>{{ report()!.personName }}</p>
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="text-muted">Profesional</label>
+          <p>{{ report()!.professionalName }}</p>
+        </c-col>
+      </c-row>
+
+      @if (report()!.periodStartDate || report()!.periodEndDate) {
+        <c-row class="mb-3">
+          <c-col xs="12" md="6">
+            <label class="text-muted">Período desde</label>
+            <p>{{ report()!.periodStartDate | date:'dd/MM/yyyy' }}</p>
+          </c-col>
+          <c-col xs="12" md="6">
+            <label class="text-muted">Período hasta</label>
+            <p>{{ report()!.periodEndDate | date:'dd/MM/yyyy' }}</p>
+          </c-col>
+        </c-row>
+      }
+
+      <hr />
+
+      <c-row class="mb-3">
+        <c-col xs="12">
+          <label class="text-muted">Contenido</label>
+          <p class="mb-0">{{ report()!.content }}</p>
+        </c-col>
+      </c-row>
+
+      @if (report()!.achievedGoals) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Objetivos alcanzados</label>
+            <p class="mb-0">{{ report()!.achievedGoals }}</p>
+          </c-col>
+        </c-row>
+      }
+      @if (report()!.areasToReinforce) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Áreas a reforzar</label>
+            <p class="mb-0">{{ report()!.areasToReinforce }}</p>
+          </c-col>
+        </c-row>
+      }
+      @if (report()!.futureRecommendations) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Recomendaciones</label>
+            <p class="mb-0">{{ report()!.futureRecommendations }}</p>
+          </c-col>
+        </c-row>
+      }
+      @if (report()!.nextObjectives) {
+        <c-row class="mb-3">
+          <c-col xs="12">
+            <label class="text-muted">Próximos objetivos</label>
+            <p class="mb-0">{{ report()!.nextObjectives }}</p>
+          </c-col>
+        </c-row>
+      }
+
+      <hr />
+      <button cButton color="secondary" (click)="onBack()">Volver a reportes</button>
+    </c-card-body>
+  </c-card>
+}

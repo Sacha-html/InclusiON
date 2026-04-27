@@ -1,0 +1,21 @@
+<button
+  type="button"
+  class="avatar-button"
+  [class.selected]="selected"
+  [attr.aria-label]="ariaLabel || name || 'Avatar'"
+  [attr.aria-pressed]="selected"
+  (click)="handleClick()"
+  (keydown.enter)="handleClick()"
+  (keydown.space)="handleClick()">
+  <div
+    class="avatar-circle"
+    [style.width.px]="size"
+    [style.height.px]="size"
+    [style.background-color]="color"
+    [style.font-size.px]="fontSize">
+    {{ displayInitial }}
+  </div>
+  @if (showName && name) {
+    <span class="avatar-name">{{ name }}</span>
+  }
+</button>

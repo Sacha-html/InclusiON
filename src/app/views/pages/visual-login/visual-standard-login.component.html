@@ -6,6 +6,7 @@
     <!-- Back Button -->
     <div class="mb-4">
       <button
+        type="button"
         cButton
         color="light"
         class="back-button"
@@ -30,8 +31,8 @@
           >
             {{ initial }}
           </div>
-          <h1 class="h4 fw-bold mb-1">Hola, {{ displayName }}</h1>
-          <p class="text-muted">Ingresa tu contraseña para continuar</p>
+          <h1 class="h4 fw-bold mb-1" style="color: var(--a11y-text)">Hola, {{ displayName }}</h1>
+          <p class="mb-0" style="color: var(--a11y-text-muted)">Ingresa tu contraseña para continuar</p>
         </header>
 
         <!-- Error Alert -->
@@ -113,7 +114,7 @@
             color="primary"
             type="submit"
             size="lg"
-            class="w-100 submit-button"
+            class="w-100 submit-button a11y-btn-primary"
             [disabled]="!password || isLoading || isLocked"
           >
             @if (isLoading) {
@@ -128,7 +129,7 @@
 
         <!-- Help -->
         <footer class="text-center mt-4">
-          <p class="text-muted small mb-0">
+          <p class="small mb-0" style="color: var(--a11y-text-muted)">
             <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
             ¿Olvidaste tu contraseña? Pide ayuda a un familiar o profesional
           </p>
