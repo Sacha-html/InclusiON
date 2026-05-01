@@ -23,6 +23,7 @@
       <table cTable hover responsive>
         <thead>
           <tr>
+            <th>Acciones</th>
             <th>Nombre</th>
             <th>Email</th>
             <th>Tipo</th>
@@ -34,6 +35,15 @@
         <tbody>
           @for (admin of admins; track admin.id) {
             <tr>
+              <td>
+                @if (admin.id === currentUserId) {
+                  <button cButton color="primary" variant="outline" size="sm"
+                          (click)="goToEdit()"
+                          [attr.aria-label]="'Editar mis datos'">
+                    Editar
+                  </button>
+                }
+              </td>
               <td>{{ admin.fullName }}</td>
               <td>{{ admin.email }}</td>
               <td>
