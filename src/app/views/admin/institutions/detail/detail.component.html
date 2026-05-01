@@ -1,0 +1,118 @@
+@if (loading) {
+  <div class="d-flex justify-content-center py-5">
+    <c-spinner color="primary" aria-label="Cargando institución" />
+  </div>
+} @else if (institution) {
+  <!-- Encabezado -->
+  <c-card class="mb-4">
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <strong>Detalle de Institución</strong>
+      <div class="d-flex gap-2">
+        @if (institution.isActive) {
+          <button cButton color="danger" variant="outline" size="sm" (click)="deactivate()" [attr.aria-label]="'Dar de baja ' + institution.name">
+            Dar de baja
+          </button>
+        }
+        <button cButton color="primary" variant="outline" size="sm" (click)="goToEdit()" aria-label="Editar institución">
+          Editar
+        </button>
+        <button cButton color="secondary" variant="outline" size="sm" (click)="goBack()" aria-label="Volver al listado">
+          Volver
+        </button>
+      </div>
+    </c-card-header>
+    <c-card-body>
+      <c-row class="mb-2">
+        <c-col sm="3" class="fw-semibold text-body-secondary">Nombre</c-col>
+        <c-col sm="9">{{ institution.name }}</c-col>
+      </c-row>
+      <c-row class="mb-2">
+        <c-col sm="3" class="fw-semibold text-body-secondary">Email</c-col>
+        <c-col sm="9">{{ institution.email || '—' }}</c-col>
+      </c-row>
+      <c-row class="mb-2">
+        <c-col sm="3" class="fw-semibold text-body-secondary">Dirección</c-col>
+        <c-col sm="9">{{ institution.address || '—' }}</c-col>
+      </c-row>
+      <c-row class="mb-2">
+        <c-col sm="3" class="fw-semibold text-body-secondary">Teléfono</c-col>
+        <c-col sm="9">{{ institution.phone || '—' }}</c-col>
+      </c-row>
+      <c-row class="mb-2">
+        <c-col sm="3" class="fw-semibold text-body-secondary">Creada el</c-col>
+        <c-col sm="9">{{ institution.createdAt | date: 'dd/MM/yyyy' }}</c-col>
+      </c-row>
+      <c-row>
+        <c-col sm="3" class="fw-semibold text-body-secondary">Estado</c-col>
+        <c-col sm="9">
+          <c-badge [color]="institution.isActive ? 'success' : 'danger'">
+            {{ institution.isActive ? 'Activa' : 'Inactiva' }}
+          </c-badge>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+
+  <!-- Administradores asignados -->
+  <c-card class="mb-4">
+    <c-card-header>
+      <strong>Administradores asignados ({{ admins.length }})</strong>
+    </c-card-header>
+    <c-card-body>
+      @if (admins.length === 0) {
+        <p class="text-body-secondary mb-0">Sin administradores asignados.</p>
+      } @else {
+        <app-data-table
+          title=""
+          [columns]="adminCols"
+          [items]="admins"
+          [totalItems]="admins.length"
+          [pageSize]="admins.length"
+          [currentPage]="1"
+          [showSearch]="false"
+          [showPagination]="false">
+        </app-data-table>
+      }
+    </c-card-body>
+  </c-card>
+
+  <!-- Profesionales -->
+  <c-card>
+    <c-card-header>
+      <strong>Profesionales ({{ professionals.length }})</strong>
+    </c-card-header>
+    <c-card-body>
+      @if (professionals.length === 0) {
+        <p class="text-body-secondary mb-0">Sin profesionales asignados.</p>
+      } @else {
+        <app-data-table
+          title=""
+          [columns]="professionalCols"
+          [items]="professionals"
+          [totalItems]="professionals.length"
+          [pageSize]="professionals.length"
+          [currentPage]="1"
+          [showSearch]="false"
+          [showPagination]="false">
+        </app-data-table>
+      }
+    </c-card-body>
+  </c-card>
+
+  <!-- Modal confirmar baja -->
+  <c-modal [visible]="showConfirmModal" (visibleChange)="showConfirmModal = $event" alignment="center">
+    <c-modal-header><h5 cModalTitle>Confirmar baja</h5></c-modal-header>
+    <c-modal-body>
+      <p>¿Está seguro de que desea dar de baja la institución <strong>{{ institution.name }}</strong>?</p>
+      <p class="text-body-secondary mb-0">
+        Esta acción fallará si la institución tiene profesionales activos asignados.
+      </p>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelDeactivate()" [disabled]="deactivateLoading">Cancelar</button>
+      <button cButton color="danger" (click)="confirmDeactivate()" [disabled]="deactivateLoading">
+        {{ deactivateLoading ? 'Procesando...' : 'Dar de baja' }}
+      </button>
+    </c-modal-footer>
+  </c-modal>
+}

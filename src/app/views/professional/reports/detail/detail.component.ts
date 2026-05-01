@@ -44,8 +44,10 @@ export class DetailComponent implements OnInit {
   readonly ReportStatus = ReportStatus;
   report = signal<ReportResponse | null>(null);
   isLoading = signal(true);
-  showSubmitModal = false;
-  isSubmitting = false;
+  showSubmitModal     = false;
+  isSubmitting        = false;
+  showDeactivateModal = false;
+  isDeactivating      = false;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -95,6 +97,37 @@ export class DetailComponent implements OnInit {
 
   cancelSubmit(): void {
     this.showSubmitModal = false;
+  }
+
+  onEditClick(): void {
+    const r = this.report();
+    if (r) this.router.navigate(['/pro/reports', r.id, 'edit']);
+  }
+
+  onDeactivateClick(): void {
+    this.showDeactivateModal = true;
+  }
+
+  confirmDeactivate(): void {
+    const r = this.report();
+    if (!r) return;
+    this.isDeactivating = true;
+    this.reportsService.deactivate(r.id).subscribe({
+      next: () => {
+        this.toastService.success('Reporte dado de baja exitosamente.');
+        this.router.navigate(['/pro/reports']);
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Error al dar de baja el reporte.';
+        this.toastService.error(msg);
+        this.isDeactivating = false;
+        this.showDeactivateModal = false;
+      },
+    });
+  }
+
+  cancelDeactivate(): void {
+    this.showDeactivateModal = false;
   }
 
   getStatusColor(status: ReportStatus): string {
