@@ -1,0 +1,88 @@
+<c-row class="mb-3 align-items-center">
+  <c-col>
+    <h4 class="mb-0">Mis Actividades</h4>
+  </c-col>
+  <c-col xs="auto">
+    <button cButton color="primary" routerLink="/pro/activities/new">
+      + Nueva actividad
+    </button>
+  </c-col>
+</c-row>
+
+<!-- Filtros -->
+<c-row class="mb-3 g-2">
+  <c-col xs="12" md="3">
+    <label class="form-label" for="cat-filter">Categoría</label>
+    <select cSelect id="cat-filter" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
+      <option value="">Todas</option>
+      @for (cat of categories(); track cat.id) {
+        <option [value]="cat.id">{{ cat.name }}</option>
+      }
+    </select>
+  </c-col>
+
+  <c-col xs="12" md="3">
+    <label class="form-label" for="type-filter">Tipo de plantilla</label>
+    <select cSelect id="type-filter" [(ngModel)]="templateTypeFilter" (ngModelChange)="onFilterChange()">
+      <option value="">Todos</option>
+      @for (t of templateTypes(); track t.id) {
+        <option [value]="t.id">{{ t.name }}</option>
+      }
+    </select>
+  </c-col>
+
+  <c-col xs="12" md="2">
+    <label class="form-label" for="status-filter">Estado</label>
+    <select cSelect id="status-filter" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+      <option value="">Todos</option>
+      <option value="true">Activa</option>
+      <option value="false">Inactiva</option>
+    </select>
+  </c-col>
+
+  <c-col xs="12" md="2">
+    <label class="form-label" for="standard-filter">Origen</label>
+    <select cSelect id="standard-filter" [(ngModel)]="standardFilter" (ngModelChange)="onFilterChange()">
+      <option value="">Todos</option>
+      <option value="false">Propias</option>
+      <option value="true">Estándar</option>
+    </select>
+  </c-col>
+
+  <c-col xs="12" md="2" class="d-flex align-items-end">
+    <button cButton color="secondary" variant="outline" class="w-100" (click)="clearFilters()">
+      Limpiar filtros
+    </button>
+  </c-col>
+</c-row>
+
+<app-data-table
+  [columns]="columns"
+  [items]="activities()"
+  [loading]="isLoading()"
+  [currentPage]="currentPage()"
+  [pageSize]="pageSize()"
+  [totalItems]="totalRecords()"
+  [headerButtons]="headerButtons"
+  [showSearch]="true"
+  (searchAction)="onSearch($event)"
+  (pageChange)="onPageChange($event)"
+  (sortAction)="onSort($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)"
+/>
+
+<app-confirm-modal
+  [visible]="showDeactivateModal"
+  title="Desactivar Actividad"
+  [itemName]="itemToDeactivate?.title ?? ''"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()"
+/>
+
+<app-assign-activity-modal
+  [visible]="showAssignModal"
+  [activity]="itemToAssign"
+  (visibleChange)="showAssignModal = $event"
+  (assigned)="onAssigned()"
+/>

@@ -8,6 +8,7 @@ import {
   UpdateInstitutionRequest,
 } from '../models';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { unwrapResponse } from '@shared/utils';
 
 @Injectable({
@@ -18,6 +19,10 @@ export class InstitutionsService {
 
   private get apiUrl(): string {
     return `${environment.apiUrl}/Institutions`;
+  }
+
+  getById(id: number): Observable<InstitutionResponse | undefined> {
+    return this.getAll().pipe(map((list) => list.find((i) => i.id === id)));
   }
 
   getAll(): Observable<InstitutionResponse[]> {
@@ -35,6 +40,12 @@ export class InstitutionsService {
   update(id: number, request: UpdateInstitutionRequest): Observable<InstitutionResponse> {
     return this.http
       .put<ApiResponse<InstitutionResponse>>(`${this.apiUrl}/${id}`, request)
+      .pipe(unwrapResponse());
+  }
+
+  patchStatus(id: number, isActive: boolean): Observable<InstitutionResponse> {
+    return this.http
+      .patch<ApiResponse<InstitutionResponse>>(`${this.apiUrl}/${id}`, { isActive })
       .pipe(unwrapResponse());
   }
 }
