@@ -21,6 +21,7 @@ import { ProfessionalDiagnosesComponent } from './components/professional-diagno
 import { FamilyService } from '@services';
 import { PersonRepresentativeResponse } from '@models';
 import { ProfessionalFamilyTabComponent } from './components/family-tab.component';
+import { ProfessionalActivitiesTabComponent } from './components/professional-activities-tab.component';
 
 @Component({
   selector: 'app-person-detail',
@@ -37,6 +38,7 @@ import { ProfessionalFamilyTabComponent } from './components/family-tab.componen
     ProfessionalSkillsComponent,
     ProfessionalDiagnosesComponent,
     ProfessionalFamilyTabComponent,
+    ProfessionalActivitiesTabComponent,
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -50,7 +52,7 @@ export class PersonDetailComponent implements OnInit {
   private readonly diagnosesService = inject(DiagnosesService);
 
   person: PersonResponse | null = null;
-  activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' = 'datos';
+  activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' | 'actividades' = 'datos';
 
   skillProfile = signal<PersonSkillProfileResponse[]>([]);
   diagnoses = signal<any[]>([]);
