@@ -64,4 +64,25 @@ export class CatalogAdminService {
   updateLoginMethod(id: number, request: Record<string, unknown>): Observable<LoginMethodItem> {
     return this.http.put<ApiResponse<LoginMethodItem>>(`${this.apiUrl}/login-methods/${id}`, request).pipe(unwrapResponse());
   }
+
+  // Patch status (state machine)
+  patchDisabilityTypeStatus(id: number, isActive: boolean): Observable<CatalogItem> {
+    return this.http.patch<ApiResponse<CatalogItem>>(`${this.apiUrl}/disability-types/${id}`, { isActive }).pipe(unwrapResponse());
+  }
+
+  patchAutonomyLevelStatus(id: number, isActive: boolean): Observable<AutonomyLevelItem> {
+    return this.http.patch<ApiResponse<AutonomyLevelItem>>(`${this.apiUrl}/autonomy-levels/${id}`, { isActive }).pipe(unwrapResponse());
+  }
+
+  patchActivityCategoryStatus(id: number, isActive: boolean): Observable<ActivityCategoryItem> {
+    return this.http.patch<ApiResponse<ActivityCategoryItem>>(`${this.apiUrl}/activity-categories/${id}`, { isActive }).pipe(unwrapResponse());
+  }
+
+  patchSkillAreaStatus(id: number, isActive: boolean): Observable<SkillAreaItem> {
+    return this.http.patch<ApiResponse<SkillAreaItem>>(`${this.apiUrl}/skill-areas/${id}`, { isActive }).pipe(unwrapResponse());
+  }
+
+  patchActivityTemplateTypeStatus(id: number, isActive: boolean): Observable<ActivityTemplateTypeItem> {
+    return this.http.patch<ApiResponse<ActivityTemplateTypeItem>>(`${this.apiUrl}/activity-template-types/${id}`, { isActive }).pipe(unwrapResponse());
+  }
 }
