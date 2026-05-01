@@ -33,6 +33,7 @@ export class ListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
+        { action: 'detail', label: 'Ver detalle', icon: 'cil-search' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes' },
       ],
     },
@@ -82,6 +83,9 @@ export class ListComponent implements OnInit {
 
   onRowAction(event: { action: string; item: any }): void {
     switch (event.action) {
+      case 'detail':
+        this.router.navigate(['/admin/institutions', event.item.id, 'detail']);
+        break;
       case 'edit':
         this.router.navigate(['/admin/institutions', event.item.id, 'edit']);
         break;
