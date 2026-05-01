@@ -48,13 +48,20 @@
           </button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="tab-familiares" [class.active]="activeTab === 'familiares'" 
-                  role="tab" [attr.aria-selected]="activeTab === 'familiares'" 
+          <button class="nav-link" id="tab-familiares" [class.active]="activeTab === 'familiares'"
+                  role="tab" [attr.aria-selected]="activeTab === 'familiares'"
                   aria-controls="panel-familiares" (click)="activeTab = 'familiares'; loadRepresentatives()">
             Familiares
             @if (representatives.length > 0) {
               <c-badge color="success" class="ms-1" [attr.aria-label]="representatives.length + ' familiares'">{{ representatives.length }}</c-badge>
             }
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-actividades" [class.active]="activeTab === 'actividades'"
+                  role="tab" [attr.aria-selected]="activeTab === 'actividades'"
+                  aria-controls="panel-actividades" (click)="activeTab = 'actividades'">
+            Actividades
           </button>
         </li>
       </ul>
@@ -91,6 +98,12 @@
             [loading]="loadingRepresentatives"
             (refresh)="onRefreshFamily()">
           </app-professional-family-tab>
+        </div>
+      }
+
+      @if (activeTab === 'actividades') {
+        <div role="tabpanel" id="panel-actividades" aria-labelledby="tab-actividades">
+          <app-professional-activities-tab [personId]="person.id" />
         </div>
       }
 
