@@ -22,6 +22,7 @@ import {
   SpinnerComponent,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-professional-diagnoses',
@@ -42,6 +43,7 @@ import { IconDirective } from '@coreui/icons-angular';
     RowComponent,
     SpinnerComponent,
     IconDirective,
+    ConfirmModalComponent,
   ],
   templateUrl: './professional-diagnoses.component.html',
   styleUrl: './professional-diagnoses.component.scss',
@@ -67,6 +69,10 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   currentDiagnoses = signal<DiagnosisListItemResponse[]>([]);
   submitted = false;
   form: CreateDiagnosisRequest = this.emptyForm();
+
+  showDeactivateModal = signal(false);
+  deactivatingDiag    = signal<DiagnosisListItemResponse | null>(null);
+  isDeactivating      = signal(false);
 
   filterFrom = signal('');
   filterTo   = signal('');
@@ -168,6 +174,36 @@ export class ProfessionalDiagnosesComponent implements OnInit {
         this.toastService.error(msg);
       },
     });
+  }
+
+  openDeactivate(diag: DiagnosisListItemResponse): void {
+    this.deactivatingDiag.set(diag);
+    this.showDeactivateModal.set(true);
+  }
+
+  confirmDeactivate(): void {
+    const diag = this.deactivatingDiag();
+    if (!diag) return;
+    this.isDeactivating.set(true);
+    this.diagnosesService.patchStatus(diag.id, false).subscribe({
+      next: () => {
+        this.toastService.success('Diagnóstico dado de baja exitosamente.');
+        this.showDeactivateModal.set(false);
+        this.isDeactivating.set(false);
+        this.loadDiagnoses();
+      },
+      error: (err) => {
+        const msg = err?.error?.message ?? 'Error al dar de baja el diagnóstico.';
+        this.toastService.error(msg);
+        this.isDeactivating.set(false);
+        this.showDeactivateModal.set(false);
+      },
+    });
+  }
+
+  cancelDeactivate(): void {
+    this.showDeactivateModal.set(false);
+    this.deactivatingDiag.set(null);
   }
 
   private emptyForm(): CreateDiagnosisRequest {
