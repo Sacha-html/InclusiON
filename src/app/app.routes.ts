@@ -216,6 +216,14 @@ export const routes: Routes = [
                 (m) => m.NewComponent,
               ),
           },
+          {
+            path: 'edit',
+            loadComponent: () =>
+              import('./views/admin/admin-users/edit/edit.component').then(
+                (m) => m.EditComponent,
+              ),
+            data: { title: 'Editar mis datos' },
+          },
         ],
       },
       {
