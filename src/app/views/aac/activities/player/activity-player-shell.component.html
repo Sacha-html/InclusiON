@@ -1,0 +1,21 @@
+@if (isLoading()) {
+  <div class="shell-loading" role="status" aria-live="polite">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <p>Cargando actividad...</p>
+  </div>
+} @else if (hasError() || !assignment()) {
+  <div class="shell-error" role="alert">
+    <p>No se pudo cargar la actividad.</p>
+    <button class="back-btn" (click)="onCompleted()">← Volver</button>
+  </div>
+} @else if (templateCode === 'SELECT_FIGURE') {
+  <app-select-figure-player
+    [assignment]="assignment()!"
+    (completed)="onCompleted()"
+  />
+} @else {
+  <div class="shell-error" role="alert">
+    <p>Este tipo de actividad no está disponible todavía.</p>
+    <button class="back-btn" (click)="onCompleted()">← Volver</button>
+  </div>
+}
