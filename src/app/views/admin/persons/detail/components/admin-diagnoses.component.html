@@ -22,10 +22,14 @@
           <td>{{ formatDate(d.diagnosisDate) }}</td>
           <td>{{ truncate(d.primaryDiagnosis, 80) }}</td>
           <td>{{ d.professionalName }}</td>
-          <td>
+          <td class="d-flex gap-2">
             <button cButton color="primary" size="sm" variant="outline"
                     (click)="openDetail(d.id)">
               Ver
+            </button>
+            <button cButton color="danger" size="sm" variant="outline"
+                    (click)="openDeactivate(d)">
+              Dar de baja
             </button>
           </td>
         </tr>
@@ -89,3 +93,16 @@
     <button cButton color="secondary" (click)="closeModal()">Cerrar</button>
   </c-modal-footer>
 </c-modal>
+
+<app-confirm-modal
+  [visible]="showDeactivateModal"
+  title="Dar de baja diagnóstico"
+  messagePrefix="¿Confirmás dar de baja el diagnóstico del &quot;"
+  [itemName]="formatDate(deactivatingDiag?.diagnosisDate)"
+  messageSuffix="&quot;? Esta acción desactivará el registro."
+  confirmLabel="Dar de baja"
+  confirmColor="danger"
+  [loading]="isDeactivating"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()">
+</app-confirm-modal>

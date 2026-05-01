@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AdminUsersService } from '@services';
+import { AuthService } from '../../../services/auth.service';
 import { AdminUserResponse } from '@models';
 
 import {
@@ -22,10 +23,15 @@ import {
 })
 export class AdminUsersComponent implements OnInit {
   private readonly adminUsersService = inject(AdminUsersService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   admins: AdminUserResponse[] = [];
   isLoading = true;
+
+  get currentUserId(): string {
+    return this.authService.getCurrentUser()?.id ?? '';
+  }
 
   ngOnInit(): void {
     this.loadAdmins();
@@ -41,6 +47,10 @@ export class AdminUsersComponent implements OnInit {
 
   goToNew(): void {
     this.router.navigate(['/admin/admins/new']);
+  }
+
+  goToEdit(): void {
+    this.router.navigate(['/admin/admins/edit']);
   }
 
   getTypeLabel(admin: AdminUserResponse): string {
