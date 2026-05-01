@@ -33,6 +33,7 @@ interface CatalogConfig {
   load: () => Observable<any[]>;
   create?: (v: any) => Observable<any>;
   update: (id: number, v: any) => Observable<any>;
+  deactivate?: (id: number) => Observable<any>;
 }
 
 @Component({
@@ -66,6 +67,10 @@ export class CatalogsComponent implements OnInit {
   editingId: number | null = null;
   form!: FormGroup;
 
+  showDeactivateModal = false;
+  deactivatingItem: any | null = null;
+  isDeactivating = false;
+
   private skillAreasCache: { id: number; name: string }[] = [];
 
   private configs: Record<CatalogType, CatalogConfig> = {
@@ -84,6 +89,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getDisabilityTypes(),
       create: (v) => this.adminService.createDisabilityType(v),
       update: (id, v) => this.adminService.updateDisabilityType(id, v),
+      deactivate: (id) => this.adminService.patchDisabilityTypeStatus(id, false),
     },
     'autonomy-levels': {
       title: 'Niveles de Autonomia',
@@ -103,6 +109,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getAutonomyLevels(),
       create: (v) => this.adminService.createAutonomyLevel(v),
       update: (id, v) => this.adminService.updateAutonomyLevel(id, v),
+      deactivate: (id) => this.adminService.patchAutonomyLevelStatus(id, false),
     },
     'activity-categories': {
       title: 'Categorias de Actividad',
@@ -119,6 +126,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getActivityCategories(),
       create: (v) => this.adminService.createActivityCategory(v),
       update: (id, v) => this.adminService.updateActivityCategory(id, v),
+      deactivate: (id) => this.adminService.patchActivityCategoryStatus(id, false),
     },
     'skill-areas': {
       title: 'Areas de Habilidad',
@@ -139,6 +147,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getSkillAreas(),
       create: (v) => this.adminService.createSkillArea(v),
       update: (id, v) => this.adminService.updateSkillArea(id, v),
+      deactivate: (id) => this.adminService.patchSkillAreaStatus(id, false),
     },
     'template-types': {
       title: 'Tipos de Template',
@@ -160,6 +169,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getActivityTemplateTypes(),
       create: (v) => this.adminService.createActivityTemplateType(v),
       update: (id, v) => this.adminService.updateActivityTemplateType(id, v),
+      deactivate: (id) => this.adminService.patchActivityTemplateTypeStatus(id, false),
     },
     'login-methods': {
       title: 'Metodos de Login',
@@ -262,5 +272,38 @@ export class CatalogsComponent implements OnInit {
 
   getCellValue(item: any, col: any): string {
     return item[col.key] ?? '-';
+  }
+
+  openDeactivate(item: any): void {
+    this.deactivatingItem = item;
+    this.showDeactivateModal = true;
+  }
+
+  cancelDeactivate(): void {
+    this.showDeactivateModal = false;
+    this.deactivatingItem = null;
+  }
+
+  confirmDeactivate(): void {
+    if (!this.deactivatingItem || !this.config.deactivate) return;
+    this.isDeactivating = true;
+
+    this.config.deactivate(this.deactivatingItem.id).subscribe({
+      next: () => {
+        this.isDeactivating = false;
+        this.showDeactivateModal = false;
+        this.deactivatingItem = null;
+        this.toastService.success('Dado de baja exitosamente.');
+        this.catalogsService.clearCache();
+        this.loadData();
+      },
+      error: (err: any) => {
+        this.isDeactivating = false;
+        this.showDeactivateModal = false;
+        this.deactivatingItem = null;
+        const msg = err?.error?.message ?? 'Error al dar de baja.';
+        this.toastService.error(msg);
+      },
+    });
   }
 }
