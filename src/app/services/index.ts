@@ -19,6 +19,8 @@ export { InstitutionsService } from './institutions.service';
 export { AssignmentsService } from './assignments.service';
 export { ReportsService } from './reports.service';
 export { DiagnosesService } from './diagnoses.service';
+export { ActivitiesService } from './activities.service';
+export { ArasaacService } from './arasaac.service';
 
 export type { StorageKey } from './local-storage.service';
 export type {

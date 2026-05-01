@@ -8,3 +8,4 @@ export * from './invitations';
 export * from './family';
 export * from './assignments';
 export * from './institutions';
+export * from './activities';
