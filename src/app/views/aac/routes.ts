@@ -16,6 +16,14 @@ export const aacRoutes: Routes = [
     data: { title: 'Actividades' }
   },
   {
+    path: 'activities/:assignmentId',
+    loadComponent: () =>
+      import('./activities/player/activity-player-shell.component').then(
+        (m) => m.ActivityPlayerShellComponent
+      ),
+    data: { title: 'Actividad' }
+  },
+  {
     path: 'calendar',
     loadComponent: () =>
       import('./calendar/aac-calendar.component').then(

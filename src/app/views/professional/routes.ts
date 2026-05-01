@@ -28,10 +28,26 @@ export const professionalRoutes: Routes = [
   {
     path: 'activities',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('./activities/list/list.component').then(
+        (m) => m.ListComponent
       ),
     data: { title: 'Actividades' }
+  },
+  {
+    path: 'activities/new',
+    loadComponent: () =>
+      import('./activities/new/new.component').then(
+        (m) => m.NewComponent
+      ),
+    data: { title: 'Nueva Actividad' }
+  },
+  {
+    path: 'activities/:id/edit',
+    loadComponent: () =>
+      import('./activities/edit/edit.component').then(
+        (m) => m.EditComponent
+      ),
+    data: { title: 'Editar Actividad' }
   },
   {
     path: 'goals',
@@ -64,6 +80,14 @@ export const professionalRoutes: Routes = [
         (m) => m.NewComponent
       ),
     data: { title: 'Crear Reporte' }
+  },
+  {
+    path: 'reports/:id/edit',
+    loadComponent: () =>
+      import('./reports/edit/edit.component').then(
+        (m) => m.EditComponent
+      ),
+    data: { title: 'Editar Reporte' }
   },
   {
     path: 'reports/:id',
