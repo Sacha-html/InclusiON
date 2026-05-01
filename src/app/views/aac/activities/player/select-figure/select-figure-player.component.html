@@ -1,0 +1,115 @@
+<!-- ══ INTRO ══════════════════════════════════════════════════════════════ -->
+@if (phase() === 'intro') {
+  <div class="player-intro" role="main">
+    <h1 class="activity-title">{{ assignment.activityTitle }}</h1>
+
+    <div class="intro-card" aria-label="Instrucción de la actividad">
+      <div class="intro-icon" aria-hidden="true">🎯</div>
+      <p class="intro-instruction">
+        {{ content.instruction || 'Seleccioná la figura correcta.' }}
+      </p>
+      <p class="intro-hint">Hay {{ items.length }} opciones para elegir.</p>
+    </div>
+
+    <button
+      class="action-btn action-btn--primary"
+      [disabled]="isLoading()"
+      (click)="startActivity()"
+      aria-label="Iniciar actividad"
+    >
+      @if (isLoading()) {
+        <span class="btn-spinner" aria-hidden="true"></span>
+        Iniciando...
+      } @else {
+        ▶ Jugar
+      }
+    </button>
+  </div>
+}
+
+<!-- ══ PLAYING ════════════════════════════════════════════════════════════ -->
+@if (phase() === 'playing') {
+  <div class="player-game" role="main">
+    <p class="game-instruction" role="heading" aria-level="2">
+      {{ content.instruction }}
+    </p>
+
+    <div
+      class="items-grid"
+      role="group"
+      aria-label="Opciones"
+      [attr.aria-disabled]="selectedItemId() !== null"
+    >
+      @for (item of items; track item.id) {
+        <button
+          class="item-btn"
+          [class]="itemClass(item)"
+          [disabled]="selectedItemId() !== null"
+          (click)="selectItem(item)"
+          [attr.aria-label]="item.label"
+          [attr.aria-pressed]="selectedItemId() === item.id"
+        >
+          <img
+            [src]="pictogramUrl(item.pictogramId)"
+            [alt]="item.label"
+            class="item-img"
+            loading="lazy"
+          />
+          <span class="item-label">{{ item.label }}</span>
+
+          @if (selectedItemId() === item.id && isCorrect()) {
+            <span class="item-feedback item-feedback--ok" aria-hidden="true">✅</span>
+          }
+          @if (selectedItemId() === item.id && isCorrect() === false) {
+            <span class="item-feedback item-feedback--fail" aria-hidden="true">❌</span>
+          }
+          @if (selectedItemId() !== null && item.id === content.correctItemId && !isCorrect()) {
+            <span class="item-feedback item-feedback--reveal" aria-hidden="true">⭐</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<!-- ══ RESULT ═════════════════════════════════════════════════════════════ -->
+@if (phase() === 'result') {
+  <div class="player-result" role="main" aria-live="assertive">
+    @if (isCorrect()) {
+      <div class="result-icon result-icon--success" aria-hidden="true">🎉</div>
+      <h2 class="result-title result-title--success">¡Muy bien!</h2>
+      <p class="result-msg">Elegiste la respuesta correcta.</p>
+    } @else {
+      <div class="result-icon result-icon--fail" aria-hidden="true">💪</div>
+      <h2 class="result-title result-title--fail">¡Casi!</h2>
+      <p class="result-msg">La respuesta correcta era <strong>{{ correctLabel }}</strong>.</p>
+    }
+
+    <div class="result-actions">
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="isLoading()"
+        (click)="finishActivity()"
+        aria-label="Finalizar y volver"
+      >
+        @if (isLoading()) {
+          <span class="btn-spinner" aria-hidden="true"></span>
+          Guardando...
+        } @else {
+          ✓ Finalizar
+        }
+      </button>
+
+      @if (!isCorrect()) {
+        <button
+          class="action-btn action-btn--secondary"
+          [disabled]="isLoading()"
+          (click)="retry()"
+          aria-label="Intentar de nuevo"
+        >
+          🔄 Intentar de nuevo
+        </button>
+      }
+    </div>
+  </div>
+}
