@@ -13,6 +13,12 @@ export const institutionRoutes: Routes = [
     data: { title: 'Crear Institución' },
   },
   {
+    path: ':id/detail',
+    loadComponent: () =>
+      import('./detail/detail.component').then((m) => m.DetailComponent),
+    data: { title: 'Detalle de Institución' },
+  },
+  {
     path: ':id/edit',
     loadComponent: () =>
       import('./edit/edit.component').then((m) => m.EditComponent),
