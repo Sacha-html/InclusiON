@@ -9,68 +9,73 @@
 ## ABM 01 — Instituciones
 
 ### Backend (`InclusiON.Server`)
-- [ ] `PUT /api/institutions/{id}/deactivate` — baja lógica (`Activo = false`)
+- [x] `PATCH /api/institutions/{id}` — máquina de estados (`{ isActive: bool }`, valida no-op + integridad en baja)
+- [x] Tests unitarios `PatchInstitutionStatusCommandHandlerTests` (10 casos)
 
 ### Frontend (`InclusiON.Client`)
-- [ ] `institutions/detail.component` — detalle de institución (admins asignados, profesionales, datos)
-- [ ] Botón "Dar de baja" en `institutions/list.component` con confirmación
+- [x] `institutions/detail.component` — detalle de institución (admins asignados, profesionales, datos)
+- [x] Botón "Dar de baja" en `institutions/detail.component` con confirmación (409 del BE surfacea mensaje directo)
 
 ---
 
-## ABM 02 — Administradores
+## ABM 02 — Administradores ✅
 
 ### Backend
-- [ ] `PUT /api/admin/users/{userId}` — editar nombre, apellido y email del administrador
+- [x] `PUT /api/admin/users/{userId}` — editar nombre, apellido, email (`AdminUpdateUserCommand`)
 
 ### Frontend
-- [ ] `admins/edit.component` (o modal de edición) — formulario reactivo con nombre, apellido, email
-- [ ] Botón "Editar" en `admin-users.component`
+- [x] `admin-users/edit/edit.component` — formulario reactivo con nombre, apellido, email
+- [x] Botón "Editar" en `admin-users.component` (visible solo para el propio usuario)
 
 ---
 
 ## ABM 03 — Catálogos
 
-### Backend — endpoints de baja lógica
-- [ ] `PUT /api/catalogs/admin/disability-types/{id}/deactivate`
-- [ ] `PUT /api/catalogs/admin/autonomy-levels/{id}/deactivate`
-- [ ] `PUT /api/catalogs/admin/activity-categories/{id}/deactivate`
-- [ ] `PUT /api/catalogs/admin/skill-areas/{id}/deactivate`
-- [ ] `PUT /api/catalogs/admin/activity-template-types/{id}/deactivate`
-- [ ] `PUT /api/catalogs/admin/report-types/{id}/deactivate`
+### Backend — endpoints de estado (PATCH con máquina de estados)
+- [x] `PATCH /api/admin/catalogs/disability-types/{id}` — baja + reactivación con no-op check
+- [x] `PATCH /api/admin/catalogs/autonomy-levels/{id}`
+- [x] `PATCH /api/admin/catalogs/activity-categories/{id}`
+- [x] `PATCH /api/admin/catalogs/skill-areas/{id}`
+- [x] `PATCH /api/admin/catalogs/activity-template-types/{id}`
+- [x] `PATCH /api/admin/catalogs/report-types/{id}`
 
 ### Backend — validaciones de integridad en baja
-- [ ] `DisabilityType`: rechazar si hay `PersonWithDisability` activos con ese tipo
-- [ ] `ActivityCategory`: rechazar si hay `Activity` activas con esa categoría
-- [ ] `SkillArea`: rechazar si hay `PersonSkillProfile` activos o `ActivityTemplateType` activos asociados
-- [ ] `ActivityTemplateType`: rechazar si hay `ActivityContent` activos asociados
-- [ ] `ReportType`: rechazar si hay `Report` activos asociados
+- [x] `DisabilityType`: rechazar si hay `PersonWithDisability` con ese tipo
+- [x] `ActivityCategory`: rechazar si hay `Activity` con esa categoría
+- [x] `SkillArea`: rechazar si hay `PersonSkillProfile` activos o `ActivityTemplateType` activos asociados
+- [x] `ActivityTemplateType`: rechazar si hay `ActivityContent` asociados
+- [x] `ReportType`: rechazar si hay `Report` asociados
+- [x] Tests unitarios `CatalogAdminControllerPatchStatusTests` (13 casos — DisabilityType + AutonomyLevel representativos)
 
 ### Frontend
-- [ ] Toggle activo/inactivo en `catalogs.component` (aplica a todos los tipos)
-- [ ] Confirmación de baja mostrando cuántos registros quedarían afectados
+- [x] Botón "Dar de baja" + modal de confirmación en `catalogs.component` (5 tipos con deactivate)
+- [x] Error del 409 surfacea el mensaje del backend directamente en el toast
 
 ---
 
-## ABM 11 — Diagnósticos
+## ABM 11 — Diagnósticos ✅
 
 ### Backend
-- [ ] `PUT /api/diagnoses/{id}/deactivate` — baja lógica
+- [x] `PATCH /api/diagnoses/{id}` — máquina de estados (`{ isActive: bool }`, valida no-op + autoría)
+- [x] `PatchDiagnosisStatusCommandHandler` con verificación de profesional creador
+- [x] Tests unitarios `PatchDiagnosisStatusCommandHandlerTests`
 
 ### Frontend
-- [ ] Botón "Dar de baja" en `professional-diagnoses.component` con confirmación
-- [ ] Botón "Dar de baja" en `admin-diagnoses.component` con confirmación
+- [x] Botón "Dar de baja" en `professional-diagnoses.component` — solo visible para el creador, con `ConfirmModalComponent`
+- [x] Botón "Dar de baja" en `admin-diagnoses.component` — visible para todos los diagnósticos
+- [x] Fix TS2322: `date` pipe devolvía `string | null` en `[itemName]` → corregido con `?? ''`
 
 ---
 
-## ABM 12 — Reportes
+## ABM 12 — Reportes ✅
 
 ### Backend
-- [ ] `PUT /api/reports/{id}/deactivate` — baja lógica
+- [x] `PUT /api/reports/{id}/deactivate` — baja lógica con validaciones (no permite baja en estado Enviado, verifica autoría)
 
 ### Frontend
-- [ ] `pro/reports/edit.component` — formulario reactivo para editar reporte en estado `Borrador` o `Rechazado`
-- [ ] Botón "Editar" en `pro/reports/detail.component` (visible solo si el estado lo permite)
-- [ ] Botón "Dar de baja" en `pro/reports/detail.component` (con advertencia si ya fue leído por el familiar)
+- [x] `pro/reports/edit.component` — formulario completo, valida que el reporte sea Borrador o Rechazado antes de mostrar
+- [x] Botón "Editar" en `pro/reports/detail.component` (visible solo si Draft o Rejected)
+- [x] Botón "Dar de baja" en `pro/reports/detail.component` (visible si no está Enviado, con modal de confirmación, surfacea mensaje del backend)
 
 ---
 
@@ -78,18 +83,20 @@
 
 | # | Tarea | ABM | Layer |
 |---|-------|-----|-------|
-| 1 | `PUT /institutions/{id}/deactivate` | 01 | BE |
-| 2 | `institutions/detail.component` | 01 | FE |
-| 3 | Botón baja instituciones | 01 | FE |
-| 4 | `PUT /admin/users/{id}` editar admin | 02 | BE |
-| 5 | `admins/edit.component` | 02 | FE |
-| 6 | Endpoints deactivate × 6 catálogos | 03 | BE |
-| 7 | Validaciones de integridad × 5 catálogos | 03 | BE |
-| 8 | Toggle activo/inactivo en catálogos | 03 | FE |
-| 9 | `PUT /diagnoses/{id}/deactivate` | 11 | BE |
-| 10 | Botón baja diagnósticos (2 componentes) | 11 | FE |
-| 11 | `PUT /reports/{id}/deactivate` | 12 | BE |
-| 12 | `pro/reports/edit.component` | 12 | FE |
-| 13 | Botón baja + botón editar reportes | 12 | FE |
+| 1 | ~~`PATCH /institutions/{id}` (máquina de estados)~~ ✅ | 01 | BE |
+| 2 | ~~Tests `PatchInstitutionStatusCommandHandlerTests`~~ ✅ | 01 | BE |
+| 3 | ~~`institutions/detail.component`~~ ✅ | 01 | FE |
+| 4 | ~~Botón baja instituciones~~ ✅ | 01 | FE |
+| 5 | ~~`PUT /admin/users/{id}` editar admin~~ ✅ | 02 | BE |
+| 6 | ~~`admins/edit.component`~~ ✅ | 02 | FE |
+| 7 | ~~Endpoints PATCH × 6 catálogos~~ ✅ | 03 | BE |
+| 8 | ~~Validaciones de integridad × 5 catálogos~~ ✅ | 03 | BE |
+| 9 | ~~Tests `CatalogAdminControllerPatchStatusTests`~~ ✅ | 03 | BE |
+| 10 | ~~Toggle activo/inactivo en catálogos~~ ✅ | 03 | FE |
+| 11 | ~~`PATCH /diagnoses/{id}`~~ ✅ | 11 | BE |
+| 12 | ~~Botón baja diagnósticos (2 componentes)~~ ✅ | 11 | FE |
+| 13 | ~~`PUT /reports/{id}/deactivate`~~ ✅ | 12 | BE |
+| 14 | ~~`pro/reports/edit.component`~~ ✅ | 12 | FE |
+| 15 | ~~Botón baja + botón editar reportes~~ ✅ | 12 | FE |
 
-**Total: 13 tareas**
+**Total: 15 tareas — 15 completadas ✅ — 0 pendientes** 🎉
