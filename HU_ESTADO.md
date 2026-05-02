@@ -1,6 +1,6 @@
 # InclusiON — Estado de Historias de Usuario
 
-**Última actualización:** 2026-04-18
+**Última actualización:** 2026-05-01
 
 Leyenda de estados:
 - ✅ **HECHO** — Implementado y funcionando
@@ -34,10 +34,10 @@ Leyenda de estados:
 |----------|--------|-------|
 | Áreas de Habilidad (SkillAreas) | ✅ HECHO | Incluido en catálogos como `GET /api/catalogs/skill-areas` |
 | Tipos de Template de Actividad | ✅ HECHO | Incluido en catálogos como `GET /api/catalogs/activity-template-types` |
-| CRUD Actividades con Contenido Dinámico | ⏳ PENDIENTE | Entidades `Activity`, `ActivityContent` existen. Falta: controller, commands, queries, handlers. Ver `Plans/actividades-templates-crud.md` |
+| CRUD Actividades con Contenido Dinámico | ✅ HECHO | `ActivitiesController` + Create/Update/PatchStatus commands + GetAll/GetById/SearchSemantic queries + handlers. Búsqueda semántica con ONNX embeddings. Permisos por ownership (propias) + lectura estándar. |
 | Perfil de Habilidades de la Persona | ✅ HECHO | `PersonSkillProfile` entity + endpoints GET/POST/PUT en PersonsController |
 | Sistema de Invitaciones Familiares | ✅ HECHO | `InvitationsController` con 4 endpoints + email SMTP con MailKit + templates HTML |
-| Roadmap de la Persona | ⏳ PENDIENTE | Entidades `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity` existen. Falta: controller, handlers |
+| Roadmap de la Persona | ✅ HECHO | `RoadmapController` + Create/AddArea/AddActivity/RemoveArea/RemoveActivity/UnlockActivity/UpdateNotes commands + GetPersonRoadmap query. `PersonAccess` enforced. Actividad 1 auto-desbloqueada. Validación ownership actividad. Pendiente: drag-drop reorder (IN-113). |
 
 ### Sprint 3 — Ejecución y Métricas
 
@@ -81,10 +81,10 @@ Leyenda de estados:
 
 | Historia | Estado | Notas |
 |----------|--------|-------|
-| Formulario de Actividad con Template Dinámico | ⏳ PENDIENTE | Requiere CRUD Actividades en backend |
-| Catálogo de Actividades del Profesional | ⏳ PENDIENTE | Requiere CRUD Actividades en backend |
+| Formulario de Actividad con Template Dinámico | ✅ HECHO | `new.component` + `edit.component` en `/pro/activities`. Wizard multi-paso con ARASAAC, template dinámico SelectFigure. Rutas protegidas por `permissionGuard`. |
+| Catálogo de Actividades del Profesional | ✅ HECHO | `list.component` con filtros, búsqueda semántica IA, asignación modal, activar/desactivar. Permisos `activities:create/update` aplicados en UI. |
 | Sección Perfil de Habilidades en Perfil Persona | ✅ HECHO | Sección perfil de habilidades con chips coloreados en detalle persona |
-| Gestor de Roadmap (vista Profesional) | ⏳ PENDIENTE | Requiere Roadmap en backend |
+| Gestor de Roadmap (vista Profesional) | ✅ HECHO | Tab "Hoja de Ruta" en `person-detail`. Crear roadmap, agregar/eliminar áreas y actividades, desbloqueo manual. Permisos `roadmap:create/update/delete` aplicados. Pendiente: drag-drop reorder (IN-113). |
 | Registro por Invitación (página pública Familia) | ✅ HECHO | Registro por invitación (página pública /invite/:code) |
 
 ### Sprint 3 — Experiencia del Estudiante

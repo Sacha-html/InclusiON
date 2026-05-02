@@ -42,7 +42,7 @@ InclusiON.Data/             ← DbContext, configurations, migraciones, seeders
 InclusiON.Domain/           ← Entidades del dominio y base classes
 InclusiON.DTOs/             ← Request/Response DTOs, PagedRequest/Response
 InclusiON.Shared/           ← Constantes, mensajes (resx)
-InclusiON.SemanticSearch/   ← Library ONNX para embeddings (pendiente integración)
+InclusiON.SemanticSearch/   ← Library ONNX para embeddings (modelo + DI listos; falta handler búsqueda)
 ```
 
 ---
@@ -128,10 +128,14 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 | `AssignmentsController` | Asignaciones profesional-persona |
 | `InvitationsController` | Crear invitación, aceptar, validar código |
 | `ReportsController` | CRUD informes, submit, approve, reject, GET /family |
+| `ActivitiesController` | GET (list paginado + filtros), GET (by id), POST, PUT, PATCH /status |
+| `ActivityAssignmentsController` | POST (asignar), GET /persons/{id}/activity-assignments, GET /my/activity-assignments, POST .../responses/start, POST .../responses/{resId}/complete |
 | `DiagnosesController` | GET /persons/{id}/diagnoses, GET /diagnoses/{id}, POST, PUT |
 | `AdminUsersController` | Listado paginado, reset-password, deactivate, reactivate |
 | `RolesController` | Listado de roles y permisos, asignar permisos |
 | `UsersController` | GetById, GetProfile |
+| `MessagesController` | GET inbox, GET sent, GET unread-count, GET {id}, POST (send), POST {id}/reply, PATCH {id}/read, DELETE {id} |
+| `RoadmapController` | GET /persons/{id}/roadmap, POST (create), PATCH notes, POST areas, DELETE areas/{id}, POST areas/{id}/activities, DELETE activities/{id}, PATCH activities/{id}/unlock |
 
 ---
 
@@ -191,8 +195,28 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 - `AdminDeactivateUserCommandHandler`, `AdminReactivateUserCommandHandler`
 - `AdminResetPasswordCommandHandler`
 
+### Activities
+- `CreateActivityCommandHandler`, `UpdateActivityCommandHandler`, `PatchActivityStatusCommandHandler`
+- `GetActivitiesQueryHandler`, `GetActivityByIdQueryHandler`
+
+### ActivityAssignments
+- `CreateActivityAssignmentCommandHandler`
+- `GetPersonActivityAssignmentsQueryHandler`
+- `StartActivityResponseCommandHandler`, `CompleteActivityResponseCommandHandler`
+
 ### Users
 - `GetUserProfileQueryHandler`
+
+### Messages
+- `GetInboxQueryHandler`, `GetSentQueryHandler`, `GetMessageByIdQueryHandler`, `GetUnreadCountQueryHandler`
+- `SendMessageCommandHandler`, `ReplyToMessageCommandHandler`
+- `MarkMessageReadCommandHandler`, `DeleteMessageCommandHandler`
+
+### Roadmap
+- `GetPersonRoadmapQueryHandler`
+- `CreateRoadmapCommandHandler`, `UpdateRoadmapNotesCommandHandler`
+- `AddRoadmapAreaCommandHandler`, `RemoveRoadmapAreaCommandHandler`
+- `AddRoadmapActivityCommandHandler`, `RemoveRoadmapActivityCommandHandler`, `UnlockRoadmapActivityCommandHandler`
 
 ---
 
@@ -200,13 +224,16 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 
 | Interface | Implementación | Entidad principal |
 |-----------|---------------|-------------------|
+| `IAssignmentsRepository` | `AssignmentsRepository` | `ProfessionalPerson`, `ProfessionalInstitution` (`HaveSharedPersonAsync` valida vínculo prof↔familiar) |
 | `IPersonsRepository` | `PersonsRepository` | `PersonWithDisability` |
 | `IProfessionalsRepository` | `ProfessionalsRepository` | `Professional` |
 | `IFamilyRepository` | `FamilyRepository` | `FamilyRepresentative` |
 | `IInstitutionsRepository` | `InstitutionsRepository` | `EducationalInstitution` |
 | `IReportsRepository` | `ReportsRepository` | `Report` |
 | `IDiagnosesRepository` | `DiagnosesRepository` | `Diagnosis` |
-| `IUsersRepository` | `UsersRepository` | `User` |
+| `IUsersRepository` | `UsersRepository` | `User` (`GetByIdWithProfileAsync` incluye Professional/FamilyRepresentative/PersonWithDisability) |
+| `IMessagesRepository` | `MessagesRepository` | `Message` |
+| `IRoadmapRepository` | `RoadmapRepository` | `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity` |
 | `IRefreshTokensRepository` | `RefreshTokensRepository` | `RefreshToken` |
 | `IVisualLoginRepository` | `VisualLoginRepository` | `TrustedDevice`, `LoginMethod` (login visual estándar y PIN) |
 
@@ -215,17 +242,20 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 ## Entidades del Dominio (39 entidades)
 
 ### Implementadas con handlers
-`User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`, `PersonSkillProfile`, `ProfessionalStatusHistory`, `FamilyStatusHistory`, `PersonRepresentativeHistory`
+`User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`, `PersonSkillProfile`, `ProfessionalStatusHistory`, `FamilyStatusHistory`, `PersonRepresentativeHistory`, `Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `Message`, `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`
 
 ### Con migración pero sin handlers (pendientes)
-`Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `ActivityEmbedding`, `ActivityResult`, `ActivityCategory`, `ActivityTemplateType`, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`, `DisabilityType`, `Message`, `PersonRoadmap`, `PersonRoadmapActivity`, `PersonRoadmapArea`, `ReportType`, `SkillArea`
+`ActivityEmbedding` (embedding se genera via raw SQL en CreateActivity — pendiente), `ActivityResult`, `ActivityCategory`\*, `ActivityTemplateType`\*, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`\*, `DisabilityType`\*, `ReportType`, `SkillArea`\*
+
+\* Catálogos leídos solo por el `CatalogsController`, no necesitan handlers de escritura propios.
 
 ---
 
 ## Features Complejos (documentación aparte)
 
-- **Búsqueda Semántica:** Ver `Documentacion/Features/integracion-semantic-search.md`
-- **Motor Adaptativo (MDA):** Ver `Documentacion/Features/MDA_Especificacion_Tecnica.md`
+- **Búsqueda Semántica:** Ver `Features/integracion-semantic-search.md`
+- **Motor Adaptativo (MDA):** Ver `Features/MDA_Especificacion_Tecnica.md`
+- **Plan MVP Actividades:** Ver `Plans/actividades-embeddings-mvp.md`
 
 ---
 

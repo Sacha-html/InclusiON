@@ -161,6 +161,27 @@ export class ActivitiesService {
 }
 ```
 
+### Patrón DataTableComponent
+
+```typescript
+// Inputs obligatorios
+[columns]="columns"         // TableColumn[]
+[items]="activities()"      // T[]
+[loading]="isLoading()"     // boolean
+[currentPage]="currentPage()"
+[pageSize]="pageSize()"
+[totalItems]="totalRecords()"
+
+// Outputs
+(searchAction)="onSearch($event)"
+(pageChange)="onPageChange($event)"
+(sortAction)="onSort($event)"
+(rowAction)="onRowAction($event)"       // { action: string; item: T }
+(headerAction)="onHeaderAction($event)" // string
+```
+
+Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocultar por fila.
+
 ---
 
 ## Componentes Existentes
@@ -182,9 +203,17 @@ export class ActivitiesService {
 - **Admin — Catálogos:** submenú por tipo (6 tipos) con CRUD
 - **Admin — Roles:** listado con checkboxes de permisos por módulo
 - **Portal Profesional:** dashboard con datos reales, Mi Aula (personas asignadas), lista de reportes, invitaciones
+  - **Actividades** (`/pro/activities`): lista con filtros (categoría, tipo, estado, origen), acciones asignar/editar/activar/desactivar
+  - **Nueva actividad** (`/pro/activities/new`): wizard 2 pasos — metadatos + contenido SELECT_FIGURE con picker ARASAAC
+  - **Editar actividad** (`/pro/activities/:id/edit`): misma lógica que nueva, pre-carga datos
+  - **Modal asignar** (`AssignActivityModalComponent`): selección de estudiante, fecha límite, flag evaluación
 - **Portal Familiar:** registro por invitación (/invite/:code), lista de reportes
 - **Dashboards:** admin, profesional con datos reales
-- **AAC:** home, activities, calendar, communication (stubs)
+- **AAC:**
+  - home, calendar, communication (stubs)
+  - **Actividades** (`/app/activities`): lista de asignaciones desde `GET /api/my/activity-assignments`, tarjetas con estado coloreado
+  - **Player** (`/app/activities/:assignmentId`): `ActivityPlayerShellComponent` despacha por `templateTypeCode`
+    - `SELECT_FIGURE`: 3 fases (intro → playing → result), imágenes ARASAAC, registra inicio/completado
 
 ### Shared components
 - `AvatarComponent` — Avatar con colores de catálogo
@@ -195,22 +224,28 @@ export class ActivitiesService {
 - `ConfirmModalComponent` — Modal de confirmación reutilizable
 - `InstitutionFilterComponent` — Selector de institución para admin global/institucional
 
+### Servicios de datos
+- `ActivitiesService` — CRUD actividades, asignaciones, startResponse, completeResponse, getMyAssignments
+- `ArasaacService` — `search(term)` y `getPictogramUrl(id)` para pictogramas ARASAAC
+  - API: `https://api.arasaac.org/api/pictograms/es/search/{term}`
+  - Imágenes: `https://static.arasaac.org/pictograms/{id}/{id}_500.png`
+
 ---
 
 ## Lo que FALTA construir (por portal)
 
 ### Portal Profesional (`/pro/`)
-- Listado y CRUD de actividades
-- Perfil de habilidades del estudiante
+- Vista de resultados por estudiante: tab en person-detail con historial de asignaciones/respuestas
+- Búsqueda semántica de actividades (`GET /api/activities/search?text=...`)
+- Perfil de habilidades del estudiante (radar chart)
 - Gestor de roadmap drag-and-drop
-- Radar chart de habilidades
 - Mensajería inbox
 - Panel config MDA
 - Timeline ajustes adaptativos
 
 ### Portal Estudiante AAC (`/app/`)
 - Roadmap visual estilo Duolingo
-- ActivityPlayerShell + 5 players
+- Players adicionales: MATCH_PAIRS, ORDER_SEQUENCE, FILL_BLANK, etc.
 
 ### Portal Familia (`/family/`)
 - Dashboard con datos de progreso
