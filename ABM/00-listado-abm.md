@@ -32,11 +32,11 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 | 06 | [Representantes Familiares](./06-familiares.md) | Profesional | `FamilyRepresentative`, `FamilyStatusHistory`, `Invitation`, `PersonRepresentative`, `PersonRepresentativeHistory` | ✅ |
 | 07 | [Asignación Profesional–Persona](./07-asignacion-profesional-persona.md) | Profesional / Admin Institucional | `ProfessionalPerson` | ✅ |
 | 08 | [Actividades](./08-actividades.md) | Profesional | `Activity`, `ActivityContent`, `ActivityEmbedding` | ✅ |
-| 09 | [Roadmap](./09-roadmap.md) | Profesional | `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`, `AdaptiveEngineConfig` | ⏳ |
+| 09 | [Roadmap](./09-roadmap.md) | Profesional | `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`, `AdaptiveEngineConfig` | ✅ |
 | 10 | [Asignaciones de Actividad](./10-asignaciones.md) | Profesional | `ActivityAssignment`, `ActivityResponse`, `ActivityResult` | ✅ |
 | 11 | [Diagnósticos](./11-diagnosticos.md) | Profesional | `Diagnosis` | ✅ |
 | 12 | [Reportes de Progreso](./12-reportes.md) | Profesional | `Report` | ✅ |
-| 13 | [Mensajes](./13-mensajes.md) | Profesional / Representante Familiar | `Message` | ⏳ |
+| 13 | [Mensajes](./13-mensajes.md) | Profesional / Representante Familiar | `Message` | ✅ |
 
 ---
 
