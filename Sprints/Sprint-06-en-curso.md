@@ -83,7 +83,7 @@ Leyenda: ✅ En Revisión · 🔄 En Curso · ⏳ Pendiente · ✔️ Completado
 | — | Vista resultados profesional (historial asignaciones por persona) | IN-105 ✔️ | ✔️ Completado |
 | — | Búsqueda semántica actividades (handler + endpoint + FE) | modelo listo | ✔️ Completado |
 | — | Embedding al crear actividad (fire-and-forget handler) | — | ✔️ Completado |
-| IN-86 | Timeline de diagnósticos en perfil de persona (vista admin) | ✅ listo | Cerrar en Jira |
+| IN-86 | Timeline de diagnósticos en perfil de persona (tab en person-detail) | ✔️ Completado | |
 | IN-136 | Creación de reporte de progreso | ✅ listo | Cerrar en Jira |
 
 ---

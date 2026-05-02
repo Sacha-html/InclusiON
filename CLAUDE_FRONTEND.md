@@ -207,8 +207,10 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
   - **Nueva actividad** (`/pro/activities/new`): wizard 2 pasos — metadatos + contenido SELECT_FIGURE con picker ARASAAC
   - **Editar actividad** (`/pro/activities/:id/edit`): misma lógica que nueva, pre-carga datos
   - **Modal asignar** (`AssignActivityModalComponent`): selección de estudiante, fecha límite, flag evaluación
-- **Portal Familiar:** registro por invitación (/invite/:code), lista de reportes
-- **Dashboards:** admin, profesional con datos reales
+- **Portal Familiar:** registro por invitación (/invite/:code), lista de reportes, dashboard con datos reales (personas, actividades recientes, mensajes no leídos)
+- **Mensajería** (`/pro/messages`, `/family/messages`): `MessagesComponent` compartido — inbox/enviados con paginación, detalle de mensaje, hilo de respuestas, modal redactar nuevo mensaje, badge de no leídos en sidebar
+- **Próximamente** (`/pro/goals`, `/pro/evaluations`, `/pro/calendar`, `/family/activities`, `/family/calendar`, `/family/professionals`, `/family/progress`): `ComingSoonComponent` con mensaje 🚧
+- **Dashboards:** admin (8 KPIs con badge de pendientes), profesional (personas, reportes, mensajes no leídos), familiar (personas a cargo, actividades recientes, mensajes no leídos)
 - **AAC:**
   - home, calendar, communication (stubs)
   - **Actividades** (`/app/activities`): lista de asignaciones desde `GET /api/my/activity-assignments`, tarjetas con estado coloreado
@@ -229,26 +231,25 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - `ArasaacService` — `search(term)` y `getPictogramUrl(id)` para pictogramas ARASAAC
   - API: `https://api.arasaac.org/api/pictograms/es/search/{term}`
   - Imágenes: `https://static.arasaac.org/pictograms/{id}/{id}_500.png`
+- `MessagesService` — getInbox(), getSent(), getById(), getContacts(), getUnreadCount(), send(), reply(), markAsRead()
+- `FamilyService.getDashboard()` — GET /api/Family/dashboard → `FamilyDashboardResponse`
+- `AdminUsersService.getDashboard()` — GET /api/admin/dashboard → `AdminDashboardResponse`
 
 ---
 
 ## Lo que FALTA construir (por portal)
 
 ### Portal Profesional (`/pro/`)
-- Vista de resultados por estudiante: tab en person-detail con historial de asignaciones/respuestas
-- Búsqueda semántica de actividades (`GET /api/activities/search?text=...`)
-- Perfil de habilidades del estudiante (radar chart)
-- Gestor de roadmap drag-and-drop
-- Mensajería inbox
-- Panel config MDA
+- Radar chart de habilidades por persona (IN-90)
+- Panel configuración motor adaptativo (MDA)
 - Timeline ajustes adaptativos
 
 ### Portal Estudiante AAC (`/app/`)
-- Roadmap visual estilo Duolingo
-- Players adicionales: MATCH_PAIRS, ORDER_SEQUENCE, FILL_BLANK, etc.
+- Players adicionales: MATCH_PAIRS, ORDER_SEQUENCE, FILL_BLANK (parcialmente implementados)
 
 ### Portal Familia (`/family/`)
-- Dashboard con datos de progreso
+- Vista de progreso detallado por actividad
+- Vista de calendario y profesionales asignados
 
 ---
 

@@ -199,8 +199,8 @@
 
 | Historia | Jira | Estado |
 |---|---|---|
-| Integración de pictogramas ARASAAC | IN-106 | ⏳ |
-| Búsqueda semántica por lenguaje natural | IN-135 | 🔵 |
+| Integración de pictogramas ARASAAC | IN-106 | ✅ |
+| Búsqueda semántica por lenguaje natural | IN-135 | ✅ |
 
 ---
 
@@ -210,7 +210,7 @@
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
 | Configurar motor adaptativo por actividad | IN-116 | ⏳ | |
-| Desbloqueo automático por umbral de rendimiento | IN-127 | 🔵 | CompleteActivityResponseCommandHandler: unlock next si successPercentage >= unlockThresholdPercent |
+| Desbloqueo automático por umbral de rendimiento | IN-127 | ✅ | CompleteActivityResponseCommandHandler: unlock next si successPercentage >= unlockThresholdPercent |
 | Monitoreo de frustración (pausa tras 3+ intentos) | IN-128 | ⏳ | |
 | Evaluación automática de rendimiento | IN-129 | ⏳ | |
 | Cálculo y aplicación de ajuste de dificultad | IN-130, IN-131 | 🔧 ⏳ | Entidades + migraciones listas |
@@ -226,8 +226,8 @@
 | Historia | Jira | Estado |
 |---|---|---|
 | Radar chart de habilidades por área | IN-90 | ⏳ |
-| Timeline de diagnósticos en perfil | IN-86 | ⏳ |
-| Dashboard familiar (actividades, mensajes, reportes) | IN-92 | ⏳ |
+| Timeline de diagnósticos en perfil | IN-86 | 🔵 |
+| Dashboard familiar (actividades, mensajes, reportes) | IN-92 | 🔵 |
 | Panel de visualización de progreso (familiar) | IN-153 | ⏳ |
 
 ---
@@ -258,11 +258,11 @@
 
 | Historia | Jira | Estado |
 |---|---|---|
-| Bandeja de entrada de mensajes | IN-140 | 🔵 |
-| Envío de mensajes con asunto y contenido | IN-141 | 🔵 |
-| Hilos de conversación | IN-142 | 🔵 |
-| Indicador de mensajes no leídos en sidebar | IN-143 | 🔵 |
-| Marcado automático como leído al abrir | IN-144 | 🔵 |
+| Bandeja de entrada de mensajes | IN-140 | ✅ |
+| Envío de mensajes con asunto y contenido | IN-141 | ✅ |
+| Hilos de conversación | IN-142 | ✅ |
+| Indicador de mensajes no leídos en sidebar | IN-143 | ✅ |
+| Marcado automático como leído al abrir | IN-144 | ✅ |
 | Consulta de actividad reciente del usuario | IN-98 | ⏳ |
 
 ---
@@ -284,7 +284,8 @@
 
 | Estado | Cantidad |
 |---|:---:|
-| 🔵 En revisión | 7 |
+| ✅ Hecho | 8 |
+| 🔵 En revisión | 2 |
 | 🔧 Base lista, sin handlers | 2 |
-| ⏳ Pendiente | 23 |
+| ⏳ Pendiente | 20 |
 | **Total Post-MVP** | **32** |

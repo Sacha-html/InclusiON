@@ -124,6 +124,8 @@
 - [x] Tab "Actividades" en person-detail del profesional (historial + resultados expandibles)
 - [x] Player COMPLETE_LETTER — completar letras faltantes con selector por hueco
 - [x] Wizard — editor dinámico para los 5 tipos de template (CONTENT_EDITOR_REGISTRY + ViewContainerRef)
+- [x] Wizard — refactor 3 pasos (Identificación / Detalles / Contenido)
+- [x] Asignación post-creación — pantalla "¿Asignar ahora?" con modal integrado
 - [x] Visualización del roadmap (vista estudiante, estilo Duolingo)
 
 ### 11 — Plan de Trabajo (Roadmap)
@@ -249,23 +251,22 @@
 ## Radar Chart y Métricas
 
 - [ ] Radar chart de habilidades (promedio de éxito por área)
-- [ ] Dashboard familiar (últimas actividades, mensajes, reportes)
-- [ ] Portal familia con progreso completo
+- [x] Timeline de diagnósticos en perfil de persona
+- [x] Dashboard familiar (últimas actividades, mensajes, reportes)
+- [x] Portal familia con progreso completo
 
 ## Búsqueda Semántica y Pictogramas
 
 - [x] Búsqueda semántica de actividades por lenguaje natural
-- [ ] Integración de pictogramas ARASAAC
+- [x] Integración de pictogramas ARASAAC (arasaac.service.ts + picker en los 4 editores)
 
 ## Mensajería Interna
 
-> **Backend completo (IN-140..144).** Frontend pendiente.
-
-- [ ] Bandeja de entrada de mensajes (FE)
-- [ ] Envío de mensajes con asunto y contenido (FE)
-- [ ] Hilos de conversación (respuestas) (FE)
-- [ ] Indicador de mensajes no leídos en sidebar (FE)
-- [ ] Marcado automático como leído al abrir (FE)
+- [x] Bandeja de entrada de mensajes
+- [x] Envío de mensajes con asunto y contenido
+- [x] Hilos de conversación (respuestas)
+- [x] Indicador de mensajes no leídos en sidebar
+- [x] Marcado automático como leído al abrir
 - [ ] Notificaciones automáticas de eventos del sistema
 
 ## Onboarding
@@ -299,6 +300,6 @@
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| MVP | 125 | 13 |
-| Post-MVP | 1 | 31 |
-| **Total** | **126** | **44** |
+| MVP | 154 | 0 |
+| Post-MVP | 10 | 23 |
+| **Total** | **164** | **23** |

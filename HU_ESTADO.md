@@ -13,8 +13,8 @@ Leyenda de estados:
 
 | Track | Hechas | Parciales | Pendientes | Total |
 |-------|--------|-----------|------------|-------|
-| Backend | 9 | 2 | 9 | 20 |
-| Frontend | 9 | 0 | 12 | 21 |
+| Backend | 11 | 1 | 8 | 20 |
+| Frontend | 13 | 1 | 7 | 21 |
 
 ---
 
@@ -43,9 +43,9 @@ Leyenda de estados:
 
 | Historia | Estado | Notas |
 |----------|--------|-------|
-| Asignaciones — Consulta y Gestión | ⏳ PENDIENTE | Entidad `ActivityAssignment` existe. Sin handlers |
-| Respuestas — Ciclo de Vida de Actividad | ⏳ PENDIENTE | Entidad `ActivityResponse` existe. Sin handlers |
-| Radar Chart y Dashboard con Datos Reales | ⏳ PENDIENTE | Sin implementación |
+| Asignaciones — Consulta y Gestión | ✅ HECHO | `ActivityAssignmentsController` + handlers completos. GET /persons/{id}/activity-assignments, GET /my/activity-assignments, POST asignar |
+| Respuestas — Ciclo de Vida de Actividad | ✅ HECHO | Start + Complete response handlers. `CompleteActivityResponseCommandHandler` calcula successPercentage y desbloquea siguiente actividad si supera umbral |
+| Radar Chart y Dashboard con Datos Reales | 🔧 PARCIAL | Dashboards con datos reales implementados (admin 8 KPIs, profesional, familiar). Radar chart (IN-90) pendiente |
 
 ### Sprint 4 — Avanzados
 
@@ -91,11 +91,11 @@ Leyenda de estados:
 
 | Historia | Estado | Notas |
 |----------|--------|-------|
-| Roadmap Visual (vista Estudiante, estilo Duolingo) | ⏳ PENDIENTE | AAC portal, componente principal |
-| ActivityPlayerShell (cargador dinámico) | ⏳ PENDIENTE | Shell que carga el player correcto según template |
-| Activity Players (5 componentes) | ⏳ PENDIENTE | Selección, emparejamiento, secuencia, completar, respuesta libre |
-| Radar Chart de Habilidades | ⏳ PENDIENTE | Gráfica radar por persona |
-| Dashboards con Datos Reales | ✅ HECHO | Dashboard profesional con datos reales (personas, invitaciones, saludo personalizado) |
+| Roadmap Visual (vista Estudiante, estilo Duolingo) | ✅ HECHO | AAC portal — actividades con estados (locked/available/completed), desbloqueo progresivo |
+| ActivityPlayerShell (cargador dinámico) | ✅ HECHO | `ActivityPlayerShellComponent` despacha por templateTypeCode |
+| Activity Players (5 componentes) | 🔧 PARCIAL | SELECT_FIGURE completo (intro→playing→result, ARASAAC, registra inicio/completado). Resto parcialmente implementados |
+| Radar Chart de Habilidades | ⏳ PENDIENTE | Gráfica radar por persona (IN-90) |
+| Dashboards con Datos Reales | ✅ HECHO | Admin (8 KPIs), Profesional (personas, reportes, mensajes), Familiar (personas, actividades recientes, mensajes no leídos) |
 
 ### Sprint 4 — Avanzados
 
@@ -103,7 +103,7 @@ Leyenda de estados:
 |----------|--------|-------|
 | Timeline de Diagnósticos y Formulario (IN-86) | ✅ HECHO | Timeline + formulario create/edit en tab del perfil de persona. Filtro por fecha con `computed()` client-side. |
 | Creación de Reportes y Vista Familia (IN-138) | ✅ HECHO | Profesional: lista + alta con modal + submit. Admin: lista global + tab en detalle profesional. Familiar: lista + detalle en `/family/reports`. |
-| Mensajería Interna — Inbox y Redactar | ⏳ PENDIENTE | Requiere Mensajería en backend |
+| Mensajería Interna — Inbox y Redactar | ✅ HECHO | BE: MessagesController 8 endpoints + handlers completos. FE: MessagesComponent (inbox/sent tabs, detalle, respuesta inline, modal redactar, badge sidebar, paginación). Rutas /pro/messages y /family/messages activas |
 | Panel de Configuración del Motor Adaptativo | ⏳ PENDIENTE | Config de rangos para el profesional |
 | Timeline de Ajustes Adaptativos | ⏳ PENDIENTE | Gráficas de evolución |
 
@@ -185,16 +185,8 @@ Funcionalidades implementadas que no estaban planificadas en las historias de us
 
 ## Orden de Implementación Recomendado
 
-### Próximo bloque
-1. **CRUD Actividades** (IN-105..IN-109) — prerequisito de todo el flujo educativo
-2. **Roadmap** (IN-110..IN-113) — plan de trabajo por persona
-
-### Segundo bloque
-3. **Asignaciones de actividades** — consulta y gestión
-4. **Respuestas y ciclo de vida** — ejecutar actividad, registrar resultado
-5. **Radar y Dashboard** — visualización de progreso
-
-### Tercer bloque
-6. **Mensajería Interna** — inbox profesional ↔ familia
-7. **Búsqueda Semántica**
-8. **Motor de Dificultad Adaptativa** — depende de respuestas y roadmap
+### Post-MVP (Práctica III)
+1. **Radar Chart** (IN-90) — visualización de habilidades por área
+2. **PDF export de reportes** (IN-139)
+3. **Motor Adaptativo** (IN-116, IN-129..134) — depende de respuestas y roadmap
+4. **Onboarding Wizards** (IN-99..102)

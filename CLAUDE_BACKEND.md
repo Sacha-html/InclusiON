@@ -132,9 +132,10 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 | `ActivityAssignmentsController` | POST (asignar), GET /persons/{id}/activity-assignments, GET /my/activity-assignments, POST .../responses/start, POST .../responses/{resId}/complete |
 | `DiagnosesController` | GET /persons/{id}/diagnoses, GET /diagnoses/{id}, POST, PUT |
 | `AdminUsersController` | Listado paginado, reset-password, deactivate, reactivate |
+| `AdminDashboardController` | GET /api/admin/dashboard — 8 KPIs (profesionales, validaciones pendientes, familias, personas, instituciones, asignaciones activas, reportes pendientes/aprobados) |
 | `RolesController` | Listado de roles y permisos, asignar permisos |
 | `UsersController` | GetById, GetProfile |
-| `MessagesController` | GET inbox, GET sent, GET unread-count, GET {id}, POST (send), POST {id}/reply, PATCH {id}/read, DELETE {id} |
+| `MessagesController` | GET inbox, GET sent, GET unread-count, GET {id}, POST (send), POST {id}/reply, PUT {id}/read, DELETE {id} |
 | `RoadmapController` | GET /persons/{id}/roadmap, POST (create), PATCH notes, POST areas, DELETE areas/{id}, POST areas/{id}/activities, DELETE activities/{id}, PATCH activities/{id}/unlock |
 
 ---
@@ -192,6 +193,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 
 ### AdminUsers
 - `GetAdminUsersQueryHandler`, `GetAdminUserDetailQueryHandler`
+- `GetAdminDashboardQueryHandler`, `GetUserActivityQueryHandler`
 - `AdminDeactivateUserCommandHandler`, `AdminReactivateUserCommandHandler`
 - `AdminResetPasswordCommandHandler`
 
