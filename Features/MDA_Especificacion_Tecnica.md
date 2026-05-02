@@ -586,7 +586,7 @@ Recharts (ya disponible en el stack Angular) con los componentes `LineChart`, `C
 
 ## 11. Sinergia con Búsqueda Semántica
 
-El Motor Adaptativo y la Búsqueda Semántica (ONNX + all-MiniLM-L6-v2) forman un ciclo integrado donde cada componente potencia al otro:
+El Motor Adaptativo y la Búsqueda Semántica (ONNX + paraphrase-multilingual-MiniLM-L12-v2) forman un ciclo integrado donde cada componente potencia al otro:
 
 | Fase | Búsqueda Semántica | Motor Adaptativo |
 |------|-------------------|------------------|

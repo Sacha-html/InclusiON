@@ -46,3 +46,6 @@ Los mensajes se agrupan en hilos cuando son respuestas, permitiendo seguir la co
 - [ ] El badge de no leídos se actualiza automáticamente
 - [ ] La bandeja de entrada permite filtrar solo mensajes no leídos
 - [ ] Los hilos agrupan la conversación de forma cronológica
+- [ ] Solo Profesional ↔ Familiar pueden intercambiar mensajes; mismo tipo bloqueado
+- [ ] El vínculo activo (persona compartida) es requisito para enviar
+- [ ] Las personas con discapacidad no participan en mensajería

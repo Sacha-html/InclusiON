@@ -1,6 +1,6 @@
 # Checklist de Procesos — InclusiON
 
-**Última actualización:** 2026-04-23
+**Última actualización:** 2026-05-01
 
 ---
 
@@ -109,35 +109,46 @@
 ### 10 — Gestión de Actividades
 - [x] Consulta de tipos de template (catálogo)
 - [x] Consulta de categorías de actividad (catálogo)
-- [ ] Creación de actividad con wizard (área → template → contenido → metadatos)
-- [ ] Consulta del catálogo de actividades (propias + estándar)
-- [ ] Edición de actividad propia
-- [ ] Desactivación de actividad
+- [x] Creación de actividad con wizard (área → template → contenido → metadatos)
+- [x] Consulta del catálogo de actividades (propias + estándar, paginado, filtros)
+- [x] Búsqueda semántica por texto libre (embedding + pgvector)
+- [x] Edición de actividad propia
+- [x] Desactivación/activación de actividad
+- [x] Asignación de actividad a persona (modal desde lista)
+- [x] Lista de asignaciones del estudiante (`/app/activities`)
+- [x] Player SELECT_FIGURE — selección de figura con pictograma
+- [x] Player ORDER_SEQUENCE — ordenar secuencia con botones ▲▼
+- [x] Player MATCH_IMAGE_WORD — emparejar imagen-palabra click-click
+- [x] Player VISUAL_SUM — suma visual con bolitas/pictogramas
+- [x] Inicio y completado de actividad (score, tiempo, intentos)
+- [x] Tab "Actividades" en person-detail del profesional (historial + resultados expandibles)
+- [x] Player COMPLETE_LETTER — completar letras faltantes con selector por hueco
+- [x] Wizard — editor dinámico para los 5 tipos de template (CONTENT_EDITOR_REGISTRY + ViewContainerRef)
+- [x] Visualización del roadmap (vista estudiante, estilo Duolingo)
 
 ### 11 — Plan de Trabajo (Roadmap)
-- [ ] Creación del roadmap por persona
-- [ ] Agregar actividades al roadmap por área
-- [ ] Definir orden secuencial y umbral de desbloqueo
-- [ ] Reordenamiento de actividades (drag-drop)
-- [ ] Desbloqueo manual de actividad
-- [ ] Eliminación de actividad del roadmap
+- [x] Creación del roadmap por persona
+- [x] Agregar actividades al roadmap por área
+- [x] Definir orden secuencial y umbral de desbloqueo
+- [x] Reordenamiento de actividades (drag-drop)
+- [x] Desbloqueo manual de actividad
+- [x] Eliminación de actividad del roadmap
 
 ---
 
 ## Ejecución
 
 ### 12 — Resolución de Actividades
-- [ ] Visualización del roadmap (vista estudiante, estilo Duolingo)
-- [ ] Carga de asignación con contenido completo
-- [ ] Inicio de actividad (registro de respuesta)
-- [ ] Player: Selección de figuras
-- [ ] Player: Suma visual
-- [ ] Player: Emparejar imagen-palabra
-- [ ] Player: Ordenar secuencia
-- [ ] Player: Completar letra
-- [ ] Registro de progreso durante ejecución (intentos, frustración)
-- [ ] Completar actividad y evaluar resultado
-- [ ] Ver respuestas por asignación (panel profesional)
+- [x] Carga de asignación con contenido completo
+- [x] Inicio de actividad (registro de respuesta via startResponse)
+- [x] Player: Selección de figuras (SELECT_FIGURE)
+- [x] Player: Suma visual (VISUAL_SUM)
+- [x] Player: Emparejar imagen-palabra (MATCH_IMAGE_WORD)
+- [x] Player: Ordenar secuencia (ORDER_SEQUENCE)
+- [x] Player: Completar letra (COMPLETE_LETTER)
+- [x] Completar actividad y evaluar resultado (score%, tiempo, requiredSupport)
+- [x] Ver asignaciones por persona (tab en person-detail del profesional)
+- [x] Visualización del roadmap (vista estudiante, estilo Duolingo)
 
 ---
 
@@ -165,7 +176,7 @@
 - [x] Reseteo de contraseña (genera temporal + revoca sesiones + envío email)
 - [x] Desactivación de cuenta (soft-delete + revocación de tokens)
 - [x] Reactivación de cuenta (genera temporal + envío email)
-- [ ] Consulta de actividad reciente del usuario
+- [x] Consulta de actividad reciente del usuario
 
 ---
 
@@ -243,16 +254,18 @@
 
 ## Búsqueda Semántica y Pictogramas
 
-- [ ] Búsqueda semántica de actividades por lenguaje natural
+- [x] Búsqueda semántica de actividades por lenguaje natural
 - [ ] Integración de pictogramas ARASAAC
 
 ## Mensajería Interna
 
-- [ ] Bandeja de entrada de mensajes
-- [ ] Envío de mensajes con asunto y contenido
-- [ ] Hilos de conversación (respuestas)
-- [ ] Indicador de mensajes no leídos en sidebar
-- [ ] Marcado automático como leído al abrir
+> **Backend completo (IN-140..144).** Frontend pendiente.
+
+- [ ] Bandeja de entrada de mensajes (FE)
+- [ ] Envío de mensajes con asunto y contenido (FE)
+- [ ] Hilos de conversación (respuestas) (FE)
+- [ ] Indicador de mensajes no leídos en sidebar (FE)
+- [ ] Marcado automático como leído al abrir (FE)
 - [ ] Notificaciones automáticas de eventos del sistema
 
 ## Onboarding
@@ -286,6 +299,6 @@
 
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
-| MVP | 115 | 22 |
-| Post-MVP | — | 32 |
-| **Total** | **115** | **54** |
+| MVP | 125 | 13 |
+| Post-MVP | 1 | 31 |
+| **Total** | **126** | **44** |

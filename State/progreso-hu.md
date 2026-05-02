@@ -1,7 +1,7 @@
 # InclusiON — Estado de Avance por HU
 
-**Última actualización:** 2026-04-23
-**Fuente de verdad:** Jira + HU_ESTADO.md
+**Última actualización:** 2026-05-01
+**Fuente de verdad:** Jira
 
 ---
 
@@ -100,7 +100,7 @@
 | Modo claro y oscuro (14 combinaciones) | IN-76 | 🔵 |
 | Panel de accesibilidad (Alt+A) | IN-77 | 🔵 |
 | Toasts con colores de accesibilidad | IN-78 | 🔵 |
-| Revisión de accesibilidad en componentes | IN-170 | 🔄 |
+| Revisión de accesibilidad en componentes | IN-170 | 🔵 |
 | Autorización por recurso (row-level) | IN-172 | ✅ |
 | Hardening: Argon2id + AES-256-GCM + Rate limiting | IN-173 | ✅ |
 
@@ -111,10 +111,10 @@
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
-| Crear actividad con wizard (área → template → contenido) | IN-105 | 🔧 ⏳ | Entidades + migraciones listas |
-| Consultar catálogo de actividades propias | IN-107 | ⏳ | |
-| Editar actividad propia | IN-108 | ⏳ | |
-| Desactivar actividad | IN-109 | ⏳ | |
+| Crear actividad con wizard (área → template → contenido) | IN-105 | 🔵 | BE+FE. Wizard multi-paso, ARASAAC, template SelectFigure |
+| Consultar catálogo de actividades propias | IN-107 | 🔵 | Filtros, búsqueda semántica IA, paginación |
+| Editar actividad propia | IN-108 | 🔵 | Ruta protegida por permissionGuard (activities:update) |
+| Desactivar actividad | IN-109 | 🔵 | Valida asignaciones activas. Bloquea actividades estándar |
 
 ---
 
@@ -123,12 +123,12 @@
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
-| Crear roadmap por persona | IN-110 | 🔧 ⏳ | Entidades + migraciones listas |
-| Agregar actividades al roadmap por área | IN-111 | ⏳ | |
-| Definir orden secuencial y umbral de desbloqueo | IN-112 | ⏳ | |
-| Reordenar actividades con drag-drop | IN-113 | ⏳ | |
-| Desbloqueo manual de actividad | IN-114 | ⏳ | |
-| Eliminar actividad del roadmap | IN-115 | ⏳ | |
+| Crear roadmap por persona | IN-110 | 🔵 | |
+| Agregar actividades al roadmap por área | IN-111 | 🔵 | |
+| Definir orden secuencial y umbral de desbloqueo | IN-112 | 🔵 | |
+| Reordenar actividades con drag-drop | IN-113 | 🔵 | CDK drag-drop + PUT /areas/{id}/activities/reorder |
+| Desbloqueo manual de actividad | IN-114 | 🔵 | |
+| Eliminar actividad del roadmap | IN-115 | 🔵 | |
 
 ---
 
@@ -137,7 +137,7 @@
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
-| Cargar asignación con contenido completo | IN-118 | 🔧 ⏳ | Entidad + migración lista |
+| Cargar asignación con contenido completo | IN-118 | 🔵 | GET /api/activity-assignments/{id}, valida requester es persona o profesional |
 
 ---
 
@@ -146,13 +146,13 @@
 
 | Historia | Jira | Estado |
 |---|---|---|
-| Visualizar roadmap propio (estilo Duolingo) | IN-117 | ⏳ |
-| Iniciar actividad — ActivityPlayerShell | IN-119 | ⏳ |
-| Player: Selección de figuras | IN-120 | ⏳ |
-| Player: Completar letra | IN-124 | ⏳ |
-| Player: Suma visual | IN-121 | ⏳ |
-| Player: Emparejar imagen-palabra | IN-122 | ⏳ |
-| Player: Ordenar secuencia | IN-123 | ⏳ |
+| Visualizar roadmap propio (estilo Duolingo) | IN-117 | 🔵 |
+| Iniciar actividad — ActivityPlayerShell | IN-119 | 🔵 |
+| Player: Selección de figuras | IN-120 | 🔵 |
+| Player: Completar letra | IN-124 | 🔵 |
+| Player: Suma visual | IN-121 | 🔵 |
+| Player: Emparejar imagen-palabra | IN-122 | 🔵 |
+| Player: Ordenar secuencia | IN-123 | 🔵 |
 
 ---
 
@@ -161,7 +161,7 @@
 
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
-| Completar actividad y registrar resultado | IN-126 | 🔧 ⏳ | Entidades + migraciones + cifrado listo |
+| Completar actividad y registrar resultado | IN-126 | 🔵 | CompleteActivityResponseCommandHandler implementado |
 
 ---
 
@@ -172,7 +172,7 @@
 |---|---|---|
 | Dashboard del profesional con contadores reales | IN-87 | 🔵 |
 | Mi Aula — cards de personas asignadas | IN-88 | 🔵 |
-| Ver respuestas por asignación | — | ⏳ sin ticket |
+| Detalle de persona + ver respuestas por asignación (tab Actividades) | IN-89 | 🔵 |
 
 ---
 
@@ -200,7 +200,7 @@
 | Historia | Jira | Estado |
 |---|---|---|
 | Integración de pictogramas ARASAAC | IN-106 | ⏳ |
-| Búsqueda semántica por lenguaje natural | IN-135 | 🔧 ⏳ |
+| Búsqueda semántica por lenguaje natural | IN-135 | 🔵 |
 
 ---
 
@@ -210,7 +210,7 @@
 | Historia | Jira | Estado | Nota |
 |---|---|---|---|
 | Configurar motor adaptativo por actividad | IN-116 | ⏳ | |
-| Desbloqueo automático por umbral de rendimiento | IN-127 | ⏳ | |
+| Desbloqueo automático por umbral de rendimiento | IN-127 | 🔵 | CompleteActivityResponseCommandHandler: unlock next si successPercentage >= unlockThresholdPercent |
 | Monitoreo de frustración (pausa tras 3+ intentos) | IN-128 | ⏳ | |
 | Evaluación automática de rendimiento | IN-129 | ⏳ | |
 | Cálculo y aplicación de ajuste de dificultad | IN-130, IN-131 | 🔧 ⏳ | Entidades + migraciones listas |
@@ -258,11 +258,11 @@
 
 | Historia | Jira | Estado |
 |---|---|---|
-| Bandeja de entrada de mensajes | IN-140 | ⏳ |
-| Envío de mensajes con asunto y contenido | IN-141 | ⏳ |
-| Hilos de conversación | IN-142 | ⏳ |
-| Indicador de mensajes no leídos en sidebar | IN-143 | ⏳ |
-| Marcado automático como leído al abrir | IN-144 | ⏳ |
+| Bandeja de entrada de mensajes | IN-140 | 🔵 |
+| Envío de mensajes con asunto y contenido | IN-141 | 🔵 |
+| Hilos de conversación | IN-142 | 🔵 |
+| Indicador de mensajes no leídos en sidebar | IN-143 | 🔵 |
+| Marcado automático como leído al abrir | IN-144 | 🔵 |
 | Consulta de actividad reciente del usuario | IN-98 | ⏳ |
 
 ---
@@ -274,16 +274,17 @@
 | Estado | Cantidad |
 |---|:---:|
 | ✅ Hecho | 2 |
-| 🔵 En revisión | 64 |
-| 🔄 En curso | 1 |
-| 🔧 Base lista, sin handlers | 4 |
-| ⏳ Pendiente | 16 |
+| 🔵 En revisión | 85 |
+| 🔄 En curso | 0 |
+| 🔧 Base lista, sin handlers | 0 |
+| ⏳ Pendiente | 0 |
 | **Total MVP** | **87** |
 
 ### Post-MVP
 
 | Estado | Cantidad |
 |---|:---:|
-| 🔧 Base lista, sin handlers | 3 |
-| ⏳ Pendiente | 29 |
+| 🔵 En revisión | 7 |
+| 🔧 Base lista, sin handlers | 2 |
+| ⏳ Pendiente | 23 |
 | **Total Post-MVP** | **32** |
