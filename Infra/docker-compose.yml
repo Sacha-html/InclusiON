@@ -6,11 +6,46 @@ services:
     environment:
       POSTGRES_DB: inclusion_db
       POSTGRES_USER: inclusion_user
-      POSTGRES_PASSWORD: inclusion_pass
+      POSTGRES_PASSWORD: Inclusion_Local123!
     ports:
       - "5432:5432"
     volumes:
       - inclusion_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inclusion_user -d inclusion_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../../InclusiON.Server
+      dockerfile: Dockerfile
+    container_name: inclusion_api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5000
+      ASPNETCORE_HTTPS_PORTS: ""
+      ConnectionStrings__PostgreSqlConn: "Host=postgres;Port=5432;Database=inclusion_db;Username=inclusion_user;Password=Inclusion_Local123!"
+      Cors__AllowedOrigins__0: "http://localhost:4200"
+      SmtpSettings__Enabled: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../../InclusiON.Client
+      dockerfile: Dockerfile
+    container_name: inclusion_frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
 
 volumes:
   inclusion_pgdata:

@@ -16,14 +16,14 @@
 | IN-132 | Registro de cada ajuste en historial de auditoría | ⏳ PENDIENTE | |
 | IN-133 | Alerta al profesional en estado de frustración | ⏳ PENDIENTE | |
 | IN-134 | Consulta del historial de ajustes (timeline) | ⏳ PENDIENTE | |
-| IN-135 | Búsqueda semántica de actividades por lenguaje natural | ⏳ PENDIENTE | Semantic Search |
-| IN-136 | Creación de reporte de progreso | ⏳ PENDIENTE | |
+| IN-135 | Búsqueda semántica de actividades por lenguaje natural | ✅ DONE | Handler + endpoint + FE toggle IA |
+| IN-136 | Creación de reporte de progreso | ✅ DONE | |
 | IN-139 | Exportación de reporte a PDF | ⏳ PENDIENTE | |
-| IN-140 | Bandeja de entrada de mensajes | ⏳ PENDIENTE | |
-| IN-141 | Envío de mensajes con asunto y contenido | ⏳ PENDIENTE | |
-| IN-142 | Hilos de conversación (respuestas) | ⏳ PENDIENTE | |
-| IN-143 | Indicador de mensajes no leídos en sidebar | ⏳ PENDIENTE | |
-| IN-144 | Marcado automático como leído al abrir | ⏳ PENDIENTE | |
+| IN-140 | Bandeja de entrada de mensajes | ✅ DONE | Backend completo |
+| IN-141 | Envío de mensajes con asunto y contenido | ✅ DONE | Restricción prof↔familiar por vínculo activo |
+| IN-142 | Hilos de conversación (respuestas) | ✅ DONE | ReplyToMessage + nested replies |
+| IN-143 | Indicador de mensajes no leídos en sidebar | ✅ DONE | GET /messages/unread-count |
+| IN-144 | Marcado automático como leído al abrir | ✅ DONE | Auto-mark en GetById |
 | IN-145 | Notificaciones automáticas de eventos del sistema | ⏳ PENDIENTE | |
 
 ---
@@ -33,8 +33,8 @@
 | Métrica | Valor |
 |---------|-------|
 | Total tareas | 15 |
-| Completadas | 0 |
-| Pendientes | 15 |
+| Completadas | 7 |
+| Pendientes | 8 |
 
 ---
 
@@ -42,7 +42,7 @@
 
 - Entidades existen: AdaptiveEngineConfig, ActivityEmbedding, Message
 - Library SemanticSearch existe pero falta integración
-- Backend: No existe MessageController, AdaptiveEngineController
+- Backend: `MessagesController` implementado con 8 endpoints y restricción por vínculo activo. `AdaptiveEngineController` pendiente.
 
 ---
 
