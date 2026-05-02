@@ -13,8 +13,8 @@ Leyenda de estados:
 
 | Track | Hechas | Parciales | Pendientes | Total |
 |-------|--------|-----------|------------|-------|
-| Backend | 11 | 1 | 8 | 20 |
-| Frontend | 13 | 1 | 7 | 21 |
+| Backend | 16 | 2 | 2 | 20 |
+| Frontend | 15 | 1 | 5 | 21 |
 
 ---
 
@@ -37,7 +37,7 @@ Leyenda de estados:
 | CRUD Actividades con Contenido Dinámico | ✅ HECHO | `ActivitiesController` + Create/Update/PatchStatus commands + GetAll/GetById/SearchSemantic queries + handlers. Búsqueda semántica con ONNX embeddings. Permisos por ownership (propias) + lectura estándar. |
 | Perfil de Habilidades de la Persona | ✅ HECHO | `PersonSkillProfile` entity + endpoints GET/POST/PUT en PersonsController |
 | Sistema de Invitaciones Familiares | ✅ HECHO | `InvitationsController` con 4 endpoints + email SMTP con MailKit + templates HTML |
-| Roadmap de la Persona | ✅ HECHO | `RoadmapController` + Create/AddArea/AddActivity/RemoveArea/RemoveActivity/UnlockActivity/UpdateNotes commands + GetPersonRoadmap query. `PersonAccess` enforced. Actividad 1 auto-desbloqueada. Validación ownership actividad. Pendiente: drag-drop reorder (IN-113). |
+| Roadmap de la Persona | ✅ HECHO | `RoadmapController` + Create/AddArea/AddActivity/RemoveArea/RemoveActivity/UnlockActivity/UpdateNotes/ReorderActivities commands + GetPersonRoadmap query. `PersonAccess` enforced. Actividad 1 auto-desbloqueada. Validación ownership actividad. Drag-drop reorder (IN-113) implementado. |
 
 ### Sprint 3 — Ejecución y Métricas
 
@@ -53,8 +53,8 @@ Leyenda de estados:
 |----------|--------|-------|
 | Diagnósticos Funcionales | ✅ HECHO | `DiagnosesController` + Create/Update commands + GetAll/GetById queries + `DiagnosesRepository`. Endpoints: GET /persons/{id}/diagnoses, GET /diagnoses/{id}, POST, PUT |
 | Reportes de Progreso | ✅ HECHO | Flujo completo: Draft→Submitted→Approved/Rejected. Endpoints: GET, POST, PUT, PATCH submit/approve/reject, GET /family. Emails a familiar (aprobación) y profesional (rechazo). Ver [Features/reportes-flujo-aprobacion.md](./Features/reportes-flujo-aprobacion.md) |
-| Mensajería Interna | ⏳ PENDIENTE | Entidad `Message` existe. Sin handlers |
-| Búsqueda Semántica de Actividades | 🔧 PARCIAL | Entidades `ActivityEmbedding`, `ActivityResult` con migración. Library `SemanticSearch` existe. Falta: interfaces en Application, handler, endpoint. Ver [Features/integracion-semantic-search.md](./Features/integracion-semantic-search.md) |
+| Mensajería Interna | ✅ HECHO | `MessagesController` (8 endpoints) + handlers completos: GetInbox, GetSent, GetById, GetUnreadCount, GetMessageContacts, Send, Reply, MarkRead, Delete. Auto-mark-as-read al abrir. |
+| Búsqueda Semántica de Actividades | ✅ HECHO | Handler + endpoint `GET /api/activities/search?text=...` + ONNX embeddings. FE: toggle IA en catálogo de actividades. Ver [Features/integracion-semantic-search.md](./Features/integracion-semantic-search.md) |
 | Motor de Dificultad Adaptativa (MDA) | 🔧 PARCIAL | Entidades `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog` con migración. Falta: `IAdaptiveEngineService`, implementación, pipeline steps. Ver [Features/MDA_Especificacion_Tecnica.md](./Features/MDA_Especificacion_Tecnica.md) |
 
 ### Sprint 5 — Gestión de Usuarios, Onboarding y Soporte
