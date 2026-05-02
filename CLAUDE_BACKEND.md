@@ -123,8 +123,10 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 | `CatalogAdminController` | CRUD de 6 tipos de catálogo (admin) |
 | `PersonsController` | CRUD personas, supervisor-candidates, professional-assignments, login methods |
 | `ProfessionalsController` | CRUD profesionales, pending, validate, reactivate, deactivate, status-history, reset-password |
+| `ProfessionalValidationController` | Validación/rechazo de profesionales pendientes por admin |
 | `FamilyController` | CRUD representantes familiares |
 | `InstitutionsController` | CRUD instituciones educativas, asignaciones profesional-institución |
+| `AdminInstitutionsController` | Asignación/desasignación de admin institucional a institución |
 | `AssignmentsController` | Asignaciones profesional-persona |
 | `InvitationsController` | Crear invitación, aceptar, validar código |
 | `ReportsController` | CRUD informes, submit, approve, reject, GET /family |
@@ -146,7 +148,6 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 - `LoginCommandHandler`, `PinLoginCommandHandler`, `VisualStandardLoginCommandHandler` (identifica por nombre + contraseña)
 - `AssistedLoginCommandHandler`, `FamilyLoginCommandHandler`
 - `RefreshTokenCommandHandler`, `RegisterUserCommandHandler`
-- `UpdateLoginMethodCommandHandler`
 - `IdentifyUserQueryHandler`, `GetLoginMethodsQueryHandler`
 
 ### Catalogs
@@ -158,6 +159,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 - `CreatePersonCommandHandler`, `UpdatePersonCommandHandler`
 - `GetPersonsQueryHandler`, `GetPersonByIdQueryHandler`
 - `GetPersonProfessionalsQueryHandler`, `GetSupervisorCandidatesQueryHandler`
+- `UpdateLoginMethodCommandHandler`
 
 ### Professionals
 - `CreateProfessionalCommandHandler`, `UpdateProfessionalCommandHandler`
@@ -211,6 +213,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 
 ### Messages
 - `GetInboxQueryHandler`, `GetSentQueryHandler`, `GetMessageByIdQueryHandler`, `GetUnreadCountQueryHandler`
+- `GetMessageContactsQueryHandler`
 - `SendMessageCommandHandler`, `ReplyToMessageCommandHandler`
 - `MarkMessageReadCommandHandler`, `DeleteMessageCommandHandler`
 
@@ -219,6 +222,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 - `CreateRoadmapCommandHandler`, `UpdateRoadmapNotesCommandHandler`
 - `AddRoadmapAreaCommandHandler`, `RemoveRoadmapAreaCommandHandler`
 - `AddRoadmapActivityCommandHandler`, `RemoveRoadmapActivityCommandHandler`, `UnlockRoadmapActivityCommandHandler`
+- `ReorderRoadmapActivitiesCommandHandler`
 
 ---
 
