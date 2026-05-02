@@ -155,17 +155,19 @@ Ver detalle completo en `CLAUDE_FRONTEND.md`.
 ### Búsqueda Semántica
 
 ```
-Texto de búsqueda → ONNX (all-MiniLM-L6-v2) → Embedding 384D
+Texto de búsqueda → ONNX (paraphrase-multilingual-MiniLM-L12-v2) → Embedding 384D
                                                     ↓
-                                            Cosine Similarity
+                                    pgvector cosine similarity (<=>)
                                                     ↓
                                          Top N actividades similares
 ```
 
 - Library en `InclusiON.SemanticSearch/`
+- Runtime: `Microsoft.ML.OnnxRuntime` + `Microsoft.ML.Tokenizers` (SentencePiece BPE)
+- Modelo: `paraphrase-multilingual-MiniLM-L12-v2` — multilingüe, 384 dims
 - Entidades: `ActivityEmbedding`, `ActivityResult`
-- Estado: library existe, falta integración con CQRS
-- Doc: `Documentacion/Features/integracion-semantic-search.md`
+- Estado: modelo + tokenizador + DI listos; falta handler CQRS de búsqueda y embedding al crear actividad
+- Doc: `Features/integracion-semantic-search.md`
 
 ### Motor de Dificultad Adaptativa — MDA
 
@@ -208,7 +210,7 @@ Data → Domain (EF Core configs y DbContext)
 DTOs → (sin dependencias)
 Domain → (sin dependencias)
 Shared → (sin dependencias)
-SemanticSearch → (pendiente: Application para interfaces)
+SemanticSearch → Application (implementa IEmbeddingService)
 ```
 
 ---
