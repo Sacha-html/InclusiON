@@ -1,6 +1,6 @@
 # Listado de ABMs — InclusiON
 
-**Última actualización:** 2026-04-27
+**Última actualización:** 2026-05-01
 
 Cada ABM está justificado por el actor del sistema que lo necesita para cumplir su función. Todos los ABMs tienen persistencia real en base de datos (PostgreSQL vía EF Core) y validaciones básicas de integridad.
 
@@ -20,21 +20,23 @@ Cada ABM está justificado por el actor del sistema que lo necesita para cumplir
 
 ## Resumen — ABMs por actor
 
-| # | ABM | Actor principal | Entidades del DER |
-|---|-----|-----------------|-------------------|
-| 01 | [Instituciones](./01-instituciones.md) | Admin Global | `EducationalInstitution`, `AdminInstitution` |
-| 02 | [Administradores](./02-administradores.md) | Admin Global | `User` (rol admin) |
-| 03 | [Catálogos](./03-catalogos.md) | Admin Global | `DisabilityType`, `AutonomyLevel`, `ActivityCategory`, `SkillArea`, `ActivityTemplateType`, `ReportType` |
-| 04 | [Profesionales](./04-profesionales.md) | Admin Institucional | `Professional`, `ProfessionalStatusHistory`, `ProfessionalInstitution` |
-| 05 | [Personas con Discapacidad](./05-personas.md) | Profesional | `PersonWithDisability`, `PersonSkillProfile` |
-| 06 | [Representantes Familiares](./06-familiares.md) | Profesional | `FamilyRepresentative`, `FamilyStatusHistory`, `Invitation`, `PersonRepresentative`, `PersonRepresentativeHistory` |
-| 07 | [Asignación Profesional–Persona](./07-asignacion-profesional-persona.md) | Profesional / Admin Institucional | `ProfessionalPerson` |
-| 08 | [Actividades](./08-actividades.md) | Profesional | `Activity`, `ActivityContent` |
-| 09 | [Roadmap](./09-roadmap.md) | Profesional | `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`, `AdaptiveEngineConfig` |
-| 10 | [Asignaciones de Actividad](./10-asignaciones.md) | Profesional | `ActivityAssignment`, `ActivityResponse`, `ActivityResult` |
-| 11 | [Diagnósticos](./11-diagnosticos.md) | Profesional | `Diagnosis` |
-| 12 | [Reportes de Progreso](./12-reportes.md) | Profesional | `Report` |
-| 13 | [Mensajes](./13-mensajes.md) | Profesional / Representante Familiar | `Message` |
+Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
+
+| # | ABM | Actor principal | Entidades del DER | Estado |
+|---|-----|-----------------|-------------------|--------|
+| 01 | [Instituciones](./01-instituciones.md) | Admin Global | `EducationalInstitution`, `AdminInstitution` | ✅ |
+| 02 | [Administradores](./02-administradores.md) | Admin Global | `User` (rol admin) | ✅ |
+| 03 | [Catálogos](./03-catalogos.md) | Admin Global | `DisabilityType`, `AutonomyLevel`, `ActivityCategory`, `SkillArea`, `ActivityTemplateType`, `ReportType` | ✅ |
+| 04 | [Profesionales](./04-profesionales.md) | Admin Institucional | `Professional`, `ProfessionalStatusHistory`, `ProfessionalInstitution` | ✅ |
+| 05 | [Personas con Discapacidad](./05-personas.md) | Profesional | `PersonWithDisability`, `PersonSkillProfile` | ✅ |
+| 06 | [Representantes Familiares](./06-familiares.md) | Profesional | `FamilyRepresentative`, `FamilyStatusHistory`, `Invitation`, `PersonRepresentative`, `PersonRepresentativeHistory` | ✅ |
+| 07 | [Asignación Profesional–Persona](./07-asignacion-profesional-persona.md) | Profesional / Admin Institucional | `ProfessionalPerson` | ✅ |
+| 08 | [Actividades](./08-actividades.md) | Profesional | `Activity`, `ActivityContent`, `ActivityEmbedding` | ✅ |
+| 09 | [Roadmap](./09-roadmap.md) | Profesional | `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`, `AdaptiveEngineConfig` | ⏳ |
+| 10 | [Asignaciones de Actividad](./10-asignaciones.md) | Profesional | `ActivityAssignment`, `ActivityResponse`, `ActivityResult` | ✅ |
+| 11 | [Diagnósticos](./11-diagnosticos.md) | Profesional | `Diagnosis` | ✅ |
+| 12 | [Reportes de Progreso](./12-reportes.md) | Profesional | `Report` | ✅ |
+| 13 | [Mensajes](./13-mensajes.md) | Profesional / Representante Familiar | `Message` | ⏳ |
 
 ---
 
