@@ -90,3 +90,88 @@ Todos los campos del alta son editables.
 **Filtros disponibles:** título, categoría, área de habilidad, nivel de complejidad, tiene contenido interactivo, es estándar, estado.  
 **Persistencia:** Consulta a `Activity`. El Profesional ve sus propias actividades + las estándar activas.  
 **Admin Global:** ve todas las actividades del sistema.
+
+---
+
+## Players — Tipos de contenido interactivo
+
+Cada `ActivityTemplateType` tiene un `Code` que mapea a un player Angular. La arquitectura es dinámica: el shell resuelve el componente en runtime vía `PLAYER_REGISTRY`.
+
+### Arquitectura
+
+```
+ActivityPlayerShellComponent          ← carga asignación, resuelve player via ViewContainerRef
+  └── PLAYER_REGISTRY[templateCode]   ← mapa Code → Type<PlayerBaseComponent>
+        ├── PlayerBaseComponent        ← base abstracta (startResponse, completeResponse, timer)
+        ├── PlayerIntroComponent       ← pantalla intro reutilizable
+        ├── PlayerResultComponent      ← pantalla resultado reutilizable
+        └── PictogramCardComponent     ← tarjeta imagen/picto con estados visuales
+```
+
+### Templates disponibles
+
+| Code | Nombre | ContentJson shape | Estado |
+|------|--------|-------------------|--------|
+| `SELECT_FIGURE` | Seleccionar figura | `{ instruction, correctItemId, items: [{id, pictogramId, label}] }` | ✅ Player completo |
+| `ORDER_SEQUENCE` | Ordenar secuencia | `{ instruction, items: [{id, label, pictogramId?, correctPosition}] }` | ✅ Player completo |
+| `MATCH_IMAGE_WORD` | Emparejar imagen-palabra | `{ instruction, pairs: [{id, label, pictogramId}] }` | ✅ Player completo |
+| `VISUAL_SUM` | Suma visual | `{ instruction, operandA, operandB, pictogramId?, options: [{id, value}] }` | ✅ Player completo |
+| `COMPLETE_LETTER` | Completar letra | `{ instruction, word, hiddenIndices: number[], options: string[][] }` | ✅ Player completo |
+
+### Agregar nuevo tipo
+
+1. Definir `ContentJson` shape en `player.models.ts`
+2. Crear componente en `views/aac/activities/player/<nuevo>/`  extendiendo `PlayerBaseComponent`
+3. Agregar entrada en `player-registry.ts`
+4. Agregar seed en `DatabaseSeeder` con `Code` y `ContentSchema`
+
+El shell no necesita modificación.
+
+---
+
+## Wizard de creación — Arquitectura de editores
+
+El paso 2 del wizard de alta de actividad resuelve el editor de contenido en runtime usando el mismo patrón registry que los players.
+
+### Arquitectura
+
+```
+NewComponent (wizard shell)             ← monta editor via ViewContainerRef
+  └── CONTENT_EDITOR_REGISTRY[code]     ← mapa Code → Type<ContentEditorBaseComponent>
+        └── ContentEditorBaseComponent  ← base abstracta (@Directive)
+              @Input()  initialJson: string    ← JSON actual (para edición futura)
+              @Output() contentChange          ← emite JSON actualizado en cada cambio
+              @Output() validChange            ← emite boolean de validez
+```
+
+El shell escucha `contentChange` y `validChange` para actualizar `editorContentJson` y `isEditorValid`. Al submit, usa `editorContentJson()` directamente como `contentJson` del request.
+
+### Editores disponibles
+
+| Code | Editor | Campos principales | Válido cuando |
+|------|--------|-------------------|---------------|
+| `SELECT_FIGURE` | `SelectFigureEditorComponent` | Instrucción + ítems (ARASAAC picker) + marcar correcta | ≥ 2 ítems, correcta marcada |
+| `ORDER_SEQUENCE` | `OrderSequenceEditorComponent` | Instrucción + ítems con orden correcto (▲▼) + picto opcional | ≥ 2 ítems con etiqueta |
+| `MATCH_IMAGE_WORD` | `MatchImageWordEditorComponent` | Instrucción + pares imagen–palabra (ARASAAC por par) | ≥ 2 pares completos |
+| `VISUAL_SUM` | `VisualSumEditorComponent` | Instrucción + operandoA + operandoB + opciones auto-generadas | Instrucción + opciones incluyen respuesta correcta |
+| `COMPLETE_LETTER` | `CompleteLetterEditorComponent` | Instrucción + palabra + toggle letras ocultas + distractores por hueco | ≥ 1 hueco, distractores completos |
+
+### Agregar nuevo editor
+
+1. Crear componente en `views/professional/activities/new/editors/<nuevo>/` extendiendo `ContentEditorBaseComponent`
+2. Implementar `ngOnInit()` leyendo `this.initialJson`, y `emit()` emitiendo `contentChange` + `validChange`
+3. Agregar entrada en `content-editor-registry.ts`
+
+El wizard shell no necesita modificación.
+
+---
+
+## Búsqueda semántica
+
+`GET /api/activities/search?text=<texto>&limit=10`
+
+- Genera embedding del texto con `paraphrase-multilingual-MiniLM-L12-v2` (384 dims)
+- Cosine similarity contra `ActivityEmbeddings` vía pgvector (`<=>` operator)
+- Filtra activas + propias/estándar del profesional
+- Devuelve `ActivityListItemResponse[]` ordenada por similitud
+- FE: toggle "⚡ Búsqueda semántica" en lista de actividades, desactiva filtros tradicionales
