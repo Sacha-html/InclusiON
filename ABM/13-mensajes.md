@@ -20,8 +20,10 @@
 | Mensaje padre | Referencia | No | Debe existir y estar activo (para responder en hilo) |
 
 **Validaciones de integridad:**
-- Un Profesional solo puede enviar mensajes a Familiares vinculados a personas bajo su cargo, o a otros Profesionales de su institución.
-- Un Familiar solo puede enviar mensajes a Profesionales vinculados a la persona que representa.
+- Solo se permiten mensajes entre **Profesional ↔ Representante Familiar**. Mensajes prof→prof o familiar→familiar están bloqueados.
+- El Profesional y el Familiar deben compartir al menos una persona con discapacidad con asignaciones activas en ambos lados (`ProfessionalPerson.IsActive = true` y `PersonRepresentative.IsActive = true`).
+- Las personas con discapacidad no pueden enviar ni recibir mensajes desde este canal.
+- Un usuario no puede enviarse mensajes a sí mismo.
 - Si se especifica `MensajePadre`, el destinatario debe ser el mismo que el remitente del mensaje padre (o viceversa).
 
 **Resultado:** Se crea `Message` con `Leido = false`, `FechaEnvio = now()`, `Activo = true`.
@@ -30,9 +32,9 @@
 
 ## Baja — Mensaje
 
-**Actor:** No aplica ABM de usuario para baja de mensajes.
+**Actor:** Profesional / Representante Familiar (propio mensaje)
 
-Los mensajes no se eliminan. Son parte del registro de comunicación. `Activo = true` permanente. Si en el futuro se requiere archivado, se implementará como estado adicional.
+Soft delete: `IsActive = false`. Ambos participantes (remitente y receptor) pueden eliminar. El mensaje no se borra físicamente — se desactiva del listado del usuario que lo eliminó.
 
 ---
 
