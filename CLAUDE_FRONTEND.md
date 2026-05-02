@@ -231,6 +231,7 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - `ArasaacService` — `search(term)` y `getPictogramUrl(id)` para pictogramas ARASAAC
   - API: `https://api.arasaac.org/api/pictograms/es/search/{term}`
   - Imágenes: `https://static.arasaac.org/pictograms/{id}/{id}_500.png`
+- `CatalogsService.getReportTypes()` — GET /api/catalogs/report-types → `CatalogItem[]` (con cache shareReplay)
 - `MessagesService` — getInbox(), getSent(), getById(), getContacts(), getUnreadCount(), send(), reply(), markAsRead()
 - `FamilyService.getDashboard()` — GET /api/Family/dashboard → `FamilyDashboardResponse`
 - `AdminUsersService.getDashboard()` — GET /api/admin/dashboard → `AdminDashboardResponse`
@@ -252,6 +253,17 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - Vista de calendario y profesionales asignados
 
 ---
+
+## Convención de Estados (Status Display)
+
+| Entidad | Estados | Labels ES | Colores |
+|---------|---------|-----------|---------|
+| `ProfessionalStatusEnum` | Pending/Approved/Rejected/Suspended/Terminated | Pendiente/Aprobado/Rechazado/Suspendido/Dado de baja | warning/success/danger/warning/secondary |
+| `ReportStatus` | Draft/Submitted/Approved/Rejected | Borrador/Enviado/Aprobado/Rechazado | secondary/warning/success/danger |
+| `ActivityAssignmentStatus` | Pendiente/EnProgreso/Completada/Cancelada | Pendiente/En progreso/Completada/Cancelada | warning/info/success/secondary |
+| `InvitationStatus` (computed) | Enviada/Aceptada/Expirada | Enviada/Aceptada/Expirada | info/success/danger |
+
+**Regla:** nunca mostrar el string en inglés del enum. Siempre mapear a label español con `getBadgeLabel()` o `badgeMap`. Cancelada ≠ Pendiente (colores distintos).
 
 ## Lo que NO hacer
 

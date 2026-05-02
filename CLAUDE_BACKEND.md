@@ -119,7 +119,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 | Controller | Endpoints |
 |-----------|-----------|
 | `AuthController` | identify, login (standard/PIN/assisted/family), refresh, register, change-login-method |
-| `CatalogsController` | GET disability-types, autonomy-levels, activity-categories, skill-areas, template-types, login-methods, avatar-colors |
+| `CatalogsController` | GET disability-types, autonomy-levels, activity-categories, skill-areas, template-types, login-methods, avatar-colors, report-types |
 | `CatalogAdminController` | CRUD de 6 tipos de catálogo (admin) |
 | `PersonsController` | CRUD personas, supervisor-candidates, professional-assignments, login methods |
 | `ProfessionalsController` | CRUD profesionales, pending, validate, reactivate, deactivate, status-history, reset-password |
@@ -154,6 +154,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 - `GetActivityCategoriesQueryHandler`, `GetActivityTemplateTypesQueryHandler`
 - `GetAutonomyLevelsQueryHandler`, `GetDisabilityTypesQueryHandler`, `GetSkillAreasQueryHandler`
 - `GetAvatarColorsQueryHandler`, `GetLoginMethodsQueryHandler`
+- `GetReportTypesQueryHandler`
 
 ### Persons
 - `CreatePersonCommandHandler`, `UpdatePersonCommandHandler`
