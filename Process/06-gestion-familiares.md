@@ -109,8 +109,27 @@ Obtiene el historial de cambios de vinculación para un familiar.
 - **Permiso:** `family:read`
 
 ### 7. Estados del Familiar
-- **Active** — Familiar activo en el sistema
-- **Terminated** — Familiar dado de baja
+
+```mermaid
+stateDiagram-v2
+    direction LR
+
+    [*] --> Active : Alta directa por admin (POST /api/family)
+    [*] --> Active : Auto-registro por invitación (/invite/:code)
+
+    Active --> Terminated : Admin desactiva (PUT /api/family/{id}/deactivate)
+    Terminated --> Active : Admin reactiva (PUT /api/family/{id}/reactivate)
+
+    Active --> [*]
+    Terminated --> [*]
+```
+
+| Estado | Descripción |
+|--------|-------------|
+| `Active` | Familiar activo, puede iniciar sesión y ver reportes aprobados |
+| `Terminated` | Dado de baja. Usuario bloqueado (`User.IsActive = false`), tokens revocados |
+
+> **Reactivación:** Genera contraseña temporal y envía email al familiar.
 
 ### 8. Historial de Estados del Familiar
 Registra cada cambio de estado del familiar.

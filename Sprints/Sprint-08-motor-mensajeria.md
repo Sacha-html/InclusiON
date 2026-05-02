@@ -19,11 +19,11 @@
 | IN-135 | Búsqueda semántica de actividades por lenguaje natural | ✅ DONE | Handler + endpoint + FE toggle IA |
 | IN-136 | Creación de reporte de progreso | ✅ DONE | |
 | IN-139 | Exportación de reporte a PDF | ⏳ PENDIENTE | |
-| IN-140 | Bandeja de entrada de mensajes | ✅ DONE | Backend completo |
-| IN-141 | Envío de mensajes con asunto y contenido | ✅ DONE | Restricción prof↔familiar por vínculo activo |
-| IN-142 | Hilos de conversación (respuestas) | ✅ DONE | ReplyToMessage + nested replies |
-| IN-143 | Indicador de mensajes no leídos en sidebar | ✅ DONE | GET /messages/unread-count |
-| IN-144 | Marcado automático como leído al abrir | ✅ DONE | Auto-mark en GetById |
+| IN-140 | Bandeja de entrada de mensajes | ✅ DONE | BE + FE (MessagesComponent, inbox/sent tabs) |
+| IN-141 | Envío de mensajes con asunto y contenido | ✅ DONE | BE + FE (compose modal, contactos) |
+| IN-142 | Hilos de conversación (respuestas) | ✅ DONE | BE + FE (reply inline en detalle) |
+| IN-143 | Indicador de mensajes no leídos en sidebar | ✅ DONE | BE + FE (badge sidebar professional + family) |
+| IN-144 | Marcado automático como leído al abrir | ✅ DONE | BE + FE (auto-mark en openMessage) |
 | IN-145 | Notificaciones automáticas de eventos del sistema | ⏳ PENDIENTE | |
 
 ---
@@ -40,9 +40,10 @@
 
 ## Notas
 
-- Entidades existen: AdaptiveEngineConfig, ActivityEmbedding, Message
-- Library SemanticSearch existe pero falta integración
-- Backend: `MessagesController` implementado con 8 endpoints y restricción por vínculo activo. `AdaptiveEngineController` pendiente.
+- Mensajería: `MessagesController` (8 endpoints) + `MessagesComponent` FE completo. Ruta `/pro/messages` y `/family/messages` activas. Badge sidebar en ambos portales.
+- Búsqueda semántica: handler + endpoint + toggle FE completados.
+- MDA: entidades `AdaptiveEngineConfig` existen. Handlers pendientes: IN-129..134.
+- `AdaptiveEngineController` pendiente.
 
 ---
 
