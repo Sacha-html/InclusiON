@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Mappers;
@@ -124,7 +125,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                         throw new InvalidOperationException(string.Format(ErrorMessages.UserCreationError, string.Join(", ", errors)));
                     }
 
-                    await _identityService.AddToRoleAsync(user, "PersonWithDisability");
+                    await _identityService.AddToRoleAsync(user, RoleNames.PersonWithDisability);
 
                     person.UserId = user.Id;
                     await _repository.CreateAsync(person, ct);
@@ -141,7 +142,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 _logger.LogWarning(ex, "Error de validacion al crear persona");
                 return ApiResponse<PersonResponse>.ErrorResult(
                     ErrorCode.ValidationFailed,
-                    ex.Message);
+                    "No se pudo crear el usuario. Verificá que los datos ingresados sean válidos.");
             }
         }
 

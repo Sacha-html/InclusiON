@@ -1,3 +1,4 @@
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -47,9 +48,9 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 Surname = user.Surname,
                 FullName = (entityType, linkedEntity) switch
                 {
-                    ("Professional", { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
-                    ("PersonWithDisability", { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
-                    ("FamilyRepresentative", { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
+                    (RoleNames.Professional, { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
+                    (RoleNames.PersonWithDisability, { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
+                    (RoleNames.FamilyRepresentative, { }) => $"{linkedEntity.FirstName} {linkedEntity.LastName}",
                     _ => $"{user.Name} {user.Surname}".Trim()
                 },
                 Role = primaryRole,
@@ -60,7 +61,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 MustChangePassword = user.MustChangePassword,
                 LinkedEntity = (entityType, linkedEntity) switch
                 {
-                    ("Professional", { } e) => new LinkedEntityInfo
+                    (RoleNames.Professional, { } e) => new LinkedEntityInfo
                     {
                         EntityType = entityType,
                         EntityId = e.Id,
@@ -69,13 +70,13 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                         DocumentNumber = e.DocumentNumber,
                         Phone = e.Phone
                     },
-                    ("PersonWithDisability", { } e) => new LinkedEntityInfo
+                    (RoleNames.PersonWithDisability, { } e) => new LinkedEntityInfo
                     {
                         EntityType = entityType,
                         EntityId = e.Id,
                         DocumentNumber = e.DocumentNumber
                     },
-                    ("FamilyRepresentative", { } e) => new LinkedEntityInfo
+                    (RoleNames.FamilyRepresentative, { } e) => new LinkedEntityInfo
                     {
                         EntityType = entityType,
                         EntityId = e.Id,
@@ -96,13 +97,13 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             // DbContext no es thread-safe: secuencial con short-circuit (la mayoria de los
             // usuarios tiene un solo tipo de entidad vinculada).
             if (await _professionalsRepository.GetByUserIdAsync(userId, cancellationToken) is { } pro)
-                return ("Professional", new LinkedEntityData(pro.Id, pro.FirstName, pro.LastName, pro.Specialty, pro.LicenseNumber, pro.DocumentNumber, pro.Phone, null));
+                return (RoleNames.Professional, new LinkedEntityData(pro.Id, pro.FirstName, pro.LastName, pro.Specialty, pro.LicenseNumber, pro.DocumentNumber, pro.Phone, null));
 
             if (await _personsRepository.GetByUserIdAsync(userId, cancellationToken) is { } person)
-                return ("PersonWithDisability", new LinkedEntityData(person.Id, person.FirstName, person.LastName, null, null, person.DocumentNumber, null, null));
+                return (RoleNames.PersonWithDisability, new LinkedEntityData(person.Id, person.FirstName, person.LastName, null, null, person.DocumentNumber, null, null));
 
             if (await _familyRepository.GetByUserIdAsync(userId, cancellationToken) is { } family)
-                return ("FamilyRepresentative", new LinkedEntityData(family.Id, family.FirstName, family.LastName, null, null, family.DocumentNumber, family.Phone, family.Relationship));
+                return (RoleNames.FamilyRepresentative, new LinkedEntityData(family.Id, family.FirstName, family.LastName, null, null, family.DocumentNumber, family.Phone, family.Relationship));
 
             return (null, null);
         }

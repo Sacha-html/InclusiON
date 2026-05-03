@@ -48,7 +48,7 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{userId:guid}")]
+        [HttpGet("{userId}")]
         [Authorize(Policy = "users:read")]
         [ProducesResponseType(typeof(ApiResponse<AdminUserDetailResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdminUserDetailResponse>), StatusCodes.Status404NotFound)]
@@ -62,7 +62,22 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPost("{userId:guid}/reset-password")]
+        [HttpGet("{userId}/activity")]
+        [Authorize(Policy = "users:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<UserRecentSessionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<UserRecentSessionResponse>>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<List<UserRecentSessionResponse>>>> GetUserActivity(
+            Guid userId,
+            [FromServices] IQueryHandler<GetUserActivityQuery, ApiResponse<List<UserRecentSessionResponse>>> handler,
+            [FromQuery] int limit = 15,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetUserActivityQuery(userId, limit);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpPost("{userId}/reset-password")]
         [Authorize(Policy = "users:update")]
         [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status404NotFound)]
@@ -78,7 +93,26 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPut("{userId:guid}/deactivate")]
+        [HttpPut("{userId}")]
+        [Authorize(Policy = "users:update")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> UpdateUser(
+            Guid userId,
+            [FromBody] UpdateAdminUserRequest request,
+            [FromServices] ICommandHandler<AdminUpdateUserCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            if (currentUserId is null) return Unauthorized(ApiResponse<object>.Unauthorized());
+            var command = new AdminUpdateUserCommand(userId, currentUserId.Value, request.Name, request.Surname, request.Email);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPut("{userId}/deactivate")]
         [Authorize(Policy = "users:delete")]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
@@ -95,7 +129,7 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPut("{userId:guid}/reactivate")]
+        [HttpPut("{userId}/reactivate")]
         [Authorize(Policy = "users:update")]
         [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status400BadRequest)]

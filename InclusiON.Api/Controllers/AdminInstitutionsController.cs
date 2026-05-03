@@ -5,6 +5,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.AdminInstitutions.Commands;
 using InclusiON.Application.UseCases.AdminInstitutions.Queries;
+using InclusiON.Application.Constants;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Admin;
 using InclusiON.DTOs.Requests.Assignments;
@@ -15,7 +16,7 @@ namespace InclusiON.Api.Controllers
     [Route("api/admin/institutions-assignments")]
     [ApiController]
     [Produces("application/json")]
-    [Authorize(Policy = "settings:update")]
+    [Authorize(Policy = Permissions.Settings.Update)]
     public class AdminInstitutionsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
@@ -26,7 +27,7 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpGet("admins")]
-        [Authorize(Policy = "global-admin")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<List<AdminUserResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<AdminUserResponse>>>> GetAllAdmins(
             [FromServices] IQueryHandler<GetAllAdminsQuery, ApiResponse<List<AdminUserResponse>>> handler,
@@ -51,8 +52,8 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{adminUserId:guid}")]
-        [Authorize(Policy = "global-admin")]
+        [HttpGet("{adminUserId}")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<List<AdminInstitutionResponse>>>> GetAdminInstitutions(
@@ -64,7 +65,7 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{adminUserId:guid}")]
+        [HttpPost("{adminUserId}")]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<AdminInstitutionResponse>>> AssignInstitution(
@@ -78,7 +79,7 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpDelete("{adminUserId:guid}/{institutionId:int}")]
+        [HttpDelete("{adminUserId}/{institutionId:int}")]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<AdminInstitutionResponse>>> RemoveAssignment(
@@ -93,7 +94,7 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpPost("users")]
-        [Authorize(Policy = "global-admin")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<CreateAdminUserResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<CreateAdminUserResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<CreateAdminUserResponse>), StatusCodes.Status404NotFound)]

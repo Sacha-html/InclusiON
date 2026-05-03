@@ -158,5 +158,22 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             return await query.ToPagedAsync(page, pageSize, sortBy, sortDirection, sortMappings, cancellationToken);
         }
+
+        public async Task<(int Count, Report? Latest)> GetApprovedReportsSummaryAsync(
+            Guid personId, CancellationToken cancellationToken = default)
+        {
+            var query = _context.Reports
+                .AsNoTracking()
+                .Where(r => r.PersonId == personId
+                         && r.Status == ReportStatus.Approved
+                         && r.IsActive);
+
+            var count  = await query.CountAsync(cancellationToken);
+            var latest = await query
+                .OrderByDescending(r => r.ReportDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return (count, latest);
+        }
     }
 }
