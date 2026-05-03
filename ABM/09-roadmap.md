@@ -47,7 +47,7 @@
 | Área del roadmap | Referencia | Sí | Debe estar activa |
 | Actividad | Referencia | Sí | Debe estar activa; no puede repetirse en la misma área |
 | Orden secuencial | Entero | Sí | Positivo; único dentro del área |
-| Desbloqueada | Booleano | Sí | La primera actividad de cada área suele empezar desbloqueada |
+| Desbloqueada | Booleano | Sí | La primera actividad de cada área se crea desbloqueada automáticamente; las siguientes se crean bloqueadas |
 | Umbral de desbloqueo (%) | Entero | Sí | Entre 0 y 100; por defecto: 60 |
 | Tiempo límite (seg) | Entero | No | Positivo si se ingresa |
 | Máximo de intentos | Entero | No | Positivo si se ingresa |
