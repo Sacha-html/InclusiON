@@ -1,6 +1,6 @@
 # Checklist de Procesos — InclusiON
 
-**Última actualización:** 2026-05-01
+**Última actualización:** 2026-05-03
 
 ---
 
@@ -11,11 +11,15 @@
 ## Configuración del Sistema
 
 ### 01 — Gestión de Instituciones
+> Ruta: `/admin/institutions` · IN-21, IN-22, IN-23
+
 - [x] Alta de institución
 - [x] Consulta de instituciones
 - [x] Edición de institución
 
 ### 02 — Gestión de Roles y Permisos
+> Ruta: `/admin/roles` · IN-24, IN-25, IN-26, IN-27, IN-28, IN-29, IN-30, IN-31, IN-32
+
 - [x] Consulta de roles
 - [x] Asignación de permisos por módulo
 - [x] Creación de administradores institucionales
@@ -27,6 +31,8 @@
 - [x] Invalidación correcta de caché de permisos (fix NormalizedName)
 
 ### 03 — Gestión de Catálogos
+> Ruta: `/admin/catalogs/:type` · IN-33, IN-34, IN-35
+
 - [x] Consulta de catálogos (6 tipos)
 - [x] Alta de items en catálogo
 - [x] Edición de items en catálogo
@@ -38,6 +44,8 @@
 ## Gestión de Usuarios
 
 ### 04 — Gestión de Profesionales
+> Ruta admin: `/admin/professionals` · Registro público: `/register-professional` · IN-36, IN-37, IN-38, IN-39, IN-148, IN-149, IN-150
+
 - [x] Alta de profesional con contraseña temporal + envío email
 - [x] Consulta paginada con filtros
 - [x] Edición de profesional (sin campo dirección, eliminado)
@@ -52,6 +60,8 @@
 - [x] Vinculación de familiar a persona por profesional (IN-148)
 
 ### 05 — Gestión de Personas con Discapacidad
+> Ruta: `/admin/persons` · IN-40, IN-41, IN-42, IN-43, IN-44
+
 - [x] Alta de persona con perfil funcional
 - [x] Consulta paginada con filtros
 - [x] Edición de datos personales y funcionales
@@ -59,6 +69,8 @@
 - [x] Desactivación de persona (soft-delete + revocación de tokens + confirm modal)
 
 ### 06 — Gestión de Familiares
+> Ruta: `/admin/family` · Registro por invitación: `/invite/:code` · IN-45, IN-46, IN-47, IN-48, IN-49, IN-50, IN-51, IN-52, IN-148
+
 - [x] Alta directa por admin (con selector de persona obligatorio, búsqueda mín. 3 caracteres)
 - [x] Alta por invitación (auto-registro → redirige a login)
 - [x] Consulta paginada con columna "Familiar de"
@@ -73,6 +85,8 @@
 - [x] Historial de cambios de vinculación (IN-148)
 
 ### 07 — Gestión de Invitaciones
+> Ruta admin: `/admin/invitations` · Ruta profesional: `/pro/invitations` · Registro: `/invite/:code` · IN-53, IN-54, IN-55, IN-56, IN-57
+
 - [x] Crear invitación y enviar email
 - [x] Validación de código
 - [x] Aceptación y registro automático (redirige a login post-registro)
@@ -84,6 +98,8 @@
 ## Asignaciones
 
 ### 08 — Asignación de Profesionales
+> Ruta: `/admin/professionals/:id` (tabs de asignación) · `/pro/persons` · IN-58, IN-59, IN-60, IN-61, IN-62, IN-63, IN-64
+
 - [x] Asignar profesional a institución
 - [x] Desasignar profesional de institución
 - [x] Asignar persona a profesional (búsqueda con mín. 3 caracteres)
@@ -98,6 +114,8 @@
 ## Evaluación y Planificación
 
 ### 09 — Evaluación y Diagnóstico
+> Ruta: `/pro/persons/:id` (tab Diagnósticos) · IN-81, IN-82, IN-83, IN-84, IN-85, IN-86
+
 - [x] Configuración del perfil de habilidades (selección múltiple)
 - [x] Edición del perfil funcional
 - [x] Registro de diagnóstico funcional (BE + FE tab en detalle profesional)
@@ -107,6 +125,8 @@
 - [x] Permisos dedicados: diagnoses:read, diagnoses:create, diagnoses:update
 
 ### 10 — Gestión de Actividades
+> Ruta profesional: `/pro/activities` · Nueva: `/pro/activities/new` · Edición: `/pro/activities/:id/edit` · IN-103, IN-104, IN-105, IN-106, IN-107, IN-108, IN-109, IN-118, IN-119, IN-120, IN-121, IN-122, IN-123, IN-124, IN-126, IN-127, IN-135
+
 - [x] Consulta de tipos de template (catálogo)
 - [x] Consulta de categorías de actividad (catálogo)
 - [x] Creación de actividad con wizard (área → template → contenido → metadatos)
@@ -129,6 +149,8 @@
 - [x] Visualización del roadmap (vista estudiante, estilo Duolingo)
 
 ### 11 — Plan de Trabajo (Roadmap)
+> Ruta profesional: `/pro/persons/:id` (tab Roadmap) · Ruta estudiante: `/app/roadmap` · IN-110, IN-111, IN-112, IN-113, IN-114, IN-115, IN-117, IN-127
+
 - [x] Creación del roadmap por persona
 - [x] Agregar actividades al roadmap por área
 - [x] Definir orden secuencial y umbral de desbloqueo
@@ -141,6 +163,8 @@
 ## Ejecución
 
 ### 12 — Resolución de Actividades
+> Ruta: `/app/activities` (lista) · `/app/activities/:assignmentId` (player) · IN-118, IN-119, IN-120, IN-121, IN-122, IN-123, IN-124, IN-126
+
 - [x] Carga de asignación con contenido completo
 - [x] Inicio de actividad (registro de respuesta via startResponse)
 - [x] Player: Selección de figuras (SELECT_FIGURE)
@@ -157,11 +181,15 @@
 ## Monitoreo y Reportes
 
 ### 13 — Seguimiento de Avances
+> Ruta: `/pro` (dashboard) · `/pro/persons` (Mi Aula) · `/pro/persons/:id` (detalle) · IN-87, IN-88, IN-89
+
 - [x] Dashboard del profesional (contadores reales)
 - [x] Mi Aula (cards de personas asignadas)
 - [x] Detalle de persona con edición inline
 
 ### 14 — Generación de Informes
+> Ruta profesional: `/pro/reports` · Ruta familiar: `/family/reports` · Ruta admin: `/admin/reports` · IN-136, IN-138, IN-164
+
 - [x] Consulta de reportes por profesional
 - [x] Consulta de reportes por familia
 - [x] Creación de reporte de progreso (tipo, período, contenido)
@@ -173,6 +201,8 @@
 ## Administración de Cuentas
 
 ### 15 — Gestión de Usuarios
+> Ruta: `/admin/users` · `/admin/admins` · IN-93, IN-94, IN-95, IN-96, IN-97, IN-98
+
 - [x] Listado centralizado de usuarios con filtros (rol, estado, institución)
 - [x] Detalle de usuario con entidad asociada
 - [x] Reseteo de contraseña (genera temporal + revoca sesiones + envío email)
@@ -185,6 +215,8 @@
 ## Capacidades Transversales
 
 ### Accesibilidad
+> Panel: `Alt+A` en cualquier portal · IN-75, IN-76, IN-77, IN-78
+
 - [x] 7 perfiles visuales (default, alto contraste, dislexia, baja visión, deuteranopía, protanopía, tritanopía)
 - [x] Modo claro y oscuro (14 combinaciones)
 - [x] Variables CSS por perfil
@@ -192,6 +224,8 @@
 - [x] Toasts con colores de accesibilidad (--a11y-success, --a11y-danger, etc.)
 
 ### Autenticación
+> Ruta: `/login/*` (visual) · `/admin-login` (admin/profesional) · `/change-password` · IN-65, IN-66, IN-67, IN-68, IN-69, IN-70, IN-71, IN-72, IN-73, IN-74
+
 - [x] Login estándar (email + contraseña)
 - [x] Login visual estándar (identificación por nombre + contraseña)
 - [x] Login por PIN (4 dígitos)
@@ -206,6 +240,8 @@
 - [x] Multi-match en identificación (lista de candidatos si hay homónimos)
 
 ### Sistema
+> IN-28, IN-29, IN-79, IN-80
+
 - [x] Paginación con ordenamiento dinámico (elipsis + conteo de registros)
 - [x] Filtrado por institución para admins institucionales
 - [x] Enforcement server-side de acceso por institución (InstitutionAccessFilter)
@@ -225,6 +261,8 @@
 - [x] Ordenamiento por columna en tablas (sort dinámico con SortField)
 
 ### Seguridad
+> IN-172, IN-173
+
 - [x] Autorización por recurso row-level (IN-172)
 - [x] Rate limiting en endpoints de autenticación (IN-173)
 - [x] Argon2id para PINs con migración lazy desde BCrypt (IN-173)
@@ -237,6 +275,7 @@
 ---
 
 ## Motor Adaptativo (MDA)
+> IN-116, IN-125, IN-127, IN-128, IN-129, IN-130, IN-131, IN-132, IN-133, IN-134
 
 - [ ] Configuración del motor adaptativo por actividad
 - [x] Desbloqueo automático de siguiente actividad si supera umbral
@@ -249,6 +288,7 @@
 - [ ] Consulta del historial de ajustes (timeline)
 
 ## Radar Chart y Métricas
+> IN-86, IN-90, IN-91, IN-92
 
 - [ ] Radar chart de habilidades (promedio de éxito por área)
 - [x] Timeline de diagnósticos en perfil de persona
@@ -256,11 +296,13 @@
 - [x] Portal familia con progreso completo
 
 ## Búsqueda Semántica y Pictogramas
+> IN-106, IN-135
 
 - [x] Búsqueda semántica de actividades por lenguaje natural
 - [x] Integración de pictogramas ARASAAC (arasaac.service.ts + picker en los 4 editores)
 
 ## Mensajería Interna
+> Ruta profesional: `/pro/messages` · Ruta familiar: `/family/messages` · IN-140, IN-141, IN-142, IN-143, IN-144, IN-145
 
 - [x] Bandeja de entrada de mensajes
 - [x] Envío de mensajes con asunto y contenido
@@ -270,6 +312,7 @@
 - [ ] Notificaciones automáticas de eventos del sistema
 
 ## Onboarding
+> IN-99, IN-100, IN-101, IN-102
 
 - [ ] Wizard de completado de perfil (profesional)
 - [ ] Tour guiado del portal (profesional)
@@ -277,6 +320,7 @@
 - [ ] Pantalla de bienvenida (persona con discapacidad)
 
 ## Reportes
+> IN-139
 
 - [ ] Exportación de reporte a PDF
 
@@ -291,6 +335,7 @@
 - [ ] Cierre automático de tickets inactivos (30 días)
 
 ## Administración de Cuentas
+> IN-98
 
 - [ ] Consulta de actividad reciente del usuario
 
