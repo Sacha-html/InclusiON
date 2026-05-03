@@ -1,4 +1,4 @@
-﻿using InclusiON.Domain.Models;
+using InclusiON.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,8 +16,8 @@ namespace InclusiON.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(p => p.EmbeddingJson)
-                .IsRequired();
+            // Embedding column is vector(384) — created via raw SQL in migration, not mapped by EF
+            builder.Ignore(p => p.Embedding);
 
             builder.HasOne(p => p.Activity)
                 .WithOne(a => a.Embedding)

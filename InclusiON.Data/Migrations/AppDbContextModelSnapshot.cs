@@ -227,12 +227,10 @@ namespace InclusiON.Data.Migrations
                     b.Property<int?>("SequenceOrder")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
+                    b.Property<int>("StatusId")
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasDefaultValue("Pendiente");
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -248,9 +246,49 @@ namespace InclusiON.Data.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.HasIndex("Status");
+                    b.HasIndex("StatusId");
 
                     b.ToTable("ActivityAssignments", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignmentStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ActivityAssignmentStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Pendiente"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "EnProgreso"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Completada"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Cancelada"
+                        });
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityCategory", b =>
@@ -400,10 +438,6 @@ namespace InclusiON.Data.Migrations
                     b.Property<int>("Dimensions")
                         .HasColumnType("integer");
 
-                    b.Property<string>("EmbeddingJson")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -466,7 +500,8 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Result")
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2694,11 +2729,19 @@ namespace InclusiON.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("InclusiON.Domain.Models.ActivityAssignmentStatus", "Status")
+                        .WithMany("Assignments")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Activity");
 
                     b.Navigation("AssignedByProfessional");
 
                     b.Navigation("Person");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityContent", b =>
@@ -3246,6 +3289,11 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignment", b =>
                 {
                     b.Navigation("Responses");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignmentStatus", b =>
+                {
+                    b.Navigation("Assignments");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityCategory", b =>
