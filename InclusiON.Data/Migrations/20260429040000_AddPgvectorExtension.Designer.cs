@@ -3,6 +3,7 @@ using System;
 using InclusiON.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InclusiON.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429040000_AddPgvectorExtension")]
+    partial class AddPgvectorExtension
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,10 +230,12 @@ namespace InclusiON.Data.Migrations
                     b.Property<int?>("SequenceOrder")
                         .HasColumnType("integer");
 
-                    b.Property<int>("StatusId")
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("Pendiente");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -246,49 +251,9 @@ namespace InclusiON.Data.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.HasIndex("StatusId");
+                    b.HasIndex("Status");
 
                     b.ToTable("ActivityAssignments", (string)null);
-                });
-
-            modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignmentStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("ActivityAssignmentStatuses", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Pendiente"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "EnProgreso"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Completada"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Cancelada"
-                        });
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityCategory", b =>
@@ -500,8 +465,7 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Result")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
@@ -2729,19 +2693,11 @@ namespace InclusiON.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("InclusiON.Domain.Models.ActivityAssignmentStatus", "Status")
-                        .WithMany("Assignments")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Activity");
 
                     b.Navigation("AssignedByProfessional");
 
                     b.Navigation("Person");
-
-                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityContent", b =>
@@ -3289,11 +3245,6 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignment", b =>
                 {
                     b.Navigation("Responses");
-                });
-
-            modelBuilder.Entity("InclusiON.Domain.Models.ActivityAssignmentStatus", b =>
-                {
-                    b.Navigation("Assignments");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityCategory", b =>

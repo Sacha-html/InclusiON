@@ -26,6 +26,10 @@ namespace InclusiON.Data.Configurations
 
             builder.Property(r => r.ResponsePattern);
 
+            builder.Property(r => r.Result)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
             builder.Property(r => r.RequiredSupport)
                 .HasDefaultValue(false);
 

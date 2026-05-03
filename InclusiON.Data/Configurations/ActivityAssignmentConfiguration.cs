@@ -18,10 +18,14 @@ namespace InclusiON.Data.Configurations
             builder.Property(aa => aa.AssignedAt)
                 .IsRequired();
 
-            builder.Property(aa => aa.Status)
+            builder.Property(aa => aa.StatusId)
                 .IsRequired()
-                .HasMaxLength(50)
-                .HasDefaultValue("Pendiente");
+                .HasDefaultValue(1);
+
+            builder.HasOne(aa => aa.Status)
+                .WithMany(s => s.Assignments)
+                .HasForeignKey(aa => aa.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(aa => aa.IsEvaluationActivity)
                 .HasDefaultValue(false);
@@ -32,7 +36,7 @@ namespace InclusiON.Data.Configurations
             builder.HasIndex(aa => aa.ActivityId);
             builder.HasIndex(aa => aa.PersonId);
             builder.HasIndex(aa => aa.AssignedByProfessionalId);
-            builder.HasIndex(aa => aa.Status);
+            builder.HasIndex(aa => aa.StatusId);
 
             builder.HasOne(aa => aa.Activity)
                 .WithMany(a => a.ActivityAssignments)
