@@ -1,6 +1,6 @@
 # Diccionario de Datos — Sistema InclusiON
 
-**Última actualización:** 2026-04-18
+**Última actualización:** 2026-05-03
 
 Este documento describe las entidades de datos del sistema InclusiON, organizadas por área funcional. Para cada entidad se listan sus atributos, tipo de dato, obligatoriedad y descripción.
 
@@ -526,6 +526,11 @@ Reportes formales de avance para un período determinado.
 | Áreas a reforzar | Texto largo | No | Donde se necesita más trabajo |
 | Recomendaciones futuras | Texto largo | No | Sugerencias para el siguiente período |
 | Próximos objetivos | Texto largo | No | Metas para el futuro |
+| **Estado** | | | |
+| Status | Enum (ReportStatus) | Sí | `Draft` (0), `Submitted` (1), `Approved` (2), `Rejected` (3). Default: Draft |
+| Fecha de envío | Fecha/hora | No | Cuándo se envió (Submitted) |
+| Fecha de aprobación | Fecha/hora | No | Cuándo fue aprobado/rechazado |
+| Motivo de rechazo | Texto (500) | No | Razón del rechazo (solo si Status = Rejected) |
 | Activo | Booleano | Sí | Estado lógico |
 
 ---

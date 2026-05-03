@@ -239,7 +239,7 @@
 ## Motor Adaptativo (MDA)
 
 - [ ] Configuración del motor adaptativo por actividad
-- [ ] Desbloqueo automático de siguiente actividad si supera umbral
+- [x] Desbloqueo automático de siguiente actividad si supera umbral
 - [ ] Monitoreo de frustración (pausa tras 3+ intentos)
 - [ ] Evaluación automática de rendimiento tras cada actividad
 - [ ] Cálculo de ajuste según estado (Estable/Progresando/Dificultad/Frustración)
@@ -301,5 +301,5 @@
 | | Hecho | Pendiente |
 |---|:-----:|:---------:|
 | MVP | 154 | 0 |
-| Post-MVP | 10 | 23 |
+| Post-MVP | 11 | 22 |
 | **Total** | **164** | **23** |
