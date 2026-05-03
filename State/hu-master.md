@@ -31,7 +31,7 @@
 | Sprint 4 | 14 | — | 14 | — | — |
 | Sprint 5 | 2 | — | 2 | — | — |
 | Sprint 6 | 7 | — | 6 | — | 1 |
-| Sprint 7 | 7 | — | — | — | 7 |
+| Sprint 7 | 7 | — | 2 | — | 5 |
 | Sin sprint — implementado | 30 | — | 30 | 0 | — |
 | Sin sprint — pendiente | 18 | — | — | — | 18 |
 | **Total** | **145** | **7** | **106** | **4** | **28** |
@@ -185,8 +185,8 @@
 |----|-------|--------|-------|
 | IN-179 | Ceremonias: Daily y retro | ⏳ | Documentar ceremonias Scrum del equipo |
 | IN-180 | Diccionario de datos | ⏳ | Ya existe `diccionario-datos.md` — pasar a Confluence |
-| IN-181 | Listados de ABMs | ⏳ | Ya existe `ABM/` completo — revisar y actualizar |
-| IN-182 | Listado de Casos de Uso | ⏳ | Ya existe `Process/` — alinear con HUs |
+| IN-181 | Listados de ABMs | 🔵 | `ABM/00-listado-abm.md` revisado — 13 ABMs ✅, fecha actualizada |
+| IN-182 | Listado de Casos de Uso | 🔵 | `Process/14` y `Process/16` actualizados — portal familiar + mensajería |
 | IN-183 | Pasar DER a Confluence | ⏳ | Usar `Docs/der.md` como base |
 | IN-184 | Revisar Sprint 1 | ⏳ | Revisión de documentación Sprint 1 |
 | IN-185 | Revisar ABMs (Test) | ⏳ | Validar ABMs contra código implementado |
