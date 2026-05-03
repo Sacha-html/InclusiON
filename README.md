@@ -267,6 +267,32 @@ var accessibleIds = _httpContextService.IsGlobalAdmin()
 
 **Reglas de negocio** (distinto de acceso): viven en los command handlers. Ej: solo el profesional autor puede editar un reporte en estado `Draft` — validado en `UpdateReportCommandHandler`, no en el filtro.
 
+## Mensajería
+
+### ¿Quién puede enviar mensajes a quién?
+
+Solo se permiten mensajes entre **Profesional ↔ Familiar**, siempre que compartan al menos una persona con discapacidad con asignaciones activas en ambos lados.
+
+| Combinación | ¿Permitido? | Motivo |
+|---|---|---|
+| Profesional → Familiar (vínculo activo) | ✅ | Regla principal |
+| Familiar → Profesional (vínculo activo) | ✅ | Bidireccional |
+| Profesional → Familiar (sin vínculo) | ❌ 403 | No comparten persona activa |
+| Profesional → Profesional | ❌ 403 | Mismo tipo de usuario |
+| Familiar → Familiar | ❌ 403 | Mismo tipo de usuario |
+| Cualquiera → Persona con discapacidad | ❌ 403 | Canal no habilitado para este rol |
+| Persona con discapacidad → Cualquiera | ❌ 403 | Canal no habilitado para este rol |
+| Usuario → sí mismo | ❌ 400 | Auto-mensaje no permitido |
+
+El vínculo se valida vía `HaveSharedPersonAsync`: join entre `ProfessionalPersons`, `Professionals`, `PersonRepresentatives` y `FamilyRepresentatives`, filtrando `IsActive = true` en ambos lados.
+
+### Comportamiento adicional
+
+- `GET /messages/{id}` auto-marca como leído si el usuario autenticado es el receptor.
+- Respuestas (`/reply`) heredan `Subject` y `RelatedPersonId` del mensaje padre. No re-validan la relación (el vínculo original fue válido al enviar).
+- Soft delete: el mensaje se desactiva (`IsActive = false`), no se borra físicamente.
+- Bandeja de entrada y enviados listan solo mensajes raíz (`ParentMessageId == null`); las respuestas se cargan anidadas en `GET /messages/{id}`.
+
 ## Errores Comunes
 
 ### API no refleja cambios tras compilar
@@ -318,6 +344,14 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 | `/admin/users` | GET | Listar usuarios del sistema |
 | `/catalogs/login-methods` | GET | Métodos de login activos |
 | `/catalogs/avatar-colors` | GET | Colores de avatar disponibles |
+| `/messages/inbox` | GET | Bandeja de entrada (paginado) |
+| `/messages/sent` | GET | Mensajes enviados (paginado) |
+| `/messages/unread-count` | GET | Cantidad de mensajes no leídos |
+| `/messages/{id}` | GET | Obtener mensaje (marca leído si receptor) |
+| `/messages` | POST | Enviar mensaje |
+| `/messages/{id}/reply` | POST | Responder mensaje |
+| `/messages/{id}/read` | PATCH | Marcar como leído |
+| `/messages/{id}` | DELETE | Eliminar mensaje (soft delete) |
 
 ---
 
