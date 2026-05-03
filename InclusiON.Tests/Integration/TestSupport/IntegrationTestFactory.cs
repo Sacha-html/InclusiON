@@ -1,10 +1,12 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Data;
 
 namespace InclusiON.Tests.Integration.TestSupport
@@ -80,6 +82,17 @@ namespace InclusiON.Tests.Integration.TestSupport
                     opts.TokenValidationParameters.IssuerSigningKey = key;
                     opts.TokenValidationParameters.ValidIssuer      = "InclusiONTests";
                     opts.TokenValidationParameters.ValidAudience     = "InclusiONTests";
+                });
+
+                // En integration tests los IDs de fixture se pasan como GUIDs en texto plano
+                // (no encriptados), así que quitamos el model binder que intenta descifrarlos
+                // y que devolvería 400 antes de que corran los filtros de autorización.
+                services.PostConfigure<MvcOptions>(opts =>
+                {
+                    var provider = opts.ModelBinderProviders
+                        .FirstOrDefault(p => p is EncryptedGuidModelBinderProvider);
+                    if (provider != null)
+                        opts.ModelBinderProviders.Remove(provider);
                 });
             });
         }
