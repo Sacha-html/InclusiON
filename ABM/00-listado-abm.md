@@ -1,6 +1,6 @@
 # Listado de ABMs — InclusiON
 
-**Última actualización:** 2026-05-01
+**Última actualización:** 2026-05-03
 
 Cada ABM está justificado por el actor del sistema que lo necesita para cumplir su función. Todos los ABMs tienen persistencia real en base de datos (PostgreSQL vía EF Core) y validaciones básicas de integridad.
 
