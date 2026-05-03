@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Authorization;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Invitations.Commands;
@@ -42,7 +43,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene la lista de invitaciones. Profesional: solo las suyas. Admin: todas.
         /// </summary>
         [HttpGet]
-        [Authorize(Policy = "invitations:read")]
+        [Authorize(Policy = Permissions.Invitations.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<InvitationResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<InvitationResponse>>), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ApiResponse<List<InvitationResponse>>), StatusCodes.Status403Forbidden)]
@@ -100,7 +101,7 @@ namespace InclusiON.Api.Controllers
         /// Crea una nueva invitacion para un representante familiar.
         /// </summary>
         [HttpPost]
-        [Authorize(Policy = "invitations:create")]
+        [Authorize(Policy = Permissions.Invitations.Create)]
         [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status409Conflict)]

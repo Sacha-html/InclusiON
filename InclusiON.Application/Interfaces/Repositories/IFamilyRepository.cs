@@ -29,5 +29,10 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task CreatePersonRepresentativeHistoryAsync(PersonRepresentativeHistory history, CancellationToken cancellationToken = default);
         Task<List<PersonRepresentativeHistory>> GetPersonRepresentativeHistoryAsync(Guid personId, CancellationToken cancellationToken = default);
         Task<List<PersonRepresentativeHistory>> GetPersonRepresentativeHistoryByFamilyAsync(Guid familyId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Devuelve las personas con discapacidad vinculadas activamente al familiar (por UserId).
+        /// </summary>
+        Task<List<PersonWithDisability>> GetLinkedPersonsAsync(Guid familyUserId, CancellationToken cancellationToken = default);
     }
 }

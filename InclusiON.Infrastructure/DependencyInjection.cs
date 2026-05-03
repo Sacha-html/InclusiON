@@ -77,9 +77,20 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IAdminInstitutionRepository, AdminInstitutionRepository>();
             services.AddScoped<IDiagnosesRepository, DiagnosesRepository>();
             services.AddScoped<IReportsRepository, ReportsRepository>();
+            services.AddScoped<IActivitiesRepository, ActivitiesRepository>();
+            services.AddScoped<IEmbeddingRepository, EmbeddingRepository>();
+            services.AddScoped<IActivityAssignmentRepository, ActivityAssignmentRepository>();
+            services.AddScoped<IRoadmapRepository, RoadmapRepository>();
+            services.AddScoped<IMessagesRepository, MessagesRepository>();
 
             // Email
             services.AddScoped<IEmailService, EmailService>();
+
+            // Gestión de roles e Identity RoleClaims
+            services.AddScoped<IRoleService, RoleService>();
+
+            // Administración de catálogos (Create/Update/PatchStatus genérico)
+            services.AddScoped<ICatalogAdminService, CatalogAdminService>();
 
             // Repositorios read-only para catalogos
             services.AddScoped<IReadOnlyRepository<DisabilityType>, ReadOnlyRepository<DisabilityType>>();

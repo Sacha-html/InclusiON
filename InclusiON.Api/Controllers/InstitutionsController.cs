@@ -4,7 +4,9 @@ using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.UseCases.Institutions.Commands;
 using InclusiON.Application.UseCases.Institutions.Queries;
+using InclusiON.DTOs.Requests.Common;
 using InclusiON.DTOs.Requests.Institutions;
+using InclusiON.Application.Constants;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Institutions;
 namespace InclusiON.Api.Controllers
@@ -42,7 +44,7 @@ namespace InclusiON.Api.Controllers
         /// Crea una nueva institucion educativa.
         /// </summary>
         [HttpPost]
-        [Authorize(Policy = "global-admin")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status409Conflict)]
@@ -62,10 +64,29 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Cambia el estado activo/inactivo de una institucion. Maquina de estados: rechaza transicion no-op y bloquea baja si tiene profesionales activos.
+        /// </summary>
+        [HttpPatch("{id:int}")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<InstitutionResponse>>> PatchInstitutionStatus(
+            int id,
+            [FromBody] PatchStatusRequest request,
+            [FromServices] ICommandHandler<PatchInstitutionStatusCommand, ApiResponse<InstitutionResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new PatchInstitutionStatusCommand(id, request.IsActive);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
         /// Actualiza una institucion educativa existente.
         /// </summary>
         [HttpPut("{id:int}")]
-        [Authorize(Policy = "institutions:update")]
+        [Authorize(Policy = Permissions.Institutions.Update)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InstitutionResponse>), StatusCodes.Status404NotFound)]

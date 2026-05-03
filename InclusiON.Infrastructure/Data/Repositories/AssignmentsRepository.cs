@@ -78,5 +78,54 @@ namespace InclusiON.Infrastructure.Data.Repositories
             await _context.ProfessionalInstitutions.AddAsync(assignment, ct);
             return assignment;
         }
+
+        public async Task<bool> HaveSharedPersonAsync(
+            Guid professionalUserId,
+            Guid familyUserId,
+            CancellationToken ct = default)
+        {
+            return await (
+                from pp   in _context.ProfessionalPersons
+                join prof in _context.Professionals         on pp.ProfessionalId    equals prof.Id
+                join pr   in _context.PersonRepresentatives on pp.PersonId          equals pr.PersonId
+                join fam  in _context.FamilyRepresentatives on pr.RepresentativeId  equals fam.Id
+                where pp.IsActive  && pr.IsActive
+                   && prof.UserId  == professionalUserId
+                   && fam.UserId   == familyUserId
+                select 1
+            ).AnyAsync(ct);
+        }
+
+        public async Task<List<User>> GetContactsForProfessionalAsync(
+            Guid professionalUserId,
+            CancellationToken ct = default)
+        {
+            return await (
+                from prof in _context.Professionals
+                join pp   in _context.ProfessionalPersons   on prof.Id            equals pp.ProfessionalId
+                join pr   in _context.PersonRepresentatives on pp.PersonId         equals pr.PersonId
+                join fam  in _context.FamilyRepresentatives on pr.RepresentativeId equals fam.Id
+                join u    in _context.Users                 on fam.UserId          equals u.Id
+                where pp.IsActive && pr.IsActive && u.IsActive
+                   && prof.UserId == professionalUserId
+                select u
+            ).Distinct().AsNoTracking().ToListAsync(ct);
+        }
+
+        public async Task<List<User>> GetContactsForFamilyAsync(
+            Guid familyUserId,
+            CancellationToken ct = default)
+        {
+            return await (
+                from fam  in _context.FamilyRepresentatives
+                join pr   in _context.PersonRepresentatives on fam.Id              equals pr.RepresentativeId
+                join pp   in _context.ProfessionalPersons   on pr.PersonId         equals pp.PersonId
+                join prof in _context.Professionals         on pp.ProfessionalId   equals prof.Id
+                join u    in _context.Users                 on prof.UserId         equals u.Id
+                where pr.IsActive && pp.IsActive && u.IsActive
+                   && fam.UserId == familyUserId
+                select u
+            ).Distinct().AsNoTracking().ToListAsync(ct);
+        }
     }
 }

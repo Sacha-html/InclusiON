@@ -27,7 +27,6 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.InvalidFormat or
                 ErrorCode.RequiredField or
                 ErrorCode.OutOfRange or
-                ErrorCode.BusinessRuleViolation or
                 ErrorCode.InvalidOperation or
                 ErrorCode.PinNotConfigured or
                 ErrorCode.LoginMethodNotAllowed or
@@ -65,9 +64,10 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.InvitationNotFound
                     => new NotFoundObjectResult(response),
 
-                // 409 Conflict - Conflictos de datos
+                // 409 Conflict - Conflictos de datos y violaciones de reglas de negocio
                 ErrorCode.Conflict or
                 ErrorCode.DuplicateEntry or
+                ErrorCode.BusinessRuleViolation or
                 ErrorCode.DocumentAlreadyExists or
                 ErrorCode.EmailAlreadyExists or
                 ErrorCode.UsernameAlreadyExists

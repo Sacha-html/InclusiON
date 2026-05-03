@@ -14,5 +14,19 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<RefreshTokenStatsResponse> GetUserTokenStatsAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<int> CleanupExpiredTokensAsync(CancellationToken cancellationToken = default);
         Task<int> GetActiveTokensCountAsync(Guid userId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Retorna los N tokens de refresco más recientes del usuario, ordenados por fecha de creación desc.
+        /// </summary>
+        Task<List<RefreshToken>> GetRecentByUserIdAsync(Guid userId, int limit, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Revoca todos los refresh tokens activos de una lista de usuarios.
+        /// Útil para invalidar sesiones tras un cambio de permisos de rol.
+        /// </summary>
+        Task<int> RevokeAllUsersTokensAsync(
+            IEnumerable<Guid> userIds,
+            string? reason = null,
+            CancellationToken cancellationToken = default);
     }
 }

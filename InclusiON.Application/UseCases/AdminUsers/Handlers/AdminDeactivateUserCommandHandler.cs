@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -82,7 +83,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             switch (primaryRole)
             {
-                case "Professional":
+                case RoleNames.Professional:
                     var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (pro is not null)
                     {
@@ -91,7 +92,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     }
                     break;
 
-                case "PersonWithDisability":
+                case RoleNames.PersonWithDisability:
                     var person = await _personsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (person is not null)
                     {
@@ -100,7 +101,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     }
                     break;
 
-                case "FamilyRepresentative":
+                case RoleNames.FamilyRepresentative:
                     var family = await _familyRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (family is not null)
                     {
