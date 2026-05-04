@@ -1,9 +1,10 @@
 import { INavData } from '@coreui/angular';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 export const navItems: INavData[] = [
   {
     name: 'Dashboard',
-    url: '/admin/dashboard',
+    url: AppRoutes.Admin.Dashboard,
     iconComponent: { name: 'cil-speedometer' },
   },
   {
@@ -12,37 +13,37 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Familiares',
-    url: '/admin/family',
+    url: AppRoutes.Admin.Family,
     iconComponent: { name: 'cil-home' },
   },
   {
     name: 'Instituciones',
-    url: '/admin/institutions',
+    url: AppRoutes.Admin.Institutions,
     iconComponent: { name: 'cil-book' },
   },
   {
     name: 'Invitaciones',
-    url: '/admin/invitations',
+    url: AppRoutes.Admin.Invitations,
     iconComponent: { name: 'cil-link' },
   },
   {
     name: 'Personas',
-    url: '/admin/persons',
+    url: AppRoutes.Admin.Persons,
     iconComponent: { name: 'cil-people' },
   },
   {
     name: 'Profesionales',
-    url: '/admin/professionals',
+    url: AppRoutes.Admin.Professionals,
     iconComponent: { name: 'cil-user' },
   },
   {
     name: 'Usuarios',
-    url: '/admin/users',
+    url: AppRoutes.Admin.Users,
     iconComponent: { name: 'cil-group' },
   },
   {
     name: 'Reportes',
-    url: '/admin/reports',
+    url: AppRoutes.Admin.Reports,
     iconComponent: { name: 'cil-description' },
   },
   {
@@ -51,20 +52,20 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Catálogos',
-    url: '/admin/catalogs',
+    url: AppRoutes.Admin.Catalogs.Root,
     iconComponent: { name: 'cil-notes' },
     children: [
-      { name: 'Áreas de Habilidad', url: '/admin/catalogs/skill-areas' },
-      { name: 'Categorías de Actividad', url: '/admin/catalogs/activity-categories' },
-      { name: 'Métodos de Login', url: '/admin/catalogs/login-methods' },
-      { name: 'Niveles de Autonomía', url: '/admin/catalogs/autonomy-levels' },
-      { name: 'Tipos de Discapacidad', url: '/admin/catalogs/disability-types' },
-      { name: 'Tipos de Plantilla', url: '/admin/catalogs/template-types' },
+      { name: 'Áreas de Habilidad',       url: AppRoutes.Admin.Catalogs.SkillAreas },
+      { name: 'Categorías de Actividad',   url: AppRoutes.Admin.Catalogs.ActivityCategories },
+      { name: 'Métodos de Login',          url: AppRoutes.Admin.Catalogs.LoginMethods },
+      { name: 'Niveles de Autonomía',      url: AppRoutes.Admin.Catalogs.AutonomyLevels },
+      { name: 'Tipos de Discapacidad',     url: AppRoutes.Admin.Catalogs.DisabilityTypes },
+      { name: 'Tipos de Plantilla',        url: AppRoutes.Admin.Catalogs.TemplateTypes },
     ],
   },
   {
     name: 'Mis Instituciones',
-    url: '/admin/my-institutions',
+    url: AppRoutes.Admin.MyInstitutions,
     iconComponent: { name: 'cil-library' },
   },
   {
@@ -73,12 +74,12 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Administradores',
-    url: '/admin/admins',
+    url: AppRoutes.Admin.Admins,
     iconComponent: { name: 'cil-settings' },
   },
   {
     name: 'Roles y Permisos',
-    url: '/admin/roles',
+    url: AppRoutes.Admin.Roles,
     iconComponent: { name: 'cil-lock-locked' },
   },
 ];

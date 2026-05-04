@@ -1,0 +1,67 @@
+<!-- Instruction -->
+<div class="mb-3">
+  <label class="form-label" for="os-instruction">Instrucción *</label>
+  <input cFormControl id="os-instruction" [(ngModel)]="instruction" name="instruction"
+         placeholder="Ej: Poné los pasos en orden" (ngModelChange)="onInstructionChange()" required />
+</div>
+
+<h6 class="mb-2">Elementos en orden correcto (mínimo 2) *</h6>
+<p class="text-body-secondary small">El orden en que aparecen aquí es la solución correcta.</p>
+
+@if (items().length === 0) {
+  <p class="text-body-secondary small mb-3">Todavía no hay elementos. Hacé clic en "Agregar elemento".</p>
+}
+
+<div class="sequence-list mb-3">
+  @for (item of items(); track item.id; let i = $index) {
+    <div class="sequence-item">
+      <div class="sequence-pos">{{ i + 1 }}</div>
+      @if (item.pictogramId) {
+        <img [src]="pictogramUrl(item.pictogramId)" [alt]="item.label" class="seq-picto" />
+        <button cButton size="sm" color="danger" variant="ghost" (click)="removePictogram(i)" title="Quitar imagen">✕</button>
+      } @else {
+        <button cButton size="sm" color="secondary" (click)="selectItemForPicto(i)"
+                [class.active]="activeItemIdx() === i">
+          📷 Imagen
+        </button>
+      }
+      <input cFormControl class="seq-label" [(ngModel)]="item.label" [name]="'os-lbl-' + i"
+             placeholder="Etiqueta *" (ngModelChange)="onLabelChange()" required />
+      <div class="seq-actions">
+        <button cButton size="sm" color="secondary" variant="ghost" [disabled]="i === 0" (click)="moveUp(i)">▲</button>
+        <button cButton size="sm" color="secondary" variant="ghost" [disabled]="i === items().length - 1" (click)="moveDown(i)">▼</button>
+        <button cButton size="sm" color="danger" variant="ghost" (click)="removeItem(i)">✕</button>
+      </div>
+    </div>
+  }
+</div>
+
+<button cButton type="button" color="secondary" class="mb-4" (click)="addItem()">
+  + Agregar elemento
+</button>
+
+<!-- ARASAAC search (only visible when an item is selected for pictogram) -->
+@if (activeItemIdx() >= 0) {
+  <div class="arasaac-panel mb-3">
+    <h6>Buscar pictograma para el elemento {{ activeItemIdx() + 1 }}</h6>
+    <c-row class="mb-2">
+      <c-col xs="12" md="6">
+        <input cFormControl [(ngModel)]="arasaacSearch" name="os-arasaac"
+               placeholder="Buscar..." (ngModelChange)="onArasaacSearchChange($event)" />
+      </c-col>
+      <c-col xs="auto" class="d-flex align-items-center">
+        @if (isSearching()) { <c-spinner size="sm" /> }
+      </c-col>
+    </c-row>
+    @if (arasaacResults().length > 0) {
+      <div class="arasaac-grid">
+        @for (pic of arasaacResults(); track pic.id) {
+          <button type="button" class="arasaac-card" (click)="assignPictogram(pic)" [title]="pic.keyword">
+            <img [src]="pic.imageUrl" [alt]="pic.keyword" />
+            <span>{{ pic.keyword }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

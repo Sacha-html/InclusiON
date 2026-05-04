@@ -1,0 +1,93 @@
+<c-modal
+  [visible]="visible"
+  (visibleChange)="visibleChange.emit($event)"
+  alignment="center"
+  [backdrop]="'static'"
+  aria-labelledby="assign-modal-title"
+>
+  <c-modal-header>
+    <h5 cModalTitle id="assign-modal-title">Asignar actividad</h5>
+  </c-modal-header>
+
+  <c-modal-body>
+    @if (activity) {
+      <p class="mb-3">
+        <strong>{{ activity.title }}</strong>
+        <span class="text-body-secondary ms-2">({{ activity.templateTypeName }})</span>
+      </p>
+    }
+
+    <p class="text-body-secondary small mb-3">El campo marcado con (*) es obligatorio.</p>
+
+    <!-- Persona -->
+    <c-row class="mb-3">
+      <c-col xs="12">
+        <label class="form-label" for="assign-person">Estudiante *</label>
+
+        @if (isLoadingPersons()) {
+          <div class="d-flex align-items-center gap-2 text-body-secondary">
+            <c-spinner size="sm" />
+            <span>Cargando estudiantes...</span>
+          </div>
+        } @else if (activePersons.length === 0) {
+          <p class="text-warning small mb-0">
+            No tenés estudiantes asignados. Primero asigná personas desde el panel de estudiantes.
+          </p>
+        } @else {
+          <select cSelect id="assign-person" [(ngModel)]="form.personId" name="personId" required>
+            <option value="">Seleccionar estudiante...</option>
+            @for (p of activePersons; track p.personId) {
+              <option [value]="p.personId">
+                {{ p.personFirstName }} {{ p.personLastName }}
+                @if (p.disabilityTypeName) { — {{ p.disabilityTypeName }} }
+              </option>
+            }
+          </select>
+        }
+      </c-col>
+    </c-row>
+
+    <!-- Fecha límite -->
+    <c-row class="mb-3">
+      <c-col xs="12" md="6">
+        <label class="form-label" for="assign-due-date">Fecha límite (opcional)</label>
+        <input
+          cFormControl
+          id="assign-due-date"
+          type="date"
+          [(ngModel)]="form.dueDate"
+          name="dueDate"
+          [min]="today"
+        />
+      </c-col>
+    </c-row>
+
+    <!-- Es evaluación -->
+    <c-row>
+      <c-col xs="12">
+        <c-form-check>
+          <input
+            cFormCheckInput
+            type="checkbox"
+            id="assign-eval"
+            [(ngModel)]="form.isEvaluationActivity"
+            name="isEvaluationActivity"
+          />
+          <label cFormCheckLabel for="assign-eval">
+            Marcar como actividad de evaluación
+          </label>
+        </c-form-check>
+      </c-col>
+    </c-row>
+  </c-modal-body>
+
+  <c-modal-footer>
+    <button cButton color="secondary" [disabled]="isSaving()" (click)="close()">
+      Cancelar
+    </button>
+    <button cButton color="primary" [disabled]="!isValid || isSaving() || isLoadingPersons()" (click)="save()">
+      @if (isSaving()) { <c-spinner size="sm" class="me-1" /> }
+      Asignar
+    </button>
+  </c-modal-footer>
+</c-modal>

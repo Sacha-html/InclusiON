@@ -1,7 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ReportsService } from '@services';
+import { ReportsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ReportListItemResponse } from '@models/responses/reports/report.response';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
@@ -31,6 +32,7 @@ import {
 })
 export class ListComponent implements OnInit {
   private readonly reportsService = inject(ReportsService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   reports = signal<ReportListItemResponse[]>([]);
@@ -89,7 +91,7 @@ export class ListComponent implements OnInit {
         this.totalRecords.set(response.totalRecords);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: () => { this.isLoading.set(false); this.toastService.error('Error al cargar los informes'); },
     });
   }
 
@@ -115,7 +117,7 @@ export class ListComponent implements OnInit {
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     if (event.action === 'view') {
-      this.router.navigate(['/family/reports', event.item.id]);
+      this.router.navigate([AppRoutes.Family.Reports, event.item.id]);
     }
   }
 }

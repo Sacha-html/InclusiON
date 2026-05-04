@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ReportsService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ReportResponse } from '@models/responses/reports/report.response';
 import {
   BadgeComponent,
@@ -47,11 +48,11 @@ export class DetailComponent implements OnInit {
   loadReport(id: number): void {
     this.reportsService.getById(id).subscribe({
       next: (data) => { this.report.set(data); this.isLoading.set(false); },
-      error: () => { this.isLoading.set(false); this.router.navigate(['/family/reports']); },
+      error: () => { this.isLoading.set(false); this.router.navigate([AppRoutes.Family.Reports]); },
     });
   }
 
   onBack(): void {
-    this.router.navigate(['/family/reports']);
+    this.router.navigate([AppRoutes.Family.Reports]);
   }
 }

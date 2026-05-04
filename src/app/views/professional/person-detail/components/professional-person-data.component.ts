@@ -5,7 +5,6 @@ import { PersonsService, ToastService } from '@services';
 import { PersonResponse, UpdatePersonRequest } from '@models';
 import { toDisplayDate, toIsoDate } from '@shared/utils';
 import {
-  ButtonDirective,
   ColComponent,
   FormControlDirective,
   FormLabelDirective,
@@ -18,7 +17,6 @@ import {
   standalone: true,
   imports: [
     CommonModule,
-    ButtonDirective,
     ColComponent,
     FormControlDirective,
     FormLabelDirective,
@@ -33,45 +31,56 @@ export class ProfessionalPersonDataComponent {
   @Output() personChange = new EventEmitter<PersonResponse>();
 
   private readonly personsService = inject(PersonsService);
-  private readonly toastService = inject(ToastService);
+  private readonly toastService   = inject(ToastService);
 
-  isEditing = signal(false);
-  isSaving = signal(false);
-  editData = { firstName: '', lastName: '', documentNumber: '', birthDate: '' };
+  editingField = signal<string | null>(null);
+  isSaving     = signal(false);
+  private _cancelling = false;
 
-  startEditing(): void {
-    this.editData = {
-      firstName: this.person.firstName,
-      lastName: this.person.lastName,
+  draft = { firstName: '', lastName: '', documentNumber: '', birthDate: '' };
+
+  startField(field: string): void {
+    if (this.isSaving()) return;
+    this._cancelling = false;
+    this.draft = {
+      firstName:      this.person.firstName,
+      lastName:       this.person.lastName,
       documentNumber: this.person.documentNumber ?? '',
-      birthDate: toDisplayDate(this.person.birthDate),
+      birthDate:      toDisplayDate(this.person.birthDate),
     };
-    this.isEditing.set(true);
+    this.editingField.set(field);
   }
 
-  cancel(): void {
-    this.isEditing.set(false);
+  cancelField(): void {
+    this._cancelling = true;
+    this.editingField.set(null);
   }
 
-  save(): void {
+  onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter')  { event.preventDefault(); this.saveField(); }
+    if (event.key === 'Escape') { event.preventDefault(); this.cancelField(); }
+  }
+
+  saveField(): void {
+    if (this._cancelling) { this._cancelling = false; return; }
+    if (!this.editingField()) return;
     this.isSaving.set(true);
     const request: UpdatePersonRequest = {
-      firstName: this.editData.firstName,
-      lastName: this.editData.lastName,
-      documentNumber: this.editData.documentNumber || undefined,
-      birthDate: this.editData.birthDate ? toIsoDate(this.editData.birthDate) : undefined,
+      firstName:      this.draft.firstName,
+      lastName:       this.draft.lastName,
+      documentNumber: this.draft.documentNumber || undefined,
+      birthDate:      this.draft.birthDate ? toIsoDate(this.draft.birthDate) : undefined,
     };
-
     this.personsService.updatePerson(this.person.id, request).subscribe({
       next: (person) => {
         this.personChange.emit(person);
-        this.isEditing.set(false);
+        this.editingField.set(null);
         this.isSaving.set(false);
-        this.toastService.success('Datos personales actualizados');
+        this.toastService.success('Dato actualizado');
       },
       error: () => {
         this.isSaving.set(false);
-        this.toastService.error('Error al actualizar datos');
+        this.toastService.error('Error al actualizar');
       },
     });
   }
