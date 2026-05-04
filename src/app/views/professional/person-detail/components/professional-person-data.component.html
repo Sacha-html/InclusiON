@@ -1,64 +1,96 @@
-@if (!isEditing()) {
-  <div class="d-flex justify-content-end mb-3">
-    <button cButton color="primary" size="sm" (click)="startEditing()">Editar datos</button>
-  </div>
-  <c-row class="mb-3">
-    <c-col sm="6">
-      <label cLabel>Nombre</label>
-      <input cFormControl [value]="person.firstName" readonly />
-    </c-col>
-    <c-col sm="6">
-      <label cLabel>Apellido</label>
-      <input cFormControl [value]="person.lastName" readonly />
-    </c-col>
-  </c-row>
-  <c-row class="mb-3">
-    <c-col sm="4">
-      <label cLabel>Documento</label>
-      <input cFormControl [value]="person.documentNumber ?? 'Sin especificar'" readonly />
-    </c-col>
-    <c-col sm="4">
-      <label cLabel>Fecha de nacimiento</label>
-      <input cFormControl [value]="person.birthDate | date:'dd/MM/yyyy'" readonly />
-    </c-col>
-    <c-col sm="4">
-      <label cLabel>Edad</label>
-      <input cFormControl [value]="person.age + ' años'" readonly />
-    </c-col>
-  </c-row>
-  <c-row class="mb-3">
-    <c-col sm="6">
-      <label cLabel>Tipo de discapacidad</label>
-      <input cFormControl [value]="person.disabilityTypeName ?? 'Sin especificar'" readonly />
-    </c-col>
-  </c-row>
+<div class="d-flex justify-content-end align-items-center mb-3 gap-2">
+  @if (isSaving()) {
+    <c-spinner size="sm"></c-spinner>
+    <small class="text-muted">Guardando...</small>
+  } @else {
+    <small class="text-muted">
+      <i>Hacé clic en un campo para editarlo</i>
+    </small>
+  }
+</div>
 
-} @else {
-  <c-row class="mb-3">
-    <c-col sm="6">
-      <label cLabel>Nombre</label>
-      <input cFormControl [(ngModel)]="editData.firstName" />
-    </c-col>
-    <c-col sm="6">
-      <label cLabel>Apellido</label>
-      <input cFormControl [(ngModel)]="editData.lastName" />
-    </c-col>
-  </c-row>
-  <c-row class="mb-3">
-    <c-col sm="6">
-      <label cLabel>Documento</label>
-      <input cFormControl [(ngModel)]="editData.documentNumber" />
-    </c-col>
-    <c-col sm="6">
-      <label cLabel>Fecha de nacimiento (dd/mm/aaaa)</label>
-      <input cFormControl [(ngModel)]="editData.birthDate" placeholder="dd/mm/aaaa" />
-    </c-col>
-  </c-row>
-  <div class="d-flex gap-2 mt-3">
-    <button cButton color="primary" (click)="save()" [disabled]="isSaving()">
-      @if (isSaving()) { <c-spinner size="sm" class="me-1"></c-spinner> }
-      Guardar
-    </button>
-    <button cButton color="secondary" (click)="cancel()">Cancelar</button>
-  </div>
-}
+<c-row class="mb-3">
+  <c-col sm="6">
+    <label cLabel>Nombre</label>
+    @if (editingField() === 'firstName') {
+      <input cFormControl
+             [(ngModel)]="draft.firstName"
+             [disabled]="isSaving()"
+             (blur)="saveField()"
+             (keydown)="onKeydown($event)"
+             autofocus />
+    } @else {
+      <div class="form-control-plaintext border-bottom cursor-pointer"
+           (click)="startField('firstName')"
+           title="Clic para editar">
+        {{ person.firstName || '—' }}
+      </div>
+    }
+  </c-col>
+  <c-col sm="6">
+    <label cLabel>Apellido</label>
+    @if (editingField() === 'lastName') {
+      <input cFormControl
+             [(ngModel)]="draft.lastName"
+             [disabled]="isSaving()"
+             (blur)="saveField()"
+             (keydown)="onKeydown($event)"
+             autofocus />
+    } @else {
+      <div class="form-control-plaintext border-bottom cursor-pointer"
+           (click)="startField('lastName')"
+           title="Clic para editar">
+        {{ person.lastName || '—' }}
+      </div>
+    }
+  </c-col>
+</c-row>
+
+<c-row class="mb-3">
+  <c-col sm="4">
+    <label cLabel>Documento</label>
+    @if (editingField() === 'documentNumber') {
+      <input cFormControl
+             [(ngModel)]="draft.documentNumber"
+             [disabled]="isSaving()"
+             (blur)="saveField()"
+             (keydown)="onKeydown($event)"
+             autofocus />
+    } @else {
+      <div class="form-control-plaintext border-bottom cursor-pointer"
+           (click)="startField('documentNumber')"
+           title="Clic para editar">
+        {{ person.documentNumber || 'Sin especificar' }}
+      </div>
+    }
+  </c-col>
+  <c-col sm="4">
+    <label cLabel>Fecha de nacimiento</label>
+    @if (editingField() === 'birthDate') {
+      <input cFormControl
+             [(ngModel)]="draft.birthDate"
+             placeholder="dd/mm/aaaa"
+             [disabled]="isSaving()"
+             (blur)="saveField()"
+             (keydown)="onKeydown($event)"
+             autofocus />
+    } @else {
+      <div class="form-control-plaintext border-bottom cursor-pointer"
+           (click)="startField('birthDate')"
+           title="Clic para editar">
+        {{ (person.birthDate | date:'dd/MM/yyyy') || '—' }}
+      </div>
+    }
+  </c-col>
+  <c-col sm="4">
+    <label cLabel>Edad</label>
+    <div class="form-control-plaintext">{{ person.age }} años</div>
+  </c-col>
+</c-row>
+
+<c-row class="mb-3">
+  <c-col sm="6">
+    <label cLabel>Tipo de discapacidad</label>
+    <div class="form-control-plaintext">{{ person.disabilityTypeName ?? 'Sin especificar' }}</div>
+  </c-col>
+</c-row>
