@@ -108,10 +108,12 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     await _identityService.AddToRoleAsync(user, RoleNames.FamilyRepresentative);
 
                     family.UserId = user.Id;
-                    await _repository.CreateAsync(family, ct);
-                    await _unitOfWork.SaveChangesAsync(ct);
 
-                    // Vincular familiar con la persona
+                    // Vincular familiar con la persona antes del primer SaveChanges.
+                    // family.Id ya está asignado en el constructor (Guid.NewGuid()).
+                    // Usar un solo SaveChanges evita la excepción de concurrencia de EF
+                    // que ocurría cuando Identity actualizaba el ConcurrencyStamp del User
+                    // entre los dos SaveChanges consecutivos.
                     family.PersonRepresentatives.Add(new PersonRepresentative
                     {
                         PersonId = command.PersonId,
@@ -120,6 +122,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         IsActive = true,
                         CreatedAt = _dateTime.UtcNow
                     });
+
+                    await _repository.CreateAsync(family, ct);
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
