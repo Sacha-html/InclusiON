@@ -53,6 +53,7 @@ export class AdminDiagnosesComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.toastService.error('Error al cargar los diagnósticos');
       },
     });
   }
@@ -69,6 +70,7 @@ export class AdminDiagnosesComponent implements OnInit {
       error: () => {
         this.loadingDetail = false;
         this.showModal = false;
+        this.toastService.error('Error al cargar el detalle del diagnóstico');
       },
     });
   }
@@ -95,7 +97,7 @@ export class AdminDiagnosesComponent implements OnInit {
         this.deactivatingDiag = null;
       },
       error: (err) => {
-        const msg = err?.error?.message ?? 'Error al dar de baja el diagnóstico.';
+        const msg = err?.userMessage ?? 'Error al dar de baja el diagnóstico.';
         this.toastService.error(msg);
         this.isDeactivating = false;
         this.showDeactivateModal = false;
