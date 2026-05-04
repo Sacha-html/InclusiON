@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DiagnosesService } from '@services/diagnoses.service';
 import { AuthService, ToastService } from '@services';
+import { Permissions } from '@shared/constants/permissions';
 import { CreateDiagnosisRequest } from '@models/requests/diagnoses/create-diagnosis.request';
 import { DiagnosisListItemResponse, DiagnosisResponse } from '@models/responses/diagnosis.response';
 import {
@@ -57,8 +58,8 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
 
-  canCreate = this.authService.hasPermission('diagnoses:create');
-  canUpdate = this.authService.hasPermission('diagnoses:update');
+  canCreate = this.authService.hasPermission(Permissions.Diagnoses.Create);
+  canUpdate = this.authService.hasPermission(Permissions.Diagnoses.Update);
   private readonly currentUserId = this.authService.getCurrentUser()?.id ?? '';
 
   loading = signal(false);
@@ -170,7 +171,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
       },
       error: (err) => {
         this.saving.set(false);
-        const msg = err?.error?.message ?? 'Error al guardar el diagnóstico';
+        const msg = err?.userMessage ?? 'Error al guardar el diagnóstico';
         this.toastService.error(msg);
       },
     });
@@ -193,7 +194,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
         this.loadDiagnoses();
       },
       error: (err) => {
-        const msg = err?.error?.message ?? 'Error al dar de baja el diagnóstico.';
+        const msg = err?.userMessage ?? 'Error al dar de baja el diagnóstico.';
         this.toastService.error(msg);
         this.isDeactivating.set(false);
         this.showDeactivateModal.set(false);

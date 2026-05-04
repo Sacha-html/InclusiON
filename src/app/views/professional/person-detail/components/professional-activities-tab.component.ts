@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { inject } from '@angular/core';
 import { ActivitiesService } from '@services/activities.service';
 import { ToastService } from '@services';
-import { ActivityAssignmentResponse, ActivityAttemptResponse } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse, ActivityAttemptResponse, ActivityAssignmentStatus } from '@models/responses/activity.response';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -41,21 +41,21 @@ export class ProfessionalActivitiesTabComponent implements OnInit {
     });
   }
 
-  statusColor(status: string): StatusColor {
+  statusColor(status: ActivityAssignmentStatus): StatusColor {
     switch (status) {
-      case 'Completada':  return 'success';
-      case 'EnProgreso':  return 'info';
-      case 'Vencida':     return 'danger';
-      default:            return 'warning';   // Pendiente
+      case ActivityAssignmentStatus.Completada:  return 'success';
+      case ActivityAssignmentStatus.EnProgreso:  return 'info';
+      case ActivityAssignmentStatus.Cancelada:   return 'secondary';
+      default:                                   return 'warning';   // Pendiente
     }
   }
 
-  statusLabel(status: string): string {
+  statusLabel(status: ActivityAssignmentStatus): string {
     switch (status) {
-      case 'Completada': return 'Completada';
-      case 'EnProgreso': return 'En progreso';
-      case 'Vencida':    return 'Vencida';
-      default:           return 'Pendiente';
+      case ActivityAssignmentStatus.Completada: return ActivityAssignmentStatus.Completada;
+      case ActivityAssignmentStatus.EnProgreso: return 'En progreso';
+      case ActivityAssignmentStatus.Cancelada:  return ActivityAssignmentStatus.Cancelada;
+      default:                                  return ActivityAssignmentStatus.Pendiente;
     }
   }
 
@@ -64,7 +64,7 @@ export class ProfessionalActivitiesTabComponent implements OnInit {
   }
 
   isOverdue(a: ActivityAssignmentResponse): boolean {
-    if (!a.dueDate || a.status === 'Completada') return false;
+    if (!a.dueDate || a.status === ActivityAssignmentStatus.Completada) return false;
     return new Date(a.dueDate) < new Date();
   }
 
