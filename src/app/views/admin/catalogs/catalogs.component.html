@@ -114,7 +114,7 @@
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
-    <button cButton color="primary" (click)="save()" [disabled]="isSaving || form.invalid">
+    <button cButton color="primary" (click)="save()" [disabled]="isSaving || form?.invalid">
       @if (isSaving) { <c-spinner size="sm" class="me-1"></c-spinner> }
       Guardar
     </button>

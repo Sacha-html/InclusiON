@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService, CatalogAdminService, ToastService } from '@services';
+import { ActiveStatus } from '@shared/constants/status-labels';
 import { Observable } from 'rxjs';
 
 import {
@@ -65,7 +66,7 @@ export class CatalogsComponent implements OnInit {
   showModal = false;
   modalTitle = '';
   editingId: number | null = null;
-  form!: FormGroup;
+  form: FormGroup | null = null;
 
   showDeactivateModal = false;
   deactivatingItem: any | null = null;
@@ -80,6 +81,7 @@ export class CatalogsComponent implements OnInit {
       columns: [
         { key: 'name', label: 'Nombre' },
         { key: 'description', label: 'Descripcion' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -99,6 +101,7 @@ export class CatalogsComponent implements OnInit {
         { key: 'description', label: 'Descripcion' },
         { key: 'requiresSupervision', label: 'Requiere Supervision', badge: (item) => ({ text: item.requiresSupervision ? 'Si' : 'No', color: item.requiresSupervision ? 'warning' : 'success' }) },
         { key: 'displayOrder', label: 'Orden' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -117,6 +120,7 @@ export class CatalogsComponent implements OnInit {
       columns: [
         { key: 'name', label: 'Nombre' },
         { key: 'description', label: 'Descripcion' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -136,6 +140,7 @@ export class CatalogsComponent implements OnInit {
         { key: 'icon', label: 'Icono' },
         { key: 'color', label: 'Color' },
         { key: 'displayOrder', label: 'Orden' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -158,6 +163,7 @@ export class CatalogsComponent implements OnInit {
         { key: 'skillAreaName', label: 'Area' },
         { key: 'supportsPictograms', label: 'Pictogramas', badge: (item) => ({ text: item.supportsPictograms ? 'Si' : 'No', color: item.supportsPictograms ? 'success' : 'secondary' }) },
         { key: 'supportsAudio', label: 'Audio', badge: (item) => ({ text: item.supportsAudio ? 'Si' : 'No', color: item.supportsAudio ? 'success' : 'secondary' }) },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -213,7 +219,7 @@ export class CatalogsComponent implements OnInit {
     this.isLoading = true;
     this.config.load().subscribe({
       next: (data) => { this.items = data; this.isLoading = false; },
-      error: () => this.isLoading = false,
+      error: () => { this.isLoading = false; this.toastService.error('Error al cargar el catálogo'); },
     });
   }
 
@@ -301,7 +307,7 @@ export class CatalogsComponent implements OnInit {
         this.isDeactivating = false;
         this.showDeactivateModal = false;
         this.deactivatingItem = null;
-        const msg = err?.error?.message ?? 'Error al dar de baja.';
+        const msg = err?.userMessage ?? 'Error al dar de baja.';
         this.toastService.error(msg);
       },
     });
