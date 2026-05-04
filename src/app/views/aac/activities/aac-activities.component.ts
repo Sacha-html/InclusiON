@@ -1,7 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivitiesService } from '@services/activities.service';
-import { ActivityAssignmentResponse } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models/responses/activity.response';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { VisualCardComponent } from '../../../shared/components/visual-card/visual-card.component';
 
 @Component({
@@ -27,23 +28,25 @@ export class AacActivitiesComponent implements OnInit {
   }
 
   openActivity(assignment: ActivityAssignmentResponse): void {
-    if (assignment.status === 'Completada') return;
-    this.router.navigate(['/app/activities', assignment.id]);
+    if (assignment.status === ActivityAssignmentStatus.Completada) return;
+    this.router.navigate([AppRoutes.Aac.Activities, assignment.id]);
   }
 
-  statusColor(status: string): string {
-    return status === 'Completada'  ? 'var(--a11y-success, #4CAF50)'
-         : status === 'EnProgreso'  ? 'var(--a11y-warning, #FF9800)'
-         :                            'var(--a11y-primary, #2196F3)';
+  statusColor(status: ActivityAssignmentStatus): string {
+    return status === ActivityAssignmentStatus.Completada ? 'var(--a11y-success, #4CAF50)'
+         : status === ActivityAssignmentStatus.EnProgreso ? 'var(--a11y-warning, #FF9800)'
+         : status === ActivityAssignmentStatus.Cancelada  ? 'var(--a11y-text-muted, #9E9E9E)'
+         :                                                   'var(--a11y-primary, #2196F3)';
   }
 
-  statusLabel(status: string): string {
-    return status === 'Completada' ? 'Completada'
-         : status === 'EnProgreso' ? 'En progreso'
-         :                           'Pendiente';
+  statusLabel(status: ActivityAssignmentStatus): string {
+    return status === ActivityAssignmentStatus.Completada ? ActivityAssignmentStatus.Completada
+         : status === ActivityAssignmentStatus.EnProgreso ? 'En progreso'
+         : status === ActivityAssignmentStatus.Cancelada  ? ActivityAssignmentStatus.Cancelada
+         :                                                  ActivityAssignmentStatus.Pendiente;
   }
 
   isPlayable(assignment: ActivityAssignmentResponse): boolean {
-    return assignment.status !== 'Completada' && assignment.status !== 'Cancelada';
+    return assignment.status !== ActivityAssignmentStatus.Completada && assignment.status !== ActivityAssignmentStatus.Cancelada;
   }
 }
