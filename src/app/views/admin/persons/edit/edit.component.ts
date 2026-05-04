@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogsService, PersonsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, PersonResponse, UpdateLoginMethodResponse, UpdatePersonRequest } from '../../../../models';
 import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
@@ -113,7 +114,7 @@ export class EditComponent implements OnInit {
           this.person = person;
           this.patchForm(person);
         },
-        error: () => this.router.navigate(['/admin/persons']),
+        error: () => this.router.navigate([AppRoutes.Admin.Persons]),
       });
     }
   }
@@ -175,10 +176,10 @@ export class EditComponent implements OnInit {
 
     this.personsService.updatePerson(this.person.id, request).subscribe({
       next: () => {
-        this.router.navigate(['/admin/persons', this.person!.id]);
+        this.router.navigate([AppRoutes.Admin.Persons, this.person!.id]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al actualizar la persona';
+        this.serverError = err?.userMessage || 'Error al actualizar la persona';
       },
     });
   }
@@ -207,9 +208,9 @@ export class EditComponent implements OnInit {
 
   goBack(): void {
     if (this.person) {
-      this.router.navigate(['/admin/persons', this.person.id]);
+      this.router.navigate([AppRoutes.Admin.Persons, this.person.id]);
     } else {
-      this.router.navigate(['/admin/persons']);
+      this.router.navigate([AppRoutes.Admin.Persons]);
     }
   }
 }

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { UpdateReportRequest } from '@models/requests/reports/update-report.request';
 import { ReportStatus } from '@models/responses/reports/report.response';
 import {
@@ -80,13 +81,13 @@ export class EditComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (!id) { this.router.navigate(['/pro/reports']); return; }
+    if (!id) { this.router.navigate([AppRoutes.Pro.Reports]); return; }
     this.reportId = +id;
     this.reportsService.getById(this.reportId).subscribe({
       next: (report) => {
         if (report.status !== ReportStatus.Draft && report.status !== ReportStatus.Rejected) {
           this.toastService.error('Solo se pueden editar reportes en estado Borrador o Rechazado.');
-          this.router.navigate(['/pro/reports', this.reportId]);
+          this.router.navigate([AppRoutes.Pro.Reports, this.reportId]);
           return;
         }
         this.wasRejected  = report.status === ReportStatus.Rejected;
@@ -105,7 +106,7 @@ export class EditComponent implements OnInit {
         };
         this.isLoading.set(false);
       },
-      error: () => this.router.navigate(['/pro/reports']),
+      error: () => this.router.navigate([AppRoutes.Pro.Reports]),
     });
   }
 
@@ -116,16 +117,16 @@ export class EditComponent implements OnInit {
     this.reportsService.update(this.reportId, this.form).subscribe({
       next: () => {
         this.toastService.success('Reporte actualizado exitosamente.');
-        this.router.navigate(['/pro/reports', this.reportId]);
+        this.router.navigate([AppRoutes.Pro.Reports, this.reportId]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message ?? 'Error al guardar el reporte.';
+        this.serverError = err?.userMessage ?? 'Error al guardar el reporte.';
         this.isSaving.set(false);
       },
     });
   }
 
   onCancel(): void {
-    this.router.navigate(['/pro/reports', this.reportId]);
+    this.router.navigate([AppRoutes.Pro.Reports, this.reportId]);
   }
 }
