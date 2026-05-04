@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AssignmentsService, ProfessionalsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ProfessionalInstitutionResponse, ProfessionalPersonResponse, ProfessionalResponse } from '../../../../models';
 import {
   BadgeComponent,
@@ -63,13 +64,13 @@ export class DetailComponent implements OnInit {
         next: (data) => {
           this.professional = data;
         },
-        error: () => this.router.navigate(['/admin/professionals']),
+        error: () => this.router.navigate([AppRoutes.Admin.Professionals]),
       });
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/professionals']);
+    this.router.navigate([AppRoutes.Admin.Professionals]);
   }
 
   onPersonsChange(persons: ProfessionalPersonResponse[]): void {

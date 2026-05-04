@@ -9,14 +9,18 @@
       <strong>Detalle de Institución</strong>
       <div class="d-flex gap-2">
         @if (institution.isActive) {
-          <button cButton color="danger" variant="outline" size="sm" (click)="deactivate()" [attr.aria-label]="'Dar de baja ' + institution.name">
+          <button cButton color="danger" size="sm" (click)="deactivate()" [attr.aria-label]="'Dar de baja ' + institution.name">
             Dar de baja
           </button>
+        } @else {
+          <button cButton color="success" size="sm" (click)="reactivate()" [attr.aria-label]="'Reactivar ' + institution.name">
+            Reactivar
+          </button>
         }
-        <button cButton color="primary" variant="outline" size="sm" (click)="goToEdit()" aria-label="Editar institución">
+        <button cButton color="primary" size="sm" (click)="goToEdit()" aria-label="Editar institución">
           Editar
         </button>
-        <button cButton color="secondary" variant="outline" size="sm" (click)="goBack()" aria-label="Volver al listado">
+        <button cButton color="secondary" size="sm" (click)="goBack()" aria-label="Volver al listado">
           Volver
         </button>
       </div>
@@ -98,6 +102,20 @@
       }
     </c-card-body>
   </c-card>
+
+  <!-- Modal confirmar reactivacion -->
+  <c-modal [visible]="showReactivateModal" (visibleChange)="showReactivateModal = $event" alignment="center">
+    <c-modal-header><h5 cModalTitle>Confirmar reactivación</h5></c-modal-header>
+    <c-modal-body>
+      <p>¿Está seguro de que desea reactivar la institución <strong>{{ institution.name }}</strong>?</p>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelReactivate()" [disabled]="reactivateLoading">Cancelar</button>
+      <button cButton color="success" (click)="confirmReactivate()" [disabled]="reactivateLoading">
+        {{ reactivateLoading ? 'Procesando...' : 'Reactivar' }}
+      </button>
+    </c-modal-footer>
+  </c-modal>
 
   <!-- Modal confirmar baja -->
   <c-modal [visible]="showConfirmModal" (visibleChange)="showConfirmModal = $event" alignment="center">
