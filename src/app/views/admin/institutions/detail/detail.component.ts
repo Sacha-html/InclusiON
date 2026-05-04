@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AdminInstitutionsService, InstitutionsService, ProfessionalsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { AdminUserResponse, InstitutionResponse, ProfessionalListItemResponse } from '../../../../models';
 import {
   BadgeComponent,
@@ -56,6 +57,8 @@ export class DetailComponent implements OnInit {
   loading = true;
   showConfirmModal = false;
   deactivateLoading = false;
+  showReactivateModal = false;
+  reactivateLoading = false;
 
   adminCols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre' },
@@ -73,7 +76,7 @@ export class DetailComponent implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) {
-      this.router.navigate(['/admin/institutions']);
+      this.router.navigate([AppRoutes.Admin.Institutions]);
       return;
     }
 
@@ -85,7 +88,7 @@ export class DetailComponent implements OnInit {
       next: ({ institution, admins, professionals }) => {
         if (!institution) {
           this.toastService.error('Institución no encontrada');
-          this.router.navigate(['/admin/institutions']);
+          this.router.navigate([AppRoutes.Admin.Institutions]);
           return;
         }
         this.institution = institution;
@@ -97,17 +100,17 @@ export class DetailComponent implements OnInit {
       },
       error: () => {
         this.toastService.error('Error al cargar los datos de la institución');
-        this.router.navigate(['/admin/institutions']);
+        this.router.navigate([AppRoutes.Admin.Institutions]);
       },
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/institutions']);
+    this.router.navigate([AppRoutes.Admin.Institutions]);
   }
 
   goToEdit(): void {
-    this.router.navigate(['/admin/institutions', this.institution!.id, 'edit']);
+    this.router.navigate([AppRoutes.Admin.Institutions, this.institution!.id, 'edit']);
   }
 
   deactivate(): void {
@@ -128,7 +131,7 @@ export class DetailComponent implements OnInit {
       error: (err) => {
         this.showConfirmModal = false;
         this.deactivateLoading = false;
-        const msg = err?.error?.message ?? 'Error al dar de baja la institución.';
+        const msg = err?.userMessage ?? 'Error al dar de baja la institución.';
         this.toastService.error(msg);
       },
     });
@@ -136,5 +139,33 @@ export class DetailComponent implements OnInit {
 
   cancelDeactivate(): void {
     this.showConfirmModal = false;
+  }
+
+  reactivate(): void {
+    this.showReactivateModal = true;
+  }
+
+  confirmReactivate(): void {
+    if (!this.institution) return;
+    this.reactivateLoading = true;
+
+    this.institutionsService.patchStatus(this.institution.id, true).subscribe({
+      next: (updated) => {
+        this.institution = updated;
+        this.showReactivateModal = false;
+        this.reactivateLoading = false;
+        this.toastService.success('Institución reactivada exitosamente.');
+      },
+      error: (err) => {
+        this.showReactivateModal = false;
+        this.reactivateLoading = false;
+        const msg = err?.userMessage ?? 'Error al reactivar la institución.';
+        this.toastService.error(msg);
+      },
+    });
+  }
+
+  cancelReactivate(): void {
+    this.showReactivateModal = false;
   }
 }
