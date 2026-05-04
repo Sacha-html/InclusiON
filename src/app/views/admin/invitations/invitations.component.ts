@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { InvitationsService } from '@services';
+import { InvitationsService, ToastService } from '@services';
 import { InvitationResponse } from '@models';
 import { getInvitationStatusColor } from '@shared/utils';
 
@@ -22,6 +22,7 @@ import {
 })
 export class InvitationsComponent implements OnInit {
   private readonly invitationsService = inject(InvitationsService);
+  private readonly toastService = inject(ToastService);
 
   invitations: InvitationResponse[] = [];
   isLoading = true;
@@ -34,6 +35,7 @@ export class InvitationsComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
+        this.toastService.error('Error al cargar las invitaciones');
       },
     });
   }
