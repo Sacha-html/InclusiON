@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProfessionalResponse } from '@models';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { formatDate, formatDateTime } from '@shared/utils';
 import {
   BadgeComponent,
@@ -40,10 +41,10 @@ export class ProfessionalBasicInfoComponent {
   constructor(private router: Router) {}
 
   goBack(): void {
-    this.router.navigate(['/admin/professionals']);
+    this.router.navigate([AppRoutes.Admin.Professionals]);
   }
 
   goToEdit(): void {
-    this.router.navigate(['/admin/professionals', this.professional.id, 'edit']);
+    this.router.navigate([AppRoutes.Admin.Professionals, this.professional.id, 'edit']);
   }
 }
