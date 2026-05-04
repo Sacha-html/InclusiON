@@ -1,0 +1,61 @@
+:host { display: block; }
+
+.pairs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.pair-card {
+  border: 2px solid var(--cui-border-color);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+
+  &--complete { border-color: var(--cui-success); background: rgba(var(--cui-success-rgb), 0.04); }
+}
+
+.pair-num {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cui-text-muted);
+}
+
+.pair-picto-wrap { position: relative; }
+.pair-img { width: 80px; height: 80px; object-fit: contain; }
+.btn-remove-picto { position: absolute; top: -8px; right: -8px; padding: 0 4px; }
+.btn-add-picto { font-size: 0.85rem; }
+.pair-label { width: 100%; text-align: center; }
+
+.arasaac-panel {
+  border: 1px solid var(--cui-border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--cui-tertiary-bg, #f8f9fa);
+}
+.arasaac-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.5rem;
+}
+.arasaac-card {
+  border: 1px solid var(--cui-border-color);
+  border-radius: 6px;
+  background: none;
+  padding: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  img { width: 56px; height: 56px; object-fit: contain; }
+  span { font-size: 0.7rem; text-align: center; }
+  &:hover { border-color: var(--cui-primary); }
+}
