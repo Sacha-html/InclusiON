@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Family.Commands;
 using InclusiON.Application.UseCases.Family.Queries;
 using InclusiON.DTOs.Common;
@@ -17,10 +17,11 @@ namespace InclusiON.Api.Controllers
     [Produces("application/json")]
     public class FamilyController : ControllerBase
     {
-        private Guid GetCurrentUserId()
+        private readonly IHttpContextService _httpContextService;
+
+        public FamilyController(IHttpContextService httpContextService)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+            _httpContextService = httpContextService;
         }
 
         #region Queries
@@ -43,7 +44,7 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{familyId:guid}")]
+        [HttpGet("{familyId}")]
         [Authorize(Policy = "family:read")]
         [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status404NotFound)]
@@ -71,7 +72,7 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{familyId:guid}/status-history")]
+        [HttpGet("{familyId}/status-history")]
         [Authorize(Policy = "family:read")]
         [ProducesResponseType(typeof(ApiResponse<List<FamilyStatusHistoryResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<FamilyStatusHistoryResponse>>>> GetFamilyStatusHistory(
@@ -85,7 +86,7 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("{familyId:guid}/link-history")]
+        [HttpGet("{familyId}/link-history")]
         [Authorize(Policy = "family:read")]
         [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeHistoryResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<PersonRepresentativeHistoryResponse>>>> GetFamilyLinkHistory(
@@ -135,7 +136,7 @@ namespace InclusiON.Api.Controllers
                 result);
         }
 
-        [HttpPut("{familyId:guid}")]
+        [HttpPut("{familyId}")]
         [Authorize(Policy = "family:update")]
         [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status400BadRequest)]
@@ -159,7 +160,7 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPut("{familyId:guid}/deactivate")]
+        [HttpPut("{familyId}/deactivate")]
         [Authorize(Policy = "family:delete")]
         [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status404NotFound)]
@@ -173,7 +174,7 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPost("{familyId:guid}/link/{personId:guid}")]
+        [HttpPost("{familyId}/link/{personId}")]
         [Authorize(Policy = "family:link")]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status400BadRequest)]
@@ -187,12 +188,16 @@ namespace InclusiON.Api.Controllers
             ICommandHandler<LinkFamilyToPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var userId = _httpContextService.GetCurrentUserId();
+            if (userId is null)
+                return Unauthorized();
+
             var command = new LinkFamilyToPersonCommand(
                 familyId,
                 personId,
                 request.Relationship,
                 request.IsPrimary,
-                GetCurrentUserId());
+                userId.Value);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -207,7 +212,7 @@ namespace InclusiON.Api.Controllers
                 result);
         }
 
-        [HttpDelete("{familyId:guid}/unlink/{personId:guid}")]
+        [HttpDelete("{familyId}/unlink/{personId}")]
         [Authorize(Policy = "family:unlink")]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status404NotFound)]
@@ -219,11 +224,15 @@ namespace InclusiON.Api.Controllers
             ICommandHandler<UnlinkFamilyFromPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var userId = _httpContextService.GetCurrentUserId();
+            if (userId is null)
+                return Unauthorized();
+
             var command = new UnlinkFamilyFromPersonCommand(
                 familyId,
                 personId,
                 request.Observation ?? string.Empty,
-                GetCurrentUserId());
+                userId.Value);
 
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
@@ -247,7 +256,7 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("professional/link/{familyId:guid}/{personId:guid}")]
+        [HttpPost("professional/link/{familyId}/{personId}")]
         [Authorize(Policy = "family:link")]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status400BadRequest)]
@@ -261,12 +270,16 @@ namespace InclusiON.Api.Controllers
             ICommandHandler<LinkFamilyToPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var userId = _httpContextService.GetCurrentUserId();
+            if (userId is null)
+                return Unauthorized();
+
             var command = new LinkFamilyToPersonCommand(
                 familyId,
                 personId,
                 request.Relationship,
                 request.IsPrimary,
-                GetCurrentUserId());
+                userId.Value);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -281,7 +294,7 @@ namespace InclusiON.Api.Controllers
                 result);
         }
 
-        [HttpDelete("professional/unlink/{familyId:guid}/{personId:guid}")]
+        [HttpDelete("professional/unlink/{familyId}/{personId}")]
         [Authorize(Policy = "family:unlink")]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PersonRepresentativeResponse>), StatusCodes.Status404NotFound)]
@@ -293,16 +306,43 @@ namespace InclusiON.Api.Controllers
             ICommandHandler<UnlinkFamilyFromPersonCommand, ApiResponse<PersonRepresentativeResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var userId = _httpContextService.GetCurrentUserId();
+            if (userId is null)
+                return Unauthorized();
+
             var command = new UnlinkFamilyFromPersonCommand(
                 familyId,
                 personId,
                 request.Observation ?? string.Empty,
-                GetCurrentUserId());
+                userId.Value);
 
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }
 
         #endregion
+
+        // ────────────────────────────────────────────────────────────────
+        // Dashboard Familiar
+        // ────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Dashboard del familiar autenticado: personas vinculadas, actividades recientes,
+        /// reportes aprobados y mensajes no leídos.
+        /// </summary>
+        [HttpGet("dashboard")]
+        [Authorize]
+        [ProducesResponseType(typeof(ApiResponse<FamilyDashboardResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<FamilyDashboardResponse>>> GetDashboard(
+            [FromServices] IQueryHandler<GetFamilyDashboardQuery, ApiResponse<FamilyDashboardResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var userId = _httpContextService.GetCurrentUserId();
+            if (userId is null)
+                return Unauthorized();
+
+            var result = await handler.HandleAsync(new GetFamilyDashboardQuery(userId.Value), cancellationToken);
+            return Ok(result);
+        }
     }
 }

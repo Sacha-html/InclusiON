@@ -61,6 +61,7 @@ namespace InclusiON.Data
 
         // Nivel 4: Asignaciones, reportes, mensajeria y auditoria
         public DbSet<ActivityAssignment> ActivityAssignments { get; set; }
+        public DbSet<ActivityAssignmentStatus> ActivityAssignmentStatuses { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<AccessAudit> AccessAudits { get; set; }

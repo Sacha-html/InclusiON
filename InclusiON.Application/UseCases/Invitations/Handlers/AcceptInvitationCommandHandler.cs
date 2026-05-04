@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -104,7 +105,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     }
 
                     // Asignar rol FamilyRepresentative
-                    await _identityService.AddToRoleAsync(user, "FamilyRepresentative");
+                    await _identityService.AddToRoleAsync(user, RoleNames.FamilyRepresentative);
 
                     // Crear FamilyRepresentative
                     familyRep = new FamilyRepresentative
@@ -158,7 +159,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                 _logger.LogWarning(ex, "Error de validacion al aceptar invitacion");
                 return ApiResponse<AcceptInvitationResponse>.ErrorResult(
                     ErrorCode.ValidationFailed,
-                    ex.Message);
+                    "No se pudo crear el usuario. Verificá que los datos ingresados sean válidos.");
             }
             catch (Exception ex)
             {

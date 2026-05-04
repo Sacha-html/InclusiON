@@ -1,4 +1,5 @@
 using InclusiON.Domain.Attributes;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
@@ -35,9 +36,9 @@ namespace InclusiON.Domain.Models
         public int? TimeSpentSeconds { get; set; }
 
         /// <summary>
-        /// Resultado del intento (Exito, Parcial, Fallido, Abandonado).
+        /// Resultado del intento.
         /// </summary>
-        public string? Result { get; set; }
+        public ActivityResponseResult? Result { get; set; }
 
         /// <summary>
         /// Porcentaje de exito (0-100).
