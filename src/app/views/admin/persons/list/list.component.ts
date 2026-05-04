@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, CatalogsService, PersonsService, ProfessionalsService, ToastService } from '@services';
+import { Permissions } from '@shared/constants/permissions';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { LoginMethodItem, PersonListItemResponse, ProfessionalListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
@@ -56,7 +58,7 @@ export class ListComponent {
   readonly #fb = inject(FormBuilder);
   readonly #router = inject(Router);
 
-  canCreate = this.#authService.hasPermission('persons:create');
+  canCreate = this.#authService.hasPermission(Permissions.Persons.Create);
 
   selectedInstitutionId: number | undefined;
   representativeSearch = '';
@@ -159,17 +161,17 @@ export class ListComponent {
 
   onHeaderAction(action: string): void {
     if (action === 'new') {
-      this.#router.navigate(['/admin/persons/new']);
+      this.#router.navigate([AppRoutes.Admin.Persons + '/new']);
     }
   }
 
   onRowAction(event: { action: string; item: any }): void {
     switch (event.action) {
       case 'view':
-        this.#router.navigate(['/admin/persons', event.item.id]);
+        this.#router.navigate([AppRoutes.Admin.Persons, event.item.id]);
         break;
       case 'edit':
-        this.#router.navigate(['/admin/persons', event.item.id, 'edit']);
+        this.#router.navigate([AppRoutes.Admin.Persons, event.item.id, 'edit']);
         break;
       case 'login-method':
         this.openLoginMethodModal(event.item);
@@ -256,7 +258,7 @@ export class ListComponent {
         this.loadPersons();
       },
       error: (err) => {
-        this.loginMethodError = err?.error?.message || 'Error al actualizar el método de login.';
+        this.loginMethodError = err?.userMessage || 'Error al actualizar el método de login.';
         this.showLoginMethodModal = true; // Reabrir para mostrar el error
       },
     });

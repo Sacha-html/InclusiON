@@ -1,0 +1,153 @@
+:host {
+  display: block;
+  padding: 1.5rem 1rem;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.player-game {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.game-instruction {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--a11y-text, #212121);
+  margin: 0;
+}
+
+// ── Ecuación ──────────────────────────────────────────────────────────────────
+.equation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.operand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+}
+
+.dots-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: .3rem;
+  max-width: 160px;
+}
+
+.dot {
+  width: 22px;
+  height: 22px;
+  background: var(--a11y-primary, #2196F3);
+  border-radius: 50%;
+}
+
+.dot-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.operand-number {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--a11y-primary, #2196F3);
+  line-height: 1;
+}
+
+.operator {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--a11y-text-muted, #9E9E9E);
+  line-height: 1;
+}
+
+.result-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border: 3px dashed var(--a11y-border, #BDBDBD);
+  border-radius: 20px;
+  background: rgba(0,0,0,.02);
+}
+
+.result-question {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--a11y-text-muted, #BDBDBD);
+}
+
+// ── Opciones ──────────────────────────────────────────────────────────────────
+.options-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.option-btn {
+  width: 90px;
+  height: 90px;
+  border: 3px solid var(--a11y-border, #E0E0E0);
+  border-radius: 20px;
+  background: var(--a11y-surface, #fff);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--a11y-text, #212121);
+  cursor: pointer;
+  transition: border-color .15s, transform .1s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+
+  &:focus-visible { outline: 4px solid var(--a11y-primary, #2196F3); outline-offset: 2px; }
+  &:hover:not(:disabled) {
+    border-color: var(--a11y-primary, #2196F3);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(33,150,243,.2);
+  }
+  &:disabled { cursor: default; }
+
+  &--correct {
+    border-color: var(--a11y-success, #4CAF50);
+    background: rgba(76,175,80,.1);
+    color: var(--a11y-success, #2E7D32);
+    transform: scale(1.08);
+    box-shadow: 0 4px 20px rgba(76,175,80,.3);
+  }
+  &--wrong {
+    border-color: var(--a11y-danger, #F44336);
+    background: rgba(244,67,54,.06);
+    color: var(--a11y-danger, #F44336);
+  }
+  &--reveal {
+    border-color: var(--a11y-warning, #FF9800);
+    background: rgba(255,152,0,.1);
+    color: var(--a11y-warning, #E65100);
+    animation: pulse .6s ease;
+  }
+  &--dimmed { opacity: .4; }
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 480px) {
+  .option-btn { width: 72px; height: 72px; font-size: 1.6rem; }
+  .operand-number { font-size: 2rem; }
+  .operator { font-size: 2.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

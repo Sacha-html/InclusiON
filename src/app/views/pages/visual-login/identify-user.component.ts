@@ -7,6 +7,8 @@ import { AccessibilityPanelComponent } from '@components/accessibility-panel/acc
 import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { IdentifyResultsListComponent } from './identify-results-list.component';
+import { UserRoles } from '@shared/constants/roles';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 const MIN_IDENTIFIER_LENGTH = 3;
 
@@ -124,7 +126,7 @@ export class IdentifyUserComponent implements OnInit {
       loginMethodName: match.loginMethodName,
       isTrustedDevice: match.isTrustedDevice,
       requiresSupervision: match.requiresSupervision,
-      userType: 'Person',
+      userType: UserRoles.Person,
     });
   }
 
@@ -150,24 +152,24 @@ export class IdentifyUserComponent implements OnInit {
     }
 
     // Familiares siempre van a /login/family
-    if (userData.userType === 'Family') {
-      this.router.navigate(['/login/family'], { queryParams: baseParams });
+    if (userData.userType === UserRoles.Family) {
+      this.router.navigate([AppRoutes.LoginFamily], { queryParams: baseParams });
       return;
     }
 
     // Profesionales usan login con email+password
-    if (userData.userType === 'Professional') {
-      this.router.navigate(['/admin-login']);
+    if (userData.userType === UserRoles.Professional) {
+      this.router.navigate([AppRoutes.AdminLogin]);
       return;
     }
 
     // Navigate based on login method
     switch (userData.loginMethodCode) {
       case 'STANDARD':
-        this.router.navigate(['/login/standard'], { queryParams: baseParams });
+        this.router.navigate([AppRoutes.LoginStandard], { queryParams: baseParams });
         break;
       case 'PIN':
-        this.router.navigate(['/login/pin'], { queryParams: baseParams });
+        this.router.navigate([AppRoutes.LoginPin], { queryParams: baseParams });
         break;
       case 'SUPERVISED':
       case 'ASSISTED':
@@ -181,7 +183,7 @@ export class IdentifyUserComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate([AppRoutes.Login]);
   }
 
   clearInput(): void {

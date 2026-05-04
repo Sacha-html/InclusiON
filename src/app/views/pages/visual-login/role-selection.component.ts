@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
@@ -59,7 +60,7 @@ export class RoleSelectionComponent {
   selectRole(role: UserRole): void {
     // Profesionales van directo al login con email+password
     if (role === 'PROFESSIONAL') {
-      this.router.navigate(['/admin-login'], { queryParams: { role: 'professional' } });
+      this.router.navigate([AppRoutes.AdminLogin], { queryParams: { role: 'professional' } });
       return;
     }
 
@@ -69,6 +70,6 @@ export class RoleSelectionComponent {
   }
 
   goToAdminLogin(): void {
-    this.router.navigate(['/admin-login']);
+    this.router.navigate([AppRoutes.AdminLogin]);
   }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProfessionalsService, InstitutionsService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { InstitutionResponse, RegisterProfessionalRequest } from '@models';
 import { validDate, notFutureDate, minAge, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 
@@ -144,12 +145,12 @@ export class RegisterProfessionalComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.serverError = err?.userMessage || err?.error?.message || 'Error al enviar la solicitud de registro.';
+        this.serverError = err?.userMessage || 'Error al enviar la solicitud de registro.';
       },
     });
   }
 
   goToLogin(): void {
-    this.router.navigate(['/admin-login'], { queryParams: { role: 'professional' } });
+    this.router.navigate([AppRoutes.AdminLogin], { queryParams: { role: 'professional' } });
   }
 }

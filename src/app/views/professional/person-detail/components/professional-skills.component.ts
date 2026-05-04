@@ -56,6 +56,7 @@ export class ProfessionalSkillsComponent implements OnInit {
         );
         this.allSkillAreas.set((areas ?? []).filter((a) => !activeIds.has(a.id)));
       },
+      error: () => this.toastService.error('Error al cargar las áreas de habilidad'),
     });
   }
 
@@ -118,6 +119,7 @@ export class ProfessionalSkillsComponent implements OnInit {
         this.loadSkillProfile();
         this.toastService.success('Area de habilidad removida');
       },
+      error: () => this.toastService.error('Error al desactivar el área de habilidad'),
     });
   }
 

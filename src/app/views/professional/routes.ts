@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { permissionGuard } from '../../guards/permission.guard';
+import { Permissions } from '@shared/constants/permissions';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 export const professionalRoutes: Routes = [
   {
@@ -28,24 +31,42 @@ export const professionalRoutes: Routes = [
   {
     path: 'activities',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('./activities/list/list.component').then(
+        (m) => m.ListComponent
       ),
     data: { title: 'Actividades' }
   },
   {
+    path: 'activities/new',
+    loadComponent: () =>
+      import('./activities/new/new.component').then(
+        (m) => m.NewComponent
+      ),
+    canActivate: [permissionGuard],
+    data: { title: 'Nueva Actividad', permission: Permissions.Activities.Create, redirectTo: AppRoutes.Pro.Activities }
+  },
+  {
+    path: 'activities/:id/edit',
+    loadComponent: () =>
+      import('./activities/edit/edit.component').then(
+        (m) => m.EditComponent
+      ),
+    canActivate: [permissionGuard],
+    data: { title: 'Editar Actividad', permission: Permissions.Activities.Update, redirectTo: AppRoutes.Pro.Activities }
+  },
+  {
     path: 'goals',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('./goals/professional-goals.component').then(
+        (m) => m.ProfessionalGoalsComponent
       ),
     data: { title: 'Objetivos' }
   },
   {
     path: 'evaluations',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('../coming-soon/coming-soon.component').then(
+        (m) => m.ComingSoonComponent
       ),
     data: { title: 'Evaluaciones' }
   },
@@ -66,6 +87,14 @@ export const professionalRoutes: Routes = [
     data: { title: 'Crear Reporte' }
   },
   {
+    path: 'reports/:id/edit',
+    loadComponent: () =>
+      import('./reports/edit/edit.component').then(
+        (m) => m.EditComponent
+      ),
+    data: { title: 'Editar Reporte' }
+  },
+  {
     path: 'reports/:id',
     loadComponent: () =>
       import('./reports/detail/detail.component').then(
@@ -76,16 +105,16 @@ export const professionalRoutes: Routes = [
   {
     path: 'messages',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('../messages/messages.component').then(
+        (m) => m.MessagesComponent
       ),
     data: { title: 'Mensajes' }
   },
   {
     path: 'calendar',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('../coming-soon/coming-soon.component').then(
+        (m) => m.ComingSoonComponent
       ),
     data: { title: 'Calendario' }
   },

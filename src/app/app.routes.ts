@@ -5,6 +5,7 @@ import { roleGuard } from './guards/role.guard';
 import { globalAdminGuard } from './guards/global-admin.guard';
 import { permissionGuard } from './guards/permission.guard';
 import { UserRoles } from './shared/constants/roles';
+import { Permissions } from './shared/constants/permissions';
 
 export const routes: Routes = [
   {
@@ -174,7 +175,7 @@ export const routes: Routes = [
       },
       {
         path: 'invitations',
-        data: { title: 'Invitaciones', permission: 'invitations:read' },
+        data: { title: 'Invitaciones', permission: Permissions.Invitations.Read },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./views/admin/invitations/invitations.component').then(
@@ -215,6 +216,14 @@ export const routes: Routes = [
               import('./views/admin/admin-users/new/new.component').then(
                 (m) => m.NewComponent,
               ),
+          },
+          {
+            path: 'edit',
+            loadComponent: () =>
+              import('./views/admin/admin-users/edit/edit.component').then(
+                (m) => m.EditComponent,
+              ),
+            data: { title: 'Editar mis datos' },
           },
         ],
       },

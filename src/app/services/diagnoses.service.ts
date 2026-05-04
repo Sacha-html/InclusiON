@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { ApiResponse } from '../models';
 import { DiagnosisResponse, DiagnosisListItemResponse } from '../models/responses/diagnosis.response';
 import { CreateDiagnosisRequest } from '../models/requests/diagnoses/create-diagnosis.request';
-import { unwrapResponse } from '@shared/utils';
+import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -39,5 +39,11 @@ export class DiagnosesService {
     return this.http
       .put<ApiResponse<DiagnosisResponse>>(`${this.baseUrl}/diagnoses/${id}`, request)
       .pipe(unwrapResponse());
+  }
+
+  patchStatus(id: number, isActive: boolean): Observable<void> {
+    return this.http
+      .patch<void>(`${this.baseUrl}/diagnoses/${id}`, { isActive })
+      .pipe(handleApiError());
   }
 }

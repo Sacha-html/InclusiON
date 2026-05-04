@@ -55,6 +55,10 @@ export class CatalogsService {
     return this.cached('avatar-colors');
   }
 
+  getReportTypes(): Observable<CatalogItem[]> {
+    return this.cached('report-types');
+  }
+
   clearCache(): void {
     this.cache.clear();
     this.clearCache$.next();

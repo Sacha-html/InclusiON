@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { PersonResponse } from '@models';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { formatDate, formatDateTime } from '@shared/utils';
 import {
   BadgeComponent,
@@ -57,10 +58,10 @@ export class PersonBasicInfoComponent {
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/persons']);
+    this.router.navigate([AppRoutes.Admin.Persons]);
   }
 
   goToEdit(): void {
-    this.router.navigate(['/admin/persons', this.person.id, 'edit']);
+    this.router.navigate([AppRoutes.Admin.Persons, this.person.id, 'edit']);
   }
 }

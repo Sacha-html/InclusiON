@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService, ToastService } from '../services';
+import { AppRoutes } from '../shared/constants/app-routes';
 
 export const globalAdminGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
@@ -12,6 +13,6 @@ export const globalAdminGuard: CanActivateFn = () => {
   }
 
   toastService.warning('No tienes permisos para acceder a esta sección.');
-  router.navigate(['/admin/dashboard']);
+  router.navigate([AppRoutes.Admin.Dashboard]);
   return false;
 };

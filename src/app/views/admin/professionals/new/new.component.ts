@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { CreateProfessionalRequest } from '../../../../models';
 import { validDate, notFutureDate, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 import {
@@ -117,7 +118,7 @@ export class NewComponent {
         this.showPasswordModal = true;
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al crear el profesional';
+        this.serverError = err?.userMessage || 'Error al crear el profesional';
       },
     });
   }
@@ -125,11 +126,11 @@ export class NewComponent {
   closeModalAndNavigate(): void {
     this.showPasswordModal = false;
     if (this.createdProfessional) {
-      this.router.navigate(['/admin/professionals', this.createdProfessional.id]);
+      this.router.navigate([AppRoutes.Admin.Professionals, this.createdProfessional.id]);
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/professionals']);
+    this.router.navigate([AppRoutes.Admin.Professionals]);
   }
 }

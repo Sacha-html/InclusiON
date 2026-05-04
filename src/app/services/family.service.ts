@@ -8,6 +8,7 @@ import {
   GetFamilyRequest,
   PagedResponse,
   FamilyListItemResponse,
+  FamilyDashboardResponse,
   FamilyResponse,
   PersonRepresentativeResponse,
   FamilyStatusHistoryResponse,
@@ -134,6 +135,12 @@ export class FamilyService {
   unlinkFamilyFromPersonAsProfessional(familyId: string, personId: string, observation: string): Observable<PersonRepresentativeResponse> {
     return this.http
       .delete<ApiResponse<PersonRepresentativeResponse>>(`${this.apiUrl}/professional/unlink/${familyId}/${personId}`, { body: { observation } })
+      .pipe(unwrapResponse());
+  }
+
+  getDashboard(): Observable<FamilyDashboardResponse> {
+    return this.http
+      .get<ApiResponse<FamilyDashboardResponse>>(`${this.apiUrl}/dashboard`)
       .pipe(unwrapResponse());
   }
 }

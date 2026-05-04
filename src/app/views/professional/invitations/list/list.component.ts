@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { switchMap } from 'rxjs';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InvitationsService, ToastService, ProfessionalsService, AssignmentsService } from '@services';
 import { getInvitationStatusColor } from '@shared/utils';
@@ -128,20 +129,13 @@ export class ListComponent implements OnInit {
   }
 
   private loadPersons(): void {
-    this.professionalsService.getMyProfile().subscribe({
-      next: (profile) => {
-        this.assignmentsService.getPersonsByProfessional(profile.id).subscribe({
-          next: (persons) => {
-            this.persons = persons.filter(p => p.isActive);
-          },
-          error: () => {
-            // Non-critical, persons dropdown will be empty
-          },
-        });
+    this.professionalsService.getMyProfile().pipe(
+      switchMap(profile => this.assignmentsService.getPersonsByProfessional(profile.id))
+    ).subscribe({
+      next: (persons) => {
+        this.persons = persons.filter(p => p.isActive);
       },
-      error: () => {
-        // Non-critical
-      },
+      error: () => {},
     });
   }
 

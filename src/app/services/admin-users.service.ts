@@ -1,9 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
-import { AdminUserResponse, ApiResponse, CreateAdminUserResponse } from '../models';
+import { AdminUserResponse, AdminDashboardResponse, ApiResponse, CreateAdminUserResponse } from '../models';
 import { Observable } from 'rxjs';
-import { unwrapResponse } from '@shared/utils';
+import { unwrapResponse, handleApiError } from '@shared/utils';
+
+export interface UpdateAdminUserRequest {
+  name: string;
+  surname: string;
+  email: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +19,10 @@ export class AdminUsersService {
 
   private get apiUrl(): string {
     return `${environment.apiUrl}/admin/institutions-assignments`;
+  }
+
+  private get usersApiUrl(): string {
+    return `${environment.apiUrl}/admin/users`;
   }
 
   getAdmins(): Observable<AdminUserResponse[]> {
@@ -29,6 +39,18 @@ export class AdminUsersService {
   }): Observable<CreateAdminUserResponse> {
     return this.http
       .post<ApiResponse<CreateAdminUserResponse>>(`${this.apiUrl}/users`, request)
+      .pipe(unwrapResponse());
+  }
+
+  updateAdmin(userId: string, request: UpdateAdminUserRequest): Observable<void> {
+    return this.http
+      .put<void>(`${this.usersApiUrl}/${userId}`, request)
+      .pipe(handleApiError());
+  }
+
+  getDashboard(): Observable<AdminDashboardResponse> {
+    return this.http
+      .get<ApiResponse<AdminDashboardResponse>>(`${environment.apiUrl}/admin/dashboard`)
       .pipe(unwrapResponse());
   }
 }

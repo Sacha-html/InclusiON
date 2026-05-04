@@ -7,8 +7,9 @@ import {
 } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { LoginRequest } from '@models';
-import { RoleRoutes } from '../../../shared/constants/roles';
+import { RoleRoutes, UserRoles } from '../../../shared/constants/roles';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 // CoreUI imports
@@ -110,14 +111,14 @@ export class LoginComponent implements OnInit {
       email: this.loginForm.value.email.trim(),
       password: this.loginForm.value.password,
       rememberMe: this.loginForm.value.rememberMe,
-      allowedRoles: this.isProfessional ? ['Professional'] : ['Admin'],
+      allowedRoles: this.isProfessional ? [UserRoles.Professional] : [UserRoles.Admin],
     };
 
     this.authService.login(loginData).subscribe({
       next: (response) => {
         if (response?.success) {
           if (response.data?.mustChangePassword) {
-            this.router.navigate(['/change-password']);
+            this.router.navigate([AppRoutes.ChangePassword]);
           } else {
             const role = this.authService.getUserRole();
             const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
@@ -181,6 +182,6 @@ export class LoginComponent implements OnInit {
   }
 
   goToVisualLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate([AppRoutes.Login]);
   }
 }

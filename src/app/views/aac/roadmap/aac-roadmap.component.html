@@ -1,0 +1,117 @@
+<div class="aac-roadmap" role="main" aria-label="Mi Roadmap de aprendizaje">
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-center" aria-live="polite" aria-label="Cargando tu roadmap">
+      <c-spinner color="primary" />
+      <p class="loading-text">Cargando tu camino de aprendizaje...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @else if (hasError()) {
+    <div class="empty-state" role="alert">
+      <span class="empty-icon">😕</span>
+      <p>No se pudo cargar el roadmap. Intenta de nuevo más tarde.</p>
+    </div>
+  }
+
+  <!-- Sin roadmap -->
+  @else if (!roadmap()) {
+    <div class="empty-state">
+      <span class="empty-icon">🗺️</span>
+      <h2>Tu camino está por comenzar</h2>
+      <p>Tu profesional está preparando tu roadmap de aprendizaje.<br>¡Vuelve pronto!</p>
+    </div>
+  }
+
+  <!-- Roadmap con áreas -->
+  @else {
+    <header class="roadmap-header">
+      <h1 class="roadmap-title">Mi Camino</h1>
+      @if (roadmap()!.notes) {
+        <p class="roadmap-notes">{{ roadmap()!.notes }}</p>
+      }
+    </header>
+
+    @if (enrichedAreas().length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">📚</span>
+        <p>Tu profesional aún no agregó áreas al roadmap.</p>
+      </div>
+    }
+
+    @for (area of enrichedAreas(); track area.id) {
+      <section class="roadmap-area" [attr.aria-labelledby]="'area-' + area.id">
+        <!-- Area header -->
+        <div class="area-header" [style.background-color]="area.headerColor">
+          @if (area.icon) {
+            <span class="area-icon" aria-hidden="true">{{ area.icon }}</span>
+          }
+          <h2 [id]="'area-' + area.id" class="area-name">{{ area.skillAreaName }}</h2>
+        </div>
+
+        <!-- Activity path -->
+        <div class="activity-path" role="list" [attr.aria-label]="'Actividades de ' + area.skillAreaName">
+          @if (area.nodes.length === 0) {
+            <p class="no-activities">Aún no hay actividades en esta área.</p>
+          }
+
+          @for (node of area.nodes; track node.activity.id; let i = $index) {
+            <div
+              class="path-row"
+              [ngClass]="node.side"
+              role="listitem"
+            >
+              <!-- Connecting line (not for first node) -->
+              @if (i > 0) {
+                <div class="connector" [ngClass]="node.side" aria-hidden="true"></div>
+              }
+
+              <!-- Activity node -->
+              <button
+                class="activity-node"
+                [ngClass]="[node.status, node.side]"
+                [attr.aria-label]="nodeAriaLabel(node)"
+                [attr.aria-disabled]="node.status === 'locked'"
+                [style.border-color]="node.status !== 'locked' ? area.headerColor : undefined"
+                [style.background-color]="node.status === 'completed' ? area.headerColor : undefined"
+                (click)="onNodeClick(node)"
+                type="button"
+              >
+                <span class="node-label" aria-hidden="true">{{ nodeLabel(node) }}</span>
+
+                @if (node.status === 'in-progress') {
+                  <span class="pulse-ring" aria-hidden="true"></span>
+                }
+              </button>
+
+              <!-- Activity info card -->
+              <div
+                class="node-info"
+                [ngClass]="{ 'info-right': node.side === 'left', 'info-left': node.side === 'right' }"
+              >
+                <span class="node-title">{{ node.activity.activityTitle }}</span>
+                <span class="node-difficulty" [attr.aria-label]="'Dificultad ' + node.activity.difficultyLevel + ' de 5'">
+                  {{ difficultyStars(node.activity.difficultyLevel) }}
+                </span>
+                @if (node.status === 'locked' && node.activity.unlockThresholdPercent > 0) {
+                  <span class="node-hint">Necesitas {{ node.activity.unlockThresholdPercent }}% en la anterior</span>
+                }
+                @if (node.status === 'completed') {
+                  <span class="node-badge completed">Completada ✓</span>
+                }
+                @if (node.status === 'in-progress') {
+                  <span class="node-badge in-progress">En progreso</span>
+                }
+                @if (node.status === 'available') {
+                  <span class="node-badge available">Próximamente</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

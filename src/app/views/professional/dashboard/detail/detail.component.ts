@@ -1,23 +1,28 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import {
   CardBodyComponent, CardComponent, ColComponent, RowComponent,
   SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-import { ProfessionalsService, AssignmentsService, InvitationsService } from '@services';
+import { ProfessionalsService, AssignmentsService, InvitationsService, ReportsService, ToastService } from '@services';
+import { MessagesService } from '../../../../services/messages.service';
 import { getInvitationStatusColor } from '@shared/utils';
 import {
   ProfessionalResponse,
   ProfessionalPersonResponse,
   InvitationResponse,
 } from '@models';
+import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-professional-dashboard',
   standalone: true,
   imports: [
+    CommonModule,
     CardComponent, CardBodyComponent, RowComponent, ColComponent,
     SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
     IconDirective,
@@ -27,14 +32,19 @@ import { forkJoin } from 'rxjs';
 })
 export class DetailComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
-  private readonly assignmentsService = inject(AssignmentsService);
-  private readonly invitationsService = inject(InvitationsService);
-  private readonly router = inject(Router);
+  private readonly assignmentsService   = inject(AssignmentsService);
+  private readonly invitationsService   = inject(InvitationsService);
+  private readonly reportsService       = inject(ReportsService);
+  private readonly messagesService      = inject(MessagesService);
+  private readonly toastService         = inject(ToastService);
+  private readonly router               = inject(Router);
 
   isLoading = true;
   professional: ProfessionalResponse | null = null;
   persons: ProfessionalPersonResponse[] = [];
   invitations: InvitationResponse[] = [];
+  recentReports: ReportListItemResponse[] = [];
+  unreadMessages = 0;
 
   get personCount(): number {
     return this.persons.filter(p => p.isActive).length;
@@ -52,8 +62,20 @@ export class DetailComponent implements OnInit {
     return this.persons.filter(p => p.isActive).slice(0, 5);
   }
 
-  get recentInvitations(): InvitationResponse[] {
+  get recentInvitationsList(): InvitationResponse[] {
     return this.invitations.slice(0, 5);
+  }
+
+  get draftReportsCount(): number {
+    return this.recentReports.filter(r => r.status === ReportStatus.Draft).length;
+  }
+
+  get submittedReportsCount(): number {
+    return this.recentReports.filter(r => r.status === ReportStatus.Submitted).length;
+  }
+
+  get rejectedReportsCount(): number {
+    return this.recentReports.filter(r => r.status === ReportStatus.Rejected).length;
   }
 
   ngOnInit(): void {
@@ -64,22 +86,34 @@ export class DetailComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
+        this.toastService.error('Error al cargar el perfil profesional');
       },
     });
   }
 
   private loadDashboardData(professionalId: string): void {
     forkJoin({
-      persons: this.assignmentsService.getPersonsByProfessional(professionalId),
+      persons:     this.assignmentsService.getPersonsByProfessional(professionalId),
       invitations: this.invitationsService.getAll(),
+      reports:     this.reportsService.getReports({
+                     page: 1,
+                     professionalId,
+                     pageSize: 50,
+                     sortBy: 'createdAt',
+                     sortDirection: 'DESC',
+                   }),
+      unread:      this.messagesService.getUnreadCount(),
     }).subscribe({
-      next: ({ persons, invitations }) => {
-        this.persons = persons;
-        this.invitations = invitations;
-        this.isLoading = false;
+      next: ({ persons, invitations, reports, unread }) => {
+        this.persons        = persons;
+        this.invitations    = invitations;
+        this.recentReports  = reports.data;
+        this.unreadMessages = unread;
+        this.isLoading      = false;
       },
       error: () => {
         this.isLoading = false;
+        this.toastService.error('Error al cargar el panel');
       },
     });
   }
@@ -90,9 +124,27 @@ export class DetailComponent implements OnInit {
 
   getStatusColor = getInvitationStatusColor;
 
+  getReportStatusLabel(status: ReportStatus): string {
+    switch (status) {
+      case ReportStatus.Draft:     return ReportStatusLabels.Borrador;
+      case ReportStatus.Submitted: return ReportStatusLabels.Enviado;
+      case ReportStatus.Approved:  return ReportStatusLabels.Aprobado;
+      case ReportStatus.Rejected:  return ReportStatusLabels.Rechazado;
+    }
+  }
+
+  getReportStatusColor(status: ReportStatus): string {
+    switch (status) {
+      case ReportStatus.Draft:     return 'secondary';
+      case ReportStatus.Submitted: return 'warning';
+      case ReportStatus.Approved:  return 'success';
+      case ReportStatus.Rejected:  return 'danger';
+    }
+  }
+
   getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos dias';
+    if (hour < 12) return 'Buenos días';
     if (hour < 19) return 'Buenas tardes';
     return 'Buenas noches';
   }

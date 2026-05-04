@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { InvitationsService, ToastService, ErrorCodeService, AuthService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { InvitationValidationResponse, AcceptInvitationRequest } from '@models';
 
 import {
@@ -152,7 +153,7 @@ export class RegisterByInvitationComponent implements OnInit {
         if (this.authService.getCurrentUser()) {
           this.registrationComplete = true;
         } else {
-          this.router.navigate(['/login']);
+          this.router.navigate([AppRoutes.Login]);
         }
       },
       error: (error) => {
