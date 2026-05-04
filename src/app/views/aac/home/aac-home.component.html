@@ -5,6 +5,12 @@
     <h2 id="actions-title" class="section-title">Acciones rapidas</h2>
     <div class="actions-grid">
       <app-big-button
+        label="Mi Camino"
+        icon="cilMap"
+        color="#4CAF50"
+        (buttonClick)="goTo('/app/roadmap')"
+      />
+      <app-big-button
         label="Mis Actividades"
         icon="cilTask"
         color="#2196F3"

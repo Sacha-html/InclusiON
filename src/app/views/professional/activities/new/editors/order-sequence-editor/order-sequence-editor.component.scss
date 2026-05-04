@@ -1,0 +1,60 @@
+:host { display: block; }
+
+.sequence-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.sequence-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cui-border-color);
+  border-radius: 8px;
+  background: var(--cui-body-bg);
+}
+
+.sequence-pos {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cui-primary);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.seq-picto { width: 48px; height: 48px; object-fit: contain; flex-shrink: 0; }
+.seq-label { flex: 1; min-width: 80px; }
+.seq-actions { display: flex; gap: 0.25rem; flex-shrink: 0; }
+
+.arasaac-panel {
+  border: 1px solid var(--cui-border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--cui-tertiary-bg, #f8f9fa);
+}
+
+.arasaac-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.5rem;
+}
+
+.arasaac-card {
+  border: 1px solid var(--cui-border-color);
+  border-radius: 6px;
+  background: none;
+  padding: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  transition: border-color 0.15s;
+  img { width: 56px; height: 56px; object-fit: contain; }
+  span { font-size: 0.7rem; text-align: center; }
+  &:hover { border-color: var(--cui-primary); }
+}

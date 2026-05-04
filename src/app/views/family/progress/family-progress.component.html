@@ -1,0 +1,177 @@
+<!-- Loading inicial -->
+@if (isLoading()) {
+  <div class="loading-center" role="status" aria-live="polite">
+    <c-spinner />
+    <p class="mt-2 text-body-secondary">Cargando...</p>
+  </div>
+} @else if (hasError()) {
+  <c-alert color="danger" role="alert">
+    No se pudo cargar la información. Intentá de nuevo más tarde.
+  </c-alert>
+} @else {
+
+  <!-- Selector de persona (si hay más de una) -->
+  @if (persons().length > 1) {
+    <div class="person-selector" role="group" aria-label="Seleccionar persona">
+      <p class="selector-label">¿De quién querés ver el progreso?</p>
+      <div class="person-pills">
+        @for (person of persons(); track person.personId) {
+          <button
+            class="person-pill"
+            [class.person-pill--active]="selectedPersonId() === person.personId"
+            (click)="selectPerson(person.personId)"
+            [attr.aria-pressed]="selectedPersonId() === person.personId"
+          >
+            <span
+              class="person-avatar"
+              [style.background]="person.avatarColor"
+              aria-hidden="true"
+            >
+              {{ person.fullName.charAt(0) }}
+            </span>
+            {{ person.fullName }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Sin persona seleccionada -->
+  @if (!selectedPersonId()) {
+    <div class="empty-state">
+      <p>Seleccioná una persona para ver su progreso.</p>
+    </div>
+  }
+
+  <!-- Progreso -->
+  @if (selectedPersonId()) {
+    @if (isLoadingAssignments()) {
+      <div class="loading-center" role="status" aria-live="polite">
+        <c-spinner />
+        <p class="mt-2 text-body-secondary">Cargando progreso...</p>
+      </div>
+    } @else if (stats().total === 0) {
+      <p class="empty-state">Todavía no tiene actividades asignadas.</p>
+    } @else {
+
+      <!-- ── Resumen ────────────────────────────────────────────────────────── -->
+      <c-row class="g-3 mb-4">
+
+        <!-- Completadas / Total -->
+        <c-col xs="12" sm="6" lg="3">
+          <c-card class="stat-card h-100">
+            <c-card-body>
+              <p class="stat-label">Completadas</p>
+              <p class="stat-value">
+                {{ stats().completadas }}
+                <span class="stat-total">/ {{ stats().total }}</span>
+              </p>
+              <c-progress class="mt-2" height="8">
+                <c-progress-bar
+                  [value]="completionPercent()"
+                  color="success"
+                  [animated]="true"
+                />
+              </c-progress>
+              <p class="stat-sub mt-1">{{ completionPercent() }}% completado</p>
+            </c-card-body>
+          </c-card>
+        </c-col>
+
+        <!-- Score promedio -->
+        <c-col xs="12" sm="6" lg="3">
+          <c-card class="stat-card h-100">
+            <c-card-body>
+              <p class="stat-label">Puntaje promedio</p>
+              @if (stats().avgScore !== null) {
+                <p class="stat-value">
+                  {{ stats().avgScore }}%
+                </p>
+                <c-progress class="mt-2" height="8">
+                  <c-progress-bar
+                    [value]="stats().avgScore!"
+                    [color]="scoreColor(stats().avgScore!)"
+                    [animated]="true"
+                  />
+                </c-progress>
+              } @else {
+                <p class="stat-value stat-value--empty">—</p>
+                <p class="stat-sub">Sin resultados aún</p>
+              }
+            </c-card-body>
+          </c-card>
+        </c-col>
+
+        <!-- En progreso / Pendientes -->
+        <c-col xs="12" sm="6" lg="3">
+          <c-card class="stat-card h-100">
+            <c-card-body>
+              <p class="stat-label">En curso</p>
+              <p class="stat-value">{{ stats().enProgreso }}</p>
+              <p class="stat-sub">{{ stats().pendientes }} pendiente{{ stats().pendientes !== 1 ? 's' : '' }}</p>
+            </c-card-body>
+          </c-card>
+        </c-col>
+
+        <!-- Total intentos -->
+        <c-col xs="12" sm="6" lg="3">
+          <c-card class="stat-card h-100">
+            <c-card-body>
+              <p class="stat-label">Total intentos</p>
+              <p class="stat-value">{{ stats().totalAttempts }}</p>
+              @if (stats().totalEvaluations > 0) {
+                <p class="stat-sub">
+                  {{ stats().completedEvals }}/{{ stats().totalEvaluations }}
+                  evaluaci{{ stats().totalEvaluations !== 1 ? 'ones' : 'ón' }}
+                </p>
+              }
+            </c-card-body>
+          </c-card>
+        </c-col>
+
+      </c-row>
+
+      <!-- ── Historial de intentos ─────────────────────────────────────────── -->
+      <c-card>
+        <c-card-header>
+          <strong>Historial de intentos</strong>
+          <span class="ms-2 text-body-secondary" style="font-size:.85rem;">
+            Últimos {{ recentCompletions().length }}
+          </span>
+        </c-card-header>
+        <c-card-body>
+          @if (recentCompletions().length === 0) {
+            <p class="text-body-secondary text-center py-3">
+              Todavía no hay intentos completados.
+            </p>
+          } @else {
+            <div class="timeline" role="list">
+              @for (entry of recentCompletions(); track $index) {
+                <div class="timeline-item" role="listitem">
+                  <div class="timeline-dot" aria-hidden="true"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="timeline-title">{{ entry.activityTitle }}</span>
+                      <div class="timeline-badges">
+                        <c-badge [color]="resultColor(entry.result)" shape="rounded-pill">
+                          {{ resultLabel(entry.result) }}
+                        </c-badge>
+                        @if (entry.score !== null) {
+                          <c-badge [color]="scoreColor(entry.score)" shape="rounded-pill">
+                            {{ entry.score }}%
+                          </c-badge>
+                        }
+                      </div>
+                    </div>
+                    <span class="timeline-date">{{ formatDate(entry.completedAt) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </c-card-body>
+      </c-card>
+
+    }
+  }
+}

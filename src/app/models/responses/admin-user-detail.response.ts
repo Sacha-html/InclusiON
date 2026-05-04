@@ -27,3 +27,13 @@ export interface ResetPasswordResultResponse {
   temporaryPassword: string;
   userEmail: string;
 }
+
+export interface UserRecentSessionResponse {
+  createdAt: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  isActive: boolean;
+  expiresAt: string;
+  revokedAt: string | null;
+  revokedReason: string | null;
+}

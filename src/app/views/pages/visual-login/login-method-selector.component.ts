@@ -83,7 +83,7 @@ export class LoginMethodSelectorComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.message || 'Error al cargar metodos de login';
+        this.errorMessage = error.userMessage || 'Error al cargar metodos de login';
         this.isLoading = false;
       }
     });
@@ -212,7 +212,7 @@ export class LoginMethodSelectorComponent implements OnInit {
         this.isSaving = false;
       },
       error: (error) => {
-        this.errorMessage = error.message || 'Error al actualizar metodo de login';
+        this.errorMessage = error.userMessage || 'Error al actualizar metodo de login';
         this.isSaving = false;
       }
     });

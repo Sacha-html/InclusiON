@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InstitutionsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { InstitutionResponse, UpdateInstitutionRequest } from '../../../../models';
 import {
   ButtonDirective,
@@ -63,10 +64,10 @@ export class EditComponent implements OnInit {
           if (this.institution) {
             this.patchForm(this.institution);
           } else {
-            this.router.navigate(['/admin/institutions']);
+            this.router.navigate([AppRoutes.Admin.Institutions]);
           }
         },
-        error: () => this.router.navigate(['/admin/institutions']),
+        error: () => this.router.navigate([AppRoutes.Admin.Institutions]),
       });
     }
   }
@@ -97,15 +98,15 @@ export class EditComponent implements OnInit {
     this.institutionsService.update(this.institution.id, request).subscribe({
       next: () => {
         this.toastService.success('Institucion actualizada exitosamente');
-        this.router.navigate(['/admin/institutions']);
+        this.router.navigate([AppRoutes.Admin.Institutions]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al actualizar la institucion';
+        this.serverError = err?.userMessage || 'Error al actualizar la institucion';
       },
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/institutions']);
+    this.router.navigate([AppRoutes.Admin.Institutions]);
   }
 }

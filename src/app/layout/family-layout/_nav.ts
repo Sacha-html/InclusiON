@@ -1,9 +1,10 @@
 import { INavData } from '@coreui/angular';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 export const familyNavItems: INavData[] = [
   {
     name: 'Inicio',
-    url: '/family',
+    url: AppRoutes.Family.Root,
     iconComponent: { name: 'cil-home' }
   },
   {
@@ -12,27 +13,27 @@ export const familyNavItems: INavData[] = [
   },
   {
     name: 'Actividades',
-    url: '/family/activities',
+    url: AppRoutes.Family.Activities,
     iconComponent: { name: 'cil-task' }
   },
   {
     name: 'Calendario',
-    url: '/family/calendar',
+    url: AppRoutes.Family.Calendar,
     iconComponent: { name: 'cil-calendar' }
   },
   {
     name: 'Profesionales',
-    url: '/family/professionals',
+    url: AppRoutes.Family.Professionals,
     iconComponent: { name: 'cil-medical-cross' }
   },
   {
     name: 'Progreso',
-    url: '/family/progress',
+    url: AppRoutes.Family.Progress,
     iconComponent: { name: 'cil-chart-line' }
   },
   {
     name: 'Reportes',
-    url: '/family/reports',
+    url: AppRoutes.Family.Reports,
     iconComponent: { name: 'cil-description' }
   },
   {
@@ -41,7 +42,7 @@ export const familyNavItems: INavData[] = [
   },
   {
     name: 'Mensajes',
-    url: '/family/messages',
+    url: AppRoutes.Family.Messages,
     iconComponent: { name: 'cil-envelope-closed' }
   }
 ];

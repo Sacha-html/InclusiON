@@ -6,7 +6,8 @@ import { ReportListItemResponse, ReportResponse } from '@models/responses/report
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { CreateReportRequest } from '@models/requests/reports/create-report.request';
 import { environment } from '@env';
-import { unwrapResponse } from '@shared/utils';
+import { unwrapResponse, handleApiError } from '@shared/utils';
+import { UpdateReportRequest } from '@models/requests/reports/update-report.request';
 
 @Injectable({
   providedIn: 'root',
@@ -82,6 +83,18 @@ export class ReportsService {
     return this.http
       .patch<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}/approve`, {})
       .pipe(unwrapResponse());
+  }
+
+  update(id: number, request: UpdateReportRequest): Observable<ReportResponse> {
+    return this.http
+      .put<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}`, request)
+      .pipe(unwrapResponse());
+  }
+
+  deactivate(id: number): Observable<void> {
+    return this.http
+      .put<void>(`${this.baseUrl}/${id}/deactivate`, {})
+      .pipe(handleApiError());
   }
 
   /** Admin rechaza el reporte con comentario */
