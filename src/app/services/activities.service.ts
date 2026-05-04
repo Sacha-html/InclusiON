@@ -68,13 +68,22 @@ export class ActivitiesService {
 
   setStatus(id: number, isActive: boolean): Observable<ActivityResponse> {
     return this.http
-      .patch<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}/status`, { isActive })
+      .patch<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`, { isActive })
       .pipe(unwrapResponse());
   }
 
   createAssignment(request: CreateAssignmentRequest): Observable<ActivityAssignmentResponse> {
     return this.http
       .post<ApiResponse<ActivityAssignmentResponse>>(this.assignmentsUrl, request)
+      .pipe(unwrapResponse());
+  }
+
+  searchSemantic(text: string, limit = 10): Observable<ActivityListItemResponse[]> {
+    const params = new HttpParams()
+      .set('text', text)
+      .set('limit', limit.toString());
+    return this.http
+      .get<ApiResponse<ActivityListItemResponse[]>>(`${this.baseUrl}/search`, { params })
       .pipe(unwrapResponse());
   }
 
