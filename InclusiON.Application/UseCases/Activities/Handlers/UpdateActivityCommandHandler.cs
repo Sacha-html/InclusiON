@@ -97,6 +97,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 var text = string.Join(". ", parts);
 
                 var embedding = await _embeddingService.GenerateEmbeddingAsync(text);
+                if (embedding.Length == 0) return;
                 await _embeddingRepository.StoreAsync(activityId, embedding);
             }
             catch (Exception ex)
