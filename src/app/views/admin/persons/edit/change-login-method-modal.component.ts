@@ -164,7 +164,7 @@ export class ChangeLoginMethodModalComponent implements OnChanges {
       },
       error: (err) => {
         this.submitting = false;
-        this.errorMessage = err?.error?.message || err?.message || 'No se pudo cambiar el método. Intentá de nuevo.';
+        this.errorMessage = err?.userMessage || 'No se pudo cambiar el método. Intentá de nuevo.';
       },
     });
   }

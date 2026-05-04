@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GridModule } from '@coreui/angular';
 import { FamilyService, AuthService, ToastService } from '@services';
+import { Permissions } from '@shared/constants/permissions';
 import {
   PersonRepresentativeResponse,
   FamilyResponse,
@@ -49,8 +50,8 @@ import { TableColumn, HeaderButton } from '@shared/components/data-table/data-ta
     AlertComponent,
     DataTableComponent,
   ],
-  templateUrl: './family-tab.component.html',
-  styleUrl: './family-tab.component.scss',
+  templateUrl: './professional-family-tab.component.html',
+  styleUrl: './professional-family-tab.component.scss',
 })
 export class ProfessionalFamilyTabComponent {
   private readonly familyService = inject(FamilyService);
@@ -63,8 +64,8 @@ export class ProfessionalFamilyTabComponent {
 
   @Output() refresh = new EventEmitter<void>();
 
-  canLinkFamily = this.authService.hasPermission('professionals:link-family') || this.authService.hasPermission('family:link');
-  canUnlinkFamily = this.authService.hasPermission('professionals:unlink-family') || this.authService.hasPermission('family:unlink');
+  canLinkFamily = this.authService.hasPermission(Permissions.Professionals.LinkFamily) || this.authService.hasPermission(Permissions.Family.Link);
+  canUnlinkFamily = this.authService.hasPermission(Permissions.Professionals.UnlinkFamily) || this.authService.hasPermission(Permissions.Family.Unlink);
 
   familyCols: TableColumn[] = [
     {
@@ -183,7 +184,7 @@ export class ProfessionalFamilyTabComponent {
       error: (err) => {
         this.confirmingLink = false;
         if (err?.status === 409) return;
-        const message = err?.error?.message ?? err?.message ?? 'Error al vincular familiar';
+        const message = err?.userMessage ?? 'Error al vincular familiar';
         this.toastService.error(message);
       },
     });
@@ -229,7 +230,7 @@ export class ProfessionalFamilyTabComponent {
       },
       error: (err) => {
         this.unlinking = false;
-        const message = err?.error?.message ?? err?.message ?? 'Error al desvincular familiar';
+        const message = err?.userMessage ?? 'Error al desvincular familiar';
         this.toastService.error(message);
       },
     });

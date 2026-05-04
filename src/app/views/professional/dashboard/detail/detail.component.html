@@ -4,19 +4,35 @@
   </div>
 } @else {
 
-  <!-- Saludo -->
+  <!-- Saludo + mensajes -->
   <c-row class="mb-4">
-    <c-col xs="12">
+    <c-col xs="12" md="8">
       <c-card>
         <c-card-body>
           <h4 class="mb-1">{{ getGreeting() }}, {{ professional?.firstName }}!</h4>
-          <p class="text-body-secondary mb-0">Panel de gestion profesional</p>
+          <p class="text-body-secondary mb-0">Panel de gestión profesional</p>
+        </c-card-body>
+      </c-card>
+    </c-col>
+    <c-col xs="12" md="4" class="mt-3 mt-md-0">
+      <c-card class="h-100 cursor-pointer" (click)="navigateTo('/pro/messages')">
+        <c-card-body class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="fs-4 fw-semibold" [class.text-danger]="unreadMessages > 0">
+              {{ unreadMessages }}
+            </div>
+            <div class="text-body-secondary small">Mensajes sin leer</div>
+          </div>
+          <svg cIcon name="cil-envelope-closed" size="3xl"
+               [class.text-danger]="unreadMessages > 0"
+               [class.text-body-secondary]="unreadMessages === 0">
+          </svg>
         </c-card-body>
       </c-card>
     </c-col>
   </c-row>
 
-  <!-- Contadores -->
+  <!-- Contadores principales -->
   <c-row class="mb-4">
     <c-col md="4">
       <c-card class="mb-4 cursor-pointer counter-card-primary" (click)="navigateTo('/pro/persons')">
@@ -53,6 +69,46 @@
     </c-col>
   </c-row>
 
+  <!-- Reportes resumen -->
+  @if (recentReports.length > 0) {
+    <c-row class="mb-4">
+      <c-col xs="12" sm="4">
+        <c-card class="mb-3 cursor-pointer" (click)="navigateTo('/pro/reports')">
+          <c-card-body class="text-center">
+            <div class="fs-4 fw-semibold text-body-secondary">{{ draftReportsCount }}</div>
+            <div class="small text-body-secondary">Borradores</div>
+          </c-card-body>
+        </c-card>
+      </c-col>
+      <c-col xs="12" sm="4">
+        <c-card class="mb-3 cursor-pointer"
+                [style.border-color]="submittedReportsCount > 0 ? 'var(--cui-warning)' : ''"
+                (click)="navigateTo('/pro/reports')">
+          <c-card-body class="text-center">
+            <div class="fs-4 fw-semibold"
+                 [class.text-warning]="submittedReportsCount > 0">
+              {{ submittedReportsCount }}
+            </div>
+            <div class="small text-body-secondary">Enviados (en revisión)</div>
+          </c-card-body>
+        </c-card>
+      </c-col>
+      <c-col xs="12" sm="4">
+        <c-card class="mb-3 cursor-pointer"
+                [style.border-color]="rejectedReportsCount > 0 ? 'var(--cui-danger)' : ''"
+                (click)="navigateTo('/pro/reports')">
+          <c-card-body class="text-center">
+            <div class="fs-4 fw-semibold"
+                 [class.text-danger]="rejectedReportsCount > 0">
+              {{ rejectedReportsCount }}
+            </div>
+            <div class="small text-body-secondary">Rechazados</div>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  }
+
   <!-- Tablas resumen -->
   <c-row>
     <!-- Personas a cargo -->
@@ -84,7 +140,7 @@
             </table>
             @if (persons.length > 5) {
               <p class="text-body-secondary text-center small mt-2 mb-0">
-                y {{ persons.length - 5 }} mas...
+                y {{ persons.length - 5 }} más…
               </p>
             }
           }
@@ -92,8 +148,50 @@
       </c-card>
     </c-col>
 
-    <!-- Invitaciones recientes -->
+    <!-- Reportes recientes -->
     <c-col lg="6">
+      <c-card class="mb-4">
+        <c-card-body>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Reportes recientes</h5>
+            <button cButton color="primary" size="sm" (click)="navigateTo('/pro/reports')">
+              Ver todos
+            </button>
+          </div>
+          @if (recentReports.length === 0) {
+            <p class="text-body-secondary text-center py-3">No hay reportes</p>
+          } @else {
+            <table cTable hover small>
+              <tbody>
+                @for (report of recentReports.slice(0, 5); track report.id) {
+                  <tr>
+                    <td>
+                      <div class="fw-medium">{{ report.title }}</div>
+                      <div class="small text-body-secondary">{{ report.personName }}</div>
+                    </td>
+                    <td class="text-end">
+                      <c-badge [color]="getReportStatusColor(report.status)">
+                        {{ getReportStatusLabel(report.status) }}
+                      </c-badge>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (recentReports.length > 5) {
+              <p class="text-body-secondary text-center small mt-2 mb-0">
+                y {{ recentReports.length - 5 }} más…
+              </p>
+            }
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+
+  <!-- Invitaciones recientes -->
+  <c-row>
+    <c-col lg="12">
       <c-card class="mb-4">
         <c-card-body>
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -102,12 +200,12 @@
               Ver todas
             </button>
           </div>
-          @if (recentInvitations.length === 0) {
+          @if (recentInvitationsList.length === 0) {
             <p class="text-body-secondary text-center py-3">No hay invitaciones</p>
           } @else {
             <table cTable hover small>
               <tbody>
-                @for (inv of recentInvitations; track inv.id) {
+                @for (inv of recentInvitationsList; track inv.id) {
                   <tr>
                     <td>{{ inv.firstName }} {{ inv.lastName }}</td>
                     <td>{{ inv.email }}</td>

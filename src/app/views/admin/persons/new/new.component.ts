@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CatalogsService, PersonsService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '../../../../models';
 import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
@@ -144,15 +145,15 @@ export class NewComponent implements OnInit {
 
     this.personsService.createPerson(request).subscribe({
       next: (person) => {
-        this.router.navigate(['/admin/persons', person.id]);
+        this.router.navigate([AppRoutes.Admin.Persons, person.id]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al crear la persona';
+        this.serverError = err?.userMessage || 'Error al crear la persona';
       },
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/persons']);
+    this.router.navigate([AppRoutes.Admin.Persons]);
   }
 }

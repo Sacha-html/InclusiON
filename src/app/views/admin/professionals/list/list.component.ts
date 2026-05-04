@@ -1,6 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, ProfessionalsService, ToastService, UserManagementService } from '@services';
+import { Permissions } from '@shared/constants/permissions';
+import { AppRoutes } from '@shared/constants/app-routes';
+import { ValidationStatus } from '@shared/constants/status-labels';
 import { ProfessionalListItemResponse, ValidateProfessionalRequest } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
@@ -46,8 +49,8 @@ export class ListComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly userService = inject(UserManagementService);
 
-  canCreate = this.authService.hasPermission('professionals:create');
-  canValidate = this.authService.hasPermission('professionals:update') || this.authService.isGlobalAdmin();
+  canCreate = this.authService.hasPermission(Permissions.Professionals.Create);
+  canValidate = this.authService.hasPermission(Permissions.Professionals.Update) || this.authService.isGlobalAdmin();
 
   selectedInstitutionId: number | undefined;
   activeTab: 'active' | 'validations' = 'active';
@@ -202,7 +205,7 @@ export class ListComponent implements OnInit {
 
   onHeaderAction(action: string): void {
     if (action === 'new') {
-      this.router.navigate(['/admin/professionals/new']);
+      this.router.navigate([AppRoutes.Admin.Professionals + '/new']);
     } else if (action === 'export') {
       this.exportToCsv();
     }
@@ -218,20 +221,20 @@ export class ListComponent implements OnInit {
   onRowAction(event: { action: string; item: any }): void {
     switch (event.action) {
       case 'view':
-        this.router.navigate(['/admin/professionals', event.item.id]);
+        this.router.navigate([AppRoutes.Admin.Professionals, event.item.id]);
         break;
       case 'reset-password':
         this.itemToResetPassword = event.item;
         this.showResetPasswordModal = true;
         break;
       case 'persons':
-        this.router.navigate(['/admin/professionals', event.item.id], { queryParams: { tab: 'personas' } });
+        this.router.navigate([AppRoutes.Admin.Professionals, event.item.id], { queryParams: { tab: 'personas' } });
         break;
       case 'institutions':
-        this.router.navigate(['/admin/professionals', event.item.id], { queryParams: { tab: 'instituciones' } });
+        this.router.navigate([AppRoutes.Admin.Professionals, event.item.id], { queryParams: { tab: 'instituciones' } });
         break;
       case 'edit':
-        this.router.navigate(['/admin/professionals', event.item.id, 'edit']);
+        this.router.navigate([AppRoutes.Admin.Professionals, event.item.id, 'edit']);
         break;
       case 'deactivate':
         this.itemToDeactivate = event.item;
@@ -486,21 +489,23 @@ export class ListComponent implements OnInit {
 
   getBadgeColor(value: string): string {
     switch (value?.toLowerCase()) {
-      case 'approved': return 'success';
+      case 'pending':    return 'warning';
+      case 'approved':   return 'success';
       case 'terminated': return 'secondary';
-      case 'suspended': return 'warning';
-      case 'rejected': return 'danger';
-      default: return 'info';
+      case 'suspended':  return 'warning';
+      case 'rejected':   return 'danger';
+      default:           return 'info';
     }
   }
 
   getBadgeLabel(value: string): string {
     switch (value?.toLowerCase()) {
-      case 'approved': return 'Aprobado';
+      case 'pending':    return ValidationStatus.Pendiente;
+      case 'approved':   return ValidationStatus.Aprobado;
       case 'terminated': return 'Dado de baja';
-      case 'suspended': return 'Suspendido';
-      case 'rejected': return 'Rechazado';
-      default: return value ?? '';
+      case 'suspended':  return 'Suspendido';
+      case 'rejected':   return ValidationStatus.Rechazado;
+      default:           return value ?? '';
     }
   }
 }

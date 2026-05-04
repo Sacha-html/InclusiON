@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InstitutionsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { CreateInstitutionRequest } from '../../../../models';
 import {
   ButtonDirective,
@@ -69,15 +70,15 @@ export class NewComponent {
     this.institutionsService.create(request).subscribe({
       next: () => {
         this.toastService.success('Institucion creada exitosamente');
-        this.router.navigate(['/admin/institutions']);
+        this.router.navigate([AppRoutes.Admin.Institutions]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al crear la institucion';
+        this.serverError = err?.userMessage || 'Error al crear la institucion';
       },
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/institutions']);
+    this.router.navigate([AppRoutes.Admin.Institutions]);
   }
 }

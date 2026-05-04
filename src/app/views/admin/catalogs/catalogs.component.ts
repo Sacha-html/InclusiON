@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService, CatalogAdminService, ToastService } from '@services';
+import { ActiveStatus } from '@shared/constants/status-labels';
 import { Observable } from 'rxjs';
 
 import {
@@ -33,6 +34,7 @@ interface CatalogConfig {
   load: () => Observable<any[]>;
   create?: (v: any) => Observable<any>;
   update: (id: number, v: any) => Observable<any>;
+  deactivate?: (id: number) => Observable<any>;
 }
 
 @Component({
@@ -64,7 +66,11 @@ export class CatalogsComponent implements OnInit {
   showModal = false;
   modalTitle = '';
   editingId: number | null = null;
-  form!: FormGroup;
+  form: FormGroup | null = null;
+
+  showDeactivateModal = false;
+  deactivatingItem: any | null = null;
+  isDeactivating = false;
 
   private skillAreasCache: { id: number; name: string }[] = [];
 
@@ -75,6 +81,7 @@ export class CatalogsComponent implements OnInit {
       columns: [
         { key: 'name', label: 'Nombre' },
         { key: 'description', label: 'Descripcion' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -84,6 +91,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getDisabilityTypes(),
       create: (v) => this.adminService.createDisabilityType(v),
       update: (id, v) => this.adminService.updateDisabilityType(id, v),
+      deactivate: (id) => this.adminService.patchDisabilityTypeStatus(id, false),
     },
     'autonomy-levels': {
       title: 'Niveles de Autonomia',
@@ -93,6 +101,7 @@ export class CatalogsComponent implements OnInit {
         { key: 'description', label: 'Descripcion' },
         { key: 'requiresSupervision', label: 'Requiere Supervision', badge: (item) => ({ text: item.requiresSupervision ? 'Si' : 'No', color: item.requiresSupervision ? 'warning' : 'success' }) },
         { key: 'displayOrder', label: 'Orden' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -103,6 +112,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getAutonomyLevels(),
       create: (v) => this.adminService.createAutonomyLevel(v),
       update: (id, v) => this.adminService.updateAutonomyLevel(id, v),
+      deactivate: (id) => this.adminService.patchAutonomyLevelStatus(id, false),
     },
     'activity-categories': {
       title: 'Categorias de Actividad',
@@ -110,6 +120,7 @@ export class CatalogsComponent implements OnInit {
       columns: [
         { key: 'name', label: 'Nombre' },
         { key: 'description', label: 'Descripcion' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -119,6 +130,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getActivityCategories(),
       create: (v) => this.adminService.createActivityCategory(v),
       update: (id, v) => this.adminService.updateActivityCategory(id, v),
+      deactivate: (id) => this.adminService.patchActivityCategoryStatus(id, false),
     },
     'skill-areas': {
       title: 'Areas de Habilidad',
@@ -128,6 +140,7 @@ export class CatalogsComponent implements OnInit {
         { key: 'icon', label: 'Icono' },
         { key: 'color', label: 'Color' },
         { key: 'displayOrder', label: 'Orden' },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -139,6 +152,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getSkillAreas(),
       create: (v) => this.adminService.createSkillArea(v),
       update: (id, v) => this.adminService.updateSkillArea(id, v),
+      deactivate: (id) => this.adminService.patchSkillAreaStatus(id, false),
     },
     'template-types': {
       title: 'Tipos de Template',
@@ -149,6 +163,7 @@ export class CatalogsComponent implements OnInit {
         { key: 'skillAreaName', label: 'Area' },
         { key: 'supportsPictograms', label: 'Pictogramas', badge: (item) => ({ text: item.supportsPictograms ? 'Si' : 'No', color: item.supportsPictograms ? 'success' : 'secondary' }) },
         { key: 'supportsAudio', label: 'Audio', badge: (item) => ({ text: item.supportsAudio ? 'Si' : 'No', color: item.supportsAudio ? 'success' : 'secondary' }) },
+        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -160,6 +175,7 @@ export class CatalogsComponent implements OnInit {
       load: () => this.catalogsService.getActivityTemplateTypes(),
       create: (v) => this.adminService.createActivityTemplateType(v),
       update: (id, v) => this.adminService.updateActivityTemplateType(id, v),
+      deactivate: (id) => this.adminService.patchActivityTemplateTypeStatus(id, false),
     },
     'login-methods': {
       title: 'Metodos de Login',
@@ -203,7 +219,7 @@ export class CatalogsComponent implements OnInit {
     this.isLoading = true;
     this.config.load().subscribe({
       next: (data) => { this.items = data; this.isLoading = false; },
-      error: () => this.isLoading = false,
+      error: () => { this.isLoading = false; this.toastService.error('Error al cargar el catálogo'); },
     });
   }
 
@@ -262,5 +278,38 @@ export class CatalogsComponent implements OnInit {
 
   getCellValue(item: any, col: any): string {
     return item[col.key] ?? '-';
+  }
+
+  openDeactivate(item: any): void {
+    this.deactivatingItem = item;
+    this.showDeactivateModal = true;
+  }
+
+  cancelDeactivate(): void {
+    this.showDeactivateModal = false;
+    this.deactivatingItem = null;
+  }
+
+  confirmDeactivate(): void {
+    if (!this.deactivatingItem || !this.config.deactivate) return;
+    this.isDeactivating = true;
+
+    this.config.deactivate(this.deactivatingItem.id).subscribe({
+      next: () => {
+        this.isDeactivating = false;
+        this.showDeactivateModal = false;
+        this.deactivatingItem = null;
+        this.toastService.success('Dado de baja exitosamente.');
+        this.catalogsService.clearCache();
+        this.loadData();
+      },
+      error: (err: any) => {
+        this.isDeactivating = false;
+        this.showDeactivateModal = false;
+        this.deactivatingItem = null;
+        const msg = err?.userMessage ?? 'Error al dar de baja.';
+        this.toastService.error(msg);
+      },
+    });
   }
 }
