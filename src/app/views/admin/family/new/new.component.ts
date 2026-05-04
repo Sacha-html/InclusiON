@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FamilyService, PersonsService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../../../../models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
@@ -96,7 +97,7 @@ export class NewComponent implements OnInit {
         this.showPasswordModal = true;
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al crear el familiar';
+        this.serverError = err?.userMessage || 'Error al crear el familiar';
       },
     });
   }
@@ -104,11 +105,11 @@ export class NewComponent implements OnInit {
   closeModalAndNavigate(): void {
     this.showPasswordModal = false;
     if (this.createdFamily) {
-      this.router.navigate(['/admin/family', this.createdFamily.id]);
+      this.router.navigate([AppRoutes.Admin.Family, this.createdFamily.id]);
     }
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/family']);
+    this.router.navigate([AppRoutes.Admin.Family]);
   }
 }
