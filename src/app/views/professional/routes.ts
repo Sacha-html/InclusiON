@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { permissionGuard } from '../../guards/permission.guard';
+import { Permissions } from '@shared/constants/permissions';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 export const professionalRoutes: Routes = [
   {
@@ -39,7 +42,8 @@ export const professionalRoutes: Routes = [
       import('./activities/new/new.component').then(
         (m) => m.NewComponent
       ),
-    data: { title: 'Nueva Actividad' }
+    canActivate: [permissionGuard],
+    data: { title: 'Nueva Actividad', permission: Permissions.Activities.Create, redirectTo: AppRoutes.Pro.Activities }
   },
   {
     path: 'activities/:id/edit',
@@ -47,21 +51,22 @@ export const professionalRoutes: Routes = [
       import('./activities/edit/edit.component').then(
         (m) => m.EditComponent
       ),
-    data: { title: 'Editar Actividad' }
+    canActivate: [permissionGuard],
+    data: { title: 'Editar Actividad', permission: Permissions.Activities.Update, redirectTo: AppRoutes.Pro.Activities }
   },
   {
     path: 'goals',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('./goals/professional-goals.component').then(
+        (m) => m.ProfessionalGoalsComponent
       ),
     data: { title: 'Objetivos' }
   },
   {
     path: 'evaluations',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('../coming-soon/coming-soon.component').then(
+        (m) => m.ComingSoonComponent
       ),
     data: { title: 'Evaluaciones' }
   },
@@ -100,16 +105,16 @@ export const professionalRoutes: Routes = [
   {
     path: 'messages',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('../messages/messages.component').then(
+        (m) => m.MessagesComponent
       ),
     data: { title: 'Mensajes' }
   },
   {
     path: 'calendar',
     loadComponent: () =>
-      import('./dashboard/detail/detail.component').then(
-        (m) => m.DetailComponent
+      import('../coming-soon/coming-soon.component').then(
+        (m) => m.ComingSoonComponent
       ),
     data: { title: 'Calendario' }
   },
