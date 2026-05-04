@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ProfessionalResponse, UpdateProfessionalRequest } from '../../../../models';
 import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
 import {
@@ -65,7 +66,7 @@ export class EditComponent implements OnInit {
           this.professional = data;
           this.patchForm(data);
         },
-        error: () => this.router.navigate(['/admin/professionals']),
+        error: () => this.router.navigate([AppRoutes.Admin.Professionals]),
       });
     }
   }
@@ -101,19 +102,19 @@ export class EditComponent implements OnInit {
 
     this.professionalsService.updateProfessional(this.professional.id, request).subscribe({
       next: () => {
-        this.router.navigate(['/admin/professionals', this.professional!.id]);
+        this.router.navigate([AppRoutes.Admin.Professionals, this.professional!.id]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al actualizar el profesional';
+        this.serverError = err?.userMessage || 'Error al actualizar el profesional';
       },
     });
   }
 
   goBack(): void {
     if (this.professional) {
-      this.router.navigate(['/admin/professionals', this.professional.id]);
+      this.router.navigate([AppRoutes.Admin.Professionals, this.professional.id]);
     } else {
-      this.router.navigate(['/admin/professionals']);
+      this.router.navigate([AppRoutes.Admin.Professionals]);
     }
   }
 }

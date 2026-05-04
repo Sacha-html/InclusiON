@@ -85,7 +85,7 @@
               @if (person.disabilityType) { {{ person.disabilityType }} }
             </c-col>
             <c-col sm="2" class="text-end">
-              <button cButton color="danger" variant="outline" size="sm"
+              <button cButton color="danger" size="sm"
                       (click)="openUnlinkModal(person)"
                       [attr.aria-label]="'Desvincular ' + person.fullName">
                 Desvincular

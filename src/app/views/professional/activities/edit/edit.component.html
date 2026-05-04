@@ -122,12 +122,11 @@
                 <img [src]="pictogramUrl(item.pictogramId)" [alt]="item.label" class="item-img" />
                 <input cFormControl class="item-label-input" [(ngModel)]="item.label" [name]="'lbl-' + item.id" />
                 <div class="item-actions">
-                  <button cButton size="sm" color="success" variant="outline"
-                          [disabled]="item.id === content.correctItemId"
+                  <button cButton size="sm" color="success"                          [disabled]="item.id === content.correctItemId"
                           (click)="setCorrect(item.id)">
                     @if (item.id === content.correctItemId) { ✓ Correcta } @else { Marcar correcta }
                   </button>
-                  <button cButton size="sm" color="danger" variant="outline" (click)="removeItem(item.id)">✕</button>
+                  <button cButton size="sm" color="danger" (click)="removeItem(item.id)">✕</button>
                 </div>
               </div>
             }

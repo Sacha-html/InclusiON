@@ -6,6 +6,7 @@ import { ActivitiesService } from '@services/activities.service';
 import { ArasaacService, ArasaacPictogram } from '@services/arasaac.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem } from '@models';
 import { UpdateActivityRequest } from '@models/requests/activities';
 import { SelectFigureContent } from '@models/responses/activity.response';
@@ -125,7 +126,7 @@ export class EditComponent implements OnInit {
       },
       error: () => {
         this.toastService.error('Error al cargar la actividad.');
-        this.router.navigate(['/pro/activities']);
+        this.router.navigate([AppRoutes.Pro.Activities]);
       },
     });
 
@@ -187,7 +188,7 @@ export class EditComponent implements OnInit {
     this.activitiesService.update(this.activityId, request).subscribe({
       next: () => {
         this.toastService.success('Actividad actualizada.');
-        this.router.navigate(['/pro/activities']);
+        this.router.navigate([AppRoutes.Pro.Activities]);
       },
       error: () => {
         this.toastService.error('Error al actualizar la actividad.');
@@ -196,5 +197,5 @@ export class EditComponent implements OnInit {
     });
   }
 
-  cancel(): void { this.router.navigate(['/pro/activities']); }
+  cancel(): void { this.router.navigate([AppRoutes.Pro.Activities]); }
 }
