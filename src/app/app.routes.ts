@@ -5,6 +5,7 @@ import { roleGuard } from './guards/role.guard';
 import { globalAdminGuard } from './guards/global-admin.guard';
 import { permissionGuard } from './guards/permission.guard';
 import { UserRoles } from './shared/constants/roles';
+import { Permissions } from './shared/constants/permissions';
 
 export const routes: Routes = [
   {
@@ -174,7 +175,7 @@ export const routes: Routes = [
       },
       {
         path: 'invitations',
-        data: { title: 'Invitaciones', permission: 'invitations:read' },
+        data: { title: 'Invitaciones', permission: Permissions.Invitations.Read },
         canActivate: [permissionGuard],
         loadComponent: () =>
           import('./views/admin/invitations/invitations.component').then(
