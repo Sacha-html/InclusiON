@@ -1,118 +1,78 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, signal } from '@angular/core';
-import { inject } from '@angular/core';
-import { ActivitiesService } from '@services/activities.service';
-import {
-  ActivityAssignmentResponse,
-  SelectFigureContent,
-  SelectFigureItem,
-} from '@models/responses/activity.response';
-import { ArasaacService } from '@services/arasaac.service';
+import { Component, signal } from '@angular/core';
+import { SelectFigureContent, SelectFigureItem } from '../player.models';
+import { PlayerBaseComponent } from '../player-base.component';
+import { PlayerIntroComponent } from '../components/player-intro.component';
+import { PlayerResultComponent } from '../components/player-result.component';
+import { PictogramCardComponent } from '../components/pictogram-card.component';
 
-type Phase = 'intro' | 'playing' | 'result';
+type ItemState = 'none' | 'correct' | 'wrong' | 'reveal' | 'dimmed';
 
 @Component({
   selector: 'app-select-figure-player',
   standalone: true,
-  imports: [],
+  imports: [PlayerIntroComponent, PlayerResultComponent, PictogramCardComponent],
   templateUrl: './select-figure-player.component.html',
   styleUrl: './select-figure-player.component.scss',
 })
-export class SelectFigurePlayerComponent implements OnInit, OnDestroy {
-  @Input({ required: true }) assignment!: ActivityAssignmentResponse;
-  @Output() completed = new EventEmitter<void>();
+export class SelectFigurePlayerComponent extends PlayerBaseComponent {
 
-  private readonly activitiesService = inject(ActivitiesService);
-  readonly arasaac                   = inject(ArasaacService);
-
-  phase          = signal<Phase>('intro');
-  isLoading      = signal(false);
-  responseId     = signal<number | null>(null);
   selectedItemId = signal<string | null>(null);
-  isCorrect      = signal<boolean | null>(null);
-
-  private startTime = 0;
 
   get content(): SelectFigureContent {
     try { return JSON.parse(this.assignment.contentJson) as SelectFigureContent; }
     catch { return { instruction: '', correctItemId: '', items: [] }; }
   }
 
-  get items(): SelectFigureItem[] { return this.content.items; }
+  get items(): SelectFigureItem[]  { return this.content.items; }
+  get hint(): string               { return `Hay ${this.items.length} opciones para elegir.`; }
 
   get correctLabel(): string {
     const c = this.content;
     return c.items.find(i => i.id === c.correctItemId)?.label ?? '';
   }
 
-  ngOnInit(): void {}
-  ngOnDestroy(): void {}
-
-  // ── Fase 1: intro → playing ──────────────────────────────────────────────
-  startActivity(): void {
-    this.isLoading.set(true);
-    this.activitiesService.startResponse(this.assignment.id).subscribe({
-      next: (updatedAssignment) => {
-        // El responseId es el último response en la lista (más reciente)
-        const responses = updatedAssignment.responses ?? [];
-        const latest    = responses.sort((a, b) =>
-          new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
-        )[0];
-        this.responseId.set(latest?.id ?? null);
-        this.startTime = Date.now();
-        this.isLoading.set(false);
-        this.phase.set('playing');
-      },
-      error: () => this.isLoading.set(false),
-    });
+  get resultMessage(): string {
+    return this.isCorrect()
+      ? 'Elegiste la respuesta correcta.'
+      : `La respuesta correcta era ${this.correctLabel}.`;
   }
 
-  // ── Fase 2: playing → result ─────────────────────────────────────────────
+  // ── Fase playing ─────────────────────────────────────────────────────────
   selectItem(item: SelectFigureItem): void {
-    if (this.selectedItemId() !== null) return; // ya seleccionó
+    if (this.selectedItemId() !== null) return;
     const correct = item.id === this.content.correctItemId;
     this.selectedItemId.set(item.id);
     this.isCorrect.set(correct);
-
-    // Transición automática a la pantalla de resultado
     setTimeout(() => this.phase.set('result'), 900);
   }
 
-  // ── Fase 3: result → complete ────────────────────────────────────────────
-  finishActivity(): void {
-    const responseId = this.responseId();
-    if (responseId === null) { this.completed.emit(); return; }
+  itemState(item: SelectFigureItem): ItemState {
+    const sel = this.selectedItemId();
+    if (!sel) return 'none';
+    if (item.id === sel)                                               return this.isCorrect() ? 'correct' : 'wrong';
+    if (item.id === this.content.correctItemId && !this.isCorrect())  return 'reveal';
+    return 'dimmed';
+  }
 
-    this.isLoading.set(true);
-    const timeSpent = Math.round((Date.now() - this.startTime) / 1000);
-    const success   = this.isCorrect() ? 100 : 0;
+  itemBadge(item: SelectFigureItem): string | undefined {
+    const sel = this.selectedItemId();
+    if (!sel) return undefined;
+    if (item.id === sel && this.isCorrect())                          return '✅';
+    if (item.id === sel && !this.isCorrect())                         return '❌';
+    if (item.id === this.content.correctItemId && !this.isCorrect())  return '⭐';
+    return undefined;
+  }
 
-    this.activitiesService.completeResponse(this.assignment.id, responseId, {
-      successPercentage: success,
-      timeSpentSeconds:  timeSpent,
-      requiredSupport:   false,
-    }).subscribe({
-      next:  () => { this.isLoading.set(false); this.completed.emit(); },
-      error: () => { this.isLoading.set(false); this.completed.emit(); },
+  // ── Fase result ──────────────────────────────────────────────────────────
+  onFinish(): void {
+    this.finishActivity({
+      successPercentage: this.isCorrect() ? 100 : 0,
+      timeSpentSeconds:  this.elapsedSeconds,
     });
   }
 
-  // ── Reintentar ───────────────────────────────────────────────────────────
-  retry(): void {
+  override retry(): void {
     this.selectedItemId.set(null);
-    this.isCorrect.set(null);
-    this.phase.set('intro');
-  }
-
-  itemClass(item: SelectFigureItem): string {
-    const sel = this.selectedItemId();
-    if (!sel) return '';
-    if (item.id === sel && this.isCorrect())            return 'item--correct';
-    if (item.id === sel && !this.isCorrect())           return 'item--wrong';
-    if (item.id === this.content.correctItemId && sel)  return 'item--reveal';
-    return 'item--dimmed';
-  }
-
-  pictogramUrl(id: number): string {
-    return this.arasaac.getPictogramUrl(id);
+    super.retry();
   }
 }
