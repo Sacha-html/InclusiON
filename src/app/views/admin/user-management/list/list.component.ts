@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { UserManagementService } from '../../../../services/user-management.service';
 import { AdminUserListItemResponse } from '../../../../models/responses/admin-user-list-item.response';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -138,7 +139,7 @@ export class UserManagementListComponent implements OnInit {
     const user = event.item as AdminUserListItemResponse;
     switch (event.action) {
       case 'view':
-        this.router.navigate(['/admin/users', user.userId]);
+        this.router.navigate([AppRoutes.Admin.Users, user.userId]);
         break;
       case 'reset-password':
         this.itemToReset = user;

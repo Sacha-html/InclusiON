@@ -2,7 +2,9 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ActivitiesService } from '@services/activities.service';
-import { ToastService } from '@services';
+import { AuthService, ToastService } from '@services';
+import { Permissions } from '@shared/constants/permissions';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { CatalogsService } from '@services/catalogs.service';
 import { ActivityListItemResponse } from '@models/responses/activity.response';
 import { GetActivitiesRequest } from '@models/requests/activities';
@@ -12,9 +14,11 @@ import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { AssignActivityModalComponent } from '../assign-modal/assign-activity-modal.component';
 import {
+  BadgeComponent,
   ButtonDirective,
   FormSelectDirective,
   GridModule,
+  SpinnerComponent,
 } from '@coreui/angular';
 
 @Component({
@@ -26,9 +30,11 @@ import {
     DataTableComponent,
     ConfirmModalComponent,
     AssignActivityModalComponent,
+    BadgeComponent,
     ButtonDirective,
     FormSelectDirective,
     GridModule,
+    SpinnerComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -37,7 +43,11 @@ export class ListComponent implements OnInit {
   private readonly activitiesService = inject(ActivitiesService);
   private readonly catalogsService   = inject(CatalogsService);
   private readonly toastService      = inject(ToastService);
+  private readonly authService       = inject(AuthService);
   private readonly router            = inject(Router);
+
+  canCreate = this.authService.hasPermission(Permissions.Activities.Create);
+  canUpdate = this.authService.hasPermission(Permissions.Activities.Update);
 
   activities    = signal<ActivityListItemResponse[]>([]);
   categories    = signal<ActivityCategoryItem[]>([]);
@@ -54,6 +64,12 @@ export class ListComponent implements OnInit {
   statusFilter       = '';
   standardFilter     = '';
 
+  // Modo búsqueda semántica
+  semanticMode      = signal(false);
+  semanticText      = signal('');
+  semanticLoading   = signal(false);
+  semanticResults   = signal<ActivityListItemResponse[]>([]);
+
   // Desactivar
   showDeactivateModal   = false;
   itemToDeactivate: ActivityListItemResponse | null = null;
@@ -68,10 +84,10 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'assign',     label: 'Asignar',     icon: 'cil-send',  visible: (item) => item.isActive },
-        { action: 'edit',       label: 'Editar',      icon: 'cil-notes', visible: (item) => !item.isStandardActivity },
-        { action: 'deactivate', label: 'Desactivar',  icon: 'cil-ban',   visible: (item) => item.isActive },
-        { action: 'activate',   label: 'Activar',     icon: 'cil-check', visible: (item) => !item.isActive },
+        { action: 'assign',     label: 'Asignar',    icon: 'cil-send',  visible: (item) => item.isActive },
+        { action: 'edit',       label: 'Editar',     icon: 'cil-notes', visible: (item) => this.canUpdate && !item.isStandardActivity },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cil-ban',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
+        { action: 'activate',   label: 'Activar',    icon: 'cil-check', visible: (item) => this.canUpdate && !item.isActive && !item.isStandardActivity },
       ],
     },
     { key: 'title',            label: 'Título',       sortable: true },
@@ -100,9 +116,11 @@ export class ListComponent implements OnInit {
     },
   ];
 
-  headerButtons = [
-    { action: 'create', label: 'Nueva actividad', icon: 'cilPlus', routerLink: '/pro/activities/new' },
-  ];
+  get headerButtons() {
+    return this.canCreate
+      ? [{ action: 'create', label: 'Nueva actividad', icon: 'cilPlus', routerLink: AppRoutes.Pro.ActivityNew }]
+      : [];
+  }
 
   ngOnInit(): void {
     this.loadCatalogs();
@@ -139,7 +157,7 @@ export class ListComponent implements OnInit {
         this.totalPages.set(response.totalPages);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: () => { this.isLoading.set(false); this.toastService.error('Error al cargar las actividades'); },
     });
   }
 
@@ -158,7 +176,7 @@ export class ListComponent implements OnInit {
   }
 
   onHeaderAction(action: string): void {
-    if (action === 'create') this.router.navigate(['/pro/activities/new']);
+    if (action === 'create') this.router.navigate([AppRoutes.Pro.ActivityNew]);
   }
 
   onRowAction(event: { action: string; item: ActivityListItemResponse }): void {
@@ -168,7 +186,7 @@ export class ListComponent implements OnInit {
         this.showAssignModal = true;
         break;
       case 'edit':
-        this.router.navigate(['/pro/activities', event.item.id, 'edit']);
+        this.router.navigate([AppRoutes.Pro.Activities, event.item.id, 'edit']);
         break;
       case 'deactivate':
         this.itemToDeactivate = event.item;
@@ -207,5 +225,35 @@ export class ListComponent implements OnInit {
   // ── Asignar ───────────────────────────────────────────────────────────────
   onAssigned(): void {
     // Opcional: podría recargar la lista. Por ahora solo cierra el modal.
+  }
+
+  // ── Búsqueda semántica ────────────────────────────────────────────────────
+  toggleSemanticMode(): void {
+    const entering = !this.semanticMode();
+    this.semanticMode.set(entering);
+    if (!entering) {
+      this.semanticText.set('');
+      this.semanticResults.set([]);
+    }
+  }
+
+  runSemanticSearch(): void {
+    const text = this.semanticText().trim();
+    if (!text) return;
+    this.semanticLoading.set(true);
+    this.activitiesService.searchSemantic(text).subscribe({
+      next: (results) => {
+        this.semanticResults.set(results);
+        this.semanticLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('No se pudo ejecutar la búsqueda semántica.');
+        this.semanticLoading.set(false);
+      },
+    });
+  }
+
+  onSemanticKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') this.runSemanticSearch();
   }
 }

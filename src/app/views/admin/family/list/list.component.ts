@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ButtonDirective, FormControlDirective, FormLabelDirective, FormSelectDirective, GridModule } from '@coreui/angular';
 import { AuthService, FamilyService, ToastService } from '@services';
+import { Permissions } from '@shared/constants/permissions';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { FamilyListItemResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
@@ -31,7 +33,7 @@ export class ListComponent {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
-  canCreate = this.authService.hasPermission('family:create');
+  canCreate = this.authService.hasPermission(Permissions.Family.Create);
 
   selectedInstitutionId: number | undefined;
 
@@ -110,17 +112,17 @@ export class ListComponent {
 
   onHeaderAction(action: string): void {
     if (action === 'new') {
-      this.router.navigate(['/admin/family/new']);
+      this.router.navigate([AppRoutes.Admin.Family + '/new']);
     }
   }
 
   onRowAction(event: { action: string; item: any }): void {
     switch (event.action) {
       case 'view':
-        this.router.navigate(['/admin/family', event.item.id]);
+        this.router.navigate([AppRoutes.Admin.Family, event.item.id]);
         break;
       case 'edit':
-        this.router.navigate(['/admin/family', event.item.id, 'edit']);
+        this.router.navigate([AppRoutes.Admin.Family, event.item.id, 'edit']);
         break;
       case 'deactivate':
         this.itemToDeactivate = event.item;
