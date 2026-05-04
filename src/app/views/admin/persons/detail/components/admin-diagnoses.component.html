@@ -23,11 +23,11 @@
           <td>{{ truncate(d.primaryDiagnosis, 80) }}</td>
           <td>{{ d.professionalName }}</td>
           <td class="d-flex gap-2">
-            <button cButton color="primary" size="sm" variant="outline"
+            <button cButton color="primary" size="sm"
                     (click)="openDetail(d.id)">
               Ver
             </button>
-            <button cButton color="danger" size="sm" variant="outline"
+            <button cButton color="danger" size="sm"
                     (click)="openDeactivate(d)">
               Dar de baja
             </button>
