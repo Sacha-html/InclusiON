@@ -1,3 +1,16 @@
+export enum ActivityAssignmentStatus {
+  Pendiente  = 'Pendiente',
+  EnProgreso = 'EnProgreso',
+  Completada = 'Completada',
+  Cancelada  = 'Cancelada',
+}
+
+export enum ActivityResponseResult {
+  Exito   = 'Exito',
+  Parcial = 'Parcial',
+  Fallido = 'Fallido',
+}
+
 export interface ActivityListItemResponse {
   id: number;
   title: string;
@@ -45,7 +58,7 @@ export interface ActivityAttemptResponse {
   startedAt: string;
   completedAt?: string;
   timeSpentSeconds?: number;
-  result?: string;
+  result?: ActivityResponseResult;
   successPercentage?: number;
   attemptCount: number;
 }
@@ -57,22 +70,22 @@ export interface ActivityAssignmentResponse {
   templateTypeCode: string;
   contentJson: string;
   personId: string;
-  status: string;
+  status: ActivityAssignmentStatus;
   assignedAt: string;
   dueDate?: string;
   isEvaluationActivity: boolean;
   responses: ActivityAttemptResponse[];
 }
 
-// Content shape for SELECT_FIGURE template
-export interface SelectFigureItem {
-  id: string;
-  pictogramId: number;
-  label: string;
-}
-
-export interface SelectFigureContent {
-  instruction: string;
-  correctItemId: string;
-  items: SelectFigureItem[];
-}
+// Content shapes — re-exportados desde player.models para retrocompatibilidad
+export type {
+  SelectFigureItem,
+  SelectFigureContent,
+  OrderSequenceItem,
+  OrderSequenceContent,
+  MatchPair,
+  MatchImageWordContent,
+  VisualSumOption,
+  VisualSumContent,
+  CompleteLetterContent,
+} from '../../views/aac/activities/player/player.models';
