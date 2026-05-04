@@ -24,6 +24,14 @@ export const aacRoutes: Routes = [
     data: { title: 'Actividad' }
   },
   {
+    path: 'roadmap',
+    loadComponent: () =>
+      import('./roadmap/aac-roadmap.component').then(
+        (m) => m.AacRoadmapComponent
+      ),
+    data: { title: 'Mi Roadmap' }
+  },
+  {
     path: 'calendar',
     loadComponent: () =>
       import('./calendar/aac-calendar.component').then(
