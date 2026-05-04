@@ -1,27 +1,33 @@
 <!-- Progress indicator -->
+@if (!savedActivity()) {
 <c-row class="mb-4">
   <c-col>
     <div class="d-flex align-items-center gap-2 mb-1">
       <span class="text-body-secondary small">Paso {{ currentStep() }} de {{ totalSteps }}</span>
       <span class="fw-semibold">
-        @if (currentStep() === 1) { Información general }
+        @if (currentStep() === 1) { Identificación }
+        @else if (currentStep() === 2) { Detalles }
         @else { Contenido de la actividad }
       </span>
     </div>
     <c-progress [value]="(currentStep() / totalSteps) * 100" />
   </c-col>
 </c-row>
+}
 
 <c-card>
   <c-card-header>
     <h5 cCardTitle>
-      @if (currentStep() === 1) { Nueva Actividad — Información general }
+      @if (savedActivity()) { Actividad creada }
+      @else if (currentStep() === 1) { Nueva Actividad — Identificación }
+      @else if (currentStep() === 2) { Nueva Actividad — Detalles }
       @else { Nueva Actividad — {{ selectedTemplateName }} }
     </h5>
   </c-card-header>
   <c-card-body>
 
-    <!-- ===== STEP 1: Metadata ===== -->
+    @if (!savedActivity()) {
+    <!-- ===== STEP 1: Identificación ===== -->
     @if (currentStep() === 1) {
       <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
 
@@ -35,20 +41,20 @@
 
       <c-row class="mb-3">
         <c-col xs="12" md="6">
-          <label class="form-label" for="act-category">Categoría *</label>
-          <select cSelect id="act-category" [(ngModel)]="meta.categoryId" name="categoryId" required>
-            <option [value]="0">Seleccionar...</option>
-            @for (cat of categories(); track cat.id) {
-              <option [value]="cat.id">{{ cat.name }}</option>
-            }
-          </select>
-        </c-col>
-        <c-col xs="12" md="6">
           <label class="form-label" for="act-skill">Área de habilidad</label>
           <select cSelect id="act-skill" [(ngModel)]="meta.skillAreaId" name="skillAreaId">
             <option [value]="0">Sin especificar</option>
             @for (s of skillAreas(); track s.id) {
               <option [value]="s.id">{{ s.name }}</option>
+            }
+          </select>
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="form-label" for="act-category">Categoría *</label>
+          <select cSelect id="act-category" [(ngModel)]="meta.categoryId" name="categoryId" required>
+            <option [value]="0">Seleccionar...</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
             }
           </select>
         </c-col>
@@ -64,18 +70,22 @@
             }
           </select>
         </c-col>
-        <c-col xs="12" md="3">
-          <label class="form-label" for="act-complexity">Complejidad (1–5)</label>
-          <input cFormControl id="act-complexity" type="number" [(ngModel)]="meta.complexityLevel"
-                 name="complexityLevel" min="1" max="5" />
-        </c-col>
-        <c-col xs="12" md="3">
-          <label class="form-label" for="act-duration">Duración estimada (min)</label>
-          <input cFormControl id="act-duration" type="number" [(ngModel)]="meta.estimatedDurationMinutes"
-                 name="estimatedDurationMinutes" min="1" max="600" />
-        </c-col>
       </c-row>
 
+      <c-row>
+        <c-col xs="12">
+          <button cButton type="button" color="primary" [disabled]="!step1Valid" (click)="nextStep()">
+            Siguiente →
+          </button>
+          <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">
+            Cancelar
+          </button>
+        </c-col>
+      </c-row>
+    }
+
+    <!-- ===== STEP 2: Detalles ===== -->
+    @else if (currentStep() === 2) {
       <c-row class="mb-3">
         <c-col xs="12">
           <label class="form-label" for="act-description">Descripción</label>
@@ -84,7 +94,7 @@
         </c-col>
       </c-row>
 
-      <c-row class="mb-4">
+      <c-row class="mb-3">
         <c-col xs="12">
           <label class="form-label" for="act-instructions">Instrucciones para el estudiante</label>
           <textarea cFormControl id="act-instructions" [(ngModel)]="meta.instructions" name="instructions"
@@ -92,7 +102,19 @@
         </c-col>
       </c-row>
 
-      <!-- Accesibilidad -->
+      <c-row class="mb-3">
+        <c-col xs="12" md="6">
+          <label class="form-label" for="act-complexity">Complejidad (1–5)</label>
+          <input cFormControl id="act-complexity" type="number" [(ngModel)]="meta.complexityLevel"
+                 name="complexityLevel" min="1" max="5" />
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="form-label" for="act-duration">Duración estimada (min)</label>
+          <input cFormControl id="act-duration" type="number" [(ngModel)]="meta.estimatedDurationMinutes"
+                 name="estimatedDurationMinutes" min="1" max="600" />
+        </c-col>
+      </c-row>
+
       <h6 class="mb-2">Opciones de accesibilidad</h6>
       <c-row class="mb-4 g-2">
         <c-col xs="6" md="3">
@@ -129,7 +151,10 @@
 
       <c-row>
         <c-col xs="12">
-          <button cButton type="button" color="primary" [disabled]="!step1Valid" (click)="nextStep()">
+          <button cButton type="button" color="secondary" (click)="prevStep()">
+            ← Atrás
+          </button>
+          <button cButton type="button" color="primary" class="ms-2" [disabled]="!step2Valid" (click)="nextStep()">
             Siguiente →
           </button>
           <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">
@@ -139,84 +164,22 @@
       </c-row>
     }
 
-    <!-- ===== STEP 2: Content ===== -->
-    @if (currentStep() === 2) {
-
-      @if (isSelectFigure) {
-        <!-- Instrucción -->
-        <c-row class="mb-3">
-          <c-col xs="12">
-            <label class="form-label" for="sf-instruction">Instrucción que verá el estudiante *</label>
-            <input cFormControl id="sf-instruction" [(ngModel)]="content.instruction" name="instruction"
-                   placeholder="Ej: Seleccioná el animal que vive en la casa" required />
-          </c-col>
-        </c-row>
-
-        <!-- Items agregados -->
-        <h6 class="mb-2">Opciones (mínimo 2) *</h6>
-        @if (content.items.length === 0) {
-          <p class="text-body-secondary small mb-3">Buscá pictogramas abajo para agregarlos.</p>
-        } @else {
-          <div class="items-grid mb-4">
-            @for (item of content.items; track item.id) {
-              <div class="item-card" [class.item-card--correct]="item.id === content.correctItemId">
-                <img [src]="pictogramUrl(item.pictogramId)" [alt]="item.label" class="item-img" />
-                <input cFormControl class="item-label-input" [(ngModel)]="item.label" [name]="'lbl-' + item.id"
-                       placeholder="Etiqueta" />
-                <div class="item-actions">
-                  <button cButton size="sm" color="success" variant="outline"
-                          [disabled]="item.id === content.correctItemId"
-                          (click)="setCorrect(item.id)">
-                    @if (item.id === content.correctItemId) { ✓ Correcta } @else { Marcar correcta }
-                  </button>
-                  <button cButton size="sm" color="danger" variant="outline" (click)="removeItem(item.id)">
-                    ✕
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- ARASAAC Picker -->
-        <h6 class="mb-2">Buscador de pictogramas ARASAAC</h6>
-        <c-row class="mb-2">
-          <c-col xs="12" md="6">
-            <input cFormControl [(ngModel)]="arasaacSearch" name="arasaacSearch"
-                   placeholder="Buscar pictograma (ej: perro, manzana...)"
-                   (ngModelChange)="onArasaacSearchChange($event)" />
-          </c-col>
-          <c-col xs="auto" class="d-flex align-items-center">
-            @if (isSearching()) {
-              <c-spinner size="sm" />
-            }
-          </c-col>
-        </c-row>
-
-        @if (arasaacResults().length > 0) {
-          <div class="arasaac-grid mb-4">
-            @for (pic of arasaacResults(); track pic.id) {
-              <button type="button" class="arasaac-card" (click)="addPictogram(pic)" title="{{ pic.keyword }}">
-                <img [src]="pic.imageUrl" [alt]="pic.keyword" />
-                <span>{{ pic.keyword }}</span>
-              </button>
-            }
-          </div>
-        }
-      } @else {
-        <p class="text-body-secondary">
-          El editor para "{{ selectedTemplateName }}" no está disponible aún.
-        </p>
+    <!-- ===== STEP 3: Contenido ===== -->
+    @else {
+      <ng-container #editorHost></ng-container>
+      @if (editorUnavailable()) {
+        <c-alert color="warning" class="mb-3">
+          El editor para "<strong>{{ selectedTemplateName }}</strong>" no está disponible aún.
+        </c-alert>
       }
 
-      <!-- Botones -->
-      <c-row class="mt-3">
+      <c-row class="mt-4">
         <c-col xs="12">
-          <button cButton type="button" color="secondary" variant="outline" (click)="prevStep()">
+          <button cButton type="button" color="secondary" (click)="prevStep()">
             ← Atrás
           </button>
           <button cButton type="button" color="primary" class="ms-2"
-                  [disabled]="!step2Valid || isLoading()" (click)="submit()">
+                  [disabled]="!step3Valid || isLoading()" (click)="submit()">
             @if (isLoading()) { <c-spinner size="sm" class="me-1"></c-spinner> }
             Guardar actividad
           </button>
@@ -225,6 +188,22 @@
           </button>
         </c-col>
       </c-row>
+    }
+    } @else {
+      <div class="text-center py-4">
+        <div class="text-success mb-3" style="font-size: 3rem;">✓</div>
+        <h5 class="mb-2">¡Actividad creada!</h5>
+        <p class="text-body-secondary mb-4">¿Querés asignarla a un estudiante ahora?</p>
+        <div class="d-flex justify-content-center gap-2">
+          <button cButton color="primary" (click)="openAssignModal()">Asignar ahora</button>
+          <button cButton color="secondary" (click)="skipAssign()">Ir al catálogo</button>
+        </div>
+      </div>
+      <app-assign-activity-modal
+        [(visible)]="showAssignModal"
+        [activity]="savedActivity()"
+        (assigned)="onAssigned()">
+      </app-assign-activity-modal>
     }
 
   </c-card-body>

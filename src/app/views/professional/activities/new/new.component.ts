@@ -1,19 +1,21 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { afterNextRender, Component, inject, Injector, OnInit, signal, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of } from 'rxjs';
 import { ActivitiesService } from '@services/activities.service';
-import { ArasaacService, ArasaacPictogram } from '@services/arasaac.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { ToastService } from '@services';
 import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem } from '@models';
 import { CreateActivityRequest } from '@models/requests/activities';
-import { SelectFigureContent, SelectFigureItem } from '@models/responses/activity.response';
+import { ActivityListItemResponse } from '@models/responses/activity.response';
+import { CONTENT_EDITOR_REGISTRY } from './editors/content-editor-registry';
+import { ContentEditorBaseComponent } from './editors/content-editor-base.component';
+import { AssignActivityModalComponent } from '../assign-modal/assign-activity-modal.component';
+import { AppRoutes } from '@shared/constants/app-routes';
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
   ButtonDirective, ColComponent, RowComponent,
   FormControlDirective, FormSelectDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-  SpinnerComponent, ProgressComponent,
+  SpinnerComponent, ProgressComponent, AlertComponent,
 } from '@coreui/angular';
 
 @Component({
@@ -25,21 +27,24 @@ import {
     ButtonDirective, ColComponent, RowComponent,
     FormControlDirective, FormSelectDirective,
     FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-    SpinnerComponent, ProgressComponent,
+    SpinnerComponent, ProgressComponent, AlertComponent,
+    AssignActivityModalComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
 })
 export class NewComponent implements OnInit {
   private readonly activitiesService = inject(ActivitiesService);
-  private readonly arasaacService    = inject(ArasaacService);
   private readonly catalogsService   = inject(CatalogsService);
   private readonly toastService      = inject(ToastService);
   private readonly router            = inject(Router);
+  private readonly injector          = inject(Injector);
+
+  @ViewChild('editorHost', { read: ViewContainerRef }) private editorHost!: ViewContainerRef;
 
   // Wizard state
   currentStep = signal(1);
-  totalSteps  = 2;
+  totalSteps  = 3;
 
   // Catalogs
   categories    = signal<ActivityCategoryItem[]>([]);
@@ -64,28 +69,21 @@ export class NewComponent implements OnInit {
     resourcesUrl: '',
   };
 
-  // Step 2 — SELECT_FIGURE content
-  content: SelectFigureContent = {
-    instruction: '',
-    correctItemId: '',
-    items: [],
-  };
-
-  // ARASAAC search
-  arasaacSearch   = '';
-  arasaacResults  = signal<ArasaacPictogram[]>([]);
-  isSearching     = signal(false);
-  private search$ = new Subject<string>();
+  // Step 2 — dynamic editor
+  editorContentJson  = signal('{}');
+  isEditorValid      = signal(false);
+  editorUnavailable  = signal(false);
 
   isLoading = signal(false);
+  savedActivity = signal<ActivityListItemResponse | null>(null);
+  showAssignModal = false;
 
   get selectedTemplateName(): string {
     return this.templateTypes().find(t => t.id === +this.meta.templateTypeId)?.name ?? '';
   }
 
-  get isSelectFigure(): boolean {
-    const code = this.templateTypes().find(t => t.id === +this.meta.templateTypeId)?.code ?? '';
-    return code === 'SELECT_FIGURE';
+  get selectedTemplateCode(): string {
+    return this.templateTypes().find(t => t.id === +this.meta.templateTypeId)?.code ?? '';
   }
 
   get step1Valid(): boolean {
@@ -93,76 +91,58 @@ export class NewComponent implements OnInit {
   }
 
   get step2Valid(): boolean {
-    if (!this.isSelectFigure) return true;
-    return (
-      !!this.content.instruction.trim() &&
-      this.content.items.length >= 2 &&
-      !!this.content.correctItemId &&
-      this.content.items.some(i => i.id === this.content.correctItemId)
-    );
+    return true;
+  }
+
+  get step3Valid(): boolean {
+    return this.isEditorValid();
   }
 
   ngOnInit(): void {
     this.catalogsService.getActivityCategories().subscribe({ next: c => this.categories.set(c) });
     this.catalogsService.getSkillAreas().subscribe({ next: s => this.skillAreas.set(s) });
     this.catalogsService.getActivityTemplateTypes().subscribe({ next: t => this.templateTypes.set(t) });
-
-    this.search$.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(term => {
-        if (!term.trim()) return of([]);
-        this.isSearching.set(true);
-        return this.arasaacService.search(term).pipe(catchError(() => of([])));
-      }),
-    ).subscribe(results => {
-      this.arasaacResults.set(results);
-      this.isSearching.set(false);
-    });
   }
 
-  onArasaacSearchChange(term: string): void {
-    this.search$.next(term);
-  }
-
-  addPictogram(pic: ArasaacPictogram): void {
-    const id = crypto.randomUUID();
-    this.content.items.push({ id, pictogramId: pic.id, label: pic.keyword });
-    if (this.content.items.length === 1) {
-      this.content.correctItemId = id;
+  private mountEditor(): void {
+    if (!this.editorHost) return;
+    this.editorHost.clear();
+    const code = this.selectedTemplateCode;
+    const EditorClass = CONTENT_EDITOR_REGISTRY[code];
+    if (!EditorClass) {
+      this.editorUnavailable.set(true);
+      this.isEditorValid.set(false);
+      return;
     }
-  }
-
-  removeItem(itemId: string): void {
-    this.content.items = this.content.items.filter(i => i.id !== itemId);
-    if (this.content.correctItemId === itemId) {
-      this.content.correctItemId = this.content.items[0]?.id ?? '';
-    }
-  }
-
-  setCorrect(itemId: string): void {
-    this.content.correctItemId = itemId;
-  }
-
-  pictogramUrl(id: number): string {
-    return this.arasaacService.getPictogramUrl(id);
+    this.editorUnavailable.set(false);
+    const ref = this.editorHost.createComponent<ContentEditorBaseComponent>(EditorClass);
+    // Pasa el JSON actual para preservar contenido si el usuario volvió atrás
+    ref.setInput('initialJson', this.editorContentJson() || '{}');
+    ref.instance.contentChange.subscribe((json: string) => this.editorContentJson.set(json));
+    ref.instance.validChange.subscribe((valid: boolean) => this.isEditorValid.set(valid));
+    ref.changeDetectorRef.detectChanges();
   }
 
   nextStep(): void {
-    if (this.currentStep() < this.totalSteps) this.currentStep.set(this.currentStep() + 1);
+    if (this.currentStep() < this.totalSteps) {
+      const nextStepNum = this.currentStep() + 1;
+      this.currentStep.set(nextStepNum);
+      if (nextStepNum === 3) {
+        afterNextRender(() => this.mountEditor(), { injector: this.injector });
+      }
+    }
   }
 
   prevStep(): void {
-    if (this.currentStep() > 1) this.currentStep.set(this.currentStep() - 1);
+    if (this.currentStep() > 1) {
+      if (this.currentStep() === 3 && this.editorHost) this.editorHost.clear();
+      this.currentStep.set(this.currentStep() - 1);
+    }
   }
 
   submit(): void {
-    if (!this.step1Valid || !this.step2Valid) return;
+    if (!this.step1Valid || !this.step3Valid) return;
     this.isLoading.set(true);
-
-    const contentJson = this.isSelectFigure
-      ? JSON.stringify(this.content)
-      : JSON.stringify({});
 
     const request: CreateActivityRequest = {
       title:                    this.meta.title.trim(),
@@ -179,13 +159,22 @@ export class NewComponent implements OnInit {
       usesPictograms:           this.meta.usesPictograms,
       resourcesUrl:             this.meta.resourcesUrl.trim() || undefined,
       templateTypeId:           +this.meta.templateTypeId,
-      contentJson,
+      contentJson:              this.editorContentJson(),
     };
 
     this.activitiesService.create(request).subscribe({
       next: (activity) => {
         this.toastService.success('Actividad creada exitosamente.');
-        this.router.navigate(['/pro/activities']);
+        this.savedActivity.set({
+          id: activity.id,
+          title: activity.title,
+          templateTypeCode: this.selectedTemplateCode,
+          templateTypeName: this.selectedTemplateName,
+          isActive: true,
+          isStandardActivity: false,
+          createdAt: new Date().toISOString(),
+        });
+        this.isLoading.set(false);
       },
       error: () => {
         this.toastService.error('Error al crear la actividad.');
@@ -194,7 +183,11 @@ export class NewComponent implements OnInit {
     });
   }
 
+  openAssignModal(): void { this.showAssignModal = true; }
+  onAssigned(): void      { this.router.navigate([AppRoutes.Pro.Activities]); }
+  skipAssign(): void      { this.router.navigate([AppRoutes.Pro.Activities]); }
+
   cancel(): void {
-    this.router.navigate(['/pro/activities']);
+    this.router.navigate([AppRoutes.Pro.Activities]);
   }
 }
