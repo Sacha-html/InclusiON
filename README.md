@@ -2,6 +2,19 @@
 
 .NET 10 Web API con Entity Framework Core + PostgreSQL para el sistema de gestión inclusiva.
 
+## Modelo de Búsqueda Semántica
+
+Los archivos del modelo **no están en el repositorio** (>100 MB). Descargarlos manualmente:
+
+| Archivo | Fuente |
+|---------|--------|
+| `InclusiON.SemanticSearch/Model/model.onnx` | [HuggingFace — paraphrase-multilingual-MiniLM-L12-v2 (onnx)](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/onnx/model.onnx) |
+| `InclusiON.SemanticSearch/Model/sentencepiece.bpe.model` | [HuggingFace — sentencepiece.bpe.model](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/sentencepiece.bpe.model) |
+
+Si los archivos no están presentes, la app arranca igual con `NullEmbeddingService` (búsqueda semántica deshabilitada).
+
+---
+
 ## Estructura del Proyecto
 
 ```
