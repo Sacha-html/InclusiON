@@ -64,6 +64,13 @@
             Actividades
           </button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-roadmap" [class.active]="activeTab === 'roadmap'"
+                  role="tab" [attr.aria-selected]="activeTab === 'roadmap'"
+                  aria-controls="panel-roadmap" (click)="activeTab = 'roadmap'">
+            Hoja de Ruta
+          </button>
+        </li>
       </ul>
 
       @if (activeTab === 'datos') {
@@ -104,6 +111,12 @@
       @if (activeTab === 'actividades') {
         <div role="tabpanel" id="panel-actividades" aria-labelledby="tab-actividades">
           <app-professional-activities-tab [personId]="person.id" />
+        </div>
+      }
+
+      @if (activeTab === 'roadmap') {
+        <div role="tabpanel" id="panel-roadmap" aria-labelledby="tab-roadmap">
+          <app-professional-roadmap-tab [personId]="person.id" />
         </div>
       }
 
