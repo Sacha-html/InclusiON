@@ -1,5 +1,6 @@
 import { Directive, TemplateRef, ViewContainerRef, inject, OnInit } from '@angular/core';
 import { AuthService } from '@services';
+import { UserRoles } from '@shared/constants/roles';
 
 @Directive({
   selector: '[appIfInstitutionalAdmin]',
@@ -13,7 +14,7 @@ export class IfInstitutionalAdminDirective implements OnInit {
   private hasView = false;
 
   ngOnInit(): void {
-    const isInstitutional = this.authService.getUserRole() === 'Admin' && !this.authService.isGlobalAdmin();
+    const isInstitutional = this.authService.getUserRole() === UserRoles.Admin && !this.authService.isGlobalAdmin();
 
     if (isInstitutional && !this.hasView) {
       this.viewContainer.createEmbeddedView(this.templateRef);
