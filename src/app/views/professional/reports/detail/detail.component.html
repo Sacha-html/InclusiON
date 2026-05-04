@@ -17,6 +17,18 @@
               Enviar al admin
             </button>
           }
+          @if (report()!.status === ReportStatus.Draft || report()!.status === ReportStatus.Rejected) {
+            <button cButton color="warning" size="sm" (click)="onEditClick()">
+              <svg cIcon name="cilPencil" class="me-1" size="sm" aria-hidden="true"></svg>
+              Editar
+            </button>
+          }
+          @if (report()!.status !== ReportStatus.Submitted) {
+            <button cButton color="danger" size="sm" (click)="onDeactivateClick()">
+              <svg cIcon name="cilTrash" class="me-1" size="sm" aria-hidden="true"></svg>
+              Dar de baja
+            </button>
+          }
         </div>
       </div>
     </c-card-header>
@@ -139,5 +151,19 @@
     [loading]="isSubmitting"
     (confirm)="confirmSubmit()"
     (cancel)="cancelSubmit()">
+  </app-confirm-modal>
+
+  <!-- Modal de confirmación de baja -->
+  <app-confirm-modal
+    [visible]="showDeactivateModal"
+    title="Dar de baja el reporte"
+    messagePrefix="¿Confirmas dar de baja &quot;"
+    [itemName]="report()!.title"
+    messageSuffix="&quot;? Esta acción desactivará el reporte."
+    confirmLabel="Dar de baja"
+    confirmColor="danger"
+    [loading]="isDeactivating"
+    (confirm)="confirmDeactivate()"
+    (cancel)="cancelDeactivate()">
   </app-confirm-modal>
 }

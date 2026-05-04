@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { ActiveStatus } from '@shared/constants/status-labels';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ActionItem, HeaderButton, TableColumn } from './data-table.models';
 import {
@@ -181,7 +182,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
       const key = String(value);
       return col.badgeMap[key]?.label || '-';
     }
-    if (typeof value === 'boolean') return value ? 'Activo' : 'Inactivo';
+    if (typeof value === 'boolean') return value ? ActiveStatus.Activo : ActiveStatus.Inactivo;
     switch (value?.toLowerCase()) {
       case 'approved': return 'Aprobado';
       case 'terminated': return 'Dado de baja';

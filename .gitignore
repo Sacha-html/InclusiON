@@ -48,3 +48,4 @@ Thumbs.db
 
 # Claude Code (solo settings locales, agents y skills se comparten)
 .claude/settings.local.json
+.vscode/settings.json

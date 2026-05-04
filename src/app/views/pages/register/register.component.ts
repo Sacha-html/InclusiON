@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { RegisterUserRequest, ErrorCode } from '@models';
 
 // CoreUI imports
@@ -136,7 +137,7 @@ export class RegisterComponent implements OnInit {
     // Llamar al servicio de autenticación
     this.authService.register(registerData).subscribe({
       next: () => {
-        this.router.navigate(['/login']);
+        this.router.navigate([AppRoutes.Login]);
       },
       error: (error) => {
         this.isLoading = false;

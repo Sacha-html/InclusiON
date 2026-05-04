@@ -5,9 +5,13 @@ import { catchError, throwError } from 'rxjs';
 import { AuthService, ErrorCodeService, ToastService, LocalStorageService } from '@services';
 import { ErrorCode } from '@models';
 import { RoleRoutes } from '@shared/constants/roles';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 /** URLs públicas que no requieren autenticación */
-const PUBLIC_URLS = ['/admin-login', '/register', '/visual-login', '/invite'];
+const PUBLIC_URLS = [AppRoutes.AdminLogin, AppRoutes.Register, AppRoutes.VisualLogin, AppRoutes.Invite];
+
+/** Rutas del panel AAC (persona con discapacidad) — sin toasts de error */
+const AAC_ROUTES = [AppRoutes.Aac.Root];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -35,10 +39,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       const backendMessage: string | undefined = error.error?.message;
 
       // Manejar según el código de error del backend o HTTP status
+      const isAacRoute = AAC_ROUTES.some(r => router.url.startsWith(r));
+
       if (errorCode !== undefined) {
-        handleErrorCode(errorCode, errorCodeService, toastService, router, storageService, authService);
+        handleErrorCode(errorCode, errorCodeService, toastService, router, storageService, authService, isAacRoute);
       } else {
-        handleHttpStatus(error.status, router, toastService, storageService, authService);
+        handleHttpStatus(error.status, router, toastService, storageService, authService, isAacRoute);
       }
 
       // Enriquecer el error con información adicional
@@ -65,7 +71,8 @@ function handleErrorCode(
   toastService: ToastService,
   router: Router,
   storageService: LocalStorageService,
-  authService: AuthService
+  authService: AuthService,
+  isAacRoute: boolean
 ): void {
   // Si requiere re-autenticación, limpiar sesión y redirigir
   if (errorCodeService.requiresReauth(errorCode)) {
@@ -73,12 +80,15 @@ function handleErrorCode(
 
     const currentUrl = router.url;
     if (!isPublicUrl(currentUrl)) {
-      router.navigate(['/login'], {
+      router.navigate([AppRoutes.Login], {
         queryParams: { returnUrl: currentUrl }
       });
     }
     return;
   }
+
+  // En rutas AAC no mostrar toasts — el componente maneja el estado de error internamente
+  if (isAacRoute) return;
 
   // Mostrar toast según severidad (excepto para errores de validación que se manejan en forms)
   if (!errorCodeService.isValidationError(errorCode)) {
@@ -112,32 +122,45 @@ function handleHttpStatus(
   router: Router,
   toastService: ToastService,
   storageService: LocalStorageService,
-  authService: AuthService
+  authService: AuthService,
+  isAacRoute: boolean
 ): void {
   switch (status) {
     case 401:
       storageService.clearSession();
       const currentUrl = router.url;
       if (!isPublicUrl(currentUrl)) {
-        router.navigate(['/login'], {
+        router.navigate([AppRoutes.Login], {
           queryParams: { returnUrl: currentUrl }
         });
       }
       break;
 
     case 403: {
-      toastService.error('No tenés permiso para acceder a este recurso');
+      if (!isAacRoute) {
+        toastService.error('No tenés permiso para acceder a este recurso');
+      }
       const dashboard = RoleRoutes[authService.getUserRole() ?? ''] ?? '/login';
       router.navigate([dashboard]);
       break;
     }
 
+    case 404:
+      if (!isAacRoute) {
+        toastService.warning('El recurso solicitado no fue encontrado');
+      }
+      break;
+
     case 500:
-      toastService.error('Error interno del servidor');
+      if (!isAacRoute) {
+        toastService.error('Error interno del servidor');
+      }
       break;
 
     case 0:
-      toastService.error('No se pudo conectar con el servidor');
+      if (!isAacRoute) {
+        toastService.error('No se pudo conectar con el servidor');
+      }
       break;
   }
 }

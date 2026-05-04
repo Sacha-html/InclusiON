@@ -1,0 +1,313 @@
+@if (loading()) {
+  <div class="text-center py-5">
+    <c-spinner></c-spinner>
+  </div>
+} @else if (!roadmap()) {
+
+  <!-- Empty state -->
+  <div class="text-center py-5">
+    <p class="text-body-secondary mb-3">Esta persona no tiene hoja de ruta asignada.</p>
+    @if (canCreate) {
+      <button cButton color="primary" (click)="openCreateModal()">Crear Hoja de Ruta</button>
+    }
+  </div>
+
+} @else {
+
+  <!-- Header: notes + create area -->
+  <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+    <div>
+      <span class="text-body-secondary small">Creado por {{ roadmap()!.createdByProfessionalFullName }}</span>
+      <div class="mt-1">
+        <span class="fw-semibold me-1">Notas:</span>
+        <span class="text-body-secondary">{{ roadmap()!.notes || 'Sin notas.' }}</span>
+        @if (canUpdate) {
+          <button cButton color="link" size="sm" class="p-0 ms-2" (click)="openEditNotesModal()">Editar</button>
+        }
+      </div>
+    </div>
+    @if (canUpdate) {
+      <button cButton color="outline-primary" size="sm" (click)="openAddAreaModal()">
+        + Agregar área
+      </button>
+    }
+  </div>
+
+  <!-- Areas -->
+  @if (roadmap()!.areas.length === 0) {
+    <p class="text-body-secondary text-center py-4">Sin áreas. Agregá una área para comenzar.</p>
+  }
+
+  @for (area of roadmap()!.areas; track area.id) {
+    <c-card class="mb-3">
+      <c-card-header class="d-flex justify-content-between align-items-center py-2">
+        <div class="d-flex align-items-center">
+          @if (area.color) {
+            <span class="area-header-dot" [style.background-color]="area.color" aria-hidden="true"></span>
+          }
+          <strong>{{ area.skillAreaName }}</strong>
+          <c-badge color="secondary" class="ms-2">{{ area.activities.length }} actividades</c-badge>
+        </div>
+        <div class="d-flex gap-1">
+          @if (canUpdate) {
+            <button cButton color="success" size="sm" (click)="openAddActivityModal(area)">
+              + Actividad
+            </button>
+          }
+          @if (canDelete) {
+            <button cButton color="outline-danger" size="sm" (click)="openConfirmRemoveArea(area)">
+              Eliminar área
+            </button>
+          }
+        </div>
+      </c-card-header>
+      <c-card-body class="pt-2 pb-2">
+
+        @if (area.activities.length === 0) {
+          <p class="empty-area mb-0">Sin actividades en esta área.</p>
+        }
+
+        <div
+          cdkDropList
+          [cdkDropListData]="area.activities"
+          (cdkDropListDropped)="onDropActivity($event, area)"
+          class="activities-drop-list"
+        >
+          @for (activity of area.activities; track activity.id) {
+            <div
+              cdkDrag
+              [cdkDragDisabled]="!canUpdate"
+              class="activity-row"
+              [class.locked]="!activity.isUnlocked"
+            >
+              <!-- Drag handle (solo visible si tiene permiso) -->
+              @if (canUpdate) {
+                <span cdkDragHandle class="drag-handle" title="Arrastrar para reordenar" aria-label="Arrastrar">
+                  ⠿
+                </span>
+              }
+
+              <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1">
+                <c-badge color="secondary" class="sequence-badge">{{ activity.sequenceOrder }}</c-badge>
+                <span class="fw-semibold">{{ activity.activityTitle }}</span>
+                <c-badge [color]="activity.isUnlocked ? 'success' : 'secondary'">
+                  {{ activity.isUnlocked ? 'Desbloqueada' : 'Bloqueada' }}
+                </c-badge>
+                <c-badge [color]="difficultyColor(activity.difficultyLevel)">
+                  {{ difficultyLabel(activity.difficultyLevel) }}
+                </c-badge>
+                @if (activity.showHints) {
+                  <c-badge color="info">Pistas</c-badge>
+                }
+                @if (activity.timeLimitSeconds) {
+                  <c-badge color="warning">{{ activity.timeLimitSeconds }}s</c-badge>
+                }
+                @if (activity.maxAttempts) {
+                  <c-badge color="warning">Máx. {{ activity.maxAttempts }} intentos</c-badge>
+                }
+              </div>
+              <div class="d-flex gap-1 flex-shrink-0">
+                @if (canUpdate && !activity.isUnlocked) {
+                  <button
+                    cButton color="outline-success" size="sm"
+                    (click)="unlockActivity(area, activity)"
+                    [disabled]="unlockingActivityId === activity.id">
+                    @if (unlockingActivityId === activity.id) {
+                      <c-spinner size="sm"></c-spinner>
+                    } @else {
+                      Desbloquear
+                    }
+                  </button>
+                }
+                @if (canDelete) {
+                  <button
+                    cButton color="outline-danger" size="sm"
+                    (click)="openConfirmRemoveActivity(area, activity)">
+                    ✕
+                  </button>
+                }
+              </div>
+
+              <!-- Drag preview placeholder -->
+              <div *cdkDragPlaceholder class="drag-placeholder"></div>
+            </div>
+          }
+        </div>
+
+      </c-card-body>
+    </c-card>
+  }
+
+}
+
+<!-- Modal: Crear roadmap -->
+<c-modal [visible]="showCreateModal" (visibleChange)="showCreateModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>Crear Hoja de Ruta</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <div class="mb-3">
+      <label cFormLabel for="create-notes">Notas del plan (opcional)</label>
+      <textarea cFormControl id="create-notes" [(ngModel)]="createNotes" rows="4"
+                placeholder="Objetivos, observaciones generales..."></textarea>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showCreateModal = false">Cancelar</button>
+    <button cButton color="primary" (click)="submitCreate()" [disabled]="creating">
+      @if (creating) { <c-spinner size="sm"></c-spinner> }
+      Crear
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal: Editar notas -->
+<c-modal [visible]="showEditNotesModal" (visibleChange)="showEditNotesModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>Editar Notas</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <div class="mb-3">
+      <label cFormLabel for="edit-notes">Notas del plan</label>
+      <textarea cFormControl id="edit-notes" [(ngModel)]="editNotes" rows="4"></textarea>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showEditNotesModal = false">Cancelar</button>
+    <button cButton color="primary" (click)="submitEditNotes()" [disabled]="savingNotes">
+      @if (savingNotes) { <c-spinner size="sm"></c-spinner> }
+      Guardar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal: Agregar área -->
+<c-modal [visible]="showAddAreaModal" (visibleChange)="showAddAreaModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>Agregar Área de Habilidad</h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (availableSkillAreas().length === 0) {
+      <p class="text-body-secondary">
+        @if (skillAreas().length === 0) { Cargando áreas... }
+        @else { Todas las áreas ya están agregadas. }
+      </p>
+    } @else {
+      <div class="mb-3">
+        <label cFormLabel for="select-area">Área de habilidad</label>
+        <select cSelect id="select-area" [(ngModel)]="selectedSkillAreaId">
+          <option [ngValue]="null">Seleccionar...</option>
+          @for (area of availableSkillAreas(); track area.id) {
+            <option [ngValue]="area.id">{{ area.name }}</option>
+          }
+        </select>
+      </div>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showAddAreaModal = false">Cancelar</button>
+    <button cButton color="primary" (click)="submitAddArea()"
+            [disabled]="!selectedSkillAreaId || addingArea">
+      @if (addingArea) { <c-spinner size="sm"></c-spinner> }
+      Agregar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal: Agregar actividad -->
+<c-modal [visible]="showAddActivityModal" (visibleChange)="showAddActivityModal = $event" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>Agregar Actividad — {{ targetArea?.skillAreaName }}</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <c-row>
+      <c-col [md]="12" class="mb-3">
+        <label cFormLabel for="select-activity">Actividad</label>
+        @if (loadingActivities) {
+          <div class="text-center py-2"><c-spinner size="sm"></c-spinner></div>
+        } @else {
+          <select cSelect id="select-activity" [(ngModel)]="selectedActivityId">
+            <option [ngValue]="null">Seleccionar...</option>
+            @for (act of availableActivities(); track act.id) {
+              <option [ngValue]="act.id">{{ act.title }}</option>
+            }
+          </select>
+        }
+      </c-col>
+      <c-col [md]="4" class="mb-3">
+        <label cFormLabel for="seq-order">Orden secuencial</label>
+        <input cFormControl type="number" id="seq-order" [(ngModel)]="activityConfig.sequenceOrder" min="1" />
+      </c-col>
+      <c-col [md]="4" class="mb-3">
+        <label cFormLabel for="unlock-threshold">Umbral desbloqueo (%)</label>
+        <input cFormControl type="number" id="unlock-threshold"
+               [(ngModel)]="activityConfig.unlockThresholdPercent" min="0" max="100" />
+      </c-col>
+      <c-col [md]="4" class="mb-3">
+        <label cFormLabel for="difficulty">Dificultad</label>
+        <select cSelect id="difficulty" [(ngModel)]="activityConfig.difficultyLevel">
+          <option [ngValue]="1">Fácil</option>
+          <option [ngValue]="2">Medio</option>
+          <option [ngValue]="3">Difícil</option>
+        </select>
+      </c-col>
+      <c-col [md]="4" class="mb-3">
+        <label cFormLabel for="time-limit">Tiempo límite (seg, vacío = sin límite)</label>
+        <input cFormControl type="number" id="time-limit"
+               [ngModel]="activityConfig.timeLimitSeconds"
+               (ngModelChange)="activityConfig.timeLimitSeconds = $event || null"
+               min="1" />
+      </c-col>
+      <c-col [md]="4" class="mb-3">
+        <label cFormLabel for="max-attempts">Máx. intentos (vacío = ilimitado)</label>
+        <input cFormControl type="number" id="max-attempts"
+               [ngModel]="activityConfig.maxAttempts"
+               (ngModelChange)="activityConfig.maxAttempts = $event || null"
+               min="1" />
+      </c-col>
+      <c-col [md]="4" class="mb-3 d-flex align-items-end">
+        <c-form-check>
+          <input cFormCheckInput type="checkbox" id="show-hints"
+                 [(ngModel)]="activityConfig.showHints" />
+          <label cFormCheckLabel for="show-hints">Mostrar pistas</label>
+        </c-form-check>
+      </c-col>
+    </c-row>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showAddActivityModal = false">Cancelar</button>
+    <button cButton color="primary" (click)="submitAddActivity()"
+            [disabled]="!selectedActivityId || addingActivity">
+      @if (addingActivity) { <c-spinner size="sm"></c-spinner> }
+      Agregar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Confirm: eliminar área -->
+<app-confirm-modal
+  [visible]="!!confirmRemoveArea"
+  title="Eliminar área"
+  messagePrefix="¿Eliminar el área "
+  [itemName]="confirmRemoveArea?.skillAreaName ?? ''"
+  messageSuffix="? Se eliminarán también todas sus actividades."
+  confirmLabel="Eliminar"
+  confirmColor="danger"
+  [loading]="removingArea"
+  (confirm)="submitRemoveArea()"
+  (cancel)="confirmRemoveArea = null">
+</app-confirm-modal>
+
+<!-- Confirm: eliminar actividad -->
+<app-confirm-modal
+  [visible]="!!confirmRemoveActivity"
+  title="Eliminar actividad"
+  messagePrefix="¿Eliminar la actividad "
+  [itemName]="confirmRemoveActivity?.activity?.activityTitle ?? ''"
+  messageSuffix=" del roadmap?"
+  confirmLabel="Eliminar"
+  confirmColor="danger"
+  [loading]="removingActivity"
+  (confirm)="submitRemoveActivity()"
+  (cancel)="confirmRemoveActivity = null">
+</app-confirm-modal>

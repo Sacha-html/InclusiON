@@ -4,7 +4,7 @@ import { environment } from '@env';
 import { Observable } from 'rxjs';
 import { ApiResponse, PagedResponse } from '../models';
 import { AdminUserListItemResponse } from '../models/responses/admin-user-list-item.response';
-import { AdminUserDetailResponse, ResetPasswordResultResponse } from '../models/responses/admin-user-detail.response';
+import { AdminUserDetailResponse, ResetPasswordResultResponse, UserRecentSessionResponse } from '../models/responses/admin-user-detail.response';
 import { GetAdminUsersRequest } from '../models/requests/admin-users/get-admin-users.request';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
@@ -56,6 +56,14 @@ export class UserManagementService {
   reactivateUser(userId: string): Observable<ResetPasswordResultResponse> {
     return this.http
       .put<ApiResponse<ResetPasswordResultResponse>>(`${this.apiUrl}/${userId}/reactivate`, {})
+      .pipe(unwrapResponse());
+  }
+
+  getUserActivity(userId: string, limit = 15): Observable<UserRecentSessionResponse[]> {
+    return this.http
+      .get<ApiResponse<UserRecentSessionResponse[]>>(`${this.apiUrl}/${userId}/activity`, {
+        params: { limit: limit.toString() }
+      })
       .pipe(unwrapResponse());
   }
 }

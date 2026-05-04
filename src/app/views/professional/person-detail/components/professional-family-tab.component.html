@@ -36,8 +36,8 @@
         <label cFormLabel id="family-list-label">Seleccionar familiar</label>
         <div class="list-group family-list-scroll" style="max-height: 200px; overflow-y: auto;" role="listbox" aria-labelledby="family-list-label">
           @for (family of availableFamilies; track family.id) {
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="list-group-item list-group-item-action family-list-item"
               [class.active]="selectedFamilyId === family.id"
               [class.family-previously-linked]="family.wasPreviouslyLinked"

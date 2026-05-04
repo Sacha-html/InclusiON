@@ -2,6 +2,7 @@ export interface CatalogItem {
   id: number;
   name: string;
   description?: string;
+  isActive: boolean;
 }
 
 export interface AutonomyLevelItem {
@@ -10,6 +11,7 @@ export interface AutonomyLevelItem {
   description?: string;
   requiresSupervision: boolean;
   displayOrder: number;
+  isActive: boolean;
 }
 
 export interface ActivityCategoryItem {
@@ -26,6 +28,7 @@ export interface SkillAreaItem {
   icon?: string;
   color?: string;
   displayOrder: number;
+  isActive: boolean;
 }
 
 export interface ActivityTemplateTypeItem {
@@ -36,6 +39,7 @@ export interface ActivityTemplateTypeItem {
   skillAreaName?: string;
   supportsPictograms: boolean;
   supportsAudio: boolean;
+  isActive: boolean;
 }
 
 export interface AvatarColorItem {

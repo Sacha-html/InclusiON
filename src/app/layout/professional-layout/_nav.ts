@@ -1,9 +1,10 @@
 import { INavData } from '@coreui/angular';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 export const professionalNavItems: INavData[] = [
   {
     name: 'Dashboard',
-    url: '/pro',
+    url: AppRoutes.Pro.Root,
     iconComponent: { name: 'cil-speedometer' },
     badge: {
       color: 'info',
@@ -16,17 +17,17 @@ export const professionalNavItems: INavData[] = [
   },
   {
     name: 'Actividades',
-    url: '/pro/activities',
+    url: AppRoutes.Pro.Activities,
     iconComponent: { name: 'cil-task' }
   },
   {
     name: 'Mi Aula',
-    url: '/pro/persons',
+    url: AppRoutes.Pro.Persons,
     iconComponent: { name: 'cil-people' }
   },
   {
     name: 'Objetivos',
-    url: '/pro/goals',
+    url: AppRoutes.Pro.Goals,
     iconComponent: { name: 'cil-star' }
   },
   {
@@ -35,12 +36,12 @@ export const professionalNavItems: INavData[] = [
   },
   {
     name: 'Evaluaciones',
-    url: '/pro/evaluations',
+    url: AppRoutes.Pro.Evaluations,
     iconComponent: { name: 'cil-clipboard' }
   },
   {
     name: 'Reportes',
-    url: '/pro/reports',
+    url: AppRoutes.Pro.Reports,
     iconComponent: { name: 'cil-chart' }
   },
   {
@@ -49,17 +50,17 @@ export const professionalNavItems: INavData[] = [
   },
   {
     name: 'Calendario',
-    url: '/pro/calendar',
+    url: AppRoutes.Pro.Calendar,
     iconComponent: { name: 'cil-calendar' }
   },
   {
     name: 'Invitaciones',
-    url: '/pro/invitations',
+    url: AppRoutes.Pro.Invitations,
     iconComponent: { name: 'cil-link' }
   },
   {
     name: 'Mensajes',
-    url: '/pro/messages',
+    url: AppRoutes.Pro.Messages,
     iconComponent: { name: 'cil-envelope-closed' }
   }
 ];
