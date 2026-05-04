@@ -1,3 +1,4 @@
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Queries;
@@ -26,13 +27,13 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 {
                     UserId = p.UserId,
                     FullName = $"{p.FirstName} {p.LastName}",
-                    Type = "Professional"
+                    Type = RoleNames.Professional
                 })
                 .Concat(representatives.Select(pr => new SupervisorCandidateResponse
                 {
                     UserId = pr.Representative.UserId,
                     FullName = $"{pr.Representative.FirstName} {pr.Representative.LastName}",
-                    Type = "Family",
+                    Type = RoleNames.Family,
                     Relationship = pr.Relationship
                 }))
                 .OrderBy(c => c.FullName)

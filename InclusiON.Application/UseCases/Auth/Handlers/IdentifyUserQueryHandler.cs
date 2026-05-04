@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Auth.Queries;
@@ -223,7 +224,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = false,
-                    UserType = "Professional"
+                    UserType = RoleNames.Professional
                 },
                 SuccessMessages.UserIdentified);
         }
@@ -261,7 +262,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     LoginMethodName = "Contraseña",
                     IsTrustedDevice = isTrusted,
                     RequiresSupervision = false,
-                    UserType = "Family"
+                    UserType = RoleNames.Family
                 },
                 SuccessMessages.UserIdentified);
         }

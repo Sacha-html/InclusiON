@@ -263,5 +263,17 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<List<PersonWithDisability>> GetLinkedPersonsAsync(
+            Guid familyUserId, CancellationToken cancellationToken = default)
+        {
+            return await (
+                from fam in _context.FamilyRepresentatives
+                join pr  in _context.PersonRepresentatives on fam.Id       equals pr.RepresentativeId
+                join p   in _context.PersonsWithDisability  on pr.PersonId  equals p.Id
+                where fam.UserId == familyUserId && pr.IsActive && p.IsActive
+                select p
+            ).AsNoTracking().ToListAsync(cancellationToken);
+        }
     }
 }

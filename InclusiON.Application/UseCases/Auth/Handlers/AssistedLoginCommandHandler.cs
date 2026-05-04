@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -136,7 +137,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             // DbContext no es thread-safe: consultar secuencialmente y solo la tabla
             // correspondiente al rol detectado.
             // Se verifica ademas el vinculo activo a ESTA persona con CanSuperviseLogin (HU-IN-172).
-            if (roles.Contains("Professional"))
+            if (roles.Contains(RoleNames.Professional))
             {
                 var professional = await _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
                 if (professional != null
@@ -146,7 +147,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 }
             }
 
-            if (roles.Contains("Family"))
+            if (roles.Contains(RoleNames.Family))
             {
                 var family = await _repository.GetFamilyByUserIdAsync(supervisorUserId, cancellationToken);
                 if (family != null

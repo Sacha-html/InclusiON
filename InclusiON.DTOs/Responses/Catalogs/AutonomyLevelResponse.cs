@@ -9,6 +9,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
         public string? Description { get; set; }
         public bool RequiresSupervision { get; set; }
         public int DisplayOrder { get; set; }
+        public bool IsActive { get; set; }
 
         public static AutonomyLevelResponse MapToResponse(AutonomyLevel x)
         {
@@ -18,7 +19,8 @@ namespace InclusiON.DTOs.Responses.Catalogs
                 Name = x.Name,
                 Description = x.Description,
                 RequiresSupervision = x.RequiresSupervision,
-                DisplayOrder = x.DisplayOrder
+                DisplayOrder = x.DisplayOrder,
+                IsActive = x.IsActive
             };
         }
     }
