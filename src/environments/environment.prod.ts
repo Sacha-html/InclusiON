@@ -2,7 +2,7 @@ export const environment = {
   production: true,
 
   // URLs del Backend
-  apiUrl: 'https://api.tudominio.com/api',
+  apiUrl: '/api',
 
   // Configuración de la Aplicación
   appName: 'InclusiON',
