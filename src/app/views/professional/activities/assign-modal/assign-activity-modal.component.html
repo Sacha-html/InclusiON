@@ -82,7 +82,7 @@
   </c-modal-body>
 
   <c-modal-footer>
-    <button cButton color="secondary" variant="outline" [disabled]="isSaving()" (click)="close()">
+    <button cButton color="secondary" [disabled]="isSaving()" (click)="close()">
       Cancelar
     </button>
     <button cButton color="primary" [disabled]="!isValid || isSaving() || isLoadingPersons()" (click)="save()">

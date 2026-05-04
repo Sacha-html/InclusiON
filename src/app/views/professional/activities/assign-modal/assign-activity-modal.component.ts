@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, Output, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { switchMap } from 'rxjs';
 import { ActivitiesService } from '@services/activities.service';
 import { AssignmentsService } from '@services/assignments.service';
 import { ProfessionalsService } from '@services/professionals.service';
@@ -71,14 +72,11 @@ export class AssignActivityModalComponent implements OnChanges {
 
   private loadPersons(): void {
     this.isLoadingPersons.set(true);
-    this.professionalsService.getMyProfile().subscribe({
-      next: (prof) => {
-        this.assignmentsService.getPersonsByProfessional(prof.id).subscribe({
-          next:  (persons) => { this.persons.set(persons); this.isLoadingPersons.set(false); },
-          error: ()        => this.isLoadingPersons.set(false),
-        });
-      },
-      error: () => this.isLoadingPersons.set(false),
+    this.professionalsService.getMyProfile().pipe(
+      switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
+    ).subscribe({
+      next:  (persons) => { this.persons.set(persons); this.isLoadingPersons.set(false); },
+      error: ()        => this.isLoadingPersons.set(false),
     });
   }
 
