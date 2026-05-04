@@ -2,6 +2,7 @@ import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
 import {
   BadgeComponent,
@@ -93,7 +94,7 @@ export class AdminPersonReportsComponent implements OnInit {
   }
 
   viewReport(id: number): void {
-    this.router.navigate(['/admin/reports', id]);
+    this.router.navigate([AppRoutes.Admin.Reports, id]);
   }
 
   openApproveModal(report: ReportListItemResponse): void {

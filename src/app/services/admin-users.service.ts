@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
-import { AdminUserResponse, ApiResponse, CreateAdminUserResponse } from '../models';
+import { AdminUserResponse, AdminDashboardResponse, ApiResponse, CreateAdminUserResponse } from '../models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
@@ -46,5 +46,11 @@ export class AdminUsersService {
     return this.http
       .put<void>(`${this.usersApiUrl}/${userId}`, request)
       .pipe(handleApiError());
+  }
+
+  getDashboard(): Observable<AdminDashboardResponse> {
+    return this.http
+      .get<ApiResponse<AdminDashboardResponse>>(`${environment.apiUrl}/admin/dashboard`)
+      .pipe(unwrapResponse());
   }
 }

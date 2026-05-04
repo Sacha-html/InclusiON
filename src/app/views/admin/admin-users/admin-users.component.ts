@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AdminUsersService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { AuthService } from '../../../services/auth.service';
 import { AdminUserResponse } from '@models';
 
@@ -46,11 +47,11 @@ export class AdminUsersComponent implements OnInit {
   }
 
   goToNew(): void {
-    this.router.navigate(['/admin/admins/new']);
+    this.router.navigate([AppRoutes.Admin.Admins + '/new']);
   }
 
   goToEdit(): void {
-    this.router.navigate(['/admin/admins/edit']);
+    this.router.navigate([AppRoutes.Admin.Admins + '/edit']);
   }
 
   getTypeLabel(admin: AdminUserResponse): string {
