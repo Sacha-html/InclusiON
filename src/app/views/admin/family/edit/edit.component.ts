@@ -2,7 +2,8 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { FamilyService, PersonsService } from '@services';
+import { FamilyService, PersonsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import {
   FamilyResponse, LinkedPersonInfo, UpdateFamilyRequest, PersonListItemResponse,
 } from '../../../../models';
@@ -31,6 +32,7 @@ export class EditComponent implements OnInit {
   private readonly router         = inject(Router);
   private readonly familyService  = inject(FamilyService);
   private readonly personsService = inject(PersonsService);
+  private readonly toastService   = inject(ToastService);
 
   family: FamilyResponse | null = null;
   submitted = false;
@@ -91,7 +93,7 @@ export class EditComponent implements OnInit {
           });
           this.loadPersons();
         },
-        error: () => this.router.navigate(['/admin/family']),
+        error: () => this.router.navigate([AppRoutes.Admin.Family]),
       });
     }
   }
@@ -127,7 +129,7 @@ export class EditComponent implements OnInit {
         this.refreshFamily();
       },
       error: (err) => {
-        this.linkError = err?.error?.message || 'Error al vincular la persona';
+        this.linkError = err?.userMessage || 'Error al vincular la persona';
         this.isLinking = false;
       },
     });
@@ -158,6 +160,8 @@ export class EditComponent implements OnInit {
       },
       error: () => {
         this.isUnlinking = false;
+        this.showUnlinkModal = false;
+        this.toastService.error('Error al desvincular la persona');
       },
     });
   }
@@ -180,19 +184,19 @@ export class EditComponent implements OnInit {
 
     this.familyService.updateFamily(this.family.id, request).subscribe({
       next: () => {
-        this.router.navigate(['/admin/family', this.family!.id]);
+        this.router.navigate([AppRoutes.Admin.Family, this.family!.id]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al actualizar el familiar';
+        this.serverError = err?.userMessage || 'Error al actualizar el familiar';
       },
     });
   }
 
   goBack(): void {
     if (this.family) {
-      this.router.navigate(['/admin/family', this.family.id]);
+      this.router.navigate([AppRoutes.Admin.Family, this.family.id]);
     } else {
-      this.router.navigate(['/admin/family']);
+      this.router.navigate([AppRoutes.Admin.Family]);
     }
   }
 

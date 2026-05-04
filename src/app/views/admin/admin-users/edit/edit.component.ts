@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AdminUsersService, UpdateAdminUserRequest } from '../../../../services/admin-users.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ToastService } from '../../../../services/toast.service';
+import { AppRoutes } from '@shared/constants/app-routes';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -57,7 +58,7 @@ export class EditComponent implements OnInit {
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     if (!user) {
-      this.router.navigate(['/admin/admins']);
+      this.router.navigate([AppRoutes.Admin.Admins]);
       return;
     }
     this.userId = user.id;
@@ -90,15 +91,15 @@ export class EditComponent implements OnInit {
     this.adminUsersService.updateAdmin(this.userId, request).subscribe({
       next: () => {
         this.toastService.success('Datos actualizados exitosamente');
-        this.router.navigate(['/admin/admins']);
+        this.router.navigate([AppRoutes.Admin.Admins]);
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al actualizar los datos';
+        this.serverError = err?.userMessage || 'Error al actualizar los datos';
       },
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/admins']);
+    this.router.navigate([AppRoutes.Admin.Admins]);
   }
 }
