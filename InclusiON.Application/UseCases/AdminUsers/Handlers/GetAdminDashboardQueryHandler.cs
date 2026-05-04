@@ -85,7 +85,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 WHERE pwd.""IsActive"" = true {personScope}";
 
             // ── Institutions (GlobalAdmin only) ───────────────────────────
-            var sqlInstitutions = @"SELECT COUNT(*) FROM ""Institutions"" WHERE ""IsActive"" = true";
+            var sqlInstitutions = @"SELECT COUNT(*) FROM ""EducationalInstitutions"" WHERE ""IsActive"" = true";
 
             // ── Active assignments ────────────────────────────────────────
             var assignScope = query.IsGlobalAdmin
@@ -116,14 +116,14 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 SELECT COUNT(*)
                 FROM ""Reports"" rpt
                 WHERE rpt.""IsActive"" = true
-                  AND rpt.""Status"" = 1 {reportScope}";   /* ReportStatus.Submitted = 1 */
+                  AND rpt.""Status"" = 'Submitted' {reportScope}";
 
             var sqlReportsApproved = $@"
                 SELECT COUNT(*)
                 FROM ""Reports"" rpt
                 WHERE rpt.""IsActive"" = true
-                  AND rpt.""Status"" = 2
-                  AND rpt.""ReportDate"" >= @ThisMonthStart {reportScope}";   /* ReportStatus.Approved = 2 */
+                  AND rpt.""Status"" = 'Approved'
+                  AND rpt.""ReportDate"" >= @ThisMonthStart {reportScope}";
 
             // ── Run all in parallel ───────────────────────────────────────
             var tProf     = _db.ExecuteScalarAsync<int>(sqlTotalProf,         configureInst, cancellationToken);
