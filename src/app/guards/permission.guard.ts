@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { AuthService, ToastService } from '../services';
+import { AppRoutes } from '../shared/constants/app-routes';
 
 export const permissionGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const authService = inject(AuthService);
@@ -18,6 +19,7 @@ export const permissionGuard: CanActivateFn = (route: ActivatedRouteSnapshot) =>
   }
 
   toastService.warning('No tienes permisos para acceder a esta sección.');
-  router.navigate(['/admin/dashboard']);
+  const redirectTo = route.data['redirectTo'] as string | undefined;
+  router.navigate([redirectTo ?? AppRoutes.Admin.Dashboard]);
   return false;
 };
