@@ -23,6 +23,8 @@ import {
 import { LocalStorageService, STORAGE_KEYS } from './local-storage.service';
 import { AccessibilityService } from './accessibility.service';
 import { environment } from '@env';
+import { UserRoles } from '@shared/constants/roles';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 interface JwtPayload {
   sub?: string;
@@ -98,7 +100,7 @@ export class AuthService {
   logout(): void {
     this.clearSession();
 
-    this.router.navigate(['/login']);
+    this.router.navigate([AppRoutes.Login]);
   }
 
   refreshToken(): Observable<AuthResponse> {
@@ -298,7 +300,7 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      const isAdmin = payload.role === 'Admin';
+      const isAdmin = payload.role === UserRoles.Admin;
       const isGlobal = payload.isGlobalAdmin === 'true' || payload.isGlobalAdmin === true;
       return isAdmin && isGlobal;
     } catch {
@@ -421,7 +423,7 @@ export class AuthService {
         email: '',
         name: userInfo.displayName,
         surname: '',
-        role: userInfo.roles[0] || 'Person',
+        role: userInfo.roles[0] || UserRoles.Person,
         isActive: true,
         createdAt: new Date(),
       };
