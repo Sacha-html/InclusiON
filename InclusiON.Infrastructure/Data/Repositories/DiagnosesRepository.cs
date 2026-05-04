@@ -23,6 +23,13 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(d => d.Id == id && d.IsActive, cancellationToken);
         }
 
+        public async Task<Diagnosis?> GetByIdIgnoreActiveAsync(int id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Diagnosis>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
+        }
+
         public async Task<List<Diagnosis>> GetByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
         {
             return await _context.Set<Diagnosis>()

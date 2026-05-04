@@ -26,6 +26,13 @@ namespace InclusiON.Application.Interfaces.Repositories
             CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Cuenta y devuelve el reporte aprobado más reciente de una persona.
+        /// Usado por el dashboard familiar.
+        /// </summary>
+        Task<(int Count, Report? Latest)> GetApprovedReportsSummaryAsync(
+            Guid personId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Reportes aprobados visibles para un familiar (filtra por las personas a cargo del familiar).
         /// </summary>
         Task<PagedResponse<Report>> GetFamilyPagedAsync(

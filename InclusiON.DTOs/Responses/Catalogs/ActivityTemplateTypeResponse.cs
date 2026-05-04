@@ -14,6 +14,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
         public bool UsesPictograms { get; set; }
         public bool HasAudio { get; set; }
         public int DisplayOrder { get; set; }
+        public bool IsActive { get; set; }
 
         public static ActivityTemplateTypeResponse MapToResponse(ActivityTemplateType x)
         {
@@ -28,7 +29,8 @@ namespace InclusiON.DTOs.Responses.Catalogs
                 ComponentName = x.ComponentName,
                 UsesPictograms = x.UsesPictograms,
                 HasAudio = x.HasAudio,
-                DisplayOrder = x.DisplayOrder
+                DisplayOrder = x.DisplayOrder,
+                IsActive = x.IsActive
             };
         }
     }

@@ -45,11 +45,11 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             if (professional is null || report.ProfessionalId != professional.Id)
                 return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.Forbidden, "No tenés permiso para editar este reporte.");
 
-            // Solo se puede editar si está en borrador
-            if (report.Status != ReportStatus.Draft)
+            // Solo se puede editar si está en borrador o rechazado
+            if (report.Status != ReportStatus.Draft && report.Status != ReportStatus.Rejected)
                 return ApiResponse<ReportResponse>.ErrorResult(
                     ErrorCode.InvalidOperation,
-                    $"No se puede editar un reporte en estado '{report.Status}'. Solo se permiten ediciones en borrador.");
+                    $"No se puede editar un reporte en estado '{report.Status}'. Solo se permiten ediciones en Borrador o Rechazado.");
 
             report.Title = command.Title;
             report.Content = command.Content;

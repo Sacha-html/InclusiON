@@ -20,6 +20,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
 
+        public async Task<User?> GetByIdWithProfileAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _context.Users
+                .Include(u => u.Professional)
+                .Include(u => u.FamilyRepresentative)
+                .Include(u => u.PersonWithDisability)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        }
+
         public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             return await _context.Users

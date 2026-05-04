@@ -8,6 +8,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
+        public bool IsActive { get; set; }
 
         public static CatalogItemResponse MapToResponse(ActivityCategory x)
         {
@@ -15,7 +16,8 @@ namespace InclusiON.DTOs.Responses.Catalogs
             {
                 Id = x.Id,
                 Name = x.Name,
-                Description = x.Description
+                Description = x.Description,
+                IsActive = x.IsActive
             };
         }
 
@@ -25,7 +27,8 @@ namespace InclusiON.DTOs.Responses.Catalogs
             {
                 Id = x.Id,
                 Name = x.Name,
-                Description = x.Description
+                Description = x.Description,
+                IsActive = x.IsActive
             };
         }
 
@@ -35,7 +38,19 @@ namespace InclusiON.DTOs.Responses.Catalogs
             {
                 Id = x.Id,
                 Name = x.Name,
-                Description = x.Description
+                Description = x.Description,
+                IsActive = x.IsActive
+            };
+        }
+
+        public static CatalogItemResponse MapToResponse(ReportType x)
+        {
+            return new CatalogItemResponse
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Description = x.Description,
+                IsActive = x.IsActive
             };
         }
     }

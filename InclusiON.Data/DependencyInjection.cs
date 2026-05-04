@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using InclusiON.Domain.Models;
 
 namespace InclusiON.Data
@@ -12,6 +13,12 @@ namespace InclusiON.Data
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
         {
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(
+                configuration.GetConnectionString("PostgreSqlConn"));
+            dataSourceBuilder.UseVector();
+            var dataSource = dataSourceBuilder.Build();
+            services.AddSingleton(dataSource);
+
             services.AddDbContext<AppDbContext>((sp, opt) =>
             {
                 opt
@@ -24,8 +31,7 @@ namespace InclusiON.Data
                 if (isDevelopment)
                     opt.EnableSensitiveDataLogging();
                 opt
-                    .UseNpgsql(configuration
-                    .GetConnectionString("PostgreSqlConn"), npgsqlOptions =>
+                    .UseNpgsql(dataSource, npgsqlOptions =>
                     {
                         npgsqlOptions.CommandTimeout(180);
                     });

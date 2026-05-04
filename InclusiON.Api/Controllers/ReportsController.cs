@@ -242,6 +242,26 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        /// <summary>Profesional da de baja su reporte (baja lógica). No permitido en estado Enviado.</summary>
+        [HttpPut("{reportId:int}/deactivate")]
+        [Authorize(Policy = "reports:create")]
+        [ReportAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> DeactivateReport(
+            int reportId,
+            [FromServices] ICommandHandler<DeactivateReportCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return BadRequest(ApiResponse<object>.ErrorResult("Solo los profesionales pueden dar de baja reportes."));
+
+            var result = await handler.HandleAsync(new DeactivateReportCommand(reportId, professionalId.Value), cancellationToken);
+            return result.ToActionResult();
+        }
+
         /// <summary>Admin rechaza el reporte con un motivo para el profesional.</summary>
         [HttpPatch("{reportId:int}/reject")]
         [Authorize(Policy = "reports:reject")]

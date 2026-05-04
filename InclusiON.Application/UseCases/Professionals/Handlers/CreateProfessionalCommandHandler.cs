@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -103,7 +104,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         throw new InvalidOperationException(string.Format(ErrorMessages.UserCreationError, string.Join(", ", errors)));
                     }
 
-                    await _identityService.AddToRoleAsync(user, "Professional");
+                    await _identityService.AddToRoleAsync(user, RoleNames.Professional);
 
                     professional.UserId = user.Id;
 

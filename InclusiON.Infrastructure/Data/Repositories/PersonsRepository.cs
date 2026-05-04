@@ -90,6 +90,43 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<List<PersonSkillProfile>> GetSkillProfileAsync(
+            Guid personId,
+            bool activeOnly,
+            CancellationToken cancellationToken = default)
+        {
+            var query = _context.PersonSkillProfiles
+                .Include(psp => psp.SkillArea)
+                .Where(psp => psp.PersonId == personId);
+
+            if (activeOnly)
+                query = query.Where(psp => psp.IsActive);
+
+            return await query
+                .OrderBy(psp => psp.SkillArea.DisplayOrder)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<PersonSkillProfile?> GetSkillProfileEntryAsync(
+            Guid personId,
+            int skillAreaId,
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonSkillProfiles
+                .Include(psp => psp.SkillArea)
+                .FirstOrDefaultAsync(
+                    psp => psp.PersonId == personId && psp.SkillAreaId == skillAreaId,
+                    cancellationToken);
+        }
+
+        public async Task AddSkillProfileEntryAsync(
+            PersonSkillProfile entry,
+            CancellationToken cancellationToken = default)
+        {
+            await _context.PersonSkillProfiles.AddAsync(entry, cancellationToken);
+        }
+
         public async Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
             int page,
             int pageSize,

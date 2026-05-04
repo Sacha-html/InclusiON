@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -104,13 +105,15 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         throw new InvalidOperationException(string.Format(ErrorMessages.UserCreationError, string.Join(", ", errors)));
                     }
 
-                    await _identityService.AddToRoleAsync(user, "FamilyRepresentative");
+                    await _identityService.AddToRoleAsync(user, RoleNames.FamilyRepresentative);
 
                     family.UserId = user.Id;
-                    await _repository.CreateAsync(family, ct);
-                    await _unitOfWork.SaveChangesAsync(ct);
 
-                    // Vincular familiar con la persona
+                    // Vincular familiar con la persona antes del primer SaveChanges.
+                    // family.Id ya está asignado en el constructor (Guid.NewGuid()).
+                    // Usar un solo SaveChanges evita la excepción de concurrencia de EF
+                    // que ocurría cuando Identity actualizaba el ConcurrencyStamp del User
+                    // entre los dos SaveChanges consecutivos.
                     family.PersonRepresentatives.Add(new PersonRepresentative
                     {
                         PersonId = command.PersonId,
@@ -119,6 +122,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         IsActive = true,
                         CreatedAt = _dateTime.UtcNow
                     });
+
+                    await _repository.CreateAsync(family, ct);
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
@@ -154,7 +159,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             catch (InvalidOperationException ex) when (ex.Message.StartsWith(ErrorMessages.UserCreationError.Replace("{0}", "")))
             {
                 _logger.LogWarning(ex, "Error de validacion al crear familiar");
-                return ApiResponse<FamilyResponse>.ErrorResult(ErrorCode.ValidationFailed, ex.Message);
+                return ApiResponse<FamilyResponse>.ErrorResult(ErrorCode.ValidationFailed, "No se pudo crear el usuario. Verificá que los datos ingresados sean válidos.");
             }
         }
     }

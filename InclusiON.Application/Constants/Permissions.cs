@@ -16,6 +16,12 @@ namespace InclusiON.Application.Constants
         /// </summary>
         public const string EntityIdClaimType   = "eid";
 
+        /// <summary>
+        /// Nombre de la política especial para administradores globales.
+        /// Usar en [Authorize(Policy = Permissions.GlobalAdmin)] en lugar del literal "global-admin".
+        /// </summary>
+        public const string GlobalAdmin = "global-admin";
+
         // ═══════════════════════════════════════════════════════════════
         // USUARIOS
         // ═══════════════════════════════════════════════════════════════
@@ -118,6 +124,36 @@ namespace InclusiON.Application.Constants
         }
 
         // ═══════════════════════════════════════════════════════════════
+        // ROADMAP
+        // ═══════════════════════════════════════════════════════════════
+        public static class Roadmap
+        {
+            public const string Read   = "roadmap:read";
+            public const string Create = "roadmap:create";
+            public const string Update = "roadmap:update";
+            public const string Delete = "roadmap:delete";
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // INVITACIONES
+        // ═══════════════════════════════════════════════════════════════
+        public static class Invitations
+        {
+            public const string Read   = "invitations:read";
+            public const string Create = "invitations:create";
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // INSTITUCIONES
+        // ═══════════════════════════════════════════════════════════════
+        public static class Institutions
+        {
+            public const string Read   = "institutions:read";
+            public const string Create = "institutions:create";
+            public const string Update = "institutions:update";
+        }
+
+        // ═══════════════════════════════════════════════════════════════
         // AUDITORÍA
         // ═══════════════════════════════════════════════════════════════
         public static class Audit
@@ -137,7 +173,10 @@ namespace InclusiON.Application.Constants
             Activities.Read, Activities.Create, Activities.Update, Activities.Delete, Activities.Respond,
             Diagnoses.Read, Diagnoses.Create, Diagnoses.Update,
             Reports.Read, Reports.Create, Reports.Submit, Reports.Approve, Reports.Reject, Reports.Export,
+            Roadmap.Read, Roadmap.Create, Roadmap.Update, Roadmap.Delete,
             Messages.Read, Messages.Create,
+            Invitations.Read, Invitations.Create,
+            Institutions.Read, Institutions.Create, Institutions.Update,
             Settings.Read, Settings.Update,
             Audit.Read
         };

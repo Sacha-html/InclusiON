@@ -372,3 +372,6 @@ credentials.*
 **/appsettings.Development.json
 **/appsettings.Production.json
 **/appsettings.Staging.json
+# ML Models
+*.onnx
+InclusiON.SemanticSearch/Model/

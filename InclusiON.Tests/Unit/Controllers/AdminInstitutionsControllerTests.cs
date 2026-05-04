@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Reflection;
 using Xunit;
 using InclusiON.Api.Controllers;
+using InclusiON.Application.Constants;
 using InclusiON.Application.UseCases.AdminInstitutions.Commands;
 using InclusiON.Application.UseCases.AdminInstitutions.Queries;
 using InclusiON.DTOs.Common;
@@ -34,7 +35,7 @@ namespace InclusiON.Tests.Unit.Controllers
             var method = GetAction(nameof(AdminInstitutionsController.GetAdminInstitutions));
 
             // Assert
-            method.Should().BeDecoratedWith<AuthorizeAttribute>(a => a.Policy == "global-admin",
+            method.Should().BeDecoratedWith<AuthorizeAttribute>(a => a.Policy == Permissions.GlobalAdmin,
                 because: "un admin no debe poder ver las instituciones asignadas a OTRO admin");
         }
 
@@ -57,7 +58,7 @@ namespace InclusiON.Tests.Unit.Controllers
             // Tiene al menos un [Authorize]...
             authorizeAttrs.Should().NotBeEmpty();
             // ...pero ninguno exige global-admin.
-            authorizeAttrs.Should().NotContain(a => a.Policy == "global-admin",
+            authorizeAttrs.Should().NotContain(a => a.Policy == Permissions.GlobalAdmin,
                 because: "cualquier admin autenticado puede consultar sus propias instituciones");
         }
 
@@ -70,7 +71,7 @@ namespace InclusiON.Tests.Unit.Controllers
             var method = GetAction(nameof(AdminInstitutionsController.GetAllAdmins));
 
             // Assert
-            method.Should().BeDecoratedWith<AuthorizeAttribute>(a => a.Policy == "global-admin");
+            method.Should().BeDecoratedWith<AuthorizeAttribute>(a => a.Policy == Permissions.GlobalAdmin);
         }
 
         [Fact]
@@ -80,7 +81,7 @@ namespace InclusiON.Tests.Unit.Controllers
             var method = GetAction(nameof(AdminInstitutionsController.CreateAdminUser));
 
             // Assert
-            method.Should().BeDecoratedWith<AuthorizeAttribute>(a => a.Policy == "global-admin");
+            method.Should().BeDecoratedWith<AuthorizeAttribute>(a => a.Policy == Permissions.GlobalAdmin);
         }
     }
 }

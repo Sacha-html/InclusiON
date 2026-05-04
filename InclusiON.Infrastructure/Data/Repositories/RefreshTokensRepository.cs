@@ -237,6 +237,61 @@ namespace InclusiON.Infrastructure.Data.Repositories
             }
         }
 
+        public async Task<int> RevokeAllUsersTokensAsync(
+            IEnumerable<Guid> userIds,
+            string? reason = null,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var ids = userIds.ToList();
+                var revokedCount = await GetBaseQuery()
+                    .Where(rt => ids.Contains(rt.UserId) && rt.IsActive)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(rt => rt.IsActive, false)
+                        .SetProperty(rt => rt.RevokedAt, DateTime.UtcNow)
+                        .SetProperty(rt => rt.RevokedReason, reason ?? "Tokens revocados"),
+                    cancellationToken);
+
+                if (revokedCount > 0)
+                    _logger.LogDebug("Revoked {Count} tokens for {UserCount} users", revokedCount, ids.Count);
+
+                return revokedCount;
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("RevokeAllUsersTokensAsync was cancelled");
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error revoking tokens for multiple users");
+                return 0;
+            }
+        }
+
+        public async Task<List<RefreshToken>> GetRecentByUserIdAsync(Guid userId, int limit, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await GetUserTokensQuery(userId)
+                    .OrderByDescending(rt => rt.CreatedAt)
+                    .Take(limit)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("GetRecentByUserIdAsync was cancelled");
+                return new List<RefreshToken>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recent tokens for user {UserId}", userId);
+                return new List<RefreshToken>();
+            }
+        }
+
         #region private
         private IQueryable<RefreshToken> GetBaseQuery()
         {

@@ -15,7 +15,6 @@
     <ProjectReference Include="..\InclusiON.DTOs\InclusiON.DTOs.csproj" />
     <ProjectReference Include="..\InclusiON.Domain\InclusiON.Domain.csproj" />
     <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
-    <ProjectReference Include="..\InclusiON.SemanticSearch\InclusiON.SemanticSearch.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,80 @@
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.UseCases.Messages.Commands;
+using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
+using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Messages;
+
+namespace InclusiON.Application.UseCases.Messages.Handlers
+{
+    public class ReplyToMessageCommandHandler
+        : ICommandHandler<ReplyToMessageCommand, ApiResponse<MessageResponse>>
+    {
+        private readonly IMessagesRepository _messages;
+        private readonly IUsersRepository    _users;
+        private readonly IUnitOfWork         _uow;
+
+        public ReplyToMessageCommandHandler(
+            IMessagesRepository messages,
+            IUsersRepository users,
+            IUnitOfWork uow)
+        {
+            _messages = messages;
+            _users    = users;
+            _uow      = uow;
+        }
+
+        public async Task<ApiResponse<MessageResponse>> HandleAsync(
+            ReplyToMessageCommand command, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(command.Content))
+                return ApiResponse<MessageResponse>.ErrorResult(
+                    ErrorCode.InvalidInput, "El contenido de la respuesta no puede estar vacío.");
+
+            // 1. Obtener el mensaje padre
+            var parent = await _messages.GetByIdAsync(command.ParentMessageId, cancellationToken);
+            if (parent is null || !parent.IsActive)
+                return ApiResponse<MessageResponse>.NotFound("Mensaje");
+
+            // 2. Solo participantes del hilo pueden responder
+            if (parent.SenderId != command.SenderId && parent.ReceiverId != command.SenderId)
+                return ApiResponse<MessageResponse>.Forbidden();
+
+            // 3. El receptor de la respuesta es el otro participante del mensaje padre
+            var receiverId = parent.SenderId == command.SenderId
+                ? parent.ReceiverId
+                : parent.SenderId;
+
+            var sender   = await _users.GetByIdAsync(command.SenderId, cancellationToken);
+            var receiver = await _users.GetByIdAsync(receiverId, cancellationToken);
+
+            if (sender is null || receiver is null)
+                return ApiResponse<MessageResponse>.NotFound("Usuario");
+
+            // 4. Crear la respuesta (hereda subject y relatedPersonId del padre)
+            var reply = new Message
+            {
+                SenderId        = command.SenderId,
+                ReceiverId      = receiverId,
+                Subject         = parent.Subject,
+                Content         = command.Content,
+                RelatedPersonId = parent.RelatedPersonId,
+                ParentMessageId = command.ParentMessageId,
+                SentAt          = DateTime.UtcNow,
+                IsRead          = false,
+                IsActive        = true,
+                Sender          = sender,
+                Receiver        = receiver
+            };
+
+            await _messages.CreateAsync(reply, cancellationToken);
+            await _uow.SaveChangesAsync(cancellationToken);
+
+            return ApiResponse<MessageResponse>.SuccessResult(
+                MessageMapper.ToDetail(reply),
+                "Respuesta enviada exitosamente.");
+        }
+    }
+}

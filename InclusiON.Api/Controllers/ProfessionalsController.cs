@@ -89,7 +89,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Obtiene un profesional por su ID.
         /// </summary>
-        [HttpGet("{professionalId:guid}")]
+        [HttpGet("{professionalId}")]
         [Authorize(Policy = "professionals:read")]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status404NotFound)]
@@ -219,7 +219,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Actualiza un profesional existente.
         /// </summary>
-        [HttpPut("{professionalId:guid}")]
+        [HttpPut("{professionalId}")]
         [Authorize(Policy = "professionals:update")]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status400BadRequest)]
@@ -252,7 +252,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Desactiva un profesional (soft delete).
         /// </summary>
-        [HttpPut("{professionalId:guid}/deactivate")]
+        [HttpPut("{professionalId}/deactivate")]
         [Authorize(Policy = "professionals:delete")]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status404NotFound)]
@@ -272,7 +272,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Valida (aprobar o rechazar) un profesional registrado.
         /// </summary>
-        [HttpPut("{professionalId:guid}/validate")]
+        [HttpPut("{professionalId}/validate")]
         [Authorize(Policy = "professionals:update")]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status400BadRequest)]
@@ -297,7 +297,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Reactiva un profesional dado de baja o suspendido.
         /// </summary>
-        [HttpPut("{professionalId:guid}/reactivate")]
+        [HttpPut("{professionalId}/reactivate")]
         [Authorize(Policy = "professionals:update")]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalResponse>), StatusCodes.Status400BadRequest)]
@@ -318,7 +318,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Obtiene el historial de estados de un profesional.
         /// </summary>
-        [HttpGet("{professionalId:guid}/status-history")]
+        [HttpGet("{professionalId}/status-history")]
         [Authorize(Policy = "professionals:read")]
         [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status404NotFound)]

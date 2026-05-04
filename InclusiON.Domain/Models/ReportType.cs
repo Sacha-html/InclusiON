@@ -6,7 +6,7 @@ namespace InclusiON.Domain.Models
     /// Catalogo de tipos de reportes.
     /// Define los diferentes formatos y propositos de reportes generados.
     /// </summary>
-    public class ReportType : NameableEntity
+    public class ReportType : NameableEntity, IActivatable
     {
         /// <summary>
         /// Descripcion del proposito y contenido del tipo de reporte.

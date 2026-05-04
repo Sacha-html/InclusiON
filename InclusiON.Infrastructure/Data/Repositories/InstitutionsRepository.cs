@@ -35,6 +35,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return institution;
         }
 
+        public Task UpdateAsync(EducationalInstitution institution, CancellationToken ct = default)
+        {
+            _context.EducationalInstitutions.Update(institution);
+            return Task.CompletedTask;
+        }
+
         public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(name)) return false;
@@ -48,6 +54,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
             }
 
             return await query.AnyAsync(ct);
+        }
+
+        public async Task<bool> HasActiveProfessionalsAsync(int institutionId, CancellationToken ct = default)
+        {
+            return await _context.ProfessionalInstitutions
+                .AnyAsync(pi => pi.InstitutionId == institutionId && pi.IsActive, ct);
         }
     }
 }
