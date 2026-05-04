@@ -82,11 +82,20 @@
               </div>
               <p class="mb-0">{{ diag.primaryDiagnosis }}</p>
             </div>
-            <button cButton color="link" size="sm" class="flex-shrink-0 p-0"
-                    (click)="openEdit(diag)"
-                    [attr.aria-label]="(canUpdate && isCreator(diag)) ? 'Editar diagnóstico' : 'Ver diagnóstico'">
-              {{ (canUpdate && isCreator(diag)) ? 'Editar' : 'Ver' }}
-            </button>
+            <div class="d-flex gap-2 flex-shrink-0">
+              <button cButton color="link" size="sm" class="p-0"
+                      (click)="openEdit(diag)"
+                      [attr.aria-label]="(canUpdate && isCreator(diag)) ? 'Editar diagnóstico' : 'Ver diagnóstico'">
+                {{ (canUpdate && isCreator(diag)) ? 'Editar' : 'Ver' }}
+              </button>
+              @if (canUpdate && isCreator(diag)) {
+                <button cButton color="link" size="sm" class="p-0 text-danger"
+                        (click)="openDeactivate(diag)"
+                        aria-label="Dar de baja diagnóstico">
+                  Dar de baja
+                </button>
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -197,3 +206,16 @@
     }
   </c-modal-footer>
 </c-modal>
+
+<app-confirm-modal
+  [visible]="showDeactivateModal()"
+  title="Dar de baja diagnóstico"
+  messagePrefix="¿Confirmás dar de baja el diagnóstico del &quot;"
+  [itemName]="(deactivatingDiag()?.diagnosisDate | date:'dd/MM/yyyy') ?? ''"
+  messageSuffix="&quot;? Esta acción desactivará el registro."
+  confirmLabel="Dar de baja"
+  confirmColor="danger"
+  [loading]="isDeactivating()"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()">
+</app-confirm-modal>

@@ -17,3 +17,6 @@ export * from './admin-user.response';
 export * from './skill-profile.response';
 export * from './update-login-method.response';
 export * from './diagnosis.response';
+export * from './activity.response';
+export * from './roadmap.response';
+export * from './dashboard.response';

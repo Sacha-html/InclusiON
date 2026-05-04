@@ -90,7 +90,7 @@ export class ChangePasswordComponent {
         if (err.errorCode !== undefined) {
           this.serverError = this.errorCodeService.getFullMessage(err.errorCode);
         } else {
-          this.serverError = err?.error?.message || 'Error al cambiar la contraseña';
+          this.serverError = err?.userMessage || 'Error al cambiar la contraseña';
         }
       },
       complete: () => {

@@ -1,8 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ReportsService, ToastService } from '@services';
+import { CatalogsService, ReportsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
+import { CatalogItem } from '@models';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
@@ -32,9 +35,10 @@ import {
   styleUrl: './list.component.scss',
 })
 export class ListComponent implements OnInit {
-  private readonly reportsService = inject(ReportsService);
-  private readonly toastService = inject(ToastService);
-  private readonly router = inject(Router);
+  private readonly reportsService  = inject(ReportsService);
+  private readonly toastService    = inject(ToastService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly router          = inject(Router);
 
   reports = signal<ReportListItemResponse[]>([]);
   isLoading = signal(true);
@@ -54,12 +58,7 @@ export class ListComponent implements OnInit {
   selectedReport: ReportListItemResponse | null = null;
   isActioning = false;
 
-  readonly reportTypes = [
-    { id: 1, name: 'Evaluación Mensual' },
-    { id: 2, name: 'Informe de Progreso' },
-    { id: 3, name: 'Evaluación Trimestral' },
-    { id: 4, name: 'Informe Anual' },
-  ];
+  reportTypes = signal<CatalogItem[]>([]);
 
   columns: TableColumn[] = [
     {
@@ -92,16 +91,17 @@ export class ListComponent implements OnInit {
       label: 'Estado',
       type: 'badge',
       badgeMap: {
-        [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador' },
-        [ReportStatus.Submitted]: { color: 'warning',   label: 'Pendiente' },
-        [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado' },
-        [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
+        [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador },
+        [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado },
+        [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
       },
     },
   ];
 
   ngOnInit(): void {
     this.loadReports();
+    this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
   }
 
   loadReports(): void {
@@ -123,7 +123,7 @@ export class ListComponent implements OnInit {
         this.totalRecords.set(response.totalRecords);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: () => { this.isLoading.set(false); this.toastService.error('Error al cargar los informes'); },
     });
   }
 
@@ -157,7 +157,7 @@ export class ListComponent implements OnInit {
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     this.selectedReport = event.item;
     if (event.action === 'view') {
-      this.router.navigate(['/admin/reports', event.item.id]);
+      this.router.navigate([AppRoutes.Admin.Reports, event.item.id]);
     } else if (event.action === 'approve') {
       this.showApproveModal = true;
     } else if (event.action === 'reject') {

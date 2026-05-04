@@ -1,6 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ProfessionalsService, AssignmentsService } from '@services';
+import { switchMap } from 'rxjs';
+import { ProfessionalsService, AssignmentsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ProfessionalPersonResponse } from '@models';
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
@@ -20,6 +22,7 @@ import {
 export class ListComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   persons: ProfessionalPersonResponse[] = [];
@@ -30,17 +33,14 @@ export class ListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.professionalsService.getMyProfile().subscribe({
-      next: (prof) => {
-        this.assignmentsService.getPersonsByProfessional(prof.id).subscribe({
-          next: (persons) => {
-            this.persons = persons;
-            this.isLoading = false;
-          },
-          error: () => this.isLoading = false,
-        });
+    this.professionalsService.getMyProfile().pipe(
+      switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
+    ).subscribe({
+      next: (persons) => {
+        this.persons = persons;
+        this.isLoading = false;
       },
-      error: () => this.isLoading = false,
+      error: () => { this.isLoading = false; this.toastService.error('Error al cargar el aula'); },
     });
   }
 
@@ -62,6 +62,6 @@ export class ListComponent implements OnInit {
   }
 
   goToDetail(person: ProfessionalPersonResponse): void {
-    this.router.navigate(['/pro/persons', person.personId]);
+    this.router.navigate([AppRoutes.Pro.Persons, person.personId]);
   }
 }

@@ -38,7 +38,12 @@
                   }
                 </td>
               }
-              <td><button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button></td>
+              <td class="d-flex gap-1">
+                <button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button>
+                @if (config.deactivate && item.isActive !== false) {
+                  <button cButton color="danger" size="sm" variant="ghost" (click)="openDeactivate(item)">Dar de baja</button>
+                }
+              </td>
             </tr>
           }
           @if (items.length === 0) {
@@ -50,6 +55,23 @@
 
   </c-card-body>
 </c-card>
+
+<!-- Modal confirmar baja -->
+<c-modal [visible]="showDeactivateModal" (visibleChange)="showDeactivateModal = $event" alignment="center">
+  <c-modal-header><h5 cModalTitle>Confirmar baja</h5></c-modal-header>
+  <c-modal-body>
+    @if (deactivatingItem) {
+      <p>¿Está seguro de que desea dar de baja <strong>{{ deactivatingItem.name }}</strong>?</p>
+      <p class="text-body-secondary mb-0">Esta acción fallará si el elemento tiene registros activos asociados.</p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelDeactivate()" [disabled]="isDeactivating">Cancelar</button>
+    <button cButton color="danger" (click)="confirmDeactivate()" [disabled]="isDeactivating">
+      {{ isDeactivating ? 'Procesando...' : 'Dar de baja' }}
+    </button>
+  </c-modal-footer>
+</c-modal>
 
 <!-- Modal -->
 <c-modal [visible]="showModal" (visibleChange)="showModal = $event" alignment="center">
@@ -92,7 +114,7 @@
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
-    <button cButton color="primary" (click)="save()" [disabled]="isSaving || form.invalid">
+    <button cButton color="primary" (click)="save()" [disabled]="isSaving || form?.invalid">
       @if (isSaving) { <c-spinner size="sm" class="me-1"></c-spinner> }
       Guardar
     </button>

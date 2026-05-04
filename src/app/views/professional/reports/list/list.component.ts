@@ -2,7 +2,9 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AssignmentsService, ProfessionalsService, ReportsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
 import { ProfessionalPersonResponse } from '@models';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
@@ -88,16 +90,16 @@ actions: [
       type: 'badge',
       sortable: true,
       badgeMap: {
-        [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador' },
-        [ReportStatus.Submitted]: { color: 'warning',   label: 'Enviado' },
-        [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado' },
-        [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
+        [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador },
+        [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado },
+        [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
       },
     },
   ];
 
   headerButtons = [
-    { action: 'create', label: 'Agregar', icon: 'cilPlus', routerLink: '/pro/reports/new' },
+    { action: 'create', label: 'Agregar', icon: 'cilPlus', routerLink: AppRoutes.Pro.Reports + '/new' },
   ];
 
   ngOnInit(): void {
@@ -138,7 +140,7 @@ actions: [
         this.totalPages.set(response.totalPages);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: () => { this.isLoading.set(false); this.toastService.error('Error al cargar los informes'); },
     });
   }
 
@@ -174,7 +176,7 @@ actions: [
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     if (event.action === 'view') {
-      this.router.navigate(['/pro/reports', event.item.id]);
+      this.router.navigate([AppRoutes.Pro.Reports, event.item.id]);
     } else if (event.action === 'submit') {
       this.reportToSubmit = event.item;
       this.showSubmitModal = true;
@@ -183,7 +185,7 @@ actions: [
 
   onHeaderAction(action: string): void {
     if (action === 'create') {
-      this.router.navigate(['/pro/reports/new']);
+      this.router.navigate([AppRoutes.Pro.Reports + '/new']);
     }
   }
 

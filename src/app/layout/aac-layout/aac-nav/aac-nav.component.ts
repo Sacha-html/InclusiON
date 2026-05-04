@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 interface NavItem {
   path: string;
@@ -19,25 +20,25 @@ interface NavItem {
 export class AacNavComponent {
   readonly navItems: NavItem[] = [
     {
-      path: '/app',
+      path: AppRoutes.Aac.Root,
       label: 'Inicio',
       icon: 'cilHome',
       color: 'var(--a11y-nav-home, #4CAF50)'
     },
     {
-      path: '/app/activities',
+      path: AppRoutes.Aac.Activities,
       label: 'Actividades',
       icon: 'cilTask',
       color: 'var(--a11y-nav-activities, #2196F3)'
     },
     {
-      path: '/app/calendar',
+      path: AppRoutes.Aac.Calendar,
       label: 'Calendario',
       icon: 'cilCalendar',
       color: 'var(--a11y-nav-calendar, #FF9800)'
     },
     {
-      path: '/app/talk',
+      path: AppRoutes.Aac.Talk,
       label: 'Hablar',
       icon: 'cilChatBubble',
       color: 'var(--a11y-nav-talk, #9C27B0)'

@@ -1,0 +1,102 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || 'Uní cada imagen con su palabra.'"
+    [hint]="hint"
+    icon="🔗"
+    [loading]="isLoading()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="main">
+    <p class="game-instruction" role="heading" aria-level="2" tabindex="-1">
+      {{ content.instruction }}
+    </p>
+
+    <div class="match-board" aria-label="Tablero de emparejamiento">
+      <!-- Columna imágenes -->
+      <div class="match-column" role="group" aria-label="Imágenes">
+        @for (pair of shuffledImages(); track pair.id) {
+          <button
+            class="match-card match-card--image"
+            [class]="'match-card--' + imageState(pair.id)"
+            [disabled]="matchedImageIds().has(pair.id)"
+            (click)="selectImage(pair.id)"
+            [attr.aria-label]="pair.label"
+            [attr.aria-pressed]="selectedImageId() === pair.id"
+          >
+            <img
+              [src]="arasaac.getPictogramUrl(pair.pictogramId)"
+              [alt]="pair.label"
+              class="match-img"
+              loading="lazy"
+            />
+            @if (matchedImageIds().has(pair.id)) {
+              <span class="match-badge" aria-hidden="true">
+                {{ imageState(pair.id) === 'matched-correct' ? '✅' : '❌' }}
+              </span>
+            }
+          </button>
+        }
+      </div>
+
+      <!-- Línea central -->
+      <div class="match-connector" aria-hidden="true">
+        @if (matches().length > 0) {
+          <div class="connector-count">
+            {{ matches().length }} / {{ content.pairs.length }}
+          </div>
+        }
+      </div>
+
+      <!-- Columna palabras -->
+      <div class="match-column" role="group" aria-label="Palabras">
+        @for (pair of shuffledWords(); track pair.id) {
+          <button
+            class="match-card match-card--word"
+            [class]="'match-card--' + wordState(pair.id)"
+            [disabled]="matchedWordIds().has(pair.id)"
+            (click)="selectWord(pair.id)"
+            [attr.aria-label]="pair.label"
+            [attr.aria-pressed]="selectedWordId() === pair.id"
+          >
+            <span class="word-label">{{ pair.label }}</span>
+            @if (matchedWordIds().has(pair.id)) {
+              <span class="match-badge" aria-hidden="true">
+                {{ wordState(pair.id) === 'matched-correct' ? '✅' : '❌' }}
+              </span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="board-actions">
+      @if (matches().length > 0) {
+        <button class="action-btn action-btn--secondary" (click)="undoLastMatch()" aria-label="Deshacer último emparejamiento">
+          ↩ Deshacer último
+        </button>
+      }
+      @if (allMatched()) {
+        <button class="action-btn action-btn--primary" (click)="confirmMatches()" aria-label="Ver resultado">
+          ✓ Ver resultado
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="score() === 100"
+    [score]="score()"
+    [message]="resultMessage()"
+    [loading]="isLoading()"
+    [canRetry]="score() < 100"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

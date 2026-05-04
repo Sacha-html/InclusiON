@@ -2,8 +2,10 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ToastService } from '@services';
+import { UserRoles } from '@shared/constants/roles';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { UserManagementService } from '../../../../services/user-management.service';
-import { AdminUserDetailResponse } from '../../../../models/responses/admin-user-detail.response';
+import { AdminUserDetailResponse, UserRecentSessionResponse } from '../../../../models/responses/admin-user-detail.response';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   CardComponent,
@@ -18,6 +20,8 @@ import {
   ModalHeaderComponent,
   ModalBodyComponent,
   ModalFooterComponent,
+  SpinnerComponent,
+  TableDirective,
 } from '@coreui/angular';
 
 
@@ -38,6 +42,8 @@ import {
     ModalBodyComponent,
     ModalFooterComponent,
     ConfirmModalComponent,
+    SpinnerComponent,
+    TableDirective,
   ],
   templateUrl: './detail.component.html',
 })
@@ -49,6 +55,8 @@ export class UserManagementDetailComponent implements OnInit {
 
   user: AdminUserDetailResponse | null = null;
   isLoading = true;
+  recentSessions: UserRecentSessionResponse[] = [];
+  sessionsLoading = true;
 
   showDeactivateModal = false;
   showResetPasswordModal = false;
@@ -60,6 +68,7 @@ export class UserManagementDetailComponent implements OnInit {
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
       this.loadUser(userId);
+      this.loadSessions(userId);
     }
   }
 
@@ -77,32 +86,67 @@ export class UserManagementDetailComponent implements OnInit {
     });
   }
 
+  loadSessions(userId: string): void {
+    this.sessionsLoading = true;
+    this.userService.getUserActivity(userId).subscribe({
+      next: (sessions) => {
+        this.recentSessions = sessions;
+        this.sessionsLoading = false;
+      },
+      error: () => {
+        this.sessionsLoading = false;
+      },
+    });
+  }
+
+  getSessionStatusColor(session: UserRecentSessionResponse): string {
+    if (!session.isActive) return 'danger';
+    if (new Date(session.expiresAt) < new Date()) return 'warning';
+    return 'success';
+  }
+
+  getSessionStatusLabel(session: UserRecentSessionResponse): string {
+    if (!session.isActive) return 'Revocada';
+    if (new Date(session.expiresAt) < new Date()) return 'Expirada';
+    return 'Activa';
+  }
+
+  formatUserAgent(ua: string | null): string {
+    if (!ua) return '—';
+    if (ua.includes('Chrome') && !ua.includes('Chromium')) return 'Chrome';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+    if (ua.includes('Edge')) return 'Edge';
+    if (ua.includes('MSIE') || ua.includes('Trident')) return 'IE';
+    return ua.length > 40 ? ua.slice(0, 37) + '…' : ua;
+  }
+
   get roleBadgeColor(): string {
     switch (this.user?.role) {
-      case 'Admin': return 'primary';
-      case 'Professional': return 'info';
-      case 'FamilyRepresentative': return 'warning';
-      case 'PersonWithDisability': return 'success';
+      case UserRoles.Admin:                return 'primary';
+      case UserRoles.Professional:         return 'info';
+      case UserRoles.FamilyRepresentative: return 'warning';
+      case UserRoles.PersonWithDisability: return 'success';
       default: return 'secondary';
     }
   }
 
   get roleLabel(): string {
     switch (this.user?.role) {
-      case 'Admin': return 'Administrador';
-      case 'Professional': return 'Profesional';
-      case 'FamilyRepresentative': return 'Familiar';
-      case 'PersonWithDisability': return 'Persona';
+      case UserRoles.Admin:                return 'Administrador';
+      case UserRoles.Professional:         return 'Profesional';
+      case UserRoles.FamilyRepresentative: return 'Familiar';
+      case UserRoles.PersonWithDisability: return 'Persona';
       default: return this.user?.role ?? '';
     }
   }
 
   get entityTypeLabel(): string {
     switch (this.user?.linkedEntity?.entityType) {
-      case 'Professional': return 'Profesional';
-      case 'PersonWithDisability': return 'Persona con Discapacidad';
-      case 'FamilyRepresentative': return 'Familiar';
-      case 'Admin': return 'Administrador';
+      case UserRoles.Professional:         return 'Profesional';
+      case UserRoles.PersonWithDisability: return 'Persona con Discapacidad';
+      case UserRoles.FamilyRepresentative: return 'Familiar';
+      case UserRoles.Admin:                return 'Administrador';
       default: return '';
     }
   }
@@ -171,6 +215,6 @@ export class UserManagementDetailComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/users']);
+    this.router.navigate([AppRoutes.Admin.Users]);
   }
 }

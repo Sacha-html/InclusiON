@@ -1,0 +1,55 @@
+<!-- Loading -->
+@if (isLoading()) {
+  <div class="loading-center" role="status" aria-live="polite">
+    <c-spinner />
+    <p class="mt-2 text-body-secondary">Cargando...</p>
+  </div>
+} @else if (hasError()) {
+  <c-alert color="danger" role="alert">
+    No se pudo cargar la información. Intentá de nuevo más tarde.
+  </c-alert>
+} @else if (persons().length === 0) {
+  <div class="empty-state">
+    <p>No tenés personas asignadas todavía.</p>
+  </div>
+} @else {
+
+  <!-- Selector de persona (si hay más de una) -->
+  @if (persons().length > 1) {
+    <div class="person-selector" role="group" aria-label="Seleccionar persona">
+      <p class="selector-label">¿De quién querés ver el roadmap?</p>
+      <div class="person-pills">
+        @for (p of persons(); track p.personId) {
+          <button
+            class="person-pill"
+            [class.person-pill--active]="selectedPersonId() === p.personId"
+            (click)="selectPerson(p.personId)"
+            [attr.aria-pressed]="selectedPersonId() === p.personId"
+          >
+            <span
+              class="person-avatar"
+              [style.background]="p.avatarColor || '#9E9E9E'"
+              aria-hidden="true"
+            >
+              {{ getInitial(p) }}
+            </span>
+            {{ p.personFullName }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Sin persona seleccionada -->
+  @if (!selectedPersonId()) {
+    <div class="empty-state">
+      <p>Seleccioná una persona para ver su roadmap.</p>
+    </div>
+  }
+
+  <!-- Roadmap tab -->
+  @if (selectedPersonId()) {
+    <app-professional-roadmap-tab [personId]="selectedPersonId()!" />
+  }
+
+}

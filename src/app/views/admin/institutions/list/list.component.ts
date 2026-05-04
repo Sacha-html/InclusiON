@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { InstitutionsService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { InstitutionResponse } from '../../../../models';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
@@ -33,6 +34,7 @@ export class ListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
+        { action: 'detail', label: 'Ver detalle', icon: 'cil-search' },
         { action: 'edit', label: 'Editar', icon: 'cil-notes' },
       ],
     },
@@ -76,14 +78,17 @@ export class ListComponent implements OnInit {
 
   onHeaderAction(action: string): void {
     if (action === 'new') {
-      this.router.navigate(['/admin/institutions/new']);
+      this.router.navigate([AppRoutes.Admin.Institutions + '/new']);
     }
   }
 
   onRowAction(event: { action: string; item: any }): void {
     switch (event.action) {
+      case 'detail':
+        this.router.navigate([AppRoutes.Admin.Institutions, event.item.id, 'detail']);
+        break;
       case 'edit':
-        this.router.navigate(['/admin/institutions', event.item.id, 'edit']);
+        this.router.navigate([AppRoutes.Admin.Institutions, event.item.id, 'edit']);
         break;
     }
   }

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
-import { DiagnosesService } from '@services';
+import { DiagnosesService, ToastService } from '@services';
 import { DiagnosisListItemResponse, DiagnosisResponse, PersonResponse } from '@models';
 import {
   ButtonDirective,
@@ -10,6 +10,7 @@ import {
   SpinnerComponent,
   TableDirective,
 } from '@coreui/angular';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-admin-diagnoses',
@@ -22,6 +23,7 @@ import {
     ModalFooterComponent,
     SpinnerComponent,
     TableDirective,
+    ConfirmModalComponent,
   ],
   templateUrl: './admin-diagnoses.component.html',
 })
@@ -30,12 +32,17 @@ export class AdminDiagnosesComponent implements OnInit {
   @Input() person: PersonResponse | null = null;
 
   private readonly diagnosesService = inject(DiagnosesService);
+  private readonly toastService     = inject(ToastService);
 
   diagnoses: DiagnosisListItemResponse[] = [];
   selected: DiagnosisResponse | null = null;
   loading = false;
   loadingDetail = false;
   showModal = false;
+
+  showDeactivateModal  = false;
+  deactivatingDiag: DiagnosisListItemResponse | null = null;
+  isDeactivating = false;
 
   ngOnInit(): void {
     this.loading = true;
@@ -46,6 +53,7 @@ export class AdminDiagnosesComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
+        this.toastService.error('Error al cargar los diagnósticos');
       },
     });
   }
@@ -62,6 +70,7 @@ export class AdminDiagnosesComponent implements OnInit {
       error: () => {
         this.loadingDetail = false;
         this.showModal = false;
+        this.toastService.error('Error al cargar el detalle del diagnóstico');
       },
     });
   }
@@ -69,6 +78,36 @@ export class AdminDiagnosesComponent implements OnInit {
   closeModal(): void {
     this.showModal = false;
     this.selected = null;
+  }
+
+  openDeactivate(diag: DiagnosisListItemResponse): void {
+    this.deactivatingDiag = diag;
+    this.showDeactivateModal = true;
+  }
+
+  confirmDeactivate(): void {
+    if (!this.deactivatingDiag) return;
+    this.isDeactivating = true;
+    this.diagnosesService.patchStatus(this.deactivatingDiag.id, false).subscribe({
+      next: () => {
+        this.toastService.success('Diagnóstico dado de baja exitosamente.');
+        this.diagnoses = this.diagnoses.filter(d => d.id !== this.deactivatingDiag!.id);
+        this.showDeactivateModal = false;
+        this.isDeactivating = false;
+        this.deactivatingDiag = null;
+      },
+      error: (err) => {
+        const msg = err?.userMessage ?? 'Error al dar de baja el diagnóstico.';
+        this.toastService.error(msg);
+        this.isDeactivating = false;
+        this.showDeactivateModal = false;
+      },
+    });
+  }
+
+  cancelDeactivate(): void {
+    this.showDeactivateModal = false;
+    this.deactivatingDiag = null;
   }
 
   formatDate(date?: string): string {

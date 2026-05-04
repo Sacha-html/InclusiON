@@ -1,6 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogsService, PersonsService, ToastService, FamilyService, AuthService } from '@services';
+import { Permissions } from '@shared/constants/permissions';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem, PersonRepresentativeResponse, FamilyResponse } from '../../../../models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { PersonBasicInfoComponent } from './components/person-basic-info.component';
@@ -71,9 +73,9 @@ export class DetailComponent implements OnInit {
   linkHistory: any[] = [];
   loadingHistory = false;
 
-  canLink = this.authService.hasPermission('family:link');
-  canUnlink = this.authService.hasPermission('family:unlink');
-  canViewHistory = this.authService.hasPermission('family:read');
+  canLink = this.authService.hasPermission(Permissions.Family.Link);
+  canUnlink = this.authService.hasPermission(Permissions.Family.Unlink);
+  canViewHistory = this.authService.hasPermission(Permissions.Family.Read);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -84,7 +86,7 @@ export class DetailComponent implements OnInit {
           this.loadSkillProfile();
           this.loadRepresentatives();
         },
-        error: () => this.router.navigate(['/admin/persons']),
+        error: () => this.router.navigate([AppRoutes.Admin.Persons]),
       });
     }
   }
@@ -93,6 +95,7 @@ export class DetailComponent implements OnInit {
     if (!this.person) return;
     this.personsService.getSkillProfile(this.person.id).subscribe({
       next: (data) => (this.skillProfile = data ?? []),
+      error: () => this.toastService.error('Error al cargar el perfil de habilidades'),
     });
   }
 
@@ -103,6 +106,7 @@ export class DetailComponent implements OnInit {
         this.allSkillAreas = (areas ?? []).filter(a => !activeIds.has(a.id));
         this.showAddSkillAreaModal = true;
       },
+      error: () => this.toastService.error('Error al cargar las áreas de habilidad'),
     });
   }
 
@@ -155,6 +159,7 @@ export class DetailComponent implements OnInit {
     if (!this.person) return;
     this.personsService.deactivateSkillArea(this.person.id, areaId).subscribe({
       next: () => this.loadSkillProfile(),
+      error: () => this.toastService.error('Error al desactivar el área de habilidad'),
     });
   }
 
@@ -227,13 +232,14 @@ export class DetailComponent implements OnInit {
       isPrimary: this.linkIsPrimary
     }).subscribe({
       next: () => {
+        this.linkingFamily = false;
         this.toastService.success('Familiar vinculado exitosamente');
         this.showLinkModal = false;
         this.loadRepresentatives();
       },
       error: (err) => {
         this.linkingFamily = false;
-        this.linkFamilyError = err?.error?.message || 'Error al vincular el familiar';
+        this.linkFamilyError = err?.userMessage || 'Error al vincular el familiar';
       },
     });
   }
@@ -260,6 +266,7 @@ export class DetailComponent implements OnInit {
       this.unlinkObservation
     ).subscribe({
       next: () => {
+        this.unlinking = false;
         this.toastService.success('Familiar desvinculado exitosamente');
         this.showUnlinkModal = false;
         this.loadRepresentatives();
@@ -313,13 +320,14 @@ export class DetailComponent implements OnInit {
       isPrimary: data.isPrimary
     }).subscribe({
       next: () => {
+        this.linkingFamily = false;
         this.toastService.success('Familiar vinculado exitosamente');
         this.showLinkModal = false;
         this.loadRepresentatives();
       },
       error: (err) => {
         this.linkingFamily = false;
-        this.linkFamilyError = err?.error?.message || 'Error al vincular el familiar';
+        this.linkFamilyError = err?.userMessage || 'Error al vincular el familiar';
       },
     });
   }
@@ -334,6 +342,7 @@ export class DetailComponent implements OnInit {
       observation
     ).subscribe({
       next: () => {
+        this.unlinking = false;
         this.toastService.success('Familiar desvinculado exitosamente');
         this.showUnlinkModal = false;
         this.loadRepresentatives();

@@ -1,6 +1,7 @@
 import { inject, OnInit, OnDestroy, Directive } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ErrorCode } from '@models';
 import { RoleRoutes } from '../../../shared/constants/roles';
 
@@ -125,7 +126,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
     this.avatarColor = params['avatarColor'] || '#667eea';
 
     if (!this.userId) {
-      this.router.navigate(['/login']);
+      this.router.navigate([AppRoutes.Login]);
     }
   }
 
@@ -272,7 +273,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
    */
   protected navigateToDashboard(mustChangePassword?: boolean): void {
     if (mustChangePassword) {
-      this.router.navigate(['/change-password']);
+      this.router.navigate([AppRoutes.ChangePassword]);
     } else {
       const role = this.authService.getUserRole();
       const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';

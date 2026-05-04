@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FamilyService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { FamilyResponse } from '../../../../models';
 import { formatDateTime } from '@shared/utils';
 import {
@@ -33,14 +34,14 @@ export class DetailComponent implements OnInit {
     if (id) {
       this.familyService.getFamilyById(id).subscribe({
         next: (data) => (this.family = data),
-        error: () => this.router.navigate(['/admin/family']),
+        error: () => this.router.navigate([AppRoutes.Admin.Family]),
       });
     }
   }
 
   goToEdit(): void {
     if (this.family) {
-      this.router.navigate(['/admin/family', this.family.id, 'edit']);
+      this.router.navigate([AppRoutes.Admin.Family, this.family.id, 'edit']);
     }
   }
 
@@ -71,6 +72,6 @@ export class DetailComponent implements OnInit {
   formatDateTime = formatDateTime;
 
   goBack(): void {
-    this.router.navigate(['/admin/family']);
+    this.router.navigate([AppRoutes.Admin.Family]);
   }
 }

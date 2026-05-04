@@ -34,6 +34,8 @@ export enum ErrorCode {
   UserNotFound = 501,
   PersonNotFound = 502,
   ResourceNotFound = 503,
+  ProfessionalNotFound = 504,
+  ReportNotFound = 505,
 
   // Conflictos (6xx)
   Conflict = 600,
@@ -52,6 +54,7 @@ export enum ErrorCode {
   CannotDeactivateSelf = 706,
   UserAlreadyInactive = 707,
   UserAlreadyActive = 708,
+  ProfessionalNotApproved = 709,
 
   // Invitaciones (8xx)
   InvitationNotFound = 800,

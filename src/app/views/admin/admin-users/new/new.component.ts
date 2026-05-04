@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminUsersService, InstitutionsService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { InstitutionResponse, CreateAdminUserResponse } from '@models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
@@ -66,17 +67,17 @@ export class NewComponent implements OnInit {
         this.showPasswordModal = true;
       },
       error: (err) => {
-        this.serverError = err?.error?.message || 'Error al crear el administrador';
+        this.serverError = err?.userMessage || 'Error al crear el administrador';
       },
     });
   }
 
   closeModalAndNavigate(): void {
     this.showPasswordModal = false;
-    this.router.navigate(['/admin/admins']);
+    this.router.navigate([AppRoutes.Admin.Admins]);
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/admins']);
+    this.router.navigate([AppRoutes.Admin.Admins]);
   }
 }

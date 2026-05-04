@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
-import { AdminInstitutionResponse, ApiResponse } from '../models';
+import { AdminInstitutionResponse, AdminUserResponse, ApiResponse } from '../models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
@@ -13,6 +13,12 @@ export class AdminInstitutionsService {
 
   private get apiUrl(): string {
     return `${environment.apiUrl}/admin/institutions-assignments`;
+  }
+
+  getAdmins(): Observable<AdminUserResponse[]> {
+    return this.http
+      .get<ApiResponse<AdminUserResponse[]>>(`${this.apiUrl}/admins`)
+      .pipe(unwrapResponse());
   }
 
   getMyInstitutions(): Observable<AdminInstitutionResponse[]> {
