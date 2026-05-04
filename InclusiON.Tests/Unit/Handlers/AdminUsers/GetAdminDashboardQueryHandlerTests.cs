@@ -54,7 +54,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
 
             // Only the Institutions query returns a non-zero value.
             _db.ExecuteScalarAsync<int>(
-                    Arg.Is<string>(s => s.Contains("\"Institutions\"")),
+                    Arg.Is<string>(s => s.Contains("\"EducationalInstitutions\"")),
                     Arg.Any<Action<System.Data.IDbCommand>?>(),
                     Arg.Any<CancellationToken>())
                .Returns(8);
