@@ -20,8 +20,10 @@ import { ProfessionalSkillsComponent } from './components/professional-skills.co
 import { ProfessionalDiagnosesComponent } from './components/professional-diagnoses.component';
 import { FamilyService } from '@services';
 import { PersonRepresentativeResponse } from '@models';
-import { ProfessionalFamilyTabComponent } from './components/family-tab.component';
+import { ProfessionalFamilyTabComponent } from './components/professional-family-tab.component';
 import { ProfessionalActivitiesTabComponent } from './components/professional-activities-tab.component';
+import { ProfessionalRoadmapTabComponent } from './components/professional-roadmap-tab.component';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 @Component({
   selector: 'app-person-detail',
@@ -39,6 +41,7 @@ import { ProfessionalActivitiesTabComponent } from './components/professional-ac
     ProfessionalDiagnosesComponent,
     ProfessionalFamilyTabComponent,
     ProfessionalActivitiesTabComponent,
+    ProfessionalRoadmapTabComponent,
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -52,7 +55,7 @@ export class PersonDetailComponent implements OnInit {
   private readonly diagnosesService = inject(DiagnosesService);
 
   person: PersonResponse | null = null;
-  activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' | 'actividades' = 'datos';
+  activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' | 'actividades' | 'roadmap' = 'datos';
 
   skillProfile = signal<PersonSkillProfileResponse[]>([]);
   diagnoses = signal<any[]>([]);
@@ -69,7 +72,7 @@ export class PersonDetailComponent implements OnInit {
           this.loadSkillProfile();
           this.loadDiagnoses();
         },
-        error: () => this.router.navigate(['/pro/persons']),
+        error: () => this.router.navigate([AppRoutes.Pro.Persons]),
       });
     }
   }
@@ -78,6 +81,7 @@ export class PersonDetailComponent implements OnInit {
     if (!this.person) return;
     this.personsService.getSkillProfile(this.person.id).subscribe({
       next: (data) => this.skillProfile.set(data ?? []),
+      error: () => this.toastService.error('Error al cargar el perfil de habilidades'),
     });
   }
 
@@ -85,11 +89,12 @@ export class PersonDetailComponent implements OnInit {
     if (!this.person) return;
     this.diagnosesService.getByPerson(this.person.id).subscribe({
       next: (data) => this.diagnoses.set(data),
+      error: () => this.toastService.error('Error al cargar los diagnósticos'),
     });
   }
 
   goBack(): void {
-    this.router.navigate(['/pro/persons']);
+    this.router.navigate([AppRoutes.Pro.Persons]);
   }
 
   onPersonChange(person: PersonResponse): void {
@@ -114,6 +119,7 @@ export class PersonDetailComponent implements OnInit {
       },
       error: () => {
         this.loadingRepresentatives = false;
+        this.toastService.error('Error al cargar los familiares');
       },
     });
   }
