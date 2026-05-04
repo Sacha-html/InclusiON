@@ -1,0 +1,57 @@
+<div class="mb-3">
+  <label class="form-label" for="cl-instruction">Instrucción *</label>
+  <input cFormControl id="cl-instruction" [(ngModel)]="instruction" name="instruction"
+         placeholder="Ej: Completá las letras que faltan" (ngModelChange)="onInstructionChange()" required />
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="cl-word">Palabra *</label>
+  <input cFormControl id="cl-word" [(ngModel)]="word" name="word"
+         placeholder="Ej: PERRO" maxlength="20" (ngModelChange)="onWordChange()" required />
+  <div class="form-text">Se mostrará en mayúsculas.</div>
+</div>
+
+@if (word.length >= 2) {
+  <h6 class="mb-2">Seleccioná las letras a ocultar *</h6>
+  <div class="letters-row mb-4">
+    @for (letter of letterArray(); track $index; let i = $index) {
+      <div class="letter-tile" [class.letter-tile--hidden]="isHidden(i)">
+        <button type="button" class="letter-btn"
+                [class.letter-btn--hidden]="isHidden(i)"
+                (click)="toggleHidden(i)">
+          {{ letter }}
+        </button>
+        @if (isHidden(i)) {
+          <span class="hidden-badge">✓</span>
+        }
+      </div>
+    }
+  </div>
+
+  @if (hiddenIndices().length > 0) {
+    <h6 class="mb-2">Opciones por hueco</h6>
+    <div class="slots-list">
+      @for (letterIdx of hiddenIndices(); track letterIdx; let si = $index) {
+        @if (getSlot(letterIdx); as slot) {
+          <div class="slot-editor">
+            <div class="slot-header">
+              <span class="slot-label">Hueco {{ si + 1 }}: <strong>{{ slot.correctLetter }}</strong> (pos {{ letterIdx + 1 }})</span>
+              <button cButton size="sm" color="secondary" variant="ghost"
+                      (click)="regenerateDistractors(letterIdx)">↺</button>
+            </div>
+            <div class="slot-opts">
+              <div class="opt-chip opt-chip--correct">{{ slot.correctLetter }}</div>
+              @for (d of slot.distractors; track $index; let di = $index) {
+                <input cFormControl class="distractor-input" [(ngModel)]="slot.distractors[di]"
+                       [name]="'dist-' + letterIdx + '-' + di" maxlength="1"
+                       placeholder="?" (ngModelChange)="emit()" />
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+} @else {
+  <p class="text-body-secondary small">Ingresá una palabra de al menos 2 letras para continuar.</p>
+}
