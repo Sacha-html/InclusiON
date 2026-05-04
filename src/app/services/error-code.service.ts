@@ -129,6 +129,16 @@ export class ErrorCodeService {
       userAction: 'El elemento solicitado no existe',
       severity: 'warning'
     }],
+    [ErrorCode.ProfessionalNotFound, {
+      message: 'Profesional no encontrado',
+      userAction: 'El profesional solicitado no existe o fue dado de baja',
+      severity: 'warning'
+    }],
+    [ErrorCode.ReportNotFound, {
+      message: 'Informe no encontrado',
+      userAction: 'El informe solicitado no existe o fue eliminado',
+      severity: 'warning'
+    }],
 
     // Conflictos (6xx)
     [ErrorCode.Conflict, {
@@ -199,7 +209,12 @@ export class ErrorCodeService {
     [ErrorCode.UserAlreadyActive, {
       message: 'El usuario ya se encuentra activo',
       severity: 'warning'
-    }]
+    }],
+    [ErrorCode.ProfessionalNotApproved, {
+      message: 'Profesional pendiente de aprobación',
+      userAction: 'Tu cuenta profesional aún no fue aprobada. Contactá al administrador',
+      severity: 'warning'
+    }],
   ]);
 
   /** Mensaje por defecto para códigos no mapeados */
