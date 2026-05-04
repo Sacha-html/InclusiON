@@ -15,7 +15,7 @@
       <label cLabel>Tipo</label>
       <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
         <option value="">Todos</option>
-        @for (t of reportTypes; track t.id) {
+        @for (t of reportTypes(); track t.id) {
           <option [value]="t.id">{{ t.name }}</option>
         }
       </select>
@@ -29,7 +29,7 @@
       <input cFormControl type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
     </c-col>
     <c-col sm="auto">
-      <button cButton color="secondary" variant="outline" (click)="clearFilters()">Limpiar</button>
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar</button>
     </c-col>
   </c-row>
 </fieldset>
