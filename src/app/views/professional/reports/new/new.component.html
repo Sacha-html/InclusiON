@@ -43,7 +43,7 @@
             required
           >
             <option [value]="0">Seleccionar tipo...</option>
-            @for (type of reportTypes; track type.id) {
+            @for (type of reportTypes(); track type.id) {
               <option [value]="type.id">{{ type.name }}</option>
             }
           </select>
@@ -196,7 +196,7 @@
     </p>
   </c-modal-body>
   <c-modal-footer>
-    <button cButton color="secondary" variant="outline" [disabled]="isSubmitting()" (click)="reviewLater()">
+    <button cButton color="secondary" [disabled]="isSubmitting()" (click)="reviewLater()">
       Revisar después
     </button>
     <button cButton color="primary" [disabled]="isSubmitting()" (click)="submitNow()">
