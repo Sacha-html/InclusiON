@@ -52,7 +52,7 @@ export interface MessageContactResponse {
 export interface SendMessageRequest {
   receiverId: string;
   subject: string;
-  body: string;
+  content: string;
   relatedPersonId?: string;
 }
 
@@ -123,7 +123,7 @@ export class MessagesService {
 
   reply(id: number, body: string): Observable<MessageDetailResponse> {
     return this.http
-      .post<ApiResponse<MessageDetailResponse>>(`${this.baseUrl}/${id}/reply`, { body })
+      .post<ApiResponse<MessageDetailResponse>>(`${this.baseUrl}/${id}/reply`, { content: body })
       .pipe(unwrapResponse());
   }
 

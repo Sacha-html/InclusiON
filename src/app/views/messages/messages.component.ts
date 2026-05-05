@@ -63,7 +63,7 @@ export class MessagesComponent implements OnInit {
   showCompose     = false;
   contacts        = signal<MessageContactResponse[]>([]);
   loadingContacts = false;
-  compose         = { receiverId: '', subject: '', body: '' };
+  compose         = { receiverId: '', subject: '', content: '' };
   composeError    = '';
 
   // Reply
@@ -166,7 +166,7 @@ export class MessagesComponent implements OnInit {
 
   // ── Compose ────────────────────────────────────────────────────────────
   openCompose(): void {
-    this.compose     = { receiverId: '', subject: '', body: '' };
+    this.compose     = { receiverId: '', subject: '', content: '' };
     this.composeError = '';
     this.showCompose  = true;
   }
@@ -176,7 +176,7 @@ export class MessagesComponent implements OnInit {
   }
 
   sendNew(): void {
-    if (!this.compose.receiverId || !this.compose.subject.trim() || !this.compose.body.trim()) {
+    if (!this.compose.receiverId || !this.compose.subject.trim() || !this.compose.content.trim()) {
       this.composeError = 'Todos los campos son obligatorios.';
       return;
     }
@@ -185,7 +185,7 @@ export class MessagesComponent implements OnInit {
     this.messagesService.send({
       receiverId: this.compose.receiverId,
       subject:    this.compose.subject.trim(),
-      body:       this.compose.body.trim(),
+      content:    this.compose.content.trim(),
     }).subscribe({
       next: () => {
         this.showCompose = false;
