@@ -117,7 +117,16 @@ export class NewComponent implements OnInit {
 
   onSubmit(): void {
     this.isLoading.set(true);
-    this.reportsService.create(this.form).subscribe({
+    const payload: CreateReportRequest = {
+      ...this.form,
+      periodStartDate: this.form.periodStartDate || undefined,
+      periodEndDate:   this.form.periodEndDate   || undefined,
+      achievedGoals:         this.form.achievedGoals         || undefined,
+      areasToReinforce:      this.form.areasToReinforce      || undefined,
+      futureRecommendations: this.form.futureRecommendations || undefined,
+      nextObjectives:        this.form.nextObjectives        || undefined,
+    };
+    this.reportsService.create(payload).subscribe({
       next: (report) => {
         this.createdReportId = report.id;
         this.isLoading.set(false);
