@@ -114,7 +114,16 @@ export class EditComponent implements OnInit {
     if (!this.isValid) return;
     this.isSaving.set(true);
     this.serverError = '';
-    this.reportsService.update(this.reportId, this.form).subscribe({
+    const payload = {
+      ...this.form,
+      periodStartDate:       this.form.periodStartDate       || undefined,
+      periodEndDate:         this.form.periodEndDate         || undefined,
+      achievedGoals:         this.form.achievedGoals         || undefined,
+      areasToReinforce:      this.form.areasToReinforce      || undefined,
+      futureRecommendations: this.form.futureRecommendations || undefined,
+      nextObjectives:        this.form.nextObjectives        || undefined,
+    };
+    this.reportsService.update(this.reportId, payload).subscribe({
       next: () => {
         this.toastService.success('Reporte actualizado exitosamente.');
         this.router.navigate([AppRoutes.Pro.Reports, this.reportId]);
