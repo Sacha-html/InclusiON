@@ -1,6 +1,6 @@
 # Listado de ABMs — InclusiON
 
-**Última actualización:** 2026-05-03
+**Última actualización:** 2026-05-05
 
 Cada ABM está justificado por el actor del sistema que lo necesita para cumplir su función. Todos los ABMs tienen persistencia real en base de datos (PostgreSQL vía EF Core) y validaciones básicas de integridad.
 
@@ -18,7 +18,7 @@ Cada ABM está justificado por el actor del sistema que lo necesita para cumplir
 
 ---
 
-## Resumen — ABMs por actor
+## ✅ MVP — Práctica II (ABM-01 a ABM-13)
 
 Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 
@@ -39,49 +39,72 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 | 13 | [Mensajes](./13-mensajes.md) | Profesional / Representante Familiar | `Message` | ✅ |
 
 ---
+---
+
+## 🔜 Post-MVP — Práctica III
+
+> El esquema de base de datos ya contempla estas entidades. Los ABMs se formalizarán en la siguiente iteración.
+
+| # | ABM | Actor principal | Entidades del DER | Estado |
+|---|-----|-----------------|-------------------|--------|
+| 14 | Motor Adaptativo *(pendiente)* | Sistema / Profesional | `AdaptiveEngineConfig` (activo), `AdaptiveAdjustmentLog` | ⏳ |
+
+*ABM-14 cubre los CU-48 (configurar), CU-49 (historial ajustes) y CU-50 (ajuste automático por rendimiento). La lógica de disparo es automática (Sistema); la configuración de umbrales la gestiona el Profesional.*
+
+---
 
 ## Entidades del DER cubiertas
 
-| # | Entidad (`DbSet`) | ABM que la cubre |
-|---|-------------------|------------------|
-| 1 | `DisabilityType` | 03 — Catálogos |
-| 2 | `AutonomyLevel` | 03 — Catálogos |
-| 3 | `ActivityCategory` | 03 — Catálogos |
-| 4 | `SkillArea` | 03 — Catálogos |
-| 5 | `ActivityTemplateType` | 03 — Catálogos |
-| 6 | `LoginMethod` | 03 — Catálogos (solo-lectura — seed de sistema) |
-| 7 | `ReportType` | 03 — Catálogos |
-| 8 | `User` | 02 — Administradores / implícito en 04, 05, 06 |
-| 9 | `RefreshToken` | Gestión de sesión — sin ABM de usuario |
-| 10 | `TrustedDevice` | Gestión de sesión — sin ABM de usuario |
-| 11 | `Professional` | 04 — Profesionales |
-| 12 | `ProfessionalStatusHistory` | 04 — Profesionales (historial automático) |
-| 13 | `PersonWithDisability` | 05 — Personas |
-| 14 | `FamilyRepresentative` | 06 — Familiares |
-| 15 | `FamilyStatusHistory` | 06 — Familiares (historial automático) |
-| 16 | `EducationalInstitution` | 01 — Instituciones |
-| 17 | `AdminInstitution` | 01 — Instituciones |
-| 18 | `ProfessionalInstitution` | 04 — Profesionales |
-| 19 | `ProfessionalPerson` | 07 — Asignación Profesional–Persona |
-| 20 | `PersonRepresentative` | 06 — Familiares |
-| 21 | `PersonRepresentativeHistory` | 06 — Familiares (historial automático) |
-| 22 | `PersonSkillProfile` | 05 — Personas |
-| 23 | `Invitation` | 06 — Familiares |
-| 24 | `Activity` | 08 — Actividades |
-| 25 | `ActivityContent` | 08 — Actividades |
-| 26 | `ActivityEmbedding` | 08 — Actividades (generado automáticamente) |
-| 27 | `PersonRoadmap` | 09 — Roadmap |
-| 28 | `PersonRoadmapArea` | 09 — Roadmap |
-| 29 | `PersonRoadmapActivity` | 09 — Roadmap |
-| 30 | `ActivityAssignment` | 10 — Asignaciones |
-| 31 | `ActivityResponse` | 10 — Asignaciones (registro automático) |
-| 32 | `ActivityResult` | 10 — Asignaciones (calculado automáticamente) |
-| 33 | `AdaptiveEngineConfig` | 09 — Roadmap |
-| 34 | `AdaptiveAdjustmentLog` | Motor adaptativo (registro automático) |
-| 35 | `Diagnosis` | 11 — Diagnósticos |
-| 36 | `Report` | 12 — Reportes |
-| 37 | `Message` | 13 — Mensajes |
-| 38 | `AccessAudit` | Auditoría (append-only — sin ABM de usuario) |
+| # | Entidad (`DbSet`) | ABM que la cubre | Fase |
+|---|-------------------|------------------|------|
+| 1 | `DisabilityType` | 03 — Catálogos | MVP |
+| 2 | `AutonomyLevel` | 03 — Catálogos | MVP |
+| 3 | `ActivityCategory` | 03 — Catálogos | MVP |
+| 4 | `SkillArea` | 03 — Catálogos | MVP |
+| 5 | `ActivityTemplateType` | 03 — Catálogos | MVP |
+| 6 | `LoginMethod` | 03 — Catálogos (solo-lectura — seed de sistema) | MVP |
+| 7 | `ReportType` | 03 — Catálogos | MVP |
+| 8 | `User` | 02 — Administradores / implícito en 04, 05, 06 | MVP |
+| 9 | `RefreshToken` | Gestión de sesión — sin ABM de usuario | MVP |
+| 10 | `TrustedDevice` | Gestión de sesión — sin ABM de usuario | MVP |
+| 11 | `Professional` | 04 — Profesionales | MVP |
+| 12 | `ProfessionalStatusHistory` | 04 — Profesionales (historial automático) | MVP |
+| 13 | `PersonWithDisability` | 05 — Personas | MVP |
+| 14 | `FamilyRepresentative` | 06 — Familiares | MVP |
+| 15 | `FamilyStatusHistory` | 06 — Familiares (historial automático) | MVP |
+| 16 | `EducationalInstitution` | 01 — Instituciones | MVP |
+| 17 | `AdminInstitution` | 01 — Instituciones | MVP |
+| 18 | `ProfessionalInstitution` | 04 — Profesionales | MVP |
+| 19 | `ProfessionalPerson` | 07 — Asignación Profesional–Persona | MVP |
+| 20 | `PersonRepresentative` | 06 — Familiares | MVP |
+| 21 | `PersonRepresentativeHistory` | 06 — Familiares (historial automático) | MVP |
+| 22 | `PersonSkillProfile` | 05 — Personas | MVP |
+| 23 | `Invitation` | 06 — Familiares | MVP |
+| 24 | `Activity` | 08 — Actividades | MVP |
+| 25 | `ActivityContent` | 08 — Actividades | MVP |
+| 26 | `ActivityEmbedding` | 08 — Actividades (generado automáticamente) | MVP |
+| 27 | `PersonRoadmap` | 09 — Roadmap | MVP |
+| 28 | `PersonRoadmapArea` | 09 — Roadmap | MVP |
+| 29 | `PersonRoadmapActivity` | 09 — Roadmap | MVP |
+| 30 | `ActivityAssignment` | 10 — Asignaciones | MVP |
+| 31 | `ActivityResponse` | 10 — Asignaciones (registro automático) | MVP |
+| 32 | `ActivityResult` | 10 — Asignaciones (calculado automáticamente) | MVP |
+| 33 | `AdaptiveEngineConfig` | 14 — Motor Adaptativo | **Post-MVP** |
+| 34 | `AdaptiveAdjustmentLog` | 14 — Motor Adaptativo (registro automático) | **Post-MVP** |
+| 35 | `Diagnosis` | 11 — Diagnósticos | MVP |
+| 36 | `Report` | 12 — Reportes | MVP |
+| 37 | `Message` | 13 — Mensajes | MVP |
+| 38 | `AccessAudit` | Auditoría (append-only — sin ABM de usuario) | MVP |
+
+---
+
+## Totales
+
+| Fase | ABMs | Entidades DER |
+|------|------|---------------|
+| ✅ MVP | 13 | 36 |
+| 🔜 Post-MVP | 1 | 2 |
+| **Total** | **14** | **38** |
 
 ---
 
@@ -90,5 +113,5 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 - **Baja lógica:** ninguna entidad se elimina físicamente. Todas tienen campo `Activo` (o `IsActive`). La baja establece `Activo = false`.
 - **Listado con filtros:** todos los listados permiten filtrar por estado activo/inactivo y términos de búsqueda relevantes.
 - **Persistencia real:** cada operación se confirma en PostgreSQL vía `AppDbContext.SaveChangesAsync()`.
-- **Validaciones de integridad:** se validan unicidad, referencias existentes y reglas de negocio antes de persistir.
+- **Validaciones de integridad:** se validan unicidad, referencias existentes y reglas de negocio antes de pristir.
 - **Auditoría:** las operaciones de baja y cambios de estado generan registros en las tablas de historial correspondientes.
