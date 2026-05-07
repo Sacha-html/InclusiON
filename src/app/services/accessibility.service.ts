@@ -271,7 +271,7 @@ export class AccessibilityService {
    */
   setProfile(profile: AccessibilityProfile): void {
     const profileFontSize: Partial<Record<AccessibilityProfile, FontSize>> = {
-      'low-vision': 'large',
+      'low-vision': 'x-large',
     };
     this.settings.update(current => ({
       ...current,
@@ -740,10 +740,13 @@ export class AccessibilityService {
    */
   private loadSettings(): AccessibilitySettings {
     const saved = this.storage.getAccessibilitySettings<Partial<AccessibilitySettings>>();
+    const prefersDark =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (saved) {
       return { ...DEFAULT_SETTINGS, ...saved };
     }
-    return { ...DEFAULT_SETTINGS };
+    return { ...DEFAULT_SETTINGS, colorMode: prefersDark ? 'dark' : 'light' };
   }
 
   /**
