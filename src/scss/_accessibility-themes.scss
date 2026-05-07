@@ -2730,7 +2730,7 @@ body.a11y-tts-enabled {
   // Agregar patrones además de colores para diferenciar estados
   .badge.bg-success,
   .alert-success,
-  .btn-success {
+  .btn-success:not(:has(svg)) {
     &::before {
       content: '\2713 '; // Checkmark
     }
@@ -2738,7 +2738,7 @@ body.a11y-tts-enabled {
 
   .badge.bg-danger,
   .alert-danger,
-  .btn-danger {
+  .btn-danger:not(:has(svg)) {
     &::before {
       content: '\2717 '; // X mark
     }
@@ -2746,7 +2746,7 @@ body.a11y-tts-enabled {
 
   .badge.bg-warning,
   .alert-warning,
-  .btn-warning {
+  .btn-warning:not(:has(svg)) {
     &::before {
       content: '\26A0 '; // Warning triangle
     }
