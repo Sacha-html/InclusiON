@@ -1,25 +1,24 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { FamilyService, PersonsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../../../../models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
-  FormSelectDirective, RowComponent,
+  FormSelectDirective, RowComponent, SpinnerComponent,
 } from '@coreui/angular';
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 
 @Component({
   selector: 'app-family-new',
   imports: [
-    ReactiveFormsModule, NgSelectModule,
+    ReactiveFormsModule, FormsModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective,
-    PasswordModalComponent,
+    SpinnerComponent, PasswordModalComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
@@ -38,26 +37,44 @@ export class NewComponent implements OnInit {
   persons          = signal<PersonListItemResponse[]>([]);
   isLoadingPersons = signal(true);
 
+  searchPersonText = '';
+  filteredPersons: PersonListItemResponse[] = [];
+  selectedPersonDisplay: PersonListItemResponse | null = null;
+
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
 
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.maxLength(20)]],
+    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
     relationship: [''],
     personId: [null, [Validators.required]],
   });
 
-  searchPersonFn = (term: string, item: PersonListItemResponse): boolean => {
-    const lower = term.toLowerCase();
-    return (
-      (item.fullName?.toLowerCase().includes(lower) ||
-        item.documentNumber?.toLowerCase().includes(lower)) ??
-      false
+  filterPersons(text: string): void {
+    if (!text) { this.filteredPersons = []; return; }
+    const lower = text.toLowerCase();
+    this.filteredPersons = this.persons().filter(p =>
+      (p.fullName?.toLowerCase().includes(lower) ||
+       p.documentNumber?.toLowerCase().includes(lower)) ?? false
     );
-  };
+  }
+
+  selectPerson(p: PersonListItemResponse): void {
+    this.selectedPersonDisplay = p;
+    this.searchPersonText = '';
+    this.filteredPersons = [];
+    this.form.patchValue({ personId: p.id });
+  }
+
+  clearSelectedPerson(): void {
+    this.selectedPersonDisplay = null;
+    this.searchPersonText = '';
+    this.filteredPersons = [];
+    this.form.patchValue({ personId: null });
+  }
 
   ngOnInit(): void {
     this.loadPersons();

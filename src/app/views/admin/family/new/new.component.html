@@ -11,31 +11,37 @@
       <c-row class="mb-3">
         <c-col sm="6">
           <label cLabel id="persona-label">Persona a cargo *</label>
-          <ng-select
-            inputId="personId"
-            [items]="persons()"
-            bindValue="id"
-            formControlName="personId"
-            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre o documento...'"
-            [loading]="isLoadingPersons()"
-            loadingText="Cargando..."
-            notFoundText="No se encontraron personas"
-            [searchFn]="searchPersonFn"
-            [class.is-invalid]="submitted && f['personId'].errors"
-            aria-labelledby="persona-label"
-            aria-required="true"
-            ariaDescribedBy="personId-error"
-          >
-            <ng-template ng-label-tmp let-item="item">
-              {{ item.fullName }}
-            </ng-template>
-            <ng-template ng-option-tmp let-item="item">
-              {{ item.fullName }}
-              @if (item.disabilityTypeName) {
-                <span class="text-body-secondary"> — {{ item.disabilityTypeName }}</span>
-              }
-            </ng-template>
-          </ng-select>
+          @if (selectedPersonDisplay) {
+            <div class="form-control d-flex align-items-center justify-content-between">
+              <span>{{ selectedPersonDisplay.fullName }}</span>
+              <button type="button" class="btn-close btn-close-sm ms-2"
+                      (click)="clearSelectedPerson()" aria-label="Quitar persona seleccionada"></button>
+            </div>
+          } @else {
+            <input cFormControl id="personId"
+                   [(ngModel)]="searchPersonText"
+                   [ngModelOptions]="{standalone: true}"
+                   (ngModelChange)="filterPersons($event)"
+                   placeholder="Buscar por nombre o documento..."
+                   autocomplete="off" />
+            @if (isLoadingPersons()) {
+              <div class="py-2 text-center"><c-spinner size="sm"></c-spinner></div>
+            } @else if (searchPersonText && filteredPersons.length > 0) {
+              <div class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                @for (p of filteredPersons; track p.id) {
+                  <button type="button" class="list-group-item list-group-item-action py-2"
+                          (click)="selectPerson(p)">
+                    <strong>{{ p.fullName }}</strong>
+                    @if (p.disabilityTypeName) {
+                      <small class="text-body-secondary d-block">{{ p.disabilityTypeName }}</small>
+                    }
+                  </button>
+                }
+              </div>
+            } @else if (searchPersonText && filteredPersons.length === 0) {
+              <p class="text-body-secondary small mt-1 mb-0">Sin resultados</p>
+            }
+          }
           @if (submitted && f['personId'].errors) {
             <c-form-feedback [valid]="false" id="personId-error">
               Debe seleccionar una persona.
