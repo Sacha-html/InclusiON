@@ -92,12 +92,15 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
                 SentAt          = DateTime.UtcNow,
                 IsRead          = false,
                 IsActive        = true,
-                Sender          = sender,
-                Receiver        = receiver
             };
 
             await _messages.CreateAsync(message, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
+
+            // Populate nav properties after save — setting them before EF Core's Add()
+            // causes a PK_Users violation when the users were loaded with AsNoTracking.
+            message.Sender   = sender;
+            message.Receiver = receiver;
 
             return ApiResponse<MessageResponse>.SuccessResult(
                 MessageMapper.ToDetail(message),
