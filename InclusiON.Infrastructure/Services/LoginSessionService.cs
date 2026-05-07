@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -266,11 +267,6 @@ namespace InclusiON.Infrastructure.Services
                     _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
                 }
 
-                user.LastLoginDate = _dateTime.UtcNow;
-                user.LastLoginIpAddress = ipAddress;
-                user.LastLoginUserAgent = userAgent;
-                await _identityService.UpdateUserAsync(user);
-
                 await _tokenServices.RefreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
 
                 if (rememberDevice && !string.IsNullOrEmpty(deviceId))
@@ -290,6 +286,21 @@ namespace InclusiON.Infrastructure.Services
 
                 await _unitOfWork.SaveChangesAsync(ct);
             }, cancellationToken);
+
+            // Update login metadata outside the token transaction — Identity regenerates
+            // ConcurrencyStamp on UpdateAsync, causing DbUpdateConcurrencyException when
+            // concurrent logins race on the same user (e.g. parallel E2E test workers).
+            try
+            {
+                user.LastLoginDate = _dateTime.UtcNow;
+                user.LastLoginIpAddress = ipAddress;
+                user.LastLoginUserAgent = userAgent;
+                await _identityService.UpdateUserAsync(user);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogWarning("Concurrent login for user {UserId} — LastLoginDate update skipped", user.Id);
+            }
 
             var expiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken);
             return new SessionTokens(accessToken, refreshToken, expiresAt);
