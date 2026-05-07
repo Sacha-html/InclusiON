@@ -5,24 +5,25 @@
     <c-card-header>
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 cCardTitle class="mb-0">{{ report()!.title }}</h5>
-        <div class="d-flex align-items-center gap-2">
-          <c-badge [color]="getStatusColor(report()!.status)">
-            {{ getStatusLabel(report()!.status) }}
-          </c-badge>
-          @if (report()!.status === ReportStatus.Submitted) {
-            <button cButton color="success" size="sm" (click)="showApproveModal = true">
-              <svg cIcon name="cilCheckCircle" class="me-1" size="sm" aria-hidden="true"></svg>
-              Aprobar
-            </button>
-            <button cButton color="danger" size="sm" (click)="showRejectModal = true">
-              <svg cIcon name="cilXCircle" class="me-1" size="sm" aria-hidden="true"></svg>
-              Rechazar
-            </button>
-          }
-        </div>
+        <c-badge [color]="getStatusColor(report()!.status)">
+          {{ getStatusLabel(report()!.status) }}
+        </c-badge>
       </div>
     </c-card-header>
     <c-card-body>
+
+      @if (report()!.status === ReportStatus.Submitted) {
+        <div class="d-flex gap-2 mb-4">
+          <button cButton color="success" size="sm" (click)="showApproveModal = true">
+            <svg cIcon name="cilCheckCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+            Aprobar
+          </button>
+          <button cButton color="danger" size="sm" (click)="showRejectModal = true">
+            <svg cIcon name="cilXCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+            Rechazar
+          </button>
+        </div>
+      }
 
       @if (report()!.status === ReportStatus.Rejected && report()!.adminComment) {
         <c-alert color="danger" class="mb-4">
