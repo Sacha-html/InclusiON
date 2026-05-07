@@ -57,7 +57,7 @@ export class NewComponent {
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
-      documentNumber: ['', [Validators.maxLength(20)]],
+      documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
       phone: ['', [Validators.maxLength(20)]],
       specialty: ['', [Validators.maxLength(100)]],
       licenseNumber: ['', [Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],

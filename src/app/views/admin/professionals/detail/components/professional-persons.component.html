@@ -66,30 +66,37 @@
     <form [formGroup]="assignPersonForm">
       <div class="mb-4">
         <label cLabel class="fw-semibold mb-1" id="persona-label">Persona</label>
-        <ng-select
-          [items]="availablePersons"
-          bindValue="id"
-          formControlName="personId"
-          placeholder="Buscar por nombre o documento..."
-          [searchFn]="searchPersonFn"
-          notFoundText="No se encontraron personas"
-          loadingText="Cargando..."
-          appendTo="body"
-          aria-labelledby="persona-label"
-          aria-required="true"
-        >
-          <ng-template ng-label-tmp let-item="item">
-            <strong>{{ item.fullName }}</strong>
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item">
-            <div class="d-flex flex-column py-1">
-              <strong>{{ item.fullName }}</strong>
-              <small class="text-body-secondary">
-                {{ item.disabilityTypeName ?? 'Sin tipo' }}{{ item.documentNumber ? ' · DNI ' + item.documentNumber : '' }}
-              </small>
+        @if (selectedPersonDisplay) {
+          <div class="form-control d-flex align-items-center justify-content-between">
+            <span>{{ selectedPersonDisplay.fullName }}</span>
+            <button type="button" class="btn-close btn-close-sm ms-2"
+                    (click)="clearSelectedPerson()" aria-label="Quitar persona seleccionada"></button>
+          </div>
+        } @else {
+          <input cFormControl id="search-person"
+                 [(ngModel)]="searchPersonText"
+                 [ngModelOptions]="{standalone: true}"
+                 (ngModelChange)="filterPersons($event)"
+                 placeholder="Buscar por nombre o documento..."
+                 autocomplete="off" />
+          @if (isLoadingPersons()) {
+            <div class="py-2 text-center"><c-spinner size="sm"></c-spinner></div>
+          } @else if (searchPersonText && filteredPersons.length > 0) {
+            <div class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+              @for (p of filteredPersons; track p.id) {
+                <button type="button" class="list-group-item list-group-item-action py-2"
+                        (click)="selectPerson(p)">
+                  <strong>{{ p.fullName }}</strong>
+                  @if (p.disabilityTypeName) {
+                    <small class="text-body-secondary d-block">{{ p.disabilityTypeName }}</small>
+                  }
+                </button>
+              }
             </div>
-          </ng-template>
-        </ng-select>
+          } @else if (searchPersonText && filteredPersons.length === 0) {
+            <p class="text-body-secondary small mt-1 mb-0">Sin resultados</p>
+          }
+        }
       </div>
 
       <div class="border rounded p-3 bg-body-tertiary permissions-box">

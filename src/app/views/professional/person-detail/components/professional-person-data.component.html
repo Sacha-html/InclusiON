@@ -55,7 +55,11 @@
              [disabled]="isSaving()"
              (blur)="saveField()"
              (keydown)="onKeydown($event)"
+             maxlength="20"
              autofocus />
+      @if (fieldError()) {
+        <div class="text-danger small mt-1">{{ fieldError() }}</div>
+      }
     } @else {
       <div class="form-control-plaintext border-bottom cursor-pointer"
            (click)="startField('documentNumber')"

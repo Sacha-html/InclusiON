@@ -9,6 +9,13 @@
       </div>
       <div class="d-flex gap-2 align-items-center">
         <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado">Volver</button>
+        @if (professional.statusName === 'Pendiente') {
+          <button cButton color="success" (click)="openValidate(true)">Validar</button>
+          <button cButton color="danger" (click)="openValidate(false)">Rechazar</button>
+        }
+        @if (professional.statusName === 'Dado de baja' || (!professional.isActive && professional.statusName !== 'Pendiente' && professional.statusName !== 'Rechazado')) {
+          <button cButton color="success" (click)="openReactivate()">Reactivar</button>
+        }
         @if (professional.isActive) {
           <button cButton color="primary" (click)="deactivate()" [attr.aria-label]="'Desactivar profesional ' + professional.fullName">Desactivar</button>
         }
@@ -91,6 +98,43 @@
     <c-modal-footer>
       <button cButton color="secondary" (click)="cancelDeactivate()">Cancelar</button>
       <button cButton color="danger" (click)="confirmDeactivate()">Desactivar</button>
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Modal validar/rechazar profesional -->
+  <c-modal [visible]="showValidateModal" (visibleChange)="showValidateModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>{{ validateApprove ? 'Aprobar profesional' : 'Rechazar profesional' }}</h5>
+    </c-modal-header>
+    <c-modal-body>
+      @if (!validateApprove) {
+        <div class="mb-3">
+          <label class="form-label">Observación</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="validateObservation" placeholder="Ingrese el motivo del rechazo"></textarea>
+        </div>
+      } @else {
+        <p>¿Confirma que desea aprobar al profesional <strong>{{ professional.fullName }}</strong>?</p>
+      }
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="showValidateModal = false">Cancelar</button>
+      @if (validateApprove) {
+        <button cButton color="success" (click)="confirmValidate()" [disabled]="isValidating">Aprobar</button>
+      } @else {
+        <button cButton color="danger" (click)="confirmValidate()" [disabled]="isValidating">Rechazar</button>
+      }
+    </c-modal-footer>
+  </c-modal>
+
+  <!-- Modal reactivar profesional -->
+  <c-modal [visible]="showReactivateModal" (visibleChange)="showReactivateModal = $event" alignment="center">
+    <c-modal-header><h5 cModalTitle>Reactivar profesional</h5></c-modal-header>
+    <c-modal-body>
+      <p>¿Confirma que desea reactivar al profesional <strong>{{ professional.fullName }}</strong>?</p>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="showReactivateModal = false">Cancelar</button>
+      <button cButton color="success" (click)="confirmReactivate()" [disabled]="isValidating">Reactivar</button>
     </c-modal-footer>
   </c-modal>
 }

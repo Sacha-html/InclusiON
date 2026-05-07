@@ -50,6 +50,9 @@ export class ListComponent implements OnInit {
   totalPages = signal(0);
   searchTerm = signal('');
 
+  // ID del profesional autenticado — se carga en ngOnInit antes de loadReports
+  private professionalId = '';
+
   // Filtros
   selectedPersonId = '';
   statusFilter = '';
@@ -103,13 +106,11 @@ actions: [
   ];
 
   ngOnInit(): void {
-    this.loadReports();
-    this.loadPersons();
-  }
-
-  private loadPersons(): void {
+    // Cargar perfil primero para filtrar reportes solo del profesional autenticado
     this.professionalsService.getMyProfile().subscribe({
       next: (profile) => {
+        this.professionalId = profile.id;
+        this.loadReports();
         this.assignmentsService.getPersonsByProfessional(profile.id).subscribe({
           next: (persons) => this.persons.set(persons.filter(p => p.isActive)),
         });
@@ -118,6 +119,7 @@ actions: [
   }
 
   loadReports(): void {
+    if (!this.professionalId) return;
     this.isLoading.set(true);
 
     const request: GetReportsRequest = {
@@ -126,6 +128,7 @@ actions: [
       search: this.searchTerm() || undefined,
       sortBy: 'reportDate',
       sortDirection: 'desc',
+      professionalId: this.professionalId,
       personId: this.selectedPersonId || undefined,
       status: this.statusFilter || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
