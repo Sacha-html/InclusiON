@@ -6,6 +6,7 @@ import { AppRoutes } from '@shared/constants/app-routes';
 import { ReportResponse, ReportStatus } from '@models/responses/reports/report.response';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { IconDirective } from '@coreui/icons-angular';
 import {
   AlertComponent,
   BadgeComponent,
@@ -23,6 +24,7 @@ import {
   standalone: true,
   imports: [
     DatePipe,
+    IconDirective,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,

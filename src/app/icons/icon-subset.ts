@@ -60,6 +60,7 @@ import {
   cilVolumeHigh,
   cilWarning,
   cilX,
+  cilXCircle,
   cilZoomIn,
   cilCaretTop,
   cilCaretBottom
@@ -130,6 +131,7 @@ export const iconSubset = {
   cilVolumeHigh,
   cilWarning,
   cilX,
+  cilXCircle,
   cilZoomIn,
   cilCaretTop,
   cilCaretBottom,
