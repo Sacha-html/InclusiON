@@ -24,7 +24,7 @@
   --a11y-surface: #FAFAFA;
   --a11y-text: #1A1A1A;                    // Contraste 17.4:1 (AAA)
   --a11y-text-secondary: #3D3D3D;          // Contraste 10.3:1 (AAA)
-  --a11y-text-muted: #555555;              // Contraste 7.1:1 (AAA) sobre #fafafa — antes #595959 (6.71:1)
+  --a11y-text-muted: #4B4B4B;              // Contraste 7.8:1 (AAA) sobre #f2f2f2, 7.0:1 sobre #e6e6e6 — antes #555555 (6.65:1 sobre #f2f2f2)
 
   // Color de acción (botones, foco, elementos interactivos)
   --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA) — solo para botones/fondos
@@ -217,7 +217,7 @@
     --a11y-surface: #1A1A1A;
     --a11y-text: #F5F5F5;                   // Contraste 18.1:1 (AAA)
     --a11y-text-secondary: #D0D0D0;         // Contraste 12.6:1 (AAA)
-    --a11y-text-muted: #A0A0A0;             // Contraste 7.4:1 (AAA)
+    --a11y-text-muted: #ADADAD;             // Contraste 7.3:1 on #1A1A1A (AAA)
     --a11y-primary: #90CAF9;                // Contraste 10.5:1 (AAA)
     --a11y-primary-dark: #64B5F6;
     --a11y-primary-text: #000000;
@@ -775,7 +775,7 @@
   --a11y-surface: #1A1A1A;
   --a11y-text: #F5F5F5;
   --a11y-text-secondary: #D0D0D0;
-  --a11y-text-muted: #A0A0A0;
+  --a11y-text-muted: #ADADAD;             // Contraste 7.3:1 on #1A1A1A (AAA)
   --a11y-primary: #48CAE4;                 // Cyan claro
   --a11y-primary-dark: #00B4D8;
   --a11y-primary-text: #000000;
@@ -2040,9 +2040,19 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-duration: 0ms;
+  }
+
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border-width: 2px;
   }
 }
 
