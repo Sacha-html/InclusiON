@@ -7,12 +7,12 @@
   // Variables base (modo oscuro por defecto)
   --a11y-panel-bg: #1E1E2E;
   --a11y-panel-text: #FFFFFF;
-  --a11y-panel-muted: #B0BEC5;
+  --a11y-panel-muted: #D0DDE3;          // 7.2:1 sobre #41414E (sección compuesta), 11.5:1 sobre #1E1E2E (AAA)
   --a11y-panel-accent: #90CAF9;
   --a11y-panel-border: #4A4A6A;
   --a11y-panel-active-text: #000000;
   --a11y-panel-section-bg: rgba(255, 255, 255, 0.08);
-  --a11y-panel-danger: #FF6B6B;
+  --a11y-panel-danger: #EF9A9A;          // 7.6:1 sobre #1E1E2E (AAA) — antes #FF6B6B (5.91:1)
 }
 
 // Modo claro - override en body
@@ -20,12 +20,12 @@
   :host {
     --a11y-panel-bg: #FFFFFF;
     --a11y-panel-text: #1A1A1A;
-    --a11y-panel-muted: #555555;
+    --a11y-panel-muted: #484848;           // 7.5:1 sobre #f2f2f2, 7.1:1 sobre #e6e6e6 (AAA)
     --a11y-panel-accent: #0D47A1;
     --a11y-panel-border: #9E9E9E;
     --a11y-panel-active-text: #FFFFFF;
     --a11y-panel-section-bg: rgba(0, 0, 0, 0.05);
-    --a11y-panel-danger: #C62828;
+    --a11y-panel-danger: #AF1B1B;          // 7.0:1 sobre #ffffff (AAA) — antes #C62828 (5.62:1)
   }
 }
 
