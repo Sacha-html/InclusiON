@@ -195,6 +195,7 @@ export class DetailComponent implements OnInit {
   }
 
   openLinkModal(): void {
+    this.showLinkModal = true;
     this.searchFamily = '';
     this.availableFamilies = [];
     this.selectedFamilyId = '';

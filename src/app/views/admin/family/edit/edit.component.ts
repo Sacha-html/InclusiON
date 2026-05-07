@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { FamilyService, PersonsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import {
@@ -17,7 +16,7 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
 @Component({
   selector: 'app-family-edit',
   imports: [
-    ReactiveFormsModule, FormsModule, NgSelectModule,
+    ReactiveFormsModule, FormsModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective, SpinnerComponent,
@@ -42,7 +41,7 @@ export class EditComponent implements OnInit {
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.maxLength(20)]],
+    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
   });
 
@@ -53,7 +52,10 @@ export class EditComponent implements OnInit {
 
   // Selección para vincular
   selectedPersonForLink: PersonListItemResponse | null = null;
+  searchPersonText = '';
+  filteredPersons: PersonListItemResponse[] = [];
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+  readonly PARENT_RELATIONSHIPS = ['Madre', 'Padre'];
   linkRelationship = '';
   linkIsPrimary    = false;
   isLinking        = false;
@@ -63,15 +65,6 @@ export class EditComponent implements OnInit {
   showUnlinkModal  = false;
   unlinkingPerson: LinkedPersonInfo | null = null;
   isUnlinking      = false;
-
-  searchPersonFn = (term: string, item: PersonListItemResponse): boolean => {
-    const lower = term.toLowerCase();
-    return (
-      (item.fullName?.toLowerCase().includes(lower) ||
-        item.documentNumber?.toLowerCase().includes(lower)) ??
-      false
-    );
-  };
 
   get availablePersons(): PersonListItemResponse[] {
     const linkedIds = new Set(this.family?.linkedPersons?.map(lp => lp.personId) ?? []);
@@ -108,6 +101,40 @@ export class EditComponent implements OnInit {
     });
   }
 
+  // --- Búsqueda de persona ---
+
+  filterPersons(text: string): void {
+    if (!text) { this.filteredPersons = []; return; }
+    const lower = text.toLowerCase();
+    this.filteredPersons = this.availablePersons.filter(p =>
+      (p.fullName?.toLowerCase().includes(lower) ||
+       p.documentNumber?.toLowerCase().includes(lower)) ?? false
+    );
+  }
+
+  selectPerson(p: PersonListItemResponse): void {
+    this.selectedPersonForLink = p;
+    this.searchPersonText = '';
+    this.filteredPersons = [];
+  }
+
+  clearSelectedPerson(): void {
+    this.selectedPersonForLink = null;
+    this.searchPersonText = '';
+    this.filteredPersons = [];
+  }
+
+  validateParentLimit(): string {
+    if (!this.linkRelationship) return '';
+    if (!this.PARENT_RELATIONSHIPS.includes(this.linkRelationship)) return '';
+    const exists = this.family?.linkedPersons?.some(
+      lp => lp.relationship === this.linkRelationship
+    );
+    return exists
+      ? `Ya existe una persona vinculada con la relación "${this.linkRelationship}". Solo puede haber una.`
+      : '';
+  }
+
   // --- Vincular persona ---
 
   linkPerson(): void {
@@ -122,7 +149,7 @@ export class EditComponent implements OnInit {
       isPrimary: this.linkIsPrimary,
     }).subscribe({
       next: () => {
-        this.selectedPersonForLink = null;
+        this.clearSelectedPerson();
         this.linkRelationship = '';
         this.linkIsPrimary = false;
         this.isLinking = false;

@@ -11,25 +11,34 @@
         <c-col xs="12" md="6">
           <label class="form-label" id="report-person-label">Persona con discapacidad *</label>
 
-          <ng-select
-            inputId="report-person"
-            [items]="persons()"
-            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre...'"
-            [loading]="isLoadingPersons()"
-            loadingText="Cargando..."
-            notFoundText="Sin resultados"
-            [searchFn]="searchPersonFn"
-            (change)="onPersonChange($event)"
-            aria-labelledby="report-person-label"
-            aria-required="true"
-          >
-            <ng-template ng-label-tmp let-item="item">
-              {{ item.personFirstName }} {{ item.personLastName }}
-            </ng-template>
-            <ng-template ng-option-tmp let-item="item">
-              {{ item.personFirstName }} {{ item.personLastName }}
-            </ng-template>
-          </ng-select>
+          @if (selectedPerson()) {
+            <div class="form-control d-flex align-items-center justify-content-between">
+              <span>{{ selectedPerson()!.personFirstName }} {{ selectedPerson()!.personLastName }}</span>
+              <button type="button" class="btn-close btn-close-sm ms-2"
+                      (click)="clearSelectedPerson()" aria-label="Quitar persona seleccionada"></button>
+            </div>
+          } @else {
+            <input cFormControl id="report-person"
+                   [(ngModel)]="searchPersonText"
+                   name="searchPersonText"
+                   (ngModelChange)="filterPersons($event)"
+                   placeholder="Buscar por nombre..."
+                   autocomplete="off" />
+            @if (isLoadingPersons()) {
+              <div class="py-2 text-center"><c-spinner size="sm"></c-spinner></div>
+            } @else if (searchPersonText && filteredPersons.length > 0) {
+              <div class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                @for (p of filteredPersons; track p.personId) {
+                  <button type="button" class="list-group-item list-group-item-action py-2"
+                          (click)="selectPerson(p)">
+                    <strong>{{ p.personFirstName }} {{ p.personLastName }}</strong>
+                  </button>
+                }
+              </div>
+            } @else if (searchPersonText && filteredPersons.length === 0) {
+              <p class="text-body-secondary small mt-1 mb-0">Sin resultados</p>
+            }
+          }
         </c-col>
 
         <!-- Tipo de Reporte -->

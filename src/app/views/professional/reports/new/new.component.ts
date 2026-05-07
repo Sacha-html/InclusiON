@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { ReportsService, ProfessionalsService, AssignmentsService, ToastService, CatalogsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { CreateReportRequest } from '@models/requests/reports/create-report.request';
@@ -28,7 +27,6 @@ import {
   standalone: true,
   imports: [
     FormsModule,
-    NgSelectModule,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
@@ -60,6 +58,9 @@ export class NewComponent implements OnInit {
   isLoadingPersons = signal(true);
   selectedPerson   = signal<ProfessionalPersonResponse | null>(null);
 
+  searchPersonText = '';
+  filteredPersons: ProfessionalPersonResponse[] = [];
+
   // Modal post-creación
   showSubmitModal  = signal(false);
   isSubmitting     = signal(false);
@@ -88,10 +89,25 @@ export class NewComponent implements OnInit {
     );
   }
 
-  searchPersonFn = (term: string, item: ProfessionalPersonResponse): boolean => {
-    const fullName = `${item.personFirstName} ${item.personLastName}`.toLowerCase();
-    return fullName.includes(term.toLowerCase());
-  };
+  filterPersons(text: string): void {
+    if (!text) { this.filteredPersons = []; return; }
+    const lower = text.toLowerCase();
+    this.filteredPersons = this.persons().filter(p =>
+      `${p.personFirstName} ${p.personLastName}`.toLowerCase().includes(lower)
+    );
+  }
+
+  selectPerson(p: ProfessionalPersonResponse): void {
+    this.onPersonChange(p);
+    this.searchPersonText = '';
+    this.filteredPersons = [];
+  }
+
+  clearSelectedPerson(): void {
+    this.onPersonChange(null);
+    this.searchPersonText = '';
+    this.filteredPersons = [];
+  }
 
   onPersonChange(person: ProfessionalPersonResponse | null): void {
     this.form.personId = person?.personId ?? '';
