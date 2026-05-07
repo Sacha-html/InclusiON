@@ -166,7 +166,8 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontendClient");
 
-app.UseRateLimiter();
+if (!builder.Configuration.GetValue<bool>("RateLimiter:Disabled"))
+    app.UseRateLimiter();
 app.UseOutputCache();
 
 app.UseAuthentication();

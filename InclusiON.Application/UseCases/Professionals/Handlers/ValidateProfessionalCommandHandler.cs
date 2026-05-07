@@ -121,6 +121,11 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         professional.Status = ProfessionalStatusEnum.Approved;
                         professional.ValidatedAt = _dateTime.UtcNow;
                         professional.ValidatedByUserId = adminUserId;
+                        // Clear navigation property to avoid EF change-tracker conflict:
+                        // GetByIdAsync uses AsNoTracking so professional.User is a separate
+                        // untracked instance; UpdateUserAsync already tracks the User via
+                        // UserManager — attaching a second instance with the same key throws.
+                        professional.User = null!;
 
                         await _repository.UpdateAsync(professional, ct);
 

@@ -77,6 +77,46 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.InternalError);
         }
+
+        [Fact]
+        public async Task InvalidJson_ReturnsValidationFailed()
+        {
+            var cmd = Cmd() with { ContentJson = "esto no es json" };
+
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _repo.DidNotReceive().CreateAsync(Arg.Any<Activity>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task EmptyObjectJson_ReturnsValidationFailed()
+        {
+            var cmd = Cmd() with { ContentJson = "{}" };
+
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _repo.DidNotReceive().CreateAsync(Arg.Any<Activity>(), Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData("{\"items\":[{\"id\":1}]}")]
+        [InlineData("{\"steps\":[\"A\",\"B\"]}")]
+        [InlineData("{\"groups\":{\"a\":1}}")]
+        public async Task NonEmptyValidJson_DoesNotFailOnContentValidation(string contentJson)
+        {
+            _dateTime.UtcNow.Returns(Now);
+            var created = ACreatedActivity();
+            _repo.GetByIdAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(created);
+            var cmd = Cmd() with { ContentJson = contentJson };
+
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.ErrorCode.Should().NotBe(ErrorCode.ValidationFailed);
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════════════

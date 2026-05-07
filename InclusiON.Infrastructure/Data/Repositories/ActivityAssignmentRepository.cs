@@ -17,6 +17,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<ActivityAssignment?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.ActivityAssignments
+                .Include(a => a.Status)
                 .Include(a => a.Activity)
                     .ThenInclude(a => a.Content)
                         .ThenInclude(c => c!.TemplateType)
@@ -28,6 +29,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<List<ActivityAssignment>> GetByPersonIdAsync(Guid personId, CancellationToken ct = default)
         {
             return await _context.ActivityAssignments
+                .Include(a => a.Status)
                 .Include(a => a.Activity)
                     .ThenInclude(a => a.Content)
                         .ThenInclude(c => c!.TemplateType)
@@ -46,7 +48,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public async Task UpdateAsync(ActivityAssignment assignment, CancellationToken ct = default)
         {
-            _context.ActivityAssignments.Update(assignment);
+            _context.Entry(assignment).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
         public async Task<ActivityResponse?> GetResponseByIdAsync(int responseId, CancellationToken ct = default)

@@ -12,6 +12,9 @@ namespace InclusiON.Api.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            if (configuration.GetValue<bool>("RateLimiter:Disabled"))
+                return services;
+
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;

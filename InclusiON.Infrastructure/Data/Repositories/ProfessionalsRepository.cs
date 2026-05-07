@@ -82,7 +82,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public Task UpdateAsync(Professional professional, CancellationToken cancellationToken = default)
         {
-            _context.Professionals.Update(professional);
+            _context.Entry(professional).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             return Task.CompletedTask;
         }
 
