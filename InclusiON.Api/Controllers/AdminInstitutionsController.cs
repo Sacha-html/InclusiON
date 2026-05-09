@@ -28,40 +28,47 @@ namespace InclusiON.Api.Controllers
 
         [HttpGet("admins")]
         [Authorize(Policy = Permissions.GlobalAdmin)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminUserResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<AdminUserResponse>>>> GetAllAdmins(
-            [FromServices] IQueryHandler<GetAllAdminsQuery, ApiResponse<List<AdminUserResponse>>> handler,
-            CancellationToken cancellationToken)
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminUserResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<AdminUserResponse>>>> GetAllAdmins(
+            [FromServices] IQueryHandler<GetAllAdminsQuery, ApiResponse<PagedResponse<AdminUserResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            CancellationToken cancellationToken = default)
         {
-            var result = await handler.HandleAsync(new GetAllAdminsQuery(), cancellationToken);
+            var result = await handler.HandleAsync(new GetAllAdminsQuery(page, pageSize, search), cancellationToken);
             return Ok(result);
         }
 
         [HttpGet("me")]
         [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<List<AdminInstitutionResponse>>>> GetMyInstitutions(
-            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<List<AdminInstitutionResponse>>> handler,
-            CancellationToken cancellationToken)
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<AdminInstitutionResponse>>>> GetMyInstitutions(
+            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<PagedResponse<AdminInstitutionResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
+            CancellationToken cancellationToken = default)
         {
             var userId = _httpContextService.GetCurrentUserId();
-            if (userId is null) return Unauthorized(ApiResponse<List<AdminInstitutionResponse>>.Unauthorized());
+            if (userId is null) return Unauthorized(ApiResponse<PagedResponse<AdminInstitutionResponse>>.Unauthorized());
 
-            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(userId.Value), cancellationToken);
+            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(userId.Value, page, pageSize), cancellationToken);
             return Ok(result);
         }
 
         [HttpGet("{adminUserId}")]
         [Authorize(Policy = Permissions.GlobalAdmin)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<ApiResponse<List<AdminInstitutionResponse>>>> GetAdminInstitutions(
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<AdminInstitutionResponse>>>> GetAdminInstitutions(
             Guid adminUserId,
-            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<List<AdminInstitutionResponse>>> handler,
-            CancellationToken cancellationToken)
+            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<PagedResponse<AdminInstitutionResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
+            CancellationToken cancellationToken = default)
         {
-            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(adminUserId), cancellationToken);
+            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(adminUserId, page, pageSize), cancellationToken);
             return Ok(result);
         }
 

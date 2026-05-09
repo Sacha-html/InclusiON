@@ -235,13 +235,15 @@ namespace InclusiON.Api.Controllers
         [HttpGet("{personId}/supervisor-candidates")]
         [Authorize(Policy = "persons:read")]
         [PersonAccess(AccessMode.Read)]
-        [ProducesResponseType(typeof(ApiResponse<List<SupervisorCandidateResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<SupervisorCandidateResponse>>>> GetSupervisorCandidates(
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<SupervisorCandidateResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<SupervisorCandidateResponse>>>> GetSupervisorCandidates(
             Guid personId,
-            [FromServices] IQueryHandler<GetSupervisorCandidatesQuery, ApiResponse<List<SupervisorCandidateResponse>>> handler,
+            [FromServices] IQueryHandler<GetSupervisorCandidatesQuery, ApiResponse<PagedResponse<SupervisorCandidateResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
             CancellationToken cancellationToken = default)
         {
-            var result = await handler.HandleAsync(new GetSupervisorCandidatesQuery(personId), cancellationToken);
+            var result = await handler.HandleAsync(new GetSupervisorCandidatesQuery(personId, page, pageSize), cancellationToken);
             return Ok(result);
         }
 
