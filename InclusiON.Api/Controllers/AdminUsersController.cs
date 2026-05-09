@@ -64,15 +64,16 @@ namespace InclusiON.Api.Controllers
 
         [HttpGet("{userId}/activity")]
         [Authorize(Policy = "users:read")]
-        [ProducesResponseType(typeof(ApiResponse<List<UserRecentSessionResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<List<UserRecentSessionResponse>>), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse<List<UserRecentSessionResponse>>>> GetUserActivity(
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserRecentSessionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserRecentSessionResponse>>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<UserRecentSessionResponse>>>> GetUserActivity(
             Guid userId,
-            [FromServices] IQueryHandler<GetUserActivityQuery, ApiResponse<List<UserRecentSessionResponse>>> handler,
-            [FromQuery] int limit = 15,
+            [FromServices] IQueryHandler<GetUserActivityQuery, ApiResponse<PagedResponse<UserRecentSessionResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 15,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetUserActivityQuery(userId, limit);
+            var query = new GetUserActivityQuery(userId, page, pageSize);
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }

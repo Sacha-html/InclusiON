@@ -60,14 +60,16 @@ namespace InclusiON.Api.Controllers
 
         [HttpGet("available")]
         [Authorize(Policy = "family:read")]
-        [ProducesResponseType(typeof(ApiResponse<List<FamilyResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<FamilyResponse>>>> GetAvailableFamilies(
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<FamilyResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<FamilyResponse>>>> GetAvailableFamilies(
+            [FromServices] IQueryHandler<GetAvailableFamiliesQuery, ApiResponse<PagedResponse<FamilyResponse>>> handler,
             [FromQuery] string? search,
             [FromQuery] Guid? personId,
-            [FromServices] IQueryHandler<GetAvailableFamiliesQuery, ApiResponse<List<FamilyResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetAvailableFamiliesQuery(search, personId);
+            var query = new GetAvailableFamiliesQuery(search, personId, page, pageSize);
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }
@@ -244,14 +246,16 @@ namespace InclusiON.Api.Controllers
 
         [HttpGet("professional/available")]
         [Authorize(Policy = "family:link")]
-        [ProducesResponseType(typeof(ApiResponse<List<FamilyResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<FamilyResponse>>>> GetAvailableFamiliesForProfessional(
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<FamilyResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<FamilyResponse>>>> GetAvailableFamiliesForProfessional(
+            [FromServices] IQueryHandler<GetAvailableFamiliesQuery, ApiResponse<PagedResponse<FamilyResponse>>> handler,
             [FromQuery] string? search,
             [FromQuery] Guid? personId,
-            [FromServices] IQueryHandler<GetAvailableFamiliesQuery, ApiResponse<List<FamilyResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetAvailableFamiliesQuery(search, personId);
+            var query = new GetAvailableFamiliesQuery(search, personId, page, pageSize);
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }
