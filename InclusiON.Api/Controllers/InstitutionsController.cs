@@ -8,6 +8,7 @@ using InclusiON.DTOs.Requests.Common;
 using InclusiON.DTOs.Requests.Institutions;
 using InclusiON.Application.Constants;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses.Institutions;
 namespace InclusiON.Api.Controllers
 {
@@ -26,12 +27,16 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(ApiResponse<List<InstitutionResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<InstitutionResponse>>>> GetInstitutions(
-            [FromServices] IQueryHandler<GetInstitutionsQuery, ApiResponse<List<InstitutionResponse>>> handler,
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<InstitutionResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<InstitutionResponse>>>> GetInstitutions(
+            [FromServices] IQueryHandler<GetInstitutionsQuery, ApiResponse<PagedResponse<InstitutionResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] bool? isActive = null,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetInstitutionsQuery();
+            var query = new GetInstitutionsQuery(page, pageSize, search, isActive);
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }

@@ -118,16 +118,18 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet("contacts")]
         [Authorize(Policy = Permissions.Messages.Read)]
-        [ProducesResponseType(typeof(ApiResponse<List<MessageContactResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<MessageContactResponse>>>> GetContacts(
-            [FromServices] IQueryHandler<GetMessageContactsQuery, ApiResponse<List<MessageContactResponse>>> handler,
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<MessageContactResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<MessageContactResponse>>>> GetContacts(
+            [FromServices] IQueryHandler<GetMessageContactsQuery, ApiResponse<PagedResponse<MessageContactResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 100,
             CancellationToken cancellationToken = default)
         {
             var userId = _httpContextService.GetCurrentUserId();
             if (userId is null)
                 return Unauthorized();
 
-            var result = await handler.HandleAsync(new GetMessageContactsQuery(userId.Value), cancellationToken);
+            var result = await handler.HandleAsync(new GetMessageContactsQuery(userId.Value, page, pageSize), cancellationToken);
             return Ok(result);
         }
 
