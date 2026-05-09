@@ -8,7 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
-		<PackageReference Include="MailKit" Version="4.15.1" />
+		<PackageReference Include="MailKit" Version="4.16.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
 
@@ -19,6 +19,8 @@
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 
 		<PackageReference Include="Npgsql" Version="10.0.0" />
+
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.7" />
 	</ItemGroup>
 
   <ItemGroup>
