@@ -1,20 +1,19 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BigButtonComponent } from '../../../shared/components/big-button/big-button.component';
-import { VisualCardComponent } from '../../../shared/components/visual-card/visual-card.component';
-import { AuthService, ToastService } from '../../../services';
+import { AuthService } from '../../../services';
+import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
   selector: 'app-aac-home',
   standalone: true,
-  imports: [BigButtonComponent, VisualCardComponent],
+  imports: [BigButtonComponent, IconDirective],
   templateUrl: './aac-home.component.html',
   styleUrl: './aac-home.component.scss'
 })
 export class AacHomeComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
-  private toastService = inject(ToastService);
 
   get userName(): string {
     return this.authService.getCurrentUser()?.name || 'Usuario';
@@ -31,7 +30,8 @@ export class AacHomeComponent {
     this.router.navigate([path]);
   }
 
-  requestHelp(): void {
-    this.toastService.info('Solicitando ayuda...');
-  }
+  readonly timeIcon: string = (() => {
+    const h = new Date().getHours();
+    return h >= 19 || h < 6 ? 'cilMoon' : 'cilSun';
+  })();
 }
