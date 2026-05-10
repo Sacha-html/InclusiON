@@ -24,7 +24,7 @@
       <label cLabel>Tipo</label>
       <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
         <option value="">Todos</option>
-        @for (t of reportTypes; track t.id) {
+        @for (t of reportTypes(); track t.id) {
           <option [value]="t.id">{{ t.name }}</option>
         }
       </select>
@@ -53,19 +53,14 @@
   [sortable]="true"
   [loading]="isLoading()"
   [headerButtons]="headerButtons"
+  [emptyIcon]="'cilNotes'"
+  [emptyMessage]="'No hay reportes que coincidan con los filtros seleccionados.'"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
   (sortAction)="onSort($event)"
   (rowAction)="onRowAction($event)"
   (headerAction)="onHeaderAction($event)">
 </app-data-table>
-
-@if (!reports().length && !isLoading()) {
-  <div class="text-center text-body-secondary py-5">
-    <svg cIcon name="cilNotes" size="3xl" class="mb-2"></svg>
-    <p class="mb-0">No hay reportes que coincidan con los filtros seleccionados.</p>
-  </div>
-}
 
 <!-- Modal: Confirmar envío al admin -->
 <app-confirm-modal

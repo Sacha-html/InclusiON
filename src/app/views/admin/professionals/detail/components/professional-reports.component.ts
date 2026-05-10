@@ -3,33 +3,30 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportListItemResponse } from '@models/responses/reports/report.response';
 import {
-  BadgeComponent,
-  ButtonDirective,
   FormSelectDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
   SpinnerComponent,
-  TableDirective,
 } from '@coreui/angular';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 
 @Component({
   selector: 'app-professional-reports',
   standalone: true,
   imports: [
     FormsModule,
-    BadgeComponent,
-    ButtonDirective,
     FormSelectDirective,
     ModalBodyComponent,
     ModalComponent,
     ModalFooterComponent,
     ModalHeaderComponent,
     SpinnerComponent,
-    TableDirective,
+    DataTableComponent,
   ],
   templateUrl: './professional-reports.component.html',
 })
@@ -40,13 +37,12 @@ export class ProfessionalReportsComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
-  readonly ReportStatus = ReportStatus;
-
   reports = signal<ReportListItemResponse[]>([]);
   isLoading = signal(true);
   isProcessing = signal(false);
   currentPage = signal(1);
   totalPages = signal(1);
+  totalRecords = signal(0);
 
   statusFilter = '';
   rejectComment = '';
@@ -55,12 +51,29 @@ export class ProfessionalReportsComponent implements OnInit {
   showRejectModal = signal(false);
   selectedReport = signal<ReportListItemResponse | null>(null);
 
-  readonly badgeMap: Record<ReportStatus, { color: string; label: string }> = {
-    [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador' },
-    [ReportStatus.Submitted]: { color: 'warning',   label: 'Enviado' },
-    [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado' },
-    [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
-  };
+  readonly columns: TableColumn[] = [
+    { key: 'reportDateFmt',  label: 'Fecha',   sortable: false },
+    { key: 'title',          label: 'Título',  sortable: false },
+    { key: 'personName',     label: 'Persona', sortable: false },
+    { key: 'reportTypeName', label: 'Tipo',    sortable: false },
+    {
+      key: 'status', label: 'Estado', type: 'badge',
+      badgeMap: {
+        'Draft':     { color: 'secondary', label: 'Borrador'  },
+        'Submitted': { color: 'warning',   label: 'Enviado'   },
+        'Approved':  { color: 'success',   label: 'Aprobado'  },
+        'Rejected':  { color: 'danger',    label: 'Rechazado' },
+      },
+    },
+    {
+      key: '', label: 'Acciones', type: 'actions',
+      actions: [
+        { action: 'view',    label: 'Ver',      color: 'primary' },
+        { action: 'approve', label: 'Aprobar',  color: 'success', visible: (item: any) => item.status === 'Submitted' },
+        { action: 'reject',  label: 'Rechazar', color: 'danger',  visible: (item: any) => item.status === 'Submitted' },
+      ],
+    },
+  ];
 
   ngOnInit(): void {
     this.loadReports();
@@ -77,8 +90,14 @@ export class ProfessionalReportsComponent implements OnInit {
       sortDirection: 'desc',
     }).subscribe({
       next: (response) => {
-        this.reports.set(response.data);
+        this.reports.set(response.data.map(r => ({
+          ...r,
+          reportDateFmt: r.reportDate
+            ? new Date(r.reportDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            : '—',
+        })));
         this.totalPages.set(response.totalPages);
+        this.totalRecords.set(response.totalRecords);
         this.isLoading.set(false);
       },
       error: () => {
@@ -88,9 +107,17 @@ export class ProfessionalReportsComponent implements OnInit {
     });
   }
 
-  changePage(page: number): void {
+  onPageChange(page: number): void {
     this.currentPage.set(page);
     this.loadReports();
+  }
+
+  onRowAction(event: { action: string; item: any }): void {
+    switch (event.action) {
+      case 'view':    this.viewReport(event.item.id); break;
+      case 'approve': this.openApproveModal(event.item); break;
+      case 'reject':  this.openRejectModal(event.item); break;
+    }
   }
 
   viewReport(id: number): void {
@@ -147,11 +174,5 @@ export class ProfessionalReportsComponent implements OnInit {
     this.showRejectModal.set(false);
     this.selectedReport.set(null);
     this.rejectComment = '';
-  }
-
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 }

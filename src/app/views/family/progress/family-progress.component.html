@@ -22,13 +22,11 @@
             (click)="selectPerson(person.personId)"
             [attr.aria-pressed]="selectedPersonId() === person.personId"
           >
-            <span
-              class="person-avatar"
-              [style.background]="person.avatarColor"
-              aria-hidden="true"
-            >
-              {{ person.fullName.charAt(0) }}
-            </span>
+            <app-actor-avatar
+              [name]="person.fullName"
+              [color]="person.avatarColor"
+              size="sm"
+            />
             {{ person.fullName }}
           </button>
         }

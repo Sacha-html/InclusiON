@@ -8,9 +8,10 @@ import {
   ModalFooterComponent,
   ModalHeaderComponent,
   SpinnerComponent,
-  TableDirective,
 } from '@coreui/angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 
 @Component({
   selector: 'app-admin-diagnoses',
@@ -22,7 +23,7 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
     ModalBodyComponent,
     ModalFooterComponent,
     SpinnerComponent,
-    TableDirective,
+    DataTableComponent,
     ConfirmModalComponent,
   ],
   templateUrl: './admin-diagnoses.component.html',
@@ -43,6 +44,26 @@ export class AdminDiagnosesComponent implements OnInit {
   showDeactivateModal  = false;
   deactivatingDiag: DiagnosisListItemResponse | null = null;
   isDeactivating = false;
+
+  columns: TableColumn[] = [
+    { key: 'diagnosisDate', label: 'Fecha', type: 'date' },
+    { key: 'primaryDiagnosis', label: 'Diagnóstico principal' },
+    { key: 'professionalName', label: 'Profesional' },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      type: 'actions',
+      actions: [
+        { action: 'view',       label: 'Ver',         icon: 'cil-search' },
+        { action: 'deactivate', label: 'Dar de baja', icon: 'cil-ban'    },
+      ],
+    },
+  ];
+
+  onRowAction(event: { action: string; item: DiagnosisListItemResponse }): void {
+    if (event.action === 'view')       this.openDetail(event.item.id);
+    if (event.action === 'deactivate') this.openDeactivate(event.item);
+  }
 
   ngOnInit(): void {
     this.loading = true;
@@ -117,7 +138,4 @@ export class AdminDiagnosesComponent implements OnInit {
     });
   }
 
-  truncate(text: string, max: number): string {
-    return text.length > max ? text.slice(0, max) + '…' : text;
-  }
 }

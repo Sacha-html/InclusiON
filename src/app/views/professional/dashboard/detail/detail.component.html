@@ -9,7 +9,7 @@
     <c-col xs="12" md="8">
       <c-card>
         <c-card-body>
-          <h4 class="mb-1">{{ getGreeting() }}, {{ professional?.firstName }}!</h4>
+          <h1 class="h4 mb-1">{{ getGreeting() }}, {{ professional?.firstName }}!</h1>
           <p class="text-body-secondary mb-0">Panel de gestión profesional</p>
         </c-card-body>
       </c-card>
@@ -170,8 +170,8 @@
                       <div class="small text-body-secondary">{{ report.personName }}</div>
                     </td>
                     <td class="text-end">
-                      <c-badge [color]="getReportStatusColor(report.status)">
-                        {{ getReportStatusLabel(report.status) }}
+                      <c-badge [color]="reportBadgeMap[report.status]?.color ?? 'secondary'">
+                        {{ reportBadgeMap[report.status]?.label ?? report.status }}
                       </c-badge>
                     </td>
                   </tr>

@@ -6,126 +6,146 @@
 
   <c-card-body>
     <!-- Loading State -->
-    <div *ngIf="isLoading" class="text-center py-4">
-      <c-spinner color="primary"></c-spinner>
-      <p class="mt-2">Cargando métodos de login...</p>
-    </div>
+    @if (isLoading) {
+      <div class="text-center py-4">
+        <c-spinner color="primary"></c-spinner>
+        <p class="mt-2">Cargando métodos de login...</p>
+      </div>
+    }
 
     <!-- Error Message -->
-    <c-alert *ngIf="errorMessage" color="danger" [dismissible]="true" (visibleChange)="errorMessage = ''">
-      {{ errorMessage }}
-    </c-alert>
+    @if (errorMessage) {
+      <c-alert color="danger" [dismissible]="true" (visibleChange)="errorMessage = ''">
+        {{ errorMessage }}
+      </c-alert>
+    }
 
     <!-- Success Message -->
-    <c-alert *ngIf="successMessage" color="success" [dismissible]="true" (visibleChange)="successMessage = ''">
-      {{ successMessage }}
-    </c-alert>
+    @if (successMessage) {
+      <c-alert color="success" [dismissible]="true" (visibleChange)="successMessage = ''">
+        {{ successMessage }}
+      </c-alert>
+    }
 
     <!-- Method Selection -->
-    <div *ngIf="!isLoading" class="method-grid">
-      <c-row>
-        <c-col *ngFor="let method of loginMethods" xs="12" md="4" class="mb-3">
-          <c-card
-            [class.selected]="selectedMethod?.id === method.id"
-            [class.current]="currentLoginMethodId === method.id"
-            class="method-card h-100"
-            (click)="selectMethod(method)"
-            role="button"
-            tabindex="0"
-            [attr.aria-label]="'Seleccionar metodo de acceso: ' + method.name"
-            (keydown.enter)="selectMethod(method)"
-            (keydown.space)="selectMethod(method); $event.preventDefault()">
-            <c-card-body class="text-center">
-              <div class="method-icon mb-3">
-                <svg [cIcon]="getMethodIcon(method)" size="xl" [class]="'text-' + getMethodColor(method)"></svg>
-              </div>
-              <h5 class="method-name">{{ method.name }}</h5>
-              <p class="method-description text-medium-emphasis small">
-                {{ method.description }}
-              </p>
-              @if (currentLoginMethodId === method.id) {
-                <c-badge color="info">Actual</c-badge>
-              }
-            </c-card-body>
-          </c-card>
-        </c-col>
-      </c-row>
-    </div>
+    @if (!isLoading) {
+      <div class="method-grid">
+        <c-row>
+          @for (method of loginMethods; track method.id) {
+            <c-col xs="12" md="4" class="mb-3">
+              <c-card
+                [class.selected]="selectedMethod?.id === method.id"
+                [class.current]="currentLoginMethodId === method.id"
+                class="method-card h-100"
+                (click)="selectMethod(method)"
+                role="button"
+                tabindex="0"
+                [attr.aria-label]="'Seleccionar metodo de acceso: ' + method.name"
+                (keydown.enter)="selectMethod(method)"
+                (keydown.space)="selectMethod(method); $event.preventDefault()">
+                <c-card-body class="text-center">
+                  <div class="method-icon mb-3">
+                    <svg [cIcon]="getMethodIcon(method)" size="xl" [class]="'text-' + getMethodColor(method)"></svg>
+                  </div>
+                  <h5 class="method-name">{{ method.name }}</h5>
+                  <p class="method-description text-medium-emphasis small">
+                    {{ method.description }}
+                  </p>
+                  @if (currentLoginMethodId === method.id) {
+                    <c-badge color="info">Actual</c-badge>
+                  }
+                </c-card-body>
+              </c-card>
+            </c-col>
+          }
+        </c-row>
+      </div>
+    }
 
     <!-- Configuration Form -->
-    <div *ngIf="selectedMethod && !isLoading" class="config-section mt-4">
-      <hr>
-      <h5>Configuración para: {{ selectedMethod.name }}</h5>
+    @if (selectedMethod && !isLoading) {
+      <div class="config-section mt-4">
+        <hr>
+        <h5>Configuración para: {{ selectedMethod.name }}</h5>
 
-      <form [formGroup]="configForm">
-        <!-- PIN Configuration -->
-        <div *ngIf="selectedMethod.id === LOGIN_PIN" class="pin-config">
-          <c-row>
-            <c-col xs="12" md="6" class="mb-3">
-              <label cLabel for="pin">PIN (4 dígitos)</label>
-              <input
-                cFormControl
-                type="password"
-                id="pin"
-                formControlName="pin"
-                placeholder="Ingresa tu PIN"
-                maxlength="4"
-                autofocus
-                inputmode="numeric"
-                pattern="[0-9]*"
-              />
-              <div *ngIf="configForm.get('pin')?.invalid && configForm.get('pin')?.touched" class="text-danger small mt-1">
-                El PIN debe tener 4 dígitos numéricos
-              </div>
-            </c-col>
-            <c-col xs="12" md="6" class="mb-3">
-              <label cLabel for="confirmPin">Confirmar PIN</label>
-              <input
-                cFormControl
-                type="password"
-                id="confirmPin"
-                formControlName="confirmPin"
-                placeholder="Confirma tu PIN"
-                maxlength="4"
-                inputmode="numeric"
-                pattern="[0-9]*"
-              />
-            </c-col>
-          </c-row>
-          <c-alert color="info" class="small">
-            <strong>Consejo:</strong> Usá un PIN que puedas recordar fácilmente pero que no sea obvio (evitá 1234, tu fecha de nacimiento, etc.)
-          </c-alert>
-        </div>
-
-        <!-- Assisted Login Configuration -->
-        <div *ngIf="selectedMethod.id === LOGIN_ASSISTED" class="assisted-config">
-          <c-alert color="info" class="mb-3">
-            Con el login asistido, un familiar o profesional autorizado podrá iniciar sesión en tu nombre usando sus propias credenciales.
-          </c-alert>
-          <div class="mb-3">
-            <label cLabel for="supervisorUserId">ID del Supervisor</label>
-            <input
-              cFormControl
-              type="text"
-              id="supervisorUserId"
-              formControlName="supervisorUserId"
-              placeholder="ID del familiar o profesional autorizado"
-            />
-            <div class="text-medium-emphasis small mt-1">
-              El supervisor debe ser un familiar o profesional registrado en el sistema
+        <form [formGroup]="configForm">
+          <!-- PIN Configuration -->
+          @if (selectedMethod.id === LOGIN_PIN) {
+            <div class="pin-config">
+              <c-row>
+                <c-col xs="12" md="6" class="mb-3">
+                  <label cLabel for="pin">PIN (4 dígitos)</label>
+                  <input
+                    cFormControl
+                    type="password"
+                    id="pin"
+                    formControlName="pin"
+                    placeholder="Ingresa tu PIN"
+                    maxlength="4"
+                    autofocus
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                  />
+                  @if (configForm.get('pin')?.invalid && configForm.get('pin')?.touched) {
+                    <div class="text-danger small mt-1">
+                      El PIN debe tener 4 dígitos numéricos
+                    </div>
+                  }
+                </c-col>
+                <c-col xs="12" md="6" class="mb-3">
+                  <label cLabel for="confirmPin">Confirmar PIN</label>
+                  <input
+                    cFormControl
+                    type="password"
+                    id="confirmPin"
+                    formControlName="confirmPin"
+                    placeholder="Confirma tu PIN"
+                    maxlength="4"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                  />
+                </c-col>
+              </c-row>
+              <c-alert color="info" class="small">
+                <strong>Consejo:</strong> Usá un PIN que puedas recordar fácilmente pero que no sea obvio (evitá 1234, tu fecha de nacimiento, etc.)
+              </c-alert>
             </div>
-          </div>
-        </div>
+          }
 
-        <!-- Standard Login Info -->
-        <div *ngIf="selectedMethod.id === LOGIN_STANDARD" class="standard-config">
-          <c-alert color="info">
-            Con el login estandar, usaras tu email y contraseña para acceder a la aplicacion.
-            No se requiere configuracion adicional.
-          </c-alert>
-        </div>
-      </form>
-    </div>
+          <!-- Assisted Login Configuration -->
+          @if (selectedMethod.id === LOGIN_ASSISTED) {
+            <div class="assisted-config">
+              <c-alert color="info" class="mb-3">
+                Con el login asistido, un familiar o profesional autorizado podrá iniciar sesión en tu nombre usando sus propias credenciales.
+              </c-alert>
+              <div class="mb-3">
+                <label cLabel for="supervisorUserId">ID del Supervisor</label>
+                <input
+                  cFormControl
+                  type="text"
+                  id="supervisorUserId"
+                  formControlName="supervisorUserId"
+                  placeholder="ID del familiar o profesional autorizado"
+                />
+                <div class="text-medium-emphasis small mt-1">
+                  El supervisor debe ser un familiar o profesional registrado en el sistema
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Standard Login Info -->
+          @if (selectedMethod.id === LOGIN_STANDARD) {
+            <div class="standard-config">
+              <c-alert color="info">
+                Con el login estandar, usaras tu email y contraseña para acceder a la aplicacion.
+                No se requiere configuracion adicional.
+              </c-alert>
+            </div>
+          }
+        </form>
+      </div>
+    }
   </c-card-body>
 
   <c-card-footer class="d-flex justify-content-end gap-2">
@@ -138,7 +158,9 @@
       [disabled]="!selectedMethod || isSaving"
       (click)="validateAndSave()"
       class="a11y-btn-primary">
-      <c-spinner *ngIf="isSaving" size="sm" class="me-2"></c-spinner>
+      @if (isSaving) {
+        <c-spinner size="sm" class="me-2"></c-spinner>
+      }
       {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
     </button>
   </c-card-footer>

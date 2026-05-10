@@ -15,9 +15,12 @@ export class VisualCardComponent {
   @Input() subtitle?: string;
   @Input() icon?: string;
   @Input() image?: string;
+  /** Semantic variant — sets icon bg + badge bg/text via CSS classes. */
+  @Input() variant?: 'primary' | 'success' | 'warning' | 'danger' | 'muted';
+  /** Custom color fallback (used when variant is not set, e.g. calendar event colors). */
   @Input() accentColor = 'var(--a11y-primary, #2196F3)';
   @Input() badge?: string;
-  @Input() badgeColor = 'var(--a11y-danger, #F44336)';
+  @Input() badgeColor = 'var(--a11y-primary, #2196F3)';
   @Input() interactive = true;
   @Input() ariaLabel?: string;
 

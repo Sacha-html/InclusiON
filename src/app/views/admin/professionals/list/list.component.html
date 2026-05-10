@@ -9,13 +9,16 @@
     <li class="nav-item">
       <button class="nav-link" [class.active]="activeTab==='validations'" (click)="switchTab('validations')" type="button">
         Pendientes
-        <span class="badge bg-warning ms-2" *ngIf="pendingCount>0">{{ pendingCount }}</span>
+        @if (pendingCount > 0) {
+          <span class="badge bg-warning ms-2">{{ pendingCount }}</span>
+        }
       </button>
     </li>
   </ul>
 </div>
 
-<div *ngIf="activeTab==='active'" class="mb-3">
+@if (activeTab === 'active') {
+<div class="mb-3">
   <fieldset class="p-3 border rounded mb-4">
     <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
     <c-row class="align-items-end">
@@ -61,8 +64,10 @@
     </div>
   }
 </div>
+}
 
-<div *ngIf="activeTab==='validations'" class="mb-3">
+@if (activeTab === 'validations') {
+<div class="mb-3">
   <app-data-table
     title="Solicitudes Pendientes"
     [columns]="pendingCols"
@@ -85,6 +90,7 @@
     </div>
   }
 </div>
+}
 
 <!-- Modal desactivar -->
 <app-confirm-modal
@@ -180,12 +186,12 @@
               <td class="text-nowrap">{{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
                 @if (h.oldStatus) {
-                  <c-badge [color]="getBadgeColor(h.oldStatus)">{{ getBadgeLabel(h.oldStatus) }}</c-badge>
+                  <c-badge [color]="statusMap[h.oldStatus].color">{{ statusMap[h.oldStatus].label }}</c-badge>
                 } @else {
                   <span class="text-muted">—</span>
                 }
               </td>
-              <td><c-badge [color]="getBadgeColor(h.newStatus)">{{ getBadgeLabel(h.newStatus) }}</c-badge></td>
+              <td><c-badge [color]="statusMap[h.newStatus].color">{{ statusMap[h.newStatus].label }}</c-badge></td>
               <td>{{ h.observation || '—' }}</td>
             </tr>
           }

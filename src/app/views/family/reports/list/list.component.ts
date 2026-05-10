@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ReportsService, ToastService } from '@services';
+import { CatalogsService, ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
+import { CatalogItem } from '@models';
 import { ReportListItemResponse } from '@models/responses/reports/report.response';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
@@ -33,6 +34,7 @@ import {
 export class ListComponent implements OnInit {
   private readonly reportsService = inject(ReportsService);
   private readonly toastService = inject(ToastService);
+  private readonly catalogsService = inject(CatalogsService);
   private readonly router = inject(Router);
 
   reports = signal<ReportListItemResponse[]>([]);
@@ -46,12 +48,7 @@ export class ListComponent implements OnInit {
   dateFrom = '';
   dateTo = '';
 
-  readonly reportTypes = [
-    { id: 1, name: 'Evaluación Mensual' },
-    { id: 2, name: 'Informe de Progreso' },
-    { id: 3, name: 'Evaluación Trimestral' },
-    { id: 4, name: 'Informe Anual' },
-  ];
+  reportTypes = signal<CatalogItem[]>([]);
 
   columns: TableColumn[] = [
     {
@@ -70,6 +67,7 @@ export class ListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
     this.loadReports();
   }
 

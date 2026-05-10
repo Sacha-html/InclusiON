@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogsService, PersonsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CatalogItem, AutonomyLevelItem, LoginMethodItem, PersonResponse, UpdateLoginMethodResponse, UpdatePersonRequest } from '../../../../models';
+import { CatalogItem, AutonomyLevelItem, LoginMethodItem, PersonResponse, UpdateLoginMethodResponse, UpdatePersonRequest } from '@models';
 import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
 import { ChangeLoginMethodModalComponent } from './change-login-method-modal.component';

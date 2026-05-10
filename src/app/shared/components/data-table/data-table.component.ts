@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ActiveStatus } from '@shared/constants/status-labels';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ActionItem, HeaderButton, TableColumn } from './data-table.models';
@@ -28,6 +29,7 @@ import { IconDirective } from '@coreui/icons-angular';
 @Component({
   selector: 'app-data-table',
   imports: [
+    NgTemplateOutlet,
     BadgeComponent,
     TableDirective,
     CardComponent,
@@ -66,6 +68,10 @@ export class DataTableComponent implements OnInit, OnDestroy {
   @Input() debounceMs: number = 400;
   @Input() sortable: boolean = false;
   @Input() loading: boolean = false;
+  @Input() emptyMessage = 'Sin registros';
+  @Input() emptyIcon    = '';
+  @Input() emptyDetail  = '';
+  @Input() showCard = true;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() searchAction = new EventEmitter<string>();
@@ -193,6 +199,17 @@ export class DataTableComponent implements OnInit, OnDestroy {
       case 'familyrepresentative': return 'Familiar';
       case 'personwithdisability': return 'Persona';
       default: return value ?? '';
+    }
+  }
+
+  formatDate(val: any): string {
+    if (!val) return '-';
+    try {
+      return new Date(val).toLocaleDateString('es-AR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+      });
+    } catch {
+      return String(val);
     }
   }
 }

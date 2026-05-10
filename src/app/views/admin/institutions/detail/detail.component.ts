@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AdminInstitutionsService, InstitutionsService, ProfessionalsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { AdminUserResponse, InstitutionResponse, ProfessionalListItemResponse } from '../../../../models';
+import { AdminUserResponse, InstitutionResponse, ProfessionalListItemResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -19,8 +19,8 @@ import {
   SpinnerComponent,
 } from '@coreui/angular';
 import { DatePipe } from '@angular/common';
-import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 
 @Component({
   selector: 'app-detail',
@@ -63,14 +63,14 @@ export class DetailComponent implements OnInit {
   adminCols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre' },
     { key: 'email', label: 'Email' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
   ];
 
   professionalCols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre' },
     { key: 'specialty', label: 'Especialidad' },
     { key: 'email', label: 'Email' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
   ];
 
   ngOnInit(): void {
@@ -82,7 +82,7 @@ export class DetailComponent implements OnInit {
 
     forkJoin({
       institution: this.institutionsService.getById(id),
-      admins: this.adminInstitutionsService.getAdmins(),
+      admins: this.adminInstitutionsService.getAdmins(1, 500),
       professionals: this.professionalsService.getProfessionals({ institutionId: id, pageSize: 100 }),
     }).subscribe({
       next: ({ institution, admins, professionals }) => {
@@ -92,7 +92,7 @@ export class DetailComponent implements OnInit {
           return;
         }
         this.institution = institution;
-        this.admins = admins.filter((a) =>
+        this.admins = admins.data.filter((a) =>
           a.institutions.some((i) => i.institutionId === id),
         );
         this.professionals = professionals.data;

@@ -25,7 +25,7 @@
   <!-- Encabezado + mensajes no leídos -->
   <c-row class="mb-4">
     <c-col xs="12" md="8">
-      <h4 class="mb-1">Panel Familiar</h4>
+      <h1 class="h4 mb-1">Panel Familiar</h1>
       <p class="text-body-secondary mb-0">
         Seguimiento de actividades, reportes y mensajes.
       </p>
@@ -33,13 +33,7 @@
     <c-col xs="12" md="4" class="d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
       @if (dashboard.unreadMessages > 0) {
         <a routerLink="/family/messages" class="btn btn-primary position-relative">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
-               viewBox="0 0 16 16" class="me-1">
-            <path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0
-              0 0-2-2zm0 1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2V4a1 1 0 0 1 1-1zm13
-              2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64
-              3.47A1 1 0 0 1 2 13H1V5.383l7 4.199 7-4.2V13a1 1 0 0 1-.034-.741z"/>
-          </svg>
+          <svg cIcon name="cil-envelope-closed" size="sm" class="me-1"></svg>
           Mensajes
           <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
             {{ dashboard.unreadMessages }}

@@ -43,18 +43,13 @@
   [currentPage]="currentPage()"
   [sortable]="true"
   [loading]="isLoading()"
+  [emptyIcon]="'cilNotes'"
+  [emptyMessage]="'No hay reportes que coincidan con los filtros.'"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
   (sortAction)="onSort($event)"
   (rowAction)="onRowAction($event)">
 </app-data-table>
-
-@if (!reports().length && !isLoading()) {
-  <div class="text-center text-body-secondary py-5">
-    <svg cIcon name="cilNotes" size="3xl" class="mb-2"></svg>
-    <p class="mb-0">No hay reportes que coincidan con los filtros.</p>
-  </div>
-}
 
 <!-- Modal: Aprobar -->
 <app-confirm-modal

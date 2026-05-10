@@ -1,60 +1,15 @@
-<h5 class="mb-3">Familiares Vinculados</h5>
-
-@if (loading) {
-  <div class="text-center py-3">
-    <c-spinner></c-spinner>
-  </div>
-} @else if (representatives.length === 0) {
-  <p class="text-body-secondary">No hay familiares vinculados a esta persona.</p>
-} @else {
-  <table cTable hover responsive class="mb-3">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Relacion</th>
-        <th>Principal</th>
-        <th>Estado</th>
-        @if (person.isActive && canUnlink) {
-          <th>Acciones</th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      @for (rep of representatives; track rep.representativeId) {
-        <tr>
-          <td>{{ rep.representativeFullName }}</td>
-          <td>{{ rep.relationship ?? '—' }}</td>
-          <td>{{ rep.isPrimary ? 'Si' : 'No' }}</td>
-          <td>
-            <c-badge [color]="rep.isActive ? 'success' : 'secondary'">
-              {{ rep.isActive ? 'Activo' : 'Inactivo' }}
-            </c-badge>
-          </td>
-          @if (person.isActive && canUnlink && rep.isActive) {
-            <td>
-              <button cButton color="danger" size="sm" (click)="unlink.emit(rep)"
-                      [attr.aria-label]="'Desvincular a ' + rep.representativeFullName">
-                Desvincular
-              </button>
-            </td>
-          }
-        </tr>
-      }
-    </tbody>
-  </table>
-}
-
-@if (person.isActive && canLink) {
-  <button cButton color="primary" (click)="openLinkModal.emit()" class="mt-2">
-    Vincular Familiar
-  </button>
-}
-
-@if (canViewHistory) {
-  <button cButton color="secondary" size="sm" (click)="openHistoryModal.emit()" class="mt-2 ms-2">
-    Ver historial
-  </button>
-}
+<app-data-table
+  title="Familiares Vinculados"
+  [columns]="tableColumns"
+  [items]="representatives"
+  [loading]="loading"
+  [showSearch]="false"
+  [showPagination]="false"
+  [emptyMessage]="'No hay familiares vinculados a esta persona.'"
+  [headerButtons]="repHeaderButtons"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal Historial de Vinculos -->
 <c-modal [visible]="showLinkModal" (visibleChange)="!$event && closeLinkModal.emit()"
@@ -68,36 +23,20 @@
     }
 
     <div class="mb-3">
-      <label cLabel for="search-family">Buscar familiar por nombre</label>
-      <input cFormControl id="search-family" 
-             [(ngModel)]="searchFamily" 
-             (ngModelChange)="searchChange.emit($event)"
-             placeholder="Escriba el nombre..." />
+      <label cLabel>Buscar familiar</label>
+      <app-searchable-select
+        [formControl]="selectedFamilyControl"
+        [searchFn]="searchFamilyFn"
+        [displayFn]="displayFamilyFn"
+        [subDisplayFn]="subDisplayFamilyFn"
+        [valueFn]="valueFamilyFn"
+        placeholder="Buscar por nombre..."
+        hintText="Escriba al menos 2 caracteres para buscar"
+        noResultsText="No se encontraron familiares disponibles"
+      />
     </div>
 
-    @if (loadingFamilies) {
-      <div class="text-center py-3">
-        <c-spinner></c-spinner>
-      </div>
-    } @else if (availableFamilies.length === 0) {
-      <p class="text-body-secondary">No hay familiares disponibles para vincular.</p>
-    } @else {
-      <p class="text-body-secondary mb-2">Seleccione un familiar:</p>
-      <div class="list-group" style="max-height: 200px; overflow-y: auto;">
-        @for (family of availableFamilies; track family.id) {
-          <button type="button" class="list-group-item list-group-item-action"
-                  [class.active]="selectedFamilyId === family.id"
-                  (click)="selectedFamilyId = family.id">
-            <strong>{{ family.fullName }}</strong>
-            @if (family.email) {
-              <br /><small class="text-body-secondary">{{ family.email }}</small>
-            }
-          </button>
-        }
-      </div>
-    }
-
-    @if (selectedFamilyId) {
+    @if (selectedFamilyControl.value) {
       <hr class="my-3" />
 
       <div class="mb-3">
@@ -125,8 +64,8 @@
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="closeLinkModal.emit()">Cancelar</button>
-    <button cButton color="primary" (click)="confirmLink.emit({ familyId: selectedFamilyId, relationship: selectedRelationship, isPrimary: selectedIsPrimary })"
-            [disabled]="!selectedFamilyId || !selectedRelationship || !!validateParentLimit() || linking">
+    <button cButton color="primary" (click)="confirmLink.emit({ familyId: selectedFamilyControl.value!, relationship: selectedRelationship, isPrimary: selectedIsPrimary })"
+            [disabled]="!selectedFamilyControl.value || !selectedRelationship || !!validateParentLimit() || linking">
       @if (linking) { <c-spinner size="sm" class="me-1"></c-spinner> }
       Vincular
     </button>
@@ -189,10 +128,10 @@
           @for (h of linkHistory; track h.id) {
             <tr>
               <td>{{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ h.familyFullName }}</td>
+              <td>{{ h.representativeFullName }}</td>
               <td>
-                <c-badge [color]="h.action === 'Linked' ? 'success' : 'danger'">
-                  {{ h.action === 'Linked' ? 'Vinculado' : 'Desvinculado' }}
+                <c-badge [color]="h.changeType === 'Linked' ? 'success' : 'danger'">
+                  {{ h.changeType === 'Linked' ? 'Vinculado' : 'Desvinculado' }}
                 </c-badge>
               </td>
               <td>{{ h.relationship ?? '—' }}</td>

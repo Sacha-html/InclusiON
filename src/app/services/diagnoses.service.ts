@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '../models';
+import { map } from 'rxjs/operators';
+import { ApiResponse, PagedResponse } from '../models';
 import { DiagnosisResponse, DiagnosisListItemResponse } from '../models/responses/diagnosis.response';
 import { CreateDiagnosisRequest } from '../models/requests/diagnoses/create-diagnosis.request';
 import { unwrapResponse, handleApiError } from '@shared/utils';
@@ -17,10 +18,13 @@ export class DiagnosesService {
     return environment.apiUrl;
   }
 
-  getByPerson(personId: string): Observable<DiagnosisListItemResponse[]> {
+  getByPerson(personId: string, page = 1, pageSize = 100): Observable<DiagnosisListItemResponse[]> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     return this.http
-      .get<ApiResponse<DiagnosisListItemResponse[]>>(`${this.baseUrl}/persons/${personId}/diagnoses`)
-      .pipe(unwrapResponse());
+      .get<ApiResponse<PagedResponse<DiagnosisListItemResponse>>>(`${this.baseUrl}/persons/${personId}/diagnoses`, { params })
+      .pipe(unwrapResponse(), map((r) => r.data));
   }
 
   getById(id: number): Observable<DiagnosisResponse> {

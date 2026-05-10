@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit, signal, computed } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { DiagnosesService } from '@services/diagnoses.service';
 import { AuthService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
@@ -24,12 +24,13 @@ import {
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-professional-diagnoses',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     FormsModule,
     BadgeComponent,
     ButtonDirective,
@@ -45,6 +46,7 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
     SpinnerComponent,
     IconDirective,
     ConfirmModalComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './professional-diagnoses.component.html',
   styleUrl: './professional-diagnoses.component.scss',

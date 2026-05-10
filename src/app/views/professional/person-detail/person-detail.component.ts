@@ -1,11 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { PersonsService, ToastService } from '@services';
 import { DiagnosesService } from '@services/diagnoses.service';
 import {
   PersonResponse,
   PersonSkillProfileResponse,
+  DiagnosisListItemResponse,
 } from '@models';
 import {
   BadgeComponent,
@@ -29,7 +29,6 @@ import { AppRoutes } from '@shared/constants/app-routes';
   selector: 'app-person-detail',
   standalone: true,
   imports: [
-    CommonModule,
     BadgeComponent,
     CardComponent,
     CardBodyComponent,
@@ -58,7 +57,7 @@ export class PersonDetailComponent implements OnInit {
   activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' | 'actividades' | 'roadmap' = 'datos';
 
   skillProfile = signal<PersonSkillProfileResponse[]>([]);
-  diagnoses = signal<any[]>([]);
+  diagnoses = signal<DiagnosisListItemResponse[]>([]);
 
   representatives: PersonRepresentativeResponse[] = [];
   loadingRepresentatives = false;
@@ -105,7 +104,7 @@ export class PersonDetailComponent implements OnInit {
     this.skillProfile.set(data);
   }
 
-  onDiagnosesChange(data: any[]): void {
+  onDiagnosesChange(data: DiagnosisListItemResponse[]): void {
     this.diagnoses.set(data);
   }
 

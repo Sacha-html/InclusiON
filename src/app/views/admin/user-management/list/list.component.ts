@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { AuthService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { UserManagementService } from '../../../../services/user-management.service';
-import { AdminUserListItemResponse } from '../../../../models/responses/admin-user-list-item.response';
-import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { AdminUserListItemResponse } from '@models/responses/admin-user-list-item.response';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   ColComponent,
@@ -80,6 +80,21 @@ export class UserManagementListComponent implements OnInit {
   tempPasswordEmail = '';
 
   public cols: TableColumn[] = [
+    { key: 'fullName', label: 'Nombre', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
+    {
+      key: 'role',
+      label: 'Rol',
+      type: 'badge',
+      badgeMap: {
+        'Admin':                { color: 'danger',  label: 'Administrador'            },
+        'Professional':         { color: 'primary', label: 'Profesional'              },
+        'FamilyRepresentative': { color: 'success', label: 'Representante Familiar'   },
+        'PersonWithDisability': { color: 'info',    label: 'Persona con Discapacidad' },
+      },
+    },
+    { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
+    { key: 'lastLoginDate', label: 'Último acceso', type: 'date' },
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
@@ -89,11 +104,6 @@ export class UserManagementListComponent implements OnInit {
         { action: 'reactivate', label: 'Reactivar', icon: 'cil-check', visible: (item) => !item.isActive },
       ],
     },
-    { key: 'fullName', label: 'Nombre', sortable: true },
-    { key: 'email', label: 'Email', sortable: true },
-    { key: 'role', label: 'Rol', type: 'badge' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
-    { key: 'lastLoginDate', label: 'Último acceso', type: 'date' },
   ];
 
   onRoleFilterChange(): void {

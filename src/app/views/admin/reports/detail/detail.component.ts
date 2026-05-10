@@ -104,23 +104,10 @@ export class DetailComponent implements OnInit {
     this.showRejectModal = false;
   }
 
-  getStatusColor(status: ReportStatus): string {
-    const map: Record<ReportStatus, string> = {
-      [ReportStatus.Draft]: 'secondary',
-      [ReportStatus.Submitted]: 'warning',
-      [ReportStatus.Approved]: 'success',
-      [ReportStatus.Rejected]: 'danger',
-    };
-    return map[status] ?? 'secondary';
-  }
-
-  getStatusLabel(status: ReportStatus): string {
-    const map: Record<ReportStatus, string> = {
-      [ReportStatus.Draft]:     ReportStatusLabels.Borrador,
-      [ReportStatus.Submitted]: ReportStatusLabels.Enviado,
-      [ReportStatus.Approved]:  ReportStatusLabels.Aprobado,
-      [ReportStatus.Rejected]:  ReportStatusLabels.Rechazado,
-    };
-    return map[status] ?? status.toString();
-  }
+  readonly statusMap: Partial<Record<string, { color: string; label: string }>> = {
+    [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador  },
+    [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado   },
+    [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado  },
+    [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
+  };
 }

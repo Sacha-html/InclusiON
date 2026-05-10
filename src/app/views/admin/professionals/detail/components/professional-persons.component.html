@@ -5,54 +5,17 @@
   </button>
 </div>
 
-@if (persons.length === 0) {
-  <div class="text-center text-body-secondary py-4">
-    <svg cIcon name="cil-people" size="3xl" class="mb-2 d-block mx-auto opacity-50" aria-hidden="true"></svg>
-    <p class="mb-0">No hay personas asignadas.</p>
-  </div>
-} @else {
-  <table cTable hover responsive>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th class="text-center">Principal</th>
-        <th class="text-center">Supervisa login</th>
-        <th class="text-center">Estado</th>
-        <th class="text-end">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (person of persons; track person.personId) {
-        <tr>
-          <td class="align-middle">{{ person.personFullName }}</td>
-          <td class="text-center align-middle">
-            <c-badge [color]="person.isPrimaryProfessional ? 'success' : 'secondary'">
-              {{ person.isPrimaryProfessional ? 'Sí' : 'No' }}
-            </c-badge>
-          </td>
-          <td class="text-center align-middle">
-            <c-badge [color]="person.canSuperviseLogin ? 'success' : 'secondary'">
-              {{ person.canSuperviseLogin ? 'Sí' : 'No' }}
-            </c-badge>
-          </td>
-          <td class="text-center align-middle">
-            <c-badge [color]="person.isActive ? 'success' : 'danger'">
-              {{ person.isActive ? 'Activo' : 'Inactivo' }}
-            </c-badge>
-          </td>
-          <td class="text-end align-middle">
-            @if (person.isActive) {
-              <button cButton color="danger" size="sm" variant="ghost" (click)="openDeactivatePersonModal(person)">
-                <svg cIcon name="cil-user-unfollow" class="me-1" aria-hidden="true"></svg>
-                Desasignar
-              </button>
-            }
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
+<app-data-table
+  [columns]="columns"
+  [items]="persons"
+  [showSearch]="false"
+  [currentPage]="1"
+  [pageSize]="persons.length || 1"
+  [totalItems]="persons.length"
+  emptyMessage="No hay personas asignadas."
+  emptyIcon="cil-people"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal asignar persona -->
 <c-modal [visible]="showAssignPersonModal()" (visibleChange)="showAssignPersonModal.set($event)" alignment="center" size="lg">
@@ -65,38 +28,17 @@
   <c-modal-body>
     <form [formGroup]="assignPersonForm">
       <div class="mb-4">
-        <label cLabel class="fw-semibold mb-1" id="persona-label">Persona</label>
-        @if (selectedPersonDisplay) {
-          <div class="form-control d-flex align-items-center justify-content-between">
-            <span>{{ selectedPersonDisplay.fullName }}</span>
-            <button type="button" class="btn-close btn-close-sm ms-2"
-                    (click)="clearSelectedPerson()" aria-label="Quitar persona seleccionada"></button>
-          </div>
-        } @else {
-          <input cFormControl id="search-person"
-                 [(ngModel)]="searchPersonText"
-                 [ngModelOptions]="{standalone: true}"
-                 (ngModelChange)="filterPersons($event)"
-                 placeholder="Buscar por nombre o documento..."
-                 autocomplete="off" />
-          @if (isLoadingPersons()) {
-            <div class="py-2 text-center"><c-spinner size="sm"></c-spinner></div>
-          } @else if (searchPersonText && filteredPersons.length > 0) {
-            <div class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-              @for (p of filteredPersons; track p.id) {
-                <button type="button" class="list-group-item list-group-item-action py-2"
-                        (click)="selectPerson(p)">
-                  <strong>{{ p.fullName }}</strong>
-                  @if (p.disabilityTypeName) {
-                    <small class="text-body-secondary d-block">{{ p.disabilityTypeName }}</small>
-                  }
-                </button>
-              }
-            </div>
-          } @else if (searchPersonText && filteredPersons.length === 0) {
-            <p class="text-body-secondary small mt-1 mb-0">Sin resultados</p>
-          }
-        }
+        <label class="form-label fw-semibold mb-1" [for]="'ss-input'">Persona</label>
+        <app-searchable-select
+          formControlName="personId"
+          [searchFn]="searchPersonsFn"
+          [displayFn]="displayPerson"
+          [subDisplayFn]="subDisplayPerson"
+          [valueFn]="valueFromPerson"
+          placeholder="Buscar por nombre o documento..."
+          hintText="Escriba al menos 2 caracteres para buscar"
+          noResultsText="No se encontraron personas disponibles"
+        />
       </div>
 
       <div class="border rounded p-3 bg-body-tertiary permissions-box">
@@ -131,21 +73,14 @@
   </c-modal-footer>
 </c-modal>
 
-<!-- Modal desasignar persona -->
-<c-modal [visible]="showDeactivatePersonModal()" (visibleChange)="showDeactivatePersonModal.set($event)" alignment="center">
-  <c-modal-header>
-    <h5 cModalTitle>Confirmar desasignación</h5>
-  </c-modal-header>
-  <c-modal-body>
-    @if (personToDeactivate()) {
-      <p class="mb-0">
-        ¿Está seguro de que desea desasignar a
-        <strong>{{ personToDeactivate()!.personFullName }}</strong>?
-      </p>
-    }
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="cancelDeactivatePerson()">Cancelar</button>
-    <button cButton color="danger" (click)="confirmDeactivatePerson()">Desasignar</button>
-  </c-modal-footer>
-</c-modal>
+<app-confirm-modal
+  [visible]="showDeactivatePersonModal()"
+  title="Confirmar desasignación"
+  [itemName]="personToDeactivate()?.personFullName ?? ''"
+  messagePrefix="¿Desasignar a "
+  messageSuffix="?"
+  confirmLabel="Desasignar"
+  confirmColor="danger"
+  (confirm)="confirmDeactivatePerson()"
+  (cancel)="cancelDeactivatePerson()"
+/>

@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PinLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
@@ -35,6 +35,23 @@ export class PinLoginComponent extends BaseVisualLoginComponent implements After
 
   ngAfterViewInit(): void {
     this.focusFirstPinKey();
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if (this.showKeyboardInput) return;  // input field handles its own events
+    if (this.isLoading || this.isLocked) return;
+
+    if (/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+      this.onPinDigit(event.key);
+    } else if (event.key === 'Backspace') {
+      event.preventDefault();
+      this.onBackspace();
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      this.onSubmit();
+    }
   }
 
   private focusFirstPinKey(): void {
@@ -103,7 +120,7 @@ export class PinLoginComponent extends BaseVisualLoginComponent implements After
           this.handleLoginResponseError(
             response.data,
             'PIN incorrecto',
-            () => this.pin = ''
+            () => { this.pin = ''; this.focusFirstPinKey(); }
           );
         }
       },
@@ -111,7 +128,7 @@ export class PinLoginComponent extends BaseVisualLoginComponent implements After
         this.handleHttpError(
           error,
           'Error al verificar el PIN',
-          () => this.pin = ''
+          () => { this.pin = ''; this.focusFirstPinKey(); }
         );
       },
     });

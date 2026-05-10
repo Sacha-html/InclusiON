@@ -1,7 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { switchMap } from 'rxjs';
-import { FormsModule } from '@angular/forms';
+import { of, switchMap } from 'rxjs';
+import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
+import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
 import { ReportsService, ProfessionalsService, AssignmentsService, ToastService, CatalogsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { CreateReportRequest } from '@models/requests/reports/create-report.request';
@@ -27,6 +28,8 @@ import {
   standalone: true,
   imports: [
     FormsModule,
+    ReactiveFormsModule,
+    SearchableSelectComponent,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
@@ -55,11 +58,21 @@ export class NewComponent implements OnInit {
   persons          = signal<ProfessionalPersonResponse[]>([]);
   reportTypes      = signal<CatalogItem[]>([]);
   isLoading        = signal(false);
-  isLoadingPersons = signal(true);
-  selectedPerson   = signal<ProfessionalPersonResponse | null>(null);
+  personControl = new FormControl<ProfessionalPersonResponse | null>(null);
 
-  searchPersonText = '';
-  filteredPersons: ProfessionalPersonResponse[] = [];
+  readonly searchPersonsFn = (query: string) => {
+    const lower = query.toLowerCase();
+    return of(
+      this.persons().filter(p =>
+        `${p.personFirstName} ${p.personLastName}`.toLowerCase().includes(lower)
+      )
+    );
+  };
+
+  readonly displayPersonFn = (p: ProfessionalPersonResponse) =>
+    `${p.personFirstName} ${p.personLastName}`;
+
+  readonly personValueFn = (p: ProfessionalPersonResponse) => p;
 
   // Modal post-creación
   showSubmitModal  = signal(false);
@@ -82,36 +95,11 @@ export class NewComponent implements OnInit {
 
   get isValid(): boolean {
     return (
-      this.form.personId !== '' &&
+      this.personControl.value !== null &&
       this.form.title.trim() !== '' &&
       this.form.content.trim() !== '' &&
       this.form.reportTypeId > 0
     );
-  }
-
-  filterPersons(text: string): void {
-    if (!text) { this.filteredPersons = []; return; }
-    const lower = text.toLowerCase();
-    this.filteredPersons = this.persons().filter(p =>
-      `${p.personFirstName} ${p.personLastName}`.toLowerCase().includes(lower)
-    );
-  }
-
-  selectPerson(p: ProfessionalPersonResponse): void {
-    this.onPersonChange(p);
-    this.searchPersonText = '';
-    this.filteredPersons = [];
-  }
-
-  clearSelectedPerson(): void {
-    this.onPersonChange(null);
-    this.searchPersonText = '';
-    this.filteredPersons = [];
-  }
-
-  onPersonChange(person: ProfessionalPersonResponse | null): void {
-    this.form.personId = person?.personId ?? '';
-    this.selectedPerson.set(person);
   }
 
   ngOnInit(): void {
@@ -125,9 +113,8 @@ export class NewComponent implements OnInit {
     ).subscribe({
       next: (persons) => {
         this.persons.set(persons.filter(p => p.isActive));
-        this.isLoadingPersons.set(false);
       },
-      error: () => this.isLoadingPersons.set(false),
+      error: () => {},
     });
   }
 
@@ -135,6 +122,7 @@ export class NewComponent implements OnInit {
     this.isLoading.set(true);
     const payload: CreateReportRequest = {
       ...this.form,
+      personId: this.personControl.value?.personId ?? '',
       periodStartDate: this.form.periodStartDate || undefined,
       periodEndDate:   this.form.periodEndDate   || undefined,
       achievedGoals:         this.form.achievedGoals         || undefined,

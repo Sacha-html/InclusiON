@@ -23,6 +23,22 @@ export interface MessageListItemResponse {
   replyCount: number;
 }
 
+// ── Reply within detail (full content) ──────────────────────────────────────
+export interface MessageReplyResponse {
+  id: number;
+  subject?: string;
+  content: string;
+  sentAt: string;
+  readAt?: string;
+  isRead: boolean;
+  senderId: string;
+  senderFullName: string;
+  receiverId: string;
+  receiverFullName: string;
+  relatedPersonId?: string;
+  parentMessageId?: number;
+}
+
 // ── Full detail (GET /messages/:id) ─────────────────────────────────────────
 export interface MessageDetailResponse {
   id: number;
@@ -37,7 +53,7 @@ export interface MessageDetailResponse {
   receiverFullName: string;
   relatedPersonId?: string;
   parentMessageId?: number;
-  replies: MessageListItemResponse[];
+  replies: MessageReplyResponse[];
 }
 
 // ── Contact ──────────────────────────────────────────────────────────────────
@@ -103,10 +119,13 @@ export class MessagesService {
       .pipe(unwrapResponse());
   }
 
-  getContacts(): Observable<MessageContactResponse[]> {
+  getContacts(page = 1, pageSize = 100): Observable<MessageContactResponse[]> {
+    const p = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     return this.http
-      .get<ApiResponse<MessageContactResponse[]>>(`${this.baseUrl}/contacts`)
-      .pipe(unwrapResponse());
+      .get<ApiResponse<PagedResponse<MessageContactResponse>>>(`${this.baseUrl}/contacts`, { params: p })
+      .pipe(unwrapResponse(), map((r) => r.data));
   }
 
   getUnreadCount(): Observable<number> {

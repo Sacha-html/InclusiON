@@ -113,36 +113,15 @@
       <c-row class="align-items-end">
         <c-col sm="4">
           <label cLabel for="search-person">Persona</label>
-          @if (selectedPersonForLink) {
-            <div class="form-control d-flex align-items-center justify-content-between">
-              <span>{{ selectedPersonForLink.fullName }}</span>
-              <button type="button" class="btn-close btn-close-sm ms-2"
-                      (click)="clearSelectedPerson()" aria-label="Quitar persona seleccionada"></button>
-            </div>
-          } @else {
-            <input cFormControl id="search-person"
-                   [(ngModel)]="searchPersonText"
-                   (ngModelChange)="filterPersons($event)"
-                   placeholder="Buscar por nombre o documento..."
-                   autocomplete="off" />
-            @if (isLoadingPersons()) {
-              <div class="py-2 text-center"><c-spinner size="sm"></c-spinner></div>
-            } @else if (searchPersonText && filteredPersons.length > 0) {
-              <div class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-                @for (p of filteredPersons; track p.id) {
-                  <button type="button" class="list-group-item list-group-item-action py-2"
-                          (click)="selectPerson(p)">
-                    <strong>{{ p.fullName }}</strong>
-                    @if (p.disabilityTypeName) {
-                      <small class="text-body-secondary d-block">{{ p.disabilityTypeName }}</small>
-                    }
-                  </button>
-                }
-              </div>
-            } @else if (searchPersonText && filteredPersons.length === 0) {
-              <p class="text-body-secondary small mt-1 mb-0">Sin resultados</p>
-            }
-          }
+          <app-searchable-select
+            [formControl]="linkPersonControl"
+            [searchFn]="searchPersonsFn"
+            [displayFn]="displayPerson"
+            [subDisplayFn]="subDisplayPerson"
+            placeholder="Buscar por nombre o documento..."
+            hintText="Escriba al menos 2 caracteres para buscar"
+            noResultsText="No se encontraron personas disponibles"
+          />
         </c-col>
 
         <c-col sm="3">
@@ -162,7 +141,7 @@
 
         <c-col sm="2">
           <button cButton color="primary" (click)="linkPerson()"
-                  [disabled]="!selectedPersonForLink || !linkRelationship || !!validateParentLimit() || isLinking"
+                  [disabled]="!linkPersonControl.value || !linkRelationship || !!validateParentLimit() || isLinking"
                   aria-label="Vincular persona seleccionada">
             @if (isLinking) { <c-spinner size="sm"></c-spinner> }
             Vincular

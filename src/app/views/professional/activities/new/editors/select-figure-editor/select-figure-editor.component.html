@@ -13,16 +13,22 @@
 } @else {
   <div class="items-grid mb-4">
     @for (item of content.items; track item.id) {
-      <div class="item-card" [class.item-card--correct]="item.id === content.correctItemId">
+      <div class="item-card" [class.item-card--correct]="item.id === content.correctItemId"
+           [title]="item.id === content.correctItemId ? 'Respuesta correcta' : 'Clic para marcar como correcta'"
+           (click)="setCorrect(item.id)">
+        @if (item.id === content.correctItemId) {
+          <span class="item-badge-correct">✓</span>
+        }
+        <button type="button" class="item-btn-remove" (click)="$event.stopPropagation(); removeItem(item.id)" title="Quitar">✕</button>
         <img [src]="pictogramUrl(item.pictogramId)" [alt]="item.label" class="item-img" />
-        <input cFormControl class="item-label-input" [(ngModel)]="item.label" [name]="'lbl-' + item.id"
-               placeholder="Etiqueta" (ngModelChange)="emit()" />
-        <div class="item-actions">
-          <button cButton size="sm" color="success"                  [disabled]="item.id === content.correctItemId" (click)="setCorrect(item.id)">
-            @if (item.id === content.correctItemId) { ✓ Correcta } @else { Marcar correcta }
-          </button>
-          <button cButton size="sm" color="danger" (click)="removeItem(item.id)">✕</button>
-        </div>
+        <input
+          cFormControl
+          class="item-label-input"
+          [name]="'lbl-' + item.id"
+          [(ngModel)]="item.label"
+          placeholder="Etiqueta"
+          (click)="$event.stopPropagation()"
+          (ngModelChange)="emit()" />
       </div>
     }
   </div>

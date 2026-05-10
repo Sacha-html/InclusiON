@@ -1,73 +1,19 @@
-<c-card class="mb-4">
-  <c-card-header class="d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Invitaciones Familiares</h5>
-    <button cButton color="primary" size="sm" (click)="openModal()">
-      Agregar
-    </button>
-  </c-card-header>
-  <c-card-body>
-
-    @if (isLoading) {
-      <div class="text-center p-4">
-        <c-spinner color="primary"></c-spinner>
-      </div>
-    }
-
-    @if (!isLoading && invitations.length === 0) {
-      <div class="text-center text-body-secondary p-4">
-        <p>No hay invitaciones creadas aun.</p>
-        <button cButton color="primary" (click)="openModal()">
-          Agregar invitación
-        </button>
-      </div>
-    }
-
-    @if (!isLoading && invitations.length > 0) {
-      <table cTable hover responsive>
-        <thead>
-          <tr>
-            <th (click)="onSort('email')" [class]="sortBy === 'email' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Email</th>
-            <th (click)="onSort('firstName')" [class]="sortBy === 'firstName' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Nombre</th>
-            <th (click)="onSort('relationship')" [class]="sortBy === 'relationship' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Parentesco</th>
-            <th (click)="onSort('personName')" [class]="sortBy === 'personName' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Persona</th>
-            <th (click)="onSort('status')" [class]="sortBy === 'status' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Estado</th>
-            <th (click)="onSort('createdAt')" [class]="sortBy === 'createdAt' ? (sortDirection === 'ASC' ? 'sortable asc' : 'sortable desc') : 'sortable'">Fecha</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (inv of invitations; track inv.id) {
-            <tr>
-              <td>{{ inv.email }}</td>
-              <td>{{ inv.firstName }} {{ inv.lastName }}</td>
-              <td>{{ inv.relationship || '-' }}</td>
-              <td>{{ inv.personName || '-' }}</td>
-              <td>
-                <c-badge [color]="getStatusColor(inv.status)">
-                  {{ inv.status }}
-                </c-badge>
-              </td>
-              <td>{{ inv.createdAt | date:'dd/MM/yyyy' }}</td>
-              <td>
-                @if (inv.status === 'Enviada') {
-                  <button
-                    cButton
-                    color="light"
-                    size="sm"
-                    (click)="copyToClipboard(inv.code)"
-                  >
-                    Copiar link
-                  </button>
-                }
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
-
-  </c-card-body>
-</c-card>
+<app-data-table
+  title="Invitaciones Familiares"
+  [columns]="columns"
+  [items]="invitations"
+  [totalItems]="totalRecords"
+  [currentPage]="currentPage"
+  [pageSize]="pageSize"
+  [loading]="isLoading"
+  [headerButtons]="headerButtons"
+  [showSearch]="false"
+  [sortable]="true"
+  (pageChange)="onPageChange($event)"
+  (sortAction)="onSortAction($event)"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal: Nueva Invitacion -->
 <c-modal [visible]="showModal" (visibleChange)="showModal = $event" alignment="center">
@@ -83,7 +29,6 @@
   <c-modal-body>
 
     @if (createdInvitationCode) {
-      <!-- Success state -->
       <c-alert color="success">
         Invitación creada exitosamente. Compartí el siguiente link con el familiar:
       </c-alert>
@@ -93,16 +38,11 @@
           readonly
           [value]="getInviteUrl(createdInvitationCode)"
         />
-        <button
-          cButton
-          color="primary"
-          (click)="copyToClipboard(createdInvitationCode)"
-        >
+        <button cButton color="primary" (click)="copyToClipboard(createdInvitationCode)">
           Copiar
         </button>
       </div>
     } @else {
-      <!-- Form state -->
       @if (errorMessage) {
         <c-alert color="danger" [dismissible]="true" (visibleChange)="errorMessage = ''">
           {{ errorMessage }}
@@ -116,21 +56,14 @@
           <select cSelect formControlName="personId">
             <option value="">-- Seleccionar (opcional) --</option>
             @for (person of persons; track person.personId) {
-              <option [value]="person.personId">
-                {{ person.personFullName }}
-              </option>
+              <option [value]="person.personId">{{ person.personFullName }}</option>
             }
           </select>
         </div>
 
         <div class="mb-3">
           <label cFormLabel>Email del familiar *</label>
-          <input
-            cFormControl
-            formControlName="email"
-            type="email"
-            placeholder="email@ejemplo.com"
-          />
+          <input cFormControl formControlName="email" type="email" placeholder="email@ejemplo.com" />
           @if (hasError('email', 'required')) {
             <div class="text-danger small mt-1">El email es requerido</div>
           }
@@ -168,12 +101,7 @@
       <button cButton color="primary" (click)="closeModal()">Cerrar</button>
     } @else {
       <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
-      <button
-        cButton
-        color="primary"
-        (click)="onSubmit()"
-        [disabled]="isSubmitting"
-      >
+      <button cButton color="primary" (click)="onSubmit()" [disabled]="isSubmitting">
         @if (isSubmitting) {
           <c-spinner size="sm" class="me-1"></c-spinner>
         }

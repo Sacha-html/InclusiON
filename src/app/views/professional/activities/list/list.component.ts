@@ -79,17 +79,6 @@ export class ListComponent implements OnInit {
   itemToAssign: ActivityListItemResponse | null = null;
 
   columns: TableColumn[] = [
-    {
-      key: 'actions',
-      label: 'Acciones',
-      type: 'actions',
-      actions: [
-        { action: 'assign',     label: 'Asignar',    icon: 'cil-send',  visible: (item) => item.isActive },
-        { action: 'edit',       label: 'Editar',     icon: 'cil-notes', visible: (item) => this.canUpdate && !item.isStandardActivity },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cil-ban',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
-        { action: 'activate',   label: 'Activar',    icon: 'cil-check', visible: (item) => this.canUpdate && !item.isActive && !item.isStandardActivity },
-      ],
-    },
     { key: 'title',            label: 'Título',       sortable: true },
     { key: 'templateTypeName', label: 'Tipo',         sortable: true },
     { key: 'categoryName',     label: 'Categoría',    sortable: true },
@@ -113,6 +102,17 @@ export class ListComponent implements OnInit {
         true:  { color: 'info',    label: 'Estándar' },
         false: { color: 'primary', label: 'Propia'   },
       },
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      type: 'actions',
+      actions: [
+        { action: 'assign',     label: 'Asignar',    icon: 'cil-send',  visible: (item) => item.isActive },
+        { action: 'edit',       label: 'Editar',     icon: 'cil-notes', visible: (item) => this.canUpdate && !item.isStandardActivity },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cil-ban',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
+        { action: 'activate',   label: 'Activar',    icon: 'cil-check', visible: (item) => this.canUpdate && !item.isActive && !item.isStandardActivity },
+      ],
     },
   ];
 

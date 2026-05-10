@@ -1,53 +1,11 @@
-<c-card class="mb-4">
-  <c-card-header>
-    <h5 class="mb-0">Invitaciones del Sistema</h5>
-  </c-card-header>
-  <c-card-body>
-
-    @if (isLoading) {
-      <div class="text-center p-4">
-        <c-spinner color="primary"></c-spinner>
-      </div>
-    }
-
-    @if (!isLoading && invitations.length === 0) {
-      <div class="text-center text-body-secondary p-4">
-        <p>No hay invitaciones registradas.</p>
-      </div>
-    }
-
-    @if (!isLoading && invitations.length > 0) {
-      <table cTable hover responsive>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Nombre</th>
-            <th>Parentesco</th>
-            <th>Persona</th>
-            <th>Profesional</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (inv of invitations; track inv.id) {
-            <tr>
-              <td>{{ inv.email }}</td>
-              <td>{{ inv.firstName }} {{ inv.lastName }}</td>
-              <td>{{ inv.relationship || '-' }}</td>
-              <td>{{ inv.personName || '-' }}</td>
-              <td>{{ inv.createdByProfessionalName || '-' }}</td>
-              <td>
-                <c-badge [color]="getStatusColor(inv.status)">
-                  {{ inv.status }}
-                </c-badge>
-              </td>
-              <td>{{ inv.createdAt | date:'dd/MM/yyyy' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
-
-  </c-card-body>
-</c-card>
+<app-data-table
+  title="Invitaciones del Sistema"
+  [columns]="cols"
+  [items]="invitations"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [loading]="isLoading"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)">
+</app-data-table>

@@ -23,8 +23,8 @@
           @for (role of roles; track role.id) {
             <tr>
               <td>
-                <c-badge [color]="getRoleBadgeColor(role.name)">
-                  {{ getRoleLabel(role.name) }}
+                <c-badge [color]="roleMap[role.name]?.color ?? 'secondary'">
+                  {{ roleMap[role.name]?.label ?? role.name }}
                 </c-badge>
               </td>
               <td>
@@ -74,8 +74,8 @@
     <h5 cModalTitle>
       Permisos:
       @if (selectedRole) {
-        <c-badge [color]="getRoleBadgeColor(selectedRole.name)" class="ms-2">
-          {{ getRoleLabel(selectedRole.name) }}
+        <c-badge [color]="roleMap[selectedRole.name]?.color ?? 'secondary'" class="ms-2">
+          {{ roleMap[selectedRole.name]?.label ?? selectedRole.name }}
         </c-badge>
       }
     </h5>
@@ -149,7 +149,7 @@
   [visible]="showConfirmSave"
   title="Confirmar cambio de permisos"
   messagePrefix="¿Guardar los cambios de permisos para el rol "
-  [itemName]="selectedRole ? getRoleLabel(selectedRole.name) : ''"
+  [itemName]="selectedRole ? (roleMap[selectedRole.name]?.label ?? selectedRole.name) : ''"
   messageSuffix="?"
   detail="Todos los usuarios con este rol deberán iniciar sesión nuevamente para que los cambios tomen efecto."
   confirmLabel="Guardar permisos"

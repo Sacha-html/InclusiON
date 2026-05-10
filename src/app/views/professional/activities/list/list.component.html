@@ -8,11 +8,6 @@
             [title]="semanticMode() ? 'Volver a búsqueda por filtros' : 'Buscar por significado (IA)'">
       ⚡ {{ semanticMode() ? 'Desactivar búsqueda IA' : 'Búsqueda semántica' }}
     </button>
-    @if (canCreate) {
-      <button cButton color="primary" routerLink="/pro/activities/new">
-        + Nueva actividad
-      </button>
-    }
   </c-col>
 </c-row>
 
@@ -109,7 +104,9 @@
     [currentPage]="1"
     [pageSize]="semanticResults().length || 1"
     [totalItems]="semanticResults().length"
+    [headerButtons]="headerButtons"
     (rowAction)="onRowAction($event)"
+    (headerAction)="onHeaderAction($event)"
   />
 } @else {
   <app-data-table

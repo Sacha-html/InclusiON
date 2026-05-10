@@ -1,11 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AssignmentsService, ProfessionalsService, ReportsService, ToastService } from '@services';
+import { AssignmentsService, CatalogsService, ProfessionalsService, ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
-import { ProfessionalPersonResponse } from '@models';
+import { CatalogItem, ProfessionalPersonResponse } from '@models';
 import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
@@ -39,6 +39,7 @@ export class ListComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
+  private readonly catalogsService = inject(CatalogsService);
   private readonly router = inject(Router);
 
   reports = signal<ReportListItemResponse[]>([]);
@@ -65,12 +66,7 @@ export class ListComponent implements OnInit {
   reportToSubmit: ReportListItemResponse | null = null;
   isSubmitting = false;
 
-  readonly reportTypes = [
-    { id: 1, name: 'Evaluación Mensual' },
-    { id: 2, name: 'Informe de Progreso' },
-    { id: 3, name: 'Evaluación Trimestral' },
-    { id: 4, name: 'Informe Anual' },
-  ];
+  reportTypes = signal<CatalogItem[]>([]);
 
   columns: TableColumn[] = [
     {
@@ -111,6 +107,7 @@ actions: [
       next: (profile) => {
         this.professionalId = profile.id;
         this.loadReports();
+        this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
         this.assignmentsService.getPersonsByProfessional(profile.id).subscribe({
           next: (persons) => this.persons.set(persons.filter(p => p.isActive)),
         });

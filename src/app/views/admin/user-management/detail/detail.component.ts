@@ -5,7 +5,7 @@ import { ToastService } from '@services';
 import { UserRoles } from '@shared/constants/roles';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { UserManagementService } from '../../../../services/user-management.service';
-import { AdminUserDetailResponse, UserRecentSessionResponse } from '../../../../models/responses/admin-user-detail.response';
+import { AdminUserDetailResponse, UserRecentSessionResponse } from '@models/responses/admin-user-detail.response';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   CardComponent,
@@ -99,16 +99,10 @@ export class UserManagementDetailComponent implements OnInit {
     });
   }
 
-  getSessionStatusColor(session: UserRecentSessionResponse): string {
-    if (!session.isActive) return 'danger';
-    if (new Date(session.expiresAt) < new Date()) return 'warning';
-    return 'success';
-  }
-
-  getSessionStatusLabel(session: UserRecentSessionResponse): string {
-    if (!session.isActive) return 'Revocada';
-    if (new Date(session.expiresAt) < new Date()) return 'Expirada';
-    return 'Activa';
+  getSessionStatus(session: UserRecentSessionResponse): { color: string; label: string } {
+    if (!session.isActive) return { color: 'danger',  label: 'Revocada' };
+    if (new Date(session.expiresAt) < new Date()) return { color: 'warning', label: 'Expirada' };
+    return { color: 'success', label: 'Activa' };
   }
 
   formatUserAgent(ua: string | null): string {

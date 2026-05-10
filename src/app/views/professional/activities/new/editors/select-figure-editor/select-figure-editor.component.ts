@@ -2,14 +2,14 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of } from 'rxjs';
 import { ArasaacService, ArasaacPictogram } from '@services/arasaac.service';
-import { ButtonDirective, ColComponent, FormControlDirective, RowComponent, SpinnerComponent } from '@coreui/angular';
+import { ColComponent, FormControlDirective, RowComponent, SpinnerComponent } from '@coreui/angular';
 import { ContentEditorBaseComponent } from '../content-editor-base.component';
 import { SelectFigureContent } from '../../../../../aac/activities/player/player.models';
 
 @Component({
   selector: 'app-select-figure-editor',
   standalone: true,
-  imports: [FormsModule, ButtonDirective, ColComponent, FormControlDirective, RowComponent, SpinnerComponent],
+  imports: [FormsModule, ColComponent, FormControlDirective, RowComponent, SpinnerComponent],
   templateUrl: './select-figure-editor.component.html',
   styleUrl: './select-figure-editor.component.scss',
 })
@@ -23,7 +23,10 @@ export class SelectFigureEditorComponent extends ContentEditorBaseComponent impl
   private search$ = new Subject<string>();
 
   ngOnInit(): void {
-    try { this.content = JSON.parse(this.initialJson); } catch { /* keep default */ }
+    try {
+      const parsed = JSON.parse(this.initialJson);
+      if (parsed && typeof parsed === 'object') this.content = { instruction: '', correctItemId: '', items: [], ...parsed };
+    } catch { /* keep default */ }
     this.search$.pipe(
       debounceTime(400), distinctUntilChanged(),
       switchMap(term => {
