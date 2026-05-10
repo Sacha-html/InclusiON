@@ -5,6 +5,7 @@ import { AacHeaderComponent } from './aac-header/aac-header.component';
 import { ToasterComponent } from '../../components/toaster/toaster.component';
 import { AccessibilityPanelComponent } from '../../components/accessibility-panel/accessibility-panel.component';
 import { AccessibilityService } from '../../services/accessibility.service';
+import { HelpButtonComponent } from '../../components/help-button/help-button.component';
 
 @Component({
   selector: 'app-aac-layout',
@@ -14,7 +15,8 @@ import { AccessibilityService } from '../../services/accessibility.service';
     AacNavComponent,
     AacHeaderComponent,
     ToasterComponent,
-    AccessibilityPanelComponent
+    AccessibilityPanelComponent,
+    HelpButtonComponent,
   ],
   templateUrl: './aac-layout.component.html',
   styleUrl: './aac-layout.component.scss'
