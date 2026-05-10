@@ -2,8 +2,8 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end">
     <c-col sm="3">
-      <label cLabel>Estado</label>
-      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+      <label cLabel for="statusFilter">Estado</label>
+      <select cSelect id="statusFilter" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="active">Activas</option>
         <option value="inactive">Inactivas</option>

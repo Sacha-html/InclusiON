@@ -7,8 +7,8 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end g-2">
     <c-col sm="4">
-      <label cLabel>Tipo de reporte</label>
-      <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
+      <label cLabel for="typeFilter">Tipo de reporte</label>
+      <select cSelect id="typeFilter" [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
         <option value="">Todos los tipos</option>
         @for (t of reportTypes(); track t.id) {
           <option [value]="t.id">{{ t.name }}</option>
@@ -16,12 +16,12 @@
       </select>
     </c-col>
     <c-col sm="3">
-      <label cLabel>Desde</label>
-      <input cFormControl type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateChange()" />
+      <label cLabel for="dateFrom">Desde</label>
+      <input cFormControl id="dateFrom" type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateChange()" />
     </c-col>
     <c-col sm="3">
-      <label cLabel>Hasta</label>
-      <input cFormControl type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
+      <label cLabel for="dateTo">Hasta</label>
+      <input cFormControl id="dateTo" type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
     </c-col>
     <c-col sm="auto">
       <button cButton color="secondary" (click)="clearFilters()">Limpiar</button>

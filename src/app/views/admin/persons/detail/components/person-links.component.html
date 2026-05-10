@@ -23,8 +23,9 @@
     }
 
     <div class="mb-3">
-      <label cLabel>Buscar familiar</label>
+      <label cLabel for="link-family-search">Buscar familiar</label>
       <app-searchable-select
+        id="link-family-search"
         [formControl]="selectedFamilyControl"
         [searchFn]="searchFamilyFn"
         [displayFn]="displayFamilyFn"

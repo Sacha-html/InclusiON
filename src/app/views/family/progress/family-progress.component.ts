@@ -5,7 +5,6 @@ import { ActivitiesService } from '@services/activities.service';
 import {
   ActivityAssignmentResponse,
   ActivityAssignmentStatus,
-  ActivityAttemptResponse,
   ActivityResponseResult,
 } from '@models/responses/activity.response';
 import { FamilyPersonSummaryResponse } from '../../../models';
@@ -125,7 +124,7 @@ export class FamilyProgressComponent implements OnInit {
       }
     }
     return entries
-      .sort((x, y) => new Date(y.completedAt).getTime() - new Date(x.completedAt).getTime())
+      .toSorted((x, y) => new Date(y.completedAt).getTime() - new Date(x.completedAt).getTime())
       .slice(0, 15);
   });
 
@@ -167,7 +166,7 @@ export class FamilyProgressComponent implements OnInit {
 
   private lastScore(a: ActivityAssignmentResponse): number | null {
     if (!a.responses.length) return null;
-    const sorted = [...a.responses].sort(
+    const sorted = a.responses.toSorted(
       (x, y) => new Date(y.completedAt ?? 0).getTime() - new Date(x.completedAt ?? 0).getTime()
     );
     return sorted[0].successPercentage ?? null;

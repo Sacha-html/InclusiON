@@ -13,7 +13,7 @@ import {
   AlertComponent,
 } from '@coreui/angular';
 import { FamilyService } from '@services';
-import { FamilyDashboardResponse, FamilyPersonSummaryResponse } from '../../../models';
+import { FamilyDashboardResponse } from '../../../models';
 
 @Component({
   selector: 'app-family-dashboard',

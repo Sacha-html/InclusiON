@@ -109,8 +109,8 @@
     <c-modal-body>
       @if (!validateApprove) {
         <div class="mb-3">
-          <label class="form-label">Observación</label>
-          <textarea class="form-control" rows="3" [(ngModel)]="validateObservation" placeholder="Ingrese el motivo del rechazo"></textarea>
+          <label for="validateObservation" class="form-label">Observación</label>
+          <textarea id="validateObservation" class="form-control" rows="3" [(ngModel)]="validateObservation" placeholder="Ingrese el motivo del rechazo"></textarea>
         </div>
       } @else {
         <p>¿Confirma que desea aprobar al profesional <strong>{{ professional.fullName }}</strong>?</p>
