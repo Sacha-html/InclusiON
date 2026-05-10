@@ -10,7 +10,7 @@
       <label cLabel>Tipo de reporte</label>
       <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
         <option value="">Todos los tipos</option>
-        @for (t of reportTypes; track t.id) {
+        @for (t of reportTypes(); track t.id) {
           <option [value]="t.id">{{ t.name }}</option>
         }
       </select>
@@ -38,15 +38,10 @@
   [currentPage]="currentPage()"
   [sortable]="true"
   [loading]="isLoading()"
+  [emptyIcon]="'cilNotes'"
+  [emptyMessage]="'No hay reportes disponibles aún.'"
+  [emptyDetail]="'Los reportes aparecerán aquí una vez que sean aprobados por el administrador.'"
   (pageChange)="onPageChange($event)"
   (sortAction)="onSort($event)"
   (rowAction)="onRowAction($event)">
 </app-data-table>
-
-@if (!reports().length && !isLoading()) {
-  <div class="text-center text-body-secondary py-5">
-    <svg cIcon name="cilNotes" size="3xl" class="mb-2"></svg>
-    <p class="mb-0">No hay reportes disponibles aún.</p>
-    <small>Los reportes aparecerán aquí una vez que sean aprobados por el administrador.</small>
-  </div>
-}

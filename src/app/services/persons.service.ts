@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   ApiResponse,
   PagedResponse,
@@ -207,9 +208,30 @@ export class PersonsService {
   /**
    * Lista candidatos a supervisor (profesionales asignados + familiares vinculados).
    */
-  getSupervisorCandidates(personId: string): Observable<SupervisorCandidate[]> {
+  getSupervisorCandidates(personId: string, page = 1, pageSize = 50): Observable<SupervisorCandidate[]> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     return this.http
-      .get<ApiResponse<SupervisorCandidate[]>>(`${this.apiUrl}/${personId}/supervisor-candidates`)
+      .get<ApiResponse<PagedResponse<SupervisorCandidate>>>(`${this.apiUrl}/${personId}/supervisor-candidates`, { params })
+      .pipe(unwrapResponse(), map((r) => r.data));
+  }
+
+  /**
+   * Actualiza solo la configuración de accesibilidad de una persona.
+   */
+  updateAccessibilityConfig(
+    personId: string,
+    config: {
+      requiresLargeFont: boolean;
+      requiresHighContrast: boolean;
+      visualNoiseSensitivity: boolean;
+      soundSensitivity: boolean;
+      colorBlindnessType: string;
+    }
+  ): Observable<PersonResponse> {
+    return this.http
+      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}`, config)
       .pipe(unwrapResponse());
   }
 

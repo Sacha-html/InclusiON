@@ -7,12 +7,20 @@
 
 <!-- Error -->
 @else if (hasError()) {
-  <p class="text-danger">No se pudieron cargar las actividades asignadas.</p>
+  <app-empty-state
+    icon="cil-warning"
+    message="Error al cargar actividades"
+    detail="No se pudieron cargar las actividades asignadas."
+  />
 }
 
 <!-- Vacío -->
 @else if (assignments().length === 0) {
-  <p class="text-body-secondary">No hay actividades asignadas a esta persona todavía.</p>
+  <app-empty-state
+    icon="cil-task"
+    message="Sin actividades asignadas"
+    detail="Aún no se han asignado actividades a esta persona."
+  />
 }
 
 <!-- Tabla -->

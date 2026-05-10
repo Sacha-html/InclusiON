@@ -1,5 +1,4 @@
 import { Component, Input, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { RoadmapService } from '@services/roadmap.service';
@@ -32,12 +31,12 @@ import {
   SpinnerComponent,
 } from '@coreui/angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-professional-roadmap-tab',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     DragDropModule,
     CardComponent, CardHeaderComponent, CardBodyComponent,
@@ -49,6 +48,7 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
     FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
     ConfirmModalComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './professional-roadmap-tab.component.html',
   styleUrl: './professional-roadmap-tab.component.scss',

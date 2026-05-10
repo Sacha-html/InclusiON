@@ -1,47 +1,47 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { map } from 'rxjs';
 import { AssignmentsService, PersonsService, ToastService } from '@services';
 import {
   PersonListItemResponse,
   ProfessionalPersonResponse,
 } from '@models';
+import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
 import {
-  BadgeComponent,
   ButtonDirective,
   FormCheckComponent,
   FormCheckInputDirective,
   FormCheckLabelDirective,
-  FormControlDirective,
-  FormLabelDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
   SpinnerComponent,
-  TableDirective,
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-professional-persons',
   standalone: true,
   imports: [
-    BadgeComponent,
     ButtonDirective,
     FormCheckComponent,
     FormCheckInputDirective,
     FormCheckLabelDirective,
-    FormControlDirective,
-    FormLabelDirective,
     ModalBodyComponent,
     ModalComponent,
     ModalFooterComponent,
     ModalHeaderComponent,
     SpinnerComponent,
-    TableDirective,
     ReactiveFormsModule,
     FormsModule,
     IconModule,
+    SearchableSelectComponent,
+    DataTableComponent,
+    ConfirmModalComponent,
   ],
   templateUrl: './professional-persons.component.html',
   styleUrl: './professional-persons.component.scss',
@@ -56,16 +56,10 @@ export class ProfessionalPersonsComponent implements OnInit {
   private readonly personsService = inject(PersonsService);
   private readonly toastService = inject(ToastService);
 
-  availablePersons: PersonListItemResponse[] = [];
   showAssignPersonModal = signal(false);
   showDeactivatePersonModal = signal(false);
   personToDeactivate = signal<ProfessionalPersonResponse | null>(null);
   isSubmitting = signal(false);
-  isLoadingPersons = signal(false);
-
-  searchPersonText = '';
-  filteredPersons: PersonListItemResponse[] = [];
-  selectedPersonDisplay: PersonListItemResponse | null = null;
 
   assignPersonForm: FormGroup = this.fb.group({
     personId: [null],
@@ -73,49 +67,66 @@ export class ProfessionalPersonsComponent implements OnInit {
     canSuperviseLogin: [false],
   });
 
-  filterPersons(text: string): void {
-    if (!text) { this.filteredPersons = []; return; }
-    const lower = text.toLowerCase();
-    this.filteredPersons = this.availablePersons.filter(p =>
-      (p.fullName?.toLowerCase().includes(lower) ||
-       p.documentNumber?.toLowerCase().includes(lower)) ?? false
+  /** searchFn para SearchableSelectComponent — server-side, excluye ya asignados */
+  readonly searchPersonsFn = (query: string) => {
+    const assignedIds = new Set(this.persons.filter(p => p.isActive).map(p => p.personId));
+    return this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
+      map(r => r.data.filter(p => !assignedIds.has(p.id)))
     );
-  }
+  };
 
-  selectPerson(p: PersonListItemResponse): void {
-    this.selectedPersonDisplay = p;
-    this.searchPersonText = '';
-    this.filteredPersons = [];
-    this.assignPersonForm.patchValue({ personId: p.id });
-  }
+  readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => p.disabilityTypeName ?? '';
+  readonly valueFromPerson = (p: PersonListItemResponse) => p.id;
 
-  clearSelectedPerson(): void {
-    this.selectedPersonDisplay = null;
-    this.searchPersonText = '';
-    this.filteredPersons = [];
-    this.assignPersonForm.patchValue({ personId: null });
+  columns: TableColumn[] = [
+    { key: 'personFullName', label: 'Nombre' },
+    {
+      key: 'isPrimaryProfessional',
+      label: 'Principal',
+      type: 'badge',
+      badgeMap: {
+        'true':  { color: 'success',   label: 'Sí' },
+        'false': { color: 'secondary', label: 'No' },
+      },
+    },
+    {
+      key: 'canSuperviseLogin',
+      label: 'Supervisa login',
+      type: 'badge',
+      badgeMap: {
+        'true':  { color: 'success',   label: 'Sí' },
+        'false': { color: 'secondary', label: 'No' },
+      },
+    },
+    {
+      key: 'isActive',
+      label: 'Estado',
+      type: 'badge',
+      badgeMap: {
+        'true':  { color: 'success', label: 'Activo'   },
+        'false': { color: 'danger',  label: 'Inactivo' },
+      },
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      type: 'actions',
+      actions: [
+        { action: 'deactivate', label: 'Desasignar', icon: 'cil-user-unfollow', visible: (item) => item.isActive },
+      ],
+    },
+  ];
+
+  onRowAction(event: { action: string; item: ProfessionalPersonResponse }): void {
+    if (event.action === 'deactivate') this.openDeactivatePersonModal(event.item);
   }
 
   ngOnInit(): void {}
 
   openAssignPersonModal(): void {
     this.assignPersonForm.reset({ personId: null, isPrimaryProfessional: false, canSuperviseLogin: false });
-    this.isLoadingPersons.set(true);
-    this.personsService.getPersons({ pageSize: 1000, isActive: true }).subscribe({
-      next: (response) => {
-        const assignedIds = new Set(this.persons.filter((p) => p.isActive).map((p) => p.personId));
-        this.availablePersons = response.data.filter((p) => !assignedIds.has(p.id));
-        this.isLoadingPersons.set(false);
-        this.showAssignPersonModal.set(true);
-        this.searchPersonText = '';
-        this.filteredPersons = [];
-        this.selectedPersonDisplay = null;
-      },
-      error: () => {
-        this.isLoadingPersons.set(false);
-        this.toastService.error('Error al cargar personas disponibles');
-      },
-    });
+    this.showAssignPersonModal.set(true);
   }
 
   confirmAssignPerson(): void {

@@ -216,8 +216,7 @@
 
 // Accessibility media queries
 @media (prefers-reduced-motion: reduce) {
-  .pin-dot, .pin-key, .toggle-input-btn { transition: none; }
-  .pin-dot.error { animation: none; }
+  * { animation: none !important; transition: none !important; }
 }
 
 // Responsive
@@ -260,7 +259,10 @@
   .pin-dot {
     border-width: 4px;
     border-color: var(--a11y-border);
-    &.filled { background-color: var(--a11y-bg); border-color: var(--a11y-border); }
+    &.filled {
+      background-color: var(--a11y-primary);  // keeps filled vs empty distinction in HC
+      border-color: var(--a11y-primary);
+    }
   }
   .toggle-input-btn {
     border-width: 3px;

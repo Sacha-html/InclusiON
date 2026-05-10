@@ -1,0 +1,96 @@
+:host {
+  --help-color: #D32F2F;
+  --help-z: 9997;
+  display: block;
+}
+
+.help-fab {
+  position: fixed;
+  bottom: 90px;
+  left: 20px;
+  z-index: var(--help-z);
+
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  background: var(--help-color);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(211, 47, 47, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Stacking context for ripple pseudo
+  isolation: isolate;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(211, 47, 47, 0.55);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &:focus-visible {
+    outline: 4px solid #ff6659;
+    outline-offset: 4px;
+  }
+}
+
+.help-fab__ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--help-color);
+  z-index: -1;
+  animation: help-ripple 2.4s ease-out infinite;
+}
+
+.help-fab__icon {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes help-ripple {
+  0%   { transform: scale(1);   opacity: 0.55; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+
+// ── High-contrast ───────────────────────────────────────────────────────
+
+:host-context([data-profile="high-contrast"]) .help-fab {
+  border: 3px solid #fff;
+  background: #000;
+  color: #ff4444;
+
+  .help-fab__ripple {
+    background: #ff4444;
+  }
+}
+
+// ── Dark mode ────────────────────────────────────────────────────────────
+
+:host-context([data-color-mode="dark"]) .help-fab {
+  box-shadow: 0 4px 20px rgba(211, 47, 47, 0.6);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+  .help-fab {
+    transition: none;
+  }
+
+  .help-fab__ripple {
+    animation: none;
+  }
+}

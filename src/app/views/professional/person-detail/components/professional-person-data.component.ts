@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { PersonsService, ToastService } from '@services';
 import { PersonResponse, UpdatePersonRequest } from '@models';
 import { toDisplayDate, toIsoDate } from '@shared/utils';
@@ -16,7 +16,7 @@ import {
   selector: 'app-professional-person-data',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     ColComponent,
     FormControlDirective,
     FormLabelDirective,

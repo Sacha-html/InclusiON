@@ -1,78 +1,14 @@
-<c-card class="mb-4">
-  <c-card-header class="d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Administradores del Sistema</h5>
-    <button cButton color="primary" size="sm" (click)="goToNew()">
-      Agregar
-    </button>
-  </c-card-header>
-  <c-card-body>
-
-    @if (isLoading) {
-      <div class="text-center p-4">
-        <c-spinner color="primary"></c-spinner>
-      </div>
-    }
-
-    @if (!isLoading && admins.length === 0) {
-      <div class="text-center text-body-secondary p-4">
-        <p>No hay administradores registrados.</p>
-      </div>
-    }
-
-    @if (!isLoading && admins.length > 0) {
-      <table cTable hover responsive>
-        <thead>
-          <tr>
-            <th>Acciones</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Tipo</th>
-            <th>Instituciones</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (admin of admins; track admin.id) {
-            <tr>
-              <td>
-                @if (admin.id === currentUserId) {
-                  <button cButton color="primary" size="sm"
-                          (click)="goToEdit()"
-                          [attr.aria-label]="'Editar mis datos'">
-                    Editar
-                  </button>
-                }
-              </td>
-              <td>{{ admin.fullName }}</td>
-              <td>{{ admin.email }}</td>
-              <td>
-                <c-badge [color]="getTypeColor(admin)">
-                  {{ getTypeLabel(admin) }}
-                </c-badge>
-              </td>
-              <td>
-                @if (admin.institutions.length === 0) {
-                  <span class="text-body-secondary">Todas</span>
-                } @else {
-                  @for (inst of admin.institutions; track inst.institutionId) {
-                    <c-badge color="light" class="me-1 text-dark">
-                      {{ inst.institutionName }}
-                    </c-badge>
-                  }
-                }
-              </td>
-              <td>
-                <c-badge [color]="getStatusColor(admin.isActive)">
-                  {{ admin.isActive ? 'Activo' : 'Inactivo' }}
-                </c-badge>
-              </td>
-              <td>{{ admin.createdAt | date:'dd/MM/yyyy' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
-
-  </c-card-body>
-</c-card>
+<app-data-table
+  title="Administradores del Sistema"
+  [columns]="cols"
+  [items]="admins"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [loading]="isLoading"
+  [headerButtons]="[{action: 'new', label: 'Agregar'}]"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>

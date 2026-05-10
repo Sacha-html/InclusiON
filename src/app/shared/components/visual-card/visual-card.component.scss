@@ -68,6 +68,16 @@
   }
 }
 
+// ── Variantes semánticas — icon ─────────────────────────────────────────────
+.card-icon--primary { background: var(--a11y-primary);    color: var(--a11y-primary-text); }
+.card-icon--success { background: var(--a11y-success);    color: var(--a11y-success-text); }
+.card-icon--warning { background: var(--a11y-warning);    color: var(--a11y-warning-text); }
+.card-icon--danger  { background: var(--a11y-danger);     color: var(--a11y-danger-text); }
+.card-icon--muted   {
+  background: color-mix(in srgb, var(--a11y-text-muted) 20%, var(--a11y-bg));
+  color: var(--a11y-text-muted);
+}
+
 .card-content {
   text-align: center;
 }
@@ -93,6 +103,16 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--a11y-primary-text, white);
+}
+
+// ── Variantes semánticas — badge ────────────────────────────────────────────
+.card-badge--primary { background: var(--a11y-primary);    color: var(--a11y-primary-text); }
+.card-badge--success { background: var(--a11y-success);    color: var(--a11y-success-text); }
+.card-badge--warning { background: var(--a11y-warning);    color: var(--a11y-warning-text); }
+.card-badge--danger  { background: var(--a11y-danger);     color: var(--a11y-danger-text); }
+.card-badge--muted   {
+  background: color-mix(in srgb, var(--a11y-text-muted) 20%, var(--a11y-bg));
+  color: var(--a11y-text);
 }
 
 :host-context([data-profile="high-contrast"]) .visual-card {

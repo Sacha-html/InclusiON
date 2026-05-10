@@ -8,6 +8,8 @@ import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
   ColComponent, RowComponent, SpinnerComponent, BadgeComponent,
 } from '@coreui/angular';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
+import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 
 @Component({
   selector: 'app-classroom-list',
@@ -15,6 +17,7 @@ import {
   imports: [
     CardComponent, CardBodyComponent, CardHeaderComponent,
     ColComponent, RowComponent, SpinnerComponent, BadgeComponent,
+    EmptyStateComponent, ActorAvatarComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -42,23 +45,6 @@ export class ListComponent implements OnInit {
       },
       error: () => { this.isLoading = false; this.toastService.error('Error al cargar el aula'); },
     });
-  }
-
-  getInitial(person: ProfessionalPersonResponse): string {
-    return (person.personFirstName?.charAt(0) || '?').toUpperCase();
-  }
-
-  getAvatarColor(person: ProfessionalPersonResponse): string {
-    return person.avatarColor || '#2196F3';
-  }
-
-  getTextColor(bgColor: string): string {
-    const hex = bgColor.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.5 ? '#000000' : '#FFFFFF';
   }
 
   goToDetail(person: ProfessionalPersonResponse): void {

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { IconDirective } from '@coreui/icons-angular';
 import {
   CardBodyComponent,
   CardComponent,
@@ -18,8 +19,8 @@ import { FamilyDashboardResponse, FamilyPersonSummaryResponse } from '../../../m
   selector: 'app-family-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
+    IconDirective,
     DatePipe,
     CardComponent,
     CardBodyComponent,

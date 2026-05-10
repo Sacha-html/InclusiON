@@ -64,7 +64,7 @@ export class EditComponent implements OnInit {
     this.userId = user.id;
     this.adminUsersService.getAdmins().subscribe({
       next: (admins) => {
-        const me = admins.find((a) => a.id === user.id);
+        const me = admins.data.find((a) => a.id === user.id);
         if (me) {
           this.form.patchValue({
             name: me.name,

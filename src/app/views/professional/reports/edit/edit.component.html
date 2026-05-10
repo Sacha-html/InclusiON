@@ -34,7 +34,7 @@
               required
             >
               <option [value]="0">Seleccionar tipo...</option>
-              @for (type of reportTypes; track type.id) {
+              @for (type of reportTypes(); track type.id) {
                 <option [value]="type.id">{{ type.name }}</option>
               }
             </select>

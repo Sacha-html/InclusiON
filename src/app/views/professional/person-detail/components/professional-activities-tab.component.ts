@@ -1,5 +1,4 @@
 import { Component, Input, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { inject } from '@angular/core';
 import { ActivitiesService } from '@services/activities.service';
 import { ToastService } from '@services';
@@ -9,6 +8,7 @@ import {
   ButtonDirective,
   SpinnerComponent,
 } from '@coreui/angular';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 type StatusColor = 'warning' | 'info' | 'success' | 'danger' | 'secondary';
 
@@ -16,10 +16,10 @@ type StatusColor = 'warning' | 'info' | 'success' | 'danger' | 'secondary';
   selector: 'app-professional-activities-tab',
   standalone: true,
   imports: [
-    CommonModule,
     BadgeComponent,
     ButtonDirective,
     SpinnerComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './professional-activities-tab.component.html',
 })

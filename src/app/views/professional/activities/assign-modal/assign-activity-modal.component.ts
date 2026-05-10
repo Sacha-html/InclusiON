@@ -76,7 +76,7 @@ export class AssignActivityModalComponent implements OnChanges {
       switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
     ).subscribe({
       next:  (persons) => { this.persons.set(persons); this.isLoadingPersons.set(false); },
-      error: ()        => this.isLoadingPersons.set(false),
+      error: ()        => { this.isLoadingPersons.set(false); this.toastService.error('Error al cargar personas'); },
     });
   }
 
