@@ -88,7 +88,12 @@ export class ListComponent implements OnInit {
 
   private loadInstitutions(): void {
     this.loading = true;
-    const isActive = this.statusFilter === 'active' ? true : this.statusFilter === 'inactive' ? false : undefined;
+    let isActive: boolean | undefined;
+    if (this.statusFilter === 'active') {
+      isActive = true;
+    } else if (this.statusFilter === 'inactive') {
+      isActive = false;
+    }
 
     this.institutionsService.getPaged({
       page: this.currentPage,

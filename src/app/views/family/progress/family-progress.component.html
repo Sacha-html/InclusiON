@@ -1,9 +1,9 @@
 <!-- Loading inicial -->
 @if (isLoading()) {
-  <div class="loading-center" role="status" aria-live="polite">
+  <output class="loading-center" aria-live="polite">
     <c-spinner />
     <p class="mt-2 text-body-secondary">Cargando...</p>
-  </div>
+  </output>
 } @else if (hasError()) {
   <c-alert color="danger" role="alert">
     No se pudo cargar la información. Intentá de nuevo más tarde.
@@ -12,7 +12,8 @@
 
   <!-- Selector de persona (si hay más de una) -->
   @if (persons().length > 1) {
-    <div class="person-selector" role="group" aria-label="Seleccionar persona">
+    <fieldset class="person-selector">
+      <legend class="visually-hidden">Seleccionar persona</legend>
       <p class="selector-label">¿De quién querés ver el progreso?</p>
       <div class="person-pills">
         @for (person of persons(); track person.personId) {
@@ -31,7 +32,7 @@
           </button>
         }
       </div>
-    </div>
+    </fieldset>
   }
 
   <!-- Sin persona seleccionada -->
@@ -44,10 +45,10 @@
   <!-- Progreso -->
   @if (selectedPersonId()) {
     @if (isLoadingAssignments()) {
-      <div class="loading-center" role="status" aria-live="polite">
+      <output class="loading-center" aria-live="polite">
         <c-spinner />
         <p class="mt-2 text-body-secondary">Cargando progreso...</p>
-      </div>
+      </output>
     } @else if (stats().total === 0) {
       <p class="empty-state">Todavía no tiene actividades asignadas.</p>
     } @else {
@@ -143,9 +144,9 @@
               Todavía no hay intentos completados.
             </p>
           } @else {
-            <div class="timeline" role="list">
+            <ul class="timeline" aria-label="Actividades recientes">
               @for (entry of recentCompletions(); track $index) {
-                <div class="timeline-item" role="listitem">
+                <li class="timeline-item">
                   <div class="timeline-dot" aria-hidden="true"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
@@ -163,9 +164,9 @@
                     </div>
                     <span class="timeline-date">{{ formatDate(entry.completedAt) }}</span>
                   </div>
-                </div>
+                </li>
               }
-            </div>
+            </ul>
           }
         </c-card-body>
       </c-card>
