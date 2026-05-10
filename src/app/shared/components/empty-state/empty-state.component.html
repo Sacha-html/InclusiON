@@ -1,0 +1,9 @@
+<div class="text-center text-body-secondary py-5">
+  @if (icon) {
+    <div><svg cIcon [name]="icon" size="3xl" class="mb-3 opacity-50"></svg></div>
+  }
+  <p class="mb-1 fw-medium">{{ message }}</p>
+  @if (detail) {
+    <small>{{ detail }}</small>
+  }
+</div>

@@ -5,17 +5,7 @@ import { IconDirective } from '@coreui/icons-angular';
   selector: 'app-empty-state',
   standalone: true,
   imports: [IconDirective],
-  template: `
-    <div class="text-center text-body-secondary py-5">
-      @if (icon) {
-        <div><svg cIcon [name]="icon" size="3xl" class="mb-3 opacity-50"></svg></div>
-      }
-      <p class="mb-1 fw-medium">{{ message }}</p>
-      @if (detail) {
-        <small>{{ detail }}</small>
-      }
-    </div>
-  `,
+  templateUrl: './empty-state.component.html',
 })
 export class EmptyStateComponent {
   @Input() icon    = 'cilNotes';

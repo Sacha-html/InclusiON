@@ -1,11 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PersonsService, ToastService } from '@services';
+import { PersonsService, ToastService, FamilyService } from '@services';
 import { DiagnosesService } from '@services/diagnoses.service';
 import {
   PersonResponse,
   PersonSkillProfileResponse,
   DiagnosisListItemResponse,
+  PersonRepresentativeResponse,
 } from '@models';
 import {
   BadgeComponent,
@@ -18,8 +19,7 @@ import { ProfessionalPersonDataComponent } from './components/professional-perso
 import { ProfessionalFunctionalProfileComponent } from './components/professional-functional-profile.component';
 import { ProfessionalSkillsComponent } from './components/professional-skills.component';
 import { ProfessionalDiagnosesComponent } from './components/professional-diagnoses.component';
-import { FamilyService } from '@services';
-import { PersonRepresentativeResponse } from '@models';
+
 import { ProfessionalFamilyTabComponent } from './components/professional-family-tab.component';
 import { ProfessionalActivitiesTabComponent } from './components/professional-activities-tab.component';
 import { ProfessionalRoadmapTabComponent } from './components/professional-roadmap-tab.component';
@@ -54,7 +54,14 @@ export class PersonDetailComponent implements OnInit {
   private readonly diagnosesService = inject(DiagnosesService);
 
   person: PersonResponse | null = null;
-  activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' | 'actividades' | 'roadmap' = 'datos';
+  activeTab:
+    | 'datos'
+    | 'funcional'
+    | 'habilidades'
+    | 'diagnosticos'
+    | 'familiares'
+    | 'actividades'
+    | 'roadmap' = 'datos';
 
   skillProfile = signal<PersonSkillProfileResponse[]>([]);
   diagnoses = signal<DiagnosisListItemResponse[]>([]);
@@ -80,7 +87,8 @@ export class PersonDetailComponent implements OnInit {
     if (!this.person) return;
     this.personsService.getSkillProfile(this.person.id).subscribe({
       next: (data) => this.skillProfile.set(data ?? []),
-      error: () => this.toastService.error('Error al cargar el perfil de habilidades'),
+      error: () =>
+        this.toastService.error('Error al cargar el perfil de habilidades'),
     });
   }
 
@@ -127,5 +135,3 @@ export class PersonDetailComponent implements OnInit {
     this.loadRepresentatives();
   }
 }
-
-
