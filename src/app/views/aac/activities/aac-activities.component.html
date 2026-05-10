@@ -21,9 +21,8 @@
           <app-visual-card
             [title]="a.activityTitle"
             icon="cilTask"
-            [accentColor]="statusColor(a.status)"
+            [variant]="statusVariant(a.status)"
             [badge]="statusLabel(a.status)"
-            [badgeColor]="statusColor(a.status)"
             [interactive]="isPlayable(a)"
             [ariaLabel]="a.activityTitle + ', estado: ' + statusLabel(a.status)"
             (cardClick)="openActivity(a)"

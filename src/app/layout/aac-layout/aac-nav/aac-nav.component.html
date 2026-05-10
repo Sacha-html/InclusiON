@@ -4,12 +4,14 @@
       class="nav-item"
       [routerLink]="item.path"
       routerLinkActive="active"
+      #rla="routerLinkActive"
       [routerLinkActiveOptions]="{ exact: item.path === '/app' }"
       [attr.aria-label]="item.label"
+      [attr.aria-current]="rla.isActive ? 'page' : null"
       [style.--item-color]="item.color"
     >
       <div class="nav-icon">
-        <svg cIcon [name]="item.icon" size="xl"></svg>
+        <svg cIcon [name]="item.icon" size="xl" aria-hidden="true"></svg>
       </div>
       <span class="nav-label">{{ item.label }}</span>
     </a>

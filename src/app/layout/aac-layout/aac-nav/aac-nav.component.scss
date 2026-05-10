@@ -42,6 +42,8 @@
     .nav-label {
       color: var(--item-color);
       font-weight: 700;
+      text-decoration: underline;   // non-color active indicator (WCAG 1.4.1)
+      text-underline-offset: 2px;
     }
   }
 }
@@ -65,7 +67,7 @@
 }
 
 .nav-label {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--a11y-text-muted, #666);
   text-align: center;

@@ -32,11 +32,13 @@ export class AacActivitiesComponent implements OnInit {
     this.router.navigate([AppRoutes.Aac.Activities, assignment.id]);
   }
 
-  statusColor(status: ActivityAssignmentStatus): string {
-    return status === ActivityAssignmentStatus.Completada ? 'var(--a11y-success, #4CAF50)'
-         : status === ActivityAssignmentStatus.EnProgreso ? 'var(--a11y-warning, #FF9800)'
-         : status === ActivityAssignmentStatus.Cancelada  ? 'var(--a11y-text-muted, #9E9E9E)'
-         :                                                   'var(--a11y-primary, #2196F3)';
+  statusVariant(status: ActivityAssignmentStatus): 'success' | 'warning' | 'danger' | 'primary' | 'muted' {
+    switch (status) {
+      case ActivityAssignmentStatus.Completada:  return 'success';
+      case ActivityAssignmentStatus.EnProgreso:  return 'warning';
+      case ActivityAssignmentStatus.Cancelada:   return 'muted';
+      default:                                   return 'primary';
+    }
   }
 
   statusLabel(status: ActivityAssignmentStatus): string {

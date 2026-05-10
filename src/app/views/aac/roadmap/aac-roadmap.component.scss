@@ -200,7 +200,7 @@ $node-size-sm: 56px;
     border-color: transparent;
 
     .node-label {
-      color: #fff;
+      color: var(--a11y-primary-text, #fff);
       font-size: 1.6rem;
     }
   }
@@ -260,7 +260,7 @@ $node-size-sm: 56px;
 
 .node-difficulty {
   font-size: 0.7rem;
-  color: #f5a623;
+  color: var(--a11y-warning, #f5a623);
   letter-spacing: 1px;
 }
 
@@ -279,13 +279,13 @@ $node-size-sm: 56px;
   width: fit-content;
 
   &.completed {
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: color-mix(in srgb, var(--a11y-success, #1B5E20) 15%, transparent);
+    color: var(--a11y-success, #1B5E20);
   }
 
   &.in-progress {
-    background: #fff8e1;
-    color: #f57f17;
+    background: color-mix(in srgb, var(--a11y-warning, #A32E0A) 15%, transparent);
+    color: var(--a11y-warning, #A32E0A);
   }
 }
 
@@ -306,4 +306,8 @@ $node-size-sm: 56px;
   }
 
   .node-label { font-size: 1.1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }
