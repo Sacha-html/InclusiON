@@ -1,7 +1,7 @@
 export interface TableColumn {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'date' | 'boolean' | 'badge' | 'actions';
+  type?: 'text' | 'number' | 'date' | 'boolean' | 'badge' | 'actions' | 'color' | 'code';
   sortable?: boolean;
   actions?: ActionItem[];
   badgeMap?: Record<string, { color: string; label: string }>;

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { AssignmentsService, InstitutionsService, ToastService } from '@services';
 import { InstitutionResponse, ProfessionalInstitutionResponse } from '@models';
 import {

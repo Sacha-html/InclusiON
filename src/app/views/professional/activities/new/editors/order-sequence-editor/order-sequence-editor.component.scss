@@ -18,8 +18,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--cui-primary);
-  color: #fff;
+  background: var(--a11y-primary, #2196F3);
+  color: var(--a11y-primary-text, #fff);
   border-radius: 50%;
   font-weight: 700;
   font-size: 0.85rem;

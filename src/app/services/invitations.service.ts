@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import {
@@ -8,6 +8,7 @@ import {
   InvitationResponse,
   InvitationValidationResponse,
   AcceptInvitationResponse,
+  PagedResponse,
 } from '../models';
 import { Observable } from 'rxjs';
 import { unwrapResponse } from '@shared/utils';
@@ -22,9 +23,13 @@ export class InvitationsService {
     return `${environment.apiUrl}/Invitations`;
   }
 
-  getAll(): Observable<InvitationResponse[]> {
+  getAll(page = 1, pageSize = 10): Observable<PagedResponse<InvitationResponse>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
     return this.http
-      .get<ApiResponse<InvitationResponse[]>>(this.apiUrl)
+      .get<ApiResponse<PagedResponse<InvitationResponse>>>(this.apiUrl, { params })
       .pipe(unwrapResponse());
   }
 

@@ -15,6 +15,7 @@ import {
   PersonRepresentativeHistoryResponse,
 } from '../models';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({
@@ -70,13 +71,15 @@ export class FamilyService {
       .pipe(handleApiError());
   }
 
-  getAvailableFamilies(search?: string): Observable<FamilyResponse[]> {
-    let params = new HttpParams();
+  getAvailableFamilies(search?: string, page = 1, pageSize = 50): Observable<FamilyResponse[]> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     if (search) params = params.set('search', search);
 
     return this.http
-      .get<ApiResponse<FamilyResponse[]>>(`${this.apiUrl}/available`, { params })
-      .pipe(unwrapResponse());
+      .get<ApiResponse<PagedResponse<FamilyResponse>>>(`${this.apiUrl}/available`, { params })
+      .pipe(unwrapResponse(), map((r) => r.data));
   }
 
   getPersonRepresentatives(personId: string): Observable<PersonRepresentativeResponse[]> {
@@ -116,14 +119,16 @@ export class FamilyService {
   }
 
   // Professional endpoints
-  getAvailableFamiliesForProfessional(search?: string, personId?: string): Observable<FamilyResponse[]> {
-    let params = new HttpParams();
+  getAvailableFamiliesForProfessional(search?: string, personId?: string, page = 1, pageSize = 50): Observable<FamilyResponse[]> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     if (search) params = params.set('search', search);
     if (personId) params = params.set('personId', personId);
 
     return this.http
-      .get<ApiResponse<FamilyResponse[]>>(`${this.apiUrl}/professional/available`, { params })
-      .pipe(unwrapResponse());
+      .get<ApiResponse<PagedResponse<FamilyResponse>>>(`${this.apiUrl}/professional/available`, { params })
+      .pipe(unwrapResponse(), map((r) => r.data));
   }
 
   linkFamilyToPersonAsProfessional(familyId: string, personId: string, request: { relationship: string; isPrimary: boolean }): Observable<PersonRepresentativeResponse> {

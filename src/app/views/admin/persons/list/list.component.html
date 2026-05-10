@@ -29,6 +29,7 @@
   [pageSize]="pageSize"
   [currentPage]="currentPage"
   [headerButtons]="canCreate ? [{action: 'new', label: 'Agregar'}] : []"
+  [loading]="isLoading"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
   (sortAction)="onSort($event)"

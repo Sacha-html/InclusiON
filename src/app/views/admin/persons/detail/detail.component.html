@@ -8,32 +8,37 @@
       <!-- Tabs -->
       <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'datos'" (click)="activeTab = 'datos'" role="button">
+          <button type="button" class="nav-link" [class.active]="activeTab === 'datos'" (click)="activeTab = 'datos'">
             Datos Personales
-          </a>
+          </button>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'habilidades'" (click)="activeTab = 'habilidades'" role="button">
+          <button type="button" class="nav-link" [class.active]="activeTab === 'habilidades'" (click)="activeTab = 'habilidades'">
             Habilidades
-          </a>
+          </button>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'vinculos'" (click)="activeTab = 'vinculos'" role="button">
+          <button type="button" class="nav-link" [class.active]="activeTab === 'vinculos'" (click)="activeTab = 'vinculos'">
             Vinculos
             @if (representatives.length > 0) {
               <c-badge color="primary" class="ms-1">{{ representatives.length }}</c-badge>
             }
-          </a>
+          </button>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'diagnosticos'" (click)="activeTab = 'diagnosticos'" role="button">
+          <button type="button" class="nav-link" [class.active]="activeTab === 'diagnosticos'" (click)="activeTab = 'diagnosticos'">
             Diagnósticos
-          </a>
+          </button>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'reportes'" (click)="activeTab = 'reportes'" role="button">
+          <button type="button" class="nav-link" [class.active]="activeTab === 'accesibilidad'" (click)="activeTab = 'accesibilidad'">
+            Accesibilidad
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="activeTab === 'reportes'" (click)="activeTab = 'reportes'">
             Reportes
-          </a>
+          </button>
         </li>
       </ul>
 
@@ -71,6 +76,11 @@
         <app-admin-diagnoses [personId]="person.id" [person]="person"></app-admin-diagnoses>
       }
 
+      <!-- Tab: Accesibilidad -->
+      @if (activeTab === 'accesibilidad') {
+        <app-person-accessibility [person]="person"></app-person-accessibility>
+      }
+
       <!-- Tab: Vinculos -->
       @if (activeTab === 'vinculos') {
         <app-person-links
@@ -81,8 +91,6 @@
           [canUnlink]="canUnlink"
           [canViewHistory]="canViewHistory"
           [showLinkModal]="showLinkModal"
-          [availableFamilies]="availableFamilies"
-          [loadingFamilies]="loadingFamilies"
           [linkError]="linkFamilyError"
           [linking]="linkingFamily"
           [showUnlinkModal]="showUnlinkModal"
@@ -92,8 +100,8 @@
           [linkHistory]="linkHistory"
           [loadingHistory]="loadingHistory"
           (openLinkModal)="openLinkModal()"
+          [searchFamilyFn]="searchFamilyFn"
           (closeLinkModal)="closeLinkModal()"
-          (searchChange)="searchFamily = $event; loadAvailableFamilies()"
           (confirmLink)="confirmLinkFromChild($event)"
           (unlink)="openUnlinkModal($event)"
           (closeUnlinkModal)="closeUnlinkModal()"

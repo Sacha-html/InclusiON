@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { CatalogsService, PersonsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '../../../../models';
+import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '@models';
 import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
 import {

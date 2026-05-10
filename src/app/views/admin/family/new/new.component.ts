@@ -1,5 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FamilyService, PersonsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
@@ -7,23 +7,25 @@ import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
-  FormSelectDirective, RowComponent, SpinnerComponent,
+  FormSelectDirective, RowComponent,
 } from '@coreui/angular';
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
+import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-family-new',
   imports: [
-    ReactiveFormsModule, FormsModule,
+    ReactiveFormsModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective,
-    SpinnerComponent, PasswordModalComponent,
+    PasswordModalComponent, SearchableSelectComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
 })
-export class NewComponent implements OnInit {
+export class NewComponent {
   private readonly fb            = inject(FormBuilder);
   private readonly router        = inject(Router);
   private readonly familyService = inject(FamilyService);
@@ -33,13 +35,6 @@ export class NewComponent implements OnInit {
   serverError = '';
   showPasswordModal = false;
   createdFamily: FamilyResponse | null = null;
-
-  persons          = signal<PersonListItemResponse[]>([]);
-  isLoadingPersons = signal(true);
-
-  searchPersonText = '';
-  filteredPersons: PersonListItemResponse[] = [];
-  selectedPersonDisplay: PersonListItemResponse | null = null;
 
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
 
@@ -53,42 +48,13 @@ export class NewComponent implements OnInit {
     personId: [null, [Validators.required]],
   });
 
-  filterPersons(text: string): void {
-    if (!text) { this.filteredPersons = []; return; }
-    const lower = text.toLowerCase();
-    this.filteredPersons = this.persons().filter(p =>
-      (p.fullName?.toLowerCase().includes(lower) ||
-       p.documentNumber?.toLowerCase().includes(lower)) ?? false
+  readonly searchPersonsFn = (query: string) =>
+    this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
+      map(r => r.data)
     );
-  }
-
-  selectPerson(p: PersonListItemResponse): void {
-    this.selectedPersonDisplay = p;
-    this.searchPersonText = '';
-    this.filteredPersons = [];
-    this.form.patchValue({ personId: p.id });
-  }
-
-  clearSelectedPerson(): void {
-    this.selectedPersonDisplay = null;
-    this.searchPersonText = '';
-    this.filteredPersons = [];
-    this.form.patchValue({ personId: null });
-  }
-
-  ngOnInit(): void {
-    this.loadPersons();
-  }
-
-  loadPersons(): void {
-    this.personsService.getPersons({ page: 1, pageSize: 200, isActive: true }).subscribe({
-      next: (response) => {
-        this.persons.set(response.data);
-        this.isLoadingPersons.set(false);
-      },
-      error: () => this.isLoadingPersons.set(false),
-    });
-  }
+  readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => p.disabilityTypeName ?? '';
+  readonly valueFromPerson = (p: PersonListItemResponse) => p.id;
 
   get f() { return this.form.controls; }
 

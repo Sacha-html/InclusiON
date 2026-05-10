@@ -2,7 +2,7 @@
   <button
     type="button"
     class="visual-card interactive"
-    [style.--card-accent]="accentColor"
+    [style.--card-accent]="variant ? null : accentColor"
     [attr.aria-label]="ariaLabel || title"
     (click)="handleClick()">
     <ng-container *ngTemplateOutlet="cardContent" />
@@ -10,7 +10,7 @@
 } @else {
   <article
     class="visual-card"
-    [style.--card-accent]="accentColor"
+    [style.--card-accent]="variant ? null : accentColor"
     [attr.aria-label]="ariaLabel || title">
     <ng-container *ngTemplateOutlet="cardContent" />
   </article>
@@ -21,7 +21,9 @@
     @if (image) {
       <img [src]="image" alt="" class="card-image" />
     } @else if (icon) {
-      <div class="card-icon" [style.background-color]="accentColor">
+      <div
+        [class]="'card-icon' + (variant ? ' card-icon--' + variant : '')"
+        [style.background-color]="variant ? null : accentColor">
         <svg cIcon [name]="icon" size="xxl" aria-hidden="true" focusable="false"></svg>
       </div>
     }
@@ -36,8 +38,8 @@
 
   @if (badge) {
     <span
-      class="card-badge"
-      [style.background-color]="badgeColor"
+      [class]="'card-badge' + (variant ? ' card-badge--' + variant : '')"
+      [style.background-color]="variant ? null : badgeColor"
       [attr.aria-label]="'Estado: ' + badge">
       <span aria-hidden="true">{{ badge }}</span>
     </span>

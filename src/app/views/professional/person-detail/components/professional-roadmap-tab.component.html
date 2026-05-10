@@ -4,13 +4,16 @@
   </div>
 } @else if (!roadmap()) {
 
-  <!-- Empty state -->
-  <div class="text-center py-5">
-    <p class="text-body-secondary mb-3">Esta persona no tiene hoja de ruta asignada.</p>
-    @if (canCreate) {
+  <app-empty-state
+    icon="cil-list"
+    message="Sin hoja de ruta"
+    detail="Esta persona no tiene una hoja de ruta asignada."
+  />
+  @if (canCreate) {
+    <div class="text-center mt-2">
       <button cButton color="primary" (click)="openCreateModal()">Crear Hoja de Ruta</button>
-    }
-  </div>
+    </div>
+  }
 
 } @else {
 
@@ -35,7 +38,11 @@
 
   <!-- Areas -->
   @if (roadmap()!.areas.length === 0) {
-    <p class="text-body-secondary text-center py-4">Sin áreas. Agregá una área para comenzar.</p>
+    <app-empty-state
+      icon="cil-puzzle"
+      message="Sin áreas"
+      detail="Agregá una área para comenzar."
+    />
   }
 
   @for (area of roadmap()!.areas; track area.id) {

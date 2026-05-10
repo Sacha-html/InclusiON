@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { UserRoles } from '@shared/constants/roles';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 import { FormsModule } from '@angular/forms';
 import {
   CardBodyComponent, CardComponent, CardHeaderComponent,
@@ -10,6 +11,7 @@ import {
   ModalBodyComponent, ModalFooterComponent, ModalTitleDirective,
   AlertComponent,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 import {
   MessagesService,
   MessageListItemResponse,
@@ -24,8 +26,8 @@ type ActiveTab = 'inbox' | 'sent';
   selector: 'app-messages',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
+    ActorAvatarComponent,
     DatePipe,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent,
@@ -35,8 +37,10 @@ type ActiveTab = 'inbox' | 'sent';
     ModalComponent, ModalHeaderComponent, ModalBodyComponent,
     ModalFooterComponent, ModalTitleDirective,
     AlertComponent,
+    IconDirective,
   ],
   templateUrl: './messages.component.html',
+  styleUrl: './messages.component.scss',
 })
 export class MessagesComponent implements OnInit {
   private readonly messagesService = inject(MessagesService);
@@ -243,4 +247,5 @@ export class MessagesComponent implements OnInit {
     const type = c.userType === UserRoles.Professional ? 'Profesional' : 'Familiar';
     return `${c.fullName} (${type})`;
   }
+
 }

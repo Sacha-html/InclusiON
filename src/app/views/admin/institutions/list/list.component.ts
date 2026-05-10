@@ -3,9 +3,9 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { InstitutionsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { InstitutionResponse } from '../../../../models';
-import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { InstitutionResponse } from '@models';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ButtonDirective, FormLabelDirective, FormSelectDirective, GridModule } from '@coreui/angular';
 
 @Component({
@@ -20,17 +20,19 @@ export class ListComponent implements OnInit {
   private readonly router = inject(Router);
 
   statusFilter = '';
+  searchTerm = '';
 
   institutions: InstitutionResponse[] = [];
-  filteredInstitutions: InstitutionResponse[] = [];
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
-  sortBy = 'name';
-  sortDirection: 'ASC' | 'DESC' = 'ASC';
   loading = false;
 
   public cols: TableColumn[] = [
+    { key: 'name', label: 'Nombre', sortable: true },
+    { key: 'address', label: 'Direccion', sortable: true },
+    { key: 'phone', label: 'Telefono', sortable: true },
+    { key: 'isActive', label: 'Estado', type: 'badge', sortable: true, badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
@@ -38,10 +40,6 @@ export class ListComponent implements OnInit {
         { action: 'edit', label: 'Editar', icon: 'cil-notes' },
       ],
     },
-    { key: 'name', label: 'Nombre', sortable: true },
-    { key: 'address', label: 'Direccion', sortable: true },
-    { key: 'phone', label: 'Telefono', sortable: true },
-    { key: 'isActive', label: 'Estado', type: 'badge', sortable: true },
   ];
 
   ngOnInit(): void {
@@ -50,30 +48,25 @@ export class ListComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.applyFilter();
-  }
-
-  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
-    this.sortBy = event.sortBy;
-    this.sortDirection = event.sortDirection;
-    this.currentPage = 1;
-    this.applyFilter();
+    this.loadInstitutions();
   }
 
   onSearch(term: string): void {
+    this.searchTerm = term;
     this.currentPage = 1;
-    this.applyFilter(term);
+    this.loadInstitutions();
   }
 
   onStatusFilterChange(): void {
     this.currentPage = 1;
-    this.applyFilter();
+    this.loadInstitutions();
   }
 
   clearFilters(): void {
     this.statusFilter = '';
+    this.searchTerm = '';
     this.currentPage = 1;
-    this.applyFilter();
+    this.loadInstitutions();
   }
 
   onHeaderAction(action: string): void {
@@ -94,43 +87,24 @@ export class ListComponent implements OnInit {
   }
 
   private loadInstitutions(): void {
-    this.institutionsService.getAll().subscribe({
-      next: (data) => {
-        this.institutions = data;
-        this.applyFilter();
+    this.loading = true;
+    const isActive = this.statusFilter === 'active' ? true : this.statusFilter === 'inactive' ? false : undefined;
+
+    this.institutionsService.getPaged({
+      page: this.currentPage,
+      pageSize: this.pageSize,
+      search: this.searchTerm || undefined,
+      isActive,
+    }).subscribe({
+      next: (response) => {
+        this.institutions = response.data;
+        this.totalItems = response.totalRecords;
+        this.loading = false;
       },
       error: () => {
         this.toastService.error('Error al obtener instituciones');
+        this.loading = false;
       },
     });
-  }
-
-  private applyFilter(search?: string): void {
-    let filtered = [...this.institutions];
-
-    if (this.statusFilter) {
-      const isActive = this.statusFilter === 'active';
-      filtered = filtered.filter(i => i.isActive === isActive);
-    }
-
-    if (search) {
-      const term = search.toLowerCase();
-      filtered = filtered.filter(
-        (i) =>
-          i.name.toLowerCase().includes(term) ||
-          (i.address && i.address.toLowerCase().includes(term)),
-      );
-    }
-
-    filtered.sort((a, b) => {
-      const aVal = (a[this.sortBy as keyof InstitutionResponse] ?? '').toString().toLowerCase();
-      const bVal = (b[this.sortBy as keyof InstitutionResponse] ?? '').toString().toLowerCase();
-      const direction = this.sortDirection === 'ASC' ? 1 : -1;
-      return aVal.localeCompare(bVal) * direction;
-    });
-
-    this.totalItems = filtered.length;
-    const start = (this.currentPage - 1) * this.pageSize;
-    this.filteredInstitutions = filtered.slice(start, start + this.pageSize);
   }
 }

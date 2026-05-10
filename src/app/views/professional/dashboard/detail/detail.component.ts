@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import {
   CardBodyComponent, CardComponent, ColComponent, RowComponent,
   SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
@@ -22,7 +21,6 @@ import { forkJoin } from 'rxjs';
   selector: 'app-professional-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     CardComponent, CardBodyComponent, RowComponent, ColComponent,
     SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
     IconDirective,
@@ -66,6 +64,13 @@ export class DetailComponent implements OnInit {
     return this.invitations.slice(0, 5);
   }
 
+  readonly reportBadgeMap: Partial<Record<string, { color: string; label: string }>> = {
+    [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador },
+    [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado  },
+    [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado },
+    [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
+  };
+
   get draftReportsCount(): number {
     return this.recentReports.filter(r => r.status === ReportStatus.Draft).length;
   }
@@ -98,7 +103,7 @@ export class DetailComponent implements OnInit {
       reports:     this.reportsService.getReports({
                      page: 1,
                      professionalId,
-                     pageSize: 50,
+                     pageSize: 10,
                      sortBy: 'createdAt',
                      sortDirection: 'DESC',
                    }),
@@ -106,7 +111,7 @@ export class DetailComponent implements OnInit {
     }).subscribe({
       next: ({ persons, invitations, reports, unread }) => {
         this.persons        = persons;
-        this.invitations    = invitations;
+        this.invitations    = invitations.data;
         this.recentReports  = reports.data;
         this.unreadMessages = unread;
         this.isLoading      = false;
@@ -123,24 +128,6 @@ export class DetailComponent implements OnInit {
   }
 
   getStatusColor = getInvitationStatusColor;
-
-  getReportStatusLabel(status: ReportStatus): string {
-    switch (status) {
-      case ReportStatus.Draft:     return ReportStatusLabels.Borrador;
-      case ReportStatus.Submitted: return ReportStatusLabels.Enviado;
-      case ReportStatus.Approved:  return ReportStatusLabels.Aprobado;
-      case ReportStatus.Rejected:  return ReportStatusLabels.Rechazado;
-    }
-  }
-
-  getReportStatusColor(status: ReportStatus): string {
-    switch (status) {
-      case ReportStatus.Draft:     return 'secondary';
-      case ReportStatus.Submitted: return 'warning';
-      case ReportStatus.Approved:  return 'success';
-      case ReportStatus.Rejected:  return 'danger';
-    }
-  }
 
   getGreeting(): string {
     const hour = new Date().getHours();

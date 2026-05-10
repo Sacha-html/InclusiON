@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiResponse, PagedResponse } from '../models';
 import { AdminUserListItemResponse } from '../models/responses/admin-user-list-item.response';
 import { AdminUserDetailResponse, ResetPasswordResultResponse, UserRecentSessionResponse } from '../models/responses/admin-user-detail.response';
@@ -59,11 +60,12 @@ export class UserManagementService {
       .pipe(unwrapResponse());
   }
 
-  getUserActivity(userId: string, limit = 15): Observable<UserRecentSessionResponse[]> {
+  getUserActivity(userId: string, page = 1, pageSize = 15): Observable<UserRecentSessionResponse[]> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     return this.http
-      .get<ApiResponse<UserRecentSessionResponse[]>>(`${this.apiUrl}/${userId}/activity`, {
-        params: { limit: limit.toString() }
-      })
-      .pipe(unwrapResponse());
+      .get<ApiResponse<PagedResponse<UserRecentSessionResponse>>>(`${this.apiUrl}/${userId}/activity`, { params })
+      .pipe(unwrapResponse(), map((r) => r.data));
   }
 }

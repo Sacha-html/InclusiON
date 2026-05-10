@@ -1,4 +1,4 @@
-<!-- Filtros -->
+<!-- Filtro estado -->
 <div class="d-flex gap-2 mb-3">
   <select cSelect style="max-width: 180px" [(ngModel)]="statusFilter" (ngModelChange)="loadReports()">
     <option value="">Todos los estados</option>
@@ -9,77 +9,19 @@
   </select>
 </div>
 
-<!-- Spinner -->
-@if (isLoading()) {
-  <div class="text-center py-4">
-    <c-spinner></c-spinner>
-  </div>
-} @else if (reports().length === 0) {
-  <p class="text-body-secondary text-center py-3">No hay reportes para este profesional.</p>
-} @else {
-  <table cTable hover responsive>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Título</th>
-        <th>Persona</th>
-        <th>Tipo</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (report of reports(); track report.id) {
-        <tr>
-          <td class="text-nowrap">{{ formatDate(report.reportDate) }}</td>
-          <td>{{ report.title }}</td>
-          <td>{{ report.personName }}</td>
-          <td>{{ report.reportTypeName }}</td>
-          <td>
-            <c-badge [color]="badgeMap[report.status].color">
-              {{ badgeMap[report.status].label }}
-            </c-badge>
-          </td>
-          <td class="text-nowrap">
-            <button cButton color="primary" size="sm" variant="ghost"
-                    (click)="viewReport(report.id)">
-              Ver
-            </button>
-            @if (report.status === ReportStatus.Submitted) {
-              <button cButton color="success" size="sm" variant="ghost" class="ms-1"
-                      (click)="openApproveModal(report)">
-                Aprobar
-              </button>
-              <button cButton color="danger" size="sm" variant="ghost" class="ms-1"
-                      (click)="openRejectModal(report)">
-                Rechazar
-              </button>
-            }
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-
-  <!-- Paginación simple -->
-  @if (totalPages() > 1) {
-    <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
-      <button cButton color="secondary" size="sm" variant="ghost"
-              [disabled]="currentPage() === 1"
-              (click)="changePage(currentPage() - 1)">
-        ‹
-      </button>
-      <span class="text-body-secondary small">
-        Página {{ currentPage() }} de {{ totalPages() }}
-      </span>
-      <button cButton color="secondary" size="sm" variant="ghost"
-              [disabled]="currentPage() === totalPages()"
-              (click)="changePage(currentPage() + 1)">
-        ›
-      </button>
-    </div>
-  }
-}
+<app-data-table
+  [showCard]="false"
+  [showTitle]="false"
+  [showSearch]="false"
+  [columns]="columns"
+  [items]="reports()"
+  [totalItems]="totalRecords()"
+  [currentPage]="currentPage()"
+  [pageSize]="10"
+  [loading]="isLoading()"
+  (pageChange)="onPageChange($event)"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal: Aprobar reporte -->
 <c-modal [visible]="showApproveModal()" (visibleChange)="showApproveModal.set($event)" alignment="center">

@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   CardModule,
@@ -18,7 +17,6 @@ import { LoginMethod, UpdateLoginMethodRequest } from '../../../models';
   selector: 'app-login-method-selector',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     CardModule,
     FormModule,

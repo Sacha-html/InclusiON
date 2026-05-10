@@ -40,17 +40,19 @@
   }
 </c-sidebar>
 
+<a href="#main-content" class="skip-link">Ir al contenido principal</a>
+
 <div class="wrapper d-flex flex-column min-vh-100">
   <app-default-header
     class="mb-4 d-print-none header header-sticky p-0 shadow-sm"
     sidebarId="sidebar"
   />
 
-  <div class="body flex-grow-1">
+  <main id="main-content" tabindex="-1" class="body flex-grow-1">
     <c-container breakpoint="lg" class="h-auto px-4">
       <router-outlet />
     </c-container>
-  </div>
+  </main>
 
   <app-default-footer class="d-print-none" />
 </div>

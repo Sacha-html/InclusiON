@@ -51,6 +51,7 @@ export class ListComponent implements OnInit {
   typeFilter = '';
   dateFrom = '';
   dateTo = '';
+  searchTerm = '';
 
   // Modales
   showApproveModal = false;
@@ -61,6 +62,22 @@ export class ListComponent implements OnInit {
   reportTypes = signal<CatalogItem[]>([]);
 
   columns: TableColumn[] = [
+    { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
+    { key: 'title', label: 'Título', sortable: true },
+    { key: 'personName', label: 'Persona', sortable: true },
+    { key: 'professionalName', label: 'Profesional', sortable: true },
+    { key: 'reportTypeName', label: 'Tipo', sortable: true },
+    {
+      key: 'status',
+      label: 'Estado',
+      type: 'badge',
+      badgeMap: {
+        [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador },
+        [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado },
+        [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
+      },
+    },
     {
       key: 'actions',
       label: 'Acciones',
@@ -81,22 +98,6 @@ export class ListComponent implements OnInit {
         },
       ],
     },
-    { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
-    { key: 'title', label: 'Título', sortable: true },
-    { key: 'personName', label: 'Persona', sortable: true },
-    { key: 'professionalName', label: 'Profesional', sortable: true },
-    { key: 'reportTypeName', label: 'Tipo', sortable: true },
-    {
-      key: 'status',
-      label: 'Estado',
-      type: 'badge',
-      badgeMap: {
-        [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador },
-        [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado },
-        [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado },
-        [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
-      },
-    },
   ];
 
   ngOnInit(): void {
@@ -115,6 +116,7 @@ export class ListComponent implements OnInit {
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
       dateTo: this.dateTo || undefined,
+      search: this.searchTerm || undefined,
     };
 
     this.reportsService.getReports(request).subscribe({
@@ -146,6 +148,7 @@ export class ListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
+    this.searchTerm = term;
     this.currentPage.set(1);
     this.loadReports();
   }
