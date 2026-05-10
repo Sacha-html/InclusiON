@@ -1,60 +1,14 @@
-<c-card class="mb-4">
-  <c-card-header class="d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">{{ config.title }}</h5>
-    @if (config.canCreate) {
-      <button cButton color="primary" size="sm" (click)="openNew()">Agregar</button>
-    }
-  </c-card-header>
-  <c-card-body>
-
-    @if (isLoading) {
-      <div class="text-center p-4"><c-spinner color="primary"></c-spinner></div>
-    }
-
-    @if (!isLoading) {
-      <table cTable hover responsive>
-        <thead>
-          <tr>
-            @for (col of config.columns; track col.key) {
-              <th>{{ col.label }}</th>
-            }
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of items; track item.id) {
-            <tr>
-              @for (col of config.columns; track col.key) {
-                <td>
-                  @if (col.badge) {
-                    <c-badge [color]="col.badge(item).color">{{ col.badge(item).text }}</c-badge>
-                  } @else if (col.key === 'color' && item[col.key]) {
-                    <span class="d-inline-block rounded" [style.background-color]="item[col.key]" style="width: 20px; height: 20px; vertical-align: middle;"></span>
-                    <small class="ms-1">{{ item[col.key] }}</small>
-                  } @else if (col.key === 'code') {
-                    <code>{{ item[col.key] }}</code>
-                  } @else {
-                    {{ getCellValue(item, col) }}
-                  }
-                </td>
-              }
-              <td class="d-flex gap-1">
-                <button cButton color="info" size="sm" variant="ghost" (click)="openEdit(item)">Editar</button>
-                @if (config.deactivate && item.isActive !== false) {
-                  <button cButton color="danger" size="sm" variant="ghost" (click)="openDeactivate(item)">Dar de baja</button>
-                }
-              </td>
-            </tr>
-          }
-          @if (items.length === 0) {
-            <tr><td [attr.colspan]="config.columns.length + 1" class="text-center text-body-secondary">Sin registros</td></tr>
-          }
-        </tbody>
-      </table>
-    }
-
-  </c-card-body>
-</c-card>
+<app-data-table
+  [title]="config.title"
+  [columns]="tableColumns"
+  [items]="items"
+  [loading]="isLoading"
+  [showSearch]="false"
+  [showPagination]="false"
+  [headerButtons]="config.canCreate ? headerButtons : []"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal confirmar baja -->
 <c-modal [visible]="showDeactivateModal" (visibleChange)="showDeactivateModal = $event" alignment="center">
@@ -83,14 +37,14 @@
           @if (field.type === 'checkbox') {
             <div class="mb-3">
               <c-form-check>
-                <input cFormCheckInput type="checkbox" [formControlName]="field.key" />
-                <label cFormCheckLabel>{{ field.label }}</label>
+                <input cFormCheckInput type="checkbox" [formControlName]="field.key" [id]="'field-' + field.key" />
+                <label cFormCheckLabel [for]="'field-' + field.key">{{ field.label }}</label>
               </c-form-check>
             </div>
           } @else if (field.type === 'select') {
             <div class="mb-3">
-              <label cLabel>{{ field.label }}</label>
-              <select cSelect [formControlName]="field.key">
+              <label cLabel [for]="'field-' + field.key">{{ field.label }}</label>
+              <select cSelect [formControlName]="field.key" [id]="'field-' + field.key">
                 <option [ngValue]="null">-- Ninguna --</option>
                 @for (opt of field.options!(); track opt.id) {
                   <option [ngValue]="opt.id">{{ opt.name }}</option>
@@ -99,13 +53,13 @@
             </div>
           } @else if (field.type === 'color') {
             <div class="mb-3">
-              <label cLabel>{{ field.label }}</label>
-              <input type="color" class="form-control form-control-color" [formControlName]="field.key" />
+              <label cLabel [for]="'field-' + field.key">{{ field.label }}</label>
+              <input type="color" class="form-control form-control-color" [formControlName]="field.key" [id]="'field-' + field.key" />
             </div>
           } @else {
             <div class="mb-3">
-              <label cLabel>{{ field.label }}@if (field.required) { *}</label>
-              <input cFormControl [type]="field.type" [formControlName]="field.key" />
+              <label cLabel [for]="'field-' + field.key">{{ field.label }}@if (field.required) { *}</label>
+              <input cFormControl [type]="field.type" [formControlName]="field.key" [id]="'field-' + field.key" />
             </div>
           }
         }
