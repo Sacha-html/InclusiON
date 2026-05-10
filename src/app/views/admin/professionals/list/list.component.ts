@@ -485,7 +485,7 @@ export class ListComponent implements OnInit {
       ...data.map(row =>
         headers.map(h => {
           const val = String((row as any)[h] ?? '');
-          return `"${val.replace(/"/g, '""')}"`;
+          return `"${val.replaceAll('"', '""')}"`;
         }).join(',')
       ),
     ].join('\n');

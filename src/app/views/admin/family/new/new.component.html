@@ -10,8 +10,9 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel id="persona-label">Persona a cargo *</label>
+          <label cLabel for="personId">Persona a cargo *</label>
           <app-searchable-select
+            id="personId"
             formControlName="personId"
             [searchFn]="searchPersonsFn"
             [displayFn]="displayPerson"
