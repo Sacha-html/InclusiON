@@ -1,41 +1,26 @@
 <header class="aac-header-container">
-  @if (isReadingMode) {
-    <!-- Modo lectura: header simplificado con botón volver -->
+  <div class="aac-user-info">
+    <div class="aac-avatar" [attr.aria-label]="'Usuario: ' + userName">
+      {{ userInitial }}
+    </div>
+    <span class="aac-user-name">Hola, {{ userName }}</span>
+  </div>
+
+  <div class="aac-header-actions">
     <button
-      class="aac-btn-back"
-      (click)="goBack()"
-      aria-label="Volver a la pagina anterior"
+      class="aac-btn-icon"
+      (click)="openSettings()"
+      aria-label="Configuraciones de accesibilidad"
     >
-      <svg cIcon name="cilArrowLeft" size="xl" aria-hidden="true"></svg>
-      <span>Volver</span>
+      <svg cIcon name="cilSettings" size="xl" aria-hidden="true"></svg>
     </button>
 
-    <span class="aac-user-name">{{ userName }}</span>
-  } @else {
-    <!-- Modo normal -->
-    <div class="aac-user-info">
-      <div class="aac-avatar" [attr.aria-label]="'Usuario: ' + userName">
-        {{ userInitial }}
-      </div>
-      <span class="aac-user-name">Hola, {{ userName }}</span>
-    </div>
-
-    <div class="aac-header-actions">
-      <button
-        class="aac-btn-icon"
-        (click)="openSettings()"
-        aria-label="Configuraciones de accesibilidad"
-      >
-        <svg cIcon name="cilSettings" size="xl" aria-hidden="true"></svg>
-      </button>
-
-      <button
-        class="aac-btn-icon aac-btn-logout"
-        (click)="logout()"
-        aria-label="Cerrar sesion"
-      >
-        <svg cIcon name="cilAccountLogout" size="xl" aria-hidden="true"></svg>
-      </button>
-    </div>
-  }
+    <button
+      class="aac-btn-icon aac-btn-logout"
+      (click)="logout()"
+      aria-label="Cerrar sesion"
+    >
+      <svg cIcon name="cilAccountLogout" size="xl" aria-hidden="true"></svg>
+    </button>
+  </div>
 </header>
