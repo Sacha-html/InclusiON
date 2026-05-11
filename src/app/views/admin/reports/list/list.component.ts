@@ -46,6 +46,9 @@ export class ListComponent implements OnInit {
   pageSize = signal(10);
   totalRecords = signal(0);
 
+  sortBy = 'createdAt';
+  sortDirection = 'DESC';
+
   // Filtros
   statusFilter = 'Submitted'; // Por defecto: pendientes de revisión
   typeFilter = '';
@@ -83,17 +86,17 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
         {
           action: 'approve',
           label: 'Aprobar',
-          icon: 'cil-check-circle',
+          icon: 'cilCheckCircle',
           visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
         },
         {
           action: 'reject',
           label: 'Rechazar',
-          icon: 'cil-x-circle',
+          icon: 'cilXCircle',
           visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
         },
       ],
@@ -110,8 +113,8 @@ export class ListComponent implements OnInit {
     const request: GetReportsRequest = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
-      sortBy: 'reportDate',
-      sortDirection: 'desc',
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
       status: this.statusFilter || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
@@ -153,14 +156,16 @@ export class ListComponent implements OnInit {
     this.loadReports();
   }
 
-  onSort(_event: { sortBy: string; sortDirection: string }): void {
+  onSort(event: { sortBy: string; sortDirection: string }): void {
+    this.sortBy = event.sortBy;
+    this.sortDirection = event.sortDirection;
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     this.selectedReport = event.item;
     if (event.action === 'view') {
-      this.router.navigate([AppRoutes.Admin.Reports, event.item.id]);
+      this.router.navigate([AppRoutes.Admin.Reports, event.item.encryptedId]);
     } else if (event.action === 'approve') {
       this.showApproveModal = true;
     } else if (event.action === 'reject') {
@@ -171,7 +176,7 @@ export class ListComponent implements OnInit {
   confirmApprove(): void {
     if (!this.selectedReport) return;
     this.isActioning = true;
-    this.reportsService.approveReport(this.selectedReport.id).subscribe({
+    this.reportsService.approveReport(this.selectedReport.encryptedId).subscribe({
       next: () => {
         this.toastService.success('Reporte aprobado. El familiar ya puede consultarlo.');
         this.showApproveModal = false;
@@ -189,7 +194,7 @@ export class ListComponent implements OnInit {
   confirmReject(comment: string): void {
     if (!this.selectedReport) return;
     this.isActioning = true;
-    this.reportsService.rejectReport(this.selectedReport.id, comment).subscribe({
+    this.reportsService.rejectReport(this.selectedReport.encryptedId, comment).subscribe({
       next: () => {
         this.toastService.success('Reporte rechazado. El profesional fue notificado.');
         this.showRejectModal = false;

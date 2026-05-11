@@ -54,8 +54,8 @@ export class AdminDiagnosesComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'view',       label: 'Ver',         icon: 'cil-search' },
-        { action: 'deactivate', label: 'Dar de baja', icon: 'cil-ban'    },
+        { action: 'view',       label: 'Ver',         icon: 'cilSearch' },
+        { action: 'deactivate', label: 'Dar de baja', icon: 'cilBan'    },
       ],
     },
   ];

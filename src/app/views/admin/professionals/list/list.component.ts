@@ -104,14 +104,14 @@ export class ListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        { action: 'reset-password', label: 'Resetear', icon: 'cil-reload', visible: (item) => item.status === 'Approved' },
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        { action: 'reset-password', label: 'Resetear', icon: 'cilReload', visible: (item) => item.status === 'Approved' },
         { action: 'history', label: 'Historial', icon: 'cilHistory' },
-        { action: 'persons', label: 'Personas', icon: 'cil-people' },
-        { action: 'institutions', label: 'Instituciones', icon: 'cil-book' },
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === 'Approved' },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.status === 'Approved' },
-        { action: 'reactivate', label: 'Reactivar', icon: 'cil-reload', visible: (item) => item.status !== 'Approved' },
+        { action: 'persons', label: 'Personas', icon: 'cilPeople' },
+        { action: 'institutions', label: 'Instituciones', icon: 'cilBook' },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.status === 'Approved' },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.status === 'Approved' },
+        { action: 'reactivate', label: 'Reactivar', icon: 'cilReload', visible: (item) => item.status !== 'Approved' },
       ],
     },
   ];
@@ -125,8 +125,8 @@ export class ListComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'approve', label: 'Aprobar', icon: 'cil-check' },
-        { action: 'reject', label: 'Rechazar', icon: 'cil-x' },
+        { action: 'approve', label: 'Aprobar', icon: 'cilCheck' },
+        { action: 'reject', label: 'Rechazar', icon: 'cilX' },
       ],
     },
   ];

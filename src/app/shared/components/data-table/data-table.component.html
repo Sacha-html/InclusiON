@@ -29,15 +29,15 @@
     <table cTable hover striped aria-label="Tabla de datos" [attr.aria-busy]="loading">
     <thead>
       <tr>
-        @for (col of columns; track col.key) {
+        @for (col of orderedColumns; track col.key) {
           <th scope="col" [attr.aria-sort]="getAriaSort(col)">
             @if (col.sortable) {
               <button type="button" class="th-sort-btn" (click)="onSort(col)"
                       [attr.aria-label]="'Ordenar por ' + col.label">
                 {{ col.label }}
                 <span class="sort-arrows ms-1" aria-hidden="true">
-                  <svg cIcon name="cil-caret-top" [class.active]="sortField === col.key && sortDirection === 'ASC'" size="sm" class="sort-arrow-up"></svg>
-                  <svg cIcon name="cil-caret-bottom" [class.active]="sortField === col.key && sortDirection === 'DESC'" size="sm" class="sort-arrow-down"></svg>
+                  <svg cIcon name="cilCaretTop" [class.active]="sortField === col.key && sortDirection === 'ASC'" size="sm" class="sort-arrow-up"></svg>
+                  <svg cIcon name="cilCaretBottom" [class.active]="sortField === col.key && sortDirection === 'DESC'" size="sm" class="sort-arrow-down"></svg>
                 </span>
               </button>
             } @else {
@@ -50,7 +50,7 @@
     <tbody>
       @for (item of items; track $index) {
         <tr>
-          @for (col of columns; track col.key) {
+          @for (col of orderedColumns; track col.key) {
             <td>
               @switch (col.type) {
                 @case ('badge') {
@@ -106,7 +106,7 @@
       }
       @if (items.length === 0) {
         <tr>
-          <td [attr.colspan]="columns.length" class="text-center text-body-secondary py-5" role="status" aria-live="polite">
+          <td [attr.colspan]="orderedColumns.length" class="text-center text-body-secondary py-5" role="status" aria-live="polite">
             @if (emptyIcon) {
               <div><svg cIcon [name]="emptyIcon" size="3xl" class="mb-2 opacity-50"></svg></div>
             }

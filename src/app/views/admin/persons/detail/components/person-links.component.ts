@@ -120,7 +120,7 @@ export class PersonLinksComponent implements OnChanges {
         key: '', label: 'Acciones', type: 'actions',
         actions: [
           {
-            action: 'unlink', label: 'Desvincular', icon: 'cil-trash',
+            action: 'unlink', label: 'Desvincular', icon: 'cilTrash',
             visible: (item: PersonRepresentativeResponse) => item.isActive,
           },
         ],

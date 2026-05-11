@@ -22,7 +22,6 @@
       class="action-btn action-btn--primary"
       [disabled]="loading"
       (click)="finish.emit()"
-      aria-label="Finalizar y volver"
     >
       @if (loading) {
         <span class="btn-spinner" aria-hidden="true"></span>
@@ -37,7 +36,6 @@
         class="action-btn action-btn--secondary"
         [disabled]="loading"
         (click)="retry.emit()"
-        aria-label="Intentar de nuevo"
       >
         🔄 Intentar de nuevo
       </button>

@@ -77,7 +77,7 @@ export class NewComponent implements OnInit {
   // Modal post-creación
   showSubmitModal  = signal(false);
   isSubmitting     = signal(false);
-  createdReportId: number | null = null;
+  createdReportId: string | null = null;
 
   form: CreateReportRequest = {
     personId: '',
@@ -132,7 +132,7 @@ export class NewComponent implements OnInit {
     };
     this.reportsService.create(payload).subscribe({
       next: (report) => {
-        this.createdReportId = report.id;
+        this.createdReportId = report.encryptedId;
         this.isLoading.set(false);
         this.showSubmitModal.set(true);
       },

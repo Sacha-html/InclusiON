@@ -85,14 +85,14 @@ export class ProfessionalFamilyTabComponent {
       label: '',
       type: 'actions',
       actions: [
-        { action: 'unlink', label: 'Desvincular', icon: 'cil-x', visible: (item) => this.canUnlinkFamily && item.isActive },
+        { action: 'unlink', label: 'Desvincular', icon: 'cilX', visible: (item) => this.canUnlinkFamily && item.isActive },
       ],
     },
   ];
 
   get familyHeaderButtons(): HeaderButton[] {
     return this.canLinkFamily
-      ? [{ action: 'link', label: 'Vincular', icon: 'cil-plus', color: 'primary' }]
+      ? [{ action: 'link', label: 'Vincular', icon: 'cilPlus', color: 'primary' }]
       : [];
   }
 

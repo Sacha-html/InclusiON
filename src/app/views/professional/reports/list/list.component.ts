@@ -50,6 +50,8 @@ export class ListComponent implements OnInit {
   totalRecords = signal(0);
   totalPages = signal(0);
   searchTerm = signal('');
+  sortBy = signal('createdAt');
+  sortDirection = signal('DESC');
 
   // ID del profesional autenticado — se carga en ngOnInit antes de loadReports
   private professionalId = '';
@@ -74,9 +76,9 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
 actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === ReportStatus.Draft },
-        { action: 'submit', label: 'Enviar', icon: 'cil-send', visible: (item) => item.status === ReportStatus.Draft },
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.status === ReportStatus.Draft },
+        { action: 'submit', label: 'Enviar', icon: 'cilSend', visible: (item) => item.status === ReportStatus.Draft },
       ],
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
@@ -123,8 +125,8 @@ actions: [
       page: this.currentPage(),
       pageSize: this.pageSize(),
       search: this.searchTerm() || undefined,
-      sortBy: 'reportDate',
-      sortDirection: 'desc',
+      sortBy: this.sortBy(),
+      sortDirection: this.sortDirection(),
       professionalId: this.professionalId,
       personId: this.selectedPersonId || undefined,
       status: this.statusFilter || undefined,
@@ -170,13 +172,17 @@ actions: [
     this.loadReports();
   }
 
-  onSort(_event: { sortBy: string; sortDirection: string }): void {
+  onSort(event: { sortBy: string; sortDirection: string }): void {
+    this.sortBy.set(event.sortBy);
+    this.sortDirection.set(event.sortDirection);
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     if (event.action === 'view') {
-      this.router.navigate([AppRoutes.Pro.Reports, event.item.id]);
+      this.router.navigate([AppRoutes.Pro.Reports, event.item.encryptedId]);
+    } else if (event.action === 'edit') {
+      this.router.navigate([AppRoutes.Pro.Reports, event.item.encryptedId, 'edit']);
     } else if (event.action === 'submit') {
       this.reportToSubmit = event.item;
       this.showSubmitModal = true;
@@ -192,7 +198,7 @@ actions: [
   confirmSubmit(): void {
     if (!this.reportToSubmit) return;
     this.isSubmitting = true;
-    this.reportsService.submitReport(this.reportToSubmit.id).subscribe({
+    this.reportsService.submitReport(this.reportToSubmit.encryptedId).subscribe({
       next: () => {
         this.toastService.success('Reporte enviado al administrador para revisión.');
         this.showSubmitModal = false;

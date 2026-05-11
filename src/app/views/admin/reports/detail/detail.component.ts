@@ -55,10 +55,10 @@ export class DetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.loadReport(+id);
+    if (id) this.loadReport(id);
   }
 
-  loadReport(id: number): void {
+  loadReport(id: string): void {
     this.reportsService.getById(id).subscribe({
       next: (data) => { this.report.set(data); this.isLoading.set(false); },
       error: () => { this.isLoading.set(false); this.router.navigate([AppRoutes.Admin.Reports]); },
@@ -73,7 +73,7 @@ export class DetailComponent implements OnInit {
     const r = this.report();
     if (!r) return;
     this.isActioning = true;
-    this.reportsService.approveReport(r.id).subscribe({
+    this.reportsService.approveReport(r.encryptedId).subscribe({
       next: (updated) => {
         this.report.set(updated);
         this.toastService.success('Reporte aprobado. El familiar ya puede consultarlo.');
@@ -88,7 +88,7 @@ export class DetailComponent implements OnInit {
     const r = this.report();
     if (!r) return;
     this.isActioning = true;
-    this.reportsService.rejectReport(r.id, comment).subscribe({
+    this.reportsService.rejectReport(r.encryptedId, comment).subscribe({
       next: (updated) => {
         this.report.set(updated);
         this.toastService.success('Reporte rechazado. El profesional fue notificado.');

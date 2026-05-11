@@ -58,6 +58,8 @@ export class ListComponent implements OnInit {
   totalRecords  = signal(0);
   totalPages    = signal(0);
   searchTerm    = signal('');
+  sortBy        = signal('title');
+  sortDirection = signal<'asc' | 'desc'>('asc');
 
   categoryFilter     = '';
   templateTypeFilter = '';
@@ -108,10 +110,10 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'assign',     label: 'Asignar',    icon: 'cil-send',  visible: (item) => item.isActive },
-        { action: 'edit',       label: 'Editar',     icon: 'cil-notes', visible: (item) => this.canUpdate && !item.isStandardActivity },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cil-ban',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
-        { action: 'activate',   label: 'Activar',    icon: 'cil-check', visible: (item) => this.canUpdate && !item.isActive && !item.isStandardActivity },
+        { action: 'assign',     label: 'Asignar',    icon: 'cilSend',  visible: (item) => item.isActive },
+        { action: 'edit',       label: 'Editar',     icon: 'cilNotes', visible: (item) => this.canUpdate && !item.isStandardActivity },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cilBan',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
+        { action: 'activate',   label: 'Activar',    icon: 'cilCheck', visible: (item) => this.canUpdate && !item.isActive && !item.isStandardActivity },
       ],
     },
   ];
@@ -146,8 +148,8 @@ export class ListComponent implements OnInit {
       templateTypeId: this.templateTypeFilter ? +this.templateTypeFilter : undefined,
       isActive:       this.statusFilter  !== '' ? this.statusFilter  === 'true' : undefined,
       isStandard:     this.standardFilter !== '' ? this.standardFilter === 'true' : undefined,
-      sortBy:         'title',
-      sortDirection:  'asc',
+      sortBy:         this.sortBy(),
+      sortDirection:  this.sortDirection(),
     };
 
     this.activitiesService.getActivities(request).subscribe({
@@ -163,7 +165,12 @@ export class ListComponent implements OnInit {
 
   onSearch(term: string): void     { this.searchTerm.set(term); this.currentPage.set(1); this.loadActivities(); }
   onPageChange(page: number): void { this.currentPage.set(page); this.loadActivities(); }
-  onSort(_: unknown): void         { this.loadActivities(); }
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    this.sortBy.set(event.sortBy);
+    this.sortDirection.set(event.sortDirection.toLowerCase() as 'asc' | 'desc');
+    this.currentPage.set(1);
+    this.loadActivities();
+  }
   onFilterChange(): void           { this.currentPage.set(1); this.loadActivities(); }
 
   clearFilters(): void {

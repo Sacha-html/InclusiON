@@ -2,19 +2,13 @@
 
 <div class="d-flex flex-wrap gap-2 mb-3">
   @for (sp of skillProfile; track sp.skillAreaId) {
-    <span class="skill-chip d-inline-flex align-items-center gap-1 px-3 py-1 rounded-pill"
-          [style.background-color]="sp.color ?? '#6c757d'"
-          [style.color]="'#fff'">
-      @if (sp.icon) {
-        <span class="material-icons skill-chip-icon">{{ sp.icon }}</span>
-      }
-      {{ sp.skillAreaName }}
-      @if (person.isActive) {
-        <button cButtonClose (click)="removeSkillArea.emit(sp.skillAreaId)"
-                [attr.aria-label]="'Quitar ' + sp.skillAreaName">
-        </button>
-      }
-    </span>
+    <app-skill-chip
+      [name]="sp.skillAreaName"
+      [color]="sp.color ?? '#6c757d'"
+      [icon]="sp.icon"
+      [removable]="person.isActive"
+      (remove)="removeSkillArea.emit(sp.skillAreaId)"
+    />
   }
   @if (skillProfile.length === 0) {
     <span class="text-body-secondary">Sin areas de habilidad asignadas.</span>

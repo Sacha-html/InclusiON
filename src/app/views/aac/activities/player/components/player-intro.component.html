@@ -13,7 +13,6 @@
     class="action-btn action-btn--primary"
     [disabled]="loading"
     (click)="start.emit()"
-    aria-label="Iniciar actividad"
   >
     @if (loading) {
       <span class="btn-spinner" aria-hidden="true"></span>
