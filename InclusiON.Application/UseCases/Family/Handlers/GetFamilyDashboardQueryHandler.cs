@@ -1,5 +1,6 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Family.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -36,37 +37,27 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             // 2. Mensajes no leídos (por UserId del familiar)
             var unreadMessages = await _messages.GetUnreadCountAsync(query.FamilyUserId, cancellationToken);
 
-            // 3. Por cada persona: actividades recientes + resumen de reportes
-            var summaries = new List<FamilyPersonSummaryResponse>();
+            // 3. Bulk: actividades recientes + resumen de reportes para todas las personas en 2 queries
+            var personIds = persons.Select(p => p.Id).ToList();
 
-            foreach (var person in persons)
+            var recentResponsesByPerson = await _assignments
+                .GetRecentCompletedResponsesByPersonIdsAsync(personIds, limit: 3, cancellationToken);
+
+            var reportSummaryByPerson = await _reports
+                .GetApprovedReportsSummaryByPersonIdsAsync(personIds, cancellationToken);
+
+            var summaries = persons.Select(person =>
             {
-                var recentResponses = await _assignments.GetRecentCompletedResponsesAsync(
-                    person.Id, limit: 3, cancellationToken);
+                recentResponsesByPerson.TryGetValue(person.Id, out var responses);
+                reportSummaryByPerson.TryGetValue(person.Id, out var reportSummary);
 
-                var (reportCount, latestReport) = await _reports.GetApprovedReportsSummaryAsync(
-                    person.Id, cancellationToken);
-
-                summaries.Add(new FamilyPersonSummaryResponse
-                {
-                    PersonId    = person.Id,
-                    FullName    = $"{person.FirstName} {person.LastName}".Trim(),
-                    AvatarColor = person.AvatarColor,
-
-                    RecentActivities = recentResponses.Select(r => new RecentActivityResultResponse
-                    {
-                        AssignmentId      = r.AssignmentId,
-                        ActivityTitle     = r.Assignment.Activity.Title,
-                        Result            = r.Result?.ToString(),
-                        SuccessPercentage = r.SuccessPercentage,
-                        CompletedAt       = r.CompletedAt!.Value
-                    }).ToList(),
-
-                    ApprovedReportsCount = reportCount,
-                    LatestReportTitle    = latestReport?.Title,
-                    LatestReportDate     = latestReport?.ReportDate
-                });
-            }
+                return FamilyMapper.ToPersonSummary(
+                    person,
+                    recentActivities:     (responses ?? []).Select(FamilyMapper.ToRecentActivityResult).ToList(),
+                    approvedReportsCount: reportSummary.Count,
+                    latestReportTitle:    reportSummary.Latest?.Title,
+                    latestReportDate:     reportSummary.Latest?.ReportDate);
+            }).ToList();
 
             return ApiResponse<FamilyDashboardResponse>.SuccessResult(new FamilyDashboardResponse
             {

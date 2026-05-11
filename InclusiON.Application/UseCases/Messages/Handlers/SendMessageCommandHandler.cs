@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Messages.Commands;
+using InclusiON.Application.Mappers;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -16,17 +17,20 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
         private readonly IUsersRepository       _users;
         private readonly IAssignmentsRepository _assignments;
         private readonly IUnitOfWork            _uow;
+        private readonly IEncryptionService     _encryption;
 
         public SendMessageCommandHandler(
             IMessagesRepository messages,
             IUsersRepository users,
             IAssignmentsRepository assignments,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IEncryptionService encryption)
         {
             _messages    = messages;
             _users       = users;
             _assignments = assignments;
             _uow         = uow;
+            _encryption  = encryption;
         }
 
         public async Task<ApiResponse<MessageResponse>> HandleAsync(
@@ -102,9 +106,11 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             message.Sender   = sender;
             message.Receiver = receiver;
 
-            return ApiResponse<MessageResponse>.SuccessResult(
-                MessageMapper.ToDetail(message),
-                "Mensaje enviado exitosamente.");
+            var dto = MessageMapper.ToDetail(message);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(message.Id.ToString()));
+            return ApiResponse<MessageResponse>.SuccessResult(dto, "Mensaje enviado exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

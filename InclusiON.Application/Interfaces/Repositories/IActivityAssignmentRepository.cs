@@ -19,5 +19,12 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// </summary>
         Task<List<ActivityResponse>> GetRecentCompletedResponsesAsync(
             Guid personId, int limit, CancellationToken ct = default);
+
+        /// <summary>
+        /// Últimas N respuestas completadas para un conjunto de personas en una sola query.
+        /// Devuelve un diccionario PersonId → respuestas (máximo <paramref name="limit"/> por persona).
+        /// </summary>
+        Task<Dictionary<Guid, List<ActivityResponse>>> GetRecentCompletedResponsesByPersonIdsAsync(
+            IEnumerable<Guid> personIds, int limit, CancellationToken ct = default);
     }
 }

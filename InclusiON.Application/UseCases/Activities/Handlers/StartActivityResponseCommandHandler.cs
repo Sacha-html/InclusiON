@@ -16,15 +16,18 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IActivityAssignmentRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public StartActivityResponseCommandHandler(
             IActivityAssignmentRepository repository,
             IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
             _dateTime = dateTime;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -66,9 +69,13 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             var updated = await _repository.GetByIdAsync(command.AssignmentId, cancellationToken);
 
-            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(
-                ActivityAssignmentResponse.From(updated!),
-                "Actividad iniciada.");
+            var dto = ActivityAssignmentResponse.From(updated!);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(updated!.Id.ToString()));
+            foreach (var attempt in dto.Responses)
+                attempt.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(attempt.Id.ToString()));
+            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(dto, "Actividad iniciada.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

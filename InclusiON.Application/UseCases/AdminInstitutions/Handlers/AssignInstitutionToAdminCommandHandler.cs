@@ -1,6 +1,7 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.AdminInstitutions.Commands;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
@@ -55,7 +56,7 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
                 }
 
                 return ApiResponse<AdminInstitutionResponse>.SuccessResult(
-                    MapToResponse(existing, institution.Name), "Asignación creada exitosamente.");
+                    AdminInstitutionMapper.ToResponse(existing, institution.Name), "Asignación creada exitosamente.");
             }
 
             var assignment = new AdminInstitution
@@ -70,16 +71,8 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return ApiResponse<AdminInstitutionResponse>.SuccessResult(
-                MapToResponse(assignment, institution.Name), "Asignación creada exitosamente.");
+                AdminInstitutionMapper.ToResponse(assignment, institution.Name), "Asignación creada exitosamente.");
         }
 
-        private static AdminInstitutionResponse MapToResponse(AdminInstitution ai, string institutionName) => new()
-        {
-            AdminUserId     = ai.AdminUserId,
-            InstitutionId   = ai.InstitutionId,
-            InstitutionName = institutionName,
-            AssignedAt      = ai.AssignedAt,
-            IsActive        = ai.IsActive
-        };
     }
 }
