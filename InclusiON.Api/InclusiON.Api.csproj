@@ -45,6 +45,7 @@
     <ProjectReference Include="..\InclusiON.Infrastructure\InclusiON.Infrastructure.csproj" />
     <ProjectReference Include="..\InclusiON.Infrastructure.Telemetry\InclusiON.Infrastructure.Telemetry.csproj" />
     <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
+    <ProjectReference Include="..\InclusiON.Agents\InclusiON.Agents.csproj" />
     <ProjectReference Include="..\InclusiON.SemanticSearch\InclusiON.SemanticSearch.csproj" />
   </ItemGroup>
 
