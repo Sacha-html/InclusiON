@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Application.Extensions;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
@@ -148,6 +148,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.LoginMethod)
                 .Include(p => p.PersonRepresentatives.Where(pr => pr.IsActive))
                     .ThenInclude(pr => pr.Representative)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .AsQueryable();
 
