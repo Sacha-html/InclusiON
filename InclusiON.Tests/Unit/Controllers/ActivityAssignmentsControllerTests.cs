@@ -116,7 +116,7 @@ namespace InclusiON.Tests.Unit.Controllers
             // Arrange
             var sut     = BuildSut(entityId: null);
             var handler = OkCreateAssignmentHandler();
-            var request = new CreateActivityAssignmentRequest { ActivityId = 1, PersonId = Guid.NewGuid() };
+            var request = new CreateActivityAssignmentRequest { EncryptedActivityId = "ENCRYPTED_1", PersonId = Guid.NewGuid() };
 
             // Act
             var result = await sut.CreateAssignment(request, handler);
@@ -132,7 +132,7 @@ namespace InclusiON.Tests.Unit.Controllers
             var entityId = Guid.NewGuid();
             var handler  = OkCreateAssignmentHandler();
             var sut      = BuildSut(entityId: entityId);
-            var request  = new CreateActivityAssignmentRequest { ActivityId = 1, PersonId = Guid.NewGuid() };
+            var request  = new CreateActivityAssignmentRequest { EncryptedActivityId = "ENCRYPTED_1", PersonId = Guid.NewGuid() };
 
             // Act
             await sut.CreateAssignment(request, handler);

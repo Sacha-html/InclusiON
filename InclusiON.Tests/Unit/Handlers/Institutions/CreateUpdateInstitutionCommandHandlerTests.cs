@@ -16,13 +16,14 @@ namespace InclusiON.Tests.Unit.Handlers.Institutions
         private readonly IInstitutionsRepository _repo = Substitute.For<IInstitutionsRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
         // ── CreateInstitution ────────────────────────────────────────────
 
         private CreateInstitutionCommandHandler BuildCreate() =>
-            new(_repo, _uow, _dateTime);
+            new(_repo, _uow, _dateTime, _encryption);
 
         private static CreateInstitutionCommand CreateCmd(string name = "Colegio Test") =>
             new(name, "Av. Siempre Viva 123", "555-1234", "colegio@test.com");
@@ -60,7 +61,7 @@ namespace InclusiON.Tests.Unit.Handlers.Institutions
         // ── UpdateInstitution ────────────────────────────────────────────
 
         private UpdateInstitutionCommandHandler BuildUpdate() =>
-            new(_repo, _uow, _dateTime);
+            new(_repo, _uow, _dateTime, _encryption);
 
         private static UpdateInstitutionCommand UpdateCmd(int id = 1, string name = "Nuevo Nombre") =>
             new(id, name, "Nueva Dir", "555-9999", "nuevo@test.com");

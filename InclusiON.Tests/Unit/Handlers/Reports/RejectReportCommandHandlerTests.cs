@@ -5,6 +5,7 @@ using Xunit;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using InclusiON.Application.UseCases.Reports.Commands;
 using InclusiON.Application.UseCases.Reports.Handlers;
 using InclusiON.Domain.Enums;
@@ -15,15 +16,15 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
 {
     public class RejectReportCommandHandlerTests
     {
-        private readonly IReportsRepository       _reportsRepo  = Substitute.For<IReportsRepository>();
-        private readonly IProfessionalsRepository _prosRepo     = Substitute.For<IProfessionalsRepository>();
-        private readonly IEmailService            _emailService = Substitute.For<IEmailService>();
-        private readonly IUnitOfWork              _uow          = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider        _dateTime     = Substitute.For<IDateTimeProvider>();
+        private readonly IReportsRepository    _reportsRepo  = Substitute.For<IReportsRepository>();
+        private readonly IEmailService         _emailService = Substitute.For<IEmailService>();
+        private readonly IUnitOfWork           _uow          = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider     _dateTime     = Substitute.For<IDateTimeProvider>();
+        private readonly IServiceScopeFactory  _scopeFactory = Substitute.For<IServiceScopeFactory>();
 
         private RejectReportCommandHandler BuildSut() =>
-            new(_reportsRepo, _prosRepo, _emailService, _uow,
-                NullLogger<RejectReportCommandHandler>.Instance, _dateTime);
+            new(_reportsRepo, _emailService, _uow,
+                NullLogger<RejectReportCommandHandler>.Instance, _dateTime, _scopeFactory);
 
         private static readonly Guid AdminId = Guid.NewGuid();
         private static readonly Guid ProfId  = Guid.NewGuid();
@@ -96,8 +97,6 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
             var now    = DateTime.UtcNow;
             _reportsRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(report);
             _dateTime.UtcNow.Returns(now);
-            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>())
-                     .Returns((Professional?)null);
 
             var result = await BuildSut().HandleAsync(Cmd("  Corregir datos  "), default);
 

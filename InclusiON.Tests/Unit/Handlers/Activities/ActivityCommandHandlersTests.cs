@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -25,14 +26,19 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _repo = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
-        private readonly IEmbeddingService _embedding = Substitute.For<IEmbeddingService>();
-        private readonly IEmbeddingRepository _embeddingRepo = Substitute.For<IEmbeddingRepository>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobRepo = Substitute.For<IBackgroundJobRepository>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public CreateActivityCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private CreateActivityCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime, _embedding, _embeddingRepo,
+            new(_repo, _uow, _dateTime, _encryption, _bgJobRepo,
                 NullLogger<CreateActivityCommandHandler>.Instance);
 
         private static CreateActivityCommand Cmd() => new(
@@ -128,16 +134,21 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _repo = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
-        private readonly IEmbeddingService _embedding = Substitute.For<IEmbeddingService>();
-        private readonly IEmbeddingRepository _embeddingRepo = Substitute.For<IEmbeddingRepository>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobRepo = Substitute.For<IBackgroundJobRepository>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();
         private const int ActivityId = 5;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public UpdateActivityCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private UpdateActivityCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime, _embedding, _embeddingRepo,
+            new(_repo, _uow, _dateTime, _encryption, _bgJobRepo,
                 NullLogger<UpdateActivityCommandHandler>.Instance);
 
         private static UpdateActivityCommand Cmd(Guid? profId = null) => new(
@@ -219,14 +230,20 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _repo = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();
         private const int ActivityId = 7;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public PatchActivityStatusCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private PatchActivityStatusCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime);
+            new(_repo, _uow, _dateTime, _encryption);
 
         private static Activity AnActivity(bool isActive = true, Guid? profId = null) => new()
         {
@@ -335,6 +352,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _activitiesRepo = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();
@@ -342,11 +360,21 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private const int ActivityId = 10;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        // The encrypted activity ID that decrypts to "10"
+        private const string EncryptedActivityId = "ENCRYPTED_10";
+
+        public CreateActivityAssignmentCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+            // Decrypt: "ENCRYPTED_10" (url-safe) → standard base64 → "10"
+            _encryption.Decrypt(Arg.Any<string>()).Returns(ActivityId.ToString());
+        }
+
         private CreateActivityAssignmentCommandHandler BuildSut() =>
-            new(_repo, _activitiesRepo, _uow, _dateTime);
+            new(_repo, _activitiesRepo, _uow, _dateTime, _encryption);
 
         private static CreateActivityAssignmentCommand Cmd(Guid? profId = null) => new(
-            ActivityId, PersonId, profId ?? ProfId,
+            EncryptedActivityId, PersonId, profId ?? ProfId,
             DueDate: null, IsEvaluationActivity: false, SequenceOrder: null);
 
         private static Activity AnActivity(bool isActive = true, bool isStandard = false, Guid? profId = null) => new()
@@ -442,14 +470,20 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivityAssignmentRepository _repo = Substitute.For<IActivityAssignmentRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid OtherPersonId = Guid.NewGuid();
         private const int AssignmentId = 3;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public StartActivityResponseCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private StartActivityResponseCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime);
+            new(_repo, _uow, _dateTime, _encryption);
 
         private static ActivityAssignment AnAssignment(int status = AssignmentStatuses.Pendiente, Guid? personId = null) => new()
         {
@@ -550,6 +584,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IRoadmapRepository           _roadmaps = Substitute.For<IRoadmapRepository>();
         private readonly IUnitOfWork                  _uow      = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider            _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService           _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid OtherPersonId = Guid.NewGuid();
@@ -557,8 +592,13 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private const int ResponseId = 9;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public CompleteActivityResponseCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private CompleteActivityResponseCommandHandler BuildSut() =>
-            new(_repo, _roadmaps, _uow, _dateTime);
+            new(_repo, _roadmaps, _uow, _dateTime, _encryption);
 
         private static CompleteActivityResponseCommand Cmd(
             Guid? personId = null, decimal success = 85m) => new(
