@@ -11,7 +11,7 @@ using InclusiON.Api.Scalar;
 using InclusiON.Infrastructure;
 using InclusiON.Infrastructure.Seeders;
 using InclusiON.Infrastructure.Telemetry;
-using InclusiON.SemanticSearch.Extensions;
+using InclusiON.Agents;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +51,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
     options.Filters.Add<InclusiON.Api.Filters.InstitutionAccessFilter>();
     options.ModelBinderProviders.Insert(0, new InclusiON.Api.ModelBinders.EncryptedGuidModelBinderProvider());
+    options.ModelBinderProviders.Insert(1, new InclusiON.Api.ModelBinders.EncryptedIntModelBinderProvider());
 })
 .AddJsonOptions(options =>
 {
@@ -69,7 +70,7 @@ var connectionString = builder.Configuration.GetConnectionString("PostgreSqlConn
 builder.Services.AddInfrastructureTelemetry(builder.Configuration, connectionString);
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplicationServices();
-builder.Services.AddSemanticSearch(builder.Configuration);
+builder.Services.AddAgents();
 
 builder.Services.AddTransient<OpenApiExamplesTransformer>();
 
