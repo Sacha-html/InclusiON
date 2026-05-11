@@ -7,6 +7,7 @@ namespace InclusiON.DTOs.Responses.Roadmap
     {
         /// <summary>ID de la entrada PersonRoadmapActivity.</summary>
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
 
         /// <summary>ID de la actividad referenciada.</summary>
         public int ActivityId { get; set; }
