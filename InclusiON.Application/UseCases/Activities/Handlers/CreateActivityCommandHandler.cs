@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Activities.Commands;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Activities;
@@ -20,24 +21,24 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IActivitiesRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
-        private readonly IEmbeddingService _embeddingService;
-        private readonly IEmbeddingRepository _embeddingRepository;
+        private readonly IEncryptionService _encryption;
+        private readonly IBackgroundJobRepository _backgroundJobRepository;
         private readonly ILogger<CreateActivityCommandHandler> _logger;
 
         public CreateActivityCommandHandler(
             IActivitiesRepository repository,
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
-            IEmbeddingService embeddingService,
-            IEmbeddingRepository embeddingRepository,
+            IEncryptionService encryption,
+            IBackgroundJobRepository backgroundJobRepository,
             ILogger<CreateActivityCommandHandler> logger)
         {
-            _repository = repository;
-            _unitOfWork = unitOfWork;
-            _dateTime = dateTime;
-            _embeddingService = embeddingService;
-            _embeddingRepository = embeddingRepository;
-            _logger = logger;
+            _repository      = repository;
+            _unitOfWork      = unitOfWork;
+            _dateTime        = dateTime;
+            _encryption      = encryption;
+            _backgroundJobRepository = backgroundJobRepository;
+            _logger          = logger;
         }
 
         public async Task<ApiResponse<ActivityResponse>> HandleAsync(
@@ -101,11 +102,22 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 // Reload con includes para devolver respuesta completa
                 var created = await _repository.GetByIdAsync(activity.Id, cancellationToken);
 
-                _ = GenerateAndStoreEmbeddingAsync(activity.Id, command.Title, command.Description, command.Instructions);
+                var payload = JsonSerializer.Serialize(new
+                {
+                    entity_type = "activity",
+                    entity_id = activity.Id.ToString(),
+                    title = command.Title,
+                    description = command.Description,
+                    instructions = command.Instructions,
+                    content_json = command.ContentJson,
+                });
 
-                return ApiResponse<ActivityResponse>.SuccessResult(
-                    ActivityResponse.From(created!),
-                    "Actividad creada exitosamente.");
+                await _backgroundJobRepository.CreateAsync(
+                    JobTypes.Embedding, payload, maxRetries: 3, cancellationToken: cancellationToken);
+
+                var dto = ActivityResponse.From(created!);
+                dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(created!.Id.ToString()));
+                return ApiResponse<ActivityResponse>.SuccessResult(dto, "Actividad creada exitosamente.");
             }
             catch (Exception ex)
             {
@@ -114,29 +126,13 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             }
         }
 
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+
         private static bool TryParseContentJson(string json, out JsonDocument? doc)
         {
             doc = null;
             try { doc = JsonDocument.Parse(json); return true; }
             catch { return false; }
-        }
-
-        private async Task GenerateAndStoreEmbeddingAsync(int activityId, string title, string? description, string? instructions)
-        {
-            try
-            {
-                var parts = new[] { title, description, instructions }
-                    .Where(p => !string.IsNullOrWhiteSpace(p));
-                var text = string.Join(". ", parts);
-
-                var embedding = await _embeddingService.GenerateEmbeddingAsync(text);
-                if (embedding.Length == 0) return;
-                await _embeddingRepository.StoreAsync(activityId, embedding);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "No se pudo generar embedding para actividad {ActivityId}", activityId);
-            }
         }
     }
 }

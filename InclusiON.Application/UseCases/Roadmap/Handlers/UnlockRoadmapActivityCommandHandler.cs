@@ -1,6 +1,7 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Roadmap.Commands;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -13,11 +14,13 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
     {
         private readonly IRoadmapRepository _roadmaps;
         private readonly IUnitOfWork        _uow;
+        private readonly IEncryptionService _encryption;
 
-        public UnlockRoadmapActivityCommandHandler(IRoadmapRepository roadmaps, IUnitOfWork uow)
+        public UnlockRoadmapActivityCommandHandler(IRoadmapRepository roadmaps, IUnitOfWork uow, IEncryptionService encryption)
         {
-            _roadmaps = roadmaps;
-            _uow      = uow;
+            _roadmaps   = roadmaps;
+            _uow        = uow;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<RoadmapActivityResponse>> HandleAsync(
@@ -38,9 +41,11 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
 
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<RoadmapActivityResponse>.SuccessResult(
-                GetPersonRoadmapQueryHandler.MapActivity(activity),
-                "Actividad desbloqueada exitosamente.");
+            var actDto = RoadmapMapper.ToActivityResponse(activity);
+            actDto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(activity.Id.ToString()));
+            return ApiResponse<RoadmapActivityResponse>.SuccessResult(actDto, "Actividad desbloqueada exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

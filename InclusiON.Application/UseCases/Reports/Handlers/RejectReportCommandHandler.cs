@@ -6,6 +6,7 @@ using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Reports;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace InclusiON.Application.UseCases.Reports.Handlers
@@ -13,26 +14,26 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
     public class RejectReportCommandHandler : ICommandHandler<RejectReportCommand, ApiResponse<ReportResponse>>
     {
         private readonly IReportsRepository _repository;
-        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RejectReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public RejectReportCommandHandler(
             IReportsRepository repository,
-            IProfessionalsRepository professionalsRepository,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
             ILogger<RejectReportCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IServiceScopeFactory scopeFactory)
         {
-            _repository = repository;
-            _professionalsRepository = professionalsRepository;
+            _repository   = repository;
             _emailService = emailService;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
+            _unitOfWork   = unitOfWork;
+            _logger       = logger;
+            _dateTime     = dateTime;
+            _scopeFactory = scopeFactory;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -73,17 +74,22 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _ = Task.Run(async () =>
             {
+                // Crear scope propio: el scope del request ya está dispuesto cuando Task.Run ejecuta
+                using var scope = _scopeFactory.CreateScope();
+                var professionalsRepository = scope.ServiceProvider.GetRequiredService<IProfessionalsRepository>();
+                var emailService            = scope.ServiceProvider.GetRequiredService<IEmailService>();
+
                 try
                 {
-                    var professional = await _professionalsRepository.GetByIdAsync(professionalId);
+                    var professional = await professionalsRepository.GetByIdAsync(professionalId);
                     var professionalEmail = professional?.User?.Email ?? professional?.Email;
-                    var professionalName = professional != null
+                    var professionalName  = professional != null
                         ? $"{professional.FirstName} {professional.LastName}"
                         : string.Empty;
 
                     if (string.IsNullOrWhiteSpace(professionalEmail)) return;
 
-                    await _emailService.SendTemplatedEmailAsync(
+                    await emailService.SendTemplatedEmailAsync(
                         professionalEmail,
                         "Tu reporte requiere correcciones",
                         "ReportRejected",

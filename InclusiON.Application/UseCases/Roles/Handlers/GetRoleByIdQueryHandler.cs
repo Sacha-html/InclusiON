@@ -1,5 +1,6 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Roles.Queries;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roles;
@@ -23,8 +24,7 @@ namespace InclusiON.Application.UseCases.Roles.Handlers
             if (role is null)
                 return ApiResponse<RoleResponse>.NotFound("Rol");
 
-            return ApiResponse<RoleResponse>.SuccessResult(
-                new RoleResponse { Id = role.Id, Name = role.Name, Permissions = role.Permissions });
+            return ApiResponse<RoleResponse>.SuccessResult(RoleMapper.ToResponse(role));
         }
     }
 }
