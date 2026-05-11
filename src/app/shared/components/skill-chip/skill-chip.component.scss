@@ -1,0 +1,44 @@
+:host {
+  display: inline-flex;
+}
+
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50rem;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+
+  &__icon {
+    font-size: 1rem;
+    line-height: 1;
+    color: #fff;
+  }
+
+  &__name {
+    color: #fff;
+  }
+
+  &__close {
+    margin-left: 0.25rem;
+    padding: 0;
+    width: 0.75em;
+    height: 0.75em;
+    opacity: 0.8;
+    flex-shrink: 0;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
+    }
+  }
+}
