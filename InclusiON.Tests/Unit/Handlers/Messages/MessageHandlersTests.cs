@@ -49,7 +49,8 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     public class GetInboxQueryHandlerTests
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
-        private GetInboxQueryHandler BuildSut() => new(_messages);
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private GetInboxQueryHandler BuildSut() => new(_messages, _encryption);
 
         private static readonly Guid UserId = Guid.NewGuid();
 
@@ -109,7 +110,8 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     public class GetSentQueryHandlerTests
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
-        private GetSentQueryHandler BuildSut() => new(_messages);
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private GetSentQueryHandler BuildSut() => new(_messages, _encryption);
 
         private static readonly Guid UserId = Guid.NewGuid();
 
@@ -145,7 +147,8 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
         private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
-        private GetMessageByIdQueryHandler BuildSut() => new(_messages, _uow);
+        private readonly IEncryptionService  _encryption = Substitute.For<IEncryptionService>();
+        private GetMessageByIdQueryHandler BuildSut() => new(_messages, _uow, _encryption);
 
         private static readonly Guid SenderId   = Guid.NewGuid();
         private static readonly Guid ReceiverId = Guid.NewGuid();
@@ -268,8 +271,9 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
         private readonly IUsersRepository       _users       = Substitute.For<IUsersRepository>();
         private readonly IAssignmentsRepository _assignments = Substitute.For<IAssignmentsRepository>();
         private readonly IUnitOfWork            _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IEncryptionService     _encryption  = Substitute.For<IEncryptionService>();
 
-        private SendMessageCommandHandler BuildSut() => new(_messages, _users, _assignments, _uow);
+        private SendMessageCommandHandler BuildSut() => new(_messages, _users, _assignments, _uow, _encryption);
 
         private static readonly Guid ProfUserId   = Guid.NewGuid();
         private static readonly Guid FamilyUserId = Guid.NewGuid();
@@ -487,7 +491,8 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
         private readonly IUsersRepository    _users    = Substitute.For<IUsersRepository>();
         private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
-        private ReplyToMessageCommandHandler BuildSut() => new(_messages, _users, _uow);
+        private readonly IEncryptionService  _encryption = Substitute.For<IEncryptionService>();
+        private ReplyToMessageCommandHandler BuildSut() => new(_messages, _users, _uow, _encryption);
 
         private static readonly Guid SenderId   = Guid.NewGuid();
         private static readonly Guid ReceiverId = Guid.NewGuid();
@@ -558,7 +563,8 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
         private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
-        private MarkMessageReadCommandHandler BuildSut() => new(_messages, _uow);
+        private readonly IEncryptionService  _encryption = Substitute.For<IEncryptionService>();
+        private MarkMessageReadCommandHandler BuildSut() => new(_messages, _uow, _encryption);
 
         private static readonly Guid SenderId   = Guid.NewGuid();
         private static readonly Guid ReceiverId = Guid.NewGuid();
@@ -735,7 +741,7 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
         }
 
         [Fact]
@@ -751,10 +757,10 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().HaveCount(1);
-            result.Data![0].UserId.Should().Be(ContactId);
-            result.Data[0].UserType.Should().Be("FamilyRepresentative");
-            result.Data[0].FullName.Should().Be("Luis López");
+            result.Data!.Data.Should().HaveCount(1);
+            result.Data!.Data[0].UserId.Should().Be(ContactId);
+            result.Data!.Data[0].UserType.Should().Be("FamilyRepresentative");
+            result.Data!.Data[0].FullName.Should().Be("Luis López");
         }
 
         [Fact]
@@ -770,10 +776,10 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().HaveCount(1);
-            result.Data![0].UserId.Should().Be(ContactId);
-            result.Data[0].UserType.Should().Be("Professional");
-            result.Data[0].FullName.Should().Be("Ana Gómez");
+            result.Data!.Data.Should().HaveCount(1);
+            result.Data!.Data[0].UserId.Should().Be(ContactId);
+            result.Data!.Data[0].UserType.Should().Be("Professional");
+            result.Data!.Data[0].FullName.Should().Be("Ana Gómez");
         }
 
         [Fact]
@@ -788,7 +794,7 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
         }
     }
 }
