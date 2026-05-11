@@ -290,12 +290,20 @@ namespace InclusiON.Infrastructure.Services
             // Update login metadata outside the token transaction — Identity regenerates
             // ConcurrencyStamp on UpdateAsync, causing DbUpdateConcurrencyException when
             // concurrent logins race on the same user (e.g. parallel E2E test workers).
+            //
+            // Re-fetch via FindByIdAsync: EF ChangeTracker may have tracked the User during
+            // SaveChangesAsync (relationship fixup through RefreshToken.User navigation).
+            // Using the original AsNoTracking instance would throw InvalidOperationException
+            // ("another instance with the same key value is already being tracked").
+            // FindByIdAsync hits the ChangeTracker cache first (O(1)) — no extra DB round-trip
+            // when the entity is already tracked, which is the common path after SaveChangesAsync.
             try
             {
-                user.LastLoginDate = _dateTime.UtcNow;
-                user.LastLoginIpAddress = ipAddress;
-                user.LastLoginUserAgent = userAgent;
-                await _identityService.UpdateUserAsync(user);
+                var trackedUser = await _identityService.FindByIdAsync(user.Id) ?? user;
+                trackedUser.LastLoginDate = _dateTime.UtcNow;
+                trackedUser.LastLoginIpAddress = ipAddress;
+                trackedUser.LastLoginUserAgent = userAgent;
+                await _identityService.UpdateUserAsync(trackedUser);
             }
             catch (DbUpdateConcurrencyException)
             {
