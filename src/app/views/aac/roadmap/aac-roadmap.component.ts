@@ -80,7 +80,7 @@ export class AacRoadmapComponent implements OnInit {
 
   onNodeClick(node: RoadmapNode): void {
     if (node.status === 'locked' || !node.assignment || node.status === 'completed') return;
-    this.router.navigate([AppRoutes.Aac.Activities, node.assignment.id]);
+    this.router.navigate([AppRoutes.Aac.Activities, node.assignment.encryptedId]);
   }
 
   nodeLabel(node: RoadmapNode): string {

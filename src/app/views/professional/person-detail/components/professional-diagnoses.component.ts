@@ -127,7 +127,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
 
   openEdit(item: DiagnosisListItemResponse): void {
     this.editingIsCreator.set(this.isCreator(item));
-    this.diagnosesService.getById(item.id).subscribe({
+    this.diagnosesService.getById(item.encryptedId).subscribe({
       next: (d) => {
         this.editing.set(d);
         this.submitted = false;
@@ -159,7 +159,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
     this.saving.set(true);
 
     const op = this.editing()
-      ? this.diagnosesService.update(this.editing()!.id, this.form)
+      ? this.diagnosesService.update(this.editing()!.encryptedId, this.form)
       : this.diagnosesService.create(this.personId, this.form);
 
     op.subscribe({
@@ -188,7 +188,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
     const diag = this.deactivatingDiag();
     if (!diag) return;
     this.isDeactivating.set(true);
-    this.diagnosesService.patchStatus(diag.id, false).subscribe({
+    this.diagnosesService.patchStatus(diag.encryptedId, false).subscribe({
       next: () => {
         this.toastService.success('Diagnóstico dado de baja exitosamente.');
         this.showDeactivateModal.set(false);

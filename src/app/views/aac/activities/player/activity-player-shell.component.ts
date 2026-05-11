@@ -34,11 +34,11 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
   private completedSub?: Subscription;
 
   ngOnInit(): void {
-    const assignmentId = +this.route.snapshot.paramMap.get('assignmentId')!;
+    const assignmentId = this.route.snapshot.paramMap.get('assignmentId')!;
 
     this.activitiesService.getMyAssignments().subscribe({
       next: (list) => {
-        const found = list.find(a => a.id === assignmentId) ?? null;
+        const found = list.find(a => a.encryptedId === assignmentId) ?? null;
 
         if (!found) {
           this.hasError.set(true);

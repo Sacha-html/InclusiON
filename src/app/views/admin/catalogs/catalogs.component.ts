@@ -34,8 +34,8 @@ interface CatalogConfig {
   fields: FieldConfig[];
   load: () => Observable<any[]>;
   create?: (v: any) => Observable<any>;
-  update: (id: number, v: any) => Observable<any>;
-  deactivate?: (id: number) => Observable<any>;
+  update: (id: string, v: any) => Observable<any>;
+  deactivate?: (id: string) => Observable<any>;
 }
 
 @Component({
@@ -66,7 +66,7 @@ export class CatalogsComponent implements OnInit {
   isSaving = false;
   showModal = false;
   modalTitle = '';
-  editingId: number | null = null;
+  editingId: string | null = null;
   form: FormGroup | null = null;
 
   showDeactivateModal = false;
@@ -296,7 +296,7 @@ export class CatalogsComponent implements OnInit {
   }
 
   openEdit(item: any): void {
-    this.editingId = item.id;
+    this.editingId = item.encryptedId;
     this.modalTitle = `Editar - ${this.config.title}`;
     this.buildForm(item);
     this.showModal = true;
@@ -346,7 +346,7 @@ export class CatalogsComponent implements OnInit {
     if (!this.deactivatingItem || !this.config.deactivate) return;
     this.isDeactivating = true;
 
-    this.config.deactivate(this.deactivatingItem.id).subscribe({
+    this.config.deactivate(this.deactivatingItem.encryptedId).subscribe({
       next: () => {
         this.isDeactivating = false;
         this.showDeactivateModal = false;

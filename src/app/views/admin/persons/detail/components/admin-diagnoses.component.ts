@@ -61,7 +61,7 @@ export class AdminDiagnosesComponent implements OnInit {
   ];
 
   onRowAction(event: { action: string; item: DiagnosisListItemResponse }): void {
-    if (event.action === 'view')       this.openDetail(event.item.id);
+    if (event.action === 'view')       this.openDetail(event.item.encryptedId);
     if (event.action === 'deactivate') this.openDeactivate(event.item);
   }
 
@@ -79,7 +79,7 @@ export class AdminDiagnosesComponent implements OnInit {
     });
   }
 
-  openDetail(id: number): void {
+  openDetail(id: string): void {
     this.selected = null;
     this.loadingDetail = true;
     this.showModal = true;
@@ -109,10 +109,10 @@ export class AdminDiagnosesComponent implements OnInit {
   confirmDeactivate(): void {
     if (!this.deactivatingDiag) return;
     this.isDeactivating = true;
-    this.diagnosesService.patchStatus(this.deactivatingDiag.id, false).subscribe({
+    this.diagnosesService.patchStatus(this.deactivatingDiag.encryptedId, false).subscribe({
       next: () => {
         this.toastService.success('Diagnóstico dado de baja exitosamente.');
-        this.diagnoses = this.diagnoses.filter(d => d.id !== this.deactivatingDiag!.id);
+        this.diagnoses = this.diagnoses.filter(d => d.encryptedId !== this.deactivatingDiag!.encryptedId);
         this.showDeactivateModal = false;
         this.isDeactivating = false;
         this.deactivatingDiag = null;

@@ -13,6 +13,7 @@ export enum ActivityResponseResult {
 
 export interface ActivityListItemResponse {
   id: number;
+  encryptedId: string;
   title: string;
   description?: string;
   categoryName?: string;
@@ -28,6 +29,7 @@ export interface ActivityListItemResponse {
 
 export interface ActivityResponse {
   id: number;
+  encryptedId: string;
   title: string;
   description?: string;
   instructions?: string;
@@ -55,6 +57,7 @@ export interface ActivityResponse {
 
 export interface ActivityAttemptResponse {
   id: number;
+  encryptedId: string;
   startedAt: string;
   completedAt?: string;
   timeSpentSeconds?: number;
@@ -65,6 +68,7 @@ export interface ActivityAttemptResponse {
 
 export interface ActivityAssignmentResponse {
   id: number;
+  encryptedId: string;
   activityId: number;
   activityTitle: string;
   templateTypeCode: string;

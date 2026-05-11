@@ -48,7 +48,7 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
-  getById(id: number): Observable<ActivityResponse> {
+  getById(id: string): Observable<ActivityResponse> {
     return this.http
       .get<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`)
       .pipe(unwrapResponse());
@@ -60,13 +60,13 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
-  update(id: number, request: UpdateActivityRequest): Observable<ActivityResponse> {
+  update(id: string, request: UpdateActivityRequest): Observable<ActivityResponse> {
     return this.http
       .put<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`, request)
       .pipe(unwrapResponse());
   }
 
-  setStatus(id: number, isActive: boolean): Observable<ActivityResponse> {
+  setStatus(id: string, isActive: boolean): Observable<ActivityResponse> {
     return this.http
       .patch<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`, { isActive })
       .pipe(unwrapResponse());
@@ -103,7 +103,7 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
-  startResponse(assignmentId: number): Observable<ActivityAssignmentResponse> {
+  startResponse(assignmentId: string): Observable<ActivityAssignmentResponse> {
     return this.http
       .post<ApiResponse<ActivityAssignmentResponse>>(
         `${this.assignmentsUrl}/${assignmentId}/responses/start`,
@@ -113,8 +113,8 @@ export class ActivitiesService {
   }
 
   completeResponse(
-    assignmentId: number,
-    responseId: number,
+    assignmentId: string,
+    responseId: string,
     data: { successPercentage: number; timeSpentSeconds: number; requiredSupport: boolean; frustrationLevel?: number; responsePattern?: string; observations?: string }
   ): Observable<ActivityAssignmentResponse> {
     return this.http

@@ -11,6 +11,7 @@ export interface RoadmapResponse {
 
 export interface RoadmapAreaResponse {
   id: number;
+  encryptedId: string;
   skillAreaId: number;
   skillAreaName: string;
   color?: string | null;
@@ -21,6 +22,7 @@ export interface RoadmapAreaResponse {
 
 export interface RoadmapActivityResponse {
   id: number;
+  encryptedId: string;
   activityId: number;
   activityTitle: string;
   sequenceOrder: number;

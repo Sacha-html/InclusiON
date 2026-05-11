@@ -1,5 +1,6 @@
 export interface CatalogItem {
   id: number;
+  encryptedId: string;
   name: string;
   description?: string;
   isActive: boolean;
@@ -7,6 +8,7 @@ export interface CatalogItem {
 
 export interface AutonomyLevelItem {
   id: number;
+  encryptedId: string;
   name: string;
   description?: string;
   requiresSupervision: boolean;
@@ -16,6 +18,7 @@ export interface AutonomyLevelItem {
 
 export interface ActivityCategoryItem {
   id: number;
+  encryptedId: string;
   name: string;
   description?: string;
   isActive: boolean;
@@ -23,6 +26,7 @@ export interface ActivityCategoryItem {
 
 export interface SkillAreaItem {
   id: number;
+  encryptedId: string;
   name: string;
   description?: string;
   icon?: string;
@@ -33,6 +37,7 @@ export interface SkillAreaItem {
 
 export interface ActivityTemplateTypeItem {
   id: number;
+  encryptedId: string;
   name: string;
   code: string;
   skillAreaId?: number;
@@ -49,6 +54,7 @@ export interface AvatarColorItem {
 
 export interface LoginMethodItem {
   id: number;
+  encryptedId: string;
   code: string;
   name: string;
   description?: string;

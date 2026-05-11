@@ -36,13 +36,13 @@ export class AdminInstitutionsService {
       .pipe(unwrapResponse(), map((r) => r.data));
   }
 
-  assign(adminUserId: string, institutionId: number): Observable<AdminInstitutionResponse> {
+  assign(adminUserId: string, institutionId: string): Observable<AdminInstitutionResponse> {
     return this.http
       .post<ApiResponse<AdminInstitutionResponse>>(`${this.apiUrl}/${adminUserId}`, { institutionId })
       .pipe(unwrapResponse());
   }
 
-  remove(adminUserId: string, institutionId: number): Observable<void> {
+  remove(adminUserId: string, institutionId: string): Observable<void> {
     return this.http
       .delete<void>(`${this.apiUrl}/${adminUserId}/${institutionId}`)
       .pipe(handleApiError());

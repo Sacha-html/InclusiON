@@ -29,7 +29,7 @@ export class AacActivitiesComponent implements OnInit {
 
   openActivity(assignment: ActivityAssignmentResponse): void {
     if (assignment.status === ActivityAssignmentStatus.Completada) return;
-    this.router.navigate([AppRoutes.Aac.Activities, assignment.id]);
+    this.router.navigate([AppRoutes.Aac.Activities, assignment.encryptedId]);
   }
 
   statusVariant(status: ActivityAssignmentStatus): 'success' | 'warning' | 'danger' | 'primary' | 'muted' {

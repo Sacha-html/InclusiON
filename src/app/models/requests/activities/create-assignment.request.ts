@@ -1,5 +1,5 @@
 export interface CreateAssignmentRequest {
-  activityId: number;
+  encryptedActivityId: string;
   personId: string;
   dueDate?: string;
   isEvaluationActivity: boolean;

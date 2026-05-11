@@ -45,25 +45,25 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  removeArea(personId: string, areaId: number): Observable<unknown> {
+  removeArea(personId: string, areaId: string): Observable<unknown> {
     return this.http
       .delete<ApiResponse<unknown>>(`${this.url(personId)}/areas/${areaId}`)
       .pipe(unwrapResponse());
   }
 
-  addActivity(personId: string, areaId: number, request: AddRoadmapActivityRequest): Observable<RoadmapActivityResponse> {
+  addActivity(personId: string, areaId: string, request: AddRoadmapActivityRequest): Observable<RoadmapActivityResponse> {
     return this.http
       .post<ApiResponse<RoadmapActivityResponse>>(`${this.url(personId)}/areas/${areaId}/activities`, request)
       .pipe(unwrapResponse());
   }
 
-  removeActivity(personId: string, areaId: number, activityEntryId: number): Observable<unknown> {
+  removeActivity(personId: string, areaId: string, activityEntryId: string): Observable<unknown> {
     return this.http
       .delete<ApiResponse<unknown>>(`${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}`)
       .pipe(unwrapResponse());
   }
 
-  reorderActivities(personId: string, areaId: number, activities: ReorderActivityItem[]): Observable<unknown> {
+  reorderActivities(personId: string, areaId: string, activities: ReorderActivityItem[]): Observable<unknown> {
     return this.http
       .put<ApiResponse<unknown>>(
         `${this.url(personId)}/areas/${areaId}/activities/reorder`,
@@ -72,7 +72,7 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  unlockActivity(personId: string, areaId: number, activityEntryId: number): Observable<RoadmapActivityResponse> {
+  unlockActivity(personId: string, areaId: string, activityEntryId: string): Observable<RoadmapActivityResponse> {
     return this.http
       .put<ApiResponse<RoadmapActivityResponse>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/unlock`,

@@ -40,7 +40,7 @@ export class EditComponent implements OnInit {
   private readonly router            = inject(Router);
   private readonly route             = inject(ActivatedRoute);
 
-  activityId = 0;
+  activityId = '';
   templateTypeCode = '';
 
   categories    = signal<ActivityCategoryItem[]>([]);
@@ -91,7 +91,7 @@ export class EditComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.activityId = +this.route.snapshot.paramMap.get('id')!;
+    this.activityId = this.route.snapshot.paramMap.get('id')!;
 
     this.catalogsService.getActivityCategories().subscribe({ next: c => this.categories.set(c) });
     this.catalogsService.getSkillAreas().subscribe({ next: s => this.skillAreas.set(s) });
