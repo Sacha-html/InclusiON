@@ -6,6 +6,7 @@ using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Reports;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace InclusiON.Application.UseCases.Reports.Handlers
@@ -13,26 +14,26 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
     public class ApproveReportCommandHandler : ICommandHandler<ApproveReportCommand, ApiResponse<ReportResponse>>
     {
         private readonly IReportsRepository _repository;
-        private readonly IFamilyRepository _familyRepository;
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ApproveReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public ApproveReportCommandHandler(
             IReportsRepository repository,
-            IFamilyRepository familyRepository,
             IEmailService emailService,
             IUnitOfWork unitOfWork,
             ILogger<ApproveReportCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IServiceScopeFactory scopeFactory)
         {
-            _repository = repository;
-            _familyRepository = familyRepository;
+            _repository   = repository;
             _emailService = emailService;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
+            _unitOfWork   = unitOfWork;
+            _logger       = logger;
+            _dateTime     = dateTime;
+            _scopeFactory = scopeFactory;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -73,20 +74,24 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _ = Task.Run(async () =>
             {
+                // Crear scope propio: el scope del request ya está dispuesto cuando Task.Run ejecuta
+                using var scope = _scopeFactory.CreateScope();
+                var familyRepository = scope.ServiceProvider.GetRequiredService<IFamilyRepository>();
+                var emailService     = scope.ServiceProvider.GetRequiredService<IEmailService>();
+
                 try
                 {
-                    var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(personId);
+                    var representatives = await familyRepository.GetPersonRepresentativesByPersonIdAsync(personId);
                     var activeReps = representatives.Where(r => r.IsActive).ToList();
 
                     foreach (var rep in activeReps)
                     {
-                        // La navegación a User debe estar cargada o se busca por otro medio
                         var familyEmail = rep.Representative?.User?.Email;
                         var familyFirstName = rep.Representative?.FirstName ?? "Familiar";
 
                         if (string.IsNullOrWhiteSpace(familyEmail)) continue;
 
-                        await _emailService.SendTemplatedEmailAsync(
+                        await emailService.SendTemplatedEmailAsync(
                             familyEmail,
                             $"Nuevo reporte disponible sobre {personName}",
                             "ReportApproved",

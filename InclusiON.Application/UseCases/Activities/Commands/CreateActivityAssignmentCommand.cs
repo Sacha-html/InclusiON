@@ -1,7 +1,7 @@
 namespace InclusiON.Application.UseCases.Activities.Commands
 {
     public record CreateActivityAssignmentCommand(
-        int ActivityId,
+        string EncryptedActivityId,
         Guid PersonId,
         Guid AssignedByProfessionalId,
         DateTime? DueDate,

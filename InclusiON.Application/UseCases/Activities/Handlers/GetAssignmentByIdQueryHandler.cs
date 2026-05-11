@@ -1,4 +1,5 @@
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Activities.Queries;
 using InclusiON.DTOs.Responses;
@@ -10,10 +11,12 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         : IQueryHandler<GetAssignmentByIdQuery, ApiResponse<ActivityAssignmentResponse>>
     {
         private readonly IActivityAssignmentRepository _repository;
+        private readonly IEncryptionService _encryption;
 
-        public GetAssignmentByIdQueryHandler(IActivityAssignmentRepository repository)
+        public GetAssignmentByIdQueryHandler(IActivityAssignmentRepository repository, IEncryptionService encryption)
         {
             _repository = repository;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -29,8 +32,13 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 assignment.AssignedByProfessionalId != query.RequesterId)
                 return ApiResponse<ActivityAssignmentResponse>.Forbidden();
 
-            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(
-                ActivityAssignmentResponse.From(assignment));
+            var dto = ActivityAssignmentResponse.From(assignment);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(assignment.Id.ToString()));
+            foreach (var attempt in dto.Responses)
+                attempt.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(attempt.Id.ToString()));
+            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(dto);
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

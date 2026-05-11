@@ -1,4 +1,5 @@
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Activities.Queries;
 using InclusiON.DTOs.Common;
@@ -11,10 +12,12 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         : IQueryHandler<GetActivityByIdQuery, ApiResponse<ActivityResponse>>
     {
         private readonly IActivitiesRepository _repository;
+        private readonly IEncryptionService _encryption;
 
-        public GetActivityByIdQueryHandler(IActivitiesRepository repository)
+        public GetActivityByIdQueryHandler(IActivitiesRepository repository, IEncryptionService encryption)
         {
             _repository = repository;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<ActivityResponse>> HandleAsync(
@@ -29,7 +32,11 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             if (!activity.IsStandardActivity && activity.ProfessionalId != query.ProfessionalId)
                 return ApiResponse<ActivityResponse>.Forbidden();
 
-            return ApiResponse<ActivityResponse>.SuccessResult(ActivityResponse.From(activity));
+            var dto = ActivityResponse.From(activity);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(activity.Id.ToString()));
+            return ApiResponse<ActivityResponse>.SuccessResult(dto);
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

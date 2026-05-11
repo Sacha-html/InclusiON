@@ -1,5 +1,6 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
@@ -22,18 +23,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             var assignments = await _assignments.GetProfessionalsByPersonIdAsync(
                 query.PersonId, cancellationToken);
 
-            var response = assignments.Select(pp => new PersonProfessionalResponse
-            {
-                ProfessionalId        = pp.ProfessionalId,
-                PersonId              = pp.PersonId,
-                PersonFirstName       = pp.Professional.FirstName,
-                PersonLastName        = pp.Professional.LastName,
-                PersonFullName        = $"{pp.Professional.FirstName} {pp.Professional.LastName}",
-                IsPrimaryProfessional = pp.IsPrimaryProfessional,
-                CanSuperviseLogin     = pp.CanSuperviseLogin,
-                IsActive              = pp.IsActive,
-                AssignedAt            = pp.AssignedAt
-            }).ToList();
+            var response = assignments.Select(PersonMapper.ToProfessionalResponse).ToList();
 
             return ApiResponse<List<PersonProfessionalResponse>>.SuccessResult(response);
         }

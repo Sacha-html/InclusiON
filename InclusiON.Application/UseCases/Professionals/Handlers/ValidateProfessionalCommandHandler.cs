@@ -148,7 +148,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                         professional.Id, professional.UserId);
 
                     // Enviar email de aprobación sin bloquear la respuesta
-                    var email = userToActivate.Email ?? "";
+                    var email = userToActivate!.Email ?? "";
                     var firstName = professional.FirstName;
                     var tempPassword = password;
                     if (!string.IsNullOrEmpty(email))

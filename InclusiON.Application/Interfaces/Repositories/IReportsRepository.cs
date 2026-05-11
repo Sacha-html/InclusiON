@@ -33,6 +33,13 @@ namespace InclusiON.Application.Interfaces.Repositories
             Guid personId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Bulk: cuenta y devuelve el reporte aprobado más reciente para un conjunto de personas.
+        /// Devuelve un diccionario PersonId → (Count, Latest). Personas sin reportes no aparecen en el dict.
+        /// </summary>
+        Task<Dictionary<Guid, (int Count, Report? Latest)>> GetApprovedReportsSummaryByPersonIdsAsync(
+            IEnumerable<Guid> personIds, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Reportes aprobados visibles para un familiar (filtra por las personas a cargo del familiar).
         /// </summary>
         Task<PagedResponse<Report>> GetFamilyPagedAsync(

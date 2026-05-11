@@ -1,4 +1,5 @@
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Activities.Queries;
 using InclusiON.DTOs.Common;
@@ -11,10 +12,12 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         : IQueryHandler<GetActivitiesQuery, ApiResponse<PagedResponse<ActivityListItemResponse>>>
     {
         private readonly IActivitiesRepository _repository;
+        private readonly IEncryptionService _encryption;
 
-        public GetActivitiesQueryHandler(IActivitiesRepository repository)
+        public GetActivitiesQueryHandler(IActivitiesRepository repository, IEncryptionService encryption)
         {
             _repository = repository;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<PagedResponse<ActivityListItemResponse>>> HandleAsync(
@@ -38,7 +41,12 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             var paged = new PagedResponse<ActivityListItemResponse>
             {
-                Data            = items.Select(ActivityListItemResponse.From).ToList(),
+                Data = items.Select(a =>
+                {
+                    var item = ActivityListItemResponse.From(a);
+                    item.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(a.Id.ToString()));
+                    return item;
+                }).ToList(),
                 TotalRecords    = total,
                 TotalPages      = totalPages,
                 CurrentPage     = query.Page,
@@ -49,5 +57,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             return ApiResponse<PagedResponse<ActivityListItemResponse>>.SuccessResult(paged);
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

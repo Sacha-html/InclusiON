@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Activities.Commands;
 using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Activities;
@@ -16,17 +17,20 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IRoadmapRepository _roadmapRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public CompleteActivityResponseCommandHandler(
             IActivityAssignmentRepository repository,
             IRoadmapRepository roadmapRepository,
             IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _repository = repository;
             _roadmapRepository = roadmapRepository;
             _unitOfWork = unitOfWork;
             _dateTime = dateTime;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -52,6 +56,22 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             var now = _dateTime.UtcNow;
 
+            // Read roadmap data before any mutations — both reads only need PersonId/ActivityId
+            // which are available from the already-loaded assignment.
+            var roadmapEntry = await _roadmapRepository.GetByPersonAndActivityAsync(
+                assignment.PersonId, assignment.ActivityId, cancellationToken);
+
+            PersonRoadmapActivity? nextToUnlock = null;
+            if (roadmapEntry is not null && command.SuccessPercentage >= roadmapEntry.UnlockThresholdPercent)
+            {
+                var next = await _roadmapRepository.GetNextInAreaAsync(
+                    roadmapEntry.PersonRoadmapAreaId, roadmapEntry.SequenceOrder, cancellationToken);
+
+                if (next is not null && !next.IsUnlocked)
+                    nextToUnlock = next;
+            }
+
+            // Apply all mutations
             response.CompletedAt       = now;
             response.TimeSpentSeconds  = command.TimeSpentSeconds;
             response.SuccessPercentage = command.SuccessPercentage;
@@ -68,31 +88,25 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             assignment.UpdatedAt = now;
             await _repository.UpdateAsync(assignment, cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            // Auto-unlock next roadmap activity if threshold met
-            var roadmapEntry = await _roadmapRepository.GetByPersonAndActivityAsync(
-                assignment.PersonId, assignment.ActivityId, cancellationToken);
-
-            if (roadmapEntry is not null && command.SuccessPercentage >= roadmapEntry.UnlockThresholdPercent)
+            if (nextToUnlock is not null)
             {
-                var next = await _roadmapRepository.GetNextInAreaAsync(
-                    roadmapEntry.PersonRoadmapAreaId, roadmapEntry.SequenceOrder, cancellationToken);
-
-                if (next is not null && !next.IsUnlocked)
-                {
-                    next.IsUnlocked = true;
-                    next.UnlockedAt = now;
-                    await _unitOfWork.SaveChangesAsync(cancellationToken);
-                }
+                nextToUnlock.IsUnlocked = true;
+                nextToUnlock.UnlockedAt = now;
             }
+
+            // Single save — all mutations committed atomically
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var updated = await _repository.GetByIdAsync(command.AssignmentId, cancellationToken);
 
-            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(
-                ActivityAssignmentResponse.From(updated!),
-                "Actividad completada.");
+            var dto = ActivityAssignmentResponse.From(updated!);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(updated!.Id.ToString()));
+            foreach (var attempt in dto.Responses)
+                attempt.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(attempt.Id.ToString()));
+            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(dto, "Actividad completada.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
 
         private static ActivityResponseResult ResolveResult(decimal successPercentage) =>
             successPercentage >= 80 ? ActivityResponseResult.Exito

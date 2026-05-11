@@ -1,5 +1,6 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Roles.Queries;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roles;
@@ -20,9 +21,7 @@ namespace InclusiON.Application.UseCases.Roles.Handlers
         {
             var roles = await _roleService.GetAllAsync(cancellationToken);
 
-            var response = roles
-                .Select(r => new RoleResponse { Id = r.Id, Name = r.Name, Permissions = r.Permissions })
-                .ToList();
+            var response = roles.Select(RoleMapper.ToResponse).ToList();
 
             return ApiResponse<List<RoleResponse>>.SuccessResult(response);
         }

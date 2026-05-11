@@ -2,6 +2,7 @@ using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Roles.Commands;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roles;
@@ -60,7 +61,7 @@ namespace InclusiON.Application.UseCases.Roles.Handlers
             var permissions = command.Permissions.Distinct().OrderBy(p => p).ToList();
 
             return ApiResponse<RoleResponse>.SuccessResult(
-                new RoleResponse { Id = role.Id, Name = role.Name, Permissions = permissions },
+                RoleMapper.ToResponse(role, permissions),
                 "Permisos actualizados exitosamente");
         }
     }
