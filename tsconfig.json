@@ -35,7 +35,7 @@
     "module": "preserve",
     "useDefineForClassFields": false,
     "lib": [
-      "ES2022",
+      "ES2023",
       "dom"
     ]
   },
