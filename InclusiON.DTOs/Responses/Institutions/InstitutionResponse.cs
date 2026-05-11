@@ -8,6 +8,7 @@ namespace InclusiON.DTOs.Responses.Institutions
     public class InstitutionResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Address { get; set; }
         public string? Phone { get; set; }

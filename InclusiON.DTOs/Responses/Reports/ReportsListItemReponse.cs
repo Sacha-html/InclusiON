@@ -6,6 +6,7 @@ namespace InclusiON.DTOs.Responses.Reports
     public class ReportsListItemReponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public DateTime ReportDate { get; set; }
         public Guid PersonId { get; set; }

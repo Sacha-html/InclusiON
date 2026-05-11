@@ -5,6 +5,7 @@ namespace InclusiON.DTOs.Responses.Activities
     public class ActivityResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string? Instructions { get; set; }
