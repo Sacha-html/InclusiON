@@ -60,9 +60,9 @@ export class ListComponent {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.isActive },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.isActive },
       ],
     },
   ];

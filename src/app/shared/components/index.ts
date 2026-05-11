@@ -14,3 +14,4 @@ export * from './spinner-overlay/spinner-overlay.component';
 export * from './empty-state/empty-state.component';
 export * from './stat-card/stat-card.component';
 export { ActorAvatarComponent } from './actor-avatar/actor-avatar.component';
+export { SkillChipComponent } from './skill-chip/skill-chip.component';

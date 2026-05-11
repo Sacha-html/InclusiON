@@ -33,7 +33,7 @@ export class AdminUsersComponent implements OnInit {
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item: AdminUserResponse) => item.id === this.currentUserId },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item: AdminUserResponse) => item.id === this.currentUserId },
       ],
     },
     { key: 'fullName',  label: 'Nombre',       sortable: true },

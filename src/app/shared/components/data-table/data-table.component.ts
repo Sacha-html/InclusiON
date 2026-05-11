@@ -142,6 +142,13 @@ export class DataTableComponent implements OnInit, OnDestroy {
     return Math.min(this.currentPage * this.pageSize, this.totalItems);
   }
 
+  /** Actions column always renders first, then the rest in declared order. */
+  get orderedColumns(): TableColumn[] {
+    const actions = this.columns.filter(c => c.type === 'actions');
+    const rest    = this.columns.filter(c => c.type !== 'actions');
+    return [...actions, ...rest];
+  }
+
   getVisibleActions(col: TableColumn, item: any): ActionItem[] {
     if (!col.actions) return [];
     return col.actions.filter(a => !a.visible || a.visible(item));

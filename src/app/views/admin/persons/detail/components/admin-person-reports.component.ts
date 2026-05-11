@@ -114,14 +114,14 @@ export class AdminPersonReportsComponent implements OnInit {
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     switch (event.action) {
-      case 'view':    this.viewReport(event.item.id); break;
+      case 'view':    this.viewReport(event.item.encryptedId); break;
       case 'approve': this.openApproveModal(event.item); break;
       case 'reject':  this.openRejectModal(event.item); break;
     }
   }
 
-  viewReport(id: number): void {
-    this.router.navigate([AppRoutes.Admin.Reports, id]);
+  viewReport(encryptedId: string): void {
+    this.router.navigate([AppRoutes.Admin.Reports, encryptedId]);
   }
 
   openApproveModal(report: ReportListItemResponse): void {
@@ -132,7 +132,7 @@ export class AdminPersonReportsComponent implements OnInit {
   confirmApprove(): void {
     if (!this.selectedReport()) return;
     this.isProcessing.set(true);
-    this.reportsService.approveReport(this.selectedReport()!.id).subscribe({
+    this.reportsService.approveReport(this.selectedReport()!.encryptedId).subscribe({
       next: () => {
         this.toastService.success('Reporte aprobado exitosamente.');
         this.showApproveModal.set(false);
@@ -156,7 +156,7 @@ export class AdminPersonReportsComponent implements OnInit {
   confirmReject(): void {
     if (!this.selectedReport() || !this.rejectComment.trim()) return;
     this.isProcessing.set(true);
-    this.reportsService.rejectReport(this.selectedReport()!.id, this.rejectComment.trim()).subscribe({
+    this.reportsService.rejectReport(this.selectedReport()!.encryptedId, this.rejectComment.trim()).subscribe({
       next: () => {
         this.toastService.success('Reporte rechazado.');
         this.closeRejectModal();

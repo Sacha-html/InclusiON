@@ -59,7 +59,7 @@ export class ReportsService {
       .pipe(unwrapResponse());
   }
 
-  getById(id: number): Observable<ReportResponse> {
+  getById(id: string): Observable<ReportResponse> {
     return this.http
       .get<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}`)
       .pipe(unwrapResponse());
@@ -72,33 +72,33 @@ export class ReportsService {
   }
 
   /** Profesional envía el borrador al admin para revisión */
-  submitReport(id: number): Observable<ReportResponse> {
+  submitReport(id: string): Observable<ReportResponse> {
     return this.http
       .patch<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}/submit`, {})
       .pipe(unwrapResponse());
   }
 
   /** Admin aprueba el reporte */
-  approveReport(id: number): Observable<ReportResponse> {
+  approveReport(id: string): Observable<ReportResponse> {
     return this.http
       .patch<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}/approve`, {})
       .pipe(unwrapResponse());
   }
 
-  update(id: number, request: UpdateReportRequest): Observable<ReportResponse> {
+  update(id: string, request: UpdateReportRequest): Observable<ReportResponse> {
     return this.http
       .put<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}`, request)
       .pipe(unwrapResponse());
   }
 
-  deactivate(id: number): Observable<void> {
+  deactivate(id: string): Observable<void> {
     return this.http
       .put<void>(`${this.baseUrl}/${id}/deactivate`, {})
       .pipe(handleApiError());
   }
 
   /** Admin rechaza el reporte con comentario */
-  rejectReport(id: number, comment: string): Observable<ReportResponse> {
+  rejectReport(id: string, comment: string): Observable<ReportResponse> {
     return this.http
       .patch<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}/reject`, { comment })
       .pipe(unwrapResponse());

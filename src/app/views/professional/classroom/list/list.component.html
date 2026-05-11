@@ -20,8 +20,8 @@
 
       <c-row>
         @for (person of activePersons; track person.personId) {
-          <c-col sm="6" md="4" lg="3" class="mb-4">
-            <button type="button" class="person-card" (click)="goToDetail(person)" [attr.aria-label]="'Ver detalle de ' + person.personFullName">
+          <c-col sm="6" md="4" lg="3" class="mb-4 d-flex">
+            <button type="button" class="person-card" (click)="goToDetail(person)" [attr.aria-label]="'Ver detalle de ' + person.personFullName" [style.--card-accent]="person.avatarColor || '#9E9E9E'">
               <!-- Avatar -->
               <app-actor-avatar
                 [name]="person.personFullName"

@@ -45,7 +45,7 @@ export class EditComponent implements OnInit {
   private readonly route           = inject(ActivatedRoute);
   private readonly router          = inject(Router);
 
-  reportId     = 0;
+  reportId     = '';
   isLoading    = signal(true);
   isSaving     = signal(false);
   serverError  = '';
@@ -79,7 +79,7 @@ export class EditComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.router.navigate([AppRoutes.Pro.Reports]); return; }
-    this.reportId = +id;
+    this.reportId = id;
     this.catalogsService.getReportTypes().subscribe({
       next: (types) => this.reportTypes.set(types),
     });

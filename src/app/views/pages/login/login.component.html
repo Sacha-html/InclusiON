@@ -8,11 +8,11 @@
         <c-card class="p-4 shadow">
           <c-card-body>
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-              <div class="text-center mb-4">
+              <header class="text-center mb-4">
                 <svg cIcon name="cilLockLocked" size="3xl" class="mb-3" style="color: var(--a11y-text-secondary)" aria-hidden="true"></svg>
                 <h1 class="h3" style="color: var(--a11y-text)">{{ pageTitle }}</h1>
                 <p class="mb-0" style="color: var(--a11y-text-muted)">{{ pageSubtitle }}</p>
-              </div>
+              </header>
 
               <!-- Error Alert -->
               @if (errorMessage) {

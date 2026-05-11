@@ -43,6 +43,9 @@ export class ListComponent implements OnInit {
   pageSize = signal(10);
   totalRecords = signal(0);
 
+  sortBy = 'createdAt';
+  sortDirection = 'DESC';
+
   // Filtros
   typeFilter = '';
   dateFrom = '';
@@ -56,7 +59,7 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver reporte', icon: 'cil-search' },
+        { action: 'view', label: 'Ver reporte', icon: 'cilSearch' },
       ],
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
@@ -76,8 +79,8 @@ export class ListComponent implements OnInit {
     const request: GetReportsRequest = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
-      sortBy: 'reportDate',
-      sortDirection: 'desc',
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
       dateTo: this.dateTo || undefined,
@@ -109,13 +112,15 @@ export class ListComponent implements OnInit {
     this.loadReports();
   }
 
-  onSort(_event: { sortBy: string; sortDirection: string }): void {
+  onSort(event: { sortBy: string; sortDirection: string }): void {
+    this.sortBy = event.sortBy;
+    this.sortDirection = event.sortDirection;
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     if (event.action === 'view') {
-      this.router.navigate([AppRoutes.Family.Reports, event.item.id]);
+      this.router.navigate([AppRoutes.Family.Reports, event.item.encryptedId]);
     }
   }
 }
