@@ -1,5 +1,6 @@
 using InclusiON.Api.Extensions;
 using InclusiON.Api.Filters;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -112,13 +113,13 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Obtiene un reporte por ID.</summary>
-        [HttpGet("{reportId:int}")]
+        [HttpGet("{reportId}")]
         [Authorize(Policy = "reports:read")]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         [ReportAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> GetReportById(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] IQueryHandler<GetReportByIdQuery, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -168,14 +169,14 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Edita un reporte. Solo permitido cuando Status == Draft.</summary>
-        [HttpPut("{reportId:int}")]
+        [HttpPut("{reportId}")]
         [Authorize(Policy = "reports:create")]
         [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> UpdateReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromBody] UpdateReportRequest request,
             [FromServices] ICommandHandler<UpdateReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -207,14 +208,14 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Profesional envía el borrador al admin para revisión.</summary>
-        [HttpPatch("{reportId:int}/submit")]
+        [HttpPatch("{reportId}/submit")]
         [Authorize(Policy = "reports:submit")]
         [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> SubmitReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] ICommandHandler<SubmitReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -227,13 +228,13 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Admin aprueba el reporte. El familiar podrá consultarlo.</summary>
-        [HttpPatch("{reportId:int}/approve")]
+        [HttpPatch("{reportId}/approve")]
         [Authorize(Policy = "reports:approve")]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> ApproveReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] ICommandHandler<ApproveReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -243,14 +244,14 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Profesional da de baja su reporte (baja lógica). No permitido en estado Enviado.</summary>
-        [HttpPut("{reportId:int}/deactivate")]
+        [HttpPut("{reportId}/deactivate")]
         [Authorize(Policy = "reports:create")]
         [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<object>>> DeactivateReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] ICommandHandler<DeactivateReportCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -263,13 +264,13 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Admin rechaza el reporte con un motivo para el profesional.</summary>
-        [HttpPatch("{reportId:int}/reject")]
+        [HttpPatch("{reportId}/reject")]
         [Authorize(Policy = "reports:reject")]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> RejectReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromBody] RejectReportRequest request,
             [FromServices] ICommandHandler<RejectReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
