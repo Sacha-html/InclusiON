@@ -193,7 +193,7 @@ export class ListComponent implements OnInit {
         this.showAssignModal = true;
         break;
       case 'edit':
-        this.router.navigate([AppRoutes.Pro.Activities, event.item.id, 'edit']);
+        this.router.navigate([AppRoutes.Pro.Activities, event.item.encryptedId, 'edit']);
         break;
       case 'deactivate':
         this.itemToDeactivate = event.item;
@@ -218,7 +218,7 @@ export class ListComponent implements OnInit {
   }
 
   private toggleStatus(item: ActivityListItemResponse, isActive: boolean): void {
-    this.activitiesService.setStatus(item.id, isActive).subscribe({
+    this.activitiesService.setStatus(item.encryptedId, isActive).subscribe({
       next: () => {
         this.toastService.success(isActive ? 'Actividad activada.' : 'Actividad desactivada.');
         this.loadActivities();

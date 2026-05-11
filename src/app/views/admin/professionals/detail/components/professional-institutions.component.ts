@@ -35,7 +35,7 @@ export class ProfessionalInstitutionsComponent {
   private readonly toastService = inject(ToastService);
 
   availableInstitutions: InstitutionResponse[] = [];
-  selectedInstitutionId: number | null = null;
+  selectedInstitutionId: string | null = null;
   showAssignInstitutionModal = signal(false);
   showRemoveInstitutionModal = signal(false);
   institutionToRemove = signal<ProfessionalInstitutionResponse | null>(null);
@@ -45,7 +45,7 @@ export class ProfessionalInstitutionsComponent {
     this.institutionsService.getAll().subscribe({
       next: (data) => {
         const assignedIds = new Set(this.institutions.filter((i) => i.isActive).map((i) => i.institutionId));
-        this.availableInstitutions = data.filter((i) => i.isActive && !assignedIds.has(i.id));
+        this.availableInstitutions = data.filter((i) => i.isActive && !assignedIds.has(i.encryptedId));
         this.showAssignInstitutionModal.set(true);
       },
       error: () => this.toastService.error('Error al cargar instituciones disponibles'),

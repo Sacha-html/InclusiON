@@ -1,6 +1,6 @@
 export interface AdminInstitutionResponse {
   adminUserId: string;
-  institutionId: number;
+  institutionId: string;
   institutionName: string;
   assignedAt: string;
   isActive: boolean;

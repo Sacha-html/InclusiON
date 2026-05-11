@@ -85,7 +85,7 @@ export class AssignActivityModalComponent implements OnChanges {
     this.isSaving.set(true);
 
     this.activitiesService.createAssignment({
-      activityId:           this.activity.id,
+      encryptedActivityId:  this.activity.encryptedId,
       personId:             this.form.personId,
       dueDate:              this.form.dueDate || undefined,
       isEvaluationActivity: this.form.isEvaluationActivity,

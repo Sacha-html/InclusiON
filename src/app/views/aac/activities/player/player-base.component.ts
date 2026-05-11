@@ -21,7 +21,7 @@ export abstract class PlayerBaseComponent {
   // Estado compartido
   phase      = signal<PlayerPhase>('intro');
   isLoading  = signal(false);
-  responseId = signal<number | null>(null);
+  responseId = signal<string | null>(null);
   isCorrect  = signal<boolean | null>(null);
 
   private _startTime = 0;
@@ -34,13 +34,13 @@ export abstract class PlayerBaseComponent {
   // ── Fase intro → playing ──────────────────────────────────────────────────
   startActivity(): void {
     this.isLoading.set(true);
-    this.activitiesService.startResponse(this.assignment.id).subscribe({
+    this.activitiesService.startResponse(this.assignment.encryptedId).subscribe({
       next: (updated) => {
         const responses = [...(updated.responses ?? [])];
         const latest    = responses.sort(
           (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
         )[0];
-        this.responseId.set(latest?.id ?? null);
+        this.responseId.set(latest?.encryptedId ?? null);
         this._startTime = Date.now();
         this.isLoading.set(false);
         this.phase.set('playing');
@@ -61,7 +61,7 @@ export abstract class PlayerBaseComponent {
       return;
     }
     this.isLoading.set(true);
-    this.activitiesService.completeResponse(this.assignment.id, responseId, {
+    this.activitiesService.completeResponse(this.assignment.encryptedId, responseId, {
       successPercentage: result.successPercentage,
       timeSpentSeconds:  result.timeSpentSeconds,
       requiredSupport:   result.requiredSupport ?? false,

@@ -118,8 +118,8 @@
                   <button
                     cButton color="outline-success" size="sm"
                     (click)="unlockActivity(area, activity)"
-                    [disabled]="unlockingActivityId === activity.id">
-                    @if (unlockingActivityId === activity.id) {
+                    [disabled]="unlockingActivityId === activity.encryptedId">
+                    @if (unlockingActivityId === activity.encryptedId) {
                       <c-spinner size="sm"></c-spinner>
                     } @else {
                       Desbloquear

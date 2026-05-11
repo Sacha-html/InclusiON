@@ -74,29 +74,36 @@ export class DetailComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate([AppRoutes.Admin.Institutions]);
       return;
     }
 
-    forkJoin({
-      institution: this.institutionsService.getById(id),
-      admins: this.adminInstitutionsService.getAdmins(1, 500),
-      professionals: this.professionalsService.getProfessionals({ institutionId: id, pageSize: 100 }),
-    }).subscribe({
-      next: ({ institution, admins, professionals }) => {
+    this.institutionsService.getById(id).subscribe({
+      next: (institution) => {
         if (!institution) {
           this.toastService.error('Institución no encontrada');
           this.router.navigate([AppRoutes.Admin.Institutions]);
           return;
         }
         this.institution = institution;
-        this.admins = admins.data.filter((a) =>
-          a.institutions.some((i) => i.institutionId === id),
-        );
-        this.professionals = professionals.data;
-        this.loading = false;
+        forkJoin({
+          admins: this.adminInstitutionsService.getAdmins(1, 500),
+          professionals: this.professionalsService.getProfessionals({ institutionId: institution.id, pageSize: 100 }),
+        }).subscribe({
+          next: ({ admins, professionals }) => {
+            this.admins = admins.data.filter((a) =>
+              a.institutions.some((i) => i.institutionId === institution.id),
+            );
+            this.professionals = professionals.data;
+            this.loading = false;
+          },
+          error: () => {
+            this.toastService.error('Error al cargar los datos de la institución');
+            this.router.navigate([AppRoutes.Admin.Institutions]);
+          },
+        });
       },
       error: () => {
         this.toastService.error('Error al cargar los datos de la institución');
@@ -110,7 +117,7 @@ export class DetailComponent implements OnInit {
   }
 
   goToEdit(): void {
-    this.router.navigate([AppRoutes.Admin.Institutions, this.institution!.id, 'edit']);
+    this.router.navigate([AppRoutes.Admin.Institutions, this.institution!.encryptedId, 'edit']);
   }
 
   deactivate(): void {
@@ -121,7 +128,7 @@ export class DetailComponent implements OnInit {
     if (!this.institution) return;
     this.deactivateLoading = true;
 
-    this.institutionsService.patchStatus(this.institution.id, false).subscribe({
+    this.institutionsService.patchStatus(this.institution.encryptedId, false).subscribe({
       next: (updated) => {
         this.institution = updated;
         this.showConfirmModal = false;
@@ -149,7 +156,7 @@ export class DetailComponent implements OnInit {
     if (!this.institution) return;
     this.reactivateLoading = true;
 
-    this.institutionsService.patchStatus(this.institution.id, true).subscribe({
+    this.institutionsService.patchStatus(this.institution.encryptedId, true).subscribe({
       next: (updated) => {
         this.institution = updated;
         this.showReactivateModal = false;

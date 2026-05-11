@@ -20,7 +20,7 @@ export class SelectFigureEditorComponent extends ContentEditorBaseComponent impl
   arasaacSearch  = '';
   arasaacResults = signal<ArasaacPictogram[]>([]);
   isSearching    = signal(false);
-  private search$ = new Subject<string>();
+  private readonly search$ = new Subject<string>();
 
   ngOnInit(): void {
     try {
