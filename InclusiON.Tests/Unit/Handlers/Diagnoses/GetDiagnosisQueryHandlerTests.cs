@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Diagnoses.Handlers;
 using InclusiON.Application.UseCases.Diagnoses.Queries;
@@ -12,6 +13,7 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
     public class GetDiagnosisQueryHandlerTests
     {
         private readonly IDiagnosesRepository _repo = Substitute.For<IDiagnosesRepository>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private const int DiagnosisId = 7;
         private static readonly Guid PersonId = Guid.NewGuid();
@@ -32,7 +34,7 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
             _repo.GetByIdAsync(DiagnosisId, Arg.Any<CancellationToken>())
                  .Returns((Diagnosis?)null);
 
-            var handler = new GetDiagnosisByIdQueryHandler(_repo);
+            var handler = new GetDiagnosisByIdQueryHandler(_repo, _encryption);
             var result = await handler.HandleAsync(new GetDiagnosisByIdQuery(DiagnosisId), default);
 
             result.Success.Should().BeFalse();
@@ -45,7 +47,7 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
             _repo.GetByIdAsync(DiagnosisId, Arg.Any<CancellationToken>())
                  .Returns(ADiagnosis());
 
-            var handler = new GetDiagnosisByIdQueryHandler(_repo);
+            var handler = new GetDiagnosisByIdQueryHandler(_repo, _encryption);
             var result = await handler.HandleAsync(new GetDiagnosisByIdQuery(DiagnosisId), default);
 
             result.Success.Should().BeTrue();

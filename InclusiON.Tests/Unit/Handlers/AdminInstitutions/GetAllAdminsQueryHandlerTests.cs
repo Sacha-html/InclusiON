@@ -5,6 +5,7 @@ using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.AdminInstitutions.Handlers;
 using InclusiON.Application.UseCases.AdminInstitutions.Queries;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
 {
@@ -17,15 +18,15 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         public async Task HandleAsync_NoAdmins_ReturnsEmptyList()
         {
             // Arrange
-            _repository.GetAllAdminsWithInstitutionsAsync(Arg.Any<CancellationToken>())
-                       .Returns([]);
+            _repository.GetAllAdminsPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                       .Returns(new PagedResponse<User>());
 
             // Act
             var result = await BuildSut().HandleAsync(new GetAllAdminsQuery(), default);
 
             // Assert
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
         }
 
         [Fact]
@@ -33,15 +34,15 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         {
             // Arrange
             var admin = new User { Id = Guid.NewGuid(), Name = "Ana", Surname = "Lopez", Email = "ana@test.com" };
-            _repository.GetAllAdminsWithInstitutionsAsync(Arg.Any<CancellationToken>())
-                       .Returns([admin]);
+            _repository.GetAllAdminsPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                       .Returns(new PagedResponse<User> { Data = [admin], TotalRecords = 1, TotalPages = 1, CurrentPage = 1, PageSize = 100 });
 
             // Act
             var result = await BuildSut().HandleAsync(new GetAllAdminsQuery(), default);
 
             // Assert
-            result.Data!.Single().IsGlobalAdmin.Should().BeTrue();
-            result.Data.Single().Institutions.Should().BeEmpty();
+            result.Data!.Data.Single().IsGlobalAdmin.Should().BeTrue();
+            result.Data!.Data.Single().Institutions.Should().BeEmpty();
         }
 
         [Fact]
@@ -58,14 +59,14 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
                 IsActive      = true
             });
 
-            _repository.GetAllAdminsWithInstitutionsAsync(Arg.Any<CancellationToken>())
-                       .Returns([admin]);
+            _repository.GetAllAdminsPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                       .Returns(new PagedResponse<User> { Data = [admin], TotalRecords = 1, TotalPages = 1, CurrentPage = 1, PageSize = 100 });
 
             // Act
             var result = await BuildSut().HandleAsync(new GetAllAdminsQuery(), default);
 
             // Assert
-            var dto = result.Data!.Single();
+            var dto = result.Data!.Data.Single();
             dto.IsGlobalAdmin.Should().BeFalse();
             dto.Institutions.Should().HaveCount(1);
             dto.Institutions[0].InstitutionName.Should().Be("Escuela N° 1");
@@ -76,14 +77,14 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         {
             // Arrange
             var admin = new User { Id = Guid.NewGuid(), Name = "Luis", Surname = "Martinez", Email = "luis@test.com", IsActive = true };
-            _repository.GetAllAdminsWithInstitutionsAsync(Arg.Any<CancellationToken>())
-                       .Returns([admin]);
+            _repository.GetAllAdminsPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                       .Returns(new PagedResponse<User> { Data = [admin], TotalRecords = 1, TotalPages = 1, CurrentPage = 1, PageSize = 100 });
 
             // Act
             var result = await BuildSut().HandleAsync(new GetAllAdminsQuery(), default);
 
             // Assert
-            var dto = result.Data!.Single();
+            var dto = result.Data!.Data.Single();
             dto.Name.Should().Be("Luis");
             dto.Surname.Should().Be("Martinez");
             dto.Email.Should().Be("luis@test.com");

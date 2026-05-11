@@ -26,33 +26,37 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         public async Task WithSearch_ReturnsMappedFamilies()
         {
             var personId = Guid.NewGuid();
-            _repo.GetAvailableFamiliesAsync("Mar", personId, Arg.Any<CancellationToken>())
-                .Returns(new List<(FamilyRepresentative Family, bool WasPreviouslyLinked)>
-                {
-                    (AFamily("María", "García"), false),
-                    (AFamily("Marta", "López"), true)
-                });
+            var families = new List<(FamilyRepresentative Family, bool WasPreviouslyLinked)>
+            {
+                (AFamily("María", "García"), false),
+                (AFamily("Marta", "López"), true)
+            };
+
+            _repo.GetAvailableFamiliesAsync("Mar", personId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+                .Returns((families, families.Count));
 
             var query = new GetAvailableFamiliesQuery("Mar", personId);
             var result = await BuildSut().HandleAsync(query, default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().HaveCount(2);
-            result.Data![0].FirstName.Should().Be("María");
-            result.Data[0].WasPreviouslyLinked.Should().BeFalse();
-            result.Data[1].WasPreviouslyLinked.Should().BeTrue();
+            result.Data!.Data.Should().HaveCount(2);
+            result.Data!.Data[0].FirstName.Should().Be("María");
+            result.Data!.Data[0].WasPreviouslyLinked.Should().BeFalse();
+            result.Data!.Data[1].WasPreviouslyLinked.Should().BeTrue();
         }
 
         [Fact]
         public async Task EmptyResult_ReturnsEmptyList()
         {
-            _repo.GetAvailableFamiliesAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
-                .Returns(new List<(FamilyRepresentative, bool)>());
+            var empty = new List<(FamilyRepresentative, bool)>();
+            _repo.GetAvailableFamiliesAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+                .Returns((empty, 0));
 
             var result = await BuildSut().HandleAsync(new GetAvailableFamiliesQuery(null), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
+            result.Data!.TotalRecords.Should().Be(0);
         }
     }
 }

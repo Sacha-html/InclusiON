@@ -20,6 +20,7 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
         private readonly IPersonsRepository _personRepo = Substitute.For<IPersonsRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid PersonId = Guid.NewGuid();
@@ -27,7 +28,7 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
 
         private CreateDiagnosisCommandHandler BuildSut() =>
             new(_repo, _proRepo, _personRepo, _uow,
-                NullLogger<CreateDiagnosisCommandHandler>.Instance, _dateTime);
+                NullLogger<CreateDiagnosisCommandHandler>.Instance, _dateTime, _encryption);
 
         private static CreateDiagnosisCommand Cmd() => new(
             PersonId, ProfId,

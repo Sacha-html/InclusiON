@@ -55,11 +55,11 @@ namespace InclusiON.Tests.Unit.Controllers
             return handler;
         }
 
-        private static IQueryHandler<GetMessageContactsQuery, ApiResponse<List<MessageContactResponse>>> OkContactsHandler()
+        private static IQueryHandler<GetMessageContactsQuery, ApiResponse<PagedResponse<MessageContactResponse>>> OkContactsHandler()
         {
-            var handler = Substitute.For<IQueryHandler<GetMessageContactsQuery, ApiResponse<List<MessageContactResponse>>>>();
+            var handler = Substitute.For<IQueryHandler<GetMessageContactsQuery, ApiResponse<PagedResponse<MessageContactResponse>>>>();
             handler.HandleAsync(Arg.Any<GetMessageContactsQuery>(), Arg.Any<CancellationToken>())
-                   .Returns(ApiResponse<List<MessageContactResponse>>.SuccessResult(new List<MessageContactResponse>()));
+                   .Returns(ApiResponse<PagedResponse<MessageContactResponse>>.SuccessResult(new PagedResponse<MessageContactResponse>()));
             return handler;
         }
 

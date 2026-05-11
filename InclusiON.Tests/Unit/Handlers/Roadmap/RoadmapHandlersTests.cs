@@ -19,7 +19,8 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
     public class GetPersonRoadmapQueryHandlerTests
     {
         private readonly IRoadmapRepository _roadmaps = Substitute.For<IRoadmapRepository>();
-        private GetPersonRoadmapQueryHandler BuildSut() => new(_roadmaps);
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private GetPersonRoadmapQueryHandler BuildSut() => new(_roadmaps, _encryption);
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid ProfId   = Guid.NewGuid();
@@ -94,8 +95,9 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
         private readonly IRoadmapRepository       _roadmaps      = Substitute.For<IRoadmapRepository>();
         private readonly IProfessionalsRepository _professionals = Substitute.For<IProfessionalsRepository>();
         private readonly IUnitOfWork              _uow           = Substitute.For<IUnitOfWork>();
+        private readonly IEncryptionService       _encryption    = Substitute.For<IEncryptionService>();
 
-        private CreateRoadmapCommandHandler BuildSut() => new(_roadmaps, _professionals, _uow);
+        private CreateRoadmapCommandHandler BuildSut() => new(_roadmaps, _professionals, _uow, _encryption);
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid ProfId   = Guid.NewGuid();
@@ -170,7 +172,8 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
     {
         private readonly IRoadmapRepository _roadmaps = Substitute.For<IRoadmapRepository>();
         private readonly IUnitOfWork        _uow      = Substitute.For<IUnitOfWork>();
-        private UpdateRoadmapNotesCommandHandler BuildSut() => new(_roadmaps, _uow);
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private UpdateRoadmapNotesCommandHandler BuildSut() => new(_roadmaps, _uow, _encryption);
 
         private static readonly Guid PersonId = Guid.NewGuid();
 
@@ -219,7 +222,8 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
         private readonly IRoadmapRepository             _roadmaps   = Substitute.For<IRoadmapRepository>();
         private readonly IReadOnlyRepository<SkillArea> _skillAreas = Substitute.For<IReadOnlyRepository<SkillArea>>();
         private readonly IUnitOfWork                    _uow        = Substitute.For<IUnitOfWork>();
-        private AddRoadmapAreaCommandHandler BuildSut() => new(_roadmaps, _skillAreas, _uow);
+        private readonly IEncryptionService             _encryption = Substitute.For<IEncryptionService>();
+        private AddRoadmapAreaCommandHandler BuildSut() => new(_roadmaps, _skillAreas, _uow, _encryption);
 
         private static readonly Guid PersonId   = Guid.NewGuid();
         private const int            SkillAreaId = 3;
@@ -352,7 +356,8 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
         private readonly IRoadmapRepository    _roadmaps   = Substitute.For<IRoadmapRepository>();
         private readonly IActivitiesRepository _activities = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork           _uow        = Substitute.For<IUnitOfWork>();
-        private AddRoadmapActivityCommandHandler BuildSut() => new(_roadmaps, _activities, _uow);
+        private readonly IEncryptionService    _encryption = Substitute.For<IEncryptionService>();
+        private AddRoadmapActivityCommandHandler BuildSut() => new(_roadmaps, _activities, _uow, _encryption);
 
         private const int AreaId       = 10;
         private const int ActivityId   = 42;
@@ -483,7 +488,8 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
     {
         private readonly IRoadmapRepository _roadmaps = Substitute.For<IRoadmapRepository>();
         private readonly IUnitOfWork        _uow      = Substitute.For<IUnitOfWork>();
-        private UnlockRoadmapActivityCommandHandler BuildSut() => new(_roadmaps, _uow);
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private UnlockRoadmapActivityCommandHandler BuildSut() => new(_roadmaps, _uow, _encryption);
 
         [Fact]
         public async Task HandleAsync_ActivityNotFound_ReturnsNotFound()
@@ -544,6 +550,74 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
             await BuildSut().HandleAsync(new UnlockRoadmapActivityCommand(55), default);
 
             await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // ReorderRoadmapActivitiesCommandHandler
+    // ════════════════════════════════════════════════════════════════════════════
+
+    public class ReorderRoadmapActivitiesCommandHandlerTests
+    {
+        private readonly IRoadmapRepository _roadmaps = Substitute.For<IRoadmapRepository>();
+        private readonly IUnitOfWork        _uow      = Substitute.For<IUnitOfWork>();
+
+        private ReorderRoadmapActivitiesCommandHandler BuildSut() =>
+            new(_roadmaps, _uow);
+
+        private static PersonRoadmapActivity ARoadmapActivity(int id, int order = 1) => new()
+        {
+            Id            = id,
+            SequenceOrder = order,
+        };
+
+        [Fact]
+        public async Task NoActivitiesInArea_ReturnsNotFound()
+        {
+            _roadmaps.GetActivitiesByAreaIdAsync(1, Arg.Any<CancellationToken>())
+                     .Returns(new List<PersonRoadmapActivity>());
+
+            var cmd    = new ReorderRoadmapActivitiesCommand(1, [(1, 1)]);
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.NotFound);
+        }
+
+        [Fact]
+        public async Task ActivityIdNotInArea_ReturnsValidationFailed()
+        {
+            _roadmaps.GetActivitiesByAreaIdAsync(1, Arg.Any<CancellationToken>())
+                     .Returns(new List<PersonRoadmapActivity>
+                     {
+                         ARoadmapActivity(10),
+                         ARoadmapActivity(20),
+                     });
+
+            var cmd    = new ReorderRoadmapActivitiesCommand(1, [(10, 1), (99, 2)]); // 99 not in area
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ValidReorder_UpdatesSequenceOrdersAndSaves()
+        {
+            var act10 = ARoadmapActivity(10, order: 1);
+            var act20 = ARoadmapActivity(20, order: 2);
+
+            _roadmaps.GetActivitiesByAreaIdAsync(1, Arg.Any<CancellationToken>())
+                     .Returns(new List<PersonRoadmapActivity> { act10, act20 });
+
+            var cmd    = new ReorderRoadmapActivitiesCommand(1, [(10, 2), (20, 1)]);
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeTrue();
+            act10.SequenceOrder.Should().Be(2);
+            act20.SequenceOrder.Should().Be(1);
+            await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         }
     }
 }

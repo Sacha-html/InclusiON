@@ -14,6 +14,7 @@ using InclusiON.Application.UseCases.Invitations.Commands;
 using InclusiON.Application.UseCases.Invitations.Queries;
 using InclusiON.DTOs.Requests.Invitations;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses.Invitations;
 
 namespace InclusiON.Tests.Unit.Controllers
@@ -63,11 +64,11 @@ namespace InclusiON.Tests.Unit.Controllers
             return controller;
         }
 
-        private static IQueryHandler<GetInvitationsQuery, ApiResponse<List<InvitationResponse>>> OkListHandler()
+        private static IQueryHandler<GetInvitationsQuery, ApiResponse<PagedResponse<InvitationResponse>>> OkListHandler()
         {
-            var handler = Substitute.For<IQueryHandler<GetInvitationsQuery, ApiResponse<List<InvitationResponse>>>>();
+            var handler = Substitute.For<IQueryHandler<GetInvitationsQuery, ApiResponse<PagedResponse<InvitationResponse>>>>();
             handler.HandleAsync(Arg.Any<GetInvitationsQuery>(), Arg.Any<CancellationToken>())
-                   .Returns(ApiResponse<List<InvitationResponse>>.SuccessResult([]));
+                   .Returns(ApiResponse<PagedResponse<InvitationResponse>>.SuccessResult(new PagedResponse<InvitationResponse>()));
             return handler;
         }
 
