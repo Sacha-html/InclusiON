@@ -7,7 +7,7 @@ namespace InclusiON.Domain.Models
     /// Determina el tipo de login y supervision requerida para una persona con discapacidad.
     /// Valores: Alta (independiente), Media (login simplificado), Baja (requiere supervision).
     /// </summary>
-    public class AutonomyLevel : IActivatable
+    public class AutonomyLevel : IActivatable, IHasIntId
     {
         /// <summary>
         /// Identificador unico del nivel de autonomia.

@@ -6,7 +6,7 @@ namespace InclusiON.Domain.Models
     /// Area de habilidad que agrupa actividades y plantillas por dominio de desarrollo.
     /// Ejemplos: Comunicacion, Motricidad, Lectoescritura, etc.
     /// </summary>
-    public class SkillArea : AuditableBaseEntity
+    public class SkillArea : AuditableBaseEntity, IHasIntId
     {
         /// <summary>
         /// Identificador unico del area de habilidad.

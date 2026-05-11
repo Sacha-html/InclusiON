@@ -8,7 +8,7 @@ namespace InclusiON.Domain.Models
     /// Valores de Code en DB: PICTOGRAM_SELECT, OPTION_SELECT, GLOBAL_READING, SOUND_RECOGNITION,
     /// BUILD_WORD, CLASSIFY, ORDER_SEQUENCE, NUMERATION.
     /// </summary>
-    public class ActivityTemplateType : AuditableBaseEntity
+    public class ActivityTemplateType : AuditableBaseEntity, IHasIntId
     {
         /// <summary>
         /// Identificador unico del tipo de plantilla.
