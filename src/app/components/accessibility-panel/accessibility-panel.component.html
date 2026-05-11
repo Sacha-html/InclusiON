@@ -11,19 +11,6 @@
   <span class="a11y-trigger-text">Accesibilidad</span>
 </button>
 
-<!-- Botón de salida del modo lectura (visible solo cuando está activo) -->
-@if (a11y.readingMode()) {
-<button
-  type="button"
-  class="a11y-exit-reading-btn"
-  (click)="toggleReadingMode()"
-  aria-label="Salir del modo lectura"
->
-  <svg cIcon name="cilX" size="lg" aria-hidden="true"></svg>
-  <span>Salir del modo lectura</span>
-</button>
-}
-
 <!-- Indicador flotante de lectura activa -->
 @if (a11y.isSpeaking()) {
 <div
@@ -227,19 +214,6 @@
         }
       </button>
 
-      <button
-        type="button"
-        class="a11y-option-btn"
-        [class.active]="a11y.readingMode()"
-        (click)="toggleReadingMode()"
-        [attr.aria-pressed]="a11y.readingMode()"
-      >
-        <svg cIcon name="cilBook" size="lg" aria-hidden="true"></svg>
-        <span>Modo Lectura</span>
-        @if (a11y.readingMode()) {
-          <svg cIcon name="cilCheck" size="lg" class="a11y-check" aria-hidden="true"></svg>
-        }
-      </button>
     </section>
 
     <!-- Texto a Voz -->
@@ -353,10 +327,6 @@
         <div class="a11y-shortcut" role="listitem">
           <kbd aria-label="Alt más X">Alt+X</kbd>
           <span>Detener lectura</span>
-        </div>
-        <div class="a11y-shortcut" role="listitem">
-          <kbd>Esc</kbd>
-          <span>Salir modo lectura</span>
         </div>
       </div>
     </section>

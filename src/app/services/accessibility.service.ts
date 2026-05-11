@@ -57,7 +57,6 @@ export interface AccessibilitySettings {
   reducedMotion: boolean;
   readingGuide: boolean;
   largeCursor: boolean;
-  readingMode: boolean;
   textToSpeechEnabled: boolean;
   textToSpeechRate: number;
 }
@@ -73,7 +72,6 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   reducedMotion: false,
   readingGuide: false,
   largeCursor: false,
-  readingMode: false,
   textToSpeechEnabled: false,
   textToSpeechRate: 1.0
 };
@@ -181,7 +179,6 @@ export class AccessibilityService {
   readonly reducedMotion = computed(() => this.settings().reducedMotion);
   readonly readingGuide = computed(() => this.settings().readingGuide);
   readonly largeCursor = computed(() => this.settings().largeCursor);
-  readonly readingMode = computed(() => this.settings().readingMode);
   readonly textToSpeechEnabled = computed(() => this.settings().textToSpeechEnabled);
   readonly textToSpeechRate = computed(() => this.settings().textToSpeechRate);
 
@@ -278,6 +275,9 @@ export class AccessibilityService {
       profile,
       ...(profileFontSize[profile] ? { fontSize: profileFontSize[profile] as FontSize } : {}),
     }));
+    this.saveSettings();
+    const profileInfo = this.profiles.find(p => p.id === profile);
+    this.announce(`Perfil de accesibilidad: ${profileInfo?.name ?? profile}`);
   }
 
   /**
@@ -374,10 +374,6 @@ export class AccessibilityService {
     overrides.fontSize = prefs.requiresLargeFont ? 'large' : 'medium';
     overrides.reducedMotion = !!prefs.visualNoiseSensitivity;
 
-    if (prefs.visualNoiseSensitivity) {
-      overrides.readingMode = false;
-    }
-
     if (prefs.soundSensitivity) {
       overrides.textToSpeechEnabled = false;
     }
@@ -471,7 +467,6 @@ export class AccessibilityService {
     body.classList.toggle('a11y-reduced-motion', settings.reducedMotion);
     body.classList.toggle('a11y-reading-guide', settings.readingGuide);
     body.classList.toggle('a11y-large-cursor', settings.largeCursor);
-    body.classList.toggle('a11y-reading-mode', settings.readingMode);
     body.classList.toggle('a11y-tts-enabled', settings.textToSpeechEnabled);
   }
 
@@ -489,7 +484,9 @@ export class AccessibilityService {
     document.body.appendChild(announcement);
 
     setTimeout(() => {
-      document.body.removeChild(announcement);
+      if (document.body.contains(announcement)) {
+        document.body.removeChild(announcement);
+      }
     }, 1000);
   }
 
@@ -526,8 +523,6 @@ export class AccessibilityService {
         return value ? 'Guía de lectura activada' : 'Guía de lectura desactivada';
       case 'largeCursor':
         return value ? 'Cursor grande activado' : 'Cursor grande desactivado';
-      case 'readingMode':
-        return value ? 'Modo lectura activado' : 'Modo lectura desactivado';
       case 'textToSpeechEnabled':
         return value ? 'Texto a voz activado' : 'Texto a voz desactivado';
       case 'textToSpeechRate':
@@ -649,7 +644,10 @@ export class AccessibilityService {
 
     utterance.onerror = (event) => {
       this.isSpeaking.set(false);
-      this.announce('Error al leer el texto');
+      // 'interrupted' / 'canceled' fires when cancel() is called deliberately — not a real error
+      if (event.error !== 'interrupted' && event.error !== 'canceled') {
+        this.announce('Error al leer el texto');
+      }
     };
 
     this.currentUtterance = utterance;
@@ -674,7 +672,9 @@ export class AccessibilityService {
   speakMainContent(): void {
     const mainContent = document.querySelector('main, [role="main"], .main-content, .body');
     if (mainContent) {
-      const text = mainContent.textContent || '';
+      // innerText respects CSS visibility (display:none, visibility:hidden)
+      // so nav menus, tooltips, hidden elements are excluded
+      const text = (mainContent as HTMLElement).innerText || '';
       if (text.trim()) {
         this.speak(text.trim());
       }
@@ -715,13 +715,6 @@ export class AccessibilityService {
   setTextToSpeechRate(rate: number): void {
     const clampedRate = Math.max(0.5, Math.min(2, rate));
     this.updateSetting('textToSpeechRate', clampedRate);
-  }
-
-  /**
-   * Activa/desactiva el modo lectura
-   */
-  toggleReadingMode(): void {
-    this.updateSetting('readingMode', !this.readingMode());
   }
 
   /**
