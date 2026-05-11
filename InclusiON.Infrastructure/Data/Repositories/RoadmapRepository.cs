@@ -23,6 +23,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(r => r.Areas)
                     .ThenInclude(a => a.Activities)
                         .ThenInclude(act => act.Activity)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(r => r.PersonId == personId, cancellationToken);
         }
 

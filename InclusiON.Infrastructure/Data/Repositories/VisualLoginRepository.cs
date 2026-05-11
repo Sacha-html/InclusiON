@@ -35,6 +35,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     .Include(p => p.User)
                     .Include(p => p.LoginMethod)
                     .Include(p => p.SupervisorUser)
+                    .AsNoTracking()
                     .Where(p => p.IsActive && p.User.IsActive &&
                         (EF.Functions.ILike(p.FirstName, searchPattern) ||
                          EF.Functions.ILike(p.LastName, searchPattern) ||
@@ -65,6 +66,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     .Include(p => p.User)
                     .Include(p => p.LoginMethod)
                     .Include(p => p.SupervisorUser)
+                    .AsNoTracking()
                     .Where(p => p.IsActive && p.User.IsActive &&
                         (EF.Functions.ILike(p.FirstName, searchPattern) ||
                          EF.Functions.ILike(p.LastName, searchPattern) ||
@@ -96,6 +98,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 var searchPattern = $"%{identifier}%";
                 return await _context.Professionals
                     .Include(p => p.User)
+                    .AsNoTracking()
                     .Where(p => p.IsActive &&
                         (EF.Functions.ILike(p.FirstName, searchPattern) ||
                          EF.Functions.ILike(p.LastName, searchPattern) ||
@@ -125,6 +128,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 var searchPattern = $"%{identifier}%";
                 return await _context.FamilyRepresentatives
                     .Include(f => f.User)
+                    .AsNoTracking()
                     .Where(f => f.IsActive &&
                         (EF.Functions.ILike(f.FirstName, searchPattern) ||
                          EF.Functions.ILike(f.LastName, searchPattern) ||
@@ -151,6 +155,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     .Include(p => p.User)
                     .Include(p => p.LoginMethod)
                     .Include(p => p.SupervisorUser)
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.UserId == userId && p.IsActive, cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -169,6 +174,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 return await _context.Professionals
                     .Include(p => p.User)
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.UserId == userId && p.IsActive, cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -187,6 +193,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 return await _context.FamilyRepresentatives
                     .Include(f => f.User)
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(f => f.UserId == userId && f.IsActive, cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -228,6 +235,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 return await _context.TrustedDevices
                     .Include(td => td.User)
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(td => td.UserId == userId &&
                                                td.DeviceId == deviceId &&
                                                td.IsActive &&
@@ -300,6 +308,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             try
             {
                 return await _context.LoginMethods
+                    .AsNoTracking()
                     .Where(lm => lm.IsActive)
                     .OrderBy(lm => lm.DisplayOrder)
                     .ToListAsync(cancellationToken)
@@ -319,6 +328,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             try
             {
                 return await _context.LoginMethods
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(lm => lm.Id == id, cancellationToken)
                     .ConfigureAwait(false);
             }

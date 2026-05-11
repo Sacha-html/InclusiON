@@ -92,6 +92,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     .ThenInclude(r => r.Sender)
                 .Include(m => m.Replies)
                     .ThenInclude(r => r.Receiver)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
         }
 

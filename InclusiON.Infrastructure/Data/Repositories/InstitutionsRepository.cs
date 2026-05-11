@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
@@ -20,6 +22,24 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .AsNoTracking()
                 .OrderBy(i => i.Name)
                 .ToListAsync(ct);
+        }
+
+        public async Task<PagedResponse<EducationalInstitution>> GetPagedAsync(int page, int pageSize, string? search, bool? isActive, CancellationToken ct = default)
+        {
+            var query = _context.EducationalInstitutions.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var pattern = $"%{search}%";
+                query = query.Where(i =>
+                    EF.Functions.ILike(i.Name, pattern) ||
+                    (i.Address != null && EF.Functions.ILike(i.Address, pattern)));
+            }
+
+            if (isActive.HasValue)
+                query = query.Where(i => i.IsActive == isActive.Value);
+
+            return await query.OrderBy(i => i.Name).ToPagedAsync(page, pageSize, ct);
         }
 
         public async Task<EducationalInstitution?> GetByIdAsync(int id, CancellationToken ct = default)

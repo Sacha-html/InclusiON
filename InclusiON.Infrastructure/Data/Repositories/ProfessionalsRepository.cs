@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Application.Extensions;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Enums;
