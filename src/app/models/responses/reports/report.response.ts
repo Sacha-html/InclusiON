@@ -7,6 +7,7 @@ export enum ReportStatus {
 
 export interface ReportListItemResponse {
   id: number;
+  encryptedId: string;
   personId: string;
   personName: string;
   professionalId: string;

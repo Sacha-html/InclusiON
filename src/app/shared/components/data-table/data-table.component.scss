@@ -52,6 +52,8 @@
 
 .table-wrapper {
   position: relative;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
   &.loading {
     opacity: 0.5;

@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit, OnChanges, signal } from '@angular/core';
 import { CatalogsService, PersonsService, ToastService } from '@services';
 import { PersonSkillProfileResponse, SkillAreaItem } from '@models';
+import { SkillChipComponent } from '@shared/components';
 import {
   ButtonDirective,
   ModalBodyComponent,
@@ -16,6 +17,7 @@ import {
   selector: 'app-professional-skills',
   standalone: true,
   imports: [
+    SkillChipComponent,
     ButtonDirective,
     ModalBodyComponent,
     ModalComponent,
@@ -27,7 +29,7 @@ import {
   ],
   templateUrl: './professional-skills.component.html',
 })
-export class ProfessionalSkillsComponent implements OnInit {
+export class ProfessionalSkillsComponent implements OnInit, OnChanges {
   @Input({ required: true }) personId!: string;
   @Input() skillProfile: PersonSkillProfileResponse[] = [];
   @Output() skillProfileChange = new EventEmitter<PersonSkillProfileResponse[]>();
@@ -43,6 +45,10 @@ export class ProfessionalSkillsComponent implements OnInit {
   currentSkillProfile = signal<PersonSkillProfileResponse[]>([]);
 
   ngOnInit(): void {
+    this.currentSkillProfile.set(this.skillProfile);
+  }
+
+  ngOnChanges(): void {
     this.currentSkillProfile.set(this.skillProfile);
   }
 
@@ -125,7 +131,11 @@ export class ProfessionalSkillsComponent implements OnInit {
 
   private loadSkillProfile(): void {
     this.personsService.getSkillProfile(this.personId).subscribe({
-      next: (data) => this.skillProfileChange.emit(data ?? []),
+      next: (data) => {
+        const updated = data ?? [];
+        this.currentSkillProfile.set(updated);
+        this.skillProfileChange.emit(updated);
+      },
     });
   }
 }

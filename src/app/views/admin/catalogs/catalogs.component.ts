@@ -81,13 +81,13 @@ export class CatalogsComponent implements OnInit {
 
   get tableColumns(): TableColumn[] {
     const actions: ActionItem[] = [
-      { action: 'edit', label: 'Editar', icon: 'cil-pencil' },
+      { action: 'edit', label: 'Editar', icon: 'cilPencil' },
     ];
     if (this.config.deactivate) {
       actions.push({
         action: 'deactivate',
         label: 'Dar de baja',
-        icon: 'cil-x-circle',
+        icon: 'cilXCircle',
         visible: (item: any) => item.isActive !== false,
       });
     }

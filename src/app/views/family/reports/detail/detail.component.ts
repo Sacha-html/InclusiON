@@ -42,10 +42,10 @@ export class DetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.loadReport(+id);
+    if (id) this.loadReport(id);
   }
 
-  loadReport(id: number): void {
+  loadReport(id: string): void {
     this.reportsService.getById(id).subscribe({
       next: (data) => { this.report.set(data); this.isLoading.set(false); },
       error: () => { this.isLoading.set(false); this.router.navigate([AppRoutes.Family.Reports]); },

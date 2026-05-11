@@ -113,7 +113,7 @@ export class ProfessionalPersonsComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'deactivate', label: 'Desasignar', icon: 'cil-user-unfollow', visible: (item) => item.isActive },
+        { action: 'deactivate', label: 'Desasignar', icon: 'cilUserUnfollow', visible: (item) => item.isActive },
       ],
     },
   ];
