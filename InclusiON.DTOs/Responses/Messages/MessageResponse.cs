@@ -6,6 +6,7 @@ namespace InclusiON.DTOs.Responses.Messages
     public class MessageResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
 
         public string? Subject { get; set; }
         public string Content { get; set; } = string.Empty;
@@ -27,6 +28,6 @@ namespace InclusiON.DTOs.Responses.Messages
         public int? ParentMessageId { get; set; }
 
         /// <summary>Respuestas directas a este mensaje, ordenadas por SentAt ASC.</summary>
-        public List<MessageListItemResponse> Replies { get; set; } = new();
+        public List<MessageReplyResponse> Replies { get; set; } = new();
     }
 }

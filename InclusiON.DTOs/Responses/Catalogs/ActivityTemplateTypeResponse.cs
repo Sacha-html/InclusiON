@@ -5,6 +5,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
     public class ActivityTemplateTypeResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string Code { get; set; } = string.Empty;

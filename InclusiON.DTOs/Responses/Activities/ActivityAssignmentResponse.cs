@@ -6,6 +6,7 @@ namespace InclusiON.DTOs.Responses.Activities
     public class ActivityAssignmentResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public int ActivityId { get; set; }
         public string ActivityTitle { get; set; } = string.Empty;
         public string TemplateTypeCode { get; set; } = string.Empty;
@@ -39,6 +40,7 @@ namespace InclusiON.DTOs.Responses.Activities
     public class ActivityAttemptResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public int? TimeSpentSeconds { get; set; }

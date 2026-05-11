@@ -7,6 +7,7 @@ namespace InclusiON.DTOs.Responses.Roadmap
     {
         /// <summary>ID de la entrada PersonRoadmapArea.</summary>
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
 
         /// <summary>ID del area de habilidad.</summary>
         public int SkillAreaId { get; set; }
