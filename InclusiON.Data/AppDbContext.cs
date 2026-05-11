@@ -37,6 +37,8 @@ namespace InclusiON.Data
         public DbSet<LoginMethod> LoginMethods { get; set; }
         public DbSet<SkillArea> SkillAreas { get; set; }
         public DbSet<ActivityTemplateType> ActivityTemplateTypes { get; set; }
+        public DbSet<BackgroundJobStatus> BackgroundJobStatuses { get; set; }
+        public DbSet<JobType> JobTypes { get; set; }
 
         // Nivel 2: Perfiles de usuario y autenticacion
         public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -77,6 +79,9 @@ namespace InclusiON.Data
         // Nivel 6: Motor de dificultad adaptativa
         public DbSet<AdaptiveEngineConfig> AdaptiveEngineConfigs { get; set; }
         public DbSet<AdaptiveAdjustmentLog> AdaptiveAdjustmentLogs { get; set; }
+
+        // Nivel 7: Background Jobs (procesamiento asincrono por agentes MAF)
+        public DbSet<BackgroundJob> BackgroundJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
