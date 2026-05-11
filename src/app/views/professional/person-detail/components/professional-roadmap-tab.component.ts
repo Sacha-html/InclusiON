@@ -117,7 +117,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   removingActivity = false;
 
   // ── Unlock activity ─────────────────────────────────────────────────
-  unlockingActivityId: number | null = null;
+  unlockingActivityId: string | null = null;
 
   ngOnInit(): void {
     this.loadRoadmap();
@@ -244,15 +244,15 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
       ...this.activityConfig,
       activityId: this.selectedActivityId,
     };
-    this.roadmapService.addActivity(this.personId, this.targetArea.id, request).subscribe({
+    this.roadmapService.addActivity(this.personId, this.targetArea.encryptedId, request).subscribe({
       next: (activity) => {
-        const areaId = this.targetArea!.id;
+        const areaId = this.targetArea!.encryptedId;
         this.roadmap.update(r => {
           if (!r) return r;
           return {
             ...r,
             areas: r.areas.map(a =>
-              a.id === areaId ? { ...a, activities: [...a.activities, activity] } : a
+              a.encryptedId === areaId ? { ...a, activities: [...a.activities, activity] } : a
             ),
           };
         });
@@ -280,11 +280,11 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
   submitRemoveArea(): void {
     if (!this.confirmRemoveArea) return;
-    const areaId = this.confirmRemoveArea.id;
+    const areaId = this.confirmRemoveArea.encryptedId;
     this.removingArea = true;
     this.roadmapService.removeArea(this.personId, areaId).subscribe({
       next: () => {
-        this.roadmap.update(r => r ? { ...r, areas: r.areas.filter(a => a.id !== areaId) } : r);
+        this.roadmap.update(r => r ? { ...r, areas: r.areas.filter(a => a.encryptedId !== areaId) } : r);
         this.toastService.success('Área eliminada');
         this.confirmRemoveArea = null;
         this.removingArea = false;
@@ -307,15 +307,15 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     if (!this.confirmRemoveActivity) return;
     const { area, activity } = this.confirmRemoveActivity;
     this.removingActivity = true;
-    this.roadmapService.removeActivity(this.personId, area.id, activity.id).subscribe({
+    this.roadmapService.removeActivity(this.personId, area.encryptedId, activity.encryptedId).subscribe({
       next: () => {
         this.roadmap.update(r => {
           if (!r) return r;
           return {
             ...r,
             areas: r.areas.map(a =>
-              a.id === area.id
-                ? { ...a, activities: a.activities.filter(act => act.id !== activity.id) }
+              a.encryptedId === area.encryptedId
+                ? { ...a, activities: a.activities.filter(act => act.encryptedId !== activity.encryptedId) }
                 : a
             ),
           };
@@ -335,17 +335,17 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   // ── Unlock activity ──────────────────────────────────────────────────
 
   unlockActivity(area: RoadmapAreaResponse, activity: RoadmapActivityResponse): void {
-    this.unlockingActivityId = activity.id;
-    this.roadmapService.unlockActivity(this.personId, area.id, activity.id).subscribe({
+    this.unlockingActivityId = activity.encryptedId;
+    this.roadmapService.unlockActivity(this.personId, area.encryptedId, activity.encryptedId).subscribe({
       next: (updated) => {
-        const areaId = area.id;
+        const areaId = area.encryptedId;
         this.roadmap.update(r => {
           if (!r) return r;
           return {
             ...r,
             areas: r.areas.map(a =>
-              a.id === areaId
-                ? { ...a, activities: a.activities.map(act => act.id === updated.id ? updated : act) }
+              a.encryptedId === areaId
+                ? { ...a, activities: a.activities.map(act => act.encryptedId === updated.encryptedId ? updated : act) }
                 : a
             ),
           };
@@ -372,7 +372,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
     // Optimistic update: reorder locally and reassign sequenceOrder
     const updatedAreas = this.roadmap()!.areas.map(a => {
-      if (a.id !== area.id) return a;
+      if (a.encryptedId !== area.encryptedId) return a;
       const activities = [...a.activities];
       moveItemInArray(activities, event.previousIndex, event.currentIndex);
       return {
@@ -383,10 +383,10 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     this.roadmap.update(r => r ? { ...r, areas: updatedAreas } : r);
 
     // Persist
-    const updatedArea = updatedAreas.find(a => a.id === area.id)!;
+    const updatedArea = updatedAreas.find(a => a.encryptedId === area.encryptedId)!;
     const items = updatedArea.activities.map(act => ({ id: act.id, sequenceOrder: act.sequenceOrder }));
 
-    this.roadmapService.reorderActivities(this.personId, area.id, items).subscribe({
+    this.roadmapService.reorderActivities(this.personId, area.encryptedId, items).subscribe({
       error: (err) => {
         const msg = err?.userMessage ?? 'Error al reordenar. Recargando...';
         this.toastService.error(msg);

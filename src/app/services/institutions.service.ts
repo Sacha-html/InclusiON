@@ -41,8 +41,8 @@ export class InstitutionsService {
       .pipe(unwrapResponse());
   }
 
-  getById(id: number): Observable<InstitutionResponse | undefined> {
-    return this.getAll().pipe(map((list) => list?.find((i) => i.id === id)));
+  getById(id: string): Observable<InstitutionResponse | undefined> {
+    return this.getAll().pipe(map((list) => list?.find((i) => i.encryptedId === id)));
   }
 
   getAll(): Observable<InstitutionResponse[]> {
@@ -57,13 +57,13 @@ export class InstitutionsService {
       .pipe(unwrapResponse());
   }
 
-  update(id: number, request: UpdateInstitutionRequest): Observable<InstitutionResponse> {
+  update(id: string, request: UpdateInstitutionRequest): Observable<InstitutionResponse> {
     return this.http
       .put<ApiResponse<InstitutionResponse>>(`${this.apiUrl}/${id}`, request)
       .pipe(unwrapResponse());
   }
 
-  patchStatus(id: number, isActive: boolean): Observable<InstitutionResponse> {
+  patchStatus(id: string, isActive: boolean): Observable<InstitutionResponse> {
     return this.http
       .patch<ApiResponse<InstitutionResponse>>(`${this.apiUrl}/${id}`, { isActive })
       .pipe(unwrapResponse());

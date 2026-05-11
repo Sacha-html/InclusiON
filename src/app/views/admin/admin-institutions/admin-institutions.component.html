@@ -76,7 +76,7 @@
         <select cSelect id="institutionSelect" [(ngModel)]="selectedInstitutionId">
           <option [ngValue]="null" disabled>-- Seleccionar --</option>
           @for (inst of availableInstitutions; track inst.id) {
-            <option [ngValue]="inst.id">{{ inst.name }}</option>
+            <option [ngValue]="inst.encryptedId">{{ inst.name }}</option>
           }
         </select>
       }

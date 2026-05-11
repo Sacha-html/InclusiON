@@ -15,7 +15,7 @@ export interface ProfessionalPersonResponse {
 
 export interface ProfessionalInstitutionResponse {
   professionalId: string;
-  institutionId: number;
+  institutionId: string;
   institutionName: string;
   isActive: boolean;
   assignedAt: string;

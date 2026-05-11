@@ -16,6 +16,7 @@ import { SpinnerOverlayComponent } from '@shared/components';
 })
 export class AppComponent implements OnInit {
   title = 'InclusiON';
+  readonly currentYear = new Date().getFullYear();
 
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
   readonly #activatedRoute: ActivatedRoute = inject(ActivatedRoute);

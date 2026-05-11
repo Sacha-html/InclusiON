@@ -40,7 +40,7 @@ export class AdminInstitutionsComponent implements OnInit {
   isGlobalAdmin = false;
 
   showAssignModal = false;
-  selectedInstitutionId: number | null = null;
+  selectedInstitutionId: string | null = null;
 
   showRemoveModal = false;
   institutionToRemove: AdminInstitutionResponse | null = null;
@@ -51,7 +51,7 @@ export class AdminInstitutionsComponent implements OnInit {
 
   get availableInstitutions(): InstitutionResponse[] {
     const assignedIds = new Set(this.myInstitutions.map((i) => i.institutionId));
-    return this.allInstitutions.filter((i) => i.isActive && !assignedIds.has(i.id));
+    return this.allInstitutions.filter((i) => i.isActive && !assignedIds.has(i.encryptedId));
   }
 
   ngOnInit(): void {

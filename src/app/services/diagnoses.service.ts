@@ -27,7 +27,7 @@ export class DiagnosesService {
       .pipe(unwrapResponse(), map((r) => r.data));
   }
 
-  getById(id: number): Observable<DiagnosisResponse> {
+  getById(id: string): Observable<DiagnosisResponse> {
     return this.http
       .get<ApiResponse<DiagnosisResponse>>(`${this.baseUrl}/diagnoses/${id}`)
       .pipe(unwrapResponse());
@@ -39,13 +39,13 @@ export class DiagnosesService {
       .pipe(unwrapResponse());
   }
 
-  update(id: number, request: CreateDiagnosisRequest): Observable<DiagnosisResponse> {
+  update(id: string, request: CreateDiagnosisRequest): Observable<DiagnosisResponse> {
     return this.http
       .put<ApiResponse<DiagnosisResponse>>(`${this.baseUrl}/diagnoses/${id}`, request)
       .pipe(unwrapResponse());
   }
 
-  patchStatus(id: number, isActive: boolean): Observable<void> {
+  patchStatus(id: string, isActive: boolean): Observable<void> {
     return this.http
       .patch<void>(`${this.baseUrl}/diagnoses/${id}`, { isActive })
       .pipe(handleApiError());

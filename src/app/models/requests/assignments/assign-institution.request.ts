@@ -1,3 +1,3 @@
 export interface AssignInstitutionRequest {
-  institutionId: number;
+  institutionId: string;
 }

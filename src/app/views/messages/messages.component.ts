@@ -125,14 +125,14 @@ export class MessagesComponent implements OnInit {
   openMessage(msg: MessageListItemResponse): void {
     this.loadingDetail.set(true);
     this.replyBody = '';
-    this.messagesService.getById(msg.id).subscribe({
+    this.messagesService.getById(msg.encryptedId).subscribe({
       next: (detail) => {
         this.selectedDetail.set(detail);
         this.loadingDetail.set(false);
         // Backend auto-marks as read on getById; update local list to reflect
         if (!msg.isRead && this.activeTab === 'inbox') {
           this.inboxMessages.update(list =>
-            list.map(m => m.id === msg.id ? { ...m, isRead: true } : m)
+            list.map(m => m.encryptedId === msg.encryptedId ? { ...m, isRead: true } : m)
           );
         }
       },
@@ -154,7 +154,7 @@ export class MessagesComponent implements OnInit {
     if (!detail || !this.replyBody.trim()) return;
 
     this.sendingReply.set(true);
-    this.messagesService.reply(detail.id, this.replyBody.trim()).subscribe({
+    this.messagesService.reply(detail.encryptedId, this.replyBody.trim()).subscribe({
       next: (updated) => {
         this.selectedDetail.set(updated);
         this.replyBody = '';
