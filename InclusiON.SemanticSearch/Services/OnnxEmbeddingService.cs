@@ -7,7 +7,9 @@ namespace InclusiON.SemanticSearch.Services;
 
 /// <summary>
 /// Servicio de embeddings usando paraphrase-multilingual-MiniLM-L12-v2 (384 dims).
-/// Tokenización: SentencePieceTokenizer (LlamaTokenizer.Create) con el archivo .model nativo.
+/// Tokenización: SentencePieceTokenizer.Create (Microsoft.ML.Tokenizers 2.0.0).
+///   - Soporta modelos Unigram y BPE (a diferencia de LlamaTokenizer.Create que era BPE-only).
+///   - El modelo sentencepiece.bpe.model es Unigram (XLM-RoBERTa), de ahí el error anterior.
 /// Inferencia: Microsoft.ML.OnnxRuntime con mean-pooling + normalización L2.
 /// </summary>
 public sealed class OnnxEmbeddingService : IEmbeddingService, IDisposable
@@ -22,22 +24,23 @@ public sealed class OnnxEmbeddingService : IEmbeddingService, IDisposable
         _session = new InferenceSession(modelPath);
 
         using var stream = File.OpenRead(sentencePieceModelPath);
-        // LlamaTokenizer.Create es la fábrica de SentencePieceTokenizer en Microsoft.ML.Tokenizers 0.22.x
-        // addBeginningOfSentence=true  → agrega <s> (id=0 en XLM-RoBERTa)
-        // addEndOfSentence=true        → agrega </s>
-        // Create(Stream, bool addBeginningOfSentence, bool addEndOfSentence, IReadOnlyDictionary? specialTokens)
-        _tokenizer = LlamaTokenizer.Create(stream, true, true, null);
+        // SentencePieceTokenizer.Create (2.0.0) soporta BPE y Unigram.
+        // LlamaTokenizer.Create (0.22.x) solo aceptaba BPE → "The model type is not Bpe".
+        _tokenizer = SentencePieceTokenizer.Create(stream,
+            addBeginningOfSentence: true,
+            addEndOfSentence:       true,
+            specialTokens:          null);
     }
 
     public Task<float[]> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {
-        // 1. Tokenizar (incluye <s> y </s> automáticamente por la config del tokenizador)
+        // 1. Tokenizar (incluye <s> y </s> automáticamente)
         var rawIds = _tokenizer.EncodeToIds(
             text,
-            considerNormalization:    true,
-            considerPreTokenization:  true,
-            addBeginningOfSentence:   true,
-            addEndOfSentence:         true);
+            addBeginningOfSentence:  true,
+            addEndOfSentence:        true,
+            considerPreTokenization: true,
+            considerNormalization:   true);
 
         // 2. Truncar a MaxSequenceLength
         int seqLen = Math.Min(rawIds.Count, MaxSequenceLength);
