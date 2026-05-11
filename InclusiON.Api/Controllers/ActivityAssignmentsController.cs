@@ -1,4 +1,5 @@
 using InclusiON.Api.Extensions;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -32,7 +33,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> GetAssignmentById(
-            int assignmentId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int assignmentId,
             [FromServices] IQueryHandler<GetAssignmentByIdQuery, ApiResponse<ActivityAssignmentResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -65,7 +66,7 @@ namespace InclusiON.Api.Controllers
                 return NotFound(ApiResponse<ActivityAssignmentResponse>.NotFound("Profesional"));
 
             var command = new CreateActivityAssignmentCommand(
-                request.ActivityId,
+                request.EncryptedActivityId,
                 request.PersonId,
                 professionalId.Value,
                 request.DueDate,
@@ -131,7 +132,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> StartResponse(
-            int assignmentId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int assignmentId,
             [FromServices] ICommandHandler<StartActivityResponseCommand, ApiResponse<ActivityAssignmentResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -155,8 +156,8 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> CompleteResponse(
-            int assignmentId,
-            int responseId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int assignmentId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int responseId,
             [FromBody] CompleteActivityResponseRequest request,
             [FromServices] ICommandHandler<CompleteActivityResponseCommand, ApiResponse<ActivityAssignmentResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -191,7 +192,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> CancelAssignment(
-            int assignmentId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int assignmentId,
             [FromServices] ICommandHandler<CancelActivityAssignmentCommand, ApiResponse<ActivityAssignmentResponse>> handler,
             CancellationToken cancellationToken = default)
         {

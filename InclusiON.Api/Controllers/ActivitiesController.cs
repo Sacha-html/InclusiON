@@ -1,4 +1,5 @@
 using InclusiON.Api.Extensions;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -90,7 +91,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromServices] IQueryHandler<GetActivityByIdQuery, ApiResponse<ActivityResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -153,7 +154,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ActivityResponse>>> UpdateActivity(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromBody] UpdateActivityRequest request,
             [FromServices] ICommandHandler<UpdateActivityCommand, ApiResponse<ActivityResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -194,7 +195,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<ActivityResponse>>> PatchActivityStatus(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromBody] PatchStatusRequest request,
             [FromServices] ICommandHandler<PatchActivityStatusCommand, ApiResponse<ActivityResponse>> handler,
             CancellationToken cancellationToken = default)
