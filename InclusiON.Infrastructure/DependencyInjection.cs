@@ -40,6 +40,20 @@ namespace InclusiON.Infrastructure
 
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+            services.Configure<BackgroundJobSettings>(configuration.GetSection("BackgroundJobs"));
+
+            // Python agent HTTP client
+            var pythonUrl = configuration.GetSection("BackgroundJobs:PythonAgent:Url")?.Value
+                ?? "http://localhost:5001";
+            var pythonTimeout = configuration.GetValue("BackgroundJobs:PythonAgent:TimeoutSeconds", 60);
+            services.AddHttpClient("PythonAgent", client =>
+            {
+                client.BaseAddress = new Uri(pythonUrl);
+                client.Timeout = TimeSpan.FromSeconds(pythonTimeout);
+            });
+
+            // IEmbeddingService — reemplaza al ONNX local, llama al agente Python vía HTTP
+            services.AddSingleton<IEmbeddingService, HttpEmbeddingService>();
 
             var encryptionService = new AesGcmEncryptionService(configuration);
             EncryptionAccessor.Initialize(encryptionService.Encrypt, encryptionService.Decrypt);
@@ -96,14 +110,18 @@ namespace InclusiON.Infrastructure
             // Administración de catálogos (Create/Update/PatchStatus genérico)
             services.AddScoped<ICatalogAdminService, CatalogAdminService>();
 
-            // Repositorios read-only — auto-registrado para todo tipo que implemente IActivatable
+            // Repositorios read-only — auto-registrado para todo tipo que implemente IActivatable e IHasIntId
+            // (IReadOnlyRepository<TEntity> tiene constraint where TEntity : class, IActivatable, IHasIntId)
             var activatableType = typeof(IActivatable);
+            var hasIntIdType    = typeof(IHasIntId);
             var readOnlyRepoOpen = typeof(IReadOnlyRepository<>);
             var readOnlyRepoImplOpen = typeof(ReadOnlyRepository<>);
 
             var domainTypes = typeof(DisabilityType).Assembly
                 .GetTypes()
-                .Where(t => t.IsClass && !t.IsAbstract && activatableType.IsAssignableFrom(t));
+                .Where(t => t.IsClass && !t.IsAbstract
+                            && activatableType.IsAssignableFrom(t)
+                            && hasIntIdType.IsAssignableFrom(t));
 
             foreach (var domainType in domainTypes)
             {

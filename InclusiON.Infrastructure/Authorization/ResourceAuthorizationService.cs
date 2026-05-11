@@ -192,17 +192,24 @@ namespace InclusiON.Infrastructure.Authorization
 
         public async Task<bool> CanAccessReportAsync(int reportId, AccessMode mode, CancellationToken ct = default)
         {
-            var personId = await _context.Reports
+            var report = await _context.Reports
                 .Where(r => r.Id == reportId)
-                .Select(r => (Guid?)r.PersonId)
+                .Select(r => new { r.PersonId, r.ProfessionalId })
                 .FirstOrDefaultAsync(ct);
 
-            if (personId is null)
-            {
+            if (report is null)
                 return false;
+
+            // El profesional siempre puede leer sus propios reportes aunque ya no tenga
+            // un assignment activo con esa persona (el reporte es evidencia histórica).
+            if (mode == AccessMode.Read)
+            {
+                var entityId = _httpContext.GetCurrentEntityId();
+                if (entityId.HasValue && report.ProfessionalId == entityId.Value)
+                    return true;
             }
 
-            return await CanAccessPersonAsync(personId.Value, mode, ct);
+            return await CanAccessPersonAsync(report.PersonId, mode, ct);
         }
 
         public async Task<bool> CanAccessDiagnosisAsync(int diagnosisId, AccessMode mode, CancellationToken ct = default)
