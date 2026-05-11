@@ -1,0 +1,14 @@
+<span class="skill-chip" [style.background-color]="color">
+  @if (icon) {
+    <span class="material-icons skill-chip__icon" aria-hidden="true">{{ icon }}</span>
+  }
+  <span class="skill-chip__name">{{ name }}</span>
+  @if (removable) {
+    <button
+      type="button"
+      class="btn-close btn-close-white skill-chip__close"
+      (click)="remove.emit()"
+      [attr.aria-label]="'Quitar ' + name"
+    ></button>
+  }
+</span>
