@@ -873,6 +873,116 @@ namespace InclusiON.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.BackgroundJob", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("JobTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaxRetries")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(3);
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("RetryCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("ScheduledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobTypeId");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("StatusId", "CreatedAt");
+
+                    b.ToTable("BackgroundJobs", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.BackgroundJobStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("BackgroundJobStatuses", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Pendiente"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "En Proceso"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Completado"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Fallido"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Cancelado"
+                        });
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.Property<int>("Id")
@@ -1243,6 +1353,51 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("UsedByUserId");
 
                     b.ToTable("Invitations", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.JobType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("JobTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Embedding"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Email"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Notificacion Push"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Ajuste Adaptativo"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Generacion de Templates"
+                        });
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.LoginMethod", b =>
@@ -2856,6 +3011,25 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Institution");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.BackgroundJob", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.JobType", "JobType")
+                        .WithMany("BackgroundJobs")
+                        .HasForeignKey("JobTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.BackgroundJobStatus", "Status")
+                        .WithMany("BackgroundJobs")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("JobType");
+
+                    b.Navigation("Status");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -3316,6 +3490,11 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("PersonsWithDisability");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.BackgroundJobStatus", b =>
+                {
+                    b.Navigation("BackgroundJobs");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.DisabilityType", b =>
                 {
                     b.Navigation("PersonsWithDisability");
@@ -3331,6 +3510,11 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("PersonRepresentatives");
 
                     b.Navigation("StatusHistory");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.JobType", b =>
+                {
+                    b.Navigation("BackgroundJobs");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.LoginMethod", b =>
