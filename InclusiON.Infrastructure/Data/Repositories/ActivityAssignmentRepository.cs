@@ -86,5 +86,24 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Take(limit)
                 .ToListAsync(ct);
         }
+
+        public async Task<Dictionary<Guid, List<ActivityResponse>>> GetRecentCompletedResponsesByPersonIdsAsync(
+            IEnumerable<Guid> personIds, int limit, CancellationToken ct = default)
+        {
+            var idList = personIds.ToList();
+            if (idList.Count == 0) return new();
+
+            var responses = await _context.ActivityResponses
+                .Include(r => r.Assignment)
+                    .ThenInclude(a => a.Activity)
+                .AsNoTracking()
+                .Where(r => idList.Contains(r.Assignment.PersonId) && r.CompletedAt != null)
+                .OrderByDescending(r => r.CompletedAt)
+                .ToListAsync(ct);
+
+            return responses
+                .GroupBy(r => r.Assignment.PersonId)
+                .ToDictionary(g => g.Key, g => g.Take(limit).ToList());
+        }
     }
 }

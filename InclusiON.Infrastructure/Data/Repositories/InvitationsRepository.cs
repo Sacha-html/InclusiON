@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
@@ -54,6 +56,40 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     pi.IsActive))
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<PagedResponse<Invitation>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+        {
+            return await _context.Invitations
+                .Include(i => i.ForPerson)
+                .Include(i => i.CreatedByProfessional)
+                .AsNoTracking()
+                .OrderByDescending(i => i.CreatedAt)
+                .ToPagedAsync(page, pageSize, cancellationToken);
+        }
+
+        public async Task<PagedResponse<Invitation>> GetPagedByProfessionalIdAsync(Guid professionalId, int page, int pageSize, CancellationToken cancellationToken = default)
+        {
+            return await _context.Invitations
+                .Include(i => i.ForPerson)
+                .AsNoTracking()
+                .Where(i => i.CreatedByProfessionalId == professionalId)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToPagedAsync(page, pageSize, cancellationToken);
+        }
+
+        public async Task<PagedResponse<Invitation>> GetPagedByInstitutionIdsAsync(List<int> institutionIds, int page, int pageSize, CancellationToken cancellationToken = default)
+        {
+            return await _context.Invitations
+                .Include(i => i.ForPerson)
+                .Include(i => i.CreatedByProfessional)
+                .AsNoTracking()
+                .Where(i => _context.ProfessionalInstitutions.Any(pi =>
+                    pi.ProfessionalId == i.CreatedByProfessionalId &&
+                    institutionIds.Contains(pi.InstitutionId) &&
+                    pi.IsActive))
+                .OrderByDescending(i => i.CreatedAt)
+                .ToPagedAsync(page, pageSize, cancellationToken);
         }
 
         public async Task<Invitation> CreateAsync(Invitation invitation, CancellationToken cancellationToken = default)
