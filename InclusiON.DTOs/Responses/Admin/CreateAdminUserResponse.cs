@@ -1,4 +1,4 @@
-namespace InclusiON.DTOs.Responses
+namespace InclusiON.DTOs.Responses.Admin
 {
     /// <summary>
     /// Respuesta al crear un nuevo usuario administrador.

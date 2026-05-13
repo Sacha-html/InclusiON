@@ -1,4 +1,4 @@
-﻿namespace InclusiON.DTOs.Auth
+namespace InclusiON.DTOs.Common
 {
     public class TokenUserData
     {
