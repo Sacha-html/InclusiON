@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Api.Extensions;
 using InclusiON.Api.Filters;
 using InclusiON.Application.Authorization;
@@ -122,6 +123,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene el historial de vinculaciones de una persona.
         /// </summary>
         [HttpGet("{personId}/link-history")]
+        [OutputCache(PolicyName = "history")]
         [Authorize(Policy = "family:read")]
         [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeHistoryResponse>>), StatusCodes.Status200OK)]

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.UseCases.Institutions.Commands;
@@ -20,6 +21,13 @@ namespace InclusiON.Api.Controllers
     [Produces("application/json")]
     public class InstitutionsController : ControllerBase
     {
+        private readonly IOutputCacheStore _cacheStore;
+
+        public InstitutionsController(IOutputCacheStore cacheStore)
+        {
+            _cacheStore = cacheStore;
+        }
+
         #region Queries
 
         /// <summary>
@@ -27,6 +35,7 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet]
         [AllowAnonymous]
+        [OutputCache(PolicyName = "institutions")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<InstitutionResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<PagedResponse<InstitutionResponse>>>> GetInstitutions(
             [FromServices] IQueryHandler<GetInstitutionsQuery, ApiResponse<PagedResponse<InstitutionResponse>>> handler,
@@ -65,6 +74,10 @@ namespace InclusiON.Api.Controllers
                 request.Email);
 
             var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (result.Success)
+                await _cacheStore.EvictByTagAsync("institutions", cancellationToken);
+
             return result.ToActionResult();
         }
 
@@ -84,6 +97,10 @@ namespace InclusiON.Api.Controllers
         {
             var command = new PatchInstitutionStatusCommand(id, request.IsActive);
             var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (result.Success)
+                await _cacheStore.EvictByTagAsync("institutions", cancellationToken);
+
             return result.ToActionResult();
         }
 
@@ -110,6 +127,10 @@ namespace InclusiON.Api.Controllers
                 request.Email);
 
             var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (result.Success)
+                await _cacheStore.EvictByTagAsync("institutions", cancellationToken);
+
             return result.ToActionResult();
         }
 

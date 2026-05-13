@@ -129,6 +129,9 @@ namespace InclusiON.Api.Controllers
             if (userId is null)
                 return Unauthorized();
 
+            page     = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
             var result = await handler.HandleAsync(new GetMessageContactsQuery(userId.Value, page, pageSize), cancellationToken);
             return Ok(result);
         }
