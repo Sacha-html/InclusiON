@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories.Base;
@@ -16,7 +17,6 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         private readonly IMemoryCache _cache;
         private readonly IEncryptionService _encryption;
 
-        private const string CacheKey = "Catalog_SkillAreas";
         private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
 
         public GetSkillAreasQueryHandler(IReadOnlyRepository<SkillArea> repository, IMemoryCache cache, IEncryptionService encryption)
@@ -29,7 +29,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         public async Task<ApiResponse<List<SkillAreaResponse>>> HandleAsync(
             GetSkillAreasQuery query, CancellationToken cancellationToken)
         {
-            if (_cache.TryGetValue(CacheKey, out List<SkillAreaResponse>? cached) && cached is not null)
+            if (_cache.TryGetValue(CatalogCacheKeys.SkillAreas, out List<SkillAreaResponse>? cached) && cached is not null)
                 return ApiResponse<List<SkillAreaResponse>>.SuccessResult(cached);
 
             var items = await _repository.GetAllActiveAsync(cancellationToken);
@@ -40,7 +40,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
                 return item;
             }).ToList();
 
-            _cache.Set(CacheKey, response, new MemoryCacheEntryOptions()
+            _cache.Set(CatalogCacheKeys.SkillAreas, response, new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(CacheDuration)
                 .SetPriority(CacheItemPriority.Normal));
 

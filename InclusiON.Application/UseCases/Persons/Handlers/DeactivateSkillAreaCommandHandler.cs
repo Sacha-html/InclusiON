@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Persons;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {
