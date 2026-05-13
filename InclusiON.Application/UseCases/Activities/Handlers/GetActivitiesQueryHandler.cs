@@ -23,8 +23,6 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         public async Task<ApiResponse<PagedResponse<ActivityListItemResponse>>> HandleAsync(
             GetActivitiesQuery query, CancellationToken cancellationToken)
         {
-            var skip = (query.Page - 1) * query.PageSize;
-
             var (items, total) = await _repository.GetPagedAsync(
                 query.ProfessionalId,
                 query.Search,
@@ -33,7 +31,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 query.TemplateTypeId,
                 query.IsActive,
                 query.IsStandard,
-                skip,
+                query.Page,
                 query.PageSize,
                 cancellationToken);
 

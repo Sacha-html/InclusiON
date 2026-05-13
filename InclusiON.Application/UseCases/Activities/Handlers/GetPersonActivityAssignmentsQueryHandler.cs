@@ -12,11 +12,16 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
     {
         private readonly IActivityAssignmentRepository _repository;
         private readonly IEncryptionService _encryption;
+        private readonly IFamilyRepository _familyRepository;
 
-        public GetPersonActivityAssignmentsQueryHandler(IActivityAssignmentRepository repository, IEncryptionService encryption)
+        public GetPersonActivityAssignmentsQueryHandler(
+            IActivityAssignmentRepository repository,
+            IEncryptionService encryption,
+            IFamilyRepository familyRepository)
         {
             _repository = repository;
             _encryption = encryption;
+            _familyRepository = familyRepository;
         }
 
         public async Task<ApiResponse<List<ActivityAssignmentResponse>>> HandleAsync(
@@ -24,12 +29,19 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         {
             var assignments = await _repository.GetByPersonIdAsync(query.PersonId, cancellationToken);
 
-            // Security: only return assignments the requester owns.
+            // Check if requester is an active family representative of this person
+            var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(
+                query.PersonId, cancellationToken);
+            var isFamilyRep = representatives.Any(r => r.RepresentativeId == query.RequesterId && r.IsActive);
+
+            // Security: allow person, assigned professionals, or active family representatives.
             // Student: RequesterId == PersonId  → sees all their own assignments.
             // Professional: RequesterId == AssignedByProfessionalId → sees only their assignments.
+            // Family: active representative of the person → sees all assignments.
             var authorized = assignments
                 .Where(a => a.PersonId == query.RequesterId ||
-                            a.AssignedByProfessionalId == query.RequesterId)
+                            a.AssignedByProfessionalId == query.RequesterId ||
+                            isFamilyRep)
                 .ToList();
 
             var response = authorized.Select(a =>

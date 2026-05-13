@@ -1,5 +1,5 @@
 using InclusiON.Domain.Models;
-using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Application.Mappers
 {

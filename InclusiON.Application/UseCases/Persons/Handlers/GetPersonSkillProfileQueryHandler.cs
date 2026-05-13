@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Persons;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {

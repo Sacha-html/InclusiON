@@ -4,6 +4,7 @@ using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.AdminInstitutions.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
 {

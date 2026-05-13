@@ -1,4 +1,4 @@
-﻿using InclusiON.DTOs.Auth;
+﻿using InclusiON.DTOs.Common;
 using System.Security.Claims;
 
 namespace InclusiON.Application.Interfaces.Infrastructure

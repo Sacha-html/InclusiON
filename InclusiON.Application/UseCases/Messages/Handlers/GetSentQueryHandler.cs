@@ -24,10 +24,8 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
         public async Task<ApiResponse<PagedResponse<MessageListItemResponse>>> HandleAsync(
             GetSentQuery query, CancellationToken cancellationToken)
         {
-            var skip = (query.Page - 1) * query.PageSize;
-
             var (items, total) = await _messages.GetSentAsync(
-                query.UserId, skip, query.PageSize,
+                query.UserId, query.Page, query.PageSize,
                 query.IsRead, query.RelatedPersonId, query.ReceiverId,
                 cancellationToken);
 

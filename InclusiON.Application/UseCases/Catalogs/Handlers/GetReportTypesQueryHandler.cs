@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories.Base;
@@ -16,7 +17,6 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         private readonly IMemoryCache _cache;
         private readonly IEncryptionService _encryption;
 
-        private const string CacheKey = "Catalog_ReportTypes";
         private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
 
         public GetReportTypesQueryHandler(IReadOnlyRepository<ReportType> repository, IMemoryCache cache, IEncryptionService encryption)
@@ -29,7 +29,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         public async Task<ApiResponse<List<CatalogItemResponse>>> HandleAsync(
             GetReportTypesQuery query, CancellationToken cancellationToken)
         {
-            if (_cache.TryGetValue(CacheKey, out List<CatalogItemResponse>? cached) && cached is not null)
+            if (_cache.TryGetValue(CatalogCacheKeys.ReportTypes, out List<CatalogItemResponse>? cached) && cached is not null)
                 return ApiResponse<List<CatalogItemResponse>>.SuccessResult(cached);
 
             var items = await _repository.GetAllActiveAsync(cancellationToken);
@@ -40,7 +40,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
                 return item;
             }).ToList();
 
-            _cache.Set(CacheKey, response, new MemoryCacheEntryOptions()
+            _cache.Set(CatalogCacheKeys.ReportTypes, response, new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(CacheDuration)
                 .SetPriority(CacheItemPriority.Normal));
 

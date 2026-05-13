@@ -8,6 +8,7 @@ using InclusiON.Application.UseCases.AdminInstitutions.Commands;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
 {

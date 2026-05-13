@@ -13,8 +13,8 @@ namespace InclusiON.Application.Interfaces.Repositories
             int? templateTypeId,
             bool? isActive,
             bool? isStandard,
-            int skip,
-            int take,
+            int page,
+            int pageSize,
             CancellationToken cancellationToken = default);
         Task<Activity> CreateAsync(Activity activity, CancellationToken cancellationToken = default);
         Task UpdateAsync(Activity activity, CancellationToken cancellationToken = default);
