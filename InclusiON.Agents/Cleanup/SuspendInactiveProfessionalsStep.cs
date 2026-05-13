@@ -6,26 +6,18 @@ using InclusiON.DTOs.Responses.Professionals;
 
 namespace InclusiON.Agents.Cleanup;
 
-public class SuspendInactiveProfessionalsStep : ICleanupStep
+public class SuspendInactiveProfessionalsStep(
+    ICommandHandler<SuspendInactiveProfessionalsCommand, ApiResponse<SuspendResult>> handler,
+    ILogger<SuspendInactiveProfessionalsStep> logger)
+    : ICleanupStep
 {
-    readonly ICommandHandler<SuspendInactiveProfessionalsCommand, ApiResponse<SuspendResult>> _handler;
-    readonly ILogger<SuspendInactiveProfessionalsStep> _logger;
-
-    public SuspendInactiveProfessionalsStep(
-        ICommandHandler<SuspendInactiveProfessionalsCommand, ApiResponse<SuspendResult>> handler,
-        ILogger<SuspendInactiveProfessionalsStep> logger)
-    {
-        _handler = handler;
-        _logger = logger;
-    }
-
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        var result = await _handler.HandleAsync(new SuspendInactiveProfessionalsCommand(), cancellationToken);
+        var result = await handler.HandleAsync(new SuspendInactiveProfessionalsCommand(), cancellationToken);
 
         if (result.Data?.SuspendedCount > 0)
-            _logger.LogInformation("Suspended {Count} inactive professionals", result.Data.SuspendedCount);
+            logger.LogInformation("Suspended {Count} inactive professionals", result.Data.SuspendedCount);
         else
-            _logger.LogInformation("No inactive professionals to suspend");
+            logger.LogInformation("No inactive professionals to suspend");
     }
 }

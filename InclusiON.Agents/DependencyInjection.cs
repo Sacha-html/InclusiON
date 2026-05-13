@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Agents.Cleanup;
 using InclusiON.Agents.Workers;
 
@@ -18,7 +19,6 @@ public static class DependencyInjection
 
         // Cleanup steps
         services.AddScoped<ICleanupStep, DeleteCompletedJobsStep>();
-        services.AddScoped<ICleanupStep, ResetOrphanedRunningStep>();
         services.AddScoped<ICleanupStep, SuspendInactiveProfessionalsStep>();
         services.AddScoped<ICleanupStep, GenerateTemplateCentroidsStep>();
 
