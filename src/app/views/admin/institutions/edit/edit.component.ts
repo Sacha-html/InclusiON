@@ -60,7 +60,7 @@ export class EditComponent implements OnInit {
     if (id) {
       this.institutionsService.getAll().subscribe({
         next: (data) => {
-          this.institution = data.find((i) => i.encryptedId === id) ?? null;
+          this.institution = data.find((i) => i.id.toString() === id) ?? null;
           if (this.institution) {
             this.patchForm(this.institution);
           } else {
@@ -95,7 +95,7 @@ export class EditComponent implements OnInit {
       ...(raw.email && { email: raw.email }),
     };
 
-    this.institutionsService.update(this.institution.encryptedId, request).subscribe({
+    this.institutionsService.update(this.institution.id.toString(), request).subscribe({
       next: () => {
         this.toastService.success('Institucion actualizada exitosamente');
         this.router.navigate([AppRoutes.Admin.Institutions]);

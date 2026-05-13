@@ -5,8 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { RoadmapService } from '@services/roadmap.service';
 import { ActivitiesService } from '@services/activities.service';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse } from '@models/responses';
-import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models/responses/activity.response';
+import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse, ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models';
 import { SpinnerComponent } from '@coreui/angular';
 import { NgClass } from '@angular/common';
 

@@ -3,10 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse, PagedResponse } from '../models';
-import { AdminUserListItemResponse } from '../models/responses/admin-user-list-item.response';
-import { AdminUserDetailResponse, ResetPasswordResultResponse, UserRecentSessionResponse } from '../models/responses/admin-user-detail.response';
-import { GetAdminUsersRequest } from '../models/requests/admin-users/get-admin-users.request';
+import { ApiResponse, PagedResponse, AdminUserListItemResponse, AdminUserDetailResponse, ResetPasswordResultResponse, UserRecentSessionResponse, GetAdminUsersRequest } from '../models';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({

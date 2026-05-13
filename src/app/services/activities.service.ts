@@ -3,18 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
-import { ApiResponse, PagedResponse } from '@models';
-import {
-  ActivityListItemResponse,
-  ActivityResponse,
-  ActivityAssignmentResponse,
-} from '@models/responses/activity.response';
-import {
-  GetActivitiesRequest,
-  CreateActivityRequest,
-  UpdateActivityRequest,
-  CreateAssignmentRequest,
-} from '@models/requests/activities';
+import { ApiResponse, PagedResponse, ActivityListItemResponse, ActivityResponse, ActivityAssignmentResponse, GetActivitiesRequest, CreateActivityRequest, UpdateActivityRequest, CreateAssignmentRequest } from '@models';
 
 @Injectable({ providedIn: 'root' })
 export class ActivitiesService {

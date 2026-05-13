@@ -7,9 +7,7 @@ import { ArasaacService, ArasaacPictogram } from '@services/arasaac.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem } from '@models';
-import { UpdateActivityRequest } from '@models/requests/activities';
-import { SelectFigureContent } from '@models/responses/activity.response';
+import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem, UpdateActivityRequest, SelectFigureContent } from '@models';
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
   ButtonDirective, ColComponent, RowComponent,

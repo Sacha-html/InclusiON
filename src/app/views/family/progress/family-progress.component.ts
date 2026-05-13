@@ -2,11 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 import { FamilyService, ToastService } from '@services';
 import { ActivitiesService } from '@services/activities.service';
-import {
-  ActivityAssignmentResponse,
-  ActivityAssignmentStatus,
-  ActivityResponseResult,
-} from '@models/responses/activity.response';
+import { ActivityAssignmentResponse, ActivityAssignmentStatus, ActivityResponseResult } from '@models';
 import { FamilyPersonSummaryResponse } from '../../../models';
 import {
   BadgeComponent,
