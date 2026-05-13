@@ -18,7 +18,8 @@ public class EncryptedIntModelBinder : IModelBinder
 
         if (string.IsNullOrEmpty(raw))
         {
-            bindingContext.ModelState.AddModelError(bindingContext.ModelName, "El identificador es requerido.");
+            // Not provided — let framework apply default/null for optional params.
+            // Required route params are always present when route matches.
             return Task.CompletedTask;
         }
 
