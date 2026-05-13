@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using Xunit;
@@ -10,12 +11,12 @@ using InclusiON.DTOs.Requests.Roles;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roles;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     public class RolesControllerTests
     {
         private static RolesController BuildSut(IMemoryCache cache)
-            => new RolesController(cache);
+            => new RolesController(cache, Substitute.For<IOutputCacheStore>());
 
         // ── UpdateRolePermissions ────────────────────────────────────────────
 

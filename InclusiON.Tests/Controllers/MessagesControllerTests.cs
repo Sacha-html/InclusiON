@@ -12,7 +12,7 @@ using InclusiON.DTOs.Requests.Messages;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Messages;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica que <see cref="MessagesController"/> requiere un userId valido en todos

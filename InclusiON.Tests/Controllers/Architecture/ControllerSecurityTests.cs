@@ -6,7 +6,7 @@ using System.Reflection;
 using Xunit;
 using InclusiON.Api.Controllers;
 
-namespace InclusiON.Tests.Unit.Architecture
+namespace InclusiON.Tests.Controllers.Architecture
 {
     /// <summary>
     /// Verifica que los controllers apliquen correctamente los atributos de seguridad

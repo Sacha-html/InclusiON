@@ -12,7 +12,7 @@ using InclusiON.DTOs.Requests.Family;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Family;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     public class FamilyControllerTests
     {

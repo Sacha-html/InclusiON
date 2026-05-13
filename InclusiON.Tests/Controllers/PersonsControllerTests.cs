@@ -11,7 +11,7 @@ using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     public class PersonsControllerTests
     {

@@ -6,7 +6,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Infrastructure.Data.Repositories;
 using InclusiON.Api.Controllers;
 
-namespace InclusiON.Tests.Unit.Architecture
+namespace InclusiON.Tests.Controllers.Architecture
 {
     /// <summary>
     /// Verifica que las dependencias entre capas respeten la arquitectura limpia:

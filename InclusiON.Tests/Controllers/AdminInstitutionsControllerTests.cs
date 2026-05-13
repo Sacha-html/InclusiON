@@ -9,7 +9,7 @@ using InclusiON.Application.UseCases.AdminInstitutions.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica las políticas de autorización en <see cref="AdminInstitutionsController"/>.

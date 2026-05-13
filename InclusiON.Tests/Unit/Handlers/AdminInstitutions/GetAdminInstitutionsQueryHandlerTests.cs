@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.AdminInstitutions.Handlers;
 using InclusiON.Application.UseCases.AdminInstitutions.Queries;
@@ -12,7 +13,8 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
     public class GetAdminInstitutionsQueryHandlerTests
     {
         private readonly IAdminInstitutionRepository _repository = Substitute.For<IAdminInstitutionRepository>();
-        private GetAdminInstitutionsQueryHandler BuildSut() => new(_repository);
+        private readonly IEncryptionService          _encryption = Substitute.For<IEncryptionService>();
+        private GetAdminInstitutionsQueryHandler BuildSut() => new(_repository, _encryption);
 
         [Fact]
         public async Task HandleAsync_AdminWithNoAssignments_ReturnsEmptyList()

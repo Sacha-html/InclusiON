@@ -9,7 +9,7 @@ using InclusiON.Application.UseCases.Professionals.Queries;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Professionals;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica que el endpoint <c>GET /api/professionals/me</c> resuelve el

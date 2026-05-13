@@ -11,7 +11,7 @@ using InclusiON.DTOs.Requests.Auth;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica el comportamiento de <see cref="AuthController"/> en los casos

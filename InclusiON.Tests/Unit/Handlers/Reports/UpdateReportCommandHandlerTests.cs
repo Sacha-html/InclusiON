@@ -19,10 +19,11 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
         private readonly IProfessionalsRepository _prosRepo    = Substitute.For<IProfessionalsRepository>();
         private readonly IUnitOfWork              _uow         = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider        _dateTime    = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService       _encryption  = Substitute.For<IEncryptionService>();
 
         private UpdateReportCommandHandler BuildSut() =>
             new(_reportsRepo, _prosRepo, _uow,
-                NullLogger<UpdateReportCommandHandler>.Instance, _dateTime);
+                NullLogger<UpdateReportCommandHandler>.Instance, _dateTime, _encryption);
 
         private static readonly Guid ProfId      = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();

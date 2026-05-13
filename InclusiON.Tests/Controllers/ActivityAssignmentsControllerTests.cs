@@ -12,7 +12,7 @@ using InclusiON.DTOs.Requests.Activities;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Activities;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     public class ActivityAssignmentsControllerTests
     {

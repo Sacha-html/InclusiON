@@ -7,7 +7,7 @@ using NSubstitute;
 using Xunit;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Infrastructure;
-using InclusiON.DTOs.Auth;
+using InclusiON.DTOs.Common;
 using InclusiON.Infrastructure.Authentication;
 using InclusiON.Infrastructure.Configuration;
 

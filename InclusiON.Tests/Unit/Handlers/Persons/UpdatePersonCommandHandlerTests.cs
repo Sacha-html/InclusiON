@@ -14,11 +14,12 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
 {
     public class UpdatePersonCommandHandlerTests
     {
-        private readonly IPersonsRepository _personsRepo = Substitute.For<IPersonsRepository>();
-        private readonly IUnitOfWork        _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IPersonsRepository      _personsRepo = Substitute.For<IPersonsRepository>();
+        private readonly IUnitOfWork             _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IBackgroundJobRepository _bgJobs     = Substitute.For<IBackgroundJobRepository>();
 
         private UpdatePersonCommandHandler BuildSut() =>
-            new(_personsRepo, _uow, NullLogger<UpdatePersonCommandHandler>.Instance);
+            new(_personsRepo, _uow, _bgJobs, NullLogger<UpdatePersonCommandHandler>.Instance);
 
         private static readonly Guid PersonId = Guid.NewGuid();
 
