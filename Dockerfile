@@ -15,7 +15,7 @@ COPY ["InclusiON.Infrastructure.Telemetry/InclusiON.Infrastructure.Telemetry.csp
 COPY ["InclusiON.Data/InclusiON.Data.csproj", "InclusiON.Data/"]
 COPY ["InclusiON.DTOs/InclusiON.DTOs.csproj", "InclusiON.DTOs/"]
 COPY ["InclusiON.Shared/InclusiON.Shared.csproj", "InclusiON.Shared/"]
-COPY ["InclusiON.SemanticSearch/InclusiON.SemanticSearch.csproj", "InclusiON.SemanticSearch/"]
+COPY ["InclusiON.Agents/InclusiON.Agents.csproj", "InclusiON.Agents/"]
 RUN dotnet restore "InclusiON.Api/InclusiON.Api.csproj"
 
 COPY . .
@@ -29,7 +29,5 @@ RUN dotnet publish "InclusiON.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-ENV ASPNETCORE_ENVIRONMENT=Development
 
 ENTRYPOINT ["dotnet", "InclusiON.Api.dll"]
