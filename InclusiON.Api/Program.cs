@@ -12,6 +12,9 @@ using InclusiON.Infrastructure;
 using InclusiON.Infrastructure.Seeders;
 using InclusiON.Infrastructure.Telemetry;
 using InclusiON.Agents;
+using InclusiON.Api.Hubs;
+using InclusiON.Api.Services;
+using InclusiON.Application.Interfaces.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +49,8 @@ builder.Host.UseSerilog((context, config) =>
                          outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
 });
 
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealTimeNotifier, SignalRNotifier>();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
@@ -175,6 +180,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.MapPrometheusScrapingEndpoint("/metrics");
 app.MapHealthChecks("/health");
@@ -210,8 +216,12 @@ if (!app.Environment.IsEnvironment("IntegrationTests"))
     await DatabaseSeeder.SeedAsync(app.Services);
 }
 
-Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
-Log.Information("API Docs: {Url}/scalar/v1", app.Urls.FirstOrDefault());
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
+    if (app.Environment.IsDevelopment())
+        Log.Information("API Docs: {Url}/scalar/v1", app.Urls.FirstOrDefault());
+});
 
 app.Run();
 
