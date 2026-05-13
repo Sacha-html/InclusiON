@@ -1,3 +1,4 @@
+using InclusiON.Application.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -6,6 +7,7 @@ using InclusiON.Application.UseCases.AdminInstitutions.Commands;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
 {
@@ -17,19 +19,22 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public AssignInstitutionToAdminCommandHandler(
             IAdminInstitutionRepository adminInstitutionRepository,
             IInstitutionsRepository institutionsRepository,
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _adminInstitutionRepository = adminInstitutionRepository;
             _institutionsRepository     = institutionsRepository;
             _identityService            = identityService;
             _unitOfWork                 = unitOfWork;
             _dateTime                   = dateTime;
+            _encryption                 = encryption;
         }
 
         public async Task<ApiResponse<AdminInstitutionResponse>> HandleAsync(
@@ -55,8 +60,9 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
                     await _unitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
-                return ApiResponse<AdminInstitutionResponse>.SuccessResult(
-                    AdminInstitutionMapper.ToResponse(existing, institution.Name), "Asignación creada exitosamente.");
+                var existingResponse = AdminInstitutionMapper.ToResponse(existing, institution.Name);
+                existingResponse.EncryptedInstitutionId = _encryption.EncryptId(existing.InstitutionId);
+                return ApiResponse<AdminInstitutionResponse>.SuccessResult(existingResponse, "Asignación creada exitosamente.");
             }
 
             var assignment = new AdminInstitution
@@ -70,8 +76,9 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
             await _adminInstitutionRepository.AddAsync(assignment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<AdminInstitutionResponse>.SuccessResult(
-                AdminInstitutionMapper.ToResponse(assignment, institution.Name), "Asignación creada exitosamente.");
+            var response = AdminInstitutionMapper.ToResponse(assignment, institution.Name);
+            response.EncryptedInstitutionId = _encryption.EncryptId(assignment.InstitutionId);
+            return ApiResponse<AdminInstitutionResponse>.SuccessResult(response, "Asignación creada exitosamente.");
         }
 
     }

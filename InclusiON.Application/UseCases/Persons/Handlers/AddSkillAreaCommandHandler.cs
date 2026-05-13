@@ -7,6 +7,7 @@ using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Persons;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {

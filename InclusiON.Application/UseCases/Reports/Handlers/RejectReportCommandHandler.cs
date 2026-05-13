@@ -19,6 +19,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly ILogger<RejectReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IEncryptionService _encryption;
 
         public RejectReportCommandHandler(
             IReportsRepository repository,
@@ -26,7 +27,8 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             IUnitOfWork unitOfWork,
             ILogger<RejectReportCommandHandler> logger,
             IDateTimeProvider dateTime,
-            IServiceScopeFactory scopeFactory)
+            IServiceScopeFactory scopeFactory,
+            IEncryptionService encryption)
         {
             _repository   = repository;
             _emailService = emailService;
@@ -34,6 +36,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             _logger       = logger;
             _dateTime     = dateTime;
             _scopeFactory = scopeFactory;
+            _encryption   = encryption;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -109,7 +112,12 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 }
             });
 
-            return ApiResponse<ReportResponse>.SuccessResult(ReportResponse.MapToResponse(report));
+            var response = ReportResponse.MapToResponse(report);
+            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+            return ApiResponse<ReportResponse>.SuccessResult(response);
         }
+
+        private static string ToUrlSafeBase64(string s)
+            => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }
