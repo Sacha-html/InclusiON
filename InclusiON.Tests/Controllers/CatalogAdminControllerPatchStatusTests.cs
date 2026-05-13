@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using Xunit;
 using InclusiON.Api.Controllers;
@@ -12,11 +13,12 @@ using InclusiON.DTOs.Responses.Catalogs;
 using InclusiON.Infrastructure.Services;
 using InclusiON.Tests.TestSupport;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     public class CatalogAdminControllerPatchStatusTests : DbContextTestBase
     {
         private readonly IOutputCacheStore _cacheStore = Substitute.For<IOutputCacheStore>();
+        private readonly IMemoryCache _memoryCache = Substitute.For<IMemoryCache>();
 
         public CatalogAdminControllerPatchStatusTests()
         {
@@ -24,7 +26,7 @@ namespace InclusiON.Tests.Unit.Controllers
                        .Returns(ValueTask.CompletedTask);
         }
 
-        private CatalogAdminController BuildSut() => new(new CatalogAdminService(Db), _cacheStore);
+        private CatalogAdminController BuildSut() => new(new CatalogAdminService(Db), _cacheStore, _memoryCache);
 
         private static DisabilityType ActiveDisabilityType(int id = 1) =>
             new() { Id = id, Name = "Motriz", IsActive = true };

@@ -57,7 +57,7 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
         [Fact]
         public async Task HandleAsync_EmptyInbox_ReturnsEmptyPaged()
         {
-            _messages.GetInboxAsync(UserId, 0, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetInboxAsync(UserId, 1, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message>(), 0));
 
             var result = await BuildSut().HandleAsync(new GetInboxQuery(UserId, 1, 20), default);
@@ -73,15 +73,18 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var senderId   = Guid.NewGuid();
             var msg        = Helpers.AMessage(1, senderId, UserId);
 
-            _messages.GetInboxAsync(UserId, 0, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetInboxAsync(UserId, 1, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message> { msg }, 1));
+            _encryption.Encrypt(Arg.Any<string>()).Returns(x => x.Arg<string>());
 
             var result = await BuildSut().HandleAsync(new GetInboxQuery(UserId, 1, 20), default);
 
+            result.Success.Should().BeTrue();
             result.Data!.Data.Should().HaveCount(1);
             result.Data.Data[0].Id.Should().Be(1);
             result.Data.Data[0].SenderFullName.Should().Be("Ana García");
             result.Data.Data[0].ReceiverFullName.Should().Be("Luis López");
+            result.Data.Data[0].EncryptedId.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -91,11 +94,13 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
                 .Select(i => Helpers.AMessage(i, Guid.NewGuid(), UserId))
                 .ToList();
 
-            _messages.GetInboxAsync(UserId, 0, 5, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetInboxAsync(UserId, 1, 5, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((items, 12));
+            _encryption.Encrypt(Arg.Any<string>()).Returns(x => x.Arg<string>());
 
             var result = await BuildSut().HandleAsync(new GetInboxQuery(UserId, 1, 5), default);
 
+            result.Success.Should().BeTrue();
             result.Data!.TotalRecords.Should().Be(12);
             result.Data.TotalPages.Should().Be(3);
             result.Data.HasNextPage.Should().BeTrue();
@@ -118,24 +123,25 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
         [Fact]
         public async Task HandleAsync_EmptySent_ReturnsEmptyPaged()
         {
-            _messages.GetSentAsync(UserId, 0, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetSentAsync(UserId, 1, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message>(), 0));
 
             var result = await BuildSut().HandleAsync(new GetSentQuery(UserId, 1, 20), default);
 
             result.Success.Should().BeTrue();
             result.Data!.Data.Should().BeEmpty();
+            result.Data.TotalRecords.Should().Be(0);
         }
 
         [Fact]
-        public async Task HandleAsync_SkipCalculatedCorrectly()
+        public async Task HandleAsync_PagePassedCorrectly()
         {
-            _messages.GetSentAsync(UserId, 40, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetSentAsync(UserId, 3, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message>(), 0));
 
             await BuildSut().HandleAsync(new GetSentQuery(UserId, Page: 3, PageSize: 20), default);
 
-            await _messages.Received(1).GetSentAsync(UserId, 40, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
+            await _messages.Received(1).GetSentAsync(UserId, 3, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
         }
     }
 

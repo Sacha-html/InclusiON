@@ -11,7 +11,7 @@ using InclusiON.DTOs.Requests.Roadmap;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roadmap;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica que <see cref="RoadmapController"/> requiere un entityId valido en los
