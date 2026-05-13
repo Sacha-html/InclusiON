@@ -156,9 +156,9 @@ namespace InclusiON.Api.Scalar
             CanSuperviseLogin = true
         };
 
-        public static AssignInstitutionRequest AssignInstitution => new()
+        public static AssignInstitutionToAdminRequest AssignInstitution => new()
         {
-            InstitutionId = 1
+            InstitutionId = "abc123"
         };
 
         // ═══════════════════════════════════════════════════════════════
