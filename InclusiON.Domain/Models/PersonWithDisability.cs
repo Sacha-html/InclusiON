@@ -211,6 +211,11 @@ namespace InclusiON.Domain.Models
         /// Registros de auditoria de acceso a datos de esta persona.
         /// </summary>
         public virtual ICollection<AccessAudit> AccessAudits { get; set; }
+
+        /// <summary>
+        /// Embedding semantico del perfil de la persona para recomendacion de actividades.
+        /// </summary>
+        public virtual PersonEmbedding? Embedding { get; set; }
         #endregion
 
         public PersonWithDisability()

@@ -1,4 +1,4 @@
-namespace InclusiON.DTOs.Responses
+namespace InclusiON.DTOs.Responses.Admin
 {
     /// <summary>
     /// Respuesta con informacion de un usuario administrador y sus instituciones asignadas.

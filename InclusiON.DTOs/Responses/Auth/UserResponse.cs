@@ -1,4 +1,4 @@
-﻿namespace InclusiON.DTOs.Responses
+namespace InclusiON.DTOs.Responses.Auth
 {
     public class UserResponse
     {
