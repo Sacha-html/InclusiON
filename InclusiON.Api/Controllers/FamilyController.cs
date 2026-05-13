@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -75,6 +76,7 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpGet("{familyId}/status-history")]
+        [OutputCache(PolicyName = "history")]
         [Authorize(Policy = "family:read")]
         [ProducesResponseType(typeof(ApiResponse<List<FamilyStatusHistoryResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<FamilyStatusHistoryResponse>>>> GetFamilyStatusHistory(
@@ -89,6 +91,7 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpGet("{familyId}/link-history")]
+        [OutputCache(PolicyName = "history")]
         [Authorize(Policy = "family:read")]
         [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeHistoryResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<PersonRepresentativeHistoryResponse>>>> GetFamilyLinkHistory(

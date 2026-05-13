@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Api.Extensions;
@@ -66,6 +67,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los metodos de login disponibles (activos) para personas con discapacidad.
         /// </summary>
         [HttpGet("login-methods")]
+        [OutputCache(PolicyName = "catalogs")]
         [ProducesResponseType(typeof(ApiResponse<List<LoginMethodResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<LoginMethodResponse>>>> GetLoginMethods(
             [FromServices] IQueryHandler<GetLoginMethodsQuery, ApiResponse<List<LoginMethodResponse>>> handler,
