@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ReportsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportResponse } from '@models/responses/reports/report.response';
+import { ReportResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,

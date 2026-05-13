@@ -44,8 +44,8 @@ export class ProfessionalInstitutionsComponent {
     this.selectedInstitutionId = null;
     this.institutionsService.getAll().subscribe({
       next: (data) => {
-        const assignedIds = new Set(this.institutions.filter((i) => i.isActive).map((i) => i.institutionId));
-        this.availableInstitutions = data.filter((i) => i.isActive && !assignedIds.has(i.encryptedId));
+        const assignedIds = new Set(this.institutions.filter((i) => i.isActive).map((i) => Number(i.institutionId)));
+        this.availableInstitutions = data.filter((i) => i.isActive && !assignedIds.has(i.id));
         this.showAssignInstitutionModal.set(true);
       },
       error: () => this.toastService.error('Error al cargar instituciones disponibles'),

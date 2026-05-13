@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse } from '@models/responses/reports/report.response';
+import { ReportListItemResponse } from '@models';
 import {
   FormSelectDirective,
   ModalBodyComponent,

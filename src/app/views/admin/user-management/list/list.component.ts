@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { UserManagementService } from '../../../../services/user-management.service';
-import { AdminUserListItemResponse } from '@models/responses/admin-user-list-item.response';
+import { AdminUserListItemResponse } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';

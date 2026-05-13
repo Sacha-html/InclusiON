@@ -1,13 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiResponse, PagedResponse } from '@models';
-import { ReportListItemResponse, ReportResponse } from '@models/responses/reports/report.response';
-import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
-import { CreateReportRequest } from '@models/requests/reports/create-report.request';
+import { ApiResponse, PagedResponse, ReportListItemResponse, ReportResponse, GetReportsRequest, CreateReportRequest, UpdateReportRequest } from '@models';
 import { environment } from '@env';
 import { unwrapResponse, handleApiError } from '@shared/utils';
-import { UpdateReportRequest } from '@models/requests/reports/update-report.request';
 
 @Injectable({
   providedIn: 'root',

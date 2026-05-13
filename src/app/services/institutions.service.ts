@@ -42,7 +42,7 @@ export class InstitutionsService {
   }
 
   getById(id: string): Observable<InstitutionResponse | undefined> {
-    return this.getAll().pipe(map((list) => list?.find((i) => i.encryptedId === id)));
+    return this.getAll().pipe(map((list) => list?.find((i) => i.id.toString() === id)));
   }
 
   getAll(): Observable<InstitutionResponse[]> {

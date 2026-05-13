@@ -3,9 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
-import { ApiResponse } from '@models';
-import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse } from '@models/responses/roadmap.response';
-import { AddRoadmapActivityRequest, ReorderActivityItem } from '@models/requests/roadmap';
+import { ApiResponse, RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse, AddRoadmapActivityRequest, ReorderActivityItem } from '@models';
 
 @Injectable({ providedIn: 'root' })
 export class RoadmapService {

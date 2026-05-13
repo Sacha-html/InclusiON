@@ -5,8 +5,7 @@ import { ActivitiesService } from '@services/activities.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { ToastService } from '@services';
 import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem } from '@models';
-import { CreateActivityRequest } from '@models/requests/activities';
-import { ActivityListItemResponse } from '@models/responses/activity.response';
+import { CreateActivityRequest, ActivityListItemResponse } from '@models';
 import { CONTENT_EDITOR_REGISTRY } from './editors/content-editor-registry';
 import { ContentEditorBaseComponent } from './editors/content-editor-base.component';
 import { AssignActivityModalComponent } from '../assign-modal/assign-activity-modal.component';
@@ -167,6 +166,7 @@ export class NewComponent implements OnInit {
         this.toastService.success('Actividad creada exitosamente.');
         this.savedActivity.set({
           id: activity.id,
+          encryptedId: activity.encryptedId,
           title: activity.title,
           templateTypeCode: this.selectedTemplateCode,
           templateTypeName: this.selectedTemplateName,

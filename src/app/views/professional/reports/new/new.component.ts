@@ -5,7 +5,7 @@ import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
 import { ReportsService, ProfessionalsService, AssignmentsService, ToastService, CatalogsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CreateReportRequest } from '@models/requests/reports/create-report.request';
+import { CreateReportRequest } from '@models';
 import { CatalogItem, ProfessionalPersonResponse } from '@models';
 import {
   CardComponent,

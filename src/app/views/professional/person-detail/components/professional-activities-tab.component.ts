@@ -2,7 +2,7 @@ import { Component, Input, OnInit, signal } from '@angular/core';
 import { inject } from '@angular/core';
 import { ActivitiesService } from '@services/activities.service';
 import { ToastService } from '@services';
-import { ActivityAssignmentResponse, ActivityAttemptResponse, ActivityAssignmentStatus } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse, ActivityAttemptResponse, ActivityAssignmentStatus } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,

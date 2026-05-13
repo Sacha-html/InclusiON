@@ -5,7 +5,7 @@ import { ToastService } from '@services';
 import { UserRoles } from '@shared/constants/roles';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { UserManagementService } from '../../../../services/user-management.service';
-import { AdminUserDetailResponse, UserRecentSessionResponse } from '@models/responses/admin-user-detail.response';
+import { AdminUserDetailResponse, UserRecentSessionResponse } from '@models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   CardComponent,

@@ -296,7 +296,7 @@ export class CatalogsComponent implements OnInit {
   }
 
   openEdit(item: any): void {
-    this.editingId = item.encryptedId;
+    this.editingId = item.id.toString();
     this.modalTitle = `Editar - ${this.config.title}`;
     this.buildForm(item);
     this.showModal = true;
@@ -346,7 +346,7 @@ export class CatalogsComponent implements OnInit {
     if (!this.deactivatingItem || !this.config.deactivate) return;
     this.isDeactivating = true;
 
-    this.config.deactivate(this.deactivatingItem.encryptedId).subscribe({
+    this.config.deactivate(this.deactivatingItem.id.toString()).subscribe({
       next: () => {
         this.isDeactivating = false;
         this.showDeactivateModal = false;

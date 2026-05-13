@@ -3,9 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogsService, ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CatalogItem } from '@models';
-import { ReportListItemResponse } from '@models/responses/reports/report.response';
-import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
+import { CatalogItem, ReportListItemResponse, GetReportsRequest } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import {
