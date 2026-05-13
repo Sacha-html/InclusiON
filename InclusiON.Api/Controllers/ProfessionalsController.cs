@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -319,6 +320,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene el historial de estados de un profesional.
         /// </summary>
         [HttpGet("{professionalId}/status-history")]
+        [OutputCache(PolicyName = "history")]
         [Authorize(Policy = "professionals:read")]
         [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status404NotFound)]
