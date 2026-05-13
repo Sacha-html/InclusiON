@@ -3,9 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService, CatalogsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { UpdateReportRequest } from '@models/requests/reports/update-report.request';
-import { ReportStatus } from '@models/responses/reports/report.response';
-import { CatalogItem } from '@models';
+import { UpdateReportRequest, ReportStatus, CatalogItem } from '@models';
 import {
   CardComponent,
   CardBodyComponent,

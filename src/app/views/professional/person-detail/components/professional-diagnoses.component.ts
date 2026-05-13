@@ -4,8 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DiagnosesService } from '@services/diagnoses.service';
 import { AuthService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
-import { CreateDiagnosisRequest } from '@models/requests/diagnoses/create-diagnosis.request';
-import { DiagnosisListItemResponse, DiagnosisResponse } from '@models/responses/diagnosis.response';
+import { CreateDiagnosisRequest, DiagnosisListItemResponse, DiagnosisResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,

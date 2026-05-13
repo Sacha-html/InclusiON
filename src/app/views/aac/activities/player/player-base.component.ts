@@ -1,6 +1,6 @@
 import { Directive, ElementRef, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { ActivitiesService } from '@services/activities.service';
-import { ActivityAssignmentResponse } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse } from '@models';
 import { PlayerResult } from './player.models';
 
 export type PlayerPhase = 'intro' | 'playing' | 'result';

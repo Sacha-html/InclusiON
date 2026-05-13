@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportResponse, ReportStatus } from '@models';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {

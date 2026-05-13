@@ -6,10 +6,7 @@ import { ActivitiesService } from '@services/activities.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { AuthService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
-import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse } from '@models/responses/roadmap.response';
-import { ActivityListItemResponse } from '@models/responses/activity.response';
-import { SkillAreaItem } from '@models';
-import { AddRoadmapActivityRequest } from '@models/requests/roadmap';
+import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse, ActivityListItemResponse, SkillAreaItem, AddRoadmapActivityRequest } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,

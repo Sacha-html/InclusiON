@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ActivitiesService } from '@services/activities.service';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ActivityAssignmentResponse } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse } from '@models';
 import { PLAYER_REGISTRY } from './player-registry';
 import { PlayerBaseComponent } from './player-base.component';
 

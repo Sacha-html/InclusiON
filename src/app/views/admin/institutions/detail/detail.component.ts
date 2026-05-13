@@ -117,7 +117,7 @@ export class DetailComponent implements OnInit {
   }
 
   goToEdit(): void {
-    this.router.navigate([AppRoutes.Admin.Institutions, this.institution!.encryptedId, 'edit']);
+    this.router.navigate([AppRoutes.Admin.Institutions, this.institution!.id, 'edit']);
   }
 
   deactivate(): void {
@@ -128,7 +128,7 @@ export class DetailComponent implements OnInit {
     if (!this.institution) return;
     this.deactivateLoading = true;
 
-    this.institutionsService.patchStatus(this.institution.encryptedId, false).subscribe({
+    this.institutionsService.patchStatus(this.institution.id.toString(), false).subscribe({
       next: (updated) => {
         this.institution = updated;
         this.showConfirmModal = false;
@@ -156,7 +156,7 @@ export class DetailComponent implements OnInit {
     if (!this.institution) return;
     this.reactivateLoading = true;
 
-    this.institutionsService.patchStatus(this.institution.encryptedId, true).subscribe({
+    this.institutionsService.patchStatus(this.institution.id.toString(), true).subscribe({
       next: (updated) => {
         this.institution = updated;
         this.showReactivateModal = false;

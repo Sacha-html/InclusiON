@@ -13,7 +13,7 @@ import {
   ProfessionalPersonResponse,
   InvitationResponse,
 } from '@models';
-import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportListItemResponse, ReportStatus } from '@models';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
 import { forkJoin } from 'rxjs';
 
