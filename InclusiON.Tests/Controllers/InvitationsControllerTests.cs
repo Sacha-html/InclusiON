@@ -17,7 +17,7 @@ using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses.Invitations;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica el enrutamiento de queries en <see cref="InvitationsController"/>:

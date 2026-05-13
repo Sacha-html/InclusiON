@@ -21,10 +21,11 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
         private readonly IUnitOfWork           _uow          = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider     _dateTime     = Substitute.For<IDateTimeProvider>();
         private readonly IServiceScopeFactory  _scopeFactory = Substitute.For<IServiceScopeFactory>();
+        private readonly IEncryptionService    _encryption   = Substitute.For<IEncryptionService>();
 
         private ApproveReportCommandHandler BuildSut() =>
             new(_reportsRepo, _emailService, _uow,
-                NullLogger<ApproveReportCommandHandler>.Instance, _dateTime, _scopeFactory);
+                NullLogger<ApproveReportCommandHandler>.Instance, _dateTime, _scopeFactory, _encryption);
 
         private static readonly Guid AdminId = Guid.NewGuid();
 

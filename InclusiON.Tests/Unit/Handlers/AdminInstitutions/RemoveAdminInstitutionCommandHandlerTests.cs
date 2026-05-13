@@ -12,10 +12,11 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
 {
     public class RemoveAdminInstitutionCommandHandlerTests
     {
-        private readonly IAdminInstitutionRepository _repository = Substitute.For<IAdminInstitutionRepository>();
-        private readonly IUnitOfWork                 _uow        = Substitute.For<IUnitOfWork>();
+        private readonly IAdminInstitutionRepository _repository  = Substitute.For<IAdminInstitutionRepository>();
+        private readonly IUnitOfWork                 _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IEncryptionService          _encryption  = Substitute.For<IEncryptionService>();
 
-        private RemoveAdminInstitutionCommandHandler BuildSut() => new(_repository, _uow);
+        private RemoveAdminInstitutionCommandHandler BuildSut() => new(_repository, _uow, _encryption);
 
         [Fact]
         public async Task HandleAsync_AssignmentNotFound_ReturnsNotFound()

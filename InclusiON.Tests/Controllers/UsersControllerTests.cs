@@ -9,7 +9,7 @@ using InclusiON.Application.UseCases.Users.Queries;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     public class UsersControllerTests
     {

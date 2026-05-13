@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Xunit;
 using InclusiON.Api.Middleware;
 
-namespace InclusiON.Tests.Unit.Middleware
+namespace InclusiON.Tests.Controllers.Middleware
 {
     public class SecurityHeadersMiddlewareTests
     {

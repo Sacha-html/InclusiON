@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Xunit;
 using InclusiON.Api.Controllers;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica que <see cref="ProfessionalValidationController"/> esté protegido con

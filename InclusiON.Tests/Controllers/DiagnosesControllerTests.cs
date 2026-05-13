@@ -10,7 +10,7 @@ using InclusiON.DTOs.Requests.Diagnoses;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Diagnoses;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica que <see cref="DiagnosesController"/> lee el professionalId

@@ -14,7 +14,7 @@ using InclusiON.DTOs.Requests.Reports;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Reports;
 
-namespace InclusiON.Tests.Unit.Controllers
+namespace InclusiON.Tests.Controllers
 {
     /// <summary>
     /// Verifica que <see cref="ReportsController"/> resuelve familyId / professionalId
