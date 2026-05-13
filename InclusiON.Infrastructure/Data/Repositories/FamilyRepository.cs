@@ -170,11 +170,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             var orderedQuery = query.OrderBy(f => f.FirstName).ThenBy(f => f.LastName);
 
-            var total   = await query.CountAsync(cancellationToken);
-            var families = await orderedQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync(cancellationToken);
+            var paged   = await orderedQuery.ToPagedAsync(page, pageSize, cancellationToken);
+            var total   = paged.TotalRecords;
+            var families = paged.Data;
 
             if (personId.HasValue && families.Count > 0)
             {

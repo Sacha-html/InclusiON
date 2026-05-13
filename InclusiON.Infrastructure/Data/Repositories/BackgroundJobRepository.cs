@@ -94,6 +94,21 @@ public class BackgroundJobRepository : IBackgroundJobRepository
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    public async Task RetryAsync(int jobId, string errorMessage, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            UPDATE "BackgroundJobs"
+            SET "StatusId" = $1, "ErrorMessage" = $2, "UpdatedAt" = NOW()
+            WHERE "Id" = $3;
+            """;
+
+        await using var cmd = _dataSource.CreateCommand(sql);
+        cmd.Parameters.AddWithValue(BackgroundJobStatuses.Pending);
+        cmd.Parameters.AddWithValue(errorMessage);
+        cmd.Parameters.AddWithValue(jobId);
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+    }
+
     public async Task<List<BackgroundJob>> GetPendingAsync(int batchSize, DateTime orphanTimeout, CancellationToken cancellationToken = default)
     {
         const string sql = """

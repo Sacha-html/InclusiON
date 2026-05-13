@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
 
@@ -15,7 +16,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         }
 
         public async Task<(List<Message> Items, int Total)> GetInboxAsync(
-            Guid userId, int skip, int take,
+            Guid userId, int page, int pageSize,
             bool? isRead = null,
             Guid? relatedPersonId = null,
             Guid? senderId = null,
@@ -39,18 +40,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (senderId.HasValue)
                 query = query.Where(m => m.SenderId == senderId.Value);
 
-            var total = await query.CountAsync(cancellationToken);
-            var items = await query
+            var paged = await query
                 .OrderByDescending(m => !m.IsRead)
                 .ThenByDescending(m => m.SentAt)
-                .Skip(skip).Take(take)
-                .ToListAsync(cancellationToken);
+                .ToPagedAsync(page, pageSize, cancellationToken);
 
-            return (items, total);
+            return (paged.Data, paged.TotalRecords);
         }
 
         public async Task<(List<Message> Items, int Total)> GetSentAsync(
-            Guid userId, int skip, int take,
+            Guid userId, int page, int pageSize,
             bool? isRead = null,
             Guid? relatedPersonId = null,
             Guid? receiverId = null,
@@ -74,13 +73,11 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (receiverId.HasValue)
                 query = query.Where(m => m.ReceiverId == receiverId.Value);
 
-            var total = await query.CountAsync(cancellationToken);
-            var items = await query
+            var paged = await query
                 .OrderByDescending(m => m.SentAt)
-                .Skip(skip).Take(take)
-                .ToListAsync(cancellationToken);
+                .ToPagedAsync(page, pageSize, cancellationToken);
 
-            return (items, total);
+            return (paged.Data, paged.TotalRecords);
         }
 
         public async Task<Message?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
