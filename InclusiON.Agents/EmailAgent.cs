@@ -6,18 +6,9 @@ using InclusiON.Domain.Models;
 
 namespace InclusiON.Agents;
 
-public class EmailAgent : IJobHandler
+public class EmailAgent(IEmailService emailService, ILogger<EmailAgent> logger) : IJobHandler
 {
-    readonly IEmailService _emailService;
-    readonly ILogger<EmailAgent> _logger;
-
     public int JobTypeId => JobTypes.Email;
-
-    public EmailAgent(IEmailService emailService, ILogger<EmailAgent> logger)
-    {
-        _emailService = emailService;
-        _logger = logger;
-    }
 
     public async Task HandleAsync(BackgroundJob job, CancellationToken cancellationToken = default)
     {
@@ -26,7 +17,7 @@ public class EmailAgent : IJobHandler
 
         if (payload.TemplateName is not null)
         {
-            var sent = await _emailService.SendTemplatedEmailAsync(
+            var sent = await emailService.SendTemplatedEmailAsync(
                 payload.To, payload.Subject, payload.TemplateName,
                 payload.Replacements ?? [], cancellationToken);
 
@@ -35,7 +26,7 @@ public class EmailAgent : IJobHandler
         }
         else
         {
-            var sent = await _emailService.SendEmailAsync(
+            var sent = await emailService.SendEmailAsync(
                 payload.To, payload.Subject,
                 payload.HtmlBody ?? string.Empty, cancellationToken);
 
@@ -43,7 +34,7 @@ public class EmailAgent : IJobHandler
                 throw new InvalidOperationException($"Failed to send email to {payload.To}");
         }
 
-        _logger.LogInformation("Email sent to {To}, subject '{Subject}'", payload.To, payload.Subject);
+        logger.LogInformation("Email sent to {To}, subject '{Subject}'", payload.To, payload.Subject);
     }
 }
 

@@ -7,50 +7,42 @@ using InclusiON.Infrastructure.Configuration;
 
 namespace InclusiON.Agents.Workers;
 
-public class PendingJobsWorker : BackgroundService
+public class PendingJobsWorker(
+    IServiceScopeFactory scopeFactory,
+    IOptionsMonitor<BackgroundJobSettings> settings,
+    ILogger<PendingJobsWorker> logger)
+    : BackgroundService
 {
-    readonly IServiceScopeFactory _scopeFactory;
-    readonly IOptionsMonitor<BackgroundJobSettings> _settings;
-    readonly ILogger<PendingJobsWorker> _logger;
-
-    public PendingJobsWorker(
-        IServiceScopeFactory scopeFactory,
-        IOptionsMonitor<BackgroundJobSettings> settings,
-        ILogger<PendingJobsWorker> logger)
-    {
-        _scopeFactory = scopeFactory;
-        _settings = settings;
-        _logger = logger;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("PendingJobsWorker started");
+        logger.LogInformation("PendingJobsWorker started");
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                using var scope = _scopeFactory.CreateScope();
+                using var scope = scopeFactory.CreateScope();
                 var repository = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
                 var executor = scope.ServiceProvider.GetRequiredService<JobExecutor>();
 
-                var settings = _settings.CurrentValue.Worker;
-                var orphanTimeout = DateTime.UtcNow.AddMinutes(-settings.OrphanTimeoutMinutes);
+                var settings1 = settings.CurrentValue.Worker;
+                var orphanTimeout = DateTime.UtcNow.AddMinutes(-settings1.OrphanTimeoutMinutes);
 
-                var jobs = await repository.GetPendingAsync(settings.BatchSize, orphanTimeout, stoppingToken);
+                await repository.ResetOrphanedRunningAsync(orphanTimeout, stoppingToken);
 
-                if (jobs.Count > 0)
-                    _logger.LogInformation("Found {Count} pending jobs", jobs.Count);
-
-                foreach (var job in jobs)
+                var processed = 0;
+                for (var i = 0; i < settings1.BatchSize; i++)
                 {
                     var claimed = await repository.TryClaimAsync(stoppingToken);
                     if (claimed is null)
-                        continue;
+                        break;
 
+                    processed++;
                     await executor.ExecuteAsync(claimed, stoppingToken);
                 }
+
+                if (processed > 0)
+                    logger.LogInformation("Processed {Count} jobs", processed);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -58,14 +50,14 @@ public class PendingJobsWorker : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in PendingJobsWorker loop");
+                logger.LogError(ex, "Error in PendingJobsWorker loop");
             }
 
             await Task.Delay(
-                TimeSpan.FromSeconds(_settings.CurrentValue.Worker.PendingJobsIntervalSeconds),
+                TimeSpan.FromSeconds(settings.CurrentValue.Worker.PendingJobsIntervalSeconds),
                 stoppingToken);
         }
 
-        _logger.LogInformation("PendingJobsWorker stopped");
+        logger.LogInformation("PendingJobsWorker stopped");
     }
 }
