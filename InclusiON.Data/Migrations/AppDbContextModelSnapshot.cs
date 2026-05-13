@@ -1556,6 +1556,39 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Messages", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonEmbedding", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Dimensions")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PersonId");
+
+                    b.ToTable("PersonEmbeddings", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRepresentative", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3129,6 +3162,17 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.PersonEmbedding", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
+                        .WithOne("Embedding")
+                        .HasForeignKey("InclusiON.Domain.Models.PersonEmbedding", "PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.PersonRepresentative", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -3553,6 +3597,8 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("ActivityAssignments");
 
                     b.Navigation("Diagnoses");
+
+                    b.Navigation("Embedding");
 
                     b.Navigation("PersonRepresentatives");
 
