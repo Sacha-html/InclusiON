@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { BigButtonComponent } from '../../../shared/components/big-button/big-button.component';
-import { AuthService } from '../../../services';
+import { BigButtonComponent } from '@shared/components/big-button/big-button.component';
+import { AuthService } from '@services';
 import { IconDirective } from '@coreui/icons-angular';
 
 @Component({

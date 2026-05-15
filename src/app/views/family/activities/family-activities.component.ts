@@ -3,7 +3,7 @@ import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avat
 import { FamilyService, ToastService } from '@services';
 import { ActivitiesService } from '@services/activities.service';
 import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models';
-import { FamilyPersonSummaryResponse } from '../../../models';
+import { FamilyPersonSummaryResponse } from '@models';
 import {
   BadgeComponent,
   CardBodyComponent,

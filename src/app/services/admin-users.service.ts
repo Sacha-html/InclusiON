@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
-import { AdminUserResponse, AdminDashboardResponse, ApiResponse, CreateAdminUserResponse, PagedResponse } from '../models';
+import { AdminUserResponse, AdminDashboardResponse, ApiResponse, CreateAdminUserResponse, PagedResponse } from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CreateProfessionalRequest } from '../../../../models';
+import { CreateProfessionalRequest } from '@models';
 import { validDate, notFutureDate, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 import {
   ButtonDirective,
@@ -16,7 +16,7 @@ import {
   FormLabelDirective,
   RowComponent,
 } from '@coreui/angular';
-import { ProfessionalResponse } from '../../../../models';
+import { ProfessionalResponse } from '@models';
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 
 @Component({

@@ -10,8 +10,8 @@ import {
   BadgeModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
-import { AuthService, UpdateLoginMethodApiResponse } from '../../../services/auth.service';
-import { LoginMethod, UpdateLoginMethodRequest } from '../../../models';
+import { AuthService, UpdateLoginMethodApiResponse } from '@services/auth.service';
+import { LoginMethod, UpdateLoginMethodRequest } from '@models';
 
 @Component({
   selector: 'app-login-method-selector',

@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { UserManagementService } from '../../../../services/user-management.service';
+import { UserManagementService } from '@services/user-management.service';
 import { AdminUserListItemResponse } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';

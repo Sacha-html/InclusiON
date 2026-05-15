@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ProfessionalResponse, UpdateProfessionalRequest } from '../../../../models';
+import { ProfessionalResponse, UpdateProfessionalRequest } from '@models';
 import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
 import {
   ButtonDirective,

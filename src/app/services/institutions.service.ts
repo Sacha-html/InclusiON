@@ -7,7 +7,7 @@ import {
   InstitutionResponse,
   PagedResponse,
   UpdateInstitutionRequest,
-} from '../models';
+} from '@models';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { unwrapResponse } from '@shared/utils';

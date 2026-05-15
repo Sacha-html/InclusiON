@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminUsersService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { AuthService } from '../../../services/auth.service';
+import { AuthService } from '@services/auth.service';
 import { AdminUserResponse } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';

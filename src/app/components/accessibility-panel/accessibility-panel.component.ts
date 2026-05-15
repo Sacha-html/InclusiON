@@ -7,7 +7,7 @@ import {
   AccessibilityTheme,
   AccessibilityProfile,
   ColorMode
-} from '../../services/accessibility.service';
+} from '@services/accessibility.service';
 
 @Component({
   selector: 'app-accessibility-panel',
