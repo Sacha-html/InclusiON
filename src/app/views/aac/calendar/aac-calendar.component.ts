@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { VisualCardComponent } from '../../../shared/components/visual-card/visual-card.component';
+import { VisualCardComponent } from '@shared/components/visual-card/visual-card.component';
 
 @Component({
   selector: 'app-aac-calendar',

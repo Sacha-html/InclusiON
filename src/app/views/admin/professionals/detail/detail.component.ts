@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AssignmentsService, ProfessionalsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ProfessionalInstitutionResponse, ProfessionalPersonResponse, ProfessionalResponse } from '../../../../models';
+import { ProfessionalInstitutionResponse, ProfessionalPersonResponse, ProfessionalResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,

@@ -3,7 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { ErrorCode } from '@models';
-import { RoleRoutes } from '../../../shared/constants/roles';
+import { RoleRoutes } from '@shared/constants/roles';
 
 /**
  * Datos de error de respuesta de login visual.

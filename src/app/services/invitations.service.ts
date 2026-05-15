@@ -9,7 +9,7 @@ import {
   InvitationValidationResponse,
   AcceptInvitationResponse,
   PagedResponse,
-} from '../models';
+} from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse } from '@shared/utils';
 

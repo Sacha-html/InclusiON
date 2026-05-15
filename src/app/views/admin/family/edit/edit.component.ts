@@ -5,7 +5,7 @@ import { FamilyService, PersonsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import {
   FamilyResponse, LinkedPersonInfo, UpdateFamilyRequest, PersonListItemResponse,
-} from '../../../../models';
+} from '@models';
 import {
   BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,

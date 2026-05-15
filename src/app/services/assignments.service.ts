@@ -7,7 +7,7 @@ import {
   AssignPersonRequest,
   ProfessionalInstitutionResponse,
   ProfessionalPersonResponse,
-} from '../models';
+} from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 

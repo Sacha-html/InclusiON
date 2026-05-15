@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { IconDirective } from '@coreui/icons-angular';
-import { ToastService } from '../../services';
+import { ToastService } from '@services';
 
 @Component({
   selector: 'app-help-button',

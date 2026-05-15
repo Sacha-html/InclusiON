@@ -10,8 +10,8 @@ import {
   AlertComponent,
 } from '@coreui/angular';
 import { AuthService } from '@services';
-import { AdminUsersService } from '../../../services/admin-users.service';
-import { AdminDashboardResponse } from '../../../models';
+import { AdminUsersService } from '@services/admin-users.service';
+import { AdminDashboardResponse } from '@models';
 import { StatCardComponent } from '@shared/components/stat-card/stat-card.component';
 
 @Component({
