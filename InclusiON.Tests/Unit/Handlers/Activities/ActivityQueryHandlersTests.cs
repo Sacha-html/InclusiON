@@ -18,6 +18,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _activitiesRepo = Substitute.For<IActivitiesRepository>();
         private readonly IActivityAssignmentRepository _assignRepo = Substitute.For<IActivityAssignmentRepository>();
         private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private readonly IFamilyRepository _familyRepository = Substitute.For<IFamilyRepository>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid PersonId = Guid.NewGuid();
@@ -25,6 +26,8 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         public ActivityQueryHandlersTests()
         {
             _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+            _familyRepository.GetPersonRepresentativesByPersonIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+                .Returns(new List<PersonRepresentative>());
         }
 
         private static Activity AnActivity(int id = 1, bool isStandard = false) => new()
@@ -151,7 +154,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
                     }
                 });
 
-            var handler = new GetPersonActivityAssignmentsQueryHandler(_assignRepo, _encryption);
+            var handler = new GetPersonActivityAssignmentsQueryHandler(_assignRepo, _encryption, _familyRepository);
             // Pass PersonId as RequesterId so the student sees their own assignments
             var result = await handler.HandleAsync(
                 new GetPersonActivityAssignmentsQuery(PersonId, PersonId), default);
@@ -167,7 +170,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             _assignRepo.GetByPersonIdAsync(PersonId, Arg.Any<CancellationToken>())
                 .Returns(new List<ActivityAssignment>());
 
-            var result = await new GetPersonActivityAssignmentsQueryHandler(_assignRepo, _encryption)
+            var result = await new GetPersonActivityAssignmentsQueryHandler(_assignRepo, _encryption, _familyRepository)
                 .HandleAsync(new GetPersonActivityAssignmentsQuery(PersonId, PersonId), default);
 
             result.Success.Should().BeTrue();
