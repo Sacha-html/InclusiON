@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { InstitutionsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { InstitutionResponse, UpdateInstitutionRequest } from '../../../../models';
+import { InstitutionResponse, UpdateInstitutionRequest } from '@models';
 import {
   ButtonDirective,
   CardBodyComponent,

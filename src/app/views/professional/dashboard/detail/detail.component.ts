@@ -6,7 +6,7 @@ import {
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ProfessionalsService, AssignmentsService, InvitationsService, ReportsService, ToastService } from '@services';
-import { MessagesService } from '../../../../services/messages.service';
+import { MessagesService } from '@services/messages.service';
 import { getInvitationStatusColor } from '@shared/utils';
 import {
   ProfessionalResponse,

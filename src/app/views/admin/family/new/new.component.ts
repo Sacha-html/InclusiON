@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { FamilyService, PersonsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../../../../models';
+import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '@models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,

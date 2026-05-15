@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ActivitiesService } from '@services/activities.service';
 import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { VisualCardComponent } from '../../../shared/components/visual-card/visual-card.component';
+import { VisualCardComponent } from '@shared/components/visual-card/visual-card.component';
 
 @Component({
   selector: 'app-aac-activities',

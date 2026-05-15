@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FamilyService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { FamilyResponse } from '../../../../models';
+import { FamilyResponse } from '@models';
 import { formatDateTime } from '@shared/utils';
 import {
   AlertComponent, BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,

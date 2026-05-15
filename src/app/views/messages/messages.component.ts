@@ -17,7 +17,7 @@ import {
   MessageListItemResponse,
   MessageDetailResponse,
   MessageContactResponse,
-} from '../../services/messages.service';
+} from '@services/messages.service';
 import { ToastService } from '@services';
 
 type ActiveTab = 'inbox' | 'sent';

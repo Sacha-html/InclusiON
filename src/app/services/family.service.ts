@@ -13,7 +13,7 @@ import {
   PersonRepresentativeResponse,
   FamilyStatusHistoryResponse,
   PersonRepresentativeHistoryResponse,
-} from '../models';
+} from '@models';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { unwrapResponse, handleApiError } from '@shared/utils';

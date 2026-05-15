@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService, ToastService } from '../services';
-import { AppRoutes } from '../shared/constants/app-routes';
+import { AuthService, ToastService } from '@services';
+import { AppRoutes } from '@shared/constants/app-routes';
 
 export const globalAdminGuard: CanActivateFn = () => {
   const authService = inject(AuthService);

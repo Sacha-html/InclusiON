@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResponse, PagedResponse, DiagnosisResponse, DiagnosisListItemResponse, CreateDiagnosisRequest } from '../models';
+import { ApiResponse, PagedResponse, DiagnosisResponse, DiagnosisListItemResponse, CreateDiagnosisRequest } from '@models';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({

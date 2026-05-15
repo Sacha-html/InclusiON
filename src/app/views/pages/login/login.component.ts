@@ -9,7 +9,7 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { LoginRequest } from '@models';
-import { RoleRoutes, UserRoles } from '../../../shared/constants/roles';
+import { RoleRoutes, UserRoles } from '@shared/constants/roles';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
 
 // CoreUI imports

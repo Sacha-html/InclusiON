@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { permissionGuard } from '../../guards/permission.guard';
+import { permissionGuard } from '@guards/permission.guard';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants/app-routes';
 
