@@ -108,6 +108,7 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
+        { action: 'view',       label: 'Ver',        icon: 'cilMagnifyingGlass', visible: () => true },
         { action: 'assign',     label: 'Asignar',    icon: 'cilSend',  visible: (item) => item.isActive },
         { action: 'edit',       label: 'Editar',     icon: 'cilNotes', visible: (item) => this.canUpdate && !item.isStandardActivity },
         { action: 'deactivate', label: 'Desactivar', icon: 'cilBan',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
@@ -186,6 +187,9 @@ export class ListComponent implements OnInit {
 
   onRowAction(event: { action: string; item: ActivityListItemResponse }): void {
     switch (event.action) {
+      case 'view':
+        this.router.navigate([AppRoutes.Pro.Activities, event.item.encryptedId]);
+        break;
       case 'assign':
         this.itemToAssign = event.item;
         this.showAssignModal = true;

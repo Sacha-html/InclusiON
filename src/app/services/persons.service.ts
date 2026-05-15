@@ -8,6 +8,7 @@ import {
   PersonResponse,
   PersonListItemResponse,
   PersonSkillProfileResponse,
+  ActivityListItemResponse,
   CreatePersonRequest,
   UpdatePersonRequest,
   GetPersonsRequest,
@@ -242,6 +243,17 @@ export class PersonsService {
   updateLoginMethod(userId: string, request: UpdateLoginMethodRequest): Observable<UpdateLoginMethodResponse> {
     return this.http
       .put<ApiResponse<UpdateLoginMethodResponse>>(`${this.apiUrl}/${userId}/login-method`, request)
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Obtiene actividades recomendadas para una persona (basadas en compatibilidad semántica).
+   */
+  getRecommendedActivities(personId: string, limit = 10): Observable<ActivityListItemResponse[]> {
+    return this.http
+      .get<ApiResponse<ActivityListItemResponse[]>>(`${this.apiUrl}/${personId}/recommended-activities`, {
+        params: { limit: limit.toString() }
+      })
       .pipe(unwrapResponse());
   }
 }

@@ -74,12 +74,20 @@
 
         <div class="row mb-3">
           <div class="col-md-6">
-            <label cFormLabel>Nombre</label>
-            <input cFormControl formControlName="firstName" placeholder="Nombre" />
+            <label cFormLabel>Nombre *</label>
+            <input cFormControl formControlName="firstName" placeholder="Nombre"
+                   [class.is-invalid]="hasError('firstName', 'required')" />
+            @if (hasError('firstName', 'required')) {
+              <div class="text-danger small mt-1">El nombre es requerido</div>
+            }
           </div>
           <div class="col-md-6">
-            <label cFormLabel>Apellido</label>
-            <input cFormControl formControlName="lastName" placeholder="Apellido" />
+            <label cFormLabel>Apellido *</label>
+            <input cFormControl formControlName="lastName" placeholder="Apellido"
+                   [class.is-invalid]="hasError('lastName', 'required')" />
+            @if (hasError('lastName', 'required')) {
+              <div class="text-danger small mt-1">El apellido es requerido</div>
+            }
           </div>
         </div>
 

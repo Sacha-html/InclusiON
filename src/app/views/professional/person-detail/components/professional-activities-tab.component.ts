@@ -1,8 +1,8 @@
 import { Component, Input, OnInit, signal } from '@angular/core';
 import { inject } from '@angular/core';
 import { ActivitiesService } from '@services/activities.service';
-import { ToastService } from '@services';
-import { ActivityAssignmentResponse, ActivityAttemptResponse, ActivityAssignmentStatus } from '@models';
+import { PersonsService, ToastService } from '@services';
+import { ActivityAssignmentResponse, ActivityAttemptResponse, ActivityAssignmentStatus, ActivityListItemResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -27,6 +27,7 @@ export class ProfessionalActivitiesTabComponent implements OnInit {
   @Input({ required: true }) personId!: string;
 
   private readonly activitiesService = inject(ActivitiesService);
+  private readonly personsService     = inject(PersonsService);
   private readonly toastService      = inject(ToastService);
 
   assignments = signal<ActivityAssignmentResponse[]>([]);
@@ -34,10 +35,25 @@ export class ProfessionalActivitiesTabComponent implements OnInit {
   hasError    = signal(false);
   expandedId  = signal<number | null>(null);
 
+  recommendedActivities = signal<ActivityListItemResponse[]>([]);
+  recommendedLoading    = signal(false);
+
   ngOnInit(): void {
     this.activitiesService.getPersonAssignments(this.personId).subscribe({
       next:  (data) => { this.assignments.set(data); this.isLoading.set(false); },
       error: ()     => { this.hasError.set(true);    this.isLoading.set(false); },
+    });
+    this.loadRecommendedActivities();
+  }
+
+  private loadRecommendedActivities(): void {
+    this.recommendedLoading.set(true);
+    this.personsService.getRecommendedActivities(this.personId, 5).subscribe({
+      next: (data) => {
+        this.recommendedActivities.set(data);
+        this.recommendedLoading.set(false);
+      },
+      error: () => { this.recommendedLoading.set(false); },
     });
   }
 

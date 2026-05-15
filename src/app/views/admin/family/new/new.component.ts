@@ -44,7 +44,7 @@ export class NewComponent {
     email: ['', [Validators.required, Validators.email]],
     documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
-    relationship: [''],
+    relationship: ['', [Validators.required]],
     personId: [null, [Validators.required]],
   });
 
@@ -71,7 +71,7 @@ export class NewComponent {
       personId: raw.personId,
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       ...(raw.phone && { phone: raw.phone }),
-      ...(raw.relationship && { relationship: raw.relationship }),
+      relationship: raw.relationship,
     };
 
     this.familyService.createFamily(request).subscribe({
