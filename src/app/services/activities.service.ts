@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
-import { ApiResponse, PagedResponse, ActivityListItemResponse, ActivityResponse, ActivityAssignmentResponse, GetActivitiesRequest, CreateActivityRequest, UpdateActivityRequest, CreateAssignmentRequest } from '@models';
+import { ApiResponse, PagedResponse, ActivityListItemResponse, ActivityResponse, ActivityAssignmentResponse, GetActivitiesRequest, CreateActivityRequest, UpdateActivityRequest, CreateAssignmentRequest, PersonListItemResponse } from '@models';
 
 @Injectable({ providedIn: 'root' })
 export class ActivitiesService {
@@ -111,6 +111,18 @@ export class ActivitiesService {
         `${this.assignmentsUrl}/${assignmentId}/responses/${responseId}/complete`,
         data
       )
+      .pipe(unwrapResponse());
+  }
+
+  getSimilarActivities(encryptedId: string, limit = 5): Observable<ActivityListItemResponse[]> {
+    return this.http
+      .get<ApiResponse<ActivityListItemResponse[]>>(`${this.baseUrl}/${encryptedId}/similar`, { params: { limit: limit.toString() } })
+      .pipe(unwrapResponse());
+  }
+
+  getCompatiblePersons(encryptedId: string, limit = 10): Observable<PersonListItemResponse[]> {
+    return this.http
+      .get<ApiResponse<PersonListItemResponse[]>>(`${this.baseUrl}/${encryptedId}/compatible-persons`, { params: { limit: limit.toString() } })
       .pipe(unwrapResponse());
   }
 }
