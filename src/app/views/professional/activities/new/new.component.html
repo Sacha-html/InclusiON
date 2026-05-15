@@ -199,6 +199,18 @@
           <button cButton color="secondary" (click)="skipAssign()">Ir al catálogo</button>
         </div>
       </div>
+      @if (similarActivities().length > 0) {
+        <div class="mt-4 p-3 bg-light rounded">
+          <h6 class="mb-3">Actividades similares que podrían interesarte</h6>
+          <div class="d-flex flex-wrap gap-2">
+            @for (act of similarActivities(); track act.encryptedId) {
+              <span class="badge bg-secondary-subtle text-dark fs-6">
+                {{ act.title }}
+              </span>
+            }
+          </div>
+        </div>
+      }
       <app-assign-activity-modal
         [(visible)]="showAssignModal"
         [activity]="savedActivity()"

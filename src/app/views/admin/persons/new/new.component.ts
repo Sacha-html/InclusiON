@@ -64,7 +64,7 @@ export class NewComponent implements OnInit {
     documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate]],
     // Discapacidad
-    disabilityTypeId: [null],
+    disabilityTypeId: [null, [Validators.required]],
     // Perfil funcional
     attentionLevel: [null],
     communicationLevel: [null],
@@ -129,7 +129,7 @@ export class NewComponent implements OnInit {
       soundSensitivity: raw.soundSensitivity ?? false,
       ...(raw.colorBlindnessType && { colorBlindnessType: raw.colorBlindnessType }),
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
-      ...(raw.disabilityTypeId && { disabilityTypeId: +raw.disabilityTypeId }),
+      disabilityTypeId: +raw.disabilityTypeId,
       ...(raw.attentionLevel && { attentionLevel: +raw.attentionLevel }),
       ...(raw.communicationLevel && { communicationLevel: +raw.communicationLevel }),
       ...(raw.motorSkillLevel && { motorSkillLevel: +raw.motorSkillLevel }),

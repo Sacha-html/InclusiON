@@ -7,7 +7,7 @@ import { ArasaacService, ArasaacPictogram } from '@services/arasaac.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem, UpdateActivityRequest, SelectFigureContent } from '@models';
+import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem, UpdateActivityRequest, SelectFigureContent, ActivityListItemResponse } from '@models';
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
   ButtonDirective, ColComponent, RowComponent,
@@ -74,6 +74,9 @@ export class EditComponent implements OnInit {
   isSearching    = signal(false);
   private search$ = new Subject<string>();
 
+  similarActivities = signal<ActivityListItemResponse[]>([]);
+  similarLoading = signal(false);
+
   get isSelectFigure(): boolean { return this.templateTypeCode === 'SELECT_FIGURE'; }
 
   get isValid(): boolean {
@@ -121,6 +124,7 @@ export class EditComponent implements OnInit {
           }
         }
         this.isLoadingData.set(false);
+        this.loadSimilarActivities();
       },
       error: () => {
         this.toastService.error('Error al cargar la actividad.');
@@ -196,4 +200,17 @@ export class EditComponent implements OnInit {
   }
 
   cancel(): void { this.router.navigate([AppRoutes.Pro.Activities]); }
+
+  private loadSimilarActivities(): void {
+    this.similarLoading.set(true);
+    this.activitiesService.getSimilarActivities(this.activityId, 5).subscribe({
+      next: (results) => {
+        this.similarActivities.set(results);
+        this.similarLoading.set(false);
+      },
+      error: () => {
+        this.similarLoading.set(false);
+      },
+    });
+  }
 }

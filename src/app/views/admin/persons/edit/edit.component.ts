@@ -69,7 +69,7 @@ export class EditComponent implements OnInit {
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate]],
     // Discapacidad
-    disabilityTypeId: [null],
+    disabilityTypeId: [null, [Validators.required]],
     // Perfil funcional
     attentionLevel: [null],
     communicationLevel: [null],
@@ -162,7 +162,7 @@ export class EditComponent implements OnInit {
       visualNoiseSensitivity: raw.visualNoiseSensitivity ?? false,
       soundSensitivity: raw.soundSensitivity ?? false,
       colorBlindnessType: raw.colorBlindnessType ?? null,
-      ...(raw.disabilityTypeId && { disabilityTypeId: +raw.disabilityTypeId }),
+      disabilityTypeId: +raw.disabilityTypeId,
       ...(raw.attentionLevel && { attentionLevel: +raw.attentionLevel }),
       ...(raw.communicationLevel && { communicationLevel: +raw.communicationLevel }),
       ...(raw.motorSkillLevel && { motorSkillLevel: +raw.motorSkillLevel }),

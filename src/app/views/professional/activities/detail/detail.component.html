@@ -1,0 +1,121 @@
+@if (isLoading()) {
+  <div class="text-center py-5">
+    <c-spinner aria-label="Cargando actividad"></c-spinner>
+  </div>
+} @else if (activity()) {
+  <c-card>
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <h5 cCardTitle class="mb-0">Detalle de Actividad</h5>
+      @if (canUpdate && !activity()?.isStandardActivity) {
+        <button cButton color="primary" (click)="edit()">
+          Editar
+        </button>
+      }
+    </c-card-header>
+    <c-card-body>
+      <div class="mb-4">
+        <h4>{{ activity().title }}</h4>
+        <div class="d-flex gap-2 mb-3">
+          <c-badge [color]="activity().isActive ? 'success' : 'secondary'">
+            {{ activity().isActive ? 'Activa' : 'Inactiva' }}
+          </c-badge>
+          <c-badge color="info">
+            {{ activity().templateTypeName }}
+          </c-badge>
+          <c-badge color="primary">
+            {{ activity().categoryName }}
+          </c-badge>
+          @if (activity().isStandardActivity) {
+            <c-badge color="secondary">Estándar</c-badge>
+          }
+        </div>
+      </div>
+
+      @if (activity().description) {
+        <div class="mb-3">
+          <strong>Descripción:</strong>
+          <p class="mb-0 text-body">{{ activity().description }}</p>
+        </div>
+      }
+
+      @if (activity().instructions) {
+        <div class="mb-3">
+          <strong>Instrucciones:</strong>
+          <p class="mb-0 text-body">{{ activity().instructions }}</p>
+        </div>
+      }
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <strong>Complejidad:</strong> {{ activity().complexityLevel }}/5
+        </div>
+        <div class="col-md-4">
+          <strong>Duración:</strong> {{ activity().estimatedDurationMinutes }} min
+        </div>
+        @if (activity().skillAreaName) {
+          <div class="col-md-4">
+            <strong>Área de habilidad:</strong> {{ activity().skillAreaName }}
+          </div>
+        }
+      </div>
+
+      <div class="mb-4">
+        <strong>Opciones de accesibilidad:</strong>
+        <div class="d-flex flex-wrap gap-2 mt-1">
+          @if (activity().hasVisualSupport) {
+            <c-badge color="info">Soporte visual</c-badge>
+          }
+          @if (activity().hasAudioSupport) {
+            <c-badge color="info">Soporte auditivo</c-badge>
+          }
+          @if (activity().usesEasyReading) {
+            <c-badge color="info">Lectura fácil</c-badge>
+          }
+          @if (activity().usesPictograms) {
+            <c-badge color="info">Pictogramas</c-badge>
+          }
+          @if (activity().requiresSupervision) {
+            <c-badge color="warning">Requiere supervisión</c-badge>
+          }
+        </div>
+      </div>
+
+      @if (compatiblePersons().length > 0) {
+        <div class="mt-4 p-3 bg-light rounded">
+          <h6 class="mb-3">Personas compatibles para esta actividad</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Tipo de discapacidad</th>
+                  <th>Nivel de autonomía</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (person of compatiblePersons(); track person.id) {
+                  <tr>
+                    <td>{{ person.fullName }}</td>
+                    <td>{{ person.disabilityTypeName || '-' }}</td>
+                    <td>{{ person.autonomyLevelName || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      } @else if (personsLoading()) {
+        <div class="mt-4 p-3 bg-light rounded">
+          <c-spinner size="sm" class="me-2"></c-spinner>
+          Buscando personas compatibles...
+        </div>
+      }
+
+      <div class="mt-4">
+        <button cButton color="secondary" (click)="back()">
+          Volver al catálogo
+        </button>
+      </div>
+    </c-card-body>
+  </c-card>
+}

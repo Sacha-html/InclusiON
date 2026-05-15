@@ -101,8 +101,8 @@ export class ListComponent implements OnInit {
     this.invitationForm = this.fb.group({
       personId:     [''],
       email:        ['', [Validators.required, Validators.email]],
-      firstName:    ['', [Validators.maxLength(100)]],
-      lastName:     ['', [Validators.maxLength(100)]],
+      firstName:    ['', [Validators.required, Validators.maxLength(100)]],
+      lastName:     ['', [Validators.required, Validators.maxLength(100)]],
       relationship: [''],
     });
   }
@@ -196,8 +196,8 @@ export class ListComponent implements OnInit {
     const values = this.invitationForm.value;
     const request: CreateInvitationRequest = {
       email:        values.email.trim(),
-      firstName:    values.firstName?.trim()  || undefined,
-      lastName:     values.lastName?.trim()   || undefined,
+      firstName:    values.firstName.trim(),
+      lastName:     values.lastName.trim(),
       relationship: values.relationship       || undefined,
       personId:     values.personId           || undefined,
     };

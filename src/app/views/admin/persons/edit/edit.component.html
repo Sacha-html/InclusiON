@@ -66,14 +66,20 @@
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="disabilityTypeId">Tipo de discapacidad</label>
+            <label cLabel for="disabilityTypeId">Tipo de discapacidad *</label>
             <select cSelect id="disabilityTypeId" formControlName="disabilityTypeId"
-                    aria-label="Seleccionar tipo de discapacidad">
+                    aria-label="Seleccionar tipo de discapacidad"
+                    [valid]="submitted ? f['disabilityTypeId'].valid : undefined">
               <option [ngValue]="null">-- Seleccionar --</option>
               @for (dt of disabilityTypes; track dt.id) {
                 <option [value]="dt.id">{{ dt.name }}</option>
               }
             </select>
+            @if (submitted && f['disabilityTypeId'].errors) {
+              <c-form-feedback [valid]="false">
+                @if (f['disabilityTypeId'].errors['required']) { El tipo de discapacidad es obligatorio. }
+              </c-form-feedback>
+            }
           </c-col>
         </c-row>
 

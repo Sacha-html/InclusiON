@@ -64,8 +64,15 @@
                   }
                 </c-col>
                 <c-col sm="6">
-                  <label cLabel for="documentNumber">Documento</label>
-                  <input cFormControl id="documentNumber" formControlName="documentNumber" />
+                  <label cLabel for="documentNumber">Documento *</label>
+                  <input cFormControl id="documentNumber" formControlName="documentNumber"
+                         [valid]="showFieldError('documentNumber') ? (f['documentNumber'].valid ? true : false) : undefined" />
+                  @if (showFieldError('documentNumber')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
+                      @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength'] || f['documentNumber'].errors?.['pattern']) { El documento debe tener entre 6 y 20 caracteres alfanumericos. }
+                    </c-form-feedback>
+                  }
                 </c-col>
               </c-row>
 

@@ -150,3 +150,16 @@
     {{ assignments().length }} asignación{{ assignments().length !== 1 ? 'es' : '' }} en total
   </div>
 }
+
+@if (recommendedActivities().length > 0) {
+  <div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-3">Actividades recomendadas para esta persona</h6>
+    <div class="d-flex flex-wrap gap-2">
+      @for (act of recommendedActivities(); track act.encryptedId) {
+        <span class="badge bg-secondary-subtle text-dark fs-6">
+          {{ act.title }}
+        </span>
+      }
+    </div>
+  </div>
+}
