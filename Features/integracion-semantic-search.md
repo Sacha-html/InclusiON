@@ -1,13 +1,15 @@
 # Integración SemanticSearch en Clean Architecture
 
-## Estado actual
+## Estado actual ✅ IMPLEMENTADO
 
 `InclusiON.SemanticSearch/` es una library independiente con:
 - `OnnxEmbeddingService` — implementa `IEmbeddingService` usando OnnxRuntime + SentencePieceTokenizer
 - `SemanticSearchExtensions` — extension method `AddSemanticSearch(IConfiguration)`
 - Archivos de modelo en `Model/`: `model.onnx` (448 MB), `sentencepiece.bpe.model` (5 MB)
 
-La biblioteca está integrada y funcional. **Falta:** el handler CQRS de búsqueda semántica y el endpoint.
+La biblioteca está integrada y funcional. **Implementado:**
+- Handler CQRS de búsqueda semántica
+- Endpoints de actividades similares, personas compatibles y actividades recomendadas
 
 ---
 
@@ -49,39 +51,38 @@ Los archivos se copian al output automáticamente desde `InclusiON.Api.csproj` (
 
 ---
 
-## Lo que falta implementar
+## Implementado
 
-### Handler CQRS
+### Queries y Handlers
 
 En `InclusiON.Application/UseCases/Activities/Queries/`:
+- `GetSimilarActivitiesQuery.cs` — obtiene actividades similares a una dada
+- `GetSimilarActivitiesQueryHandler.cs` — usa cosine similarity con pgvector
+- `GetCompatiblePersonsQuery.cs` — busca personas compatibles para una actividad
 
-```
-SearchActivitiesSemanticQuery.cs        — SearchText, TopN, MinScore
-SearchActivitiesSemanticQueryHandler.cs — embebe texto, consulta ActivityEmbeddings via coseno, devuelve top N
-```
+En `InclusiON.Application/UseCases/Persons/Queries/`:
+- `GetRecommendedActivitiesQuery.cs` — obtiene actividades recomendadas para una persona
+- `GetRecommendedActivitiesQueryHandler.cs`
 
-El handler inyecta `IEmbeddingService` (para vectorizar la consulta) y usa raw SQL:
+### Endpoints
 
-```sql
-SELECT a.*, 1 - (ae."Embedding" <=> $1::vector) AS "Score"
-FROM "ActivityEmbeddings" ae
-JOIN "Activities" a ON a."Id" = ae."ActivityId"
-WHERE 1 - (ae."Embedding" <=> $1::vector) > {minScore}
-ORDER BY ae."Embedding" <=> $1::vector
-LIMIT {topN};
-```
+| Endpoint | Descripción |
+|----------|-------------|
+| `GET /api/activities/{id}/similar` | Actividades similares (top 5) |
+| `GET /api/activities/{id}/compatible-persons` | Personas compatibles para actividad (top 10) |
+| `GET /api/persons/{id}/recommended-activities` | Actividades recomendadas para persona (top 10) |
 
-### DTOs
+### Repositorios
 
-`ActivitySearchResultDto` — Id, Title, CategoryName, TemplateTypeName, Score
+`IEmbeddingRepository` con métodos:
+- `GetByActivityIdAsync` — obtener embedding de actividad
+- `GetPersonEmbeddingAsync` — obtener embedding de persona
+- `SearchPersonsForActivityAsync` — buscar personas por compatibilidad
+- `SearchActivitiesAsync` — buscar actividades similares
 
-### Endpoint
+### EmbeddingRepository
 
-```
-GET /api/activities/search?text=...&topN=10&minScore=0.6
-```
-
-En `ActivitiesController` (o nuevo `ActivitySearchController`).
+Implementación en `InclusiON.Infrastructure/Data/Repositories/EmbeddingRepository.cs` usa raw SQL con pgvector para similarity search.
 
 ---
 
@@ -97,18 +98,17 @@ Application → (solo interfaces, no referencia SemanticSearch)
 
 ## Cómo se genera un embedding al crear una actividad
 
-En `CreateActivityCommandHandler`, después de guardar la actividad:
+La generación de embeddings se ejecuta via **Python Agent** en `Inclusion.Agent/main.py`:
+- El backend encola un job de generación de embedding
+- El agente Python (localhost:5050) procesa la cola y genera los vectores
+- Los embeddings se almacenan en `ActivityEmbeddings` y `PersonEmbeddings`
 
-```csharp
-var embedding = await _embeddingService.GenerateEmbeddingAsync(
-    $"{activity.Title} {activity.Description} {contentJson}",
-    cancellationToken);
+### Flujo completo
 
-// Persistir via raw SQL (pgvector no soporta EF 10)
-await _rawDb.ExecuteAsync(
-    "INSERT INTO \"ActivityEmbeddings\" (\"ActivityId\", \"Embedding\") VALUES ($1, $2::vector) ON CONFLICT (\"ActivityId\") DO UPDATE SET \"Embedding\" = $2::vector",
-    activity.Id, $"[{string.Join(",", embedding)}]");
-```
+1. **Backend** crea/actualiza actividad → encola job
+2. **BackgroundJob** procesa y genera embedding
+3. **EmbeddingRepository** persiste en PostgreSQL via raw SQL
+4. **Queries** de búsqueda semántica usan cosine similarity con pgvector
 
-> **Estado:** la generación de embedding en `CreateActivityCommandHandler` está pendiente de implementación.
-> El resto del pipeline (modelo, tokenizador, DI) está operativo.
+> **Nota:** El modelo ONNX (`paraphrase-multilingual-MiniLM-L12-v2`) se ejecuta en el agente Python,
+> no en el backend .NET. El backend solo almacena y consulta los vectores.

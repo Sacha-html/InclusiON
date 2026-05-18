@@ -42,7 +42,7 @@ InclusiON.Data/             ← DbContext, configurations, migraciones, seeders
 InclusiON.Domain/           ← Entidades del dominio y base classes
 InclusiON.DTOs/             ← Request/Response DTOs, PagedRequest/Response
 InclusiON.Shared/           ← Constantes, mensajes (resx)
-InclusiON.SemanticSearch/   ← Library ONNX para embeddings (modelo + DI listos; falta handler búsqueda)
+InclusiON.SemanticSearch/   ← Library ONNX para embeddings con búsqueda semántica implementada
 ```
 
 ---
@@ -252,7 +252,7 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 `User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`, `PersonSkillProfile`, `ProfessionalStatusHistory`, `FamilyStatusHistory`, `PersonRepresentativeHistory`, `Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `Message`, `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`
 
 ### Con migración pero sin handlers (pendientes)
-`ActivityEmbedding` (embedding se genera via raw SQL en CreateActivity — pendiente), `ActivityResult`, `ActivityCategory`\*, `ActivityTemplateType`\*, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`\*, `DisabilityType`\*, `ReportType`, `SkillArea`\*
+`ActivityEmbedding` (implementado con búsqueda semántica), `ActivityResult`, `ActivityCategory`\*, `ActivityTemplateType`\*, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`\*, `DisabilityType`\*, `ReportType`, `SkillArea`\*
 
 \* Catálogos leídos solo por el `CatalogsController`, no necesitan handlers de escritura propios.
 

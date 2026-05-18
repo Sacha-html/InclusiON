@@ -32,9 +32,22 @@ services:
       ConnectionStrings__PostgreSqlConn: "Host=postgres;Port=5432;Database=inclusion_db;Username=inclusion_user;Password=Inclusion_Local123!"
       Cors__AllowedOrigins__0: "http://localhost:4200"
       SmtpSettings__Enabled: "false"
+      BackgroundJobs__PythonAgent__Url: "http://inclusion-agent:5050"
     depends_on:
       postgres:
         condition: service_healthy
+
+  inclusion-agent:
+    build:
+      context: ../../Inclusion.Agent
+      dockerfile: Dockerfile
+    container_name: inclusion_agent
+    restart: unless-stopped
+    ports:
+      - "5001:5050"
+    environment:
+      PORT: "5050"
+      MODEL_CACHE_DIR: "/app/models"
 
   frontend:
     build:

@@ -1,6 +1,6 @@
 # DER — InclusiON
 
-**Última actualización:** 2026-04-23  
+**Última actualización:** 2026-05-15  
 **Fuente:** `InclusiON.Data/AppDbContext.cs` + `InclusiON.Domain/Models/`
 
 ```mermaid
@@ -13,9 +13,9 @@ erDiagram
     %% perfil de rol (Professional, PersonWithDisability o FamilyRepresentative).
     User {
         uuid        Id                  PK  "NOT NULL"
-        varchar256  Email               UK  "NOT NULL"
-        varchar100  Name                    "NOT NULL"
-        varchar100  Surname                 "NOT NULL"
+        varchar256  Email               UK  "nullable"
+        varchar100  Name                    "nullable"
+        varchar100  Surname                 "nullable"
         bool        IsActive                "NOT NULL"
         bool        MustChangePassword      "NOT NULL"
         timestamptz CreatedAt               "NOT NULL"
@@ -104,8 +104,8 @@ erDiagram
     SkillArea {
         int    Id           PK  "NOT NULL"
         varchar100 Name         "NOT NULL"
-        varchar50 Icon           "NOT NULL"
-        varchar7  Color          "NOT NULL - formato #RRGGBB"
+        varchar50 Icon           "nullable"
+        varchar7  Color          "nullable"
         int    DisplayOrder      "NOT NULL"
         bool   IsActive          "NOT NULL"
     }
@@ -156,7 +156,7 @@ erDiagram
         uuid        UserId          FK  "NOT NULL - UK"
         varchar100  FirstName           "NOT NULL"
         varchar100  LastName            "NOT NULL"
-        varchar20   DocumentNumber  UK  "NOT NULL"
+        varchar20   DocumentNumber  UK  "nullable"
         varchar200  Specialty           "nullable"
         varchar50   LicenseNumber       "nullable"
         varchar20   Status              "NOT NULL - Pending/Approved/Rejected"
@@ -180,15 +180,15 @@ erDiagram
     PersonWithDisability {
         uuid   Id               PK  "NOT NULL"
         uuid   UserId           FK  "NOT NULL - UK"
-        int    DisabilityTypeId FK  "NOT NULL"
-        int    AutonomyLevelId  FK  "NOT NULL"
-        int    LoginMethodId    FK  "NOT NULL"
+        int    DisabilityTypeId FK  "nullable"
+        int    AutonomyLevelId  FK  "nullable"
+        int    LoginMethodId    FK  "nullable"
         uuid   SupervisorUserId FK  "nullable"
         varchar100 FirstName        "NOT NULL"
         varchar100 LastName         "NOT NULL"
-        varchar20 DocumentNumber UK "NOT NULL"
-        date   BirthDate            "nullable"
-        varchar7 AvatarColor        "NOT NULL - formato #RRGGBB"
+        varchar20 DocumentNumber UK "nullable"
+        date   BirthDate            "NOT NULL"
+        varchar7 AvatarColor        "nullable"
         bool   UsesAAC              "NOT NULL"
         bool   UsesSignLanguage     "NOT NULL"
         bool   RequiresHighContrast "NOT NULL"
@@ -203,9 +203,9 @@ erDiagram
         uuid   UserId          FK  "NOT NULL - UK"
         varchar100 FirstName       "NOT NULL"
         varchar100 LastName        "NOT NULL"
-        varchar20 DocumentNumber UK "NOT NULL"
+        varchar20 DocumentNumber UK "nullable"
         varchar20 Phone             "nullable"
-        varchar50 Relationship      "NOT NULL"
+        varchar50 Relationship      "nullable"
         varchar20 Status            "NOT NULL"
         bool   IsActive             "NOT NULL"
     }
@@ -249,7 +249,7 @@ erDiagram
         uuid        Id               PK  "NOT NULL"
         uuid        PersonId         FK  "NOT NULL"
         uuid        RepresentativeId FK  "NOT NULL"
-        varchar50   Relationship         "NOT NULL"
+        varchar50   Relationship         "nullable"
         bool        IsPrimary            "NOT NULL"
         bool        HasInformedConsent   "NOT NULL"
         bool        CanSuperviseLogin    "NOT NULL"
@@ -287,7 +287,7 @@ erDiagram
     Invitation {
         int         Id                      PK  "NOT NULL"
         uuid        CreatedByProfessionalId FK  "NOT NULL"
-        uuid        ForPersonId             FK  "NOT NULL"
+        uuid        ForPersonId             FK  "nullable"
         uuid        UsedByUserId            FK  "nullable"
         varchar256  Email                       "NOT NULL"
         varchar64   Code                    UK  "NOT NULL"
@@ -305,9 +305,9 @@ erDiagram
         int    Id                   PK  "NOT NULL"
         uuid   ProfessionalId       FK  "NOT NULL"
         int    CategoryId           FK  "NOT NULL"
-        int    SkillAreaId          FK  "NOT NULL"
+        int    SkillAreaId          FK  "nullable"
         varchar200 Title                "NOT NULL"
-        int    ComplexityLevel          "NOT NULL - 1 a 5"
+        int    ComplexityLevel          "nullable"
         bool   RequiresSupervision      "NOT NULL"
         bool   IsStandardActivity       "NOT NULL"
         bool   HasVisualSupport         "NOT NULL"
@@ -394,11 +394,11 @@ erDiagram
     ActivityResponse {
         int         Id                  PK  "NOT NULL"
         int         AssignmentId        FK  "NOT NULL"
-        varchar20   Result                  "NOT NULL - cifrado: Correct/Incorrect/Partial"
-        numeric5_2  SuccessPercentage       "NOT NULL - 0.00 a 100.00"
+        varchar20   Result                  "nullable - cifrado: Correct/Incorrect/Partial"
+        numeric5_2  SuccessPercentage       "nullable - 0.00 a 100.00"
         int         AttemptCount            "NOT NULL"
         bool        RequiredSupport         "NOT NULL"
-        int         FrustrationLevel        "NOT NULL - 0 a 5"
+        int         FrustrationLevel        "nullable"
         timestamptz StartedAt               "NOT NULL"
         timestamptz CompletedAt             "nullable"
         bool        IsActive                "NOT NULL"
@@ -469,8 +469,8 @@ erDiagram
         varchar200 Title            "NOT NULL"
         varchar20 Status            "NOT NULL - Draft/Submitted/Approved/Rejected"
         date   ReportDate           "NOT NULL"
-        date   PeriodStartDate      "NOT NULL"
-        date   PeriodEndDate        "NOT NULL"
+        date   PeriodStartDate      "nullable"
+        date   PeriodEndDate        "nullable"
         uuid   ApprovedBy       FK  "nullable"
         bool   IsActive             "NOT NULL"
     }
@@ -485,7 +485,7 @@ erDiagram
         uuid        ReceiverId      FK  "NOT NULL"
         uuid        RelatedPersonId FK  "nullable"
         int         ParentMessageId FK  "nullable - hilo"
-        varchar200  Subject             "NOT NULL"
+        varchar200  Subject             "nullable"
         bool        IsRead              "NOT NULL"
         timestamptz SentAt              "NOT NULL"
         bool        IsActive            "NOT NULL"
@@ -499,7 +499,7 @@ erDiagram
         int         Id              PK  "NOT NULL"
         uuid        UserId          FK  "NOT NULL"
         uuid        AccessedPersonId FK "nullable"
-        varchar50   Role                "NOT NULL"
+        varchar50   Role                "nullable"
         varchar50   ActionType          "NOT NULL"
         varchar20   Result              "NOT NULL - Allowed/Denied"
         varchar100  AffectedTable       "nullable"

@@ -123,7 +123,7 @@ Profesionales que trabajan con personas con discapacidad (docentes, terapeutas, 
 | Usuario | Referencia | Sí | Cuenta de usuario asociada (1:1) |
 | Nombre | Texto (100) | Sí | Nombre de pila |
 | Apellido | Texto (100) | Sí | Apellido |
-| DNI | Texto (20) | No | Documento de identidad (único) |
+| DNI | Texto (20) | Sí* | Documento de identidad (único) — obligatorio en creación, opcional en BD para registros legacy |
 | Teléfono | Texto (20) | No | Número de contacto |
 | Especialidad | Texto (100) | No | Área de especialización |
 | Matrícula | Texto (50) | No | Número de matrícula profesional (único) |
@@ -160,7 +160,7 @@ Destinatario central del sistema. Recibe planes de trabajo, realiza actividades 
 | Apellido | Texto (100) | Sí | Apellido |
 | DNI | Texto (20) | No | Documento de identidad (único) |
 | Fecha de nacimiento | Fecha | Sí | Fecha de nacimiento |
-| Tipo de discapacidad | Referencia | No | Del catálogo de tipos de discapacidad |
+| Tipo de discapacidad | Referencia | Sí | Del catálogo de tipos de discapacidad |
 | Foto | Texto (500) | No | URL de la foto de perfil |
 | **Perfil funcional** | | | |
 | Nivel de atención | Entero (1-5) | No | Capacidad de atención |

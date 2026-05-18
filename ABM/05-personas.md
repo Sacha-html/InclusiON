@@ -18,7 +18,7 @@
 | DNI | Texto (20) | No | Único si se ingresa |
 | Fecha de nacimiento | Fecha | Sí | Debe ser pasada |
 | Email (para cuenta) | Texto (255) | No | Formato válido; único en `User` si se ingresa |
-| Tipo de discapacidad | Referencia | No | Debe existir y estar activo en el catálogo |
+| Tipo de discapacidad | Referencia | Sí | Debe existir y estar activo en el catálogo |
 | Nivel de autonomía | Referencia | No | Debe existir y estar activo |
 | Método de login | Referencia | No | Debe existir y estar activo; coherente con nivel de autonomía |
 | Color de avatar | Texto (10) | No | Hex válido (`#RRGGBB`) |

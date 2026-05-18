@@ -16,7 +16,7 @@
 
 **Flujo principal**
 1. El Profesional accede a la página pública de registro.
-2. Completa el formulario: nombre, apellido, email, especialidad, fecha de nacimiento (obligatorios); DNI, teléfono, matrícula, institución (opcionales).
+2. Completa el formulario: nombre, apellido, email, DNI, especialidad, fecha de nacimiento (obligatorios); teléfono, matrícula, institución (opcionales).
 3. El sistema valida en tiempo real que el email y la matrícula no estén en uso (debounce 800 ms).
 4. El Profesional envía el formulario.
 5. El sistema crea el `User` con `IsActive = false` y el `Professional` con `Status = Pending`.

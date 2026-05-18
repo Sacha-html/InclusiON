@@ -18,7 +18,7 @@ El alta de un profesional inicia un flujo de dos pasos: (1) el admin crea el reg
 | Nombre | Texto (100) | Sí | No vacío |
 | Apellido | Texto (100) | Sí | No vacío |
 | Email | Texto (255) | Sí | Formato válido; único en `User` |
-| DNI | Texto (20) | No | Único si se ingresa |
+| DNI | Texto (20) | Sí | Único |
 | Teléfono | Texto (20) | No | — |
 | Especialidad | Texto (100) | No | — |
 | Matrícula | Texto (50) | No | Único si se ingresa |
@@ -27,7 +27,7 @@ El alta de un profesional inicia un flujo de dos pasos: (1) el admin crea el reg
 
 **Validaciones de integridad:**
 - El email no puede existir ya en `User`.
-- El DNI, si se ingresa, no puede existir en otro `Professional`.
+- El DNI no puede existir en otro `Professional`.
 - La matrícula, si se ingresa, no puede existir en otro `Professional`.
 
 **Resultado:**
