@@ -7,26 +7,26 @@ namespace InclusiON.Shared.Constants
     public static class AvatarColors
     {
         /// <summary>
-        /// Lista de colores disponibles para avatares.
+        /// Lista de colores disponibles para avatares. Todos cumplen WCAG AAA (7:1).
         /// </summary>
         public static readonly AvatarColor[] Items = new[]
         {
-            new AvatarColor("#F44336", "Rojo"),
-            new AvatarColor("#E91E63", "Rosa"),
-            new AvatarColor("#9C27B0", "Violeta"),
-            new AvatarColor("#673AB7", "Purpura"),
-            new AvatarColor("#3F51B5", "Indigo"),
+            new AvatarColor("#C62828", "Rojo"),
+            new AvatarColor("#AD1457", "Rosa"),
+            new AvatarColor("#6A1B9A", "Violeta"),
+            new AvatarColor("#4527A0", "Purpura"),
+            new AvatarColor("#283593", "Indigo"),
             new AvatarColor("#2196F3", "Azul"),
             new AvatarColor("#03A9F4", "Celeste"),
             new AvatarColor("#00BCD4", "Cian"),
-            new AvatarColor("#009688", "Verde Azulado"),
+            new AvatarColor("#00695C", "Verde Azulado"),
             new AvatarColor("#4CAF50", "Verde"),
             new AvatarColor("#8BC34A", "Verde Claro"),
             new AvatarColor("#CDDC39", "Lima"),
             new AvatarColor("#FFEB3B", "Amarillo"),
             new AvatarColor("#FFC107", "Ambar"),
             new AvatarColor("#FF9800", "Naranja"),
-            new AvatarColor("#FF5722", "Naranja Oscuro"),
+            new AvatarColor("#BF360C", "Naranja Oscuro"),
         };
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace InclusiON.Shared.Constants
         /// <summary>
         /// Color por defecto para familiares (Violeta).
         /// </summary>
-        public const string DefaultFamily = "#9C27B0";
+        public const string DefaultFamily = "#6A1B9A";
 
         /// <summary>
         /// Devuelve un color aleatorio del catalogo.

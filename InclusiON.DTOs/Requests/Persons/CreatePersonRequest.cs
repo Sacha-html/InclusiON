@@ -22,6 +22,7 @@ namespace InclusiON.DTOs.Requests.Persons
         [Required(ErrorMessage = "La fecha de nacimiento es requerida")]
         public DateTime BirthDate { get; set; }
 
+        [Required(ErrorMessage = "El tipo de discapacidad es requerido")]
         public int? DisabilityTypeId { get; set; }
 
         public string? PhotoUrl { get; set; }

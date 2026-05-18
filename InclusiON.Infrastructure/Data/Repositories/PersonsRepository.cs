@@ -219,5 +219,21 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 sortMappings,
                 cancellationToken);
         }
+
+        public async Task<List<PersonWithDisability>> GetByIdsAsync(
+            List<Guid> ids,
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonsWithDisability
+                .Include(p => p.DisabilityType)
+                .Include(p => p.AutonomyLevel)
+                .Include(p => p.LoginMethod)
+                .Include(p => p.User)
+                .Include(p => p.PersonRepresentatives)
+                    .ThenInclude(pr => pr.Representative)
+                .Where(p => ids.Contains(p.Id))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
     }
 }

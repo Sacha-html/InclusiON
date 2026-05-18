@@ -190,6 +190,98 @@ namespace InclusiON.Infrastructure.Authorization
         // Derivados (pendientes — se implementan al instrumentar cada controller)
         // ==================================================================
 
+        public async Task<bool> CanAccessFamilyAsync(Guid familyId, AccessMode mode, CancellationToken ct = default)
+        {
+            var userId = _httpContext.GetCurrentUserId();
+            if (userId is null)
+            {
+                await _auditLogger.LogAsync(new AccessAuditEntry
+                {
+                    UserId = Guid.Empty,
+                    Role = null,
+                    AccessedPersonId = null,
+                    ActionType = AccessAuditValues.Action.Read,
+                    Result = AccessAuditValues.Result.Denied,
+                    AffectedTable = "FamilyRepresentatives",
+                    AffectedRecordId = familyId.ToString()
+                }, ct);
+                return false;
+            }
+
+            var role = _httpContext.GetCurrentUserRole();
+            var isGlobalAdmin = _httpContext.IsGlobalAdmin();
+
+            if (isGlobalAdmin)
+            {
+                await _auditLogger.LogAsync(new AccessAuditEntry
+                {
+                    UserId = userId.Value,
+                    Role = role,
+                    AccessedPersonId = null,
+                    ActionType = mode == AccessMode.Write ? AccessAuditValues.Action.Update : AccessAuditValues.Action.Read,
+                    Result = AccessAuditValues.Result.Allowed,
+                    AffectedTable = "FamilyRepresentatives",
+                    AffectedRecordId = familyId.ToString()
+                }, ct);
+                return true;
+            }
+
+            // Self-access: family member viewing/editing their own record
+            var entityId = _httpContext.GetCurrentEntityId();
+            if (role == nameof(IdentityRoles.FamilyRepresentative) && entityId.HasValue && entityId.Value == familyId)
+            {
+                await _auditLogger.LogAsync(new AccessAuditEntry
+                {
+                    UserId = userId.Value,
+                    Role = role,
+                    AccessedPersonId = null,
+                    ActionType = mode == AccessMode.Write ? AccessAuditValues.Action.Update : AccessAuditValues.Action.Read,
+                    Result = AccessAuditValues.Result.Allowed,
+                    AffectedTable = "FamilyRepresentatives",
+                    AffectedRecordId = familyId.ToString()
+                }, ct);
+                return true;
+            }
+
+            // Get linked persons for this family
+            var linkedPersonIds = await _context.PersonRepresentatives
+                .Where(pr => pr.RepresentativeId == familyId && pr.IsActive)
+                .Select(pr => pr.PersonId)
+                .ToListAsync(ct);
+
+            if (linkedPersonIds.Count == 0)
+            {
+                await _auditLogger.LogAsync(new AccessAuditEntry
+                {
+                    UserId = userId.Value,
+                    Role = role,
+                    AccessedPersonId = null,
+                    ActionType = mode == AccessMode.Write ? AccessAuditValues.Action.Update : AccessAuditValues.Action.Read,
+                    Result = AccessAuditValues.Result.Denied,
+                    AffectedTable = "FamilyRepresentatives",
+                    AffectedRecordId = familyId.ToString()
+                }, ct);
+                return false;
+            }
+
+            // Check if caller can access any linked person
+            var accessibleIds = await GetAccessiblePersonIdsAsync(ct);
+            var allowed = linkedPersonIds.Any(id => accessibleIds.Contains(id));
+
+            await _auditLogger.LogAsync(new AccessAuditEntry
+            {
+                UserId = userId.Value,
+                Role = role,
+                AccessedPersonId = null,
+                ActionType = mode == AccessMode.Write ? AccessAuditValues.Action.Update : AccessAuditValues.Action.Read,
+                Result = allowed ? AccessAuditValues.Result.Allowed : AccessAuditValues.Result.Denied,
+                AffectedTable = "FamilyRepresentatives",
+                AffectedRecordId = familyId.ToString()
+            }, ct);
+
+            return allowed;
+        }
+
         public async Task<bool> CanAccessReportAsync(int reportId, AccessMode mode, CancellationToken ct = default)
         {
             var report = await _context.Reports

@@ -11,7 +11,7 @@
   <Project Path="InclusiON.DTOs/InclusiON.DTOs.csproj" />
   <Project Path="InclusiON.Infrastructure.Telemetry/InclusiON.Infrastructure.Telemetry.csproj" />
   <Project Path="InclusiON.Infrastructure/InclusiON.Infrastructure.csproj" />
-  <Project Path="InclusiON.Agents/InclusiON.Agents.csproj" />
+  <Project Path="InclusiON.Workers/InclusiON.Workers.csproj" />
   <Project Path="InclusiON.Shared/InclusiON.Shared.csproj" />
   <Project Path="InclusiON.Tests/Unit/InclusiON.Tests.Unit.csproj" />
   <Project Path="InclusiON.Tests/Integration/InclusiON.Tests.Integration.csproj" />

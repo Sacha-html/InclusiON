@@ -31,22 +31,69 @@ namespace InclusiON.Infrastructure.Data.Repositories
             await cmd.ExecuteNonQueryAsync(cancellationToken);
         }
 
+        public async Task<float[]?> GetByActivityIdAsync(int activityId, CancellationToken cancellationToken = default)
+        {
+            const string sql = """
+                SELECT "Embedding" FROM "ActivityEmbeddings" WHERE "ActivityId" = $1
+                """;
+
+            await using var cmd = _dataSource.CreateCommand(sql);
+            cmd.Parameters.AddWithValue(activityId);
+
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            if (await reader.ReadAsync(cancellationToken) && !reader.IsDBNull(0))
+            {
+                var vector = (Vector)reader.GetValue(0);
+                return vector.ToArray();
+            }
+
+            return null;
+        }
+
+        public async Task<float[]?> GetPersonEmbeddingAsync(Guid personId, CancellationToken cancellationToken = default)
+        {
+            const string sql = """
+                SELECT "Embedding" FROM "PersonEmbeddings" WHERE "PersonId" = $1
+                """;
+
+            await using var cmd = _dataSource.CreateCommand(sql);
+            cmd.Parameters.AddWithValue(personId);
+
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            if (await reader.ReadAsync(cancellationToken) && !reader.IsDBNull(0))
+            {
+                var vector = (Vector)reader.GetValue(0);
+                return vector.ToArray();
+            }
+
+            return null;
+        }
+
         public async Task<List<int>> SearchAsync(
             float[] queryEmbedding,
             Guid professionalId,
             int limit = 10,
+            List<int>? excludeIds = null,
             CancellationToken cancellationToken = default)
         {
             // Similitud coseno: 1 - distancia coseno (<=>).
             // Filtra actividades activas que el profesional puede ver:
             //   - propias (ProfessionalId = $2) o estándar (IsStandardActivity = true)
-            const string sql = """
+            var sql = """
                 SELECT ae."ActivityId"
                 FROM   "ActivityEmbeddings" ae
                 JOIN   "Activities" a ON a."Id" = ae."ActivityId"
                 WHERE  a."IsActive" = true
                   AND  ae."Embedding" IS NOT NULL
                   AND  (a."ProfessionalId" = $2 OR a."IsStandardActivity" = true)
+                """;
+
+            if (excludeIds is { Count: > 0 })
+            {
+                sql += $" AND ae.\"ActivityId\" NOT IN ({string.Join(",", excludeIds)})";
+            }
+
+            sql += """
                 ORDER BY ae."Embedding" <=> $1::vector
                 LIMIT  $3
                 """;
@@ -92,6 +139,38 @@ namespace InclusiON.Infrastructure.Data.Repositories
             await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
             while (await reader.ReadAsync(cancellationToken))
                 ids.Add(reader.GetInt32(0));
+
+            return ids;
+        }
+
+        public async Task<List<Guid>> SearchPersonsForActivityAsync(
+            int activityId,
+            Guid professionalId,
+            int limit = 10,
+            CancellationToken cancellationToken = default)
+        {
+            const string sql = """
+                SELECT pe."PersonId"
+                FROM   "PersonEmbeddings" pe
+                JOIN   "PersonProfessionalAssignments" ppa ON ppa."PersonId" = pe."PersonId"
+                JOIN   "ActivityEmbeddings" ae ON ae."ActivityId" = $1
+                WHERE  pe."Embedding" IS NOT NULL
+                  AND  ae."Embedding" IS NOT NULL
+                  AND  ppa."ProfessionalId" = $2
+                  AND  ppa."IsActive" = true
+                ORDER BY pe."Embedding" <=> ae."Embedding"
+                LIMIT  $3
+                """;
+
+            await using var cmd = _dataSource.CreateCommand(sql);
+            cmd.Parameters.AddWithValue(activityId);
+            cmd.Parameters.AddWithValue(professionalId);
+            cmd.Parameters.AddWithValue(limit);
+
+            var ids = new List<Guid>();
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+                ids.Add(reader.GetGuid(0));
 
             return ids;
         }

@@ -46,6 +46,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     queryEmbedding,
                     query.ProfessionalId,
                     query.Limit,
+                    null, // excludeIds
                     cancellationToken);
 
                 if (ids.Count == 0)
