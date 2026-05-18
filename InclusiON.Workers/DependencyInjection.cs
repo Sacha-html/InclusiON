@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using InclusiON.Application.Interfaces.Infrastructure;
-using InclusiON.Agents.Cleanup;
-using InclusiON.Agents.Workers;
+using InclusiON.Workers.Cleanup;
+using InclusiON.Workers.Hosted;
 
-namespace InclusiON.Agents;
+namespace InclusiON.Workers;
 
 public static class DependencyInjection
 {
