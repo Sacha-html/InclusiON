@@ -4,7 +4,7 @@ using InclusiON.Domain.Models;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 
-namespace InclusiON.Agents;
+namespace InclusiON.Workers;
 
 public class JobExecutor(
     IEnumerable<IJobHandler> handlers,

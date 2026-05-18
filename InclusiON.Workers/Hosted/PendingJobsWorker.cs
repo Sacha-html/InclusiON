@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Infrastructure.Configuration;
 
-namespace InclusiON.Agents.Workers;
+namespace InclusiON.Workers.Hosted;
 
 public class PendingJobsWorker(
     IServiceScopeFactory scopeFactory,
