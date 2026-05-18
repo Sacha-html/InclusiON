@@ -2,10 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using InclusiON.Agents.Cleanup;
+using InclusiON.Workers.Cleanup;
 using InclusiON.Infrastructure.Configuration;
 
-namespace InclusiON.Agents.Workers;
+namespace InclusiON.Workers.Hosted;
 
 public class MidnightCleanupWorker : BackgroundService
 {

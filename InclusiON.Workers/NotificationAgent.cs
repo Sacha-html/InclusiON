@@ -4,7 +4,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 
-namespace InclusiON.Agents;
+namespace InclusiON.Workers;
 
 public class NotificationAgent(
     IRealTimeNotifier notifier,

@@ -1,4 +1,4 @@
-namespace InclusiON.Agents.Cleanup;
+namespace InclusiON.Workers.Cleanup;
 
 public interface ICleanupStep
 {

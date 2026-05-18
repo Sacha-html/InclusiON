@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using InclusiON.Domain.Enums;
 using InclusiON.Application.Interfaces.Repositories;
 
-namespace InclusiON.Agents.Cleanup;
+namespace InclusiON.Workers.Cleanup;
 
 public class GenerateTemplateCentroidsStep(
     IBackgroundJobRepository repository,

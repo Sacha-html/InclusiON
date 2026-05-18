@@ -4,7 +4,7 @@ using InclusiON.Application.UseCases.Professionals.Commands;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Professionals;
 
-namespace InclusiON.Agents.Cleanup;
+namespace InclusiON.Workers.Cleanup;
 
 public class SuspendInactiveProfessionalsStep(
     ICommandHandler<SuspendInactiveProfessionalsCommand, ApiResponse<SuspendResult>> handler,

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Repositories;
 
-namespace InclusiON.Agents.Cleanup;
+namespace InclusiON.Workers.Cleanup;
 
 public class DeleteCompletedJobsStep(IBackgroundJobRepository repository, ILogger<DeleteCompletedJobsStep> logger)
     : ICleanupStep
