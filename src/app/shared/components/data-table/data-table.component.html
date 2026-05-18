@@ -1,22 +1,20 @@
 <ng-template #tableContent>
 
-  <!-- Buscador -->
+  <!-- Buscador: usa div simple, no c-row/c-col (evita negative gutters que generan overflow en mobile) -->
   @if (showSearch) {
-    <c-row class="align-items-center mb-3">
-      <c-col sm="12">
-        <c-input-group>
-          <label cInputGroupText for="table-search">Buscar: </label>
-          <input
-            cFormControl
-            id="table-search"
-            placeholder="Buscar..."
-            aria-label="Buscar en la tabla"
-            #searchInput
-            (input)="onSearchInput(searchInput.value)"
-          />
-        </c-input-group>
-      </c-col>
-    </c-row>
+    <div class="mb-3">
+      <c-input-group>
+        <label cInputGroupText for="table-search">Buscar: </label>
+        <input
+          cFormControl
+          id="table-search"
+          placeholder="Buscar..."
+          aria-label="Buscar en la tabla"
+          #searchInput
+          (input)="onSearchInput(searchInput.value)"
+        />
+      </c-input-group>
+    </div>
   }
 
   <!-- Tabla -->
@@ -106,7 +104,7 @@
       }
       @if (items.length === 0) {
         <tr>
-          <td [attr.colspan]="orderedColumns.length" class="text-center text-body-secondary py-5" role="status" aria-live="polite">
+          <td [attr.colspan]="orderedColumns.length" class="text-center text-body-secondary py-5">
             @if (emptyIcon) {
               <div><svg cIcon [name]="emptyIcon" size="3xl" class="mb-2 opacity-50"></svg></div>
             }
@@ -128,11 +126,11 @@
         Mostrando {{ showingFrom }}–{{ showingTo }} de {{ totalItems }}
       </small>
       @if (totalPages > 1) {
-        <nav aria-label="Paginacion de tabla">
+        <nav aria-label="Paginación de tabla">
           <c-pagination align="end" class="mb-0">
             <c-page-item [disabled]="currentPage === 1">
               <button type="button" cPageLink (click)="pageChange.emit(currentPage - 1)"
-                      [disabled]="currentPage === 1" aria-label="Pagina anterior">&lsaquo;</button>
+                      [disabled]="currentPage === 1" aria-label="Página anterior">&lsaquo;</button>
             </c-page-item>
             @for (page of pages; track $index) {
               @if (page === '...') {
@@ -142,14 +140,14 @@
               } @else {
                 <c-page-item [active]="page === currentPage">
                   <button type="button" cPageLink (click)="pageChange.emit(+page)"
-                          [attr.aria-label]="'Ir a pagina ' + page"
+                          [attr.aria-label]="'Ir a página ' + page"
                           [attr.aria-current]="page === currentPage ? 'page' : null">{{ page }}</button>
                 </c-page-item>
               }
             }
             <c-page-item [disabled]="currentPage === totalPages">
               <button type="button" cPageLink (click)="pageChange.emit(currentPage + 1)"
-                      [disabled]="currentPage === totalPages" aria-label="Pagina siguiente">&rsaquo;</button>
+                      [disabled]="currentPage === totalPages" aria-label="Página siguiente">&rsaquo;</button>
             </c-page-item>
           </c-pagination>
         </nav>
@@ -164,9 +162,9 @@
 
     <!-- Header con titulo y botones -->
     @if (showTitle && (title || headerButtons.length > 0)) {
-      <c-card-header class="d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">{{ title }}</h5>
-        <div class="d-flex gap-2">
+      <c-card-header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0" style="min-width: 0; overflow-wrap: anywhere;">{{ title }}</h5>
+        <div class="d-flex gap-2 flex-shrink-0">
           @for (btn of headerButtons; track btn.action) {
             <button
               cButton

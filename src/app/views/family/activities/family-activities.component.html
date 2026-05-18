@@ -47,9 +47,9 @@
       <c-card-header>
         <div class="header-row">
           <div class="header-title">
-            <strong>
+            <h2 class="h6 mb-0">
               Actividades de {{ selectedPerson()?.fullName }}
-            </strong>
+            </h2>
           </div>
           @if (!isLoadingAssignments()) {
             <span class="total-badge">{{ counts().all }} total</span>
@@ -72,44 +72,53 @@
           <!-- Filtros de estado -->
           <div class="filter-tabs" role="tablist" aria-label="Filtrar por estado">
             <button
+              id="tab-all"
               class="filter-tab"
               [class.filter-tab--active]="statusFilter() === 'all'"
               (click)="setFilter('all')"
               role="tab"
               [attr.aria-selected]="statusFilter() === 'all'"
+              aria-controls="activities-panel"
             >
               Todas <span class="tab-count">{{ counts().all }}</span>
             </button>
             <button
+              id="tab-pendiente"
               class="filter-tab filter-tab--warning"
               [class.filter-tab--active]="statusFilter() === ActivityAssignmentStatus.Pendiente"
               (click)="setFilter(ActivityAssignmentStatus.Pendiente)"
               role="tab"
               [attr.aria-selected]="statusFilter() === ActivityAssignmentStatus.Pendiente"
+              aria-controls="activities-panel"
             >
               Pendientes <span class="tab-count">{{ counts().pendiente }}</span>
             </button>
             <button
+              id="tab-en-progreso"
               class="filter-tab filter-tab--info"
               [class.filter-tab--active]="statusFilter() === ActivityAssignmentStatus.EnProgreso"
               (click)="setFilter(ActivityAssignmentStatus.EnProgreso)"
               role="tab"
               [attr.aria-selected]="statusFilter() === ActivityAssignmentStatus.EnProgreso"
+              aria-controls="activities-panel"
             >
               En progreso <span class="tab-count">{{ counts().enProgreso }}</span>
             </button>
             <button
+              id="tab-completada"
               class="filter-tab filter-tab--success"
               [class.filter-tab--active]="statusFilter() === ActivityAssignmentStatus.Completada"
               (click)="setFilter(ActivityAssignmentStatus.Completada)"
               role="tab"
               [attr.aria-selected]="statusFilter() === ActivityAssignmentStatus.Completada"
+              aria-controls="activities-panel"
             >
               Completadas <span class="tab-count">{{ counts().completada }}</span>
             </button>
           </div>
 
           <!-- Lista de actividades -->
+          <div id="activities-panel" role="tabpanel" tabindex="0" aria-live="polite" aria-label="Actividades filtradas">
           @if (filteredAssignments().length === 0) {
             <p class="text-body-secondary text-center py-3">
               No hay actividades con ese estado.
@@ -162,6 +171,7 @@
               }
             </div>
           }
+          </div><!-- /activities-panel -->
         }
       </c-card-body>
     </c-card>

@@ -67,7 +67,7 @@
     <button cButton color="secondary" (click)="closeLinkModal.emit()">Cancelar</button>
     <button cButton color="primary" (click)="confirmLink.emit({ familyId: selectedFamilyControl.value!, relationship: selectedRelationship, isPrimary: selectedIsPrimary })"
             [disabled]="!selectedFamilyControl.value || !selectedRelationship || !!validateParentLimit() || linking">
-      @if (linking) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      @if (linking) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
       Vincular
     </button>
   </c-modal-footer>
@@ -95,7 +95,7 @@
     <button cButton color="secondary" (click)="closeUnlinkModal.emit()">Cancelar</button>
     <button cButton color="danger" (click)="confirmUnlink.emit(unlinkObservation)"
             [disabled]="!unlinkObservation.trim() || unlinking">
-      @if (unlinking) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      @if (unlinking) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
       Desvincular
     </button>
   </c-modal-footer>

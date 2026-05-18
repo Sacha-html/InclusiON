@@ -11,6 +11,8 @@
 // =========================================
 :root,
 [data-color-mode="light"] {
+  color-scheme: light;
+
   // Tipografía
   --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
   --a11y-font-size: 16px;
@@ -41,6 +43,8 @@
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
   --a11y-border: #9E9E9E;
+  // Badge secondary bg — dark enough for white text (8.1:1 AAA)
+  --a11y-badge-secondary-bg: #4B4B4B;  // same as text-muted, white text = 8.1:1 AAA
 
   // Sidebar
   --a11y-sidebar-bg: #263238;
@@ -200,6 +204,10 @@
   --cui-sidebar-nav-link-hover-bg: var(--a11y-sidebar-nav-link-hover-bg);
   --cui-sidebar-nav-link-active-bg: var(--a11y-sidebar-nav-link-active-bg);
   --cui-sidebar-nav-icon-color: var(--a11y-sidebar-icon);
+  --cui-sidebar-nav-title-color: var(--a11y-sidebar-text);  // sidebar section titles (Gestión, Evaluación, etc.)
+
+  // Secondary badges — dark bg ensures white text meets WCAG AAA (7:1)
+  --cui-secondary: var(--a11y-badge-secondary-bg);
 
   // Focus
   --cui-focus-ring-color:    var(--a11y-focus-color);
@@ -211,6 +219,8 @@
 // =========================================
 [data-color-mode="dark"],
 .dark-theme {
+    color-scheme: dark;
+
     // Colores modo oscuro - WCAG AA/AAA compliant
     --a11y-bg: #121212;
     --a11y-bg-secondary: #1E1E1E;
@@ -230,6 +240,7 @@
     --a11y-warning-text: #000000;
     --a11y-danger-text: #000000;
     --a11y-border: #616161;
+    --a11y-badge-secondary-bg: #4A4A4A;  // dark bg maintains white text = 8.3:1 AAA
 
     --a11y-sidebar-bg: #0D0D0D;
     --a11y-sidebar-text: #F5F5F5;
@@ -708,12 +719,12 @@
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
   --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
-  --a11y-primary: #005A8C;                 // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-primary: #004E8C;                 // WCAG AAA (7.8:1 sobre #F5F5F5, 9.1:1 sobre #FFF) — era #005A8C (6.77:1 sobre bg-secondary)
   --a11y-primary-dark: #003D66;
   --a11y-primary-text: #FFFFFF;
-  --a11y-link: #005A8C;                   // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-link: #004E8C;                   // WCAG AAA (7.8:1) — era #005A8C
   --a11y-link-hover: #003D66;
-  --a11y-success: #005A8C;                 // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-success: #004E8C;                 // WCAG AAA (7.8:1) — era #005A8C
   --a11y-warning: #7D4F00;                 // WCAG AAA (7.0:1) — antes #8F5A00 (5.8:1)
   --a11y-danger: #AF1B1B;                  // WCAG AAA (7.0:1) — antes #B71C1C (6.6:1)
   --a11y-success-text: #FFFFFF;
@@ -915,7 +926,7 @@
   --a11y-surface: #1D3557;
   --a11y-text: #F1FAEE;
   --a11y-text-secondary: #A8DADC;
-  --a11y-text-muted: #97D0EB;              // WCAG AAA (7.38:1 sobre #1D3557) — era #8ECAE6 (6.91:1)
+  --a11y-text-muted: #B8E0F0;              // WCAG AAA (9.77:1 sobre #1D3557) — era #97D0EB (7.38:1, muy ajustado)
   --a11y-primary: #A8DADC;
   --a11y-primary-dark: #97D0EB;            // WCAG AAA sobre bg — era #8ECAE6
   --a11y-primary-text: #14213D;
@@ -1200,7 +1211,7 @@ a {
     background-color: var(--a11y-sidebar-bg) !important;
 
     .nav-title {
-      color: var(--a11y-sidebar-text-muted) !important;
+      color: var(--a11y-sidebar-text) !important;  // text-muted #B0BEC5 = 6.24:1 → falla AAA; usar text #ECEFF1 = 10:1 ✓
       font-weight: 700;
       text-transform: uppercase;
       font-size: 0.75em;
@@ -1949,6 +1960,225 @@ a {
 }
 
 // =========================================
+// SIDEBAR NAV TITLES
+// Override directo necesario: CoreUI redefine --cui-sidebar-nav-title-color
+// en .sidebar/.sidebar-nav (especificidad [0,1,0]) que gana sobre :root [0,0,1].
+// !important en propiedad computed gana sobre cualquier especificidad.
+// =========================================
+
+.nav-title {
+  color: var(--a11y-sidebar-text) !important;
+}
+
+// =========================================
+// BADGES — SECONDARY Y INFO
+// CoreUI Angular renderiza como class="badge bg-secondary" / "badge bg-info".
+// Bootstrap redefine --cui-secondary en .badge.bg-secondary → :root bridge pierde.
+// Override directo con !important en background-color resuelve el cascade.
+// =========================================
+
+.badge.bg-secondary {
+  background-color: var(--a11y-badge-secondary-bg) !important;
+  color: #fff !important;
+}
+
+// Info badges (roles, etiquetas) → map a primary para mantener AAA por perfil
+.badge.bg-info {
+  background-color: var(--a11y-primary) !important;
+  color: var(--a11y-primary-text) !important;
+}
+
+// Botones outline-secondary: Sass compila $secondary (#455A64) hardcodeado.
+// En fondos levemente off-white (#FAFAFA), #455A64 da 6.73:1 → falla AAA.
+// Override directo a #4B4B4B que da 8.36:1 en #FAFAFA (AAA ✓).
+.btn-outline-secondary {
+  color: var(--a11y-badge-secondary-bg) !important;
+  border-color: var(--a11y-badge-secondary-bg) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-badge-secondary-bg) !important;
+    color: #fff !important;
+  }
+}
+
+// Dark mode: --a11y-badge-secondary-bg = #4A4A4A (dark gray) → invisible on #121212.
+// Use text-secondary (#D0D0D0) which gives 11.6:1 on #121212 (AAA ✓).
+[data-color-mode="dark"],
+.dark-theme {
+  .btn-outline-secondary {
+    color: var(--a11y-text-secondary) !important;
+    border-color: var(--a11y-text-secondary) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-text-secondary) !important;
+      color: var(--a11y-bg) !important;
+    }
+  }
+}
+
+// =========================================
+// LIST GROUP
+// =========================================
+
+.list-group-item {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+  border-color: var(--a11y-border) !important;
+
+  &.active {
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text) !important;
+  }
+}
+
+// =========================================
+// TABS Y PILLS
+// =========================================
+
+.nav-tabs {
+  border-bottom-color: var(--a11y-border) !important;
+
+  .nav-link {
+    color: var(--a11y-text-secondary) !important;
+    border-color: transparent !important;
+
+    &:hover,
+    &:focus {
+      color: var(--a11y-text) !important;
+      border-color: var(--a11y-border) var(--a11y-border) transparent !important;
+      background-color: var(--a11y-bg-secondary) !important;
+    }
+
+    &.active {
+      color: var(--a11y-text) !important;
+      background-color: var(--a11y-bg) !important;
+      border-color: var(--a11y-border) var(--a11y-border) var(--a11y-bg) !important;
+    }
+
+    &.disabled {
+      color: var(--a11y-text-muted) !important;
+    }
+  }
+}
+
+.nav-pills .nav-link {
+  color: var(--a11y-text-secondary) !important;
+
+  &.active {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  &:hover:not(.active) {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text) !important;
+  }
+}
+
+// =========================================
+// ACCORDION
+// =========================================
+
+.accordion-item {
+  background-color: var(--a11y-bg) !important;
+  border-color: var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+}
+
+.accordion-button {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+
+  &:not(.collapsed) {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-primary) !important;
+    box-shadow: inset 0 -1px 0 var(--a11y-border) !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+  }
+
+  &::after {
+    filter: none;
+  }
+}
+
+.accordion-body {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+}
+
+// =========================================
+// PAGINATION
+// =========================================
+
+.pagination {
+  .page-link {
+    background-color: var(--a11y-bg) !important;
+    color: var(--a11y-primary) !important;
+    border-color: var(--a11y-border) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-bg-secondary) !important;
+      color: var(--a11y-primary) !important;
+    }
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  .page-item.disabled .page-link {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text-muted) !important;
+    border-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
+// PROGRESS BARS
+// =========================================
+
+.progress {
+  background-color: var(--a11y-bg-secondary) !important;
+}
+
+.progress-bar {
+  background-color: var(--a11y-primary) !important;
+
+  &.bg-success { background-color: var(--a11y-success) !important; }
+  &.bg-danger  { background-color: var(--a11y-danger) !important; }
+  &.bg-warning { background-color: var(--a11y-warning) !important; }
+  &.bg-info    { background-color: var(--a11y-primary) !important; }
+}
+
+// =========================================
+// FORM CONTROL PLAINTEXT
+// (campos display inline-edit)
+// =========================================
+
+.form-control-plaintext {
+  color: var(--a11y-text) !important;
+
+  &.border-bottom {
+    border-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
 // ESTILOS ESPECÍFICOS POR TEMA
 // =========================================
 
@@ -2099,10 +2329,10 @@ a {
 // CLASES UTILITARIAS DE ACCESIBILIDAD
 // =========================================
 
-// Resaltar enlaces — sin gradiente, usa outline-bottom accesible
+// Resaltar enlaces
 body.a11y-highlight-links {
+  // Links de contenido (inline, routerLink, etc.)
   a:not(.btn):not(.nav-link):not(.dropdown-item) {
-    background: transparent !important;
     padding: 0 2px;
     border-radius: 2px;
     text-decoration: underline !important;
@@ -2111,11 +2341,36 @@ body.a11y-highlight-links {
     text-underline-offset: 4px !important;
 
     &:hover,
-    &:focus {
+    &:focus-visible {
       background: var(--a11y-primary) !important;
       color: var(--a11y-primary-text) !important;
       text-decoration-color: var(--a11y-primary-text, #FFFFFF) !important;
     }
+  }
+
+  // Links de navegación del sidebar
+  a.nav-link {
+    text-decoration: underline !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+  }
+
+  // Items de menú desplegable (menú de usuario, acciones)
+  .dropdown-item {
+    text-decoration: underline !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+  }
+
+  // Skip link visible permanentemente cuando highlight está activo
+  .skip-link {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    opacity: 0.92;
+    font-size: 0.85rem;
   }
 }
 

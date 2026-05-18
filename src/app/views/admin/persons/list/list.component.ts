@@ -271,6 +271,13 @@ export class ListComponent {
     });
   }
 
+  copyTemporaryPassword(): void {
+    if (!this.temporaryPassword) return;
+    navigator.clipboard.writeText(this.temporaryPassword).then(() => {
+      this.#toastService.success('Contraseña copiada al portapapeles');
+    });
+  }
+
   loadPersons(search?: string): void {
     this.isLoading = true;
     const isActive = this.statusFilter === 'true' ? true

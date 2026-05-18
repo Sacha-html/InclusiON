@@ -18,7 +18,7 @@
               <!-- Nombre -->
               <c-input-group class="mb-3" [class.is-invalid]="hasError('name', 'required') || hasError('name', 'minlength')">
                 <span cInputGroupText>
-                  <svg cIcon name="cilUser"></svg>
+                  <svg cIcon name="cilUser" aria-hidden="true"></svg>
                 </span>
                 <input
                   cFormControl
@@ -39,14 +39,14 @@
               <!-- Apellido -->
               <c-input-group class="mb-3" [class.is-invalid]="hasError('surname', 'required') || hasError('surname', 'minlength')">
                 <span cInputGroupText>
-                  <svg cIcon name="cilUser"></svg>
+                  <svg cIcon name="cilUser" aria-hidden="true"></svg>
                 </span>
                 <input
                   cFormControl
                   type="text"
                   formControlName="surname"
                   placeholder="Apellido"
-                  autocomplete="surname"
+                  autocomplete="family-name"
                   aria-required="true"
                   [attr.aria-invalid]="hasError('surname', 'required') || hasError('surname', 'minlength')"
                   [attr.aria-describedby]="hasError('surname', 'required') || hasError('surname', 'minlength') ? 'surname-error' : null"
@@ -60,7 +60,7 @@
               <!-- Email -->
               <c-input-group class="mb-3" [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email')">
                 <span cInputGroupText>
-                  <svg cIcon name="cilEnvelopeClosed"></svg>
+                  <svg cIcon name="cilEnvelopeClosed" aria-hidden="true"></svg>
                 </span>
                 <input
                   cFormControl
@@ -81,7 +81,7 @@
               <!-- Password -->
               <c-input-group class="mb-3" [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength')">
                 <span cInputGroupText>
-                  <svg cIcon name="cilLockLocked"></svg>
+                  <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
                 </span>
                 <input
                   cFormControl
@@ -94,14 +94,17 @@
                   [attr.aria-describedby]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength') ? 'password-error' : null"
                   [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength')"
                 />
-                <span 
-                  cInputGroupText 
+                <button
+                  type="button"
+                  cInputGroupText
                   class="cursor-pointer"
                   (click)="togglePasswordVisibility()"
+                  [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="showPassword"
                   style="min-width: 55px; justify-content: center;"
                 >
-                  <small>{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
-                </span>
+                  <small aria-hidden="true">{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </button>
               </c-input-group>
               @if (getErrorMessage('password')) {
               <small class="text-danger d-block mt-n2 mb-2" id="password-error" role="alert">{{ getErrorMessage('password') }}</small>
@@ -111,12 +114,17 @@
               @if (f['password'].value) {
               <div class="password-strength-indicator mb-3">
                 <div class="progress" style="height: 5px;">
-                  <div 
+                  <div
                     class="progress-bar"
+                    role="progressbar"
                     [class.bg-danger]="passwordStrength <= 2"
                     [class.bg-warning]="passwordStrength === 3"
                     [class.bg-success]="passwordStrength >= 4"
                     [style.width.%]="(passwordStrength / 4) * 100"
+                    [attr.aria-valuenow]="(passwordStrength / 4) * 100"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-label]="'Fortaleza de contraseña: ' + passwordStrengthText"
                   ></div>
                 </div>
                 <small [class.text-danger]="passwordStrength <= 2"
@@ -130,7 +138,7 @@
               <!-- Confirm Password -->
               <c-input-group class="mb-3" [class.is-invalid]="hasError('confirmPassword', 'required') || !passwordsMatch">
                 <span cInputGroupText>
-                  <svg cIcon name="cilLockLocked"></svg>
+                  <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
                 </span>
                 <input
                   cFormControl
@@ -142,14 +150,17 @@
                   [attr.aria-invalid]="hasError('confirmPassword', 'required') || (!passwordsMatch && f['confirmPassword'].touched)"
                   [class.is-invalid]="hasError('confirmPassword', 'required') || (!passwordsMatch && f['confirmPassword'].touched)"
                 />
-                <span 
-                  cInputGroupText 
+                <button
+                  type="button"
+                  cInputGroupText
                   class="cursor-pointer"
                   (click)="toggleConfirmPasswordVisibility()"
+                  [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="showConfirmPassword"
                   style="min-width: 55px; justify-content: center;"
                 >
-                  <small>{{ showConfirmPassword ? 'Ocultar' : 'Mostrar' }}</small>
-                </span>
+                  <small aria-hidden="true">{{ showConfirmPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </button>
               </c-input-group>
               @if (registerForm.errors?.['passwordMismatch'] && f['confirmPassword'].touched) {
               <small class="text-danger d-block mt-n2 mb-3">Las contraseñas no coinciden</small>
@@ -184,7 +195,7 @@
                   <span>Crear Cuenta</span>
                   } @else {
                   <span>
-                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
                     Creando cuenta...
                   </span>
                   }

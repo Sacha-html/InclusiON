@@ -4,63 +4,58 @@
   --panel-z: 9999;
   display: block;
 
-  // Variables base (modo oscuro por defecto)
+  // Default: modo claro
+  --a11y-panel-bg: #FFFFFF;
+  --a11y-panel-text: #1A1A1A;
+  --a11y-panel-muted: #484848;           // 7.5:1 sobre #f2f2f2, 7.1:1 sobre #e6e6e6 (AAA)
+  --a11y-panel-accent: #0D47A1;
+  --a11y-panel-border: #9E9E9E;
+  --a11y-panel-active-text: #FFFFFF;
+  --a11y-panel-section-bg: rgba(0, 0, 0, 0.05);
+  --a11y-panel-danger: #AF1B1B;          // 7.0:1 sobre #ffffff (AAA)
+}
+
+// Modo oscuro
+:host-context([data-color-mode="dark"]) {
   --a11y-panel-bg: #1E1E2E;
   --a11y-panel-text: #FFFFFF;
-  --a11y-panel-muted: #D0DDE3;          // 7.2:1 sobre #41414E (sección compuesta), 11.5:1 sobre #1E1E2E (AAA)
+  --a11y-panel-muted: #D0DDE3;           // 7.2:1 sobre #41414E (sección compuesta), 11.5:1 sobre #1E1E2E (AAA)
   --a11y-panel-accent: #90CAF9;
   --a11y-panel-border: #4A4A6A;
   --a11y-panel-active-text: #000000;
   --a11y-panel-section-bg: rgba(255, 255, 255, 0.08);
-  --a11y-panel-danger: #EF9A9A;          // 7.6:1 sobre #1E1E2E (AAA) — antes #FF6B6B (5.91:1)
+  --a11y-panel-danger: #EF9A9A;          // 7.6:1 sobre #1E1E2E (AAA)
 }
 
-// Modo claro - override en body
-[data-color-mode="light"] {
-  :host {
-    --a11y-panel-bg: #FFFFFF;
-    --a11y-panel-text: #1A1A1A;
-    --a11y-panel-muted: #484848;           // 7.5:1 sobre #f2f2f2, 7.1:1 sobre #e6e6e6 (AAA)
-    --a11y-panel-accent: #0D47A1;
-    --a11y-panel-border: #9E9E9E;
-    --a11y-panel-active-text: #FFFFFF;
-    --a11y-panel-section-bg: rgba(0, 0, 0, 0.05);
-    --a11y-panel-danger: #AF1B1B;          // 7.0:1 sobre #ffffff (AAA) — antes #C62828 (5.62:1)
-  }
+// Alto contraste oscuro
+:host-context([data-profile="high-contrast"]) {
+  --a11y-panel-bg: #000000;
+  --a11y-panel-text: #FFFFFF;
+  --a11y-panel-muted: #E0E0E0;
+  --a11y-panel-accent: #FFFF00;
+  --a11y-panel-border: #FFFFFF;
+  --a11y-panel-active-text: #000000;
+  --a11y-panel-section-bg: rgba(255, 255, 255, 0.1);
+  --a11y-panel-danger: #FF5E5E;          // 7.01:1 sobre #000000 (AAA)
 }
 
-// Alto contraste
-[data-profile="high-contrast"] {
-  :host {
-    --a11y-panel-bg: #000000;
-    --a11y-panel-text: #FFFFFF;
-    --a11y-panel-muted: #E0E0E0;
-    --a11y-panel-accent: #FFFF00;
-    --a11y-panel-border: #FFFFFF;
-    --a11y-panel-active-text: #000000;
-    --a11y-panel-section-bg: rgba(255, 255, 255, 0.1);
-    --a11y-panel-danger: #FF5E5E;          // 7.01:1 sobre #000000 (AAA) — antes #FF4444 (6.16:1)
-  }
-}
-
-[data-profile="high-contrast"][data-color-mode="light"] {
-  :host {
-    --a11y-panel-bg: #FFFFFF;
-    --a11y-panel-text: #000000;
-    --a11y-panel-muted: #333333;
-    --a11y-panel-accent: #0000CC;
-    --a11y-panel-border: #000000;
-    --a11y-panel-active-text: #FFFFFF;
-    --a11y-panel-section-bg: rgba(0, 0, 0, 0.05);
-    --a11y-panel-danger: #B60000;          // 7.03:1 sobre #FFFFFF (AAA) — antes #CC0000 (5.89:1)
-  }
+// Alto contraste claro
+:host-context([data-profile="high-contrast"][data-color-mode="light"]) {
+  --a11y-panel-bg: #FFFFFF;
+  --a11y-panel-text: #000000;
+  --a11y-panel-muted: #333333;
+  --a11y-panel-accent: #0000CC;
+  --a11y-panel-border: #000000;
+  --a11y-panel-active-text: #FFFFFF;
+  --a11y-panel-section-bg: rgba(0, 0, 0, 0.05);
+  --a11y-panel-danger: #B60000;          // 7.03:1 sobre #FFFFFF (AAA)
 }
 
 // Botón flotante
 .a11y-trigger-btn {
   position: fixed;
-  bottom: 90px;
-  right: 20px;
+  bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  right: max(20px, env(safe-area-inset-right, 20px));
   z-index: calc(var(--panel-z) - 1);
   display: flex;
   align-items: center;
@@ -93,6 +88,16 @@
   color: var(--a11y-panel-text);
   font-weight: 600;
   @media (max-width: 500px) { display: none; }
+}
+
+@media (max-width: 500px) {
+  .a11y-trigger-btn {
+    padding: 12px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    justify-content: center;
+  }
 }
 
 // Overlay

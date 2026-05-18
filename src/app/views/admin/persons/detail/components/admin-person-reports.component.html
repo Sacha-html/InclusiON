@@ -41,7 +41,7 @@
   <c-modal-footer>
     <button cButton color="secondary" (click)="showApproveModal.set(false)">Cancelar</button>
     <button cButton color="success" [disabled]="isProcessing()" (click)="confirmApprove()">
-      @if (isProcessing()) { <c-spinner size="sm"></c-spinner> }
+      @if (isProcessing()) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Aprobar
     </button>
   </c-modal-footer>
@@ -68,7 +68,7 @@
     <button cButton color="danger"
             [disabled]="isProcessing() || !rejectComment.trim()"
             (click)="confirmReject()">
-      @if (isProcessing()) { <c-spinner size="sm"></c-spinner> }
+      @if (isProcessing()) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Rechazar
     </button>
   </c-modal-footer>

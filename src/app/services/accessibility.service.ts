@@ -426,6 +426,10 @@ export class AccessibilityService {
     root.setAttribute('data-color-mode', settings.colorMode);
     body.setAttribute('data-color-mode', settings.colorMode);
 
+    // data-coreui-theme activa los overrides de componentes de CoreUI
+    // ([data-coreui-theme="dark"] .card, .nav, .dropdown, etc.)
+    root.setAttribute('data-coreui-theme', settings.colorMode);
+
     // Clase para CoreUI dark mode
     if (settings.colorMode === 'dark') {
       root.classList.add('dark-theme');

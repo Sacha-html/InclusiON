@@ -84,7 +84,7 @@
     <c-modal-footer>
       <button cButton color="secondary" (click)="cancelAssign()">Cancelar</button>
       <button cButton color="primary" (click)="confirmAssign()" [disabled]="!selectedInstitutionId || isSaving">
-        @if (isSaving) { <c-spinner size="sm"></c-spinner> }
+        @if (isSaving) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
         Asignar
       </button>
     </c-modal-footer>
@@ -102,7 +102,7 @@
     <c-modal-footer>
       <button cButton color="secondary" (click)="cancelRemove()">Cancelar</button>
       <button cButton color="danger" (click)="confirmRemove()" [disabled]="isSaving">
-        @if (isSaving) { <c-spinner size="sm"></c-spinner> }
+        @if (isSaving) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
         Quitar
       </button>
     </c-modal-footer>

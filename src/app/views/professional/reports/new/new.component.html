@@ -159,7 +159,7 @@
         <c-col xs="12">
           <button cButton type="submit" color="primary" [disabled]="isLoading() || !isValid">
             @if (isLoading()) {
-              <c-spinner size="sm"></c-spinner>
+              <c-spinner size="sm" aria-hidden="true"></c-spinner>
             }
             Guardar
           </button>
@@ -190,7 +190,7 @@
     </button>
     <button cButton color="primary" [disabled]="isSubmitting()" (click)="submitNow()">
       @if (isSubmitting()) {
-        <c-spinner size="sm" class="me-1"></c-spinner>
+        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
       }
       Enviar al administrador
     </button>

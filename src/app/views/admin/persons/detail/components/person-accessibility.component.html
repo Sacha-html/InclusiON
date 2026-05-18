@@ -76,7 +76,7 @@
 <div class="d-flex justify-content-end gap-2">
   <button cButton color="primary" (click)="save()" [disabled]="isSaving()">
     @if (isSaving()) {
-      <c-spinner size="sm" class="me-1"></c-spinner>
+      <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
       Guardando...
     } @else {
       Guardar cambios

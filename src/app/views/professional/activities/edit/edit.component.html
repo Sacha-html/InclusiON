@@ -161,7 +161,7 @@
       <c-row class="mt-4">
         <c-col xs="12">
           <button cButton type="button" color="primary" [disabled]="!isValid || isLoading()" (click)="submit()">
-            @if (isLoading()) { <c-spinner size="sm" class="me-1"></c-spinner> }
+            @if (isLoading()) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
             Guardar cambios
           </button>
           <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">

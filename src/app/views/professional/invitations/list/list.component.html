@@ -111,7 +111,7 @@
       <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
       <button cButton color="primary" (click)="onSubmit()" [disabled]="isSubmitting">
         @if (isSubmitting) {
-          <c-spinner size="sm" class="me-1"></c-spinner>
+          <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
         }
         Guardar
       </button>

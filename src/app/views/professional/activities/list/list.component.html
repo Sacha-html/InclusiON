@@ -22,13 +22,13 @@
       Describí qué tipo de actividad buscás con tus palabras. La IA encontrará las más similares por significado.
     </p>
     <div class="input-group">
-      <input type="text" class="form-control"
-             placeholder="Ej: actividades para trabajar la autonomía en el hogar..."
-             [value]="semanticText()"
-             (input)="semanticText.set($any($event.target).value)"
-             (keydown)="onSemanticKeydown($event)"
-             [disabled]="semanticLoading()"
-             aria-label="Texto de búsqueda semántica" />
+       <input type="text" class="form-control"
+              placeholder="Ej: actividades para trabajar la autonomía en el hogar..."
+              [value]="semanticText()"
+              (input)="onSemanticInput($any($event.target).value)"
+              (keydown)="onSemanticKeydown($event)"
+              [disabled]="semanticLoading()"
+              aria-label="Texto de búsqueda semántica" />
       <button cButton color="primary" (click)="runSemanticSearch()" [disabled]="semanticLoading() || !semanticText().trim()">
         @if (semanticLoading()) {
           <c-spinner size="sm" aria-hidden="true"></c-spinner>

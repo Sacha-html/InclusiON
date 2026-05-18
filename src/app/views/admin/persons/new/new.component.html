@@ -1,10 +1,10 @@
 <c-card>
   <c-card-header>
-    <strong>Registrar Persona con Discapacidad</strong>
+    <h2 class="h5 mb-0">Registrar Persona con Discapacidad</h2>
   </c-card-header>
   <c-card-body>
     @if (serverError) {
-      <div class="alert alert-danger">{{ serverError }}</div>
+      <div class="alert alert-danger" role="alert" aria-live="assertive">{{ serverError }}</div>
     }
 
     <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
@@ -12,12 +12,13 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
       <!-- Datos Personales -->
-      <h5 class="mb-3">Datos personales</h5>
+      <h3 class="h5 mb-3">Datos personales</h3>
 
       <c-row class="mb-3">
         <c-col sm="6">
           <label cLabel for="firstName">Nombre *</label>
           <input cFormControl id="firstName" formControlName="firstName"
+                 autocomplete="given-name"
                  [valid]="submitted ? f['firstName'].valid : undefined" />
           @if (submitted && f['firstName'].errors) {
             <c-form-feedback [valid]="false">
@@ -29,6 +30,7 @@
         <c-col sm="6">
           <label cLabel for="lastName">Apellido *</label>
           <input cFormControl id="lastName" formControlName="lastName"
+                 autocomplete="family-name"
                  [valid]="submitted ? f['lastName'].valid : undefined" />
           @if (submitted && f['lastName'].errors) {
             <c-form-feedback [valid]="false">
@@ -60,13 +62,12 @@
       </c-row>
 
       <!-- Discapacidad -->
-      <h5 class="mt-4 mb-3">Discapacidad</h5>
+      <h3 class="h5 mt-4 mb-3">Discapacidad</h3>
 
       <c-row class="mb-3">
         <c-col sm="6">
           <label cLabel for="disabilityTypeId">Tipo de discapacidad *</label>
           <select cSelect id="disabilityTypeId" formControlName="disabilityTypeId"
-                  aria-label="Seleccionar tipo de discapacidad"
                   [valid]="submitted ? f['disabilityTypeId'].valid : undefined">
             <option [ngValue]="null">-- Seleccionar --</option>
             @for (dt of disabilityTypes; track dt.id) {
@@ -82,13 +83,12 @@
       </c-row>
 
       <!-- Perfil Funcional -->
-      <h5 class="mt-4 mb-3">Perfil funcional</h5>
+      <h3 class="h5 mt-4 mb-3">Perfil funcional</h3>
 
       <c-row class="mb-3">
         <c-col sm="4">
           <label cLabel for="attentionLevel">Atención (1-5)</label>
-          <select cSelect id="attentionLevel" formControlName="attentionLevel"
-                  aria-label="Nivel de atención">
+          <select cSelect id="attentionLevel" formControlName="attentionLevel">
             <option [ngValue]="null">-- Seleccionar --</option>
             @for (level of [1,2,3,4,5]; track level) {
               <option [value]="level">{{ level }}</option>
@@ -97,8 +97,7 @@
         </c-col>
         <c-col sm="4">
           <label cLabel for="communicationLevel">Comunicación (1-5)</label>
-          <select cSelect id="communicationLevel" formControlName="communicationLevel"
-                  aria-label="Nivel de comunicación">
+          <select cSelect id="communicationLevel" formControlName="communicationLevel">
             <option [ngValue]="null">-- Seleccionar --</option>
             @for (level of [1,2,3,4,5]; track level) {
               <option [value]="level">{{ level }}</option>
@@ -107,8 +106,7 @@
         </c-col>
         <c-col sm="4">
           <label cLabel for="motorSkillLevel">Motricidad (1-5)</label>
-          <select cSelect id="motorSkillLevel" formControlName="motorSkillLevel"
-                  aria-label="Nivel de motricidad">
+          <select cSelect id="motorSkillLevel" formControlName="motorSkillLevel">
             <option [ngValue]="null">-- Seleccionar --</option>
             @for (level of [1,2,3,4,5]; track level) {
               <option [value]="level">{{ level }}</option>
@@ -133,7 +131,7 @@
       </c-row>
 
       <!-- Preferencias -->
-      <h5 class="mt-4 mb-3">Preferencias</h5>
+      <h3 class="h5 mt-4 mb-3">Preferencias</h3>
 
       <c-row class="mb-3">
         <c-col sm="6">
@@ -158,7 +156,7 @@
       </c-row>
 
       <!-- Accesibilidad -->
-      <h5 class="mt-4 mb-3">Accesibilidad</h5>
+      <h3 class="h5 mt-4 mb-3">Accesibilidad</h3>
 
       <c-row class="mb-3">
         <c-col sm="6">
@@ -203,13 +201,12 @@
       </c-row>
 
       <!-- Configuración de Acceso -->
-      <h5 class="mt-4 mb-3">Configuración de acceso</h5>
+      <h3 class="h5 mt-4 mb-3">Configuración de acceso</h3>
 
       <c-row class="mb-3">
         <c-col sm="6">
           <label cLabel for="autonomyLevelId">Nivel de autonomía</label>
-          <select cSelect id="autonomyLevelId" formControlName="autonomyLevelId"
-                  aria-label="Seleccionar nivel de autonomía">
+          <select cSelect id="autonomyLevelId" formControlName="autonomyLevelId">
             <option [ngValue]="null">-- Seleccionar --</option>
             @for (al of autonomyLevels; track al.id) {
               <option [value]="al.id">{{ al.name }}</option>
@@ -218,8 +215,7 @@
         </c-col>
         <c-col sm="6">
           <label cLabel for="loginMethodId">Método de login</label>
-          <select cSelect id="loginMethodId" formControlName="loginMethodId"
-                  aria-label="Seleccionar método de login">
+          <select cSelect id="loginMethodId" formControlName="loginMethodId">
             <option [ngValue]="null">-- Seleccionar --</option>
             @for (lm of loginMethods; track lm.id) {
               <option [value]="lm.id">{{ lm.name }}</option>

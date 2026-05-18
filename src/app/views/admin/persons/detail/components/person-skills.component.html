@@ -55,7 +55,7 @@
     <button cButton color="secondary" (click)="closeModal.emit()">Cancelar</button>
     <button cButton color="primary" (click)="confirmAdd.emit(getSelectedIds())"
             [disabled]="selectedIds.size === 0 || loading">
-      @if (loading) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      @if (loading) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
       Agregar ({{ selectedIds.size }})
     </button>
   </c-modal-footer>

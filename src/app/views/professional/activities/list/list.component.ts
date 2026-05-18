@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ActivitiesService } from '@services/activities.service';
@@ -18,6 +19,7 @@ import {
   GridModule,
   SpinnerComponent,
 } from '@coreui/angular';
+import { Subject, debounceTime, distinctUntilChanged, filter } from 'rxjs';
 
 @Component({
   selector: 'app-activities-list',
@@ -38,6 +40,9 @@ import {
   styleUrl: './list.component.scss',
 })
 export class ListComponent implements OnInit {
+  readonly #destroyRef = inject(DestroyRef);
+  readonly #semanticInput$ = new Subject<string>();
+
   private readonly activitiesService = inject(ActivitiesService);
   private readonly catalogsService   = inject(CatalogsService);
   private readonly toastService      = inject(ToastService);
@@ -126,6 +131,13 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.loadCatalogs();
     this.loadActivities();
+
+    this.#semanticInput$.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      filter(() => this.semanticMode()),
+      takeUntilDestroyed(this.#destroyRef),
+    ).subscribe(() => this.runSemanticSearch());
   }
 
   private loadCatalogs(): void {
@@ -242,6 +254,16 @@ export class ListComponent implements OnInit {
     this.semanticMode.set(entering);
     if (!entering) {
       this.semanticText.set('');
+      this.semanticResults.set([]);
+    }
+  }
+
+  onSemanticInput(value: string): void {
+    this.semanticText.set(value);
+    const trimmed = value.trim();
+    if (trimmed.length >= 3) {
+      this.#semanticInput$.next(trimmed);
+    } else {
       this.semanticResults.set([]);
     }
   }

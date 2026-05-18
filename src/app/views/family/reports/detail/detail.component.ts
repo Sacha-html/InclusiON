@@ -26,8 +26,6 @@ import {
     BadgeComponent,
     ButtonDirective,
     SpinnerComponent,
-    ColComponent,
-    RowComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',

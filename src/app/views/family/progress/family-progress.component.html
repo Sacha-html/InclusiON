@@ -1,9 +1,9 @@
 <!-- Loading inicial -->
 @if (isLoading()) {
-  <output class="loading-center" aria-live="polite">
+  <div class="loading-center" role="status" aria-live="polite">
     <c-spinner />
     <p class="mt-2 text-body-secondary">Cargando...</p>
-  </output>
+  </div>
 } @else if (hasError()) {
   <c-alert color="danger" role="alert">
     No se pudo cargar la información. Intentá de nuevo más tarde.
@@ -45,10 +45,10 @@
   <!-- Progreso -->
   @if (selectedPersonId()) {
     @if (isLoadingAssignments()) {
-      <output class="loading-center" aria-live="polite">
+      <div class="loading-center" role="status" aria-live="polite">
         <c-spinner />
         <p class="mt-2 text-body-secondary">Cargando progreso...</p>
-      </output>
+      </div>
     } @else if (stats().total === 0) {
       <p class="empty-state">Todavía no tiene actividades asignadas.</p>
     } @else {
@@ -133,7 +133,7 @@
       <!-- ── Historial de intentos ─────────────────────────────────────────── -->
       <c-card>
         <c-card-header>
-          <strong>Historial de intentos</strong>
+          <h2 class="h6 mb-0">Historial de intentos</h2>
           <span class="ms-2 text-body-secondary" style="font-size:.85rem;">
             Últimos {{ recentCompletions().length }}
           </span>

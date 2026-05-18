@@ -8,7 +8,7 @@
     <!-- Loading State -->
     @if (isLoading) {
       <div class="text-center py-4">
-        <c-spinner color="primary"></c-spinner>
+        <c-spinner color="primary" aria-hidden="true"></c-spinner>
         <p class="mt-2">Cargando métodos de login...</p>
       </div>
     }
@@ -40,11 +40,11 @@
                 (click)="selectMethod(method)"
                 role="button"
                 tabindex="0"
-                [attr.aria-label]="'Seleccionar metodo de acceso: ' + method.name"
+                [attr.aria-label]="'Seleccionar método de acceso: ' + method.name"
                 (keydown.enter)="selectMethod(method)"
                 (keydown.space)="selectMethod(method); $event.preventDefault()">
                 <c-card-body class="text-center">
-                  <div class="method-icon mb-3">
+                  <div class="method-icon mb-3" aria-hidden="true">
                     <svg [cIcon]="getMethodIcon(method)" size="xl" [class]="'text-' + getMethodColor(method)"></svg>
                   </div>
                   <h5 class="method-name">{{ method.name }}</h5>
@@ -138,8 +138,8 @@
           @if (selectedMethod.id === LOGIN_STANDARD) {
             <div class="standard-config">
               <c-alert color="info">
-                Con el login estandar, usaras tu email y contraseña para acceder a la aplicacion.
-                No se requiere configuracion adicional.
+                Con el login estándar, usarás tu email y contraseña para acceder a la aplicación.
+                No se requiere configuración adicional.
               </c-alert>
             </div>
           }
@@ -159,9 +159,11 @@
       (click)="validateAndSave()"
       class="a11y-btn-primary">
       @if (isSaving) {
-        <c-spinner size="sm" class="me-2"></c-spinner>
+        <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
+        <span>Guardando...</span>
+      } @else {
+        <span>Guardar cambios</span>
       }
-      {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
     </button>
   </c-card-footer>
 </c-card>

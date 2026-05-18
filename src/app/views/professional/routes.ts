@@ -37,14 +37,6 @@ export const professionalRoutes: Routes = [
     data: { title: 'Actividades' }
   },
   {
-    path: 'activities/:id',
-    loadComponent: () =>
-      import('./activities/detail/detail.component').then(
-        (m) => m.DetailComponent
-      ),
-    data: { title: 'Detalle de Actividad' }
-  },
-  {
     path: 'activities/new',
     loadComponent: () =>
       import('./activities/new/new.component').then(
@@ -52,6 +44,14 @@ export const professionalRoutes: Routes = [
       ),
     canActivate: [permissionGuard],
     data: { title: 'Nueva Actividad', permission: Permissions.Activities.Create, redirectTo: AppRoutes.Pro.Activities }
+  },
+  {
+    path: 'activities/:id',
+    loadComponent: () =>
+      import('./activities/detail/detail.component').then(
+        (m) => m.DetailComponent
+      ),
+    data: { title: 'Detalle de Actividad' }
   },
   {
     path: 'activities/:id/edit',

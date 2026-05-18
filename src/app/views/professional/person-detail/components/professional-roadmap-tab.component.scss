@@ -24,8 +24,9 @@
   cursor: default;
 
   &.locked {
-    opacity: 0.7;
     background-color: var(--cui-tertiary-bg, #f8f9fa);
+    color: var(--cui-secondary-color, #6c757d);
+    border-left: 3px solid var(--cui-border-color, #dee2e6);
   }
 
   // CDK drag state
