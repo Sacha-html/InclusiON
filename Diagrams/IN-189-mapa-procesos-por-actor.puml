@@ -1,0 +1,61 @@
+@startuml IN-189 Mapa de Procesos por Actor - InclusiON
+skinparam shadowing false
+skinparam backgroundColor #FEFEFE
+skinparam activity {
+  BorderColor #555555
+  BackgroundColor #EEF4FF
+  ArrowColor #555555
+}
+skinparam swimlane {
+  BorderColor #888888
+  TitleFontSize 13
+}
+
+title Mapa de Procesos por Actor — InclusiON
+
+|Admin Global|
+start
+:P01 - Crear instituciones;
+:P02 - Configurar roles y permisos;
+:P03 - Cargar catálogos;
+:P04 - Dar de alta profesionales;
+:P05 - Dar de alta personas;
+:P06 - Dar de alta familiares;
+:P08 - Asignar profesionales a personas;
+note right: También ejecuta P17 (gestión de cuentas)\ny P19 (soporte)
+
+|Admin Institucional|
+:P04 - Gestionar profesionales\n(dentro de su institución);
+:P05 - Gestionar personas\n(dentro de su institución);
+:P06 - Gestionar familiares;
+:P08 - Asignar profesionales\na personas;
+note right: También ejecuta P17 (gestión de cuentas)\ny P19 (soporte)
+
+|Profesional|
+:P07 - Invitar a familiar\npor email;
+:P09 - Evaluar persona:\nperfil de habilidades\ny diagnóstico;
+:P10 - Crear actividades\n(templates dinámicos);
+:P11 - Armar plan de trabajo\n(roadmap);
+:P14 - Monitorear avance\nen dashboard;
+:P15 - Generar reporte\nde progreso;
+:P16 - Comunicarse con\nfamilia (mensajería);
+note right: También ejecuta P18 (onboarding)\ny P19 (soporte)
+
+|Persona con Discapacidad|
+:P18 - Onboarding:\nprimer ingreso y configuración;
+:P12 - Realizar actividades\nen portal AAC;
+note right: El sistema ejecuta P13 (MDA)\nautomáticamente tras cada actividad
+
+|Familia / Cuidador|
+:P07 - Registrarse\npor invitación del profesional;
+:P18 - Onboarding:\nprimer ingreso y configuración;
+:P14 - Consultar progreso\nen dashboard familiar;
+:P15 - Leer reportes\nde progreso;
+:P16 - Comunicarse con\nprofesional (mensajería);
+note right: También puede usar P19 (soporte)
+
+|Sistema (automático)|
+:P13 - Motor de Dificultad Adaptativa:\nevalúa rendimiento y ajusta\ndificultad, tiempo y pistas;
+
+stop
+@enduml

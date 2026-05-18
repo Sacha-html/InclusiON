@@ -22,8 +22,7 @@ El profesional puede acceder a un formulario público de registro sin necesidad 
 
 1. El profesional accede a la página pública de registro (`/register-professional`)
 2. Completa el formulario con:
-   - Nombre, Apellido, Email (obligatorios)
-   - Documento (opcional)
+   - Nombre, Apellido, Email, Documento (obligatorios)
    - Teléfono (opcional)
    - Especialidad (obligatoria)
    - Matrícula/Número de licencia (opcional)
@@ -40,7 +39,7 @@ El profesional puede acceder a un formulario público de registro sin necesidad 
 ## Criterios de Aceptación
 
 - [x] El formulario de registro es accesible públicamente sin autenticación
-- [x] Los campos obligatorios se validan en el frontend (nombre, apellido, email, especialidad, fecha de nacimiento)
+- [x] Los campos obligatorios se validan en el frontend (nombre, apellido, email, documento, especialidad, fecha de nacimiento)
 - [x] La fecha de nacimiento valida formato dd/mm/aaaa, no es futura y el profesional es mayor de 18 años
 - [x] El email se valida en tiempo real contra usuarios y profesionales existentes (debounce 800ms)
 - [x] La matrícula se valida en tiempo real contra profesionales existentes (debounce 800ms)
@@ -89,7 +88,7 @@ El profesional puede acceder a un formulario público de registro sin necesidad 
 ## Validaciones implementadas
 
 ### Frontend (síncronas)
-- `Validators.required` en nombre, apellido, email, especialidad, fecha de nacimiento
+- `Validators.required` en nombre, apellido, email, documento, especialidad, fecha de nacimiento
 - `Validators.email` en email
 - `Validators.minLength(2)` y `maxLength(100)` en nombre y apellido
 - `validDate` — formato dd/mm/aaaa válido
