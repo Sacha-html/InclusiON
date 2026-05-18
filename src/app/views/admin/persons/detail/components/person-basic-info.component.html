@@ -1,176 +1,148 @@
 <c-card>
-  <c-card-header>
-    <strong>Datos Personales</strong>
-    <c-badge class="ms-2" [color]="person.isActive ? 'success' : 'danger'"
-          role="status"
+  <c-card-header class="d-flex align-items-center gap-2">
+    <h3 class="h6 mb-0">Datos Personales</h3>
+    <c-badge class="ms-1" [color]="person.isActive ? 'success' : 'danger'"
           [attr.aria-label]="'Estado: ' + (person.isActive ? 'Activo' : 'Inactivo')">
       {{ person.isActive ? 'Activo' : 'Inactivo' }}
     </c-badge>
   </c-card-header>
   <c-card-body>
 
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-firstName">Nombre</label>
-        <input cFormControl id="detail-firstName" [value]="person.firstName" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-lastName">Apellido</label>
-        <input cFormControl id="detail-lastName" [value]="person.lastName" readonly />
-      </c-col>
-    </c-row>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Nombre</dt>
+        <dd class="mb-0 fw-medium">{{ person.firstName }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Apellido</dt>
+        <dd class="mb-0 fw-medium">{{ person.lastName }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Documento</dt>
+        <dd class="mb-0 fw-medium">{{ person.documentNumber ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Fecha de nacimiento</dt>
+        <dd class="mb-0 fw-medium">{{ formatDate(person.birthDate) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Edad</dt>
+        <dd class="mb-0 fw-medium">{{ person.age }} años</dd>
+      </div>
+    </dl>
 
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-documentNumber">Documento</label>
-        <input cFormControl id="detail-documentNumber" [value]="person.documentNumber ?? 'Sin especificar'" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-birthDate">Fecha de nacimiento</label>
-        <input cFormControl id="detail-birthDate" [value]="formatDate(person.birthDate)" readonly />
-      </c-col>
-    </c-row>
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Discapacidad</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Tipo de discapacidad</dt>
+        <dd class="mb-0 fw-medium">{{ person.disabilityTypeName ?? 'Sin especificar' }}</dd>
+      </div>
+    </dl>
 
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-age">Edad</label>
-        <input cFormControl id="detail-age" [value]="person.age + ' años'" readonly />
-      </c-col>
-    </c-row>
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Perfil funcional</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-4">
+        <dt class="form-label text-body-secondary mb-1">Atención</dt>
+        <dd class="mb-0 fw-medium">{{ formatLevel(person.attentionLevel) }}</dd>
+      </div>
+      <div class="col-sm-4">
+        <dt class="form-label text-body-secondary mb-1">Comunicación</dt>
+        <dd class="mb-0 fw-medium">{{ formatLevel(person.communicationLevel) }}</dd>
+      </div>
+      <div class="col-sm-4">
+        <dt class="form-label text-body-secondary mb-1">Motricidad</dt>
+        <dd class="mb-0 fw-medium">{{ formatLevel(person.motorSkillLevel) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Usa CAA</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.usesAAC) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Usa lengua de señas</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.usesSignLanguage) }}</dd>
+      </div>
+    </dl>
 
-    <h5 class="mt-4 mb-3">Discapacidad</h5>
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Preferencias</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Intereses y motivadores</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.interestsAndMotivators ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Estilo de aprendizaje</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.learningStyle ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Recursos disponibles</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.availableResources ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Terapias adicionales</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.additionalTherapies ?? 'Sin especificar' }}</dd>
+      </div>
+    </dl>
 
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-disabilityType">Tipo de discapacidad</label>
-        <input cFormControl id="detail-disabilityType" [value]="person.disabilityTypeName ?? 'Sin especificar'" readonly />
-      </c-col>
-    </c-row>
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Accesibilidad</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Requiere fuente grande</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresLargeFont) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Requiere alto contraste</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresHighContrast) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Sensibilidad al ruido visual</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.visualNoiseSensitivity) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Sensibilidad al sonido</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.soundSensitivity) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Daltonismo</dt>
+        <dd class="mb-0 fw-medium">{{ formatColorBlindness(person.colorBlindnessType) }}</dd>
+      </div>
+    </dl>
 
-    <h5 class="mt-4 mb-3">Perfil funcional</h5>
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Configuración de acceso</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Nivel de autonomía</dt>
+        <dd class="mb-0 fw-medium">{{ person.autonomyLevelName ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Método de login</dt>
+        <dd class="mb-0 fw-medium">{{ person.loginMethodName ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">PIN configurado</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.hasPinConfigured) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Color de avatar</dt>
+        <dd class="mb-0 d-flex align-items-center gap-2">
+          <span class="avatar-color-preview" [style.background-color]="person.avatarColor ?? '#ccc'" aria-hidden="true"></span>
+          <span class="fw-medium">{{ person.avatarColor ?? 'Sin especificar' }}</span>
+        </dd>
+      </div>
+    </dl>
 
-    <c-row class="mb-3">
-      <c-col sm="4">
-        <label cLabel for="detail-attentionLevel">Atención</label>
-        <input cFormControl id="detail-attentionLevel" [value]="formatLevel(person.attentionLevel)" readonly />
-      </c-col>
-      <c-col sm="4">
-        <label cLabel for="detail-communicationLevel">Comunicación</label>
-        <input cFormControl id="detail-communicationLevel" [value]="formatLevel(person.communicationLevel)" readonly />
-      </c-col>
-      <c-col sm="4">
-        <label cLabel for="detail-motorSkillLevel">Motricidad</label>
-        <input cFormControl id="detail-motorSkillLevel" [value]="formatLevel(person.motorSkillLevel)" readonly />
-      </c-col>
-    </c-row>
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Auditoría</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Fecha de alta</dt>
+        <dd class="mb-0 fw-medium">{{ formatDateTime(person.createdAt) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Última actualización</dt>
+        <dd class="mb-0 fw-medium">{{ person.updatedAt ? formatDateTime(person.updatedAt) : 'Sin actualizar' }}</dd>
+      </div>
+    </dl>
 
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-usesAAC">Usa CAA</label>
-        <input cFormControl id="detail-usesAAC" [value]="formatBoolean(person.usesAAC)" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-usesSignLanguage">Usa lengua de señas</label>
-        <input cFormControl id="detail-usesSignLanguage" [value]="formatBoolean(person.usesSignLanguage)" readonly />
-      </c-col>
-    </c-row>
-
-    <h5 class="mt-4 mb-3">Preferencias</h5>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-interests">Intereses y motivadores</label>
-        <textarea cFormControl id="detail-interests" [value]="person.interestsAndMotivators ?? 'Sin especificar'" readonly rows="3"></textarea>
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-learningStyle">Estilo de aprendizaje</label>
-        <textarea cFormControl id="detail-learningStyle" [value]="person.learningStyle ?? 'Sin especificar'" readonly rows="3"></textarea>
-      </c-col>
-    </c-row>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-resources">Recursos disponibles</label>
-        <textarea cFormControl id="detail-resources" [value]="person.availableResources ?? 'Sin especificar'" readonly rows="3"></textarea>
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-therapies">Terapias adicionales</label>
-        <textarea cFormControl id="detail-therapies" [value]="person.additionalTherapies ?? 'Sin especificar'" readonly rows="3"></textarea>
-      </c-col>
-    </c-row>
-
-    <h5 class="mt-4 mb-3">Accesibilidad</h5>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-largeFont">Requiere fuente grande</label>
-        <input cFormControl id="detail-largeFont" [value]="formatBoolean(person.requiresLargeFont)" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-highContrast">Requiere alto contraste</label>
-        <input cFormControl id="detail-highContrast" [value]="formatBoolean(person.requiresHighContrast)" readonly />
-      </c-col>
-    </c-row>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-visualNoise">Sensibilidad al ruido visual</label>
-        <input cFormControl id="detail-visualNoise" [value]="formatBoolean(person.visualNoiseSensitivity)" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-sound">Sensibilidad al sonido</label>
-        <input cFormControl id="detail-sound" [value]="formatBoolean(person.soundSensitivity)" readonly />
-      </c-col>
-    </c-row>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-colorBlindness">Daltonismo</label>
-        <input cFormControl id="detail-colorBlindness" [value]="formatColorBlindness(person.colorBlindnessType)" readonly />
-      </c-col>
-    </c-row>
-
-    <h5 class="mt-4 mb-3">Configuración de acceso</h5>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-autonomyLevel">Nivel de autonomía</label>
-        <input cFormControl id="detail-autonomyLevel" [value]="person.autonomyLevelName ?? 'Sin especificar'" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-loginMethod">Método de login</label>
-        <input cFormControl id="detail-loginMethod" [value]="person.loginMethodName ?? 'Sin especificar'" readonly />
-      </c-col>
-    </c-row>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-pinConfigured">PIN configurado</label>
-        <input cFormControl id="detail-pinConfigured" [value]="formatBoolean(person.hasPinConfigured)" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-avatarColor">Color de avatar</label>
-        <div class="d-flex align-items-center gap-2">
-          <span class="avatar-color-preview" [style.background-color]="person.avatarColor ?? '#ccc'"></span>
-          <input cFormControl id="detail-avatarColor" [value]="person.avatarColor ?? 'Sin especificar'" readonly />
-        </div>
-      </c-col>
-    </c-row>
-
-    <h5 class="mt-4 mb-3">Auditoría</h5>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="detail-createdAt">Fecha de alta</label>
-        <input cFormControl id="detail-createdAt" [value]="formatDateTime(person.createdAt)" readonly />
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="detail-updatedAt">Última actualización</label>
-        <input cFormControl id="detail-updatedAt" [value]="person.updatedAt ? formatDateTime(person.updatedAt) : 'Sin actualizar'" readonly />
-      </c-col>
-    </c-row>
-
-    <div class="mt-3 d-flex justify-content-between">
+    <div class="mt-4 d-flex justify-content-between">
       <div class="d-flex gap-2">
         <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado de personas">Volver</button>
         @if (person.isActive) {

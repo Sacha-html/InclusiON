@@ -64,7 +64,7 @@
     <button cButton color="secondary" (click)="cancelAssignPerson()" [disabled]="isSubmitting()">Cancelar</button>
     <button cButton color="primary" (click)="confirmAssignPerson()" [disabled]="!assignPersonForm.value.personId || isSubmitting()">
       @if (isSubmitting()) {
-        <c-spinner size="sm" class="me-1"></c-spinner>
+        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
         Asignando...
       } @else {
         Asignar

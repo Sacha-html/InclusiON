@@ -33,11 +33,13 @@
     <c-col xs="12" md="4" class="d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
       @if (dashboard.unreadMessages > 0) {
         <a routerLink="/family/messages" class="btn btn-primary position-relative">
-          <svg cIcon name="cil-envelope-closed" size="sm" class="me-1"></svg>
+          <svg cIcon name="cil-envelope-closed" size="sm" class="me-1" aria-hidden="true"></svg>
           Mensajes
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            {{ dashboard.unreadMessages }}
-          </span>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                [attr.aria-label]="dashboard.unreadMessages + ' mensajes no leídos'">
+              {{ dashboard.unreadMessages }}
+              <span class="visually-hidden">mensajes no leídos</span>
+            </span>
         </a>
       } @else {
         <a routerLink="/family/messages" class="btn btn-outline-secondary">
@@ -76,14 +78,14 @@
               aria-hidden="true">
               {{ person.fullName.charAt(0).toUpperCase() }}
             </span>
-            <strong>{{ person.fullName }}</strong>
+            <h2 class="h6 mb-0">{{ person.fullName }}</h2>
           </c-card-header>
 
           <c-card-body>
             <c-row>
               <!-- Actividades recientes -->
               <c-col xs="12" md="7">
-                <h6 class="mb-3">Actividades recientes</h6>
+                <h3 class="h6 mb-3">Actividades recientes</h3>
                 @if (person.recentActivities.length === 0) {
                   <p class="text-body-secondary small mb-0">Sin actividades recientes.</p>
                 } @else {
@@ -112,10 +114,10 @@
 
               <!-- Reportes aprobados -->
               <c-col xs="12" md="5" class="mt-4 mt-md-0">
-                <h6 class="mb-3">Reportes aprobados</h6>
+                <h3 class="h6 mb-3">Reportes aprobados</h3>
                 <div
                   class="rounded-3 p-3 text-center mb-3"
-                  [style.background-color]="'var(--cui-secondary-bg)'"
+                  [style.background-color]="'var(--a11y-bg-secondary)'"
                   [attr.aria-label]="person.approvedReportsCount + ' reportes aprobados'">
                   <span class="display-6 fw-bold">{{ person.approvedReportsCount }}</span>
                   <p class="small text-body-secondary mb-0">reportes aprobados</p>

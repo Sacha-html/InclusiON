@@ -39,7 +39,7 @@
   <c-modal-footer>
     <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
     <button cButton color="primary" (click)="confirm()" [disabled]="selectedIds.size === 0 || loading()">
-      @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      @if (loading()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
       Agregar ({{ selectedIds.size }})
     </button>
   </c-modal-footer>

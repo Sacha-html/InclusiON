@@ -180,7 +180,7 @@
           </button>
           <button cButton type="button" color="primary" class="ms-2"
                   [disabled]="!step3Valid || isLoading()" (click)="submit()">
-            @if (isLoading()) { <c-spinner size="sm" class="me-1"></c-spinner> }
+            @if (isLoading()) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
             Guardar actividad
           </button>
           <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">

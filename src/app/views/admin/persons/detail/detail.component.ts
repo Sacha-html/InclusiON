@@ -46,6 +46,21 @@ export class DetailComponent implements OnInit {
   showDeactivateModal = false;
   activeTab = 'datos';
 
+  readonly tabs = ['datos', 'habilidades', 'vinculos', 'diagnosticos', 'accesibilidad', 'reportes'];
+
+  onTabKeydown(event: KeyboardEvent): void {
+    const idx = this.tabs.indexOf(this.activeTab);
+    let newIdx = idx;
+    if (event.key === 'ArrowRight') newIdx = (idx + 1) % this.tabs.length;
+    else if (event.key === 'ArrowLeft') newIdx = (idx - 1 + this.tabs.length) % this.tabs.length;
+    else if (event.key === 'Home') newIdx = 0;
+    else if (event.key === 'End') newIdx = this.tabs.length - 1;
+    else return;
+    event.preventDefault();
+    this.activeTab = this.tabs[newIdx];
+    setTimeout(() => document.getElementById(`tab-${this.activeTab}`)?.focus());
+  }
+
   // Skill profile
   skillProfile: PersonSkillProfileResponse[] = [];
   allSkillAreas: SkillAreaItem[] = [];

@@ -63,6 +63,21 @@ export class PersonDetailComponent implements OnInit {
     | 'actividades'
     | 'roadmap' = 'datos';
 
+  readonly tabs = ['datos', 'funcional', 'habilidades', 'diagnosticos', 'familiares', 'actividades', 'roadmap'];
+
+  onTabKeydown(event: KeyboardEvent): void {
+    const idx = this.tabs.indexOf(this.activeTab);
+    let newIdx = idx;
+    if (event.key === 'ArrowRight') newIdx = (idx + 1) % this.tabs.length;
+    else if (event.key === 'ArrowLeft') newIdx = (idx - 1 + this.tabs.length) % this.tabs.length;
+    else if (event.key === 'Home') newIdx = 0;
+    else if (event.key === 'End') newIdx = this.tabs.length - 1;
+    else return;
+    event.preventDefault();
+    this.activeTab = this.tabs[newIdx] as any;
+    setTimeout(() => document.getElementById(`tab-${this.activeTab}`)?.focus());
+  }
+
   skillProfile = signal<PersonSkillProfileResponse[]>([]);
   diagnoses = signal<DiagnosisListItemResponse[]>([]);
 

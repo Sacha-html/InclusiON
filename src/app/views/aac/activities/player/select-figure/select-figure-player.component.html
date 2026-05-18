@@ -10,10 +10,10 @@
 }
 
 @if (phase() === 'playing') {
-  <div class="player-game" role="main">
-    <p class="game-instruction" role="heading" aria-level="2" tabindex="-1">
+  <div class="player-game" role="region" aria-labelledby="game-instruction">
+    <h2 class="game-instruction" id="game-instruction" tabindex="-1">
       {{ content.instruction }}
-    </p>
+    </h2>
 
     <div class="items-grid"
          role="group"

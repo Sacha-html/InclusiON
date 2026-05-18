@@ -1,7 +1,7 @@
-<div class="player-intro" role="main">
-  <h1 class="activity-title">{{ title }}</h1>
+<div class="player-intro" role="region" aria-labelledby="intro-title">
+  <h1 class="activity-title" id="intro-title">{{ title }}</h1>
 
-  <div class="intro-card" aria-label="Instrucción de la actividad">
+  <div class="intro-card">
     <div class="intro-icon" aria-hidden="true">{{ icon }}</div>
     <p class="intro-instruction">{{ instruction }}</p>
     @if (hint) {
@@ -18,7 +18,7 @@
       <span class="btn-spinner" aria-hidden="true"></span>
       Iniciando...
     } @else {
-      ▶ Jugar
+      <span aria-hidden="true">▶</span> Jugar
     }
   </button>
 </div>

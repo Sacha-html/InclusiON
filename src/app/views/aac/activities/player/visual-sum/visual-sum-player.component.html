@@ -10,10 +10,10 @@
 }
 
 @if (phase() === 'playing') {
-  <div class="player-game" role="main">
-    <p class="game-instruction" role="heading" aria-level="2" tabindex="-1">
+  <div class="player-game" role="region" aria-labelledby="game-instruction">
+    <h2 class="game-instruction" id="game-instruction" tabindex="-1">
       {{ content.instruction || '¿Cuánto es la suma?' }}
-    </p>
+    </h2>
 
     <!-- Ecuación visual -->
     <div class="equation" aria-label="Operación a resolver">

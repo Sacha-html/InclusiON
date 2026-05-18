@@ -18,5 +18,6 @@
 
   @if (badge) {
     <span class="picto-badge" aria-hidden="true">{{ badge }}</span>
+    <span class="visually-hidden">{{ badge === '✅' ? 'correcto' : 'incorrecto' }}</span>
   }
 </button>

@@ -12,7 +12,7 @@
     <c-card-body>
 
       <!-- Tabs -->
-      <ul class="nav nav-tabs mb-3" role="tablist" aria-label="Secciones de persona">
+      <ul class="nav nav-tabs mb-3" role="tablist" aria-label="Secciones de persona" (keydown)="onTabKeydown($event)">
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="tab-datos" [class.active]="activeTab === 'datos'" 
                   role="tab" [attr.aria-selected]="activeTab === 'datos'" 
