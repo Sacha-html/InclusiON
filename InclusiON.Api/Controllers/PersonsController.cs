@@ -6,12 +6,14 @@ using InclusiON.Api.Filters;
 using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.Application.UseCases.Family.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Activities;
 using InclusiON.DTOs.Responses.Family;
 using InclusiON.DTOs.Responses.Persons;
 using InclusiON.Shared.Resources;
@@ -28,13 +30,16 @@ namespace InclusiON.Api.Controllers
     {
         private readonly IHttpContextService _httpContextService;
         private readonly IResourceAuthorizationService _resourceAuthz;
+        private readonly IPersonsRepository _personsRepository;
 
         public PersonsController(
             IHttpContextService httpContextService,
-            IResourceAuthorizationService resourceAuthz)
+            IResourceAuthorizationService resourceAuthz,
+            IPersonsRepository personsRepository)
         {
             _httpContextService = httpContextService;
             _resourceAuthz      = resourceAuthz;
+            _personsRepository  = personsRepository;
         }
 
         #region Queries
@@ -265,6 +270,13 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateLoginMethodCommand, ApiResponse<UpdateLoginMethodResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var person = await _personsRepository.GetByUserIdAsync(userId, cancellationToken);
+            if (person is null)
+                return ApiResponse<UpdateLoginMethodResponse>.NotFound("Persona").ToActionResult();
+
+            if (!await _resourceAuthz.CanAccessPersonAsync(person.Id, AccessMode.Write, cancellationToken))
+                return ApiResponse<UpdateLoginMethodResponse>.Forbidden().ToActionResult();
+
             var command = new UpdateLoginMethodCommand(userId, request.LoginMethodId, request.Pin, request.SupervisorUserId);
             var result  = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
@@ -311,6 +323,30 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
             var result = await handler.HandleAsync(new GetPersonSkillProfileQuery(personId, all), cancellationToken);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Obtiene actividades recomendadas para una persona (ordenadas por compatibilidad).
+        /// </summary>
+        [HttpGet("{personId}/recommended-activities")]
+        [Authorize(Policy = "persons:read")]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<ActivityListItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<ActivityListItemResponse>>>> GetRecommendedActivities(
+            Guid personId,
+            [FromServices] IQueryHandler<GetRecommendedActivitiesQuery, ApiResponse<List<ActivityListItemResponse>>> handler,
+            [FromQuery] int limit = 10,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<List<ActivityListItemResponse>>.NotFound("Profesional"));
+
+            var result = await handler.HandleAsync(
+                new GetRecommendedActivitiesQuery(personId, professionalId.Value, limit),
+                cancellationToken);
+
             return Ok(result);
         }
 

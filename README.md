@@ -373,6 +373,9 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 | `/messages/{id}/reply` | POST | Responder mensaje |
 | `/messages/{id}/read` | PATCH | Marcar como leído |
 | `/messages/{id}` | DELETE | Eliminar mensaje (soft delete) |
+| `/activities/{id}/similar` | GET | Actividades similares (búsqueda semántica) |
+| `/activities/{id}/compatible-persons` | GET | Personas compatibles para una actividad |
+| `/persons/{id}/recommended-activities` | GET | Actividades recomendadas para una persona |
 
 ---
 

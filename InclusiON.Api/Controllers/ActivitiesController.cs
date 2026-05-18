@@ -10,6 +10,7 @@ using InclusiON.DTOs.Requests.Activities;
 using InclusiON.DTOs.Requests.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Activities;
+using InclusiON.DTOs.Responses.Persons;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,6 +51,48 @@ namespace InclusiON.Api.Controllers
 
             var result = await handler.HandleAsync(
                 new SearchActivitiesSemanticQuery(professionalId.Value, text, limit),
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        /// <summary>Obtiene actividades similares a una actividad existente.</summary>
+        [HttpGet("{id:int}/similar")]
+        [Authorize(Policy = Permissions.Activities.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<ActivityListItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<ActivityListItemResponse>>>> GetSimilarActivities(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
+            [FromServices] IQueryHandler<GetSimilarActivitiesQuery, ApiResponse<List<ActivityListItemResponse>>> handler,
+            [FromQuery] int limit = 5,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<List<ActivityListItemResponse>>.NotFound("Profesional"));
+
+            var result = await handler.HandleAsync(
+                new GetSimilarActivitiesQuery(professionalId.Value, id, limit),
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        /// <summary>Obtiene personas compatibles con una actividad (ordenadas por compatibilidad).</summary>
+        [HttpGet("{id:int}/compatible-persons")]
+        [Authorize(Policy = Permissions.Activities.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonListItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<PersonListItemResponse>>>> GetCompatiblePersons(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
+            [FromServices] IQueryHandler<GetCompatiblePersonsQuery, ApiResponse<List<PersonListItemResponse>>> handler,
+            [FromQuery] int limit = 10,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<List<PersonListItemResponse>>.NotFound("Profesional"));
+
+            var result = await handler.HandleAsync(
+                new GetCompatiblePersonsQuery(id, professionalId.Value, limit),
                 cancellationToken);
 
             return Ok(result);

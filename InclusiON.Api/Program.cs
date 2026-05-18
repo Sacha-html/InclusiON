@@ -11,7 +11,7 @@ using InclusiON.Api.Scalar;
 using InclusiON.Infrastructure;
 using InclusiON.Infrastructure.Seeders;
 using InclusiON.Infrastructure.Telemetry;
-using InclusiON.Agents;
+using InclusiON.Workers;
 using InclusiON.Api.Hubs;
 using InclusiON.Api.Services;
 using InclusiON.Application.Interfaces.Infrastructure;

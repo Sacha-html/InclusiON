@@ -1,5 +1,7 @@
 using InclusiON.Api.Extensions;
+using InclusiON.Api.Filters;
 using InclusiON.Api.ModelBinders;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -20,10 +22,14 @@ namespace InclusiON.Api.Controllers
     public class ActivityAssignmentsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
+        private readonly IResourceAuthorizationService _resourceAuthz;
 
-        public ActivityAssignmentsController(IHttpContextService httpContextService)
+        public ActivityAssignmentsController(
+            IHttpContextService httpContextService,
+            IResourceAuthorizationService resourceAuthz)
         {
             _httpContextService = httpContextService;
+            _resourceAuthz      = resourceAuthz;
         }
 
         /// <summary>Obtiene una asignación por ID con ContentJson y TemplateTypeCode completos.</summary>
@@ -56,6 +62,7 @@ namespace InclusiON.Api.Controllers
         [Authorize(Policy = Permissions.Activities.Create)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> CreateAssignment(
             [FromBody] CreateActivityAssignmentRequest request,
             [FromServices] ICommandHandler<CreateActivityAssignmentCommand, ApiResponse<ActivityAssignmentResponse>> handler,
@@ -64,6 +71,9 @@ namespace InclusiON.Api.Controllers
             var professionalId = _httpContextService.GetCurrentEntityId();
             if (professionalId is null)
                 return NotFound(ApiResponse<ActivityAssignmentResponse>.NotFound("Profesional"));
+
+            if (!await _resourceAuthz.CanAccessPersonAsync(request.PersonId, AccessMode.Write, cancellationToken))
+                return ApiResponse<ActivityAssignmentResponse>.Forbidden().ToActionResult();
 
             var command = new CreateActivityAssignmentCommand(
                 request.EncryptedActivityId,
@@ -87,7 +97,9 @@ namespace InclusiON.Api.Controllers
         /// <summary>Lista de asignaciones activas de una persona (vista estudiante).</summary>
         [HttpGet("persons/{personId}/activity-assignments")]
         [Authorize(Policy = Permissions.Activities.Read)]
+        [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<ActivityAssignmentResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<ActivityAssignmentResponse>>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<List<ActivityAssignmentResponse>>>> GetPersonAssignments(
             Guid personId,
             [FromServices] IQueryHandler<GetPersonActivityAssignmentsQuery, ApiResponse<List<ActivityAssignmentResponse>>> handler,

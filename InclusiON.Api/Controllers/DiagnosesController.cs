@@ -92,9 +92,11 @@ namespace InclusiON.Api.Controllers
 
         [HttpPatch("diagnoses/{id:int}")]
         [Authorize(Policy = "diagnoses:update")]
+        [DiagnosisAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<object>>> PatchDiagnosisStatus(
             int id,
             [FromBody] PatchStatusRequest request,

@@ -62,6 +62,10 @@ namespace InclusiON.Api.Controllers
                 return BuildDeniedResponse<PagedResponse<ReportsListItemReponse>>("Persona").ToActionResult();
             }
 
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && string.IsNullOrWhiteSpace(request.ProfessionalId))
+                request.ProfessionalId = entityId.Value.ToString();
+
             var query = new GetReportsQuery(
                 request.Page,
                 request.PageSize,
@@ -230,9 +234,11 @@ namespace InclusiON.Api.Controllers
         /// <summary>Admin aprueba el reporte. El familiar podrá consultarlo.</summary>
         [HttpPatch("{reportId}/approve")]
         [Authorize(Policy = "reports:approve")]
+        [ReportAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> ApproveReport(
             [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] ICommandHandler<ApproveReportCommand, ApiResponse<ReportResponse>> handler,
@@ -266,9 +272,11 @@ namespace InclusiON.Api.Controllers
         /// <summary>Admin rechaza el reporte con un motivo para el profesional.</summary>
         [HttpPatch("{reportId}/reject")]
         [Authorize(Policy = "reports:reject")]
+        [ReportAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> RejectReport(
             [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromBody] RejectReportRequest request,

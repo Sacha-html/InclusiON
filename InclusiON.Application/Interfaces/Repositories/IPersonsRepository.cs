@@ -85,5 +85,12 @@ namespace InclusiON.Application.Interfaces.Repositories
             string? representativeSearch = null,
             IReadOnlyList<Guid>? accessiblePersonIds = null,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Obtiene múltiples personas por sus IDs (preservando orden).
+        /// </summary>
+        Task<List<PersonWithDisability>> GetByIdsAsync(
+            List<Guid> ids,
+            CancellationToken cancellationToken = default);
     }
 }

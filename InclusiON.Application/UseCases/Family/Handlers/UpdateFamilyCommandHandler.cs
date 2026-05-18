@@ -75,7 +75,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             family.LastName = command.LastName;
             family.DocumentNumber = command.DocumentNumber;
             family.Phone = command.Phone;
-            family.Relationship = command.Relationship;
+            if (command.Relationship is not null)
+                family.Relationship = command.Relationship;
             family.UpdatedAt = _dateTime.UtcNow;
 
             await _repository.UpdateAsync(family, cancellationToken);
