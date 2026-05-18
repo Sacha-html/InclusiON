@@ -1,0 +1,48 @@
+@startuml IN-187 Actores de Negocio - InclusiON
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam backgroundColor #FEFEFE
+skinparam actor {
+  BorderColor #444444
+  BackgroundColor #EEF4FF
+}
+
+left to right direction
+
+actor "Persona con\nDiscapacidad" as PCD
+actor "Profesional\n(docente/terapeuta)" as PROF
+actor "Familia /\nCuidador" as FAM
+actor "Admin\nInstitucional" as ADMIN_INST
+actor "Admin\nGlobal" as ADMIN_GLOB
+
+package "InclusiON" {
+
+  usecase "Realizar actividades\n(Portal AAC)" as UC1
+  usecase "Gestión educativa:\nevaluación, actividades\ny plan de trabajo" as UC2
+  usecase "Seguimiento y\nreportes de progreso" as UC3
+  usecase "Comunicación\nprofesional-familia" as UC4
+  usecase "Gestión de usuarios\nde la institución" as UC5
+  usecase "Gestión global del\nsistema e instituciones" as UC6
+
+}
+
+note as N1
+  Admin Institucional y Admin Global
+  comparten el rol técnico "admin".
+  Se diferencian por alcance:
+  - Institucional: filtrado por institutionId
+  - Global: acceso total (isGlobalAdmin = true)
+end note
+
+PCD        --> UC1
+PROF       --> UC2
+PROF       --> UC3
+PROF       --> UC4
+FAM        --> UC3
+FAM        --> UC4
+ADMIN_INST --> UC5
+ADMIN_GLOB --> UC5
+ADMIN_GLOB --> UC6
+
+@enduml

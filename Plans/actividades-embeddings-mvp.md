@@ -171,12 +171,12 @@
 | 3 | Assignment + Response (BE) | ✅ |
 | 4 | FE Profesional (gestión + wizard ARASAAC + modal asignar) | ✅ |
 | 5 | FE Estudiante (player SELECT_FIGURE) | ✅ |
+| 6 | Búsqueda semántica (similar activities, compatible persons, recommended activities) | ✅ |
 
 ---
 
 ## Pendiente (post-MVP)
 
-- Búsqueda semántica: handler + endpoint + FE (`GET /api/activities/search?text=...`)
 - Vista de resultados del profesional: tab en person-detail con historial de asignaciones
 - Players adicionales: MATCH_PAIRS, ORDER_SEQUENCE, FILL_BLANK, etc.
 - Roadmap visual estilo Duolingo

@@ -1,10 +1,20 @@
 # InclusiON — HU Master (Única Fuente de Verdad)
 
-**Última actualización:** 2026-05-03  
-**Fuente Jira:** `Sprints/Jira-CSV.csv` (export 2026-05)  
+**Última actualización:** 2026-05-16
+**Fuente Jira:** `Sprints/Jira-CSV.csv` (export 2026-05)
 **Reemplaza:** `HU_ESTADO.md` y `progreso-hu.md`
 
 > **Nota:** Muchas HUs están en Backlog en Jira aunque ya implementadas — el equipo no actualizó el tablero. El estado aquí refleja el **estado real del código**, no el estado Jira.
+
+---
+
+## ⚠️ Checklist de HUs modificadas (2026-05-08)
+
+| HU | Cambio | Detalle |
+|----|--------|---------|
+| **HU-10** | ✏️ Modificada | Separada búsqueda semántica en sección propia. Agregado estado de implementación por subsección (backend ✅ / UI ⏳). Criterios marcados con progreso real. Notas técnicas de implementación pendiente. |
+| **HU-14** | ➕ Creada | Nueva HU: Perfil de Accesibilidad Configurable por Persona (profesional configura a11y para la persona con discapacidad). Incluye modelo de datos, endpoints propuestos, relación con HU-05. |
+| **hu-master.md** | ✏️ Modificada | Actualizado estado de IN-116→IN-134 (MDA). Actualizado IN-135 (búsqueda semántica). Agregada HU-14 / IN-186. Actualizado resumen de totales. |
 
 ---
 
@@ -22,6 +32,8 @@
 
 ## Resumen
 
+> Actualizado 2026-05-16. IN-135 completo: backend + servicio Angular + barra de búsqueda con toggle IA + debounce 400ms.
+
 | Sprint | HUs | ✅ | 🔵 | 🔧 | ⏳ |
 |--------|-----|----|----|----|----|
 | Sprint 0 | 7 | 7 | — | — | — |
@@ -30,11 +42,11 @@
 | Sprint 3 | 16 | — | 16 | — | — |
 | Sprint 4 | 14 | — | 14 | — | — |
 | Sprint 5 | 2 | — | 2 | — | — |
-| Sprint 6 | 7 | — | 6 | — | 1 |
+| Sprint 6 | 7 | — | 7 | — | — |
 | Sprint 7 | 7 | — | 4 | — | 3 |
-| Sin sprint — implementado | 30 | — | 30 | 0 | — |
-| Sin sprint — pendiente | 18 | — | — | — | 18 |
-| **Total** | **145** | **7** | **106** | **4** | **28** |
+| Sin sprint — implementado | 30 | — | 30 | — | — |
+| Sin sprint — pendiente | 18 | — | — | 1 | 17 |
+| **Total** | **145** | **7** | **117** | **1** | **20** |
 
 ---
 
@@ -234,28 +246,34 @@
 
 ---
 
-## Sin Sprint — Pendiente (Post-MVP)
+## Sin Sprint — Pendiente (MVP en curso / Post-MVP)
 
-| IN | Historia | Notas |
-|----|----------|-------|
-| IN-90 | Radar chart de habilidades (promedio de éxito por área) | Post-MVP |
-| IN-99 | Wizard de completado de perfil (profesional) | Post-MVP |
-| IN-100 | Tour guiado del portal (profesional) | Post-MVP |
-| IN-101 | Pantalla de bienvenida (familiar) | Post-MVP |
-| IN-102 | Pantalla de bienvenida (persona con discapacidad) | Post-MVP |
-| IN-116 | Configuración del motor adaptativo por actividad | Post-MVP — MDA |
-| IN-125 | Registro de progreso durante ejecución (intentos, frustración) | Post-MVP |
-| IN-128 | Monitoreo de frustración (pausa tras 3+ intentos) | Post-MVP — MDA |
-| IN-129 | Evaluación automática de rendimiento | Post-MVP — MDA |
-| IN-130 | Cálculo de ajuste según estado (Estable/Progresando/Dificultad) | Post-MVP — MDA |
-| IN-131 | Aplicación de ajuste dentro de rangos configurados | Post-MVP — MDA |
-| IN-132 | Registro de cada ajuste en historial de auditoría | Post-MVP — MDA |
-| IN-133 | Alerta al profesional en estado de frustración | Post-MVP — MDA |
-| IN-134 | Consulta del historial de ajustes (timeline) | Post-MVP — MDA |
-| IN-139 | Exportación de reporte a PDF | Post-MVP |
-| IN-145 | Notificaciones automáticas de eventos del sistema | Post-MVP |
-| IN-153 | Panel de visualización de progreso y reportes (familiar) | Post-MVP |
-| IN-154 | Canal de sugerencias sobre perfiles de accesibilidad | Post-MVP |
+| IN | Historia | Estado | Notas |
+|----|----------|--------|-------|
+| IN-90 | Radar chart de habilidades (promedio de éxito por área) | ⏳ | Post-MVP |
+| IN-99 | Wizard de completado de perfil (profesional) | ⏳ | Post-MVP |
+| IN-100 | Tour guiado del portal (profesional) | ⏳ | Post-MVP |
+| IN-101 | Pantalla de bienvenida (familiar) | ⏳ | Post-MVP |
+| IN-102 | Pantalla de bienvenida (persona con discapacidad) | ⏳ | Post-MVP |
+| IN-116 | Configuración del motor adaptativo por actividad | 🔧 | Schema BD listo, sin handlers/endpoints. Ver HU-10. |
+| IN-125 | Registro de progreso durante ejecución (intentos, frustración) | ⏳ | MDA |
+| IN-128 | Monitoreo de frustración (pausa tras 3+ intentos) | ⏳ | MDA |
+| IN-129 | Evaluación automática de rendimiento | ⏳ | MDA |
+| IN-130 | Cálculo de ajuste según estado (Estable/Progresando/Dificultad) | ⏳ | MDA |
+| IN-131 | Aplicación de ajuste dentro de rangos configurados | ⏳ | MDA |
+| IN-132 | Registro de cada ajuste en historial de auditoría | ⏳ | MDA |
+| IN-133 | Alerta al profesional en estado de frustración | ⏳ | MDA |
+| IN-134 | Consulta del historial de ajustes (timeline) | ⏳ | MDA |
+| IN-135 | Búsqueda semántica de actividades (UI) | 🔵 | Backend + servicio Angular + barra de búsqueda con toggle IA + debounce 400ms. Ver HU-10. |
+| IN-139 | Exportación de reporte a PDF | ⏳ | Post-MVP |
+| IN-145 | Notificaciones automáticas de eventos del sistema | ⏳ | Post-MVP |
+| IN-153 | Panel de visualización de progreso y reportes (familiar) | ⏳ | Post-MVP |
+| IN-154 | Canal de sugerencias sobre perfiles de accesibilidad | ⏳ | Post-MVP |
+| **IN-186** | **Perfil de accesibilidad configurable por persona (profesional configura para persona con discapacidad)** | ⏳ | **Nueva HU. Ver HU-14.** Full-stack: nueva tabla, endpoints GET/PUT, tab en person-detail, carga al login. |
+
+---
+
+## Sin Sprint — Implementado (actualizado 2026-05-16)
 
 ---
 
