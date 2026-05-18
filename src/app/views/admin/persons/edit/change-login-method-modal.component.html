@@ -131,7 +131,7 @@
       @case ('configure') {
         <button cButton color="secondary" (click)="backToChoose()" [disabled]="submitting">Volver</button>
         <button cButton color="primary" (click)="submit()" [disabled]="!canSubmit()">
-          @if (submitting) { <c-spinner size="sm" class="me-1"></c-spinner> }
+          @if (submitting) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
           Confirmar
         </button>
       }

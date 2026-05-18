@@ -143,7 +143,7 @@
           <button cButton color="primary" (click)="linkPerson()"
                   [disabled]="!linkPersonControl.value || !linkRelationship || !!validateParentLimit() || isLinking"
                   aria-label="Vincular persona seleccionada">
-            @if (isLinking) { <c-spinner size="sm"></c-spinner> }
+            @if (isLinking) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
             Vincular
           </button>
         </c-col>

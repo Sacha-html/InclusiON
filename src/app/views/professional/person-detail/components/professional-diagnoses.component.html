@@ -3,7 +3,7 @@
   <h6 class="mb-0">Diagnósticos registrados</h6>
   @if (canCreate) {
     <button cButton color="primary" size="sm" (click)="openNew()" aria-label="Nuevo diagnóstico">
-      <svg cIcon name="cilPlus" class="me-1" size="sm"></svg>
+      <svg cIcon name="cilPlus" class="me-1" size="sm" aria-hidden="true"></svg>
       Nuevo diagnóstico
     </button>
   }
@@ -203,7 +203,7 @@
               [disabled]="saving()"
               aria-label="Guardar diagnóstico">
         @if (saving()) {
-          <c-spinner size="sm" class="me-2"></c-spinner>
+          <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
         }
         {{ editing() ? 'Guardar cambios' : 'Crear diagnóstico' }}
       </button>

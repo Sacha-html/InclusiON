@@ -156,14 +156,14 @@
 <c-modal [visible]="showHistoryModal" (visibleChange)="showHistoryModal = $event" alignment="center" size="lg">
   <c-modal-header>
     <h5 cModalTitle>
-      <svg cIcon name="cilHistory" class="me-2"></svg>
+      <svg cIcon name="cilHistory" class="me-2" aria-hidden="true"></svg>
       Historial de Estados
     </h5>
   </c-modal-header>
   <c-modal-body>
     @if (statusHistoryLoading) {
       <div class="text-center py-3">
-        <c-spinner size="sm"></c-spinner>
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
         <span class="ms-2">Cargando historial...</span>
       </div>
     } @else if (statusHistory.length) {

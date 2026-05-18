@@ -10,21 +10,15 @@
   <link href="assets/favicon.ico" rel="icon" type="image/x-icon">
   <title>InclusiON</title>
 
-  <!-- Fuentes Accesibles -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Atkinson Hyperlegible: Diseñada por Braille Institute para baja visión -->
-  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-  <!-- Lexend: Reduce estrés visual, ideal para dislexia -->
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Material Icons: Íconos para skill chips y componentes AAC -->
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Fuentes auto-hospedadas: cargadas desde node_modules vía styles.scss -->
 </head>
 <body>
-<!-- Skip link para navegación por teclado -->
-<a href="#main-content" class="skip-link">Saltar al contenido principal</a>
-
-<noscript>Necesitas habilitar JavaScript para usar esta aplicación.</noscript>
+<noscript>
+  <p style="font-family:sans-serif;padding:2rem;text-align:center">
+    InclusiON requiere JavaScript. Active JavaScript en su navegador para continuar.
+    Si usa un lector de pantalla o tecnología asistiva y necesita ayuda, contacte a su institución.
+  </p>
+</noscript>
 <app-root>
   <div class="fade show" style="text-align: center; padding-top: calc(100vh / 2); height: 100vh" role="status" aria-label="Cargando aplicación">
     <i class="spinner-grow spinner-grow-sm" aria-hidden="true"></i>

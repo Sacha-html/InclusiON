@@ -120,7 +120,7 @@
                     (click)="unlockActivity(area, activity)"
                     [disabled]="unlockingActivityId === activity.encryptedId">
                     @if (unlockingActivityId === activity.encryptedId) {
-                      <c-spinner size="sm"></c-spinner>
+                      <c-spinner size="sm" aria-hidden="true"></c-spinner>
                     } @else {
                       Desbloquear
                     }
@@ -162,7 +162,7 @@
   <c-modal-footer>
     <button cButton color="secondary" (click)="showCreateModal = false">Cancelar</button>
     <button cButton color="primary" (click)="submitCreate()" [disabled]="creating">
-      @if (creating) { <c-spinner size="sm"></c-spinner> }
+      @if (creating) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Crear
     </button>
   </c-modal-footer>
@@ -182,7 +182,7 @@
   <c-modal-footer>
     <button cButton color="secondary" (click)="showEditNotesModal = false">Cancelar</button>
     <button cButton color="primary" (click)="submitEditNotes()" [disabled]="savingNotes">
-      @if (savingNotes) { <c-spinner size="sm"></c-spinner> }
+      @if (savingNotes) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Guardar
     </button>
   </c-modal-footer>
@@ -215,7 +215,7 @@
     <button cButton color="secondary" (click)="showAddAreaModal = false">Cancelar</button>
     <button cButton color="primary" (click)="submitAddArea()"
             [disabled]="!selectedSkillAreaId || addingArea">
-      @if (addingArea) { <c-spinner size="sm"></c-spinner> }
+      @if (addingArea) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Agregar
     </button>
   </c-modal-footer>
@@ -285,7 +285,7 @@
     <button cButton color="secondary" (click)="showAddActivityModal = false">Cancelar</button>
     <button cButton color="primary" (click)="submitAddActivity()"
             [disabled]="!selectedActivityId || addingActivity">
-      @if (addingActivity) { <c-spinner size="sm"></c-spinner> }
+      @if (addingActivity) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Agregar
     </button>
   </c-modal-footer>

@@ -174,7 +174,7 @@
           <c-col xs="12">
             <button cButton type="submit" color="primary" [disabled]="isSaving() || !isValid">
               @if (isSaving()) {
-                <c-spinner size="sm" class="me-1"></c-spinner>
+                <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
               }
               Guardar cambios
             </button>

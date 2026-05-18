@@ -6,15 +6,17 @@
 
 .help-fab {
   position: fixed;
-  bottom: 90px;
-  left: 20px;
+  bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  left: max(20px, env(safe-area-inset-left, 20px));
   z-index: var(--help-z);
 
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  width: auto;
+  height: 56px;
+  padding: 0 20px;
+  border-radius: 28px;
   border: none;
   cursor: pointer;
+  gap: 10px;
 
   background: var(--help-color);
   color: #fff;
@@ -39,7 +41,7 @@
   }
 
   &:focus-visible {
-    outline: 4px solid #ff6659;
+    outline: 4px solid var(--a11y-focus-accent, #ff6659);
     outline-offset: 4px;
   }
 }
@@ -54,10 +56,21 @@
 }
 
 .help-fab__icon {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
+}
+
+.help-fab__label {
+  font: 700 1rem var(--a11y-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif);
+  color: #fff;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+
+  @media (max-width: 360px) { display: none; }
 }
 
 @keyframes help-ripple {
@@ -86,11 +99,11 @@
 // ── Reduced motion ───────────────────────────────────────────────────────
 
 @media (prefers-reduced-motion: reduce) {
-  .help-fab {
-    transition: none;
-  }
+  .help-fab { transition: none; }
+  .help-fab__ripple { animation: none; }
+}
 
-  .help-fab__ripple {
-    animation: none;
-  }
+:host-context(.a11y-reduced-motion) {
+  .help-fab { transition: none; }
+  .help-fab__ripple { animation: none; }
 }
