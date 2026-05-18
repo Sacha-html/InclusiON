@@ -30,6 +30,8 @@ namespace InclusiON.DTOs.Responses.Persons
 
         public string? RepresentativeNames { get; set; }
 
+        public string? EncryptedId { get; set; }
+
         private static int CalculateAge(DateTime birthDate)
         {
             var today = DateTime.Today;

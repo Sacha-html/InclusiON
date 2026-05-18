@@ -52,12 +52,15 @@ namespace InclusiON.Api.Controllers
         [Authorize(Policy = "users:read")]
         [ProducesResponseType(typeof(ApiResponse<AdminUserDetailResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdminUserDetailResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<AdminUserDetailResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<AdminUserDetailResponse>>> GetUserDetail(
             Guid userId,
             [FromServices] IQueryHandler<GetAdminUserDetailQuery, ApiResponse<AdminUserDetailResponse>> handler,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetAdminUserDetailQuery(userId);
+            var institutionIds = _httpContextService.IsGlobalAdmin() ? null : _httpContextService.GetInstitutionIds();
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            var query = new GetAdminUserDetailQuery(userId, currentUserId, institutionIds is { Count: > 0 } ? institutionIds : null);
             var result = await handler.HandleAsync(query, cancellationToken);
             return result.ToActionResult();
         }
@@ -66,6 +69,7 @@ namespace InclusiON.Api.Controllers
         [Authorize(Policy = "users:read")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserRecentSessionResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserRecentSessionResponse>>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<UserRecentSessionResponse>>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<PagedResponse<UserRecentSessionResponse>>>> GetUserActivity(
             Guid userId,
             [FromServices] IQueryHandler<GetUserActivityQuery, ApiResponse<PagedResponse<UserRecentSessionResponse>>> handler,
@@ -73,7 +77,9 @@ namespace InclusiON.Api.Controllers
             [FromQuery] int pageSize = 15,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetUserActivityQuery(userId, page, pageSize);
+            var institutionIds = _httpContextService.IsGlobalAdmin() ? null : _httpContextService.GetInstitutionIds();
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            var query = new GetUserActivityQuery(userId, currentUserId, institutionIds is { Count: > 0 } ? institutionIds : null, page, pageSize);
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }

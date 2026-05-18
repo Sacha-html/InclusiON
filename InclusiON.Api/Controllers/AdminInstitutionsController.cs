@@ -81,6 +81,7 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpPost("{adminUserId}")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<AdminInstitutionResponse>>> AssignInstitution(
@@ -102,6 +103,7 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpDelete("{adminUserId}/{encryptedInstitutionId}")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status404NotFound)]

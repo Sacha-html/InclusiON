@@ -12,21 +12,24 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 {
     public class GetAdminUserDetailQueryHandler : IQueryHandler<GetAdminUserDetailQuery, ApiResponse<AdminUserDetailResponse>>
     {
-        private readonly IIdentityService        _identityService;
-        private readonly IProfessionalsRepository _professionalsRepository;
-        private readonly IPersonsRepository      _personsRepository;
-        private readonly IFamilyRepository       _familyRepository;
+        private readonly IIdentityService              _identityService;
+        private readonly IProfessionalsRepository      _professionalsRepository;
+        private readonly IPersonsRepository            _personsRepository;
+        private readonly IFamilyRepository             _familyRepository;
+        private readonly IAdminInstitutionRepository   _adminInstitutionRepository;
 
         public GetAdminUserDetailQueryHandler(
-            IIdentityService        identityService,
-            IProfessionalsRepository professionalsRepository,
-            IPersonsRepository      personsRepository,
-            IFamilyRepository       familyRepository)
+            IIdentityService              identityService,
+            IProfessionalsRepository      professionalsRepository,
+            IPersonsRepository            personsRepository,
+            IFamilyRepository             familyRepository,
+            IAdminInstitutionRepository   adminInstitutionRepository)
         {
-            _identityService         = identityService;
-            _professionalsRepository = professionalsRepository;
-            _personsRepository       = personsRepository;
-            _familyRepository        = familyRepository;
+            _identityService              = identityService;
+            _professionalsRepository      = professionalsRepository;
+            _personsRepository            = personsRepository;
+            _familyRepository             = familyRepository;
+            _adminInstitutionRepository   = adminInstitutionRepository;
         }
 
         public async Task<ApiResponse<AdminUserDetailResponse>> HandleAsync(
@@ -35,6 +38,21 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             var user = await _identityService.FindByIdAsync(query.UserId);
             if (user is null)
                 return ApiResponse<AdminUserDetailResponse>.NotFound("Usuario");
+
+            // Validación de alcance institucional
+            if (query.InstitutionIds is { Count: > 0 })
+            {
+                var targetInstitutions = await _adminInstitutionRepository
+                    .GetActiveInstitutionIdsByAdminAsync(query.UserId, cancellationToken);
+
+                if (targetInstitutions.Count > 0)
+                {
+                    var hasOverlap = targetInstitutions.Any(id => query.InstitutionIds!.Contains(id));
+                    if (!hasOverlap)
+                        return ApiResponse<AdminUserDetailResponse>.Forbidden(
+                            "No tiene permisos para ver detalles de un usuario de otra institución.");
+                }
+            }
 
             // DbContext is not thread-safe — sequential queries with short-circuit.
             var roles       = await _identityService.GetRolesAsync(user);

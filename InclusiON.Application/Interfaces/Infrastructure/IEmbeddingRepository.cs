@@ -6,6 +6,16 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task StorePersonAsync(Guid personId, float[] embedding, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Obtiene el embedding de una actividad por su ID.
+        /// </summary>
+        Task<float[]?> GetByActivityIdAsync(int activityId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Obtiene el embedding de una persona por su ID.
+        /// </summary>
+        Task<float[]?> GetPersonEmbeddingAsync(Guid personId, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Búsqueda por similitud coseno contra los embeddings almacenados.
         /// Devuelve los IDs de actividad ordenados de mayor a menor similitud,
         /// filtrando solo actividades activas accesibles al profesional indicado
@@ -15,6 +25,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             float[] queryEmbedding,
             Guid professionalId,
             int limit = 10,
+            List<int>? excludeIds = null,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -23,6 +34,16 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// </summary>
         Task<List<int>> SearchActivitiesForPersonAsync(
             Guid personId,
+            Guid professionalId,
+            int limit = 10,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Búsqueda de personas compatibles con una actividad por similitud coseno
+        /// entre el embedding de la actividad y los embeddings de personas.
+        /// </summary>
+        Task<List<Guid>> SearchPersonsForActivityAsync(
+            int activityId,
             Guid professionalId,
             int limit = 10,
             CancellationToken cancellationToken = default);

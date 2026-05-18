@@ -46,6 +46,10 @@ namespace InclusiON.Api.Controllers
         {
             request.Validate();
 
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue)
+                return ApiResponse<PagedResponse<ProfessionalListItemResponse>>.Forbidden().ToActionResult();
+
             var query = new GetProfessionalsQuery(
                 request.Page,
                 request.PageSize,
@@ -55,7 +59,7 @@ namespace InclusiON.Api.Controllers
                 request.Status,
                 request.SortBy,
                 request.SortDirection,
-                request.InstitutionId.HasValue ? new List<int> { request.InstitutionId.Value } : null);
+                request.InstitutionIds);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
@@ -75,6 +79,10 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
             request.Validate();
+
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue)
+                return ApiResponse<PagedResponse<ProfessionalListItemResponse>>.Forbidden().ToActionResult();
 
             var query = new GetPendingProfessionalsQuery(
                 request.Page,
@@ -101,6 +109,10 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<GetProfessionalByIdQuery, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<ProfessionalResponse>.Forbidden().ToActionResult();
+
             var query = new GetProfessionalByIdQuery(professionalId);
             var result = await handler.HandleAsync(query, cancellationToken);
             return result.ToActionResult();
@@ -234,6 +246,9 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<ProfessionalResponse>.Forbidden().ToActionResult();
 
             var command = new UpdateProfessionalCommand(
                 professionalId,
@@ -265,6 +280,10 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<DeactivateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<ProfessionalResponse>.Forbidden().ToActionResult();
+
             var command = new DeactivateProfessionalCommand(professionalId, request?.Observation);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
@@ -286,6 +305,10 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<ValidateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<ProfessionalResponse>.Forbidden().ToActionResult();
+
             var command = new ValidateProfessionalCommand(
                 professionalId,
                 request.IsApproved,
@@ -311,6 +334,10 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<ReactivateProfessionalCommand, ApiResponse<ProfessionalResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<ProfessionalResponse>.Forbidden().ToActionResult();
+
             var command = new ReactivateProfessionalCommand(professionalId, request?.Observation);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
@@ -324,11 +351,16 @@ namespace InclusiON.Api.Controllers
         [Authorize(Policy = "professionals:read")]
         [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<List<ProfessionalStatusHistoryResponse>>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<List<ProfessionalStatusHistoryResponse>>>> GetStatusHistory(
             Guid professionalId,
             [FromServices] IQueryHandler<GetProfessionalStatusHistoryQuery, ApiResponse<List<ProfessionalStatusHistoryResponse>>> handler,
             CancellationToken cancellationToken = default)
         {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<List<ProfessionalStatusHistoryResponse>>.Forbidden().ToActionResult();
+
             var query = new GetProfessionalStatusHistoryQuery(professionalId);
             var result = await handler.HandleAsync(query, cancellationToken);
             return result.ToActionResult();

@@ -16,11 +16,12 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
         private readonly IProfessionalsRepository _proRepo = Substitute.For<IProfessionalsRepository>();
         private readonly IPersonsRepository _personRepo = Substitute.For<IPersonsRepository>();
         private readonly IFamilyRepository _familyRepo = Substitute.For<IFamilyRepository>();
+        private readonly IAdminInstitutionRepository _adminInstRepo = Substitute.For<IAdminInstitutionRepository>();
 
         private static readonly Guid UserId = Guid.NewGuid();
 
         private GetAdminUserDetailQueryHandler BuildSut() =>
-            new(_identity, _proRepo, _personRepo, _familyRepo);
+            new(_identity, _proRepo, _personRepo, _familyRepo, _adminInstRepo);
 
         private static User AUser() => new()
         {

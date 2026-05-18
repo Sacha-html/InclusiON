@@ -15,9 +15,10 @@ namespace InclusiON.DTOs.Requests.Professionals
         [StringLength(100, MinimumLength = 2, ErrorMessage = "El apellido debe tener entre 2 y 100 caracteres")]
         public string LastName { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "El documento es requerido")]
         [StringLength(20, MinimumLength = 6, ErrorMessage = "El documento debe tener entre 6 y 20 caracteres")]
         [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "El documento solo puede contener letras y números")]
-        public string? DocumentNumber { get; set; }
+        public string DocumentNumber { get; set; } = string.Empty;
 
         [StringLength(20, ErrorMessage = "El telefono no puede exceder 20 caracteres")]
         public string? Phone { get; set; }
