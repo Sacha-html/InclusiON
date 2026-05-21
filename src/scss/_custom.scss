@@ -438,6 +438,17 @@
 }
 
 // ========================================
+// FOCUS VISIBLE — WCAG 2.4.7 Focus Visible
+// ========================================
+// Bootstrap usa box-shadow para foco en botones/inputs, pero algunos elementos
+// no lo tienen. Esta regla garantiza outline en :focus-visible para todos,
+// sin interferir con el comportamiento normal (mouse).
+:focus-visible {
+  outline: 3px solid var(--a11y-focus-color, #1565C0) !important;
+  outline-offset: 2px !important;
+}
+
+// ========================================
 // AJUSTES GENERALES
 // ========================================
 

@@ -73,7 +73,7 @@
   @if (recentReports.length > 0) {
     <c-row class="mb-4">
       <c-col xs="12" sm="4">
-        <c-card class="mb-3 cursor-pointer" (click)="navigateTo('/pro/reports')">
+        <c-card class="mb-3 cursor-pointer" (click)="navigateTo('/pro/reports', { status: 'Draft' })">
           <c-card-body class="text-center">
             <div class="fs-4 fw-semibold text-body-secondary">{{ draftReportsCount }}</div>
             <div class="small text-body-secondary">Borradores</div>
@@ -83,7 +83,7 @@
       <c-col xs="12" sm="4">
         <c-card class="mb-3 cursor-pointer"
                 [style.border-color]="submittedReportsCount > 0 ? 'var(--cui-warning)' : ''"
-                (click)="navigateTo('/pro/reports')">
+                (click)="navigateTo('/pro/reports', { status: 'Submitted' })">
           <c-card-body class="text-center">
             <div class="fs-4 fw-semibold"
                  [class.text-warning]="submittedReportsCount > 0">
@@ -96,7 +96,7 @@
       <c-col xs="12" sm="4">
         <c-card class="mb-3 cursor-pointer"
                 [style.border-color]="rejectedReportsCount > 0 ? 'var(--cui-danger)' : ''"
-                (click)="navigateTo('/pro/reports')">
+                (click)="navigateTo('/pro/reports', { status: 'Rejected' })">
           <c-card-body class="text-center">
             <div class="fs-4 fw-semibold"
                  [class.text-danger]="rejectedReportsCount > 0">

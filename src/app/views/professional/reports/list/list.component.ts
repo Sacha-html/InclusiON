@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AssignmentsService, CatalogsService, ProfessionalsService, ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
@@ -39,6 +39,7 @@ export class ListComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly catalogsService = inject(CatalogsService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   reports = signal<ReportListItemResponse[]>([]);
   persons = signal<ProfessionalPersonResponse[]>([]);
@@ -102,6 +103,10 @@ actions: [
   ];
 
   ngOnInit(): void {
+    // Aplicar filtro de estado desde queryParams (ej: llegando desde el dashboard)
+    const statusParam = this.route.snapshot.queryParamMap.get('status');
+    if (statusParam) this.statusFilter = statusParam;
+
     // Cargar perfil primero para filtrar reportes solo del profesional autenticado
     this.professionalsService.getMyProfile().subscribe({
       next: (profile) => {

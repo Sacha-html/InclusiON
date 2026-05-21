@@ -55,6 +55,7 @@ import { IconDirective } from '@coreui/icons-angular';
   styleUrl: './data-table.component.scss',
 })
 export class DataTableComponent implements OnInit, OnDestroy {
+  readonly fixedDropdown = { strategy: 'fixed' as const };
   @Input() title: string = '';
   @Input() showTitle: boolean = true;
   @Input() columns: TableColumn[] = [];
@@ -173,7 +174,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
   getBadgeColor(value: any, col?: TableColumn): string {
     if (col?.badgeMap) {
-      const key = String(value);
+      const key = String(value).toLowerCase();
       return col.badgeMap[key]?.color || 'secondary';
     }
     if (typeof value === 'boolean') return value ? 'success' : 'danger';
@@ -192,7 +193,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
   getBadgeLabel(value: any, col?: TableColumn): string {
     if (col?.badgeMap) {
-      const key = String(value);
+      const key = String(value).toLowerCase();
       return col.badgeMap[key]?.label || '-';
     }
     if (typeof value === 'boolean') return value ? ActiveStatus.Activo : ActiveStatus.Inactivo;

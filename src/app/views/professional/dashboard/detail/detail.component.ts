@@ -123,8 +123,8 @@ export class DetailComponent implements OnInit {
     });
   }
 
-  navigateTo(path: string): void {
-    this.router.navigate([path]);
+  navigateTo(path: string, queryParams?: Record<string, string>): void {
+    this.router.navigate([path], queryParams ? { queryParams } : {});
   }
 
   getStatusColor = getInvitationStatusColor;
