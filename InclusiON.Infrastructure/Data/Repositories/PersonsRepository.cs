@@ -159,6 +159,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(p =>
                     EF.Functions.ILike(p.FirstName, pattern) ||
                     EF.Functions.ILike(p.LastName, pattern) ||
+                    EF.Functions.ILike(p.FirstName + " " + p.LastName, pattern) ||
+                    EF.Functions.ILike(p.LastName + " " + p.FirstName, pattern) ||
+                    EF.Functions.ILike(p.LastName + ", " + p.FirstName, pattern) ||
                     (p.DocumentNumber != null && EF.Functions.ILike(p.DocumentNumber, pattern)));
             }
 
