@@ -129,7 +129,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Detalle de una actividad por ID.</summary>
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         [Authorize(Policy = Permissions.Activities.Read)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status404NotFound)]
@@ -233,7 +233,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Activa o da de baja una actividad (máquina de estados).</summary>
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{id}")]
         [Authorize(Policy = Permissions.Activities.Update)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status409Conflict)]
