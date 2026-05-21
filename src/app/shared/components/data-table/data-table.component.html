@@ -59,7 +59,7 @@
                 }
                 @case ('actions') {
                   @if (col.actions && getVisibleActions(col, item).length > 0) {
-                    <c-dropdown>
+                    <c-dropdown [popperOptions]="fixedDropdown">
                       <button cButton color="secondary" size="sm" cDropdownToggle
                               [attr.aria-label]="'Acciones para ' + (item.fullName || item.name || 'este registro')">
                         <svg cIcon name="cilMenu" size="sm"></svg>

@@ -13,22 +13,23 @@ export class ActorAvatarComponent {
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
 
   /**
-   * Curated palette — all verified WCAG AAA (≥7:1) with white text (#ffffff).
-   * Avoids HSL mid-range (45%, 52%) where neither white nor black meets AAA.
+   * Curated palette — all verified WCAG AAA (≥7:1) against white text (#ffffff).
+   * Contrast ratios computed with WCAG 2.x relative luminance formula.
+   * Colors with L between 0.1–0.3 excluded: neither white nor black reaches 7:1.
    */
   private static readonly AAA_PALETTE = [
-    '#1565C0', // blue         ~12.9:1
-    '#7B1FA2', // purple       ~12.0:1
-    '#1B5E20', // green        ~12.1:1
-    '#B71C1C', // red          ~11.1:1
-    '#E65100', // deep orange  ~ 8.0:1
-    '#4527A0', // indigo       ~18.8:1
-    '#006064', // cyan-dark    ~15.2:1
-    '#880E4F', // pink         ~12.8:1
-    '#33691E', // lime-green   ~10.0:1
-    '#4E342E', // brown        ~18.8:1
-    '#00695C', // teal         ~13.5:1
-    '#37474F', // blue-grey    ~17.2:1
+    '#0D47A1', // blue-900      ~ 8.6:1
+    '#7B1FA2', // purple-800    ~ 8.2:1
+    '#1B5E20', // green-900     ~ 7.9:1
+    '#8B0000', // dark-red      ~10.0:1
+    '#4527A0', // deep-purple   ~10.2:1
+    '#006064', // cyan-900      ~ 7.4:1
+    '#880E4F', // pink-900      ~ 9.5:1
+    '#4E342E', // brown-700     ~11.3:1
+    '#004D40', // teal-900      ~ 9.8:1
+    '#37474F', // blue-grey-800 ~ 9.6:1
+    '#283593', // indigo-800    ~10.4:1
+    '#5D1F00', // deep-orange   ~12.6:1
   ];
 
   get initials(): string {
