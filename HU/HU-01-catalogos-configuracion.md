@@ -30,21 +30,21 @@ El administrador debe poder preparar el sistema antes de que comience el trabajo
 ## Criterios de Aceptación
 
 ### Catálogos
-- [ ] El administrador puede consultar, crear y editar items en los 6 catálogos del sistema
-- [ ] No se permiten nombres duplicados dentro del mismo catálogo
-- [ ] Solo el administrador global puede modificar catálogos; el resto los consulta en modo lectura
-- [ ] Los catálogos se reflejan automáticamente en los dropdowns de todos los formularios
+- [x] El administrador puede consultar, crear y editar items en los 6 catálogos del sistema
+- [x] No se permiten nombres duplicados dentro del mismo catálogo
+- [x] Solo el administrador global puede modificar catálogos; el resto los consulta en modo lectura
+- [x] Los catálogos se reflejan automáticamente en los dropdowns de todos los formularios
 
 ### Profesionales
-- [ ] Al crear un profesional se genera automáticamente una cuenta de usuario con contraseña temporal
-- [ ] El DNI y el email deben ser únicos en el sistema
-- [ ] Se puede buscar profesionales por nombre, especialidad, institución o estado
-- [ ] Al desactivar un profesional se cierran sus sesiones activas
-- [ ] El profesional puede consultar su propio perfil
+- [x] Al crear un profesional se genera automáticamente una cuenta de usuario con contraseña temporal
+- [x] El DNI y el email deben ser únicos en el sistema
+- [x] Se puede buscar profesionales por nombre, especialidad, institución o estado
+- [x] Al desactivar un profesional se cierran sus sesiones activas
+- [x] El profesional puede consultar su propio perfil
 
 ### Asignaciones
-- [ ] Un profesional puede estar vinculado a múltiples instituciones
-- [ ] Una persona puede tener múltiples profesionales asignados
-- [ ] Se debe indicar quién es el profesional principal de cada persona
-- [ ] Se debe indicar si el profesional puede autorizar el login asistido de la persona
-- [ ] La desvinculación es lógica (conserva historial)
+- [x] Un profesional puede estar vinculado a múltiples instituciones
+- [x] Una persona puede tener múltiples profesionales asignados
+- [x] Se debe indicar quién es el profesional principal de cada persona
+- [x] Se debe indicar si el profesional puede autorizar el login asistido de la persona
+- [x] La desvinculación es lógica (conserva historial)

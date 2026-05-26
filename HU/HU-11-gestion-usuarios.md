@@ -27,15 +27,15 @@ El administrador necesita una vista centralizada de todas las cuentas del sistem
 
 ## Criterios de Aceptación
 
-- [ ] El admin puede ver un listado centralizado de todos los usuarios del sistema con filtros por rol, estado e institución
-- [ ] El admin institucional solo ve usuarios de sus instituciones asignadas
-- [ ] Al resetear contraseña se genera una temporal, se activa `MustChangePassword` y se revocan sesiones activas
-- [ ] La contraseña temporal se muestra una sola vez con botón de copiar
-- [ ] Al desactivar un usuario se corta el acceso inmediatamente (revocación de tokens)
-- [ ] No se puede desactivar al propio usuario
-- [ ] Al reactivar un usuario se genera nueva contraseña temporal
-- [ ] Se puede consultar último login y acciones recientes del usuario
-- [ ] Todas las operaciones se registran en AccessAudit
+- [x] El admin puede ver un listado centralizado de todos los usuarios del sistema con filtros por rol, estado e institución
+- [x] El admin institucional solo ve usuarios de sus instituciones asignadas
+- [x] Al resetear contraseña se genera una temporal, se activa `MustChangePassword` y se revocan sesiones activas
+- [x] La contraseña temporal se muestra una sola vez con botón de copiar
+- [x] Al desactivar un usuario se corta el acceso inmediatamente (revocación de tokens)
+- [x] No se puede desactivar al propio usuario
+- [x] Al reactivar un usuario se genera nueva contraseña temporal
+- [x] Se puede consultar último login y acciones recientes del usuario
+- [x] Todas las operaciones se registran en AccessAudit
 
 ---
 

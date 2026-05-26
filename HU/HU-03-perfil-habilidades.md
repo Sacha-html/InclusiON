@@ -27,9 +27,9 @@ Este perfil determina qué áreas aparecen en el roadmap del estudiante y en el 
 
 ## Criterios de Aceptación
 
-- [ ] El profesional puede agregar áreas de habilidad al perfil de una persona
-- [ ] No se puede asignar un área que ya está activa
-- [ ] Solo el profesional asignado a la persona puede gestionar su perfil de habilidades
-- [ ] Desactivar un área conserva el historial de actividades y respuestas
-- [ ] Las áreas se muestran con el color e ícono definido en el catálogo
-- [ ] El listado de áreas disponibles excluye las que ya están asignadas
+- [x] El profesional puede agregar áreas de habilidad al perfil de una persona
+- [x] No se puede asignar un área que ya está activa
+- [x] Solo el profesional asignado a la persona puede gestionar su perfil de habilidades
+- [x] Desactivar un área conserva el historial de actividades y respuestas
+- [x] Las áreas se muestran con el color e ícono definido en el catálogo
+- [x] El listado de áreas disponibles excluye las que ya están asignadas
