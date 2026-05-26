@@ -2,10 +2,12 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Interfaces.Repositories.Base;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Persons;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {
@@ -51,7 +53,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 await _uow.SaveChangesAsync(cancellationToken);
 
                 return ApiResponse<PersonSkillProfileResponse>.SuccessResult(
-                    Map(existing, skillArea),
+                    PersonMapper.ToSkillProfileResponse(existing, skillArea),
                     "Area de habilidad reactivada exitosamente.");
             }
 
@@ -68,19 +70,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             await _uow.SaveChangesAsync(cancellationToken);
 
             return ApiResponse<PersonSkillProfileResponse>.SuccessResult(
-                Map(profile, skillArea),
+                PersonMapper.ToSkillProfileResponse(profile, skillArea),
                 "Area de habilidad asignada exitosamente.");
         }
-
-        private static PersonSkillProfileResponse Map(PersonSkillProfile profile, SkillArea area) =>
-            new()
-            {
-                SkillAreaId   = profile.SkillAreaId,
-                SkillAreaName = area.Name,
-                Color         = area.Color,
-                Icon          = area.Icon,
-                IsActive      = profile.IsActive,
-                AssignedAt    = profile.AssignedAt
-            };
     }
 }

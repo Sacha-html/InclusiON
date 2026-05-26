@@ -17,12 +17,12 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         private readonly IFamilyRepository    _familyRepo  = Substitute.For<IFamilyRepository>();
         private readonly IPersonsRepository   _personsRepo = Substitute.For<IPersonsRepository>();
         private readonly IIdentityService     _identity    = Substitute.For<IIdentityService>();
-        private readonly IEmailService        _email       = Substitute.For<IEmailService>();
+        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork          _uow         = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider    _dateTime    = Substitute.For<IDateTimeProvider>();
 
         private CreateFamilyCommandHandler BuildSut() =>
-            new(_familyRepo, _personsRepo, _identity, _email, _uow,
+            new(_familyRepo, _personsRepo, _identity, _backgroundJobs, _uow,
                 NullLogger<CreateFamilyCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid PersonId = Guid.NewGuid();

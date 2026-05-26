@@ -21,6 +21,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateDiagnosisCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public CreateDiagnosisCommandHandler(
             IDiagnosesRepository repository,
@@ -28,7 +29,8 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             IPersonsRepository personsRepository,
             IUnitOfWork unitOfWork,
             ILogger<CreateDiagnosisCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
@@ -36,6 +38,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<DiagnosisResponse>> HandleAsync(
@@ -86,9 +89,11 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
 
             // Recargar con includes para el response
             var created = await _repository.GetByIdAsync(diagnosis.Id, cancellationToken);
-            return ApiResponse<DiagnosisResponse>.SuccessResult(
-                DiagnosisResponse.MapToResponse(created!),
-                "Diagnóstico creado exitosamente.");
+            var dto = DiagnosisResponse.MapToResponse(created!);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(created!.Id.ToString()));
+            return ApiResponse<DiagnosisResponse>.SuccessResult(dto, "Diagnóstico creado exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

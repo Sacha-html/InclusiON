@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Data;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
@@ -34,8 +35,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             int? templateTypeId,
             bool? isActive,
             bool? isStandard,
-            int skip,
-            int take,
+            int page,
+            int pageSize,
             CancellationToken cancellationToken = default)
         {
             var query = _context.Activities
@@ -66,15 +67,11 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (isStandard.HasValue)
                 query = query.Where(a => a.IsStandardActivity == isStandard.Value);
 
-            var total = await query.CountAsync(cancellationToken);
-
-            var items = await query
+            var paged = await query
                 .OrderByDescending(a => a.CreatedAt)
-                .Skip(skip)
-                .Take(take)
-                .ToListAsync(cancellationToken);
+                .ToPagedAsync(page, pageSize, cancellationToken);
 
-            return (items, total);
+            return (paged.Data, paged.TotalRecords);
         }
 
         public async Task<Activity> CreateAsync(Activity activity, CancellationToken cancellationToken = default)
@@ -119,6 +116,36 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Select(id => activities.FirstOrDefault(a => a.Id == id))
                 .Where(a => a is not null)
                 .Select(a => a!)];
+        }
+
+        public async Task<List<ActivityEmbeddingProjection>> GetAllActiveForEmbeddingAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Activities
+                .Where(a => a.IsActive)
+                .Select(a => new ActivityEmbeddingProjection(
+                    a.Id,
+                    a.Title,
+                    a.Description,
+                    a.Instructions,
+                    a.Content != null ? a.Content.ContentJson : null))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<ActivityEmbeddingProjection>> GetStandardActivitiesForEmbeddingAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Activities
+                .Where(a => a.IsActive && a.IsStandardActivity)
+                .Select(a => new ActivityEmbeddingProjection(
+                    a.Id,
+                    a.Title,
+                    a.Description,
+                    a.Instructions,
+                    a.Content != null ? a.Content.ContentJson : null))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
     }
 }

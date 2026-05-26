@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Constants;
+using InclusiON.Application.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Messages.Commands;
@@ -23,10 +24,12 @@ namespace InclusiON.Api.Controllers
     public class MessagesController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
+        private readonly IEncryptionService _encryption;
 
-        public MessagesController(IHttpContextService httpContextService)
+        public MessagesController(IHttpContextService httpContextService, IEncryptionService encryption)
         {
             _httpContextService = httpContextService;
+            _encryption = encryption;
         }
 
         // ────────────────────────────────────────────────────────────────
@@ -93,13 +96,13 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Obtiene el detalle de un mensaje. Se marca como leído automáticamente si es el destinatario.
         /// </summary>
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         [Authorize(Policy = Permissions.Messages.Read)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<MessageResponse>>> GetMessage(
-            int id,
+            string id,
             [FromServices] IQueryHandler<GetMessageByIdQuery, ApiResponse<MessageResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -107,7 +110,10 @@ namespace InclusiON.Api.Controllers
             if (userId is null)
                 return Unauthorized();
 
-            var result = await handler.HandleAsync(new GetMessageByIdQuery(id, userId.Value), cancellationToken);
+            if (!_encryption.TryDecryptId(id, out var messageId))
+                return NotFound();
+
+            var result = await handler.HandleAsync(new GetMessageByIdQuery(messageId, userId.Value), cancellationToken);
             return result.ToActionResult();
         }
 
@@ -118,16 +124,21 @@ namespace InclusiON.Api.Controllers
         /// </summary>
         [HttpGet("contacts")]
         [Authorize(Policy = Permissions.Messages.Read)]
-        [ProducesResponseType(typeof(ApiResponse<List<MessageContactResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<MessageContactResponse>>>> GetContacts(
-            [FromServices] IQueryHandler<GetMessageContactsQuery, ApiResponse<List<MessageContactResponse>>> handler,
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<MessageContactResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<MessageContactResponse>>>> GetContacts(
+            [FromServices] IQueryHandler<GetMessageContactsQuery, ApiResponse<PagedResponse<MessageContactResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 100,
             CancellationToken cancellationToken = default)
         {
             var userId = _httpContextService.GetCurrentUserId();
             if (userId is null)
                 return Unauthorized();
 
-            var result = await handler.HandleAsync(new GetMessageContactsQuery(userId.Value), cancellationToken);
+            page     = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var result = await handler.HandleAsync(new GetMessageContactsQuery(userId.Value, page, pageSize), cancellationToken);
             return Ok(result);
         }
 
@@ -188,14 +199,14 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Responde a un mensaje existente. Solo participantes del hilo pueden responder.
         /// </summary>
-        [HttpPost("{id:int}/reply")]
+        [HttpPost("{id}/reply")]
         [Authorize(Policy = Permissions.Messages.Create)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<MessageResponse>>> ReplyToMessage(
-            int id,
+            string id,
             [FromBody] ReplyToMessageRequest request,
             [FromServices] ICommandHandler<ReplyToMessageCommand, ApiResponse<MessageResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -204,26 +215,29 @@ namespace InclusiON.Api.Controllers
             if (userId is null)
                 return Unauthorized();
 
+            if (!_encryption.TryDecryptId(id, out var messageId))
+                return NotFound();
+
             var result = await handler.HandleAsync(
-                new ReplyToMessageCommand(userId.Value, id, request.Content), cancellationToken);
+                new ReplyToMessageCommand(userId.Value, messageId, request.Content), cancellationToken);
 
             if (!result.Success)
                 return result.ToActionResult();
 
-            return CreatedAtAction(nameof(GetMessage), new { id = result.Data!.Id }, result);
+            return CreatedAtAction(nameof(GetMessage), new { id }, result);
         }
 
         /// <summary>
         /// Marca un mensaje como leído manualmente. Solo el destinatario puede hacerlo.
         /// </summary>
-        [HttpPut("{id:int}/read")]
+        [HttpPut("{id}/read")]
         [Authorize(Policy = Permissions.Messages.Read)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<MessageResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<MessageResponse>>> MarkAsRead(
-            int id,
+            string id,
             [FromServices] ICommandHandler<MarkMessageReadCommand, ApiResponse<MessageResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -231,20 +245,23 @@ namespace InclusiON.Api.Controllers
             if (userId is null)
                 return Unauthorized();
 
-            var result = await handler.HandleAsync(new MarkMessageReadCommand(id, userId.Value), cancellationToken);
+            if (!_encryption.TryDecryptId(id, out var messageId))
+                return NotFound();
+
+            var result = await handler.HandleAsync(new MarkMessageReadCommand(messageId, userId.Value), cancellationToken);
             return result.ToActionResult();
         }
 
         /// <summary>
         /// Elimina un mensaje (soft delete). Remitente o destinatario pueden eliminarlo.
         /// </summary>
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id}")]
         [Authorize(Policy = Permissions.Messages.Read)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<object>>> DeleteMessage(
-            int id,
+            string id,
             [FromServices] ICommandHandler<DeleteMessageCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -252,7 +269,10 @@ namespace InclusiON.Api.Controllers
             if (userId is null)
                 return Unauthorized();
 
-            var result = await handler.HandleAsync(new DeleteMessageCommand(id, userId.Value), cancellationToken);
+            if (!_encryption.TryDecryptId(id, out var messageId))
+                return NotFound();
+
+            var result = await handler.HandleAsync(new DeleteMessageCommand(messageId, userId.Value), cancellationToken);
             return result.ToActionResult();
         }
     }

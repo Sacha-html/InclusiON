@@ -15,18 +15,21 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IEmbeddingService _embeddingService;
         private readonly IEmbeddingRepository _embeddingRepository;
         private readonly IActivitiesRepository _activitiesRepository;
+        private readonly IEncryptionService _encryption;
         private readonly ILogger<SearchActivitiesSemanticQueryHandler> _logger;
 
         public SearchActivitiesSemanticQueryHandler(
             IEmbeddingService embeddingService,
             IEmbeddingRepository embeddingRepository,
             IActivitiesRepository activitiesRepository,
-            ILogger<SearchActivitiesSemanticQueryHandler> logger)
+            ILogger<SearchActivitiesSemanticQueryHandler> logger,
+            IEncryptionService encryption)
         {
             _embeddingService        = embeddingService;
             _embeddingRepository     = embeddingRepository;
             _activitiesRepository    = activitiesRepository;
             _logger                  = logger;
+            _encryption              = encryption;
         }
 
         public async Task<ApiResponse<List<ActivityListItemResponse>>> HandleAsync(
@@ -43,6 +46,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     queryEmbedding,
                     query.ProfessionalId,
                     query.Limit,
+                    null,
+                    minSimilarity: 0.25f,
                     cancellationToken);
 
                 if (ids.Count == 0)
@@ -51,9 +56,12 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 // 3. Cargar entidades (con includes) preservando orden de similitud
                 var activities = await _activitiesRepository.GetByIdsAsync(ids, cancellationToken);
 
-                var result = activities
-                    .Select(ActivityListItemResponse.From)
-                    .ToList();
+                var result = activities.Select(a =>
+                {
+                    var item = ActivityListItemResponse.From(a);
+                    item.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(a.Id.ToString()));
+                    return item;
+                }).ToList();
 
                 return ApiResponse<List<ActivityListItemResponse>>.SuccessResult(result);
             }
@@ -64,5 +72,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     ErrorCode.InternalError, "Error al ejecutar la búsqueda semántica.");
             }
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

@@ -10,6 +10,8 @@ using InclusiON.Application.UseCases.Roadmap.Commands;
 using InclusiON.Application.UseCases.Roadmap.Queries;
 using InclusiON.DTOs.Requests.Roadmap;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Activities;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses.Roadmap;
 
 namespace InclusiON.Api.Controllers
@@ -57,7 +59,6 @@ namespace InclusiON.Api.Controllers
         [HttpGet("/api/my/roadmap")]
         [Authorize(Policy = Permissions.Roadmap.Read)]
         [ProducesResponseType(typeof(ApiResponse<RoadmapResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<RoadmapResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<RoadmapResponse>>> GetMyRoadmap(
             [FromServices] IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -67,6 +68,9 @@ namespace InclusiON.Api.Controllers
                 return NotFound(ApiResponse<RoadmapResponse>.NotFound("Persona"));
 
             var result = await handler.HandleAsync(new GetPersonRoadmapQuery(personId.Value), cancellationToken);
+            // No roadmap assigned yet is a valid state — return 200 with null data instead of 404
+            if (!result.Success && result.ErrorCode == ErrorCode.NotFound)
+                return Ok(ApiResponse<RoadmapResponse>.SuccessResult(null!));
             return result.ToActionResult();
         }
 
@@ -272,8 +276,155 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UnlockRoadmapActivityCommand, ApiResponse<RoadmapActivityResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<RoadmapActivityResponse>.NotFound("Profesional"));
+
             var result = await handler.HandleAsync(
-                new UnlockRoadmapActivityCommand(activityEntryId), cancellationToken);
+                new UnlockRoadmapActivityCommand(activityEntryId, personId, professionalId.Value), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Asigna la actividad referenciada por la entrada del roadmap al alumno (IN-150).
+        /// Crea un ActivityAssignment directamente desde el contexto del roadmap, sin necesitar encryptedId.
+        /// </summary>
+        [HttpPost("areas/{areaId:int}/activities/{activityEntryId:int}/assign")]
+        [Authorize(Policy = Permissions.Roadmap.Update)]
+        [PersonAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> AssignFromRoadmap(
+            Guid personId,
+            int areaId,
+            int activityEntryId,
+            [FromBody] AssignFromRoadmapRequest request,
+            [FromServices] ICommandHandler<AssignFromRoadmapCommand, ApiResponse<ActivityAssignmentResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<ActivityAssignmentResponse>.NotFound("Profesional"));
+
+            var command = new AssignFromRoadmapCommand(
+                activityEntryId,
+                personId,
+                professionalId.Value,
+                request.DueDate,
+                request.IsEvaluationActivity);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+                return result.ToActionResult();
+
+            return StatusCode(StatusCodes.Status201Created, result);
+        }
+
+        /// <summary>
+        /// Radar chart de habilidades: devuelve un punto por area del roadmap con
+        /// el promedio de exito de todas las actividades completadas en esa area (IN-90).
+        /// </summary>
+        [HttpGet("skill-radar")]
+        [Authorize(Policy = Permissions.Roadmap.Read)]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<SkillRadarPointResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<SkillRadarPointResponse>>>> GetSkillRadar(
+            Guid personId,
+            [FromServices] IQueryHandler<GetSkillRadarQuery, ApiResponse<List<SkillRadarPointResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetSkillRadarQuery(personId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        // ── Adaptive Engine Config (IN-116) ──────────────────────────────────────
+
+        /// <summary>
+        /// Obtiene la configuración del motor adaptativo para una actividad del roadmap.
+        /// Devuelve null (data=null, success=true) si la actividad no tiene config aún (IN-116).
+        /// </summary>
+        [HttpGet("areas/{areaId:int}/activities/{activityEntryId:int}/adaptive-config")]
+        [Authorize(Policy = Permissions.Roadmap.Read)]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<AdaptiveEngineConfigResponse?>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<AdaptiveEngineConfigResponse?>>> GetAdaptiveConfig(
+            Guid personId,
+            int areaId,
+            int activityEntryId,
+            [FromServices] IQueryHandler<GetAdaptiveEngineConfigQuery, ApiResponse<AdaptiveEngineConfigResponse?>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetAdaptiveEngineConfigQuery(activityEntryId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Crea o reemplaza la configuración del motor adaptativo para una actividad del roadmap (IN-116).
+        /// </summary>
+        [HttpPut("areas/{areaId:int}/activities/{activityEntryId:int}/adaptive-config")]
+        [Authorize(Policy = Permissions.Roadmap.Update)]
+        [PersonAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<AdaptiveEngineConfigResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<AdaptiveEngineConfigResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<AdaptiveEngineConfigResponse>>> UpsertAdaptiveConfig(
+            Guid personId,
+            int areaId,
+            int activityEntryId,
+            [FromBody] UpsertAdaptiveEngineConfigRequest request,
+            [FromServices] ICommandHandler<UpsertAdaptiveEngineConfigCommand, ApiResponse<AdaptiveEngineConfigResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new UpsertAdaptiveEngineConfigCommand(
+                activityEntryId,
+                request.IsEnabled,
+                request.MinDifficultyLevel,
+                request.MaxDifficultyLevel,
+                request.MinTimeLimitSeconds,
+                request.MaxTimeLimitSeconds,
+                request.ConsecutiveSuccessToUpgrade,
+                request.ConsecutiveFailuresToDowngrade,
+                request.SuccessThresholdPercent,
+                request.FrustrationThreshold);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Elimina la configuración del motor adaptativo (deshabilita el motor) para la actividad indicada (IN-116).
+        /// </summary>
+        [HttpDelete("areas/{areaId:int}/activities/{activityEntryId:int}/adaptive-config")]
+        [Authorize(Policy = Permissions.Roadmap.Delete)]
+        [PersonAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<object>>> DeleteAdaptiveConfig(
+            Guid personId,
+            int areaId,
+            int activityEntryId,
+            [FromServices] ICommandHandler<DeleteAdaptiveEngineConfigCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new DeleteAdaptiveEngineConfigCommand(activityEntryId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>Consulta el historial de ajustes adaptativos de una actividad del roadmap (IN-134).</summary>
+        [HttpGet("areas/{areaId:int}/activities/{activityEntryId:int}/adjustments")]
+        [Authorize(Policy = Permissions.Roadmap.Read)]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<AdaptiveAdjustmentLogResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<List<AdaptiveAdjustmentLogResponse>>>> GetAdjustmentHistory(
+            Guid personId,
+            int areaId,
+            int activityEntryId,
+            [FromServices] IQueryHandler<GetAdaptiveAdjustmentHistoryQuery, ApiResponse<List<AdaptiveAdjustmentLogResponse>>> handler,
+            CancellationToken cancellationToken)
+        {
+            var result = await handler.HandleAsync(
+                new GetAdaptiveAdjustmentHistoryQuery(personId, activityEntryId),
+                cancellationToken);
             return result.ToActionResult();
         }
     }

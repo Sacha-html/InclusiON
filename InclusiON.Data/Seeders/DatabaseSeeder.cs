@@ -151,6 +151,7 @@ namespace InclusiON.Data.Seeders
                 // === PERSON WITH DISABILITY ===
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "activities:respond" },
+                new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "roadmap:read" },
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
             };
 

@@ -1,13 +1,15 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Invitations.Commands;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Invitations;
-using InclusiON.Domain.Models;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Invitations.Handlers
@@ -15,6 +17,8 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
     public class AcceptInvitationCommandHandler : ICommandHandler<AcceptInvitationCommand, ApiResponse<AcceptInvitationResponse>>
     {
         private readonly IInvitationsRepository _invitationsRepository;
+        private readonly IProfessionalsRepository _professionalsRepository;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AcceptInvitationCommandHandler> _logger;
@@ -22,16 +26,20 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
 
         public AcceptInvitationCommandHandler(
             IInvitationsRepository invitationsRepository,
+            IProfessionalsRepository professionalsRepository,
+            IBackgroundJobRepository backgroundJobs,
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
             ILogger<AcceptInvitationCommandHandler> logger,
             IDateTimeProvider dateTime)
         {
-            _invitationsRepository = invitationsRepository;
-            _identityService = identityService;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
+            _invitationsRepository   = invitationsRepository;
+            _professionalsRepository = professionalsRepository;
+            _backgroundJobs          = backgroundJobs;
+            _identityService         = identityService;
+            _unitOfWork              = unitOfWork;
+            _logger                  = logger;
+            _dateTime                = dateTime;
         }
 
         public async Task<ApiResponse<AcceptInvitationResponse>> HandleAsync(AcceptInvitationCommand command, CancellationToken cancellationToken)
@@ -145,6 +153,32 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                 _logger.LogInformation(
                     "Invitacion {InvitationId} aceptada. Usuario: {UserId}, Familiar: {FamilyRepId}",
                     invitation.Id, user.Id, familyRep?.Id);
+
+                // Notificar al profesional que creó la invitación — fire and forget
+                var invFirstName = invitation.FirstName ?? string.Empty;
+                var invLastName  = invitation.LastName  ?? string.Empty;
+                var createdById  = invitation.CreatedByProfessionalId;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var prof = await _professionalsRepository.GetByIdAsync(createdById, CancellationToken.None);
+                        if (prof is not null)
+                        {
+                            await _backgroundJobs.CreateAsync(
+                                JobTypes.Push,
+                                JsonSerializer.Serialize(new NotificationPayload
+                                {
+                                    UserId    = prof.UserId.ToString(),
+                                    Title     = "Invitación aceptada",
+                                    Message   = $"{invFirstName} {invLastName} aceptó tu invitación y se unió como familiar.",
+                                    ActionUrl = "/#/pro/family"
+                                }),
+                                maxRetries: 3);
+                        }
+                    }
+                    catch { /* fire and forget */ }
+                });
 
                 var response = new AcceptInvitationResponse
                 {

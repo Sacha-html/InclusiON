@@ -17,6 +17,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<ActivityAssignment?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.ActivityAssignments
+                .Include(a => a.Status)
                 .Include(a => a.Activity)
                     .ThenInclude(a => a.Content)
                         .ThenInclude(c => c!.TemplateType)
@@ -28,6 +29,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<List<ActivityAssignment>> GetByPersonIdAsync(Guid personId, CancellationToken ct = default)
         {
             return await _context.ActivityAssignments
+                .Include(a => a.Status)
                 .Include(a => a.Activity)
                     .ThenInclude(a => a.Content)
                         .ThenInclude(c => c!.TemplateType)
@@ -46,7 +48,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public async Task UpdateAsync(ActivityAssignment assignment, CancellationToken ct = default)
         {
-            _context.ActivityAssignments.Update(assignment);
+            _context.Entry(assignment).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
         public async Task<ActivityResponse?> GetResponseByIdAsync(int responseId, CancellationToken ct = default)
@@ -83,6 +85,25 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .OrderByDescending(r => r.CompletedAt)
                 .Take(limit)
                 .ToListAsync(ct);
+        }
+
+        public async Task<Dictionary<Guid, List<ActivityResponse>>> GetRecentCompletedResponsesByPersonIdsAsync(
+            IEnumerable<Guid> personIds, int limit, CancellationToken ct = default)
+        {
+            var idList = personIds.ToList();
+            if (idList.Count == 0) return new();
+
+            var responses = await _context.ActivityResponses
+                .Include(r => r.Assignment)
+                    .ThenInclude(a => a.Activity)
+                .AsNoTracking()
+                .Where(r => idList.Contains(r.Assignment.PersonId) && r.CompletedAt != null)
+                .OrderByDescending(r => r.CompletedAt)
+                .ToListAsync(ct);
+
+            return responses
+                .GroupBy(r => r.Assignment.PersonId)
+                .ToDictionary(g => g.Key, g => g.Take(limit).ToList());
         }
     }
 }

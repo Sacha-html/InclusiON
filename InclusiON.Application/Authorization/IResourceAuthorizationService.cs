@@ -88,6 +88,13 @@ namespace InclusiON.Application.Authorization
         // === Reglas especificas de negocio ===
 
         /// <summary>
+        /// Verifica si el usuario autenticado puede acceder al familiar indicado.
+        /// Para FamilyRepresentative: self-access siempre permitido.
+        /// Para el resto: permite si tiene acceso a alguna persona vinculada al familiar.
+        /// </summary>
+        Task<bool> CanAccessFamilyAsync(Guid familyId, AccessMode mode, CancellationToken ct = default);
+
+        /// <summary>
         /// Verifica si el usuario autenticado puede realizar <b>login asistido</b> sobre la persona indicada.
         /// Requiere <c>PersonRepresentative.IsActive = true</c> Y <c>CanSuperviseLogin = true</c>
         /// (o bien ser un profesional asignado con el permiso correspondiente).

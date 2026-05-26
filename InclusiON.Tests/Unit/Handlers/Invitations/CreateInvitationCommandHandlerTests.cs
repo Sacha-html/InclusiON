@@ -19,11 +19,11 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
         private readonly IProfessionalsRepository _prosRepo   = Substitute.For<IProfessionalsRepository>();
         private readonly IIdentityService         _identity   = Substitute.For<IIdentityService>();
         private readonly IUnitOfWork              _uow        = Substitute.For<IUnitOfWork>();
-        private readonly IEmailService            _email      = Substitute.For<IEmailService>();
+        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IDateTimeProvider        _dateTime   = Substitute.For<IDateTimeProvider>();
 
         private CreateInvitationCommandHandler BuildSut() =>
-            new(_invRepo, _prosRepo, _identity, _uow, _email,
+            new(_invRepo, _prosRepo, _identity, _uow, _backgroundJobs,
                 NullLogger<CreateInvitationCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid ProfId = Guid.NewGuid();

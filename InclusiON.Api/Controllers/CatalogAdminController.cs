@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.Extensions.Caching.Memory;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -27,20 +28,29 @@ namespace InclusiON.Api.Controllers
     {
         private readonly ICatalogAdminService _catalog;
         private readonly IOutputCacheStore _cacheStore;
+        private readonly IMemoryCache _memoryCache;
 
-        public CatalogAdminController(ICatalogAdminService catalog, IOutputCacheStore cacheStore)
+        public CatalogAdminController(ICatalogAdminService catalog, IOutputCacheStore cacheStore, IMemoryCache memoryCache)
         {
             _catalog = catalog;
             _cacheStore = cacheStore;
+            _memoryCache = memoryCache;
         }
 
         // ── helpers de ciclo de vida ──────────────────────────────────────────────
+
+        private async Task InvalidateAllCachesAsync(CancellationToken ct)
+        {
+            await _cacheStore.EvictByTagAsync("catalogs", ct);
+            foreach (var key in CatalogCacheKeys.All)
+                _memoryCache.Remove(key);
+        }
 
         private async Task<ActionResult<ApiResponse<T>>> CreatedAsync<T>(
             ApiResponse<T> result, CancellationToken ct) where T : class
         {
             if (!result.Success) return result.ToActionResult();
-            await _cacheStore.EvictByTagAsync("catalogs", ct);
+            await InvalidateAllCachesAsync(ct);
             return StatusCode(StatusCodes.Status201Created, result);
         }
 
@@ -48,7 +58,7 @@ namespace InclusiON.Api.Controllers
             ApiResponse<T> result, CancellationToken ct) where T : class
         {
             if (result.Success)
-                await _cacheStore.EvictByTagAsync("catalogs", ct);
+                await InvalidateAllCachesAsync(ct);
             return result.ToActionResult();
         }
 

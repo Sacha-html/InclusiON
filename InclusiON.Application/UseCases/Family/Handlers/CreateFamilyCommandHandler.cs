@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
@@ -6,10 +7,11 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Family.Commands;
 using InclusiON.Application.UseCases.Family.Queries;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Family;
-using InclusiON.Domain.Models;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Family.Handlers
@@ -19,7 +21,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IFamilyRepository _repository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IIdentityService _identityService;
-        private readonly IEmailService _emailService;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateFamilyCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
@@ -28,7 +30,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             IFamilyRepository repository,
             IPersonsRepository personsRepository,
             IIdentityService identityService,
-            IEmailService emailService,
+            IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             ILogger<CreateFamilyCommandHandler> logger,
             IDateTimeProvider dateTime)
@@ -36,7 +38,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             _repository = repository;
             _personsRepository = personsRepository;
             _identityService = identityService;
-            _emailService = emailService;
+            _backgroundJobs = backgroundJobs;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
@@ -129,27 +131,22 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
                 _logger.LogInformation("Familiar creado: {FamilyId}, Usuario: {UserId}", family.Id, user.Id);
 
-                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-                // Enviar email con contraseña temporal
-                try
-                {
-                    await _emailService.SendTemplatedEmailAsync(
-                        command.Email,
-                        "Bienvenido a InclusiON — Tu cuenta ha sido creada",
-                        "PasswordReset",
-                        new Dictionary<string, string?>
+                await _backgroundJobs.CreateAsync(
+                    JobTypes.Email,
+                    JsonSerializer.Serialize(new EmailPayload
+                    {
+                        To           = command.Email,
+                        Subject      = "Bienvenido a InclusiON — Tu cuenta ha sido creada",
+                        TemplateName = "PasswordReset",
+                        Replacements = new Dictionary<string, string?>
                         {
                             { "UserName", command.FirstName },
                             { "TemporaryPassword", password },
                             { "Year", _dateTime.UtcNow.Year.ToString() }
-                        },
-                        cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "No se pudo enviar email de bienvenida a {Email}", command.Email);
-                }
+                        }
+                    }),
+                    maxRetries: 2,
+                    cancellationToken: cancellationToken);
 
                 var response = FamilyResponse.MapToResponse(family);
                 response.TemporaryPassword = password;

@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Roadmap.Commands;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 
 namespace InclusiON.Application.UseCases.Roadmap.Handlers
@@ -25,6 +26,11 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
 
             if (activity is null)
                 return ApiResponse<object>.NotFound("Actividad del roadmap");
+
+            if (await _roadmaps.HasResponsesAsync(command.ActivityEntryId, cancellationToken))
+                return ApiResponse<object>.ErrorResult(
+                    ErrorCode.InvalidOperation,
+                    "No se puede eliminar una actividad que ya tiene respuestas registradas.");
 
             _roadmaps.RemoveActivity(activity);
             await _uow.SaveChangesAsync(cancellationToken);

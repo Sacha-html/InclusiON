@@ -49,14 +49,15 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     public class GetInboxQueryHandlerTests
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
-        private GetInboxQueryHandler BuildSut() => new(_messages);
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private GetInboxQueryHandler BuildSut() => new(_messages, _encryption);
 
         private static readonly Guid UserId = Guid.NewGuid();
 
         [Fact]
         public async Task HandleAsync_EmptyInbox_ReturnsEmptyPaged()
         {
-            _messages.GetInboxAsync(UserId, 0, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetInboxAsync(UserId, 1, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message>(), 0));
 
             var result = await BuildSut().HandleAsync(new GetInboxQuery(UserId, 1, 20), default);
@@ -72,15 +73,18 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var senderId   = Guid.NewGuid();
             var msg        = Helpers.AMessage(1, senderId, UserId);
 
-            _messages.GetInboxAsync(UserId, 0, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetInboxAsync(UserId, 1, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message> { msg }, 1));
+            _encryption.Encrypt(Arg.Any<string>()).Returns(x => x.Arg<string>());
 
             var result = await BuildSut().HandleAsync(new GetInboxQuery(UserId, 1, 20), default);
 
+            result.Success.Should().BeTrue();
             result.Data!.Data.Should().HaveCount(1);
             result.Data.Data[0].Id.Should().Be(1);
             result.Data.Data[0].SenderFullName.Should().Be("Ana García");
             result.Data.Data[0].ReceiverFullName.Should().Be("Luis López");
+            result.Data.Data[0].EncryptedId.Should().NotBeNullOrEmpty();
         }
 
         [Fact]
@@ -90,11 +94,13 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
                 .Select(i => Helpers.AMessage(i, Guid.NewGuid(), UserId))
                 .ToList();
 
-            _messages.GetInboxAsync(UserId, 0, 5, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetInboxAsync(UserId, 1, 5, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((items, 12));
+            _encryption.Encrypt(Arg.Any<string>()).Returns(x => x.Arg<string>());
 
             var result = await BuildSut().HandleAsync(new GetInboxQuery(UserId, 1, 5), default);
 
+            result.Success.Should().BeTrue();
             result.Data!.TotalRecords.Should().Be(12);
             result.Data.TotalPages.Should().Be(3);
             result.Data.HasNextPage.Should().BeTrue();
@@ -109,31 +115,33 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     public class GetSentQueryHandlerTests
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
-        private GetSentQueryHandler BuildSut() => new(_messages);
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private GetSentQueryHandler BuildSut() => new(_messages, _encryption);
 
         private static readonly Guid UserId = Guid.NewGuid();
 
         [Fact]
         public async Task HandleAsync_EmptySent_ReturnsEmptyPaged()
         {
-            _messages.GetSentAsync(UserId, 0, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetSentAsync(UserId, 1, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message>(), 0));
 
             var result = await BuildSut().HandleAsync(new GetSentQuery(UserId, 1, 20), default);
 
             result.Success.Should().BeTrue();
             result.Data!.Data.Should().BeEmpty();
+            result.Data.TotalRecords.Should().Be(0);
         }
 
         [Fact]
-        public async Task HandleAsync_SkipCalculatedCorrectly()
+        public async Task HandleAsync_PagePassedCorrectly()
         {
-            _messages.GetSentAsync(UserId, 40, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+            _messages.GetSentAsync(UserId, 3, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
                      .Returns((new List<Message>(), 0));
 
             await BuildSut().HandleAsync(new GetSentQuery(UserId, Page: 3, PageSize: 20), default);
 
-            await _messages.Received(1).GetSentAsync(UserId, 40, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
+            await _messages.Received(1).GetSentAsync(UserId, 3, 20, Arg.Any<bool?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>());
         }
     }
 
@@ -145,7 +153,8 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
         private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
-        private GetMessageByIdQueryHandler BuildSut() => new(_messages, _uow);
+        private readonly IEncryptionService  _encryption = Substitute.For<IEncryptionService>();
+        private GetMessageByIdQueryHandler BuildSut() => new(_messages, _uow, _encryption);
 
         private static readonly Guid SenderId   = Guid.NewGuid();
         private static readonly Guid ReceiverId = Guid.NewGuid();
@@ -264,12 +273,14 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
 
     public class SendMessageCommandHandlerTests
     {
-        private readonly IMessagesRepository    _messages    = Substitute.For<IMessagesRepository>();
-        private readonly IUsersRepository       _users       = Substitute.For<IUsersRepository>();
-        private readonly IAssignmentsRepository _assignments = Substitute.For<IAssignmentsRepository>();
-        private readonly IUnitOfWork            _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IMessagesRepository     _messages    = Substitute.For<IMessagesRepository>();
+        private readonly IUsersRepository        _users       = Substitute.For<IUsersRepository>();
+        private readonly IAssignmentsRepository  _assignments = Substitute.For<IAssignmentsRepository>();
+        private readonly IUnitOfWork             _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IEncryptionService      _encryption  = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobs     = Substitute.For<IBackgroundJobRepository>();
 
-        private SendMessageCommandHandler BuildSut() => new(_messages, _users, _assignments, _uow);
+        private SendMessageCommandHandler BuildSut() => new(_messages, _users, _assignments, _uow, _encryption, _bgJobs);
 
         private static readonly Guid ProfUserId   = Guid.NewGuid();
         private static readonly Guid FamilyUserId = Guid.NewGuid();
@@ -484,10 +495,12 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
 
     public class ReplyToMessageCommandHandlerTests
     {
-        private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
-        private readonly IUsersRepository    _users    = Substitute.For<IUsersRepository>();
-        private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
-        private ReplyToMessageCommandHandler BuildSut() => new(_messages, _users, _uow);
+        private readonly IMessagesRepository  _messages   = Substitute.For<IMessagesRepository>();
+        private readonly IUsersRepository     _users      = Substitute.For<IUsersRepository>();
+        private readonly IUnitOfWork          _uow        = Substitute.For<IUnitOfWork>();
+        private readonly IEncryptionService   _encryption = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobs = Substitute.For<IBackgroundJobRepository>();
+        private ReplyToMessageCommandHandler BuildSut() => new(_messages, _users, _uow, _encryption, _bgJobs);
 
         private static readonly Guid SenderId   = Guid.NewGuid();
         private static readonly Guid ReceiverId = Guid.NewGuid();
@@ -558,7 +571,8 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
     {
         private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
         private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
-        private MarkMessageReadCommandHandler BuildSut() => new(_messages, _uow);
+        private readonly IEncryptionService  _encryption = Substitute.For<IEncryptionService>();
+        private MarkMessageReadCommandHandler BuildSut() => new(_messages, _uow, _encryption);
 
         private static readonly Guid SenderId   = Guid.NewGuid();
         private static readonly Guid ReceiverId = Guid.NewGuid();
@@ -735,7 +749,7 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
         }
 
         [Fact]
@@ -751,10 +765,10 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().HaveCount(1);
-            result.Data![0].UserId.Should().Be(ContactId);
-            result.Data[0].UserType.Should().Be("FamilyRepresentative");
-            result.Data[0].FullName.Should().Be("Luis López");
+            result.Data!.Data.Should().HaveCount(1);
+            result.Data!.Data[0].UserId.Should().Be(ContactId);
+            result.Data!.Data[0].UserType.Should().Be("FamilyRepresentative");
+            result.Data!.Data[0].FullName.Should().Be("Luis López");
         }
 
         [Fact]
@@ -770,10 +784,10 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().HaveCount(1);
-            result.Data![0].UserId.Should().Be(ContactId);
-            result.Data[0].UserType.Should().Be("Professional");
-            result.Data[0].FullName.Should().Be("Ana Gómez");
+            result.Data!.Data.Should().HaveCount(1);
+            result.Data!.Data[0].UserId.Should().Be(ContactId);
+            result.Data!.Data[0].UserType.Should().Be("Professional");
+            result.Data!.Data[0].FullName.Should().Be("Ana Gómez");
         }
 
         [Fact]
@@ -788,7 +802,7 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
         }
     }
 }

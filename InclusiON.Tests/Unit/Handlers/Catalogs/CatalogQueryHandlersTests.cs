@@ -1,6 +1,8 @@
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Application.UseCases.Catalogs.Handlers;
 using InclusiON.Application.UseCases.Catalogs.Queries;
@@ -10,6 +12,8 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
 {
     public class CatalogQueryHandlersTests
     {
+        private static IMemoryCache CreateCache() => new MemoryCache(new MemoryCacheOptions());
+
         // ── DisabilityTypes ──────────────────────────────────────────────
 
         [Fact]
@@ -23,7 +27,7 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
                     new() { Id = 2, Name = "Sensorial" }
                 });
 
-            var handler = new GetDisabilityTypesQueryHandler(repo);
+            var handler = new GetDisabilityTypesQueryHandler(repo, CreateCache(), Substitute.For<IEncryptionService>());
             var result = await handler.HandleAsync(new GetDisabilityTypesQuery(), default);
 
             result.Success.Should().BeTrue();
@@ -38,7 +42,7 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
             repo.GetAllActiveAsync(Arg.Any<CancellationToken>())
                 .Returns(new List<DisabilityType>());
 
-            var result = await new GetDisabilityTypesQueryHandler(repo)
+            var result = await new GetDisabilityTypesQueryHandler(repo, CreateCache(), Substitute.For<IEncryptionService>())
                 .HandleAsync(new GetDisabilityTypesQuery(), default);
 
             result.Success.Should().BeTrue();
@@ -58,7 +62,7 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
                     new() { Id = 2, Name = "Media", DisplayOrder = 2 }
                 });
 
-            var result = await new GetAutonomyLevelsQueryHandler(repo)
+            var result = await new GetAutonomyLevelsQueryHandler(repo, CreateCache(), Substitute.For<IEncryptionService>())
                 .HandleAsync(new GetAutonomyLevelsQuery(), default);
 
             result.Success.Should().BeTrue();
@@ -79,7 +83,7 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
                     new() { Id = 2, Name = "Autonomía" }
                 });
 
-            var result = await new GetSkillAreasQueryHandler(repo)
+            var result = await new GetSkillAreasQueryHandler(repo, CreateCache(), Substitute.For<IEncryptionService>())
                 .HandleAsync(new GetSkillAreasQuery(), default);
 
             result.Success.Should().BeTrue();
@@ -98,7 +102,7 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
                     new() { Id = 1, Name = "Cognitiva" }
                 });
 
-            var result = await new GetActivityCategoriesQueryHandler(repo)
+            var result = await new GetActivityCategoriesQueryHandler(repo, CreateCache(), Substitute.For<IEncryptionService>())
                 .HandleAsync(new GetActivityCategoriesQuery(), default);
 
             result.Success.Should().BeTrue();
@@ -118,7 +122,7 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
                     new() { Id = 1, Name = "Selección", Code = "SELECTION", ContentSchema = "{}", ComponentName = "SelectionComponent" }
                 });
 
-            var result = await new GetActivityTemplateTypesQueryHandler(repo)
+            var result = await new GetActivityTemplateTypesQueryHandler(repo, CreateCache(), Substitute.For<IEncryptionService>())
                 .HandleAsync(new GetActivityTemplateTypesQuery(), default);
 
             result.Success.Should().BeTrue();

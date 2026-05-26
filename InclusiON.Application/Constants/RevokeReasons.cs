@@ -13,5 +13,6 @@ namespace InclusiON.Application.Constants
         public const string FamilyDeactivated = "Familiar desactivado";
         public const string RolePermissionsUpdated = "Permisos del rol actualizados";
         public const string ManualRevoke = "Revocación manual";
+        public const string UserPasswordReset = "Contraseña reseteada por el propio usuario";
     }
 }

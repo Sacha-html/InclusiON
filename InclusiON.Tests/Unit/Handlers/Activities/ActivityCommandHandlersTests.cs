@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -25,14 +26,19 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _repo = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
-        private readonly IEmbeddingService _embedding = Substitute.For<IEmbeddingService>();
-        private readonly IEmbeddingRepository _embeddingRepo = Substitute.For<IEmbeddingRepository>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobRepo = Substitute.For<IBackgroundJobRepository>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public CreateActivityCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private CreateActivityCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime, _embedding, _embeddingRepo,
+            new(_repo, _uow, _dateTime, _encryption, _bgJobRepo,
                 NullLogger<CreateActivityCommandHandler>.Instance);
 
         private static CreateActivityCommand Cmd() => new(
@@ -77,6 +83,46 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.InternalError);
         }
+
+        [Fact]
+        public async Task InvalidJson_ReturnsValidationFailed()
+        {
+            var cmd = Cmd() with { ContentJson = "esto no es json" };
+
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _repo.DidNotReceive().CreateAsync(Arg.Any<Activity>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task EmptyObjectJson_ReturnsValidationFailed()
+        {
+            var cmd = Cmd() with { ContentJson = "{}" };
+
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _repo.DidNotReceive().CreateAsync(Arg.Any<Activity>(), Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData("{\"items\":[{\"id\":1}]}")]
+        [InlineData("{\"steps\":[\"A\",\"B\"]}")]
+        [InlineData("{\"groups\":{\"a\":1}}")]
+        public async Task NonEmptyValidJson_DoesNotFailOnContentValidation(string contentJson)
+        {
+            _dateTime.UtcNow.Returns(Now);
+            var created = ACreatedActivity();
+            _repo.GetByIdAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(created);
+            var cmd = Cmd() with { ContentJson = contentJson };
+
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.ErrorCode.Should().NotBe(ErrorCode.ValidationFailed);
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -88,16 +134,21 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _repo = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
-        private readonly IEmbeddingService _embedding = Substitute.For<IEmbeddingService>();
-        private readonly IEmbeddingRepository _embeddingRepo = Substitute.For<IEmbeddingRepository>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobRepo = Substitute.For<IBackgroundJobRepository>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();
         private const int ActivityId = 5;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public UpdateActivityCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private UpdateActivityCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime, _embedding, _embeddingRepo,
+            new(_repo, _uow, _dateTime, _encryption, _bgJobRepo,
                 NullLogger<UpdateActivityCommandHandler>.Instance);
 
         private static UpdateActivityCommand Cmd(Guid? profId = null) => new(
@@ -179,14 +230,20 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivitiesRepository _repo = Substitute.For<IActivitiesRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();
         private const int ActivityId = 7;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public PatchActivityStatusCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private PatchActivityStatusCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime);
+            new(_repo, _uow, _dateTime, _encryption);
 
         private static Activity AnActivity(bool isActive = true, Guid? profId = null) => new()
         {
@@ -293,8 +350,11 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
     {
         private readonly IActivityAssignmentRepository _repo = Substitute.For<IActivityAssignmentRepository>();
         private readonly IActivitiesRepository _activitiesRepo = Substitute.For<IActivitiesRepository>();
+        private readonly IPersonsRepository _personsRepo = Substitute.For<IPersonsRepository>();
+        private readonly IBackgroundJobRepository _bgJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid ProfId = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();
@@ -302,11 +362,21 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private const int ActivityId = 10;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        // The encrypted activity ID that decrypts to "10"
+        private const string EncryptedActivityId = "ENCRYPTED_10";
+
+        public CreateActivityAssignmentCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+            // Decrypt: "ENCRYPTED_10" (url-safe) → standard base64 → "10"
+            _encryption.Decrypt(Arg.Any<string>()).Returns(ActivityId.ToString());
+        }
+
         private CreateActivityAssignmentCommandHandler BuildSut() =>
-            new(_repo, _activitiesRepo, _uow, _dateTime);
+            new(_repo, _activitiesRepo, _personsRepo, _bgJobs, _uow, _dateTime, _encryption);
 
         private static CreateActivityAssignmentCommand Cmd(Guid? profId = null) => new(
-            ActivityId, PersonId, profId ?? ProfId,
+            EncryptedActivityId, PersonId, profId ?? ProfId,
             DueDate: null, IsEvaluationActivity: false, SequenceOrder: null);
 
         private static Activity AnActivity(bool isActive = true, bool isStandard = false, Guid? profId = null) => new()
@@ -402,14 +472,20 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivityAssignmentRepository _repo = Substitute.For<IActivityAssignmentRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid OtherPersonId = Guid.NewGuid();
         private const int AssignmentId = 3;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public StartActivityResponseCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private StartActivityResponseCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime);
+            new(_repo, _uow, _dateTime, _encryption);
 
         private static ActivityAssignment AnAssignment(int status = AssignmentStatuses.Pendiente, Guid? personId = null) => new()
         {
@@ -506,10 +582,13 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
 
     public class CompleteActivityResponseCommandHandlerTests
     {
-        private readonly IActivityAssignmentRepository _repo     = Substitute.For<IActivityAssignmentRepository>();
-        private readonly IRoadmapRepository           _roadmaps = Substitute.For<IRoadmapRepository>();
-        private readonly IUnitOfWork                  _uow      = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider            _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IActivityAssignmentRepository _repo           = Substitute.For<IActivityAssignmentRepository>();
+        private readonly IRoadmapRepository            _roadmaps       = Substitute.For<IRoadmapRepository>();
+        private readonly IProfessionalsRepository      _profsRepo      = Substitute.For<IProfessionalsRepository>();
+        private readonly IBackgroundJobRepository      _bgJobs         = Substitute.For<IBackgroundJobRepository>();
+        private readonly IUnitOfWork                   _uow            = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider             _dateTime       = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService            _encryption     = Substitute.For<IEncryptionService>();
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid OtherPersonId = Guid.NewGuid();
@@ -517,8 +596,13 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private const int ResponseId = 9;
         private static readonly DateTime Now = new(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
 
+        public CompleteActivityResponseCommandHandlerTests()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+        }
+
         private CompleteActivityResponseCommandHandler BuildSut() =>
-            new(_repo, _roadmaps, _uow, _dateTime);
+            new(_repo, _roadmaps, _profsRepo, _bgJobs, _uow, _dateTime, _encryption);
 
         private static CompleteActivityResponseCommand Cmd(
             Guid? personId = null, decimal success = 85m) => new(
