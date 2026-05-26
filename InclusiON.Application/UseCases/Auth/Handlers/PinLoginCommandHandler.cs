@@ -45,7 +45,13 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.UserNotFound);
             }
 
-            var user = person.User;
+            var user = await _identityService.FindByIdAsync(command.UserId);
+            if (user == null)
+            {
+                return ApiResponse<VisualLoginResponse>.ErrorResult(
+                    ErrorCode.UserNotFound,
+                    ErrorMessages.UserNotFound);
+            }
 
             if (await _identityService.IsLockedOutAsync(user))
             {

@@ -95,5 +95,11 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Obtiene profesionales aprobados que no han iniciado sesión en los últimos días.
         /// </summary>
         Task<List<Professional>> GetInactiveProfessionalsAsync(int inactiveDays, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Obtiene todos los profesionales activos y aprobados (para jobs de batch como reportes semanales).
+        /// Incluye User para acceder al email.
+        /// </summary>
+        Task<List<Professional>> GetAllActiveAsync(CancellationToken cancellationToken = default);
     }
 }

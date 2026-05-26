@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Application.Extensions;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
@@ -73,6 +73,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(f => f.PersonRepresentatives.Where(pr => pr.IsActive))
                     .ThenInclude(pr => pr.Person)
                         .ThenInclude(p => p.DisabilityType)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -133,51 +134,63 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 cancellationToken);
         }
 
-        public async Task<List<(FamilyRepresentative Family, bool WasPreviouslyLinked)>> GetAvailableFamiliesAsync(string? search = null, Guid? personId = null, CancellationToken cancellationToken = default)
+        public async Task<(List<(FamilyRepresentative Family, bool WasPreviouslyLinked)> Items, int Total)> GetAvailableFamiliesAsync(
+            string? search = null, Guid? personId = null,
+            int page = 1, int pageSize = 50,
+            CancellationToken cancellationToken = default)
         {
             var query = _context.FamilyRepresentatives
                 .Include(f => f.User)
                 .Include(f => f.PersonRepresentatives)
                     .ThenInclude(pr => pr.Person)
                         .ThenInclude(p => p.DisabilityType)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .Where(f => f.User.IsActive && f.Status == Domain.Enums.FamilyStatusEnum.Active)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var searchLower = search.ToLower();
+                var pattern = $"%{search}%";
                 query = query.Where(f =>
-                    (f.FirstName + " " + f.LastName).Contains(searchLower) ||
-                    f.FirstName.Contains(searchLower) ||
-                    f.LastName.Contains(searchLower));
+                    EF.Functions.ILike(f.FirstName, pattern) ||
+                    EF.Functions.ILike(f.LastName, pattern) ||
+                    EF.Functions.ILike(f.FirstName + " " + f.LastName, pattern));
             }
 
-            var families = await query.OrderBy(f => f.FirstName).ThenBy(f => f.LastName).ToListAsync(cancellationToken);
-
+            // Exclude families already actively linked to the person (DB-side)
             if (personId.HasValue)
             {
-                var existingLinks = await _context.PersonRepresentatives
-                    .Where(pr => pr.PersonId == personId.Value)
-                    .ToListAsync(cancellationToken);
-
-                var alreadyLinkedIds = existingLinks
-                    .Where(pr => pr.IsActive)
-                    .Select(pr => pr.RepresentativeId)
-                    .ToHashSet();
-
-                var previouslyLinkedIds = existingLinks
-                    .Where(pr => !pr.IsActive)
-                    .Select(pr => pr.RepresentativeId)
-                    .ToHashSet();
-
-                return families
-                    .Where(f => !alreadyLinkedIds.Contains(f.Id))
-                    .Select(f => (f, WasPreviouslyLinked: previouslyLinkedIds.Contains(f.Id)))
-                    .ToList();
+                query = query.Where(f =>
+                    !_context.PersonRepresentatives.Any(pr =>
+                        pr.PersonId == personId.Value &&
+                        pr.RepresentativeId == f.Id &&
+                        pr.IsActive));
             }
 
-            return families.Select(f => (f, WasPreviouslyLinked: false)).ToList();
+            var orderedQuery = query.OrderBy(f => f.FirstName).ThenBy(f => f.LastName);
+
+            var paged   = await orderedQuery.ToPagedAsync(page, pageSize, cancellationToken);
+            var total   = paged.TotalRecords;
+            var families = paged.Data;
+
+            if (personId.HasValue && families.Count > 0)
+            {
+                // Load inactive link states for this page only (to compute WasPreviouslyLinked)
+                var familyIds = families.Select(f => f.Id).ToList();
+                var previouslyLinkedIds = await _context.PersonRepresentatives
+                    .Where(pr => pr.PersonId == personId.Value
+                              && !pr.IsActive
+                              && familyIds.Contains(pr.RepresentativeId))
+                    .Select(pr => pr.RepresentativeId)
+                    .ToHashSetAsync(cancellationToken);
+
+                return (families
+                    .Select(f => (f, WasPreviouslyLinked: previouslyLinkedIds.Contains(f.Id)))
+                    .ToList(), total);
+            }
+
+            return (families.Select(f => (f, WasPreviouslyLinked: false)).ToList(), total);
         }
 
         public async Task<List<PersonRepresentative>> GetPersonRepresentativesByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default)
@@ -262,6 +275,18 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(h => h.RepresentativeId == familyId)
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<PersonWithDisability>> GetLinkedPersonsAsync(
+            Guid familyUserId, CancellationToken cancellationToken = default)
+        {
+            return await (
+                from fam in _context.FamilyRepresentatives
+                join pr  in _context.PersonRepresentatives on fam.Id       equals pr.RepresentativeId
+                join p   in _context.PersonsWithDisability  on pr.PersonId  equals p.Id
+                where fam.UserId == familyUserId && pr.IsActive && p.IsActive
+                select p
+            ).AsNoTracking().ToListAsync(cancellationToken);
         }
     }
 }

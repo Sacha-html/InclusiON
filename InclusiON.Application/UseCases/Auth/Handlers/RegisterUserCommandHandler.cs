@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Auth.Commands;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
 using InclusiON.Shared.Resources;
 
