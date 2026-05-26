@@ -1,10 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ReportsService, ToastService } from '@services';
+import { CatalogsService, ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse } from '@models/responses/reports/report.response';
-import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
+import { CatalogItem, ReportListItemResponse, GetReportsRequest } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import {
@@ -33,6 +32,7 @@ import {
 export class ListComponent implements OnInit {
   private readonly reportsService = inject(ReportsService);
   private readonly toastService = inject(ToastService);
+  private readonly catalogsService = inject(CatalogsService);
   private readonly router = inject(Router);
 
   reports = signal<ReportListItemResponse[]>([]);
@@ -41,17 +41,15 @@ export class ListComponent implements OnInit {
   pageSize = signal(10);
   totalRecords = signal(0);
 
+  sortBy = 'createdAt';
+  sortDirection = 'DESC';
+
   // Filtros
   typeFilter = '';
   dateFrom = '';
   dateTo = '';
 
-  readonly reportTypes = [
-    { id: 1, name: 'Evaluación Mensual' },
-    { id: 2, name: 'Informe de Progreso' },
-    { id: 3, name: 'Evaluación Trimestral' },
-    { id: 4, name: 'Informe Anual' },
-  ];
+  reportTypes = signal<CatalogItem[]>([]);
 
   columns: TableColumn[] = [
     {
@@ -59,8 +57,17 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
-        { action: 'view', label: 'Ver reporte', icon: 'cil-search' },
+        { action: 'view', label: 'Ver reporte', icon: 'cilSearch' },
       ],
+    },
+    {
+      key: 'isReadByFamily',
+      label: '',
+      type: 'badge',
+      badgeMap: {
+        'false': { color: 'danger', label: 'Nuevo' },
+        'true':  { color: 'light',  label: ''      },
+      },
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
     { key: 'title', label: 'Título', sortable: true },
@@ -70,6 +77,7 @@ export class ListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
     this.loadReports();
   }
 
@@ -78,8 +86,8 @@ export class ListComponent implements OnInit {
     const request: GetReportsRequest = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
-      sortBy: 'reportDate',
-      sortDirection: 'desc',
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
       dateTo: this.dateTo || undefined,
@@ -111,13 +119,15 @@ export class ListComponent implements OnInit {
     this.loadReports();
   }
 
-  onSort(_event: { sortBy: string; sortDirection: string }): void {
+  onSort(event: { sortBy: string; sortDirection: string }): void {
+    this.sortBy = event.sortBy;
+    this.sortDirection = event.sortDirection;
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     if (event.action === 'view') {
-      this.router.navigate([AppRoutes.Family.Reports, event.item.id]);
+      this.router.navigate([AppRoutes.Family.Reports, event.item.encryptedId]);
     }
   }
 }

@@ -1,46 +1,47 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { NgSelectModule } from '@ng-select/ng-select';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { map } from 'rxjs';
 import { AssignmentsService, PersonsService, ToastService } from '@services';
 import {
   PersonListItemResponse,
   ProfessionalPersonResponse,
 } from '@models';
+import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
 import {
-  BadgeComponent,
   ButtonDirective,
   FormCheckComponent,
   FormCheckInputDirective,
   FormCheckLabelDirective,
-  FormLabelDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
   SpinnerComponent,
-  TableDirective,
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-professional-persons',
   standalone: true,
   imports: [
-    BadgeComponent,
     ButtonDirective,
     FormCheckComponent,
     FormCheckInputDirective,
     FormCheckLabelDirective,
-    FormLabelDirective,
     ModalBodyComponent,
     ModalComponent,
     ModalFooterComponent,
     ModalHeaderComponent,
     SpinnerComponent,
-    TableDirective,
     ReactiveFormsModule,
-    NgSelectModule,
+    FormsModule,
     IconModule,
+    SearchableSelectComponent,
+    DataTableComponent,
+    ConfirmModalComponent,
   ],
   templateUrl: './professional-persons.component.html',
   styleUrl: './professional-persons.component.scss',
@@ -55,7 +56,6 @@ export class ProfessionalPersonsComponent implements OnInit {
   private readonly personsService = inject(PersonsService);
   private readonly toastService = inject(ToastService);
 
-  availablePersons: PersonListItemResponse[] = [];
   showAssignPersonModal = signal(false);
   showDeactivatePersonModal = signal(false);
   personToDeactivate = signal<ProfessionalPersonResponse | null>(null);
@@ -67,27 +67,66 @@ export class ProfessionalPersonsComponent implements OnInit {
     canSuperviseLogin: [false],
   });
 
-  searchPersonFn = (term: string, item: PersonListItemResponse): boolean => {
-    const lower = term.toLowerCase();
-    return (
-      (item.fullName?.toLowerCase().includes(lower) ||
-        item.documentNumber?.toLowerCase().includes(lower)) ??
-      false
+  /** searchFn para SearchableSelectComponent — server-side, excluye ya asignados */
+  readonly searchPersonsFn = (query: string) => {
+    const assignedIds = new Set(this.persons.filter(p => p.isActive).map(p => p.personId));
+    return this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
+      map(r => r.data.filter(p => !assignedIds.has(p.id)))
     );
   };
+
+  readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => p.disabilityTypeName ?? '';
+  readonly valueFromPerson = (p: PersonListItemResponse) => p.id;
+
+  columns: TableColumn[] = [
+    { key: 'personFullName', label: 'Nombre' },
+    {
+      key: 'isPrimaryProfessional',
+      label: 'Principal',
+      type: 'badge',
+      badgeMap: {
+        'true':  { color: 'success',   label: 'Sí' },
+        'false': { color: 'secondary', label: 'No' },
+      },
+    },
+    {
+      key: 'canSuperviseLogin',
+      label: 'Supervisa login',
+      type: 'badge',
+      badgeMap: {
+        'true':  { color: 'success',   label: 'Sí' },
+        'false': { color: 'secondary', label: 'No' },
+      },
+    },
+    {
+      key: 'isActive',
+      label: 'Estado',
+      type: 'badge',
+      badgeMap: {
+        'true':  { color: 'success', label: 'Activo'   },
+        'false': { color: 'danger',  label: 'Inactivo' },
+      },
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      type: 'actions',
+      actions: [
+        { action: 'deactivate', label: 'Desasignar', icon: 'cilUserUnfollow', visible: (item) => item.isActive },
+      ],
+    },
+  ];
+
+  onRowAction(event: { action: string; item: ProfessionalPersonResponse }): void {
+    if (event.action === 'deactivate') this.openDeactivatePersonModal(event.item);
+  }
 
   ngOnInit(): void {}
 
   openAssignPersonModal(): void {
     this.assignPersonForm.reset({ personId: null, isPrimaryProfessional: false, canSuperviseLogin: false });
-    this.personsService.getPersons({ pageSize: 1000, isActive: true }).subscribe({
-      next: (response) => {
-        const assignedIds = new Set(this.persons.filter((p) => p.isActive).map((p) => p.personId));
-        this.availablePersons = response.data.filter((p) => !assignedIds.has(p.id));
-        this.showAssignPersonModal.set(true);
-      },
-      error: () => this.toastService.error('Error al cargar personas disponibles'),
-    });
+    this.showAssignPersonModal.set(true);
   }
 
   confirmAssignPerson(): void {

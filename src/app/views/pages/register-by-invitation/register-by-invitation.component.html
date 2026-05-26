@@ -7,8 +7,8 @@
         @if (isLoading) {
           <c-card class="text-center p-5">
             <c-card-body>
-              <c-spinner color="primary"></c-spinner>
-              <p class="mt-3">Validando invitacion...</p>
+              <c-spinner color="primary" aria-hidden="true"></c-spinner>
+              <p class="mt-3">Validando invitación...</p>
             </c-card-body>
           </c-card>
         }
@@ -20,7 +20,7 @@
               <div class="mb-4">
                 <i class="cil-warning text-danger" style="font-size: 3rem;"></i>
               </div>
-              <h4 class="text-danger mb-3">Invitacion no valida</h4>
+              <h4 class="text-danger mb-3">Invitación no válida</h4>
               <c-alert color="danger">{{ errorMessage }}</c-alert>
               <button cButton color="primary" class="mt-3 a11y-btn-primary" (click)="router.navigate(['/login'])">
                 Ir al inicio
@@ -50,7 +50,7 @@
               <h4 class="mb-0">Registro Familiar</h4>
               @if (invitationData.personName) {
                 <small style="color: var(--a11y-text-muted)">
-                  Vinculacion con: <strong>{{ invitationData.personName }}</strong>
+                  Vinculación con: <strong>{{ invitationData.personName }}</strong>
                 </small>
               }
             </c-card-header>
@@ -66,27 +66,28 @@
 
                 <!-- Readonly fields -->
                 <div class="mb-3">
-                  <label cFormLabel>Nombre</label>
-                  <input cFormControl formControlName="firstName" />
+                  <label cFormLabel for="firstName">Nombre</label>
+                  <input cFormControl id="firstName" formControlName="firstName" />
                 </div>
 
                 <div class="mb-3">
-                  <label cFormLabel>Apellido</label>
-                  <input cFormControl formControlName="lastName" />
+                  <label cFormLabel for="lastName">Apellido</label>
+                  <input cFormControl id="lastName" formControlName="lastName" />
                 </div>
 
                 <div class="mb-3">
-                  <label cFormLabel>Parentesco</label>
-                  <input cFormControl formControlName="relationship" />
+                  <label cFormLabel for="relationship">Parentesco</label>
+                  <input cFormControl id="relationship" formControlName="relationship" />
                 </div>
 
                 <hr />
 
                 <!-- Editable fields -->
                 <div class="mb-3">
-                  <label cFormLabel>Email</label>
+                  <label cFormLabel for="invEmail">Email</label>
                   <input
                     cFormControl
+                    id="invEmail"
                     formControlName="email"
                     type="email"
                     [valid]="f['email'].touched ? f['email'].valid : undefined"
@@ -97,22 +98,25 @@
                 </div>
 
                 <div class="mb-3">
-                  <label cFormLabel>Contraseña</label>
+                  <label cFormLabel for="invPassword">Contraseña</label>
                   <c-input-group>
                     <input
                       cFormControl
+                      id="invPassword"
                       formControlName="password"
                       [type]="showPassword ? 'text' : 'password'"
-                      placeholder="Minimo 8 caracteres"
+                      placeholder="Mínimo 8 caracteres"
                       [valid]="f['password'].touched ? f['password'].valid : undefined"
                     />
                     <button
                       type="button"
                       cInputGroupText
                       (click)="togglePasswordVisibility()"
+                      [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                      [attr.aria-pressed]="showPassword"
                       style="cursor: pointer;"
                     >
-                      <svg cIcon [name]="showPassword ? 'cil-low-vision' : 'cil-magnifying-glass'"></svg>
+                      <svg cIcon [name]="showPassword ? 'cil-low-vision' : 'cil-magnifying-glass'" aria-hidden="true"></svg>
                     </button>
                   </c-input-group>
                   @if (f['password'].touched && f['password'].invalid) {
@@ -121,10 +125,11 @@
                 </div>
 
                 <div class="mb-4">
-                  <label cFormLabel>Confirmar contraseña</label>
+                  <label cFormLabel for="invConfirmPassword">Confirmar contraseña</label>
                   <c-input-group>
                     <input
                       cFormControl
+                      id="invConfirmPassword"
                       formControlName="confirmPassword"
                       [type]="showConfirmPassword ? 'text' : 'password'"
                       placeholder="Repite la contraseña"
@@ -134,9 +139,11 @@
                       type="button"
                       cInputGroupText
                       (click)="toggleConfirmPasswordVisibility()"
+                      [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                      [attr.aria-pressed]="showConfirmPassword"
                       style="cursor: pointer;"
                     >
-                      <svg cIcon [name]="showConfirmPassword ? 'cil-low-vision' : 'cil-magnifying-glass'"></svg>
+                      <svg cIcon [name]="showConfirmPassword ? 'cil-low-vision' : 'cil-magnifying-glass'" aria-hidden="true"></svg>
                     </button>
                   </c-input-group>
                   @if (hasError('confirmPassword', 'required')) {
@@ -153,9 +160,11 @@
                     [disabled]="isSubmitting"
                   >
                     @if (isSubmitting) {
-                      <c-spinner size="sm" class="me-2"></c-spinner>
+                      <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
+                      <span>Enviando...</span>
+                    } @else {
+                      <span>Completar registro</span>
                     }
-                    Completar registro
                   </button>
                 </div>
 

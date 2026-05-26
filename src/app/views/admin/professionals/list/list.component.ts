@@ -3,22 +3,20 @@ import { Router } from '@angular/router';
 import { AuthService, ProfessionalsService, ToastService, UserManagementService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ValidationStatus } from '@shared/constants/status-labels';
-import { ProfessionalListItemResponse, ValidateProfessionalRequest } from '../../../../models';
-import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { ProfessionalListItemResponse, ValidateProfessionalRequest } from '@models';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 import { NavModule, ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormLabelDirective, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-list',
   standalone: true,
   imports: [
-    CommonModule,
     DatePipe,
     DataTableComponent,
     ConfirmModalComponent,
@@ -90,39 +88,47 @@ export class ListComponent implements OnInit {
   tempPassword = '';
   tempPasswordEmail = '';
 
+  readonly statusMap: Record<string, { color: string; label: string }> = {
+    'pending':    { color: 'warning',   label: 'Pendiente'    },
+    'approved':   { color: 'success',   label: 'Aprobado'     },
+    'terminated': { color: 'secondary', label: 'Dado de baja' },
+    'suspended':  { color: 'warning',   label: 'Suspendido'   },
+    'rejected':   { color: 'danger',    label: 'Rechazado'    },
+  };
+
   public cols: TableColumn[] = [
-    {
-      key: 'actions', label: 'Acciones', type: 'actions',
-      actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        { action: 'reset-password', label: 'Resetear', icon: 'cil-reload', visible: (item) => item.status === 'Approved' },
-        { action: 'history', label: 'Historial', icon: 'cilHistory' },
-        { action: 'persons', label: 'Personas', icon: 'cil-people' },
-        { action: 'institutions', label: 'Instituciones', icon: 'cil-book' },
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === 'Approved' },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.status === 'Approved' },
-        { action: 'reactivate', label: 'Reactivar', icon: 'cil-reload', visible: (item) => item.status !== 'Approved' },
-      ],
-    },
     { key: 'fullName', label: 'Nombre', sortable: true },
     { key: 'specialty', label: 'Especialidad', sortable: true },
     { key: 'licenseNumber', label: 'Matrícula', sortable: true },
-    { key: 'status', label: 'Estado', type: 'badge', sortable: true },
-  ];
-
-  public pendingCols: TableColumn[] = [
+    { key: 'status', label: 'Estado', type: 'badge', sortable: true, badgeMap: this.statusMap },
     {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
-        { action: 'approve', label: 'Aprobar', icon: 'cil-check' },
-        { action: 'reject', label: 'Rechazar', icon: 'cil-x' },
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        { action: 'reset-password', label: 'Resetear', icon: 'cilReload', visible: (item) => item.status === 'Approved' },
+        { action: 'history', label: 'Historial', icon: 'cilHistory' },
+        { action: 'persons', label: 'Personas', icon: 'cilPeople' },
+        { action: 'institutions', label: 'Instituciones', icon: 'cilBook' },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.status === 'Approved' },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.status === 'Approved' },
+        { action: 'reactivate', label: 'Reactivar', icon: 'cilReload', visible: (item) => item.status !== 'Approved' },
       ],
     },
+  ];
+
+  public pendingCols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre', sortable: true },
     { key: 'email', label: 'Email', sortable: true },
     { key: 'specialty', label: 'Especialidad', sortable: true },
     { key: 'licenseNumber', label: 'Matrícula', sortable: true },
     { key: 'createdAt', label: 'Fecha de solicitud', type: 'date', sortable: true },
+    {
+      key: 'actions', label: 'Acciones', type: 'actions',
+      actions: [
+        { action: 'approve', label: 'Aprobar', icon: 'cilCheck' },
+        { action: 'reject', label: 'Rechazar', icon: 'cilX' },
+      ],
+    },
   ];
 
   ngOnInit(): void {
@@ -476,7 +482,12 @@ export class ListComponent implements OnInit {
     const headers = Object.keys(data[0]);
     const csvContent = [
       headers.join(','),
-      ...data.map(row => headers.map(h => `"${(row as any)[h] ?? ''}"`).join(','))
+      ...data.map(row =>
+        headers.map(h => {
+          const val = String((row as any)[h] ?? '');
+          return `"${val.replaceAll('"', '""')}"`;
+        }).join(',')
+      ),
     ].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -487,25 +498,4 @@ export class ListComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
-  getBadgeColor(value: string): string {
-    switch (value?.toLowerCase()) {
-      case 'pending':    return 'warning';
-      case 'approved':   return 'success';
-      case 'terminated': return 'secondary';
-      case 'suspended':  return 'warning';
-      case 'rejected':   return 'danger';
-      default:           return 'info';
-    }
-  }
-
-  getBadgeLabel(value: string): string {
-    switch (value?.toLowerCase()) {
-      case 'pending':    return ValidationStatus.Pendiente;
-      case 'approved':   return ValidationStatus.Aprobado;
-      case 'terminated': return 'Dado de baja';
-      case 'suspended':  return 'Suspendido';
-      case 'rejected':   return ValidationStatus.Rechazado;
-      default:           return value ?? '';
-    }
-  }
 }

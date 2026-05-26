@@ -4,11 +4,12 @@ import { ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService, CatalogAdminService, ToastService } from '@services';
 import { ActiveStatus } from '@shared/constants/status-labels';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn, ActionItem, HeaderButton } from '@shared/components/data-table/data-table.models';
 import { Observable } from 'rxjs';
 
 import {
-  CardComponent, CardBodyComponent, CardHeaderComponent,
-  TableDirective, ButtonDirective, BadgeComponent, SpinnerComponent,
+  ButtonDirective, SpinnerComponent,
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
   FormControlDirective, FormLabelDirective, FormSelectDirective,
   FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
@@ -29,12 +30,12 @@ interface FieldConfig {
 interface CatalogConfig {
   title: string;
   canCreate: boolean;
-  columns: { key: string; label: string; render?: (item: any) => string; badge?: (item: any) => { text: string; color: string } }[];
+  columns: TableColumn[];
   fields: FieldConfig[];
   load: () => Observable<any[]>;
   create?: (v: any) => Observable<any>;
-  update: (id: number, v: any) => Observable<any>;
-  deactivate?: (id: number) => Observable<any>;
+  update: (id: string, v: any) => Observable<any>;
+  deactivate?: (id: string) => Observable<any>;
 }
 
 @Component({
@@ -42,8 +43,8 @@ interface CatalogConfig {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    CardComponent, CardBodyComponent, CardHeaderComponent,
-    TableDirective, ButtonDirective, BadgeComponent, SpinnerComponent,
+    DataTableComponent,
+    ButtonDirective, SpinnerComponent,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
     FormControlDirective, FormLabelDirective, FormSelectDirective,
     FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
@@ -65,7 +66,7 @@ export class CatalogsComponent implements OnInit {
   isSaving = false;
   showModal = false;
   modalTitle = '';
-  editingId: number | null = null;
+  editingId: string | null = null;
   form: FormGroup | null = null;
 
   showDeactivateModal = false;
@@ -74,14 +75,48 @@ export class CatalogsComponent implements OnInit {
 
   private skillAreasCache: { id: number; name: string }[] = [];
 
+  readonly headerButtons: HeaderButton[] = [
+    { action: 'create', label: 'Agregar', color: 'primary' },
+  ];
+
+  get tableColumns(): TableColumn[] {
+    const actions: ActionItem[] = [
+      { action: 'edit', label: 'Editar', icon: 'cilPencil' },
+    ];
+    if (this.config.deactivate) {
+      actions.push({
+        action: 'deactivate',
+        label: 'Dar de baja',
+        icon: 'cilXCircle',
+        visible: (item: any) => item.isActive !== false,
+      });
+    }
+    return [
+      ...this.config.columns,
+      { key: '', label: 'Acciones', type: 'actions', actions },
+    ];
+  }
+
+  onHeaderAction(action: string): void {
+    if (action === 'create') this.openNew();
+  }
+
+  onRowAction(event: { action: string; item: any }): void {
+    if (event.action === 'edit') this.openEdit(event.item);
+    if (event.action === 'deactivate') this.openDeactivate(event.item);
+  }
+
   private configs: Record<CatalogType, CatalogConfig> = {
     'disability-types': {
       title: 'Tipos de Discapacidad',
       canCreate: true,
       columns: [
-        { key: 'name', label: 'Nombre' },
+        { key: 'name',        label: 'Nombre' },
         { key: 'description', label: 'Descripcion' },
-        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
+        { key: 'isActive',    label: 'Estado', type: 'badge', badgeMap: {
+          'true':  { color: 'success', label: ActiveStatus.Activo   },
+          'false': { color: 'danger',  label: ActiveStatus.Inactivo },
+        }},
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -97,11 +132,17 @@ export class CatalogsComponent implements OnInit {
       title: 'Niveles de Autonomia',
       canCreate: true,
       columns: [
-        { key: 'name', label: 'Nombre' },
-        { key: 'description', label: 'Descripcion' },
-        { key: 'requiresSupervision', label: 'Requiere Supervision', badge: (item) => ({ text: item.requiresSupervision ? 'Si' : 'No', color: item.requiresSupervision ? 'warning' : 'success' }) },
+        { key: 'name',                label: 'Nombre' },
+        { key: 'description',         label: 'Descripcion' },
+        { key: 'requiresSupervision', label: 'Supervision', type: 'badge', badgeMap: {
+          'true':  { color: 'warning', label: 'Si' },
+          'false': { color: 'success', label: 'No' },
+        }},
         { key: 'displayOrder', label: 'Orden' },
-        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
+        { key: 'isActive',     label: 'Estado', type: 'badge', badgeMap: {
+          'true':  { color: 'success', label: ActiveStatus.Activo   },
+          'false': { color: 'danger',  label: ActiveStatus.Inactivo },
+        }},
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -118,9 +159,12 @@ export class CatalogsComponent implements OnInit {
       title: 'Categorias de Actividad',
       canCreate: true,
       columns: [
-        { key: 'name', label: 'Nombre' },
+        { key: 'name',        label: 'Nombre' },
         { key: 'description', label: 'Descripcion' },
-        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
+        { key: 'isActive',    label: 'Estado', type: 'badge', badgeMap: {
+          'true':  { color: 'success', label: ActiveStatus.Activo   },
+          'false': { color: 'danger',  label: ActiveStatus.Inactivo },
+        }},
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -136,11 +180,14 @@ export class CatalogsComponent implements OnInit {
       title: 'Areas de Habilidad',
       canCreate: true,
       columns: [
-        { key: 'name', label: 'Nombre' },
-        { key: 'icon', label: 'Icono' },
-        { key: 'color', label: 'Color' },
+        { key: 'name',         label: 'Nombre' },
+        { key: 'icon',         label: 'Icono' },
+        { key: 'color',        label: 'Color',  type: 'color' },
         { key: 'displayOrder', label: 'Orden' },
-        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
+        { key: 'isActive',     label: 'Estado', type: 'badge', badgeMap: {
+          'true':  { color: 'success', label: ActiveStatus.Activo   },
+          'false': { color: 'danger',  label: ActiveStatus.Inactivo },
+        }},
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -158,12 +205,21 @@ export class CatalogsComponent implements OnInit {
       title: 'Tipos de Template',
       canCreate: true,
       columns: [
-        { key: 'name', label: 'Nombre' },
-        { key: 'code', label: 'Codigo' },
-        { key: 'skillAreaName', label: 'Area' },
-        { key: 'supportsPictograms', label: 'Pictogramas', badge: (item) => ({ text: item.supportsPictograms ? 'Si' : 'No', color: item.supportsPictograms ? 'success' : 'secondary' }) },
-        { key: 'supportsAudio', label: 'Audio', badge: (item) => ({ text: item.supportsAudio ? 'Si' : 'No', color: item.supportsAudio ? 'success' : 'secondary' }) },
-        { key: 'isActive', label: 'Estado', badge: (item) => ({ text: item.isActive ? ActiveStatus.Activo : ActiveStatus.Inactivo, color: item.isActive ? 'success' : 'danger' }) },
+        { key: 'name',               label: 'Nombre' },
+        { key: 'code',               label: 'Codigo',      type: 'code' },
+        { key: 'skillAreaName',      label: 'Area' },
+        { key: 'supportsPictograms', label: 'Pictogramas', type: 'badge', badgeMap: {
+          'true':  { color: 'success',   label: 'Si' },
+          'false': { color: 'secondary', label: 'No' },
+        }},
+        { key: 'supportsAudio',      label: 'Audio',       type: 'badge', badgeMap: {
+          'true':  { color: 'success',   label: 'Si' },
+          'false': { color: 'secondary', label: 'No' },
+        }},
+        { key: 'isActive',           label: 'Estado',      type: 'badge', badgeMap: {
+          'true':  { color: 'success', label: ActiveStatus.Activo   },
+          'false': { color: 'danger',  label: ActiveStatus.Inactivo },
+        }},
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
@@ -181,8 +237,8 @@ export class CatalogsComponent implements OnInit {
       title: 'Metodos de Login',
       canCreate: false,
       columns: [
-        { key: 'name', label: 'Nombre' },
-        { key: 'code', label: 'Codigo' },
+        { key: 'name',        label: 'Nombre' },
+        { key: 'code',        label: 'Codigo', type: 'code' },
         { key: 'description', label: 'Descripcion' },
       ],
       fields: [
@@ -240,7 +296,7 @@ export class CatalogsComponent implements OnInit {
   }
 
   openEdit(item: any): void {
-    this.editingId = item.id;
+    this.editingId = item.id.toString();
     this.modalTitle = `Editar - ${this.config.title}`;
     this.buildForm(item);
     this.showModal = true;
@@ -276,10 +332,6 @@ export class CatalogsComponent implements OnInit {
     });
   }
 
-  getCellValue(item: any, col: any): string {
-    return item[col.key] ?? '-';
-  }
-
   openDeactivate(item: any): void {
     this.deactivatingItem = item;
     this.showDeactivateModal = true;
@@ -294,7 +346,7 @@ export class CatalogsComponent implements OnInit {
     if (!this.deactivatingItem || !this.config.deactivate) return;
     this.isDeactivating = true;
 
-    this.config.deactivate(this.deactivatingItem.id).subscribe({
+    this.config.deactivate(this.deactivatingItem.id.toString()).subscribe({
       next: () => {
         this.isDeactivating = false;
         this.showDeactivateModal = false;

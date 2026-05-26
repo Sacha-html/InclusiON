@@ -1,0 +1,73 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || 'Elegí la respuesta correcta.'"
+    [hint]="hint"
+    [loading]="isLoading()"
+    [error]="errorMsg()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="region" aria-labelledby="game-question">
+
+    <!-- Instrucción pequeña -->
+    @if (content.instruction) {
+      <p class="game-instruction-small">{{ content.instruction }}</p>
+    }
+
+    <!-- Pregunta prominente -->
+    <h2 class="game-question" id="game-question" tabindex="-1">
+      {{ content.question }}
+    </h2>
+
+    <!-- Opciones -->
+    <div class="options-grid"
+         role="group"
+         aria-label="Opciones de respuesta"
+         [attr.aria-disabled]="selectedOptionId() !== null">
+      @for (option of options; track option.id) {
+        <button
+          class="option-btn"
+          [class]="'option-btn--' + optionState(option)"
+          [disabled]="selectedOptionId() !== null"
+          (click)="selectOption(option)"
+          [attr.aria-label]="option.text"
+          [attr.aria-pressed]="selectedOptionId() === option.id"
+        >
+          @if (option.pictogramId) {
+            <img
+              [src]="pictogramUrl(option.pictogramId)"
+              [alt]="option.text"
+              class="option-img"
+              aria-hidden="true"
+            />
+          }
+          <span class="option-text">{{ option.text }}</span>
+          @if (optionState(option) === 'correct') {
+            <span class="option-badge" aria-hidden="true">✅</span>
+          }
+          @if (optionState(option) === 'wrong') {
+            <span class="option-badge" aria-hidden="true">❌</span>
+          }
+          @if (optionState(option) === 'reveal') {
+            <span class="option-badge" aria-hidden="true">⭐</span>
+          }
+        </button>
+      }
+    </div>
+
+  </div>
+}
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="!!isCorrect()"
+    [message]="resultMessage"
+    [loading]="isLoading()"
+    [canRetry]="!isCorrect()"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

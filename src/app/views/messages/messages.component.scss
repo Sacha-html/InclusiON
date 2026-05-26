@@ -1,0 +1,113 @@
+.msg-tabs {
+  .msg-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--cui-body-color);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+
+    &:hover {
+      color: var(--cui-primary);
+    }
+
+    &--active {
+      color: var(--cui-primary);
+      font-weight: 600;
+      border-bottom-color: var(--cui-primary);
+    }
+  }
+}
+
+.msg-item {
+  cursor: pointer;
+  transition: background-color 0.12s;
+
+  &:last-child {
+    border-bottom: none !important;
+  }
+
+  &:hover {
+    background-color: var(--cui-tertiary-bg, rgba(0, 0, 0, 0.03));
+  }
+
+  &--active {
+    background-color: var(--cui-secondary-bg) !important;
+  }
+
+  &--unread {
+    .msg-sender {
+      font-weight: 600;
+    }
+
+    .msg-subject {
+      font-weight: 500;
+      color: var(--cui-body-color);
+    }
+  }
+}
+
+.msg-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(var(--cui-primary-rgb, 13, 110, 253), 0.1);
+  color: var(--cui-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+
+  &--lg {
+    width: 42px;
+    height: 42px;
+    font-size: 0.875rem;
+  }
+}
+
+.msg-sender {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--cui-body-color);
+}
+
+.msg-subject {
+  font-size: 0.8125rem;
+  color: var(--cui-secondary-color);
+  margin-top: 1px;
+}
+
+.msg-preview {
+  font-size: 0.75rem;
+  color: var(--cui-secondary-color);
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+.msg-date {
+  font-size: 0.7rem;
+  color: var(--cui-secondary-color);
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.msg-unread-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--cui-primary);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

@@ -86,7 +86,7 @@
       Cancelar
     </button>
     <button cButton color="primary" [disabled]="!isValid || isSaving() || isLoadingPersons()" (click)="save()">
-      @if (isSaving()) { <c-spinner size="sm" class="me-1" /> }
+      @if (isSaving()) { <c-spinner size="sm" class="me-1" aria-hidden="true" /> }
       Asignar
     </button>
   </c-modal-footer>

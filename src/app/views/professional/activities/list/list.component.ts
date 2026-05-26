@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ActivitiesService } from '@services/activities.service';
@@ -6,9 +7,7 @@ import { AuthService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { CatalogsService } from '@services/catalogs.service';
-import { ActivityListItemResponse } from '@models/responses/activity.response';
-import { GetActivitiesRequest } from '@models/requests/activities';
-import { ActivityCategoryItem, ActivityTemplateTypeItem } from '@models';
+import { ActivityListItemResponse, GetActivitiesRequest, ActivityCategoryItem, ActivityTemplateTypeItem } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
@@ -20,6 +19,7 @@ import {
   GridModule,
   SpinnerComponent,
 } from '@coreui/angular';
+import { Subject, debounceTime, distinctUntilChanged, filter } from 'rxjs';
 
 @Component({
   selector: 'app-activities-list',
@@ -40,10 +40,14 @@ import {
   styleUrl: './list.component.scss',
 })
 export class ListComponent implements OnInit {
+  readonly #destroyRef = inject(DestroyRef);
+  readonly #semanticInput$ = new Subject<string>();
+
   private readonly activitiesService = inject(ActivitiesService);
   private readonly catalogsService   = inject(CatalogsService);
   private readonly toastService      = inject(ToastService);
   private readonly authService       = inject(AuthService);
+  #el = inject(ElementRef<HTMLElement>);
   private readonly router            = inject(Router);
 
   canCreate = this.authService.hasPermission(Permissions.Activities.Create);
@@ -58,6 +62,8 @@ export class ListComponent implements OnInit {
   totalRecords  = signal(0);
   totalPages    = signal(0);
   searchTerm    = signal('');
+  sortBy        = signal('title');
+  sortDirection = signal<'asc' | 'desc'>('asc');
 
   categoryFilter     = '';
   templateTypeFilter = '';
@@ -79,17 +85,6 @@ export class ListComponent implements OnInit {
   itemToAssign: ActivityListItemResponse | null = null;
 
   columns: TableColumn[] = [
-    {
-      key: 'actions',
-      label: 'Acciones',
-      type: 'actions',
-      actions: [
-        { action: 'assign',     label: 'Asignar',    icon: 'cil-send',  visible: (item) => item.isActive },
-        { action: 'edit',       label: 'Editar',     icon: 'cil-notes', visible: (item) => this.canUpdate && !item.isStandardActivity },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cil-ban',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
-        { action: 'activate',   label: 'Activar',    icon: 'cil-check', visible: (item) => this.canUpdate && !item.isActive && !item.isStandardActivity },
-      ],
-    },
     { key: 'title',            label: 'Título',       sortable: true },
     { key: 'templateTypeName', label: 'Tipo',         sortable: true },
     { key: 'categoryName',     label: 'Categoría',    sortable: true },
@@ -114,6 +109,18 @@ export class ListComponent implements OnInit {
         false: { color: 'primary', label: 'Propia'   },
       },
     },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      type: 'actions',
+      actions: [
+        { action: 'view',       label: 'Ver',        icon: 'cilMagnifyingGlass', visible: () => true },
+        { action: 'assign',     label: 'Asignar',    icon: 'cilSend',  visible: (item) => item.isActive },
+        { action: 'edit',       label: 'Editar',     icon: 'cilNotes', visible: (item) => this.canUpdate && !item.isStandardActivity },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cilBan',   visible: (item) => this.canUpdate && item.isActive && !item.isStandardActivity },
+        { action: 'activate',   label: 'Activar',    icon: 'cilCheck', visible: (item) => this.canUpdate && !item.isActive && !item.isStandardActivity },
+      ],
+    },
   ];
 
   get headerButtons() {
@@ -125,6 +132,17 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.loadCatalogs();
     this.loadActivities();
+    setTimeout(() => {
+      const h = this.#el.nativeElement.querySelector('h1') as HTMLElement;
+      h?.focus();
+    }, 80);
+
+    this.#semanticInput$.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      filter(() => this.semanticMode()),
+      takeUntilDestroyed(this.#destroyRef),
+    ).subscribe(() => this.runSemanticSearch());
   }
 
   private loadCatalogs(): void {
@@ -146,8 +164,8 @@ export class ListComponent implements OnInit {
       templateTypeId: this.templateTypeFilter ? +this.templateTypeFilter : undefined,
       isActive:       this.statusFilter  !== '' ? this.statusFilter  === 'true' : undefined,
       isStandard:     this.standardFilter !== '' ? this.standardFilter === 'true' : undefined,
-      sortBy:         'title',
-      sortDirection:  'asc',
+      sortBy:         this.sortBy(),
+      sortDirection:  this.sortDirection(),
     };
 
     this.activitiesService.getActivities(request).subscribe({
@@ -163,7 +181,12 @@ export class ListComponent implements OnInit {
 
   onSearch(term: string): void     { this.searchTerm.set(term); this.currentPage.set(1); this.loadActivities(); }
   onPageChange(page: number): void { this.currentPage.set(page); this.loadActivities(); }
-  onSort(_: unknown): void         { this.loadActivities(); }
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
+    this.sortBy.set(event.sortBy);
+    this.sortDirection.set(event.sortDirection.toLowerCase() as 'asc' | 'desc');
+    this.currentPage.set(1);
+    this.loadActivities();
+  }
   onFilterChange(): void           { this.currentPage.set(1); this.loadActivities(); }
 
   clearFilters(): void {
@@ -181,12 +204,15 @@ export class ListComponent implements OnInit {
 
   onRowAction(event: { action: string; item: ActivityListItemResponse }): void {
     switch (event.action) {
+      case 'view':
+        this.router.navigate([AppRoutes.Pro.Activities, event.item.encryptedId]);
+        break;
       case 'assign':
         this.itemToAssign = event.item;
         this.showAssignModal = true;
         break;
       case 'edit':
-        this.router.navigate([AppRoutes.Pro.Activities, event.item.id, 'edit']);
+        this.router.navigate([AppRoutes.Pro.Activities, event.item.encryptedId, 'edit']);
         break;
       case 'deactivate':
         this.itemToDeactivate = event.item;
@@ -211,7 +237,7 @@ export class ListComponent implements OnInit {
   }
 
   private toggleStatus(item: ActivityListItemResponse, isActive: boolean): void {
-    this.activitiesService.setStatus(item.id, isActive).subscribe({
+    this.activitiesService.setStatus(item.encryptedId, isActive).subscribe({
       next: () => {
         this.toastService.success(isActive ? 'Actividad activada.' : 'Actividad desactivada.');
         this.loadActivities();
@@ -233,6 +259,16 @@ export class ListComponent implements OnInit {
     this.semanticMode.set(entering);
     if (!entering) {
       this.semanticText.set('');
+      this.semanticResults.set([]);
+    }
+  }
+
+  onSemanticInput(value: string): void {
+    this.semanticText.set(value);
+    const trimmed = value.trim();
+    if (trimmed.length >= 3) {
+      this.#semanticInput$.next(trimmed);
+    } else {
       this.semanticResults.set([]);
     }
   }

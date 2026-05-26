@@ -11,69 +11,19 @@
   </select>
 </div>
 
-@if (isLoading()) {
-  <div class="text-center py-4">
-    <c-spinner></c-spinner>
-  </div>
-} @else if (reports().length === 0) {
-  <p class="text-body-secondary">No hay reportes registrados para esta persona.</p>
-} @else {
-  <table cTable hover responsive>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Título</th>
-        <th>Tipo</th>
-        <th>Profesional</th>
-        <th>Estado</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (r of reports(); track r.id) {
-        <tr>
-          <td class="text-nowrap">{{ formatDate(r.reportDate) }}</td>
-          <td>{{ r.title }}</td>
-          <td>{{ r.reportTypeName }}</td>
-          <td>{{ r.professionalName }}</td>
-          <td>
-            <c-badge [color]="badgeMap[r.status].color">
-              {{ badgeMap[r.status].label }}
-            </c-badge>
-          </td>
-          <td class="text-nowrap">
-            <button cButton color="primary" size="sm" variant="ghost"
-                    (click)="viewReport(r.id)">
-              Ver
-            </button>
-            @if (r.status === ReportStatus.Submitted) {
-              <button cButton color="success" size="sm" variant="ghost" class="ms-1"
-                      (click)="openApproveModal(r)">
-                Aprobar
-              </button>
-              <button cButton color="danger" size="sm" variant="ghost" class="ms-1"
-                      (click)="openRejectModal(r)">
-                Rechazar
-              </button>
-            }
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-
-  @if (totalPages() > 1) {
-    <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
-      <button cButton color="secondary" size="sm" variant="ghost"
-              [disabled]="currentPage() === 1"
-              (click)="changePage(currentPage() - 1)">‹</button>
-      <span class="text-body-secondary small">Página {{ currentPage() }} de {{ totalPages() }}</span>
-      <button cButton color="secondary" size="sm" variant="ghost"
-              [disabled]="currentPage() === totalPages()"
-              (click)="changePage(currentPage() + 1)">›</button>
-    </div>
-  }
-}
+<app-data-table
+  [showCard]="false"
+  [showTitle]="false"
+  [showSearch]="false"
+  [columns]="columns"
+  [items]="reports()"
+  [totalItems]="totalRecords()"
+  [currentPage]="currentPage()"
+  [pageSize]="10"
+  [loading]="isLoading()"
+  (pageChange)="onPageChange($event)"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal aprobar -->
 <c-modal [visible]="showApproveModal()" (visibleChange)="showApproveModal.set($event)" alignment="center">
@@ -91,7 +41,7 @@
   <c-modal-footer>
     <button cButton color="secondary" (click)="showApproveModal.set(false)">Cancelar</button>
     <button cButton color="success" [disabled]="isProcessing()" (click)="confirmApprove()">
-      @if (isProcessing()) { <c-spinner size="sm"></c-spinner> }
+      @if (isProcessing()) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Aprobar
     </button>
   </c-modal-footer>
@@ -118,7 +68,7 @@
     <button cButton color="danger"
             [disabled]="isProcessing() || !rejectComment.trim()"
             (click)="confirmReject()">
-      @if (isProcessing()) { <c-spinner size="sm"></c-spinner> }
+      @if (isProcessing()) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
       Rechazar
     </button>
   </c-modal-footer>

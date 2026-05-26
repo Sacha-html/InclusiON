@@ -23,6 +23,7 @@ export { ActivitiesService } from './activities.service';
 export { ArasaacService } from './arasaac.service';
 export { RoadmapService } from './roadmap.service';
 export { MessagesService } from './messages.service';
+export { SignalrService } from './signalr.service';
 export type { MessageListItemResponse, MessageDetailResponse, MessageContactResponse, SendMessageRequest } from './messages.service';
 
 export type { StorageKey } from './local-storage.service';

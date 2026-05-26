@@ -1,0 +1,28 @@
+<div class="player-intro" role="region" aria-labelledby="intro-title">
+  <h1 class="activity-title" id="intro-title">{{ title }}</h1>
+
+  <div class="intro-card">
+    <div class="intro-icon" aria-hidden="true">{{ icon }}</div>
+    <p class="intro-instruction">{{ instruction }}</p>
+    @if (hint) {
+      <p class="intro-hint">{{ hint }}</p>
+    }
+  </div>
+
+  @if (error) {
+    <div class="intro-error" role="alert">{{ error }}</div>
+  }
+
+  <button
+    class="action-btn action-btn--primary"
+    [disabled]="loading"
+    (click)="start.emit()"
+  >
+    @if (loading) {
+      <span class="btn-spinner" aria-hidden="true"></span>
+      Iniciando...
+    } @else {
+      <span aria-hidden="true">▶</span> Jugar
+    }
+  </button>
+</div>
