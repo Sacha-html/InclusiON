@@ -19,19 +19,22 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateDiagnosisCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public UpdateDiagnosisCommandHandler(
             IDiagnosesRepository repository,
             IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
             ILogger<UpdateDiagnosisCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<DiagnosisResponse>> HandleAsync(
@@ -82,9 +85,11 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
                 "Diagnosis updated: {DiagnosisId} by professional {ProfessionalId}",
                 command.DiagnosisId, command.RequestedByProfessionalId);
 
-            return ApiResponse<DiagnosisResponse>.SuccessResult(
-                DiagnosisResponse.MapToResponse(diagnosis),
-                "Diagnóstico actualizado exitosamente.");
+            var dto = DiagnosisResponse.MapToResponse(diagnosis);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(diagnosis.Id.ToString()));
+            return ApiResponse<DiagnosisResponse>.SuccessResult(dto, "Diagnóstico actualizado exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

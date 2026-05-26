@@ -1,4 +1,5 @@
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Queries;
 using InclusiON.DTOs.Common;
@@ -11,10 +12,12 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         : IQueryHandler<GetFamilyReportsQuery, ApiResponse<PagedResponse<ReportsListItemReponse>>>
     {
         private readonly IReportsRepository _repository;
+        private readonly IEncryptionService _encryption;
 
-        public GetFamilyReportsQueryHandler(IReportsRepository repository)
+        public GetFamilyReportsQueryHandler(IReportsRepository repository, IEncryptionService encryption)
         {
             _repository = repository;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<PagedResponse<ReportsListItemReponse>>> HandleAsync(
@@ -34,7 +37,12 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             var response = new PagedResponse<ReportsListItemReponse>
             {
-                Data = pagedResult.Data.Select(ReportsListItemReponse.MapToResponse).ToList(),
+                Data = pagedResult.Data.Select(r =>
+                {
+                    var item = ReportsListItemReponse.MapToResponse(r);
+                    item.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(r.Id.ToString()));
+                    return item;
+                }).ToList(),
                 TotalRecords = pagedResult.TotalRecords,
                 TotalPages = pagedResult.TotalPages,
                 CurrentPage = pagedResult.CurrentPage,
@@ -45,5 +53,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             return ApiResponse<PagedResponse<ReportsListItemReponse>>.SuccessResult(response);
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

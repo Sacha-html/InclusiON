@@ -86,6 +86,10 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:create" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:update" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "activities:delete" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "roadmap:read" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "roadmap:create" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "roadmap:update" },
+                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "roadmap:delete" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "diagnoses:read" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "diagnoses:create" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "diagnoses:update" },
@@ -112,6 +116,10 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:create" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:update" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:read" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:create" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:update" },
+                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:delete" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:read" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:create" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:update" },
@@ -143,6 +151,7 @@ namespace InclusiON.Data.Seeders
                 // === PERSON WITH DISABILITY ===
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "activities:read" },
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "activities:respond" },
+                new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "roadmap:read" },
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
             };
 

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using InclusiON.Application.Constants;
 
 namespace InclusiON.Infrastructure.Authorization
 {
@@ -26,7 +27,7 @@ namespace InclusiON.Infrastructure.Authorization
         public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
         {
             // Policy especial para admin global
-            if (policyName == "global-admin")
+            if (policyName == Permissions.GlobalAdmin)
             {
                 var globalPolicy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()

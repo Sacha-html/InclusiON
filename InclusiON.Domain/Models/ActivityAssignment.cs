@@ -39,9 +39,14 @@ namespace InclusiON.Domain.Models
         public DateTime? DueDate { get; set; }
 
         /// <summary>
-        /// Estado de la asignacion (Pendiente, EnProgreso, Completada, Cancelada).
+        /// ID del estado de la asignación (FK a ActivityAssignmentStatuses).
         /// </summary>
-        public string Status { get; set; } = "Pendiente";
+        public int StatusId { get; set; } = 1; // Pendiente
+
+        /// <summary>
+        /// Estado de la asignación.
+        /// </summary>
+        public virtual ActivityAssignmentStatus Status { get; set; } = null!;
 
         /// <summary>
         /// Orden de secuencia si es parte de un programa estructurado.

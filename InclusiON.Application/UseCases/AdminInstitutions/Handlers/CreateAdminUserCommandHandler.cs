@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -7,6 +8,7 @@ using InclusiON.Application.UseCases.AdminInstitutions.Commands;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
 {
@@ -72,7 +74,7 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
                 return ApiResponse<CreateAdminUserResponse>.ErrorResult(
                     "Error al crear el usuario.", createResult.Errors.ToList());
 
-            var roleResult = await _identityService.AddToRoleAsync(user, "Admin");
+            var roleResult = await _identityService.AddToRoleAsync(user, RoleNames.Admin);
             if (!roleResult.Succeeded)
                 return ApiResponse<CreateAdminUserResponse>.ErrorResult(
                     "Error al asignar el rol.", roleResult.Errors.ToList());

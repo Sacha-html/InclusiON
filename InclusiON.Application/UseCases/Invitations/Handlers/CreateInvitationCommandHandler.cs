@@ -1,13 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Invitations.Commands;
 using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Invitations;
-using InclusiON.Domain.Models;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Invitations.Handlers
@@ -18,7 +19,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IEmailService _emailService;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly ILogger<CreateInvitationCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
 
@@ -27,7 +28,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             IProfessionalsRepository professionalsRepository,
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
-            IEmailService emailService,
+            IBackgroundJobRepository backgroundJobs,
             ILogger<CreateInvitationCommandHandler> logger,
             IDateTimeProvider dateTime)
         {
@@ -35,7 +36,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             _professionalsRepository = professionalsRepository;
             _identityService = identityService;
             _unitOfWork = unitOfWork;
-            _emailService = emailService;
+            _backgroundJobs = backgroundJobs;
             _logger = logger;
             _dateTime = dateTime;
         }
@@ -86,10 +87,31 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
 
                 _logger.LogInformation("Invitacion creada: {InvitationId}, Email: {Email}", invitation.Id, invitation.Email);
 
-                // Enviar email con el link de invitacion (fire-and-forget, no bloquea)
+                // Encolar email de invitación (retry automático vía job queue)
                 if (!string.IsNullOrEmpty(command.BaseUrl))
                 {
-                    _ = SendInvitationEmailAsync(invitation, command.BaseUrl, cancellationToken);
+                    var inviteUrl = $"{command.BaseUrl.TrimEnd('/')}/#/invite/{invitation.Code}";
+                    await _backgroundJobs.CreateAsync(
+                        JobTypes.Email,
+                        JsonSerializer.Serialize(new EmailPayload
+                        {
+                            To           = invitation.Email,
+                            Subject      = "InclusiON - Invitacion para registro familiar",
+                            TemplateName = "invitation",
+                            Replacements = new Dictionary<string, string?>
+                            {
+                                ["RecipientName"] = !string.IsNullOrEmpty(invitation.FirstName) ? invitation.FirstName : "Familiar",
+                                ["InviteUrl"]     = inviteUrl,
+                                ["ExpiresAt"]     = invitation.ExpiresAt.ToString("dd/MM/yyyy HH:mm"),
+                                ["PersonName"]    = invitation.ForPerson != null
+                                    ? $"{invitation.ForPerson.FirstName} {invitation.ForPerson.LastName}".Trim()
+                                    : null,
+                                ["Relationship"]  = invitation.Relationship,
+                                ["Year"]          = _dateTime.UtcNow.Year.ToString()
+                            }
+                        }),
+                        maxRetries: 2,
+                        cancellationToken: cancellationToken);
                 }
 
                 var response = InvitationResponse.MapToResponse(invitation);
@@ -104,37 +126,5 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             }
         }
 
-        private async Task SendInvitationEmailAsync(Invitation invitation, string baseUrl, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var inviteUrl = $"{baseUrl.TrimEnd('/')}/#/invite/{invitation.Code}";
-
-                var replacements = new Dictionary<string, string?>
-                {
-                    ["RecipientName"] = !string.IsNullOrEmpty(invitation.FirstName) ? invitation.FirstName : "Familiar",
-                    ["InviteUrl"] = inviteUrl,
-                    ["ExpiresAt"] = invitation.ExpiresAt.ToString("dd/MM/yyyy HH:mm"),
-                    ["PersonName"] = invitation.ForPerson != null
-                        ? $"{invitation.ForPerson.FirstName} {invitation.ForPerson.LastName}".Trim()
-                        : null,
-                    ["Relationship"] = invitation.Relationship,
-                    ["Year"] = _dateTime.UtcNow.Year.ToString()
-                };
-
-                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-                await _emailService.SendTemplatedEmailAsync(
-                    invitation.Email,
-                    "InclusiON - Invitacion para registro familiar",
-                    "invitation",
-                    replacements,
-                    cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "No se pudo enviar email de invitacion a {Email}", invitation.Email);
-            }
-        }
     }
 }

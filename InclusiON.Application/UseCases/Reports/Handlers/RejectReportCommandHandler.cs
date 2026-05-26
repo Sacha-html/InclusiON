@@ -1,11 +1,14 @@
-﻿using InclusiON.Application.Interfaces.Common;
+﻿using System.Text.Json;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
 using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Reports;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace InclusiON.Application.UseCases.Reports.Handlers
@@ -13,26 +16,26 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
     public class RejectReportCommandHandler : ICommandHandler<RejectReportCommand, ApiResponse<ReportResponse>>
     {
         private readonly IReportsRepository _repository;
-        private readonly IProfessionalsRepository _professionalsRepository;
-        private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RejectReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IEncryptionService _encryption;
 
         public RejectReportCommandHandler(
             IReportsRepository repository,
-            IProfessionalsRepository professionalsRepository,
-            IEmailService emailService,
             IUnitOfWork unitOfWork,
             ILogger<RejectReportCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IServiceScopeFactory scopeFactory,
+            IEncryptionService encryption)
         {
-            _repository = repository;
-            _professionalsRepository = professionalsRepository;
-            _emailService = emailService;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
+            _repository   = repository;
+            _unitOfWork   = unitOfWork;
+            _logger       = logger;
+            _dateTime     = dateTime;
+            _scopeFactory = scopeFactory;
+            _encryption   = encryption;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -73,37 +76,69 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _ = Task.Run(async () =>
             {
+                // Crear scope propio: el scope del request ya está dispuesto cuando Task.Run ejecuta
+                using var scope = _scopeFactory.CreateScope();
+                var professionalsRepository = scope.ServiceProvider.GetRequiredService<IProfessionalsRepository>();
+                var bgJobRepo               = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
+
                 try
                 {
-                    var professional = await _professionalsRepository.GetByIdAsync(professionalId);
+                    var professional = await professionalsRepository.GetByIdAsync(professionalId);
                     var professionalEmail = professional?.User?.Email ?? professional?.Email;
-                    var professionalName = professional != null
+                    var professionalName  = professional != null
                         ? $"{professional.FirstName} {professional.LastName}"
                         : string.Empty;
 
                     if (string.IsNullOrWhiteSpace(professionalEmail)) return;
 
-                    await _emailService.SendTemplatedEmailAsync(
-                        professionalEmail,
-                        "Tu reporte requiere correcciones",
-                        "ReportRejected",
-                        new Dictionary<string, string?>
+                    // Email via job queue (retry automático)
+                    await bgJobRepo.CreateAsync(
+                        JobTypes.Email,
+                        JsonSerializer.Serialize(new EmailPayload
                         {
-                            { "ProfessionalName", professionalName },
-                            { "ReportTitle", reportTitle },
-                            { "PersonName", personName },
-                            { "ReportDate", reportDate },
-                            { "AdminComment", adminComment },
-                            { "Year", year }
-                        });
+                            To           = professionalEmail,
+                            Subject      = "Tu reporte requiere correcciones",
+                            TemplateName = "ReportRejected",
+                            Replacements = new Dictionary<string, string?>
+                            {
+                                { "ProfessionalName", professionalName },
+                                { "ReportTitle", reportTitle },
+                                { "PersonName", personName },
+                                { "ReportDate", reportDate },
+                                { "AdminComment", adminComment },
+                                { "Year", year }
+                            }
+                        }),
+                        maxRetries: 2);
+
+                    // Push SignalR al profesional
+                    if (professional!.UserId != Guid.Empty)
+                    {
+                        await bgJobRepo.CreateAsync(
+                            JobTypes.Push,
+                            JsonSerializer.Serialize(new NotificationPayload
+                            {
+                                UserId           = professional.UserId.ToString(),
+                                Title            = "Reporte rechazado",
+                                Message          = $"Tu reporte \"{reportTitle}\" requiere correcciones. Revisá los comentarios del administrador.",
+                                ActionUrl        = "/#/pro/reports",
+                                SendEmailFallback = false
+                            }),
+                            maxRetries: 3);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error enviando email de rechazo para reporte {ReportId}", reportId);
+                    _logger.LogError(ex, "Error encolando notificaciones de rechazo para reporte {ReportId}", reportId);
                 }
             });
 
-            return ApiResponse<ReportResponse>.SuccessResult(ReportResponse.MapToResponse(report));
+            var response = ReportResponse.MapToResponse(report);
+            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+            return ApiResponse<ReportResponse>.SuccessResult(response);
         }
+
+        private static string ToUrlSafeBase64(string s)
+            => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

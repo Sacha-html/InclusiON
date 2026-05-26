@@ -1,3 +1,4 @@
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -57,7 +58,7 @@ namespace InclusiON.Application.UseCases.Users.Handlers
             bool? isGlobalAdmin = null;
             List<int>? institutionIds = null;
 
-            if (primaryRole == "Admin")
+            if (primaryRole == RoleNames.Admin)
             {
                 institutionIds = await _adminInstitutionRepository
                     .GetActiveInstitutionIdsByAdminAsync(user.Id, cancellationToken);

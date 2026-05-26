@@ -37,9 +37,12 @@ namespace InclusiON.Data
         public DbSet<LoginMethod> LoginMethods { get; set; }
         public DbSet<SkillArea> SkillAreas { get; set; }
         public DbSet<ActivityTemplateType> ActivityTemplateTypes { get; set; }
+        public DbSet<BackgroundJobStatus> BackgroundJobStatuses { get; set; }
+        public DbSet<JobType> JobTypes { get; set; }
 
         // Nivel 2: Perfiles de usuario y autenticacion
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<Professional> Professionals { get; set; }
         public DbSet<PersonWithDisability> PersonsWithDisability { get; set; }
         public DbSet<FamilyRepresentative> FamilyRepresentatives { get; set; }
@@ -61,6 +64,7 @@ namespace InclusiON.Data
 
         // Nivel 4: Asignaciones, reportes, mensajeria y auditoria
         public DbSet<ActivityAssignment> ActivityAssignments { get; set; }
+        public DbSet<ActivityAssignmentStatus> ActivityAssignmentStatuses { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<AccessAudit> AccessAudits { get; set; }
@@ -68,14 +72,18 @@ namespace InclusiON.Data
         public DbSet<FamilyStatusHistory> FamilyStatusHistories { get; set; }
         public DbSet<PersonRepresentativeHistory> PersonRepresentativeHistories { get; set; }
 
-        // Nivel 5: Respuestas, resultados y embeddings de actividades
+        // Nivel 5: Respuestas, resultados y embeddings
         public DbSet<ActivityResponse> ActivityResponses { get; set; }
         public DbSet<ActivityResult> ActivityResults { get; set; }
         public DbSet<ActivityEmbedding> ActivityEmbeddings { get; set; }
+        public DbSet<PersonEmbedding> PersonEmbeddings { get; set; }
 
         // Nivel 6: Motor de dificultad adaptativa
         public DbSet<AdaptiveEngineConfig> AdaptiveEngineConfigs { get; set; }
         public DbSet<AdaptiveAdjustmentLog> AdaptiveAdjustmentLogs { get; set; }
+
+        // Nivel 7: Background Jobs (procesamiento asincrono por agentes MAF)
+        public DbSet<BackgroundJob> BackgroundJobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

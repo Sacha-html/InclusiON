@@ -18,9 +18,10 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         private readonly IIdentityService            _identity        = Substitute.For<IIdentityService>();
         private readonly IUnitOfWork                 _uow             = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider           _dateTime        = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService          _encryption      = Substitute.For<IEncryptionService>();
 
         private AssignInstitutionToAdminCommandHandler BuildSut() =>
-            new(_adminRepo, _institutionRepo, _identity, _uow, _dateTime);
+            new(_adminRepo, _institutionRepo, _identity, _uow, _dateTime, _encryption);
 
         private static EducationalInstitution AnInstitution(int id = 1) =>
             new() { Id = id, Name = "Escuela N° 1" };

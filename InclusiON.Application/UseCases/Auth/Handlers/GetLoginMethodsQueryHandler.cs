@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Auth.Queries;
@@ -20,7 +21,6 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         private readonly IMemoryCache _cache;
         private readonly ILogger<GetLoginMethodsQueryHandler> _logger;
 
-        private const string CacheKey = "LoginMethods_Active";
         private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
 
         public GetLoginMethodsQueryHandler(
@@ -40,7 +40,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             cancellationToken.ThrowIfCancellationRequested();
 
             // Intentar obtener del cache primero
-            if (_cache.TryGetValue(CacheKey, out List<LoginMethodResponse>? cachedResponse) && cachedResponse != null)
+            if (_cache.TryGetValue(CatalogCacheKeys.LoginMethods, out List<LoginMethodResponse>? cachedResponse) && cachedResponse != null)
             {
                 _logger.LogDebug("LoginMethods obtenidos desde cache");
                 return ApiResponse<List<LoginMethodResponse>>.SuccessResult(
@@ -58,7 +58,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 .SetAbsoluteExpiration(CacheDuration)
                 .SetPriority(CacheItemPriority.High);
 
-            _cache.Set(CacheKey, response, cacheOptions);
+            _cache.Set(CatalogCacheKeys.LoginMethods, response, cacheOptions);
             _logger.LogDebug("LoginMethods guardados en cache por {Duration}", CacheDuration);
 
             return ApiResponse<List<LoginMethodResponse>>.SuccessResult(

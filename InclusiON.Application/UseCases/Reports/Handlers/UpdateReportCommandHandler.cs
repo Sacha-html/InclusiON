@@ -17,19 +17,22 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public UpdateReportCommandHandler(
             IReportsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
             ILogger<UpdateReportCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -45,11 +48,11 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             if (professional is null || report.ProfessionalId != professional.Id)
                 return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.Forbidden, "No tenés permiso para editar este reporte.");
 
-            // Solo se puede editar si está en borrador
-            if (report.Status != ReportStatus.Draft)
+            // Solo se puede editar si está en borrador o rechazado
+            if (report.Status != ReportStatus.Draft && report.Status != ReportStatus.Rejected)
                 return ApiResponse<ReportResponse>.ErrorResult(
                     ErrorCode.InvalidOperation,
-                    $"No se puede editar un reporte en estado '{report.Status}'. Solo se permiten ediciones en borrador.");
+                    $"No se puede editar un reporte en estado '{report.Status}'. Solo se permiten ediciones en Borrador o Rechazado.");
 
             report.Title = command.Title;
             report.Content = command.Content;
@@ -68,7 +71,12 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _logger.LogInformation("Report {ReportId} updated by professional {ProfessionalId}", report.Id, command.ProfessionalId);
 
-            return ApiResponse<ReportResponse>.SuccessResult(ReportResponse.MapToResponse(report));
+            var response = ReportResponse.MapToResponse(report);
+            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+            return ApiResponse<ReportResponse>.SuccessResult(response);
         }
+
+        private static string ToUrlSafeBase64(string s)
+            => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

@@ -17,8 +17,9 @@ namespace InclusiON.DTOs.Requests.Institutions
         [StringLength(20, ErrorMessage = "El telefono no puede exceder 20 caracteres")]
         public string? Phone { get; set; }
 
+        [Required(ErrorMessage = "El email es requerido")]
         [EmailAddress(ErrorMessage = "El formato del email es invalido")]
         [StringLength(100, ErrorMessage = "El email no puede exceder 100 caracteres")]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty;
     }
 }

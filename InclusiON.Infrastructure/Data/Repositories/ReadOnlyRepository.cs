@@ -6,7 +6,7 @@ using InclusiON.Domain.Models.BaseEntities;
 namespace InclusiON.Infrastructure.Data.Repositories
 {
     public class ReadOnlyRepository<TEntity> : IReadOnlyRepository<TEntity>
-        where TEntity : class, IActivatable
+        where TEntity : class, IActivatable, IHasIntId
     {
         private readonly AppDbContext _context;
 
@@ -25,7 +25,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public async Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<TEntity>().FindAsync([id], cancellationToken);
+            return await _context.Set<TEntity>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
     }
 }

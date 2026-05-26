@@ -107,6 +107,20 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Obtiene los tipos de reporte activos.
+        /// </summary>
+        [HttpGet("report-types")]
+        [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetReportTypes(
+            [FromServices] IQueryHandler<GetReportTypesQuery, ApiResponse<List<CatalogItemResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetReportTypesQuery(), cancellationToken);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Obtiene los colores disponibles para avatares de usuarios.
         /// </summary>
         [HttpGet("avatar-colors")]

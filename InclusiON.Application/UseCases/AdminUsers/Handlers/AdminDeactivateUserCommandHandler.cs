@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Auditing;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -18,6 +20,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IFamilyRepository _familyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AdminDeactivateUserCommandHandler> _logger;
+        private readonly IAccessAuditLogger _audit;
 
         public AdminDeactivateUserCommandHandler(
             IIdentityService identityService,
@@ -26,7 +29,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             IPersonsRepository personsRepository,
             IFamilyRepository familyRepository,
             IUnitOfWork unitOfWork,
-            ILogger<AdminDeactivateUserCommandHandler> logger)
+            ILogger<AdminDeactivateUserCommandHandler> logger,
+            IAccessAuditLogger audit)
         {
             _identityService = identityService;
             _refreshTokensRepository = refreshTokensRepository;
@@ -35,6 +39,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             _familyRepository = familyRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _audit = audit;
         }
 
         public async Task<ApiResponse<object>> HandleAsync(
@@ -72,6 +77,16 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 "User {UserId} ({Email}) deactivated by admin {AdminId}",
                 user.Id, user.Email, command.RequestedByUserId);
 
+            await _audit.LogAsync(new AccessAuditEntry
+            {
+                UserId         = command.RequestedByUserId,
+                ActionType     = AccessAuditValues.Action.Update,
+                Result         = AccessAuditValues.Result.Allowed,
+                AffectedTable  = "Users",
+                AffectedRecordId = user.Id.ToString(),
+                Details        = "Admin deactivated user account",
+            }, cancellationToken);
+
             return ApiResponse<object>.SuccessResult("Usuario desactivado exitosamente.");
         }
 
@@ -82,7 +97,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             switch (primaryRole)
             {
-                case "Professional":
+                case RoleNames.Professional:
                     var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (pro is not null)
                     {
@@ -91,7 +106,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     }
                     break;
 
-                case "PersonWithDisability":
+                case RoleNames.PersonWithDisability:
                     var person = await _personsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (person is not null)
                     {
@@ -100,7 +115,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     }
                     break;
 
-                case "FamilyRepresentative":
+                case RoleNames.FamilyRepresentative:
                     var family = await _familyRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (family is not null)
                     {

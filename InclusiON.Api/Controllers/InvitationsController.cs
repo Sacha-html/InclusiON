@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Authorization;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Invitations.Commands;
@@ -42,31 +43,31 @@ namespace InclusiON.Api.Controllers
         /// Obtiene la lista de invitaciones. Profesional: solo las suyas. Admin: todas.
         /// </summary>
         [HttpGet]
-        [Authorize(Policy = "invitations:read")]
-        [ProducesResponseType(typeof(ApiResponse<List<InvitationResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<List<InvitationResponse>>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiResponse<List<InvitationResponse>>), StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<ApiResponse<List<InvitationResponse>>>> GetInvitations(
-            [FromServices] IQueryHandler<GetInvitationsQuery, ApiResponse<List<InvitationResponse>>> handler,
+        [Authorize(Policy = Permissions.Invitations.Read)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<InvitationResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<InvitationResponse>>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<InvitationResponse>>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<InvitationResponse>>>> GetInvitations(
+            [FromServices] IQueryHandler<GetInvitationsQuery, ApiResponse<PagedResponse<InvitationResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? status = null,
             CancellationToken cancellationToken = default)
         {
-            // Profesional: filtra por sus propias invitaciones (entityId = professionalId en el JWT).
-            // Admin institucional: filtra por sus instituciones (institutionIds en el JWT).
-            // GlobalAdmin: sin filtros.
             var professionalId = _httpContextService.GetCurrentEntityId();
 
             GetInvitationsQuery query;
             if (professionalId != null)
             {
-                // Professional: solo sus invitaciones
-                query = new GetInvitationsQuery(professionalId);
+                query = new GetInvitationsQuery(professionalId, null, page, pageSize, search, status);
             }
             else
             {
                 var institutionIds = _httpContextService.GetInstitutionIds();
                 query = institutionIds.Count > 0
-                    ? new GetInvitationsQuery(null, institutionIds)   // Admin institucional
-                    : new GetInvitationsQuery(null);                  // GlobalAdmin
+                    ? new GetInvitationsQuery(null, institutionIds, page, pageSize, search, status)
+                    : new GetInvitationsQuery(null, null, page, pageSize, search, status);
             }
 
             var result = await handler.HandleAsync(query, cancellationToken);
@@ -100,7 +101,7 @@ namespace InclusiON.Api.Controllers
         /// Crea una nueva invitacion para un representante familiar.
         /// </summary>
         [HttpPost]
-        [Authorize(Policy = "invitations:create")]
+        [Authorize(Policy = Permissions.Invitations.Create)]
         [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status409Conflict)]

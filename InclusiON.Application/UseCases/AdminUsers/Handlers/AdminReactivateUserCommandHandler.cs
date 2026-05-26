@@ -1,13 +1,17 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using InclusiON.Application.Auditing;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.AdminUsers.Commands;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Admin;
-using InclusiON.Domain.Models;
 
 namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 {
@@ -17,29 +21,32 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IFamilyRepository _familyRepository;
-        private readonly IEmailService _emailService;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AdminReactivateUserCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IAccessAuditLogger _audit;
 
         public AdminReactivateUserCommandHandler(
             IIdentityService identityService,
             IProfessionalsRepository professionalsRepository,
             IPersonsRepository personsRepository,
             IFamilyRepository familyRepository,
-            IEmailService emailService,
+            IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             ILogger<AdminReactivateUserCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IAccessAuditLogger audit)
         {
             _identityService = identityService;
             _professionalsRepository = professionalsRepository;
             _personsRepository = personsRepository;
             _familyRepository = familyRepository;
-            _emailService = emailService;
+            _backgroundJobs = backgroundJobs;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _audit = audit;
         }
 
         public async Task<ApiResponse<ResetPasswordResultResponse>> HandleAsync(
@@ -78,29 +85,34 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 "User {UserId} ({Email}) reactivated by admin {AdminId}",
                 user.Id, user.Email, command.RequestedByUserId);
 
-            // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-            // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-            // Enviar email de reactivación (si el usuario tiene email)
+            await _audit.LogAsync(new AccessAuditEntry
+            {
+                UserId           = command.RequestedByUserId,
+                ActionType       = AccessAuditValues.Action.Update,
+                Result           = AccessAuditValues.Result.Allowed,
+                AffectedTable    = "Users",
+                AffectedRecordId = user.Id.ToString(),
+                Details          = "Admin reactivated user account",
+            }, cancellationToken);
+
             if (!string.IsNullOrEmpty(user.Email))
             {
-                try
-                {
-                    await _emailService.SendTemplatedEmailAsync(
-                        user.Email,
-                        "Tu cuenta ha sido reactivada — InclusiON",
-                        "AccountReactivated",
-                        new Dictionary<string, string?>
+                await _backgroundJobs.CreateAsync(
+                    JobTypes.Email,
+                    JsonSerializer.Serialize(new EmailPayload
+                    {
+                        To           = user.Email,
+                        Subject      = "Tu cuenta ha sido reactivada — InclusiON",
+                        TemplateName = "AccountReactivated",
+                        Replacements = new Dictionary<string, string?>
                         {
                             { "UserName", user.Name ?? "Usuario" },
                             { "TemporaryPassword", tempPassword },
                             { "Year", _dateTime.UtcNow.Year.ToString() }
-                        },
-                        cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "No se pudo enviar email de reactivación a {Email}", user.Email);
-                }
+                        }
+                    }),
+                    maxRetries: 2,
+                    cancellationToken: cancellationToken);
             }
 
             return ApiResponse<ResetPasswordResultResponse>.SuccessResult(
@@ -118,7 +130,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             switch (primaryRole)
             {
-                case "Professional":
+                case RoleNames.Professional:
                     var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (pro is not null)
                     {
@@ -127,7 +139,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     }
                     break;
 
-                case "PersonWithDisability":
+                case RoleNames.PersonWithDisability:
                     var person = await _personsRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (person is not null)
                     {
@@ -136,7 +148,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     }
                     break;
 
-                case "FamilyRepresentative":
+                case RoleNames.FamilyRepresentative:
                     var family = await _familyRepository.GetByUserIdAsync(user.Id, cancellationToken);
                     if (family is not null)
                     {

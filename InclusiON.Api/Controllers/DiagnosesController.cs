@@ -7,7 +7,9 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Diagnoses.Commands;
 using InclusiON.Application.UseCases.Diagnoses.Queries;
+using InclusiON.DTOs.Requests.Common;
 using InclusiON.DTOs.Requests.Diagnoses;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Diagnoses;
 
@@ -25,16 +27,18 @@ namespace InclusiON.Api.Controllers
             _httpContextService = httpContextService;
         }
 
-        [HttpGet("persons/{personId:guid}/diagnoses")]
+        [HttpGet("persons/{personId}/diagnoses")]
         [Authorize(Policy = "diagnoses:read")]
-        [ProducesResponseType(typeof(ApiResponse<List<DiagnosisListItemResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<DiagnosisListItemResponse>>), StatusCodes.Status200OK)]
         [PersonAccess(AccessMode.Read)]
-        public async Task<ActionResult<ApiResponse<List<DiagnosisListItemResponse>>>> GetDiagnoses(
+        public async Task<ActionResult<ApiResponse<PagedResponse<DiagnosisListItemResponse>>>> GetDiagnoses(
             Guid personId,
-            [FromServices] IQueryHandler<GetDiagnosesQuery, ApiResponse<List<DiagnosisListItemResponse>>> handler,
+            [FromServices] IQueryHandler<GetDiagnosesQuery, ApiResponse<PagedResponse<DiagnosisListItemResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetDiagnosesQuery(personId);
+            var query = new GetDiagnosesQuery(personId, page, pageSize);
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }
@@ -54,7 +58,7 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPost("persons/{personId:guid}/diagnoses")]
+        [HttpPost("persons/{personId}/diagnoses")]
         [Authorize(Policy = "diagnoses:create")]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status400BadRequest)]
@@ -82,6 +86,26 @@ namespace InclusiON.Api.Controllers
                 request.PedagogicalObjectives,
                 request.RecommendedStrategies);
 
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPatch("diagnoses/{id:int}")]
+        [Authorize(Policy = "diagnoses:update")]
+        [DiagnosisAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<object>>> PatchDiagnosisStatus(
+            int id,
+            [FromBody] PatchStatusRequest request,
+            [FromServices] ICommandHandler<PatchDiagnosisStatusCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+
+            var command = new PatchDiagnosisStatusCommand(id, request.IsActive, professionalId);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }
