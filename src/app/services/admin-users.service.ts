@@ -25,11 +25,21 @@ export class AdminUsersService {
     return `${environment.apiUrl}/admin/users`;
   }
 
-  getAdmins(page = 1, pageSize = 10, search?: string): Observable<PagedResponse<AdminUserResponse>> {
+  getAdmins(
+    page = 1,
+    pageSize = 10,
+    search?: string,
+    role?: string,
+    isActive?: boolean,
+    institutionId?: number,
+  ): Observable<PagedResponse<AdminUserResponse>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
-    if (search) params = params.set('search', search);
+    if (search)                    params = params.set('search', search);
+    if (role)                      params = params.set('role', role);
+    if (isActive !== undefined)    params = params.set('isActive', isActive.toString());
+    if (institutionId)             params = params.set('institutionId', institutionId.toString());
 
     return this.http
       .get<ApiResponse<PagedResponse<AdminUserResponse>>>(`${this.apiUrl}/admins`, { params })

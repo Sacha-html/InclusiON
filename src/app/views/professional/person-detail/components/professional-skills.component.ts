@@ -1,7 +1,8 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit, OnChanges, signal } from '@angular/core';
 import { CatalogsService, PersonsService, ToastService } from '@services';
-import { PersonSkillProfileResponse, SkillAreaItem } from '@models';
-import { SkillChipComponent } from '@shared/components';
+import { RoadmapService } from '@services/roadmap.service';
+import { PersonSkillProfileResponse, SkillAreaItem, SkillRadarPointResponse } from '@models';
+import { SkillChipComponent, SkillRadarChartComponent } from '@shared/components';
 import {
   ButtonDirective,
   ModalBodyComponent,
@@ -18,6 +19,7 @@ import {
   standalone: true,
   imports: [
     SkillChipComponent,
+    SkillRadarChartComponent,
     ButtonDirective,
     ModalBodyComponent,
     ModalComponent,
@@ -37,19 +39,31 @@ export class ProfessionalSkillsComponent implements OnInit, OnChanges {
   private readonly personsService = inject(PersonsService);
   private readonly catalogsService = inject(CatalogsService);
   private readonly toastService = inject(ToastService);
+  private readonly roadmapService = inject(RoadmapService);
 
   allSkillAreas = signal<SkillAreaItem[]>([]);
   showModal = signal(false);
   selectedIds = new Set<number>();
   loading = signal(false);
   currentSkillProfile = signal<PersonSkillProfileResponse[]>([]);
+  radarPoints = signal<SkillRadarPointResponse[]>([]);
+  radarLoading = signal(false);
 
   ngOnInit(): void {
     this.currentSkillProfile.set(this.skillProfile);
+    this.loadRadar();
   }
 
   ngOnChanges(): void {
     this.currentSkillProfile.set(this.skillProfile);
+  }
+
+  private loadRadar(): void {
+    this.radarLoading.set(true);
+    this.roadmapService.getSkillRadar(this.personId).subscribe({
+      next: (data) => { this.radarPoints.set(data); this.radarLoading.set(false); },
+      error: ()    => { this.radarLoading.set(false); },  // radar is optional — no toast
+    });
   }
 
   private loadAllSkillAreas(): void {

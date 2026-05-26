@@ -9,6 +9,10 @@
     }
   </div>
 
+  @if (error) {
+    <div class="intro-error" role="alert">{{ error }}</div>
+  }
+
   <button
     class="action-btn action-btn--primary"
     [disabled]="loading"

@@ -3,8 +3,8 @@
     [title]="assignment.activityTitle"
     [instruction]="content.instruction || 'Ordená los pasos en el orden correcto.'"
     [hint]="hint"
-    icon="🔢"
     [loading]="isLoading()"
+    [error]="errorMsg()"
     (start)="startActivity()"
   />
 }
@@ -20,7 +20,8 @@
         <li
           class="sequence-item"
           [class.sequence-item--selected]="selectedIndex() === i"
-          [attr.aria-label]="'Paso ' + (i + 1) + ': ' + item.label"
+          [attr.aria-label]="'Paso ' + (i + 1) + ': ' + item.label + (selectedIndex() === i ? '. Seleccionado.' : '')"
+          tabindex="0"
         >
           <span class="step-number" aria-hidden="true">{{ i + 1 }}</span>
 

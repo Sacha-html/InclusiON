@@ -24,6 +24,7 @@ export interface ReportListItemResponse {
   approvedAt?: string;
   createdAt: string;
   updatedAt?: string;
+  isReadByFamily?: boolean;
 }
 
 export interface ReportResponse extends ReportListItemResponse {

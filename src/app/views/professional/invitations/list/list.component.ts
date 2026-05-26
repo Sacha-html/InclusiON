@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
 import { InvitationsService, ToastService, ProfessionalsService, AssignmentsService } from '@services';
 import {
@@ -15,14 +15,18 @@ import {
   ModalBodyComponent,
   ModalFooterComponent,
   FormControlDirective,
+  FormLabelDirective,
   FormSelectDirective,
   AlertComponent,
   SpinnerComponent,
+  ButtonDirective,
+  GridModule,
 } from '@coreui/angular';
 
 @Component({
   selector: 'app-invitations-list',
   imports: [
+    FormsModule,
     ReactiveFormsModule,
     DataTableComponent,
     ModalComponent,
@@ -30,9 +34,12 @@ import {
     ModalBodyComponent,
     ModalFooterComponent,
     FormControlDirective,
+    FormLabelDirective,
     FormSelectDirective,
     AlertComponent,
     SpinnerComponent,
+    ButtonDirective,
+    GridModule,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -57,6 +64,8 @@ export class ListComponent implements OnInit {
   currentPage       = 1;
   readonly pageSize = 10;
   totalRecords      = 0;
+  searchTerm        = '';
+  statusFilter      = '';
 
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
 
@@ -107,9 +116,32 @@ export class ListComponent implements OnInit {
     });
   }
 
+  onSearch(term: string): void {
+    this.searchTerm = term;
+    this.currentPage = 1;
+    this.loadInvitations();
+  }
+
+  onFilterChange(): void {
+    this.currentPage = 1;
+    this.loadInvitations();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
+    this.searchTerm   = '';
+    this.currentPage  = 1;
+    this.loadInvitations();
+  }
+
   private loadInvitations(): void {
     this.isLoading = true;
-    this.invitationsService.getAll(this.currentPage, this.pageSize).subscribe({
+    this.invitationsService.getAll(
+      this.currentPage,
+      this.pageSize,
+      this.searchTerm   || undefined,
+      this.statusFilter || undefined,
+    ).subscribe({
       next: (data) => {
         const sortField = this.sortBy === 'createdAtFmt' ? 'createdAt' : this.sortBy;
         const sorted = [...data.data].sort((a, b) => {

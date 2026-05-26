@@ -121,7 +121,7 @@ export class LoginComponent implements OnInit {
             this.router.navigate([AppRoutes.ChangePassword]);
           } else {
             const role = this.authService.getUserRole();
-            const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
+            const target = role ? (RoleRoutes[role] || '/') : '/';
             this.router.navigate([target]);
           }
         }

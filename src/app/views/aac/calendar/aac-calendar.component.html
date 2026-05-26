@@ -9,6 +9,9 @@
   <section class="upcoming" aria-labelledby="upcoming-title">
     <h2 id="upcoming-title" class="section-title">Proximos eventos</h2>
     <div class="events-list">
+      @if (events.length === 0) {
+        <p class="empty-state" role="status">No hay eventos próximos.</p>
+      }
       @for (event of events; track event.id) {
         <app-visual-card
           [title]="event.title"

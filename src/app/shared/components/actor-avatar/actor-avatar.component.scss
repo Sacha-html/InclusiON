@@ -22,3 +22,11 @@
   height: 48px;
   font-size: 1.125rem;
 }
+
+:host-context([data-profile="high-contrast"]) .actor-avatar {
+  border: 2px solid var(--a11y-border, #fff);
+}
+
+:host-context([data-color-mode="dark"]) .actor-avatar {
+  color: #fff;
+}

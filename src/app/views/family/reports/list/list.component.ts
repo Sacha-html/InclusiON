@@ -60,6 +60,15 @@ export class ListComponent implements OnInit {
         { action: 'view', label: 'Ver reporte', icon: 'cilSearch' },
       ],
     },
+    {
+      key: 'isReadByFamily',
+      label: '',
+      type: 'badge',
+      badgeMap: {
+        'false': { color: 'danger', label: 'Nuevo' },
+        'true':  { color: 'light',  label: ''      },
+      },
+    },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
     { key: 'title', label: 'Título', sortable: true },
     { key: 'reportTypeName', label: 'Tipo', sortable: true },

@@ -56,7 +56,7 @@ export class ListComponent implements OnInit {
   private professionalId = '';
 
   // Filtros
-  selectedPersonId = '';
+  selectedPersonIds: string[] = [];
   statusFilter = '';
   typeFilter = '';
   dateFrom = '';
@@ -103,9 +103,11 @@ actions: [
   ];
 
   ngOnInit(): void {
-    // Aplicar filtro de estado desde queryParams (ej: llegando desde el dashboard)
+    // Aplicar filtros desde queryParams (ej: llegando desde el dashboard o detalle de persona)
     const statusParam = this.route.snapshot.queryParamMap.get('status');
     if (statusParam) this.statusFilter = statusParam;
+    const personIdParam = this.route.snapshot.queryParamMap.get('personId');
+    if (personIdParam) this.selectedPersonIds = [personIdParam];
 
     // Cargar perfil primero para filtrar reportes solo del profesional autenticado
     this.professionalsService.getMyProfile().subscribe({
@@ -131,7 +133,7 @@ actions: [
       sortBy: this.sortBy(),
       sortDirection: this.sortDirection(),
       professionalId: this.professionalId,
-      personId: this.selectedPersonId || undefined,
+      personIds: this.selectedPersonIds.length ? this.selectedPersonIds : undefined,
       status: this.statusFilter || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
@@ -149,13 +151,18 @@ actions: [
     });
   }
 
-  onPersonFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
+  onPersonFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedPersonIds = Array.from(select.selectedOptions).map(o => o.value);
+    this.currentPage.set(1);
+    this.loadReports();
+  }
   onStatusFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
   onTypeFilterChange(): void   { this.currentPage.set(1); this.loadReports(); }
   onDateChange(): void         { this.currentPage.set(1); this.loadReports(); }
 
   clearFilters(): void {
-    this.selectedPersonId = '';
+    this.selectedPersonIds = [];
     this.statusFilter = '';
     this.typeFilter = '';
     this.dateFrom = '';

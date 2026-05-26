@@ -15,7 +15,10 @@
   flex-direction: column;
   align-items: center;
   padding: 24px;
-  background: linear-gradient(135deg, var(--a11y-success, #4CAF50), color-mix(in srgb, var(--a11y-success, #4CAF50) 70%, black));
+  /* Solid color — always paired with --a11y-success-text for correct contrast across all profiles.
+     Gradient with color-mix(... black) was causing failures in dark mode
+     (light mint + 30% black → dark olive, but text was still black → 3.7:1 ✗). */
+  background: var(--a11y-success, #1B5E20);
   border: 2px solid var(--a11y-border, #E0E0E0);
   border-radius: 24px;
   color: var(--a11y-success-text, white);
@@ -44,6 +47,13 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--a11y-text-muted, #999);
+  padding: 2rem 1rem;
+  font-size: 1.1rem;
 }
 
 :host-context([data-profile="high-contrast"]) {

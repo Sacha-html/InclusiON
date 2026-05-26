@@ -3,8 +3,8 @@
     [title]="assignment.activityTitle"
     [instruction]="content.instruction || 'Seleccioná la figura correcta.'"
     [hint]="hint"
-    icon="🎯"
     [loading]="isLoading()"
+    [error]="errorMsg()"
     (start)="startActivity()"
   />
 }

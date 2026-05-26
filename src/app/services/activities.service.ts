@@ -92,6 +92,14 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
+  getAssignmentById(encryptedId: string): Observable<ActivityAssignmentResponse> {
+    return this.http
+      .get<ApiResponse<ActivityAssignmentResponse>>(
+        `${environment.apiUrl}/activity-assignments/${encryptedId}`
+      )
+      .pipe(unwrapResponse());
+  }
+
   startResponse(assignmentId: string): Observable<ActivityAssignmentResponse> {
     return this.http
       .post<ApiResponse<ActivityAssignmentResponse>>(

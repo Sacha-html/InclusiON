@@ -11,5 +11,6 @@ export class PlayerIntroComponent {
   @Input() hint?: string;
   @Input() icon = '🎯';
   @Input() loading = false;
+  @Input() error = '';
   @Output() start = new EventEmitter<void>();
 }

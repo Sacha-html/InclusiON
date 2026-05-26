@@ -468,6 +468,18 @@ export class AuthService {
       .pipe(catchError(this.handleError));
   }
 
+  forgotPassword(email: string): Observable<ApiResponse<object>> {
+    return this.http
+      .post<ApiResponse<object>>(`${this.apiUrl}/Auth/forgot-password`, { email })
+      .pipe(catchError(this.handleError));
+  }
+
+  resetPassword(request: { token: string; newPassword: string; confirmNewPassword: string }): Observable<ApiResponse<object>> {
+    return this.http
+      .post<ApiResponse<object>>(`${this.apiUrl}/Auth/reset-password`, request)
+      .pipe(catchError(this.handleError));
+  }
+
   // Login Method Management
 
   getLoginMethods(): Observable<LoginMethodsResponse> {

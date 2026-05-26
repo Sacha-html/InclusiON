@@ -71,6 +71,20 @@
             Hoja de Ruta
           </button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-reportes" [class.active]="activeTab === 'reportes'"
+                  role="tab" [attr.aria-selected]="activeTab === 'reportes'"
+                  aria-controls="panel-reportes" (click)="activeTab = 'reportes'">
+            Reportes
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-accesibilidad" [class.active]="activeTab === 'accesibilidad'"
+                  role="tab" [attr.aria-selected]="activeTab === 'accesibilidad'"
+                  aria-controls="panel-accesibilidad" (click)="activeTab = 'accesibilidad'">
+            Accesibilidad
+          </button>
+        </li>
       </ul>
 
       @if (activeTab === 'datos') {
@@ -117,6 +131,18 @@
       @if (activeTab === 'roadmap') {
         <div role="tabpanel" id="panel-roadmap" aria-labelledby="tab-roadmap">
           <app-professional-roadmap-tab [personId]="person.id" />
+        </div>
+      }
+
+      @if (activeTab === 'reportes') {
+        <div role="tabpanel" id="panel-reportes" aria-labelledby="tab-reportes">
+          <app-professional-reports-tab [personId]="person.id" />
+        </div>
+      }
+
+      @if (activeTab === 'accesibilidad') {
+        <div role="tabpanel" id="panel-accesibilidad" aria-labelledby="tab-accesibilidad">
+          <app-professional-accessibility [person]="person" />
         </div>
       }
 

@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -47,6 +47,7 @@ export class ListComponent implements OnInit {
   private readonly catalogsService   = inject(CatalogsService);
   private readonly toastService      = inject(ToastService);
   private readonly authService       = inject(AuthService);
+  #el = inject(ElementRef<HTMLElement>);
   private readonly router            = inject(Router);
 
   canCreate = this.authService.hasPermission(Permissions.Activities.Create);
@@ -131,6 +132,10 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.loadCatalogs();
     this.loadActivities();
+    setTimeout(() => {
+      const h = this.#el.nativeElement.querySelector('h1') as HTMLElement;
+      h?.focus();
+    }, 80);
 
     this.#semanticInput$.pipe(
       debounceTime(400),

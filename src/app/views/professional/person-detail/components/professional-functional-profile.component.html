@@ -1,5 +1,8 @@
 @if (!isEditing()) {
-  <div class="d-flex justify-content-end mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <c-badge [color]="profileCompletionColor" shape="rounded-pill" class="small">
+      Perfil: {{ profileCompletion }}% completo
+    </c-badge>
     <button cButton color="primary" size="sm" (click)="startEditing()">Editar perfil</button>
   </div>
 

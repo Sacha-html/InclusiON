@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { VisualStandardLoginRequest } from '@models';
 import { BaseVisualLoginComponent } from './base-visual-login.component';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
@@ -30,6 +31,7 @@ import { IconDirective } from '@coreui/icons-angular';
     FormCheckLabelDirective,
     IconDirective,
     AccessibilityPanelComponent,
+    RouterLink,
   ],
   templateUrl: './visual-standard-login.component.html',
   styleUrl: './visual-standard-login.component.scss',

@@ -69,6 +69,63 @@
     </c-col>
   </c-row>
 
+  <!-- Resumen semanal de progreso -->
+  @if (weeklyProgress) {
+    <c-row class="mb-4">
+      <c-col xs="12">
+        <c-card class="weekly-progress-card">
+          <c-card-body>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h5 class="mb-0">Resumen semanal</h5>
+                <small class="text-body-secondary">
+                  {{ weeklyProgress.periodStart | date:'dd/MM' }} — {{ weeklyProgress.periodEnd | date:'dd/MM/yyyy' }}
+                </small>
+              </div>
+              <svg cIcon name="cil-chart" size="2xl" class="text-body-secondary" aria-hidden="true"></svg>
+            </div>
+            <c-row class="g-3 text-center">
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value">{{ weeklyProgress.personCount }}</div>
+                  <div class="weekly-stat__label">Personas activas</div>
+                </div>
+              </c-col>
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value text-primary">{{ weeklyProgress.totalCompleted }}</div>
+                  <div class="weekly-stat__label">Actividades completadas</div>
+                </div>
+              </c-col>
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value"
+                       [class.text-success]="weeklyProgress.avgSuccess >= 70"
+                       [class.text-warning]="weeklyProgress.avgSuccess >= 40 && weeklyProgress.avgSuccess < 70"
+                       [class.text-danger]="weeklyProgress.avgSuccess < 40">
+                    {{ weeklyProgress.avgSuccess }}%
+                  </div>
+                  <div class="weekly-stat__label">Promedio de éxito</div>
+                </div>
+              </c-col>
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value"
+                       [class.text-danger]="weeklyProgress.frustrationAlerts > 0"
+                       [class.text-body-secondary]="weeklyProgress.frustrationAlerts === 0">
+                    {{ weeklyProgress.frustrationAlerts }}
+                    @if (weeklyProgress.frustrationAlerts > 0) { <span class="fs-6">⚠️</span> }
+                  </div>
+                  <div class="weekly-stat__label">Alertas de frustración</div>
+                </div>
+              </c-col>
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  }
+
   <!-- Reportes resumen -->
   @if (recentReports.length > 0) {
     <c-row class="mb-4">

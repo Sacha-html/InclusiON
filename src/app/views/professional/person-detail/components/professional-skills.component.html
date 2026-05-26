@@ -14,6 +14,16 @@
 </div>
 <button cButton color="primary" size="sm" (click)="openModal()">Agregar Area</button>
 
+<!-- Radar chart de habilidades (IN-90) -->
+@if (!radarLoading()) {
+  <div class="mt-4 pt-3" style="border-top: 1px solid var(--a11y-border, #E0E0E0);">
+    <h6 class="fw-semibold mb-3" style="color: var(--a11y-text, #212121);">
+      Rendimiento por área de habilidad
+    </h6>
+    <app-skill-radar-chart [points]="radarPoints()" />
+  </div>
+}
+
 <c-modal [visible]="showModal()" (visibleChange)="showModal.set($event)" (visibleChange)="!$event && closeModal()">
   <c-modal-header><strong>Agregar Áreas de Habilidad</strong></c-modal-header>
   <c-modal-body>

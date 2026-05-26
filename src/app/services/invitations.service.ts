@@ -23,10 +23,13 @@ export class InvitationsService {
     return `${environment.apiUrl}/Invitations`;
   }
 
-  getAll(page = 1, pageSize = 10): Observable<PagedResponse<InvitationResponse>> {
-    const params = new HttpParams()
+  getAll(page = 1, pageSize = 10, search?: string, status?: string): Observable<PagedResponse<InvitationResponse>> {
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
+
+    if (search) params = params.set('search', search);
+    if (status) params = params.set('status', status);
 
     return this.http
       .get<ApiResponse<PagedResponse<InvitationResponse>>>(this.apiUrl, { params })

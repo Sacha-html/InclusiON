@@ -3,7 +3,9 @@ export interface GetReportsRequest {
   pageSize: number;
   search?: string;
   personId?: string;
+  personIds?: string[];
   professionalId?: string;
+  institutionId?: number;
   reportTypeId?: number;
   isActive?: boolean;
   status?: string;

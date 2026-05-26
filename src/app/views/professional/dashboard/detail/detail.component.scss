@@ -35,3 +35,25 @@
 
 .counter-card-muted {
 }
+
+// ── Weekly Progress Card ─────────────────────────────────────────────────────
+
+.weekly-progress-card {
+  border-left: 4px solid var(--cui-primary);
+}
+
+.weekly-stat {
+  padding: 0.5rem;
+
+  &__value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: var(--cui-secondary-color);
+    margin-top: 0.25rem;
+  }
+}

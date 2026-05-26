@@ -1,8 +1,9 @@
+<div role="region" aria-labelledby="dashboard-title">
 <!-- Cargando -->
 @if (loading) {
   <c-row>
     <c-col xs="12" class="text-center py-5">
-      <c-spinner color="primary" />
+      <c-spinner color="primary" role="status" />
       <p class="mt-2 text-body-secondary">Cargando panel familiar…</p>
     </c-col>
   </c-row>
@@ -12,7 +13,7 @@
 @if (!loading && error) {
   <c-row>
     <c-col xs="12">
-      <c-alert color="danger">
+      <c-alert color="danger" role="alert">
         No se pudo cargar el panel. Intenta nuevamente más tarde.
       </c-alert>
     </c-col>
@@ -25,7 +26,7 @@
   <!-- Encabezado + mensajes no leídos -->
   <c-row class="mb-4">
     <c-col xs="12" md="8">
-      <h1 class="h4 mb-1">Panel Familiar</h1>
+      <h1 id="dashboard-title" class="h4 mb-1" tabindex="-1">Panel Familiar</h1>
       <p class="text-body-secondary mb-0">
         Seguimiento de actividades, reportes y mensajes.
       </p>
@@ -148,3 +149,4 @@
     </c-row>
   }
 }
+</div>

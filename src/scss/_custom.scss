@@ -410,17 +410,17 @@
     color: var(--a11y-danger-text);
   }
 
-  // Botón accesible en tablas
-  td .btn {
+  // Botón accesible en tablas (excluye btn-link para no pisar su estilo)
+  td .btn:not(.btn-link) {
     background-color: var(--a11y-primary);
-    color: var(--a11y-primary-text);
+    color: var(--a11y-primary-text, #FFFFFF);
     border-color: var(--a11y-primary);
 
     &:hover,
     &:focus {
       background-color: var(--a11y-primary-dark);
       border-color: var(--a11y-primary-dark);
-      color: var(--a11y-primary-text);
+      color: var(--a11y-primary-text, #FFFFFF);
     }
   }
 }

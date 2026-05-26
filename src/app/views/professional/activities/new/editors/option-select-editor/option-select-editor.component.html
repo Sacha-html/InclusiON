@@ -1,0 +1,97 @@
+<!-- Instrucción -->
+<div class="mb-3">
+  <label class="form-label" for="os-instruction">Instrucción que verá el estudiante *</label>
+  <input cFormControl id="os-instruction" [(ngModel)]="content.instruction" name="instruction"
+         placeholder="Ej: Leé la pregunta y elegí la respuesta correcta."
+         (ngModelChange)="onInstructionChange()" required />
+</div>
+
+<!-- Pregunta -->
+<div class="mb-3">
+  <label class="form-label" for="os-question">Pregunta *</label>
+  <input cFormControl id="os-question" [(ngModel)]="content.question" name="question"
+         placeholder="Ej: ¿Cuál es el animal doméstico más común?"
+         (ngModelChange)="onQuestionChange()" required />
+</div>
+
+<!-- Opciones existentes -->
+<h6 class="mb-2">Opciones de respuesta (mínimo 2) *</h6>
+@if (content.options.length === 0) {
+  <p class="text-body-secondary small mb-3">Agregá opciones de texto abajo.</p>
+} @else {
+  <div class="options-list mb-3">
+    @for (opt of content.options; track opt.id) {
+      <div class="option-row" [class.option-row--correct]="opt.id === content.correctOptionId">
+        <!-- Correct badge -->
+        @if (opt.id === content.correctOptionId) {
+          <span class="opt-badge-correct" title="Respuesta correcta">✓</span>
+        }
+
+        <!-- Pictogram preview -->
+        <div class="opt-pic-wrap">
+          @if (opt.pictogramId) {
+            <img [src]="pictogramUrl(opt.pictogramId)" alt="Pictograma" class="opt-pic" />
+            <button type="button" class="opt-pic-clear" (click)="clearPictogram(opt.id)" title="Quitar imagen">✕</button>
+          } @else {
+            <button type="button" class="opt-pic-add" (click)="openPictogramPicker(opt.id)" title="Añadir pictograma">🖼</button>
+          }
+        </div>
+
+        <!-- Text (read-only display + click to mark correct) -->
+        <span class="opt-text" (click)="setCorrect(opt.id)" title="Clic para marcar como correcta">
+          {{ opt.text }}
+        </span>
+
+        <!-- Remove -->
+        <button type="button" class="opt-btn-remove" (click)="removeOption(opt.id)" title="Eliminar opción">✕</button>
+      </div>
+    }
+  </div>
+  <p class="text-body-secondary small mb-3">Hacé clic en una opción para marcarla como correcta.</p>
+}
+
+<!-- Agregar nueva opción -->
+<div class="mb-4">
+  <label class="form-label" for="os-new-text">Agregar opción de texto</label>
+  <c-row class="g-2 align-items-center">
+    <c-col xs="12" sm="8">
+      <input cFormControl id="os-new-text" [(ngModel)]="newOptionText" name="newOptionText"
+             placeholder="Texto de la opción..."
+             (keydown.enter)="$event.preventDefault(); addOption()" />
+    </c-col>
+    <c-col xs="auto">
+      <button type="button" class="btn btn-outline-primary btn-sm" (click)="addOption()"
+              [disabled]="!newOptionText.trim()">+ Agregar</button>
+    </c-col>
+  </c-row>
+</div>
+
+<!-- Pictogram picker flotante -->
+@if (pickingPicFor() !== null) {
+  <div class="pic-picker-overlay">
+    <div class="pic-picker">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">Buscar pictograma ARASAAC</h6>
+        <button type="button" class="btn-close btn-sm" (click)="closePictogramPicker()" aria-label="Cerrar"></button>
+      </div>
+      <c-row class="mb-2">
+        <c-col xs="12">
+          <input cFormControl [(ngModel)]="arasaacSearch" name="picSearch"
+                 placeholder="Buscar pictograma..."
+                 (ngModelChange)="onArasaacSearchChange($event)" />
+        </c-col>
+      </c-row>
+      @if (isSearching()) { <c-spinner size="sm" class="d-block mx-auto" /> }
+      @if (arasaacResults().length > 0) {
+        <div class="arasaac-grid">
+          @for (pic of arasaacResults(); track pic.id) {
+            <button type="button" class="arasaac-card" (click)="assignPictogram(pic)" [title]="pic.keyword">
+              <img [src]="pic.imageUrl" [alt]="pic.keyword" />
+              <span>{{ pic.keyword }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

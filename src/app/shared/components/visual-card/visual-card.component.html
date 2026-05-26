@@ -1,7 +1,8 @@
 @if (interactive) {
   <button
     type="button"
-    class="visual-card interactive"
+    cButton
+    [class]="'visual-card interactive' + (done ? ' card--done' : '')"
     [style.--card-accent]="variant ? null : accentColor"
     [attr.aria-label]="ariaLabel || title"
     (click)="handleClick()">
@@ -9,7 +10,7 @@
   </button>
 } @else {
   <article
-    class="visual-card"
+    [class]="'visual-card' + (done ? ' card--done' : '')"
     [style.--card-accent]="variant ? null : accentColor"
     [attr.aria-label]="ariaLabel || title">
     <ng-container *ngTemplateOutlet="cardContent" />
@@ -23,7 +24,8 @@
     } @else if (icon) {
       <div
         [class]="'card-icon' + (variant ? ' card-icon--' + variant : '')"
-        [style.background-color]="variant ? null : accentColor">
+        [style.background-color]="variant ? null : accentColor"
+        [style.color]="variant ? null : iconTextColor">
         <svg cIcon [name]="icon" size="xxl" aria-hidden="true" focusable="false"></svg>
       </div>
     }

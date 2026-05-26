@@ -1,11 +1,17 @@
+<div role="region" aria-labelledby="activity-detail-title">
 @if (isLoading()) {
   <div class="text-center py-5">
     <c-spinner aria-label="Cargando actividad"></c-spinner>
   </div>
+} @else if (hasError()) {
+  <c-alert color="danger" role="alert">
+    No se pudo cargar la actividad. Intentá de nuevo más tarde.
+  </c-alert>
+  <button cButton color="secondary" (click)="back()">Volver al catálogo</button>
 } @else if (activity()) {
   <c-card>
     <c-card-header class="d-flex justify-content-between align-items-center">
-      <h5 cCardTitle class="mb-0">Detalle de Actividad</h5>
+      <h1 id="activity-detail-title" cCardTitle class="h5 mb-0" tabindex="-1">Detalle de Actividad</h1>
       @if (canUpdate && !activity()?.isStandardActivity) {
         <button cButton color="primary" (click)="edit()">
           Editar
@@ -14,7 +20,7 @@
     </c-card-header>
     <c-card-body>
       <div class="mb-4">
-        <h4>{{ activity().title }}</h4>
+        <h2 class="h4">{{ activity().title }}</h2>
         <div class="d-flex gap-2 mb-3">
           <c-badge [color]="activity().isActive ? 'success' : 'secondary'">
             {{ activity().isActive ? 'Activa' : 'Inactiva' }}
@@ -119,3 +125,4 @@
     </c-card-body>
   </c-card>
 }
+</div>
