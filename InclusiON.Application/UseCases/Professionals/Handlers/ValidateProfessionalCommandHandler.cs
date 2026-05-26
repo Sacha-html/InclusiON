@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
@@ -18,7 +19,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
     {
         private readonly IProfessionalsRepository _repository;
         private readonly IIdentityService _identityService;
-        private readonly IEmailService _emailService;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly IHttpContextService _httpContextService;
         private readonly IUnitOfWork _unitOfWork;
@@ -28,7 +29,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         public ValidateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IIdentityService identityService,
-            IEmailService emailService,
+            IBackgroundJobRepository backgroundJobs,
             IAdminInstitutionRepository adminInstitutionRepository,
             IHttpContextService httpContextService,
             IUnitOfWork unitOfWork,
@@ -37,7 +38,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         {
             _repository = repository;
             _identityService = identityService;
-            _emailService = emailService;
+            _backgroundJobs = backgroundJobs;
             _adminInstitutionRepository = adminInstitutionRepository;
             _httpContextService = httpContextService;
             _unitOfWork = unitOfWork;
@@ -147,36 +148,27 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     _logger.LogInformation("Profesional aprobado: {ProfessionalId}, Usuario: {UserId}",
                         professional.Id, professional.UserId);
 
-                    // Enviar email de aprobación sin bloquear la respuesta
                     var email = userToActivate!.Email ?? "";
-                    var firstName = professional.FirstName;
-                    var tempPassword = password;
                     if (!string.IsNullOrEmpty(email))
                     {
-                        // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-                        // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-                        _ = Task.Run(async () =>
-                        {
-                            try
+                        await _backgroundJobs.CreateAsync(
+                            JobTypes.Email,
+                            JsonSerializer.Serialize(new EmailPayload
                             {
-                                await _emailService.SendTemplatedEmailAsync(
-                                    email,
-                                    "Tu cuenta en InclusiON ha sido validada",
-                                    "ProfessionalApproved",
-                                    new Dictionary<string, string?>
-                                    {
-                                        { "UserName", firstName },
-                                        { "Email", email },
-                                        { "TemporaryPassword", tempPassword },
-                                        { "LoginUrl", "https://inclusion.app/login" },
-                                        { "Year", _dateTime.UtcNow.Year.ToString() }
-                                    });
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogWarning(ex, "No se pudo enviar email de aprobación a {Email}", email);
-                            }
-                        });
+                                To           = email,
+                                Subject      = "Tu cuenta en InclusiON ha sido validada",
+                                TemplateName = "ProfessionalApproved",
+                                Replacements = new Dictionary<string, string?>
+                                {
+                                    { "UserName", professional.FirstName },
+                                    { "Email", email },
+                                    { "TemporaryPassword", password },
+                                    { "LoginUrl", "https://inclusion.app/login" },
+                                    { "Year", _dateTime.UtcNow.Year.ToString() }
+                                }
+                            }),
+                            maxRetries: 2,
+                            cancellationToken: cancellationToken);
                     }
                 }
                 else
@@ -215,32 +207,23 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
                     _logger.LogInformation("Profesional rechazado: {ProfessionalId}", professional.Id);
 
-                    // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-                    // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-                    // Enviar email de rechazo sin bloquear la respuesta
                     var rejectEmail = professional.Email ?? $"{professional.FirstName.ToLower()}.{professional.LastName.ToLower()}@inclusion.app";
-                    var rejectFirstName = professional.FirstName;
-                    var rejectObservation = command.Observation ?? "Sin observación";
-                    _ = Task.Run(async () =>
-                    {
-                        try
+                    await _backgroundJobs.CreateAsync(
+                        JobTypes.Email,
+                        JsonSerializer.Serialize(new EmailPayload
                         {
-                            await _emailService.SendTemplatedEmailAsync(
-                                rejectEmail,
-                                "Tu registro en InclusiON ha sido rechazado",
-                                "ProfessionalRejected",
-                                new Dictionary<string, string?>
-                                {
-                                    { "UserName", rejectFirstName },
-                                    { "Observation", rejectObservation },
-                                    { "Year", _dateTime.UtcNow.Year.ToString() }
-                                });
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning(ex, "No se pudo enviar email de rechazo a {Email}", rejectEmail);
-                        }
-                    });
+                            To           = rejectEmail,
+                            Subject      = "Tu registro en InclusiON ha sido rechazado",
+                            TemplateName = "ProfessionalRejected",
+                            Replacements = new Dictionary<string, string?>
+                            {
+                                { "UserName", professional.FirstName },
+                                { "Observation", command.Observation ?? "Sin observación" },
+                                { "Year", _dateTime.UtcNow.Year.ToString() }
+                            }
+                        }),
+                        maxRetries: 2,
+                        cancellationToken: cancellationToken);
                 }
 
                 var response = ProfessionalResponse.MapToResponse(professional);

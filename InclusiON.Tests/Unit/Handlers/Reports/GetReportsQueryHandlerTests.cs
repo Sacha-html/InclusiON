@@ -31,7 +31,7 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
                 Arg.Any<bool?>(), Arg.Any<string?>(),
                 Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
                 Arg.Any<SortField?>(), Arg.Any<string>(), Arg.Any<List<int>?>(),
-                Arg.Any<CancellationToken>())
+                Arg.Any<List<string>?>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResponse<Report>
             {
                 Data = new List<Report> { AReport() },

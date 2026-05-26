@@ -54,6 +54,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             SortField? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
+            List<string>? personIds = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.Reports
@@ -75,6 +76,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             if (!string.IsNullOrWhiteSpace(personId) && Guid.TryParse(personId, out var parsedPersonId))
                 query = query.Where(r => r.PersonId == parsedPersonId);
+
+            if (personIds is { Count: > 0 })
+            {
+                var parsedPersonIds = personIds
+                    .Where(id => Guid.TryParse(id, out _))
+                    .Select(id => Guid.Parse(id))
+                    .ToList();
+                if (parsedPersonIds.Count > 0)
+                    query = query.Where(r => parsedPersonIds.Contains(r.PersonId));
+            }
 
             if (!string.IsNullOrWhiteSpace(professionalId) && Guid.TryParse(professionalId, out var parsedProfessionalId))
                 query = query.Where(r => r.ProfessionalId == parsedProfessionalId);

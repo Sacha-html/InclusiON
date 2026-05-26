@@ -273,13 +273,14 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
 
     public class SendMessageCommandHandlerTests
     {
-        private readonly IMessagesRepository    _messages    = Substitute.For<IMessagesRepository>();
-        private readonly IUsersRepository       _users       = Substitute.For<IUsersRepository>();
-        private readonly IAssignmentsRepository _assignments = Substitute.For<IAssignmentsRepository>();
-        private readonly IUnitOfWork            _uow         = Substitute.For<IUnitOfWork>();
-        private readonly IEncryptionService     _encryption  = Substitute.For<IEncryptionService>();
+        private readonly IMessagesRepository     _messages    = Substitute.For<IMessagesRepository>();
+        private readonly IUsersRepository        _users       = Substitute.For<IUsersRepository>();
+        private readonly IAssignmentsRepository  _assignments = Substitute.For<IAssignmentsRepository>();
+        private readonly IUnitOfWork             _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IEncryptionService      _encryption  = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobs     = Substitute.For<IBackgroundJobRepository>();
 
-        private SendMessageCommandHandler BuildSut() => new(_messages, _users, _assignments, _uow, _encryption);
+        private SendMessageCommandHandler BuildSut() => new(_messages, _users, _assignments, _uow, _encryption, _bgJobs);
 
         private static readonly Guid ProfUserId   = Guid.NewGuid();
         private static readonly Guid FamilyUserId = Guid.NewGuid();
@@ -494,11 +495,12 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
 
     public class ReplyToMessageCommandHandlerTests
     {
-        private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
-        private readonly IUsersRepository    _users    = Substitute.For<IUsersRepository>();
-        private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
-        private readonly IEncryptionService  _encryption = Substitute.For<IEncryptionService>();
-        private ReplyToMessageCommandHandler BuildSut() => new(_messages, _users, _uow, _encryption);
+        private readonly IMessagesRepository  _messages   = Substitute.For<IMessagesRepository>();
+        private readonly IUsersRepository     _users      = Substitute.For<IUsersRepository>();
+        private readonly IUnitOfWork          _uow        = Substitute.For<IUnitOfWork>();
+        private readonly IEncryptionService   _encryption = Substitute.For<IEncryptionService>();
+        private readonly IBackgroundJobRepository _bgJobs = Substitute.For<IBackgroundJobRepository>();
+        private ReplyToMessageCommandHandler BuildSut() => new(_messages, _users, _uow, _encryption, _bgJobs);
 
         private static readonly Guid SenderId   = Guid.NewGuid();
         private static readonly Guid ReceiverId = Guid.NewGuid();

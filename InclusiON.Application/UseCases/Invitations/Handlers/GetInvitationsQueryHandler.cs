@@ -27,10 +27,10 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             try
             {
                 var paged = query.ProfessionalId.HasValue
-                    ? await _repository.GetPagedByProfessionalIdAsync(query.ProfessionalId.Value, query.Page, query.PageSize, cancellationToken)
+                    ? await _repository.GetPagedByProfessionalIdAsync(query.ProfessionalId.Value, query.Page, query.PageSize, query.Search, query.Status, cancellationToken)
                     : query.InstitutionIds != null && query.InstitutionIds.Any()
-                        ? await _repository.GetPagedByInstitutionIdsAsync(query.InstitutionIds, query.Page, query.PageSize, cancellationToken)
-                        : await _repository.GetPagedAsync(query.Page, query.PageSize, cancellationToken);
+                        ? await _repository.GetPagedByInstitutionIdsAsync(query.InstitutionIds, query.Page, query.PageSize, query.Search, query.Status, cancellationToken)
+                        : await _repository.GetPagedAsync(query.Page, query.PageSize, query.Search, query.Status, cancellationToken);
 
                 var response = new PagedResponse<InvitationResponse>
                 {

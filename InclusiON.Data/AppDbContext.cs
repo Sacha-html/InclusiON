@@ -42,6 +42,7 @@ namespace InclusiON.Data
 
         // Nivel 2: Perfiles de usuario y autenticacion
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<Professional> Professionals { get; set; }
         public DbSet<PersonWithDisability> PersonsWithDisability { get; set; }
         public DbSet<FamilyRepresentative> FamilyRepresentatives { get; set; }

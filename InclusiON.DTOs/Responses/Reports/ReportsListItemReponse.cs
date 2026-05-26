@@ -20,6 +20,7 @@ namespace InclusiON.DTOs.Responses.Reports
         public string? AdminComment { get; set; }
         public DateTime? ApprovedAt { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsReadByFamily { get; set; }
 
         public static ReportsListItemReponse MapToResponse(Report r) => new()
         {
@@ -36,7 +37,8 @@ namespace InclusiON.DTOs.Responses.Reports
             Status = r.Status,
             AdminComment = r.AdminComment,
             ApprovedAt = r.ApprovedAt,
-            CreatedAt = r.CreatedAt
+            CreatedAt = r.CreatedAt,
+            IsReadByFamily = r.IsReadByFamily,
         };
     }
 }

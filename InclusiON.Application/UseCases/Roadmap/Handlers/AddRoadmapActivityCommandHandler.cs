@@ -47,6 +47,12 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
             if (!activity.IsStandardActivity && activity.ProfessionalId != command.ProfessionalId)
                 return ApiResponse<RoadmapActivityResponse>.Forbidden();
 
+            // 2c. Verificar que la actividad pertenece al mismo SkillArea que el área del roadmap
+            if (activity.SkillAreaId.HasValue && activity.SkillAreaId.Value != area.SkillAreaId)
+                return ApiResponse<RoadmapActivityResponse>.ErrorResult(
+                    ErrorCode.InvalidOperation,
+                    "La actividad no pertenece al área de habilidad de este tramo del roadmap.");
+
             // 3. Verificar que la actividad no este ya en el area
             if (await _roadmaps.ActivityExistsInAreaAsync(command.AreaId, command.ActivityId, cancellationToken))
                 return ApiResponse<RoadmapActivityResponse>.Conflict(

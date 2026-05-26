@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
+// EmailPayload lives in InclusiON.Domain.Models
 
 namespace InclusiON.Workers;
 
@@ -38,11 +39,4 @@ public class EmailAgent(IEmailService emailService, ILogger<EmailAgent> logger) 
     }
 }
 
-public record EmailPayload
-{
-    public string To { get; init; } = string.Empty;
-    public string Subject { get; init; } = string.Empty;
-    public string? HtmlBody { get; init; }
-    public string? TemplateName { get; init; }
-    public Dictionary<string, string?>? Replacements { get; init; }
-}
+// EmailPayload is defined in InclusiON.Domain.Models.EmailPayload
