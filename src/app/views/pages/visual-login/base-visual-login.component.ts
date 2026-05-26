@@ -3,7 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService, ErrorCodeService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { ErrorCode } from '@models';
-import { RoleRoutes } from '../../../shared/constants/roles';
+import { RoleRoutes } from '@shared/constants/roles';
 
 /**
  * Datos de error de respuesta de login visual.
@@ -276,7 +276,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
       this.router.navigate([AppRoutes.ChangePassword]);
     } else {
       const role = this.authService.getUserRole();
-      const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
+      const target = role ? (RoleRoutes[role] || '/') : '/';
       this.router.navigate([target]);
     }
   }

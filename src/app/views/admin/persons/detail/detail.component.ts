@@ -1,15 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { Observable, map } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogsService, PersonsService, ToastService, FamilyService, AuthService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem, PersonRepresentativeResponse, FamilyResponse } from '../../../../models';
+import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem, PersonRepresentativeResponse, FamilyResponse, PersonRepresentativeHistoryResponse } from '@models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { PersonBasicInfoComponent } from './components/person-basic-info.component';
 import { PersonSkillsComponent } from './components/person-skills.component';
 import { PersonLinksComponent } from './components/person-links.component';
 import { AdminDiagnosesComponent } from './components/admin-diagnoses.component';
 import { AdminPersonReportsComponent } from './components/admin-person-reports.component';
+import { PersonAccessibilityComponent } from './components/person-accessibility.component';
 import { BadgeComponent, CardBodyComponent, CardComponent, CardHeaderComponent } from '@coreui/angular';
 
 @Component({
@@ -26,6 +28,7 @@ import { BadgeComponent, CardBodyComponent, CardComponent, CardHeaderComponent }
     PersonLinksComponent,
     AdminDiagnosesComponent,
     AdminPersonReportsComponent,
+    PersonAccessibilityComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
@@ -43,6 +46,21 @@ export class DetailComponent implements OnInit {
   showDeactivateModal = false;
   activeTab = 'datos';
 
+  readonly tabs = ['datos', 'habilidades', 'vinculos', 'diagnosticos', 'accesibilidad', 'reportes'];
+
+  onTabKeydown(event: KeyboardEvent): void {
+    const idx = this.tabs.indexOf(this.activeTab);
+    let newIdx = idx;
+    if (event.key === 'ArrowRight') newIdx = (idx + 1) % this.tabs.length;
+    else if (event.key === 'ArrowLeft') newIdx = (idx - 1 + this.tabs.length) % this.tabs.length;
+    else if (event.key === 'Home') newIdx = 0;
+    else if (event.key === 'End') newIdx = this.tabs.length - 1;
+    else return;
+    event.preventDefault();
+    this.activeTab = this.tabs[newIdx];
+    setTimeout(() => document.getElementById(`tab-${this.activeTab}`)?.focus());
+  }
+
   // Skill profile
   skillProfile: PersonSkillProfileResponse[] = [];
   allSkillAreas: SkillAreaItem[] = [];
@@ -55,12 +73,8 @@ export class DetailComponent implements OnInit {
   representatives: PersonRepresentativeResponse[] = [];
   loadingRepresentatives = false;
   showLinkModal = false;
-  availableFamilies: FamilyResponse[] = [];
-  loadingFamilies = false;
-  searchFamily = '';
   linkingFamily = false;
   linkFamilyError = '';
-  selectedFamilyId = '';
   linkRelationship = '';
   linkIsPrimary = false;
   showUnlinkModal = false;
@@ -70,8 +84,15 @@ export class DetailComponent implements OnInit {
 
   // History
   showHistoryModal = false;
-  linkHistory: any[] = [];
+  linkHistory: PersonRepresentativeHistoryResponse[] = [];
   loadingHistory = false;
+
+  readonly searchFamilyFn = (query: string): Observable<FamilyResponse[]> => {
+    const linkedIds = new Set(this.representatives.filter(r => r.isActive).map(r => r.representativeId));
+    return this.familyService.getAvailableFamilies(query || undefined).pipe(
+      map((data: FamilyResponse[]) => (data ?? []).filter((f: FamilyResponse) => !linkedIds.has(f.id)))
+    );
+  };
 
   canLink = this.authService.hasPermission(Permissions.Family.Link);
   canUnlink = this.authService.hasPermission(Permissions.Family.Unlink);
@@ -195,53 +216,14 @@ export class DetailComponent implements OnInit {
   }
 
   openLinkModal(): void {
-    this.searchFamily = '';
-    this.availableFamilies = [];
-    this.selectedFamilyId = '';
+    this.showLinkModal = true;
     this.linkRelationship = '';
     this.linkIsPrimary = false;
     this.linkFamilyError = '';
-    this.loadAvailableFamilies();
-  }
-
-  loadAvailableFamilies(): void {
-    this.loadingFamilies = true;
-    this.familyService.getAvailableFamilies(this.searchFamily || undefined).subscribe({
-      next: (data) => {
-        const linkedIds = new Set(this.representatives.filter(r => r.isActive).map(r => r.representativeId));
-        this.availableFamilies = (data ?? []).filter(f => !linkedIds.has(f.id));
-        this.loadingFamilies = false;
-      },
-      error: () => {
-        this.loadingFamilies = false;
-      },
-    });
   }
 
   closeLinkModal(): void {
     this.showLinkModal = false;
-  }
-
-  confirmLinkFamily(): void {
-    if (!this.person || !this.selectedFamilyId || !this.linkRelationship) return;
-    this.linkingFamily = true;
-    this.linkFamilyError = '';
-
-    this.familyService.linkFamilyToPerson(this.selectedFamilyId, this.person.id, {
-      relationship: this.linkRelationship,
-      isPrimary: this.linkIsPrimary
-    }).subscribe({
-      next: () => {
-        this.linkingFamily = false;
-        this.toastService.success('Familiar vinculado exitosamente');
-        this.showLinkModal = false;
-        this.loadRepresentatives();
-      },
-      error: (err) => {
-        this.linkingFamily = false;
-        this.linkFamilyError = err?.userMessage || 'Error al vincular el familiar';
-      },
-    });
   }
 
   openUnlinkModal(rep: PersonRepresentativeResponse): void {

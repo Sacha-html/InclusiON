@@ -1,19 +1,20 @@
 <div class="d-flex justify-content-end align-items-center mb-3 gap-2">
   @if (isSaving()) {
-    <c-spinner size="sm"></c-spinner>
+    <c-spinner size="sm" aria-hidden="true"></c-spinner>
     <small class="text-muted">Guardando...</small>
   } @else {
     <small class="text-muted">
-      <i>Hacé clic en un campo para editarlo</i>
+      <em>Hacé clic en un campo para editarlo</em>
     </small>
   }
 </div>
 
 <c-row class="mb-3">
   <c-col sm="6">
-    <label cLabel>Nombre</label>
+    <label cLabel for="field-firstName">Nombre</label>
     @if (editingField() === 'firstName') {
       <input cFormControl
+             id="field-firstName"
              [(ngModel)]="draft.firstName"
              [disabled]="isSaving()"
              (blur)="saveField()"
@@ -21,16 +22,22 @@
              autofocus />
     } @else {
       <div class="form-control-plaintext border-bottom cursor-pointer"
+           role="button"
+           tabindex="0"
+           [attr.aria-label]="'Editar Nombre: ' + (person.firstName || 'sin valor')"
            (click)="startField('firstName')"
+           (keydown.enter)="startField('firstName')"
+           (keydown.space)="startField('firstName'); $event.preventDefault()"
            title="Clic para editar">
         {{ person.firstName || '—' }}
       </div>
     }
   </c-col>
   <c-col sm="6">
-    <label cLabel>Apellido</label>
+    <label cLabel for="field-lastName">Apellido</label>
     @if (editingField() === 'lastName') {
       <input cFormControl
+             id="field-lastName"
              [(ngModel)]="draft.lastName"
              [disabled]="isSaving()"
              (blur)="saveField()"
@@ -38,7 +45,12 @@
              autofocus />
     } @else {
       <div class="form-control-plaintext border-bottom cursor-pointer"
+           role="button"
+           tabindex="0"
+           [attr.aria-label]="'Editar Apellido: ' + (person.lastName || 'sin valor')"
            (click)="startField('lastName')"
+           (keydown.enter)="startField('lastName')"
+           (keydown.space)="startField('lastName'); $event.preventDefault()"
            title="Clic para editar">
         {{ person.lastName || '—' }}
       </div>
@@ -48,26 +60,37 @@
 
 <c-row class="mb-3">
   <c-col sm="4">
-    <label cLabel>Documento</label>
+    <label cLabel for="field-documentNumber">Documento</label>
     @if (editingField() === 'documentNumber') {
       <input cFormControl
+             id="field-documentNumber"
              [(ngModel)]="draft.documentNumber"
              [disabled]="isSaving()"
              (blur)="saveField()"
              (keydown)="onKeydown($event)"
+             maxlength="20"
              autofocus />
+      @if (fieldError()) {
+        <div class="text-danger small mt-1" role="alert">{{ fieldError() }}</div>
+      }
     } @else {
       <div class="form-control-plaintext border-bottom cursor-pointer"
+           role="button"
+           tabindex="0"
+           [attr.aria-label]="'Editar Documento: ' + (person.documentNumber || 'sin valor')"
            (click)="startField('documentNumber')"
+           (keydown.enter)="startField('documentNumber')"
+           (keydown.space)="startField('documentNumber'); $event.preventDefault()"
            title="Clic para editar">
         {{ person.documentNumber || 'Sin especificar' }}
       </div>
     }
   </c-col>
   <c-col sm="4">
-    <label cLabel>Fecha de nacimiento</label>
+    <label cLabel for="field-birthDate">Fecha de nacimiento</label>
     @if (editingField() === 'birthDate') {
       <input cFormControl
+             id="field-birthDate"
              [(ngModel)]="draft.birthDate"
              placeholder="dd/mm/aaaa"
              [disabled]="isSaving()"
@@ -76,21 +99,26 @@
              autofocus />
     } @else {
       <div class="form-control-plaintext border-bottom cursor-pointer"
+           role="button"
+           tabindex="0"
+           [attr.aria-label]="'Editar Fecha de nacimiento: ' + ((person.birthDate | date:'dd/MM/yyyy') || 'sin valor')"
            (click)="startField('birthDate')"
+           (keydown.enter)="startField('birthDate')"
+           (keydown.space)="startField('birthDate'); $event.preventDefault()"
            title="Clic para editar">
         {{ (person.birthDate | date:'dd/MM/yyyy') || '—' }}
       </div>
     }
   </c-col>
   <c-col sm="4">
-    <label cLabel>Edad</label>
-    <div class="form-control-plaintext">{{ person.age }} años</div>
+    <label cLabel for="field-age">Edad</label>
+    <div id="field-age" class="form-control-plaintext">{{ person.age }} años</div>
   </c-col>
 </c-row>
 
 <c-row class="mb-3">
   <c-col sm="6">
-    <label cLabel>Tipo de discapacidad</label>
-    <div class="form-control-plaintext">{{ person.disabilityTypeName ?? 'Sin especificar' }}</div>
+    <label cLabel for="field-disabilityType">Tipo de discapacidad</label>
+    <div id="field-disabilityType" class="form-control-plaintext">{{ person.disabilityTypeName ?? 'Sin especificar' }}</div>
   </c-col>
 </c-row>

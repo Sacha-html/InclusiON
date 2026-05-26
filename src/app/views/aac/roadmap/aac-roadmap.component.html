@@ -1,4 +1,4 @@
-<div class="aac-roadmap" role="main" aria-label="Mi Roadmap de aprendizaje">
+<div class="aac-roadmap" aria-label="Mi Roadmap de aprendizaje">
 
   <!-- Loading -->
   @if (loading()) {
@@ -10,17 +10,18 @@
 
   <!-- Error -->
   @else if (hasError()) {
-    <div class="empty-state" role="alert">
-      <span class="empty-icon">😕</span>
+    <div class="empty-state" role="alert" aria-live="assertive">
+      <span class="empty-icon" aria-hidden="true">😕</span>
+      <h1 class="roadmap-title">Error</h1>
       <p>No se pudo cargar el roadmap. Intenta de nuevo más tarde.</p>
     </div>
   }
 
   <!-- Sin roadmap -->
   @else if (!roadmap()) {
-    <div class="empty-state">
-      <span class="empty-icon">🗺️</span>
-      <h2>Tu camino está por comenzar</h2>
+    <div class="empty-state" aria-live="polite">
+      <span class="empty-icon" aria-hidden="true">🗺️</span>
+      <h1 class="roadmap-title">Tu camino está por comenzar</h1>
       <p>Tu profesional está preparando tu roadmap de aprendizaje.<br>¡Vuelve pronto!</p>
     </div>
   }
@@ -35,8 +36,8 @@
     </header>
 
     @if (enrichedAreas().length === 0) {
-      <div class="empty-state">
-        <span class="empty-icon">📚</span>
+      <div class="empty-state" aria-live="polite">
+        <span class="empty-icon" aria-hidden="true">📚</span>
         <p>Tu profesional aún no agregó áreas al roadmap.</p>
       </div>
     }
@@ -44,9 +45,11 @@
     @for (area of enrichedAreas(); track area.id) {
       <section class="roadmap-area" [attr.aria-labelledby]="'area-' + area.id">
         <!-- Area header -->
-        <div class="area-header" [style.background-color]="area.headerColor">
+        <div class="area-header"
+             [style.background-color]="area.headerColor"
+             [style.color]="headerTextColor(area.headerColor)">
           @if (area.icon) {
-            <span class="area-icon" aria-hidden="true">{{ area.icon }}</span>
+            <span class="material-icons area-icon" aria-hidden="true">{{ area.icon }}</span>
           }
           <h2 [id]="'area-' + area.id" class="area-name">{{ area.skillAreaName }}</h2>
         </div>
@@ -70,10 +73,12 @@
 
               <!-- Activity node -->
               <button
+                cButton
                 class="activity-node"
                 [ngClass]="[node.status, node.side]"
                 [attr.aria-label]="nodeAriaLabel(node)"
                 [attr.aria-disabled]="node.status === 'locked'"
+                [style.--node-accent]="area.headerColor"
                 [style.border-color]="node.status !== 'locked' ? area.headerColor : undefined"
                 [style.background-color]="node.status === 'completed' ? area.headerColor : undefined"
                 (click)="onNodeClick(node)"
@@ -105,7 +110,7 @@
                   <span class="node-badge in-progress">En progreso</span>
                 }
                 @if (node.status === 'available') {
-                  <span class="node-badge available">Próximamente</span>
+                  <span class="node-badge available">Sin asignar</span>
                 }
               </div>
             </div>

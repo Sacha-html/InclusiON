@@ -1,13 +1,12 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
+import { SkillRadarChartComponent } from '@shared/components/skill-radar-chart/skill-radar-chart.component';
 import { FamilyService, ToastService } from '@services';
 import { ActivitiesService } from '@services/activities.service';
-import {
-  ActivityAssignmentResponse,
-  ActivityAssignmentStatus,
-  ActivityAttemptResponse,
-  ActivityResponseResult,
-} from '@models/responses/activity.response';
-import { FamilyPersonSummaryResponse } from '../../../models';
+import { RoadmapService } from '@services/roadmap.service';
+import { ActivityAssignmentResponse, ActivityAssignmentStatus, ActivityResponseResult } from '@models';
+import { FamilyPersonSummaryResponse } from '@models';
+import { SkillRadarPointResponse } from '@models/roadmap/roadmap.response';
 import {
   BadgeComponent,
   CardBodyComponent,
@@ -43,7 +42,9 @@ interface CompletionEntry {
   selector: 'app-family-progress',
   standalone: true,
   imports: [
+    ActorAvatarComponent,
     AlertComponent,
+    SkillRadarChartComponent,
     BadgeComponent,
     CardComponent,
     CardBodyComponent,
@@ -60,13 +61,16 @@ interface CompletionEntry {
 export class FamilyProgressComponent implements OnInit {
   private readonly familyService      = inject(FamilyService);
   private readonly activitiesService  = inject(ActivitiesService);
+  private readonly roadmapService     = inject(RoadmapService);
   private readonly toastService       = inject(ToastService);
 
   persons              = signal<FamilyPersonSummaryResponse[]>([]);
   selectedPersonId     = signal<string | null>(null);
   assignments          = signal<ActivityAssignmentResponse[]>([]);
+  radarPoints          = signal<SkillRadarPointResponse[]>([]);
   isLoading            = signal(true);
   isLoadingAssignments = signal(false);
+  isLoadingRadar       = signal(false);
   hasError             = signal(false);
 
   readonly selectedPerson = computed(() =>
@@ -123,11 +127,15 @@ export class FamilyProgressComponent implements OnInit {
       }
     }
     return entries
-      .sort((x, y) => new Date(y.completedAt).getTime() - new Date(x.completedAt).getTime())
+      .toSorted((x, y) => new Date(y.completedAt).getTime() - new Date(x.completedAt).getTime())
       .slice(0, 15);
   });
 
   readonly ActivityResponseResult = ActivityResponseResult;
+
+  readonly reducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
 
   ngOnInit(): void {
     this.familyService.getDashboard().subscribe({
@@ -149,7 +157,9 @@ export class FamilyProgressComponent implements OnInit {
     if (this.selectedPersonId() === personId) return;
     this.selectedPersonId.set(personId);
     this.isLoadingAssignments.set(true);
+    this.isLoadingRadar.set(true);
     this.assignments.set([]);
+    this.radarPoints.set([]);
 
     this.activitiesService.getPersonAssignments(personId).subscribe({
       next: (data) => {
@@ -161,11 +171,16 @@ export class FamilyProgressComponent implements OnInit {
         this.isLoadingAssignments.set(false);
       },
     });
+
+    this.roadmapService.getSkillRadar(personId).subscribe({
+      next: (pts) => { this.radarPoints.set(pts); this.isLoadingRadar.set(false); },
+      error: ()   => { this.isLoadingRadar.set(false); },   // silent — radar is optional
+    });
   }
 
   private lastScore(a: ActivityAssignmentResponse): number | null {
     if (!a.responses.length) return null;
-    const sorted = [...a.responses].sort(
+    const sorted = a.responses.toSorted(
       (x, y) => new Date(y.completedAt ?? 0).getTime() - new Date(x.completedAt ?? 0).getTime()
     );
     return sorted[0].successPercentage ?? null;

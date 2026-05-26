@@ -20,11 +20,14 @@
 
     .text-body-secondary {
       color: var(--a11y-primary-text, #FFFFFF) !important;
-      opacity: 0.85;
     }
   }
 
   &.family-previously-linked {
     border-left: 3px solid var(--a11y-warning, #BF360C);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }

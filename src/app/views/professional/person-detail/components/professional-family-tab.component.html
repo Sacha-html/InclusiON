@@ -102,7 +102,7 @@
       (click)="confirmLink()"
       [disabled]="!selectedFamilyId || !linkRelationship || confirmingLink">
       @if (confirmingLink) {
-        <c-spinner size="sm"></c-spinner>
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
       }
       Vincular
     </button>
@@ -122,7 +122,7 @@
     <button type="button" cButton color="secondary" (click)="showConfirmLinkModal = false">Cancelar</button>
     <button type="button" cButton color="primary" (click)="doLink()" [disabled]="confirmingLink">
       @if (confirmingLink) {
-        <c-spinner size="sm"></c-spinner>
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
       }
       Confirmar
     </button>
@@ -151,7 +151,7 @@
       (click)="confirmUnlink()"
       [disabled]="!unlinkObservation.trim() || unlinking">
       @if (unlinking) {
-        <c-spinner size="sm"></c-spinner>
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
       }
       Desvincular
     </button>

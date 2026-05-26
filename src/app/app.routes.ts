@@ -56,6 +56,24 @@ export const routes: Routes = [
       ),
   },
 
+  // Recuperación de contraseña (self-service)
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./views/pages/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+    canActivate: [guestGuard],
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./views/pages/reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent,
+      ),
+    canActivate: [guestGuard],
+  },
+
   // Cambio de contraseña obligatorio
   {
     path: 'change-password',

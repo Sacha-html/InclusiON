@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { AssignmentsService, InstitutionsService, ToastService } from '@services';
 import { InstitutionResponse, ProfessionalInstitutionResponse } from '@models';
 import {
@@ -35,7 +35,7 @@ export class ProfessionalInstitutionsComponent {
   private readonly toastService = inject(ToastService);
 
   availableInstitutions: InstitutionResponse[] = [];
-  selectedInstitutionId: number | null = null;
+  selectedInstitutionId: string | null = null;
   showAssignInstitutionModal = signal(false);
   showRemoveInstitutionModal = signal(false);
   institutionToRemove = signal<ProfessionalInstitutionResponse | null>(null);
@@ -44,7 +44,7 @@ export class ProfessionalInstitutionsComponent {
     this.selectedInstitutionId = null;
     this.institutionsService.getAll().subscribe({
       next: (data) => {
-        const assignedIds = new Set(this.institutions.filter((i) => i.isActive).map((i) => i.institutionId));
+        const assignedIds = new Set(this.institutions.filter((i) => i.isActive).map((i) => Number(i.institutionId)));
         this.availableInstitutions = data.filter((i) => i.isActive && !assignedIds.has(i.id));
         this.showAssignInstitutionModal.set(true);
       },

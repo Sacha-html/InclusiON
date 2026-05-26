@@ -1,82 +1,93 @@
 @if (!isEditing()) {
-  <div class="d-flex justify-content-end mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <c-badge [color]="profileCompletionColor" shape="rounded-pill" class="small">
+      Perfil: {{ profileCompletion }}% completo
+    </c-badge>
     <button cButton color="primary" size="sm" (click)="startEditing()">Editar perfil</button>
   </div>
 
-  <h6 class="mb-3">Niveles funcionales</h6>
-  <c-row class="mb-3">
-    <c-col sm="4">
-      <label cLabel>Atencion</label>
-      <input cFormControl [value]="formatLevel(person.attentionLevel)" readonly />
-    </c-col>
-    <c-col sm="4">
-      <label cLabel>Comunicacion</label>
-      <input cFormControl [value]="formatLevel(person.communicationLevel)" readonly />
-    </c-col>
-    <c-col sm="4">
-      <label cLabel>Motricidad</label>
-      <input cFormControl [value]="formatLevel(person.motorSkillLevel)" readonly />
-    </c-col>
-  </c-row>
-  <c-row class="mb-3">
-    <c-col sm="6">
-      <label cLabel>Usa CAA</label>
-      <input cFormControl [value]="formatBoolean(person.usesAAC)" readonly />
-    </c-col>
-    <c-col sm="6">
-      <label cLabel>Usa lengua de señas</label>
-      <input cFormControl [value]="formatBoolean(person.usesSignLanguage)" readonly />
-    </c-col>
-  </c-row>
+  <h4 class="h6 mb-3 border-bottom pb-2 text-body-secondary">Niveles funcionales</h4>
+  <dl class="row g-3 mb-0">
+    <div class="col-sm-4">
+      <dt class="form-label text-body-secondary mb-1">Atención</dt>
+      <dd class="mb-0 fw-medium">{{ formatLevel(person.attentionLevel) }}</dd>
+    </div>
+    <div class="col-sm-4">
+      <dt class="form-label text-body-secondary mb-1">Comunicación</dt>
+      <dd class="mb-0 fw-medium">{{ formatLevel(person.communicationLevel) }}</dd>
+    </div>
+    <div class="col-sm-4">
+      <dt class="form-label text-body-secondary mb-1">Motricidad</dt>
+      <dd class="mb-0 fw-medium">{{ formatLevel(person.motorSkillLevel) }}</dd>
+    </div>
+    <div class="col-sm-6">
+      <dt class="form-label text-body-secondary mb-1">Usa CAA</dt>
+      <dd class="mb-0 fw-medium">{{ formatBoolean(person.usesAAC) }}</dd>
+    </div>
+    <div class="col-sm-6">
+      <dt class="form-label text-body-secondary mb-1">Usa lengua de señas</dt>
+      <dd class="mb-0 fw-medium">{{ formatBoolean(person.usesSignLanguage) }}</dd>
+    </div>
+  </dl>
 
-  <h6 class="mt-4 mb-3">Preferencias</h6>
-  <c-row class="mb-3">
-    <c-col sm="6">
-      <label cLabel>Intereses y motivadores</label>
-      <textarea cFormControl [value]="person.interestsAndMotivators ?? 'Sin especificar'" readonly rows="2"></textarea>
-    </c-col>
-    <c-col sm="6">
-      <label cLabel>Estilo de aprendizaje</label>
-      <textarea cFormControl [value]="person.learningStyle ?? 'Sin especificar'" readonly rows="2"></textarea>
-    </c-col>
-  </c-row>
-  <c-row class="mb-3">
-    <c-col sm="6">
-      <label cLabel>Recursos disponibles</label>
-      <textarea cFormControl [value]="person.availableResources ?? 'Sin especificar'" readonly rows="2"></textarea>
-    </c-col>
-    <c-col sm="6">
-      <label cLabel>Terapias adicionales</label>
-      <textarea cFormControl [value]="person.additionalTherapies ?? 'Sin especificar'" readonly rows="2"></textarea>
-    </c-col>
-  </c-row>
+  <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Preferencias</h4>
+  <dl class="row g-3 mb-0">
+    <div class="col-sm-6">
+      <dt class="form-label text-body-secondary mb-1">Intereses y motivadores</dt>
+      <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.interestsAndMotivators ?? 'Sin especificar' }}</dd>
+    </div>
+    <div class="col-sm-6">
+      <dt class="form-label text-body-secondary mb-1">Estilo de aprendizaje</dt>
+      <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.learningStyle ?? 'Sin especificar' }}</dd>
+    </div>
+    <div class="col-sm-6">
+      <dt class="form-label text-body-secondary mb-1">Recursos disponibles</dt>
+      <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.availableResources ?? 'Sin especificar' }}</dd>
+    </div>
+    <div class="col-sm-6">
+      <dt class="form-label text-body-secondary mb-1">Terapias adicionales</dt>
+      <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.additionalTherapies ?? 'Sin especificar' }}</dd>
+    </div>
+  </dl>
 
-  <h6 class="mt-4 mb-3">Accesibilidad</h6>
-  <c-row class="mb-3">
-    <c-col sm="3"><label cLabel>Fuente grande</label><input cFormControl [value]="formatBoolean(person.requiresLargeFont)" readonly /></c-col>
-    <c-col sm="3"><label cLabel>Alto contraste</label><input cFormControl [value]="formatBoolean(person.requiresHighContrast)" readonly /></c-col>
-    <c-col sm="3"><label cLabel>Ruido visual</label><input cFormControl [value]="formatBoolean(person.visualNoiseSensitivity)" readonly /></c-col>
-    <c-col sm="3"><label cLabel>Sonido</label><input cFormControl [value]="formatBoolean(person.soundSensitivity)" readonly /></c-col>
-  </c-row>
+  <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Accesibilidad</h4>
+  <dl class="row g-3 mb-0">
+    <div class="col-sm-3">
+      <dt class="form-label text-body-secondary mb-1">Fuente grande</dt>
+      <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresLargeFont) }}</dd>
+    </div>
+    <div class="col-sm-3">
+      <dt class="form-label text-body-secondary mb-1">Alto contraste</dt>
+      <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresHighContrast) }}</dd>
+    </div>
+    <div class="col-sm-3">
+      <dt class="form-label text-body-secondary mb-1">Ruido visual</dt>
+      <dd class="mb-0 fw-medium">{{ formatBoolean(person.visualNoiseSensitivity) }}</dd>
+    </div>
+    <div class="col-sm-3">
+      <dt class="form-label text-body-secondary mb-1">Sonido</dt>
+      <dd class="mb-0 fw-medium">{{ formatBoolean(person.soundSensitivity) }}</dd>
+    </div>
+  </dl>
 
 } @else {
-  <h6 class="mb-3">Niveles funcionales</h6>
+  <h4 class="h6 mb-3 border-bottom pb-2 text-body-secondary">Niveles funcionales</h4>
   <c-row class="mb-3">
     <c-col sm="4">
-      <label cLabel>Atencion</label>
-      <select cSelect [(ngModel)]="editData.attentionLevel">
+      <label cLabel for="edit-attentionLevel">Atención</label>
+      <select cSelect id="edit-attentionLevel" [(ngModel)]="editData.attentionLevel">
         @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
       </select>
     </c-col>
     <c-col sm="4">
-      <label cLabel>Comunicacion</label>
-      <select cSelect [(ngModel)]="editData.communicationLevel">
+      <label cLabel for="edit-communicationLevel">Comunicación</label>
+      <select cSelect id="edit-communicationLevel" [(ngModel)]="editData.communicationLevel">
         @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
       </select>
     </c-col>
     <c-col sm="4">
-      <label cLabel>Motricidad</label>
-      <select cSelect [(ngModel)]="editData.motorSkillLevel">
+      <label cLabel for="edit-motorSkillLevel">Motricidad</label>
+      <select cSelect id="edit-motorSkillLevel" [(ngModel)]="editData.motorSkillLevel">
         @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
       </select>
     </c-col>
@@ -96,47 +107,59 @@
     </c-col>
   </c-row>
 
-  <h6 class="mt-4 mb-3">Preferencias</h6>
+  <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Preferencias</h4>
   <c-row class="mb-3">
     <c-col sm="6">
-      <label cLabel>Intereses y motivadores</label>
-      <textarea cFormControl [(ngModel)]="editData.interestsAndMotivators" rows="2"></textarea>
+      <label cLabel for="edit-interests">Intereses y motivadores</label>
+      <textarea cFormControl id="edit-interests" [(ngModel)]="editData.interestsAndMotivators" rows="2"></textarea>
     </c-col>
     <c-col sm="6">
-      <label cLabel>Estilo de aprendizaje</label>
-      <textarea cFormControl [(ngModel)]="editData.learningStyle" rows="2"></textarea>
+      <label cLabel for="edit-learningStyle">Estilo de aprendizaje</label>
+      <textarea cFormControl id="edit-learningStyle" [(ngModel)]="editData.learningStyle" rows="2"></textarea>
     </c-col>
   </c-row>
   <c-row class="mb-3">
     <c-col sm="6">
-      <label cLabel>Recursos disponibles</label>
-      <textarea cFormControl [(ngModel)]="editData.availableResources" rows="2"></textarea>
+      <label cLabel for="edit-resources">Recursos disponibles</label>
+      <textarea cFormControl id="edit-resources" [(ngModel)]="editData.availableResources" rows="2"></textarea>
     </c-col>
     <c-col sm="6">
-      <label cLabel>Terapias adicionales</label>
-      <textarea cFormControl [(ngModel)]="editData.additionalTherapies" rows="2"></textarea>
+      <label cLabel for="edit-therapies">Terapias adicionales</label>
+      <textarea cFormControl id="edit-therapies" [(ngModel)]="editData.additionalTherapies" rows="2"></textarea>
     </c-col>
   </c-row>
 
-  <h6 class="mt-4 mb-3">Accesibilidad</h6>
+  <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Accesibilidad</h4>
   <c-row class="mb-3">
     <c-col sm="3">
-      <c-form-check><input cFormCheckInput type="checkbox" id="edit-largeFont" [(ngModel)]="editData.requiresLargeFont" /><label cFormCheckLabel for="edit-largeFont">Fuente grande</label></c-form-check>
+      <c-form-check>
+        <input cFormCheckInput type="checkbox" id="edit-largeFont" [(ngModel)]="editData.requiresLargeFont" />
+        <label cFormCheckLabel for="edit-largeFont">Fuente grande</label>
+      </c-form-check>
     </c-col>
     <c-col sm="3">
-      <c-form-check><input cFormCheckInput type="checkbox" id="edit-highContrast" [(ngModel)]="editData.requiresHighContrast" /><label cFormCheckLabel for="edit-highContrast">Alto contraste</label></c-form-check>
+      <c-form-check>
+        <input cFormCheckInput type="checkbox" id="edit-highContrast" [(ngModel)]="editData.requiresHighContrast" />
+        <label cFormCheckLabel for="edit-highContrast">Alto contraste</label>
+      </c-form-check>
     </c-col>
     <c-col sm="3">
-      <c-form-check><input cFormCheckInput type="checkbox" id="edit-visualNoise" [(ngModel)]="editData.visualNoiseSensitivity" /><label cFormCheckLabel for="edit-visualNoise">Ruido visual</label></c-form-check>
+      <c-form-check>
+        <input cFormCheckInput type="checkbox" id="edit-visualNoise" [(ngModel)]="editData.visualNoiseSensitivity" />
+        <label cFormCheckLabel for="edit-visualNoise">Ruido visual</label>
+      </c-form-check>
     </c-col>
     <c-col sm="3">
-      <c-form-check><input cFormCheckInput type="checkbox" id="edit-sound" [(ngModel)]="editData.soundSensitivity" /><label cFormCheckLabel for="edit-sound">Sonido</label></c-form-check>
+      <c-form-check>
+        <input cFormCheckInput type="checkbox" id="edit-sound" [(ngModel)]="editData.soundSensitivity" />
+        <label cFormCheckLabel for="edit-sound">Sonido</label>
+      </c-form-check>
     </c-col>
   </c-row>
 
   <div class="d-flex gap-2 mt-3">
     <button cButton color="primary" (click)="save()" [disabled]="isSaving()">
-      @if (isSaving()) { <c-spinner size="sm" class="me-1"></c-spinner> }
+      @if (isSaving()) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
       Guardar
     </button>
     <button cButton color="secondary" (click)="cancel()">Cancelar</button>

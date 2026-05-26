@@ -1,42 +1,17 @@
 <h5 class="mb-3">Diagnósticos</h5>
 
-@if (loading) {
-  <div class="text-center py-4">
-    <c-spinner></c-spinner>
-  </div>
-} @else if (diagnoses.length === 0) {
-  <p class="text-body-secondary">No hay diagnósticos registrados para esta persona.</p>
-} @else {
-  <table cTable hover responsive>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Diagnóstico principal</th>
-        <th>Profesional</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (d of diagnoses; track d.id) {
-        <tr>
-          <td>{{ formatDate(d.diagnosisDate) }}</td>
-          <td>{{ truncate(d.primaryDiagnosis, 80) }}</td>
-          <td>{{ d.professionalName }}</td>
-          <td class="d-flex gap-2">
-            <button cButton color="primary" size="sm"
-                    (click)="openDetail(d.id)">
-              Ver
-            </button>
-            <button cButton color="danger" size="sm"
-                    (click)="openDeactivate(d)">
-              Dar de baja
-            </button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
+<app-data-table
+  [columns]="columns"
+  [items]="diagnoses"
+  [loading]="loading"
+  [showSearch]="false"
+  [currentPage]="1"
+  [pageSize]="diagnoses.length || 1"
+  [totalItems]="diagnoses.length"
+  emptyMessage="No hay diagnósticos registrados para esta persona."
+  emptyIcon="cil-description"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal detalle -->
 <c-modal [visible]="showModal" (visibleChange)="!$event && closeModal()"

@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AdminUsersService, UpdateAdminUserRequest } from '../../../../services/admin-users.service';
-import { AuthService } from '../../../../services/auth.service';
-import { ToastService } from '../../../../services/toast.service';
+import { AdminUsersService, UpdateAdminUserRequest } from '@services/admin-users.service';
+import { AuthService } from '@services/auth.service';
+import { ToastService } from '@services/toast.service';
 import { AppRoutes } from '@shared/constants/app-routes';
 import {
   ButtonDirective,
@@ -64,7 +64,7 @@ export class EditComponent implements OnInit {
     this.userId = user.id;
     this.adminUsersService.getAdmins().subscribe({
       next: (admins) => {
-        const me = admins.find((a) => a.id === user.id);
+        const me = admins.data.find((a) => a.id === user.id);
         if (me) {
           this.form.patchValue({
             name: me.name,

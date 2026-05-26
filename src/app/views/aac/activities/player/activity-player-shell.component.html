@@ -5,15 +5,17 @@
   </div>
 } @else if (hasError()) {
   <div class="shell-error" role="alert">
-    <p>No se pudo cargar la actividad.</p>
-    <button class="back-btn" (click)="onCompleted()" aria-label="Volver a mis actividades">← Volver</button>
+    <p>{{ errorMessage() }}</p>
+    <button cButton class="back-btn" (click)="onCompleted()" aria-label="Volver a mis actividades">← Volver</button>
   </div>
 } @else if (unsupported()) {
   <div class="shell-error" role="alert">
     <p>Este tipo de actividad no está disponible todavía.</p>
-    <button class="back-btn" (click)="onCompleted()" aria-label="Volver a mis actividades">← Volver</button>
+    <button cButton class="back-btn" (click)="onCompleted()" aria-label="Volver a mis actividades">← Volver</button>
   </div>
 } @else {
   <!-- El player se monta dinámicamente aquí -->
-  <ng-container #playerHost></ng-container>
+  <div aria-live="polite" aria-label="Contenido de la actividad">
+    <ng-container #playerHost></ng-container>
+  </div>
 }

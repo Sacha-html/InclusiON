@@ -5,9 +5,9 @@ import { catchError } from 'rxjs/operators';
 import { RoadmapService } from '@services/roadmap.service';
 import { ActivitiesService } from '@services/activities.service';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse } from '@models/responses';
-import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models/responses/activity.response';
-import { SpinnerComponent } from '@coreui/angular';
+import { contrastTextColor } from '@shared/utils';
+import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse, ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models';
+import { ButtonDirective, SpinnerComponent } from '@coreui/angular';
 import { NgClass } from '@angular/common';
 
 export type NodeStatus = 'locked' | 'available' | 'pending' | 'in-progress' | 'completed';
@@ -27,7 +27,7 @@ export interface EnrichedArea extends RoadmapAreaResponse {
 @Component({
   selector: 'app-aac-roadmap',
   standalone: true,
-  imports: [SpinnerComponent, NgClass],
+  imports: [ButtonDirective, SpinnerComponent, NgClass],
   templateUrl: './aac-roadmap.component.html',
   styleUrl: './aac-roadmap.component.scss',
 })
@@ -80,7 +80,7 @@ export class AacRoadmapComponent implements OnInit {
 
   onNodeClick(node: RoadmapNode): void {
     if (node.status === 'locked' || !node.assignment || node.status === 'completed') return;
-    this.router.navigate([AppRoutes.Aac.Activities, node.assignment.id]);
+    this.router.navigate([AppRoutes.Aac.Activities, node.assignment.encryptedId]);
   }
 
   nodeLabel(node: RoadmapNode): string {
@@ -105,6 +105,11 @@ export class AacRoadmapComponent implements OnInit {
 
   difficultyStars(level: number): string {
     return '★'.repeat(Math.min(level, 5)) + '☆'.repeat(Math.max(0, 5 - level));
+  }
+
+  /** Returns '#000000' or '#ffffff' for max contrast against a hex background color. */
+  headerTextColor(hexColor: string): string {
+    return contrastTextColor(hexColor);
   }
 
   private resolveStatus(act: RoadmapActivityResponse, assignment?: ActivityAssignmentResponse): NodeStatus {

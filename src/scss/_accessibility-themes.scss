@@ -11,6 +11,8 @@
 // =========================================
 :root,
 [data-color-mode="light"] {
+  color-scheme: light;
+
   // Tipografía
   --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
   --a11y-font-size: 16px;
@@ -24,7 +26,7 @@
   --a11y-surface: #FAFAFA;
   --a11y-text: #1A1A1A;                    // Contraste 17.4:1 (AAA)
   --a11y-text-secondary: #3D3D3D;          // Contraste 10.3:1 (AAA)
-  --a11y-text-muted: #555555;              // Contraste 7.1:1 (AAA) sobre #fafafa — antes #595959 (6.71:1)
+  --a11y-text-muted: #4B4B4B;              // Contraste 7.8:1 (AAA) sobre #f2f2f2, 7.0:1 sobre #e6e6e6 — antes #555555 (6.65:1 sobre #f2f2f2)
 
   // Color de acción (botones, foco, elementos interactivos)
   --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA) — solo para botones/fondos
@@ -41,6 +43,8 @@
   --a11y-warning-text: #FFFFFF;
   --a11y-danger-text: #FFFFFF;
   --a11y-border: #9E9E9E;
+  // Badge secondary bg — dark enough for white text (8.1:1 AAA)
+  --a11y-badge-secondary-bg: #4B4B4B;  // same as text-muted, white text = 8.1:1 AAA
 
   // Sidebar
   --a11y-sidebar-bg: #263238;
@@ -200,6 +204,10 @@
   --cui-sidebar-nav-link-hover-bg: var(--a11y-sidebar-nav-link-hover-bg);
   --cui-sidebar-nav-link-active-bg: var(--a11y-sidebar-nav-link-active-bg);
   --cui-sidebar-nav-icon-color: var(--a11y-sidebar-icon);
+  --cui-sidebar-nav-title-color: var(--a11y-sidebar-text);  // sidebar section titles (Gestión, Evaluación, etc.)
+
+  // Secondary badges — dark bg ensures white text meets WCAG AAA (7:1)
+  --cui-secondary: var(--a11y-badge-secondary-bg);
 
   // Focus
   --cui-focus-ring-color:    var(--a11y-focus-color);
@@ -211,13 +219,15 @@
 // =========================================
 [data-color-mode="dark"],
 .dark-theme {
+    color-scheme: dark;
+
     // Colores modo oscuro - WCAG AA/AAA compliant
     --a11y-bg: #121212;
     --a11y-bg-secondary: #1E1E1E;
     --a11y-surface: #1A1A1A;
     --a11y-text: #F5F5F5;                   // Contraste 18.1:1 (AAA)
     --a11y-text-secondary: #D0D0D0;         // Contraste 12.6:1 (AAA)
-    --a11y-text-muted: #A0A0A0;             // Contraste 7.4:1 (AAA)
+    --a11y-text-muted: #ADADAD;             // Contraste 7.3:1 on #1A1A1A (AAA)
     --a11y-primary: #90CAF9;                // Contraste 10.5:1 (AAA)
     --a11y-primary-dark: #64B5F6;
     --a11y-primary-text: #000000;
@@ -230,6 +240,7 @@
     --a11y-warning-text: #000000;
     --a11y-danger-text: #000000;
     --a11y-border: #616161;
+    --a11y-badge-secondary-bg: #4A4A4A;  // dark bg maintains white text = 8.3:1 AAA
 
     --a11y-sidebar-bg: #0D0D0D;
     --a11y-sidebar-text: #F5F5F5;
@@ -470,7 +481,7 @@
   --a11y-scrollbar-track: transparent;
   --a11y-scrollbar-thumb-hover: #657B83;
 
-  --a11y-nav-home: #859900;
+  --a11y-nav-home: #4C5900;               // WCAG 1.4.11 6.61:1 sobre fondo crema — era #859900 (2.76:1 ❌)
   --a11y-nav-activities: #268BD2;
   --a11y-nav-calendar: #CB4B16;
   --a11y-nav-talk: #6C71C4;
@@ -540,8 +551,8 @@
 
   --a11y-nav-home: #ACE600;               // Alineado con success AAA
   --a11y-nav-activities: #2AA198;
-  --a11y-nav-calendar: #CB4B16;
-  --a11y-nav-talk: #6C71C4;
+  --a11y-nav-calendar: #FF7043;           // Naranja brillante 3.80:1 sobre nav bg oscuro — era #CB4B16 (2.27:1 ❌)
+  --a11y-nav-talk: #9FA8DA;               // Índigo claro 4.52:1 sobre nav bg oscuro — era #6C71C4 (2.97:1 ❌)
 
   --a11y-role-person: #ACE600;            // WCAG AAA (10.1:1 sobre bg) — antes #9CB800 (6.6:1)
   --a11y-role-person-bg: rgba(172, 230, 0, 0.15);
@@ -575,7 +586,7 @@
   --a11y-link: #0D47A1;                   // WCAG AAA (8.6:1) - antes #1565C0 (5.75:1)
   --a11y-link-hover: #002171;
   --a11y-success: #1B5E20;
-  --a11y-warning: #AA3B00;                 // WCAG AAA (7.2:1) - antes #E65100 (3.79:1)
+  --a11y-warning: #A13200;                 // WCAG AAA (7.07:1) - antes #E65100 (3.79:1)
   --a11y-danger: #A00000;                  // WCAG AAA (7.3:1) - antes #B71C1C (6.57:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
@@ -707,13 +718,13 @@
   --a11y-surface: #FAFAFA;
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
-  --a11y-text-muted: #595959;
-  --a11y-primary: #005A8C;                 // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
+  --a11y-primary: #004E8C;                 // WCAG AAA (7.8:1 sobre #F5F5F5, 9.1:1 sobre #FFF) — era #005A8C (6.77:1 sobre bg-secondary)
   --a11y-primary-dark: #003D66;
   --a11y-primary-text: #FFFFFF;
-  --a11y-link: #005A8C;                   // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-link: #004E8C;                   // WCAG AAA (7.8:1) — era #005A8C
   --a11y-link-hover: #003D66;
-  --a11y-success: #005A8C;                 // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-success: #004E8C;                 // WCAG AAA (7.8:1) — era #005A8C
   --a11y-warning: #7D4F00;                 // WCAG AAA (7.0:1) — antes #8F5A00 (5.8:1)
   --a11y-danger: #AF1B1B;                  // WCAG AAA (7.0:1) — antes #B71C1C (6.6:1)
   --a11y-success-text: #FFFFFF;
@@ -775,7 +786,7 @@
   --a11y-surface: #1A1A1A;
   --a11y-text: #F5F5F5;
   --a11y-text-secondary: #D0D0D0;
-  --a11y-text-muted: #A0A0A0;
+  --a11y-text-muted: #ADADAD;             // Contraste 7.3:1 on #1A1A1A (AAA)
   --a11y-primary: #48CAE4;                 // Cyan claro
   --a11y-primary-dark: #00B4D8;
   --a11y-primary-text: #000000;
@@ -847,13 +858,13 @@
   --a11y-surface: #FAFAFA;
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
-  --a11y-text-muted: #595959;
+  --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
   --a11y-primary: #1D3557;                 // Azul oscuro
   --a11y-primary-dark: #14213D;
   --a11y-primary-text: #FFFFFF;
   --a11y-link: #005A8C;                    // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
   --a11y-link-hover: #003D66;
-  --a11y-success: #355E78;                 // WCAG AAA (6.7:1) - antes #457B9D (4.59:1)
+  --a11y-success: #2E5370;                 // WCAG AAA (8.1:1) — era #355E78 (6.96:1, fallaba AAA)
   --a11y-warning: #705500;                 // WCAG AAA (7.0:1) — antes #8C6A00 (5.0:1)
   --a11y-danger: #8F4400;                  // WCAG AAA (7.0:1) — antes #9C4A00 (6.2:1)
   --a11y-success-text: #FFFFFF;
@@ -893,7 +904,7 @@
   --a11y-nav-calendar: #E9C46A;
   --a11y-nav-talk: #F4A261;
 
-  --a11y-role-person: #355E78;            // WCAG AAA (6.7:1) - antes #457B9D (4.59:1)
+  --a11y-role-person: #2E5370;            // WCAG AAA (8.1:1) — era #355E78 (6.96:1, fallaba AAA)
   --a11y-role-person-bg: rgba(53, 94, 120, 0.1);
   --a11y-role-professional: #1D3557;
   --a11y-role-professional-bg: rgba(29, 53, 87, 0.1);
@@ -915,13 +926,13 @@
   --a11y-surface: #1D3557;
   --a11y-text: #F1FAEE;
   --a11y-text-secondary: #A8DADC;
-  --a11y-text-muted: #8ECAE6;
+  --a11y-text-muted: #B8E0F0;              // WCAG AAA (9.77:1 sobre #1D3557) — era #97D0EB (7.38:1, muy ajustado)
   --a11y-primary: #A8DADC;
-  --a11y-primary-dark: #8ECAE6;
+  --a11y-primary-dark: #97D0EB;            // WCAG AAA sobre bg — era #8ECAE6
   --a11y-primary-text: #14213D;
   --a11y-link: #A8DADC;
   --a11y-link-hover: #8ECAE6;
-  --a11y-success: #8ECAE6;
+  --a11y-success: #97D0EB;                 // WCAG AAA (7.38:1) — era #8ECAE6 (6.91:1)
   --a11y-warning: #E9C46A;
   --a11y-danger: #F4A261;
   --a11y-success-text: #14213D;
@@ -955,12 +966,12 @@
   --a11y-scrollbar-track: transparent;
   --a11y-scrollbar-thumb-hover: #A8DADC;
 
-  --a11y-nav-home: #8ECAE6;
+  --a11y-nav-home: #97D0EB;
   --a11y-nav-activities: #A8DADC;
   --a11y-nav-calendar: #E9C46A;
   --a11y-nav-talk: #F4A261;
 
-  --a11y-role-person: #8ECAE6;
+  --a11y-role-person: #97D0EB;             // WCAG AAA — era #8ECAE6
   --a11y-role-person-bg: rgba(142, 202, 230, 0.15);
   --a11y-role-professional: #A8DADC;
   --a11y-role-professional-bg: rgba(168, 218, 220, 0.15);
@@ -987,14 +998,14 @@
   --a11y-surface: #FAFAFA;
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
-  --a11y-text-muted: #595959;
+  --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
   --a11y-primary: #9B2335;                 // Rojo/magenta oscuro
   --a11y-primary-dark: #7B1A29;
   --a11y-primary-text: #FFFFFF;
   --a11y-link: #1D3557;                   // Azul navy oscuro, legible sobre blanco
   --a11y-link-hover: #457B9D;
   --a11y-success: #005A62;                 // WCAG AAA (7.1:1) - antes #00838F (4.52:1)
-  --a11y-warning: #B5004D;                 // Magenta oscuro WCAG AA (7.2:1) - antes #E91E63 (4.35:1)
+  --a11y-warning: #AF004A;                 // Magenta oscuro WCAG AAA (7.07:1) - antes #E91E63 (4.35:1)
   --a11y-danger: #A00000;                  // WCAG AAA (7.3:1) - antes #B71C1C (6.57:1)
   --a11y-success-text: #FFFFFF;
   --a11y-warning-text: #FFFFFF;
@@ -1030,7 +1041,7 @@
   // Tritanopia: avoid blue-yellow, use red/magenta + cyan
   --a11y-nav-home: #00838F;
   --a11y-nav-activities: #9B2335;
-  --a11y-nav-calendar: #E91E63;
+  --a11y-nav-calendar: #B5004D;            // Magenta oscuro 7.2:1 — era #E91E63 (3.99:1, fallaba AAA)
   --a11y-nav-talk: #4A148C;
 
   --a11y-role-person: #005A62;            // WCAG AAA (7.1:1) - antes #00838F (4.52:1)
@@ -1056,14 +1067,14 @@
   --a11y-text: #EAEAEA;
   --a11y-text-secondary: #B8B8B8;
   --a11y-text-muted: #B0B0B0;              // WCAG AAA (7.2:1) - antes #9A9A9A (6.06:1)
-  --a11y-primary: #FF7A90;                 // Rosa claro WCAG AA (6.4:1) - antes #E94560 (4.46:1)
+  --a11y-primary: #FF91A3;                 // Rosa claro WCAG AAA (7.44:1 sobre #16213E) — era #FF7A90 (6.38:1)
   --a11y-primary-dark: #E94560;
-  --a11y-primary-text: #1A0008;            // WCAG AAA (8.6:1 sobre #FF7A90) - antes #FFFFFF (3.83:1)
-  --a11y-link: #FF7A90;                    // WCAG AA (5.9:1 sobre surface) - antes #E94560 (4.15:1)
+  --a11y-primary-text: #1A0008;            // WCAG AAA (9.38:1 sobre #FF91A3)
+  --a11y-link: #FF91A3;                    // WCAG AAA (7.44:1 sobre surface) — era #FF7A90
   --a11y-link-hover: #FFA2B3;
   --a11y-success: #4DD0E1;                 // Cyan claro
   --a11y-warning: #F48FB1;                 // Rosa claro
-  --a11y-danger: #FF7A78;                  // WCAG AA (6.2:1) - antes #EF5350 (4.89:1)
+  --a11y-danger: #FF807E;                  // WCAG AAA (7.02:1) - antes #EF5350 (4.89:1)
   --a11y-success-text: #000000;
   --a11y-warning-text: #000000;
   --a11y-danger-text: #1A0000;             // 6.4:1 sobre #EF5350 (era #FFFFFF → 3.3:1 ✗)
@@ -1102,7 +1113,7 @@
 
   --a11y-role-person: #4DD0E1;
   --a11y-role-person-bg: rgba(77, 208, 225, 0.15);
-  --a11y-role-professional: #FF7A90;      // WCAG AA (6.4:1) - antes #E94560 (4.46:1)
+  --a11y-role-professional: #FF91A3;      // WCAG AAA (7.44:1) — era #FF7A90 (6.38:1)
   --a11y-role-professional-bg: rgba(255, 122, 144, 0.15);
   --a11y-role-family: #A78BFF;            // WCAG AA (5.5:1) - antes #7C4DFF (3.54:1)
   --a11y-role-family-bg: rgba(167, 139, 255, 0.15);
@@ -1200,7 +1211,7 @@ a {
     background-color: var(--a11y-sidebar-bg) !important;
 
     .nav-title {
-      color: var(--a11y-sidebar-text-muted) !important;
+      color: var(--a11y-sidebar-text) !important;  // text-muted #B0BEC5 = 6.24:1 → falla AAA; usar text #ECEFF1 = 10:1 ✓
       font-weight: 700;
       text-transform: uppercase;
       font-size: 0.75em;
@@ -1754,9 +1765,11 @@ a {
     color: var(--a11y-primary-text) !important;
   }
 
+  /* Badge success: sólido — fondo --a11y-success, texto --a11y-success-text (blanco/negro según tema). */
   &.bg-success {
     background-color: var(--a11y-success) !important;
-    color: var(--a11y-success-text) !important;
+    color:            var(--a11y-success-text, #FFFFFF) !important;
+    border:           none !important;
   }
 
   &.bg-danger {
@@ -1788,7 +1801,8 @@ a {
     }
 
     &.badge-success::before {
-      background-color: var(--a11y-success-text);
+      /* Outlined badge: ícono usa --a11y-success (verde) para coincidir con el texto */
+      background-color: var(--a11y-success);
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
       -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
       mask-size: contain;
@@ -1949,6 +1963,225 @@ a {
 }
 
 // =========================================
+// SIDEBAR NAV TITLES
+// Override directo necesario: CoreUI redefine --cui-sidebar-nav-title-color
+// en .sidebar/.sidebar-nav (especificidad [0,1,0]) que gana sobre :root [0,0,1].
+// !important en propiedad computed gana sobre cualquier especificidad.
+// =========================================
+
+.nav-title {
+  color: var(--a11y-sidebar-text) !important;
+}
+
+// =========================================
+// BADGES — SECONDARY Y INFO
+// CoreUI Angular renderiza como class="badge bg-secondary" / "badge bg-info".
+// Bootstrap redefine --cui-secondary en .badge.bg-secondary → :root bridge pierde.
+// Override directo con !important en background-color resuelve el cascade.
+// =========================================
+
+.badge.bg-secondary {
+  background-color: var(--a11y-badge-secondary-bg) !important;
+  color: #fff !important;
+}
+
+// Info badges (roles, etiquetas) → map a primary para mantener AAA por perfil
+.badge.bg-info {
+  background-color: var(--a11y-primary) !important;
+  color: var(--a11y-primary-text) !important;
+}
+
+// Botones outline-secondary: Sass compila $secondary (#455A64) hardcodeado.
+// En fondos levemente off-white (#FAFAFA), #455A64 da 6.73:1 → falla AAA.
+// Override directo a #4B4B4B que da 8.36:1 en #FAFAFA (AAA ✓).
+.btn-outline-secondary {
+  color: var(--a11y-badge-secondary-bg) !important;
+  border-color: var(--a11y-badge-secondary-bg) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-badge-secondary-bg) !important;
+    color: #fff !important;
+  }
+}
+
+// Dark mode: --a11y-badge-secondary-bg = #4A4A4A (dark gray) → invisible on #121212.
+// Use text-secondary (#D0D0D0) which gives 11.6:1 on #121212 (AAA ✓).
+[data-color-mode="dark"],
+.dark-theme {
+  .btn-outline-secondary {
+    color: var(--a11y-text-secondary) !important;
+    border-color: var(--a11y-text-secondary) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-text-secondary) !important;
+      color: var(--a11y-bg) !important;
+    }
+  }
+}
+
+// =========================================
+// LIST GROUP
+// =========================================
+
+.list-group-item {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+  border-color: var(--a11y-border) !important;
+
+  &.active {
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text) !important;
+  }
+}
+
+// =========================================
+// TABS Y PILLS
+// =========================================
+
+.nav-tabs {
+  border-bottom-color: var(--a11y-border) !important;
+
+  .nav-link {
+    color: var(--a11y-text-secondary) !important;
+    border-color: transparent !important;
+
+    &:hover,
+    &:focus {
+      color: var(--a11y-text) !important;
+      border-color: var(--a11y-border) var(--a11y-border) transparent !important;
+      background-color: var(--a11y-bg-secondary) !important;
+    }
+
+    &.active {
+      color: var(--a11y-text) !important;
+      background-color: var(--a11y-bg) !important;
+      border-color: var(--a11y-border) var(--a11y-border) var(--a11y-bg) !important;
+    }
+
+    &.disabled {
+      color: var(--a11y-text-muted) !important;
+    }
+  }
+}
+
+.nav-pills .nav-link {
+  color: var(--a11y-text-secondary) !important;
+
+  &.active {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  &:hover:not(.active) {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text) !important;
+  }
+}
+
+// =========================================
+// ACCORDION
+// =========================================
+
+.accordion-item {
+  background-color: var(--a11y-bg) !important;
+  border-color: var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+}
+
+.accordion-button {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+
+  &:not(.collapsed) {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-primary) !important;
+    box-shadow: inset 0 -1px 0 var(--a11y-border) !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+  }
+
+  &::after {
+    filter: none;
+  }
+}
+
+.accordion-body {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+}
+
+// =========================================
+// PAGINATION
+// =========================================
+
+.pagination {
+  .page-link {
+    background-color: var(--a11y-bg) !important;
+    color: var(--a11y-primary) !important;
+    border-color: var(--a11y-border) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-bg-secondary) !important;
+      color: var(--a11y-primary) !important;
+    }
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  .page-item.disabled .page-link {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text-muted) !important;
+    border-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
+// PROGRESS BARS
+// =========================================
+
+.progress {
+  background-color: var(--a11y-bg-secondary) !important;
+}
+
+.progress-bar {
+  background-color: var(--a11y-primary) !important;
+
+  &.bg-success { background-color: var(--a11y-success) !important; }
+  &.bg-danger  { background-color: var(--a11y-danger) !important; }
+  &.bg-warning { background-color: var(--a11y-warning) !important; }
+  &.bg-info    { background-color: var(--a11y-primary) !important; }
+}
+
+// =========================================
+// FORM CONTROL PLAINTEXT
+// (campos display inline-edit)
+// =========================================
+
+.form-control-plaintext {
+  color: var(--a11y-text) !important;
+
+  &.border-bottom {
+    border-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
 // ESTILOS ESPECÍFICOS POR TEMA
 // =========================================
 
@@ -2040,9 +2273,19 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-duration: 0ms;
+  }
+
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border-width: 2px;
   }
 }
 
@@ -2089,10 +2332,10 @@ a {
 // CLASES UTILITARIAS DE ACCESIBILIDAD
 // =========================================
 
-// Resaltar enlaces — sin gradiente, usa outline-bottom accesible
+// Resaltar enlaces
 body.a11y-highlight-links {
+  // Links de contenido (inline, routerLink, etc.)
   a:not(.btn):not(.nav-link):not(.dropdown-item) {
-    background: transparent !important;
     padding: 0 2px;
     border-radius: 2px;
     text-decoration: underline !important;
@@ -2101,11 +2344,36 @@ body.a11y-highlight-links {
     text-underline-offset: 4px !important;
 
     &:hover,
-    &:focus {
+    &:focus-visible {
       background: var(--a11y-primary) !important;
       color: var(--a11y-primary-text) !important;
       text-decoration-color: var(--a11y-primary-text, #FFFFFF) !important;
     }
+  }
+
+  // Links de navegación del sidebar
+  a.nav-link {
+    text-decoration: underline !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+  }
+
+  // Items de menú desplegable (menú de usuario, acciones)
+  .dropdown-item {
+    text-decoration: underline !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+  }
+
+  // Skip link visible permanentemente cuando highlight está activo
+  .skip-link {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    opacity: 0.92;
+    font-size: 0.85rem;
   }
 }
 
@@ -2454,95 +2722,6 @@ body.a11y-large-cursor {
 }
 
 // =========================================
-// MODO LECTURA
-// Oculta sidebar y header para enfocarse en el contenido
-// =========================================
-body.a11y-reading-mode {
-  // Ocultar sidebar
-  .sidebar {
-    transform: translateX(-100%) !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-
-  // Ocultar header
-  .header {
-    transform: translateY(-100%) !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-
-  // Ajustar el contenido principal
-  .wrapper {
-    padding-inline-start: 0 !important;
-    padding-top: 0 !important;
-  }
-
-  // Contenido principal centrado y optimizado para lectura
-  // 1000px permite que cards con badges/estados no se aplaste
-  main:not(.aac-main),
-  .main,
-  [role="main"],
-  .body {
-    max-width: 1000px !important;
-    margin: 0 auto !important;
-    padding: 2rem !important;
-    font-size: 1.125rem !important;
-    line-height: 1.8 !important;
-  }
-
-  // En layout AAC, mantener paddings del header/nav fijos pero centrar contenido
-  .aac-main {
-    max-width: 1000px !important;
-    margin: 0 auto !important;
-    font-size: 1.125rem !important;
-    line-height: 1.8 !important;
-  }
-
-  // NOTA: El botón de salida ahora es un elemento real en accessibility-panel.component.html
-  // para mejor accesibilidad (clickeable, enfocable, con aria-label)
-
-  // Ocultar elementos de navegación secundarios
-  // Excluir la barra AAC (.aac-bottom-nav) para que personas puedan navegar
-  .breadcrumb,
-  .footer {
-    display: none !important;
-  }
-
-  // Ocultar navs genéricas pero mantener la nav AAC y el panel de accesibilidad
-  nav:not(.main-nav):not(.aac-bottom-nav) {
-    display: none !important;
-  }
-
-  // En layout AAC, mantener header y barra inferior visibles
-  .aac-header {
-    display: block !important;
-    visibility: visible !important;
-    transform: none !important;
-    opacity: 1 !important;
-  }
-
-  .aac-nav {
-    display: block !important;
-    visibility: visible !important;
-    transform: none !important;
-    opacity: 1 !important;
-  }
-
-  // Mantener el botón de accesibilidad visible y accesible
-  .a11y-trigger-btn {
-    bottom: 20px !important;
-    right: 20px !important;
-  }
-}
-
-// =========================================
 // TEXTO A VOZ (TTS)
 // Estilos para indicar que TTS está activo
 // =========================================
@@ -2720,7 +2899,7 @@ body.a11y-tts-enabled {
   // Agregar patrones además de colores para diferenciar estados
   .badge.bg-success,
   .alert-success,
-  .btn-success {
+  .btn-success:not(:has(svg)) {
     &::before {
       content: '\2713 '; // Checkmark
     }
@@ -2728,7 +2907,7 @@ body.a11y-tts-enabled {
 
   .badge.bg-danger,
   .alert-danger,
-  .btn-danger {
+  .btn-danger:not(:has(svg)) {
     &::before {
       content: '\2717 '; // X mark
     }
@@ -2736,7 +2915,7 @@ body.a11y-tts-enabled {
 
   .badge.bg-warning,
   .alert-warning,
-  .btn-warning {
+  .btn-warning:not(:has(svg)) {
     &::before {
       content: '\26A0 '; // Warning triangle
     }

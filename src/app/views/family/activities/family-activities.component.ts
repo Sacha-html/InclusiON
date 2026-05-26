@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 import { FamilyService, ToastService } from '@services';
 import { ActivitiesService } from '@services/activities.service';
-import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models/responses/activity.response';
-import { FamilyPersonSummaryResponse } from '../../../models';
+import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models';
+import { FamilyPersonSummaryResponse } from '@models';
 import {
   BadgeComponent,
   CardBodyComponent,
@@ -16,6 +17,7 @@ import {
   selector: 'app-family-activities',
   standalone: true,
   imports: [
+    ActorAvatarComponent,
     BadgeComponent,
     CardComponent,
     CardBodyComponent,

@@ -64,8 +64,15 @@
                   }
                 </c-col>
                 <c-col sm="6">
-                  <label cLabel for="documentNumber">Documento</label>
-                  <input cFormControl id="documentNumber" formControlName="documentNumber" />
+                  <label cLabel for="documentNumber">Documento *</label>
+                  <input cFormControl id="documentNumber" formControlName="documentNumber"
+                         [valid]="showFieldError('documentNumber') ? (f['documentNumber'].valid ? true : false) : undefined" />
+                  @if (showFieldError('documentNumber')) {
+                    <c-form-feedback [valid]="false">
+                      @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
+                      @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength'] || f['documentNumber'].errors?.['pattern']) { El documento debe tener entre 6 y 20 caracteres alfanuméricos. }
+                    </c-form-feedback>
+                  }
                 </c-col>
               </c-row>
 
@@ -132,15 +139,15 @@
               <div class="mt-4 d-flex gap-2">
                 <button cButton color="primary" type="submit" class="a11y-btn-primary" [disabled]="isLoading || form.invalid || form.pending" aria-label="Enviar solicitud de registro">
                   @if (!isLoading) {
-                    <svg cIcon name="cilPaperPlane" class="me-2"></svg>
+                    <svg cIcon name="cilPaperPlane" class="me-2" aria-hidden="true"></svg>
                     Enviar Solicitud
                   } @else {
-                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
                     Enviando...
                   }
                 </button>
                 <button cButton color="secondary" type="button" (click)="goToLogin()" aria-label="Volver al login">
-                  <svg cIcon name="cilArrowLeft" class="me-2"></svg>
+                  <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
                   Volver
                 </button>
               </div>
@@ -153,14 +160,14 @@
 </div>
 
 <!-- Modal de éxito -->
-<c-modal [visible]="showSuccessModal" [backdrop]="false" [keyboard]="false" alignment="center">
+<c-modal [visible]="showSuccessModal" [backdrop]="false" [keyboard]="false" alignment="center" aria-labelledby="success-modal-title">
   <c-modal-header class="border-0 pb-0">
   </c-modal-header>
   <c-modal-body class="text-center pt-0">
     <div class="mb-3">
-      <svg cIcon name="cilCheckCircle" size="5xl" style="color: var(--a11y-success)"></svg>
+      <svg cIcon name="cilCheckCircle" size="5xl" style="color: var(--a11y-success)" aria-hidden="true"></svg>
     </div>
-    <h4 class="mb-2" style="color: var(--a11y-text)">¡Registro exitoso!</h4>
+    <h4 id="success-modal-title" class="mb-2" style="color: var(--a11y-text)">¡Registro exitoso!</h4>
     <p class="mb-0" style="color: var(--a11y-text-muted)">
       Tu solicitud de registro ha sido enviada correctamente.<br>
       Un administrador revisará tu solicitud y te contactará por email.

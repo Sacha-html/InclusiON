@@ -2,6 +2,39 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end g-2">
     <c-col sm="3">
+      <label cLabel>Personas</label>
+      <select cSelect multiple style="height: 120px"
+              (change)="onPersonFilterChange($event)">
+        @for (p of persons(); track p.id) {
+          <option [value]="p.id"
+                  [selected]="selectedPersonIds.includes(p.id)">
+            {{ p.fullName }}
+          </option>
+        }
+      </select>
+      @if (selectedPersonIds.length > 0) {
+        <small class="text-body-secondary">{{ selectedPersonIds.length }} seleccionada(s)</small>
+      }
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Profesional</label>
+      <select cSelect [(ngModel)]="filterProfessionalId" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        @for (p of professionals(); track p.id) {
+          <option [value]="p.id">{{ p.fullName }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Institución</label>
+      <select cSelect [(ngModel)]="filterInstitutionId" (ngModelChange)="onFilterChange()">
+        <option value="">Todas</option>
+        @for (i of institutions(); track i.id) {
+          <option [value]="i.id">{{ i.name }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="3">
       <label cLabel>Estado</label>
       <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
@@ -43,18 +76,13 @@
   [currentPage]="currentPage()"
   [sortable]="true"
   [loading]="isLoading()"
+  [emptyIcon]="'cilNotes'"
+  [emptyMessage]="'No hay reportes que coincidan con los filtros.'"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
   (sortAction)="onSort($event)"
   (rowAction)="onRowAction($event)">
 </app-data-table>
-
-@if (!reports().length && !isLoading()) {
-  <div class="text-center text-body-secondary py-5">
-    <svg cIcon name="cilNotes" size="3xl" class="mb-2"></svg>
-    <p class="mb-0">No hay reportes que coincidan con los filtros.</p>
-  </div>
-}
 
 <!-- Modal: Aprobar -->
 <app-confirm-modal

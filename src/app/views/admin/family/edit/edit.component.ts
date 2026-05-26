@@ -1,27 +1,28 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { FamilyService, PersonsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import {
   FamilyResponse, LinkedPersonInfo, UpdateFamilyRequest, PersonListItemResponse,
-} from '../../../../models';
+} from '@models';
 import {
   BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
   FormSelectDirective, RowComponent, SpinnerComponent,
 } from '@coreui/angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-family-edit',
   imports: [
-    ReactiveFormsModule, FormsModule, NgSelectModule,
+    ReactiveFormsModule, FormsModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective, SpinnerComponent,
-    BadgeComponent, ConfirmModalComponent,
+    BadgeComponent, ConfirmModalComponent, SearchableSelectComponent,
   ],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.scss',
@@ -42,18 +43,25 @@ export class EditComponent implements OnInit {
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.maxLength(20)]],
+    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
   });
 
   get f() { return this.form.controls; }
 
-  persons          = signal<PersonListItemResponse[]>([]);
-  isLoadingPersons = signal(true);
+  linkPersonControl = new FormControl<PersonListItemResponse | null>(null);
 
-  // Selección para vincular
-  selectedPersonForLink: PersonListItemResponse | null = null;
+  readonly searchPersonsFn = (query: string) => {
+    const linkedIds = new Set(this.family?.linkedPersons?.map(lp => lp.personId) ?? []);
+    return this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
+      map(r => r.data.filter((p: PersonListItemResponse) => !linkedIds.has(p.id)))
+    );
+  };
+  readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => p.disabilityTypeName ?? '';
+
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+  readonly PARENT_RELATIONSHIPS = ['Madre', 'Padre'];
   linkRelationship = '';
   linkIsPrimary    = false;
   isLinking        = false;
@@ -63,20 +71,6 @@ export class EditComponent implements OnInit {
   showUnlinkModal  = false;
   unlinkingPerson: LinkedPersonInfo | null = null;
   isUnlinking      = false;
-
-  searchPersonFn = (term: string, item: PersonListItemResponse): boolean => {
-    const lower = term.toLowerCase();
-    return (
-      (item.fullName?.toLowerCase().includes(lower) ||
-        item.documentNumber?.toLowerCase().includes(lower)) ??
-      false
-    );
-  };
-
-  get availablePersons(): PersonListItemResponse[] {
-    const linkedIds = new Set(this.family?.linkedPersons?.map(lp => lp.personId) ?? []);
-    return this.persons().filter(p => !linkedIds.has(p.id));
-  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -91,27 +85,27 @@ export class EditComponent implements OnInit {
             documentNumber: data.documentNumber ?? '',
             phone: data.phone ?? '',
           });
-          this.loadPersons();
         },
         error: () => this.router.navigate([AppRoutes.Admin.Family]),
       });
     }
   }
 
-  loadPersons(): void {
-    this.personsService.getPersons({ page: 1, pageSize: 200, isActive: true }).subscribe({
-      next: (response) => {
-        this.persons.set(response.data);
-        this.isLoadingPersons.set(false);
-      },
-      error: () => this.isLoadingPersons.set(false),
-    });
+  validateParentLimit(): string {
+    if (!this.linkRelationship) return '';
+    if (!this.PARENT_RELATIONSHIPS.includes(this.linkRelationship)) return '';
+    const exists = this.family?.linkedPersons?.some(
+      lp => lp.relationship === this.linkRelationship
+    );
+    return exists
+      ? `Ya existe una persona vinculada con la relación "${this.linkRelationship}". Solo puede haber una.`
+      : '';
   }
 
   // --- Vincular persona ---
 
   linkPerson(): void {
-    const person = this.selectedPersonForLink;
+    const person = this.linkPersonControl.value;
     if (!person || !this.linkRelationship || !this.family || this.isLinking) return;
 
     this.isLinking = true;
@@ -122,7 +116,7 @@ export class EditComponent implements OnInit {
       isPrimary: this.linkIsPrimary,
     }).subscribe({
       next: () => {
-        this.selectedPersonForLink = null;
+        this.linkPersonControl.setValue(null);
         this.linkRelationship = '';
         this.linkIsPrimary = false;
         this.isLinking = false;

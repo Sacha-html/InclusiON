@@ -4,16 +4,17 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { ButtonDirective } from '@coreui/angular';
 import { ActivitiesService } from '@services/activities.service';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ActivityAssignmentResponse } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse } from '@models';
 import { PLAYER_REGISTRY } from './player-registry';
 import { PlayerBaseComponent } from './player-base.component';
 
 @Component({
   selector: 'app-activity-player-shell',
   standalone: true,
-  imports: [],
+  imports: [ButtonDirective],
   templateUrl: './activity-player-shell.component.html',
   styleUrl: './activity-player-shell.component.scss',
 })
@@ -26,26 +27,19 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
   private readonly route             = inject(ActivatedRoute);
   private readonly router            = inject(Router);
 
-  assignment  = signal<ActivityAssignmentResponse | null>(null);
-  isLoading   = signal(true);
-  hasError    = signal(false);
-  unsupported = signal(false);
+  assignment   = signal<ActivityAssignmentResponse | null>(null);
+  isLoading    = signal(true);
+  hasError     = signal(false);
+  errorMessage = signal('');
+  unsupported  = signal(false);
 
   private completedSub?: Subscription;
 
   ngOnInit(): void {
-    const assignmentId = +this.route.snapshot.paramMap.get('assignmentId')!;
+    const assignmentId = this.route.snapshot.paramMap.get('assignmentId')!;
 
-    this.activitiesService.getMyAssignments().subscribe({
-      next: (list) => {
-        const found = list.find(a => a.id === assignmentId) ?? null;
-
-        if (!found) {
-          this.hasError.set(true);
-          this.isLoading.set(false);
-          return;
-        }
-
+    this.activitiesService.getAssignmentById(assignmentId).subscribe({
+      next: (found) => {
         if (!PLAYER_REGISTRY[found.templateTypeCode]) {
           this.unsupported.set(true);
           this.isLoading.set(false);
@@ -58,9 +52,10 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
         // Defer un tick para que Angular procese el @else block y exponga #playerHost
         setTimeout(() => this.renderPlayer());
       },
-      error: () => {
+      error: (err) => {
         this.hasError.set(true);
         this.isLoading.set(false);
+        this.errorMessage.set(err?.message || 'No se pudo cargar la actividad.');
       },
     });
   }
@@ -80,6 +75,12 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
     ref.setInput('assignment', assignment);
     this.completedSub = ref.instance.completed.subscribe(() => this.onCompleted());
     ref.changeDetectorRef.detectChanges();
+
+    setTimeout(() => {
+      const container = this.playerHost.element.nativeElement;
+      const heading = container.querySelector('[role="heading"], h1, h2, h3') as HTMLElement;
+      heading?.focus();
+    }, 100);
   }
 
   onCompleted(): void {

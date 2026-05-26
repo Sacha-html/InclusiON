@@ -1,6 +1,6 @@
 import { Directive, ElementRef, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { ActivitiesService } from '@services/activities.service';
-import { ActivityAssignmentResponse } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse } from '@models';
 import { PlayerResult } from './player.models';
 
 export type PlayerPhase = 'intro' | 'playing' | 'result';
@@ -19,10 +19,12 @@ export abstract class PlayerBaseComponent {
   private readonly el = inject(ElementRef<HTMLElement>);
 
   // Estado compartido
-  phase      = signal<PlayerPhase>('intro');
-  isLoading  = signal(false);
-  responseId = signal<number | null>(null);
-  isCorrect  = signal<boolean | null>(null);
+  phase       = signal<PlayerPhase>('intro');
+  isLoading   = signal(false);
+  hasError    = signal(false);
+  errorMsg    = signal('');
+  responseId  = signal<string | null>(null);
+  isCorrect   = signal<boolean | null>(null);
 
   private _startTime = 0;
 
@@ -34,13 +36,13 @@ export abstract class PlayerBaseComponent {
   // ── Fase intro → playing ──────────────────────────────────────────────────
   startActivity(): void {
     this.isLoading.set(true);
-    this.activitiesService.startResponse(this.assignment.id).subscribe({
+    this.activitiesService.startResponse(this.assignment.encryptedId).subscribe({
       next: (updated) => {
         const responses = [...(updated.responses ?? [])];
         const latest    = responses.sort(
           (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
         )[0];
-        this.responseId.set(latest?.id ?? null);
+        this.responseId.set(latest?.encryptedId ?? null);
         this._startTime = Date.now();
         this.isLoading.set(false);
         this.phase.set('playing');
@@ -49,7 +51,7 @@ export abstract class PlayerBaseComponent {
           heading?.focus();
         }, 80);
       },
-      error: () => this.isLoading.set(false),
+      error: () => { this.isLoading.set(false); this.hasError.set(true); this.errorMsg.set('No se pudo iniciar la actividad. Volvé a intentar.'); },
     });
   }
 
@@ -61,14 +63,14 @@ export abstract class PlayerBaseComponent {
       return;
     }
     this.isLoading.set(true);
-    this.activitiesService.completeResponse(this.assignment.id, responseId, {
+    this.activitiesService.completeResponse(this.assignment.encryptedId, responseId, {
       successPercentage: result.successPercentage,
       timeSpentSeconds:  result.timeSpentSeconds,
       requiredSupport:   result.requiredSupport ?? false,
       observations:      result.observations,
     }).subscribe({
       next:  () => { this.isLoading.set(false); this.completed.emit(); },
-      error: () => { this.isLoading.set(false); this.completed.emit(); },
+      error: () => { this.isLoading.set(false); this.hasError.set(true); this.errorMsg.set('No se pudo guardar tu progreso. Intentá de nuevo.'); },
     });
   }
 

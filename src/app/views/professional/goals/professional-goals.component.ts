@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { switchMap } from 'rxjs';
+import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 import { ProfessionalsService, AssignmentsService, ToastService } from '@services';
 import { ProfessionalPersonResponse } from '@models';
 import { ProfessionalRoadmapTabComponent } from '../person-detail/components/professional-roadmap-tab.component';
@@ -12,6 +13,7 @@ import {
   selector: 'app-professional-goals',
   standalone: true,
   imports: [
+    ActorAvatarComponent,
     AlertComponent,
     SpinnerComponent,
     ProfessionalRoadmapTabComponent,
@@ -51,9 +53,5 @@ export class ProfessionalGoalsComponent implements OnInit {
 
   selectPerson(personId: string): void {
     this.selectedPersonId.set(personId);
-  }
-
-  getInitial(p: ProfessionalPersonResponse): string {
-    return (p.personFirstName?.charAt(0) || '?').toUpperCase();
   }
 }

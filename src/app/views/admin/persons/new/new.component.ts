@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { CatalogsService, PersonsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '../../../../models';
+import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest } from '@models';
 import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
 import {
@@ -61,10 +61,10 @@ export class NewComponent implements OnInit {
     // Datos personales
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    documentNumber: ['', [Validators.maxLength(20)]],
+    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate]],
     // Discapacidad
-    disabilityTypeId: [null],
+    disabilityTypeId: [null, [Validators.required]],
     // Perfil funcional
     attentionLevel: [null],
     communicationLevel: [null],
@@ -129,7 +129,7 @@ export class NewComponent implements OnInit {
       soundSensitivity: raw.soundSensitivity ?? false,
       ...(raw.colorBlindnessType && { colorBlindnessType: raw.colorBlindnessType }),
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
-      ...(raw.disabilityTypeId && { disabilityTypeId: +raw.disabilityTypeId }),
+      disabilityTypeId: +raw.disabilityTypeId,
       ...(raw.attentionLevel && { attentionLevel: +raw.attentionLevel }),
       ...(raw.communicationLevel && { communicationLevel: +raw.communicationLevel }),
       ...(raw.motorSkillLevel && { motorSkillLevel: +raw.motorSkillLevel }),

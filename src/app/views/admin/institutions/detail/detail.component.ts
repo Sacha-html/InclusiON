@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AdminInstitutionsService, InstitutionsService, ProfessionalsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { AdminUserResponse, InstitutionResponse, ProfessionalListItemResponse } from '../../../../models';
+import { AdminUserResponse, InstitutionResponse, ProfessionalListItemResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -19,8 +19,8 @@ import {
   SpinnerComponent,
 } from '@coreui/angular';
 import { DatePipe } from '@angular/common';
-import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 
 @Component({
   selector: 'app-detail',
@@ -63,40 +63,47 @@ export class DetailComponent implements OnInit {
   adminCols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre' },
     { key: 'email', label: 'Email' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
   ];
 
   professionalCols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre' },
     { key: 'specialty', label: 'Especialidad' },
     { key: 'email', label: 'Email' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
   ];
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
+    const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate([AppRoutes.Admin.Institutions]);
       return;
     }
 
-    forkJoin({
-      institution: this.institutionsService.getById(id),
-      admins: this.adminInstitutionsService.getAdmins(),
-      professionals: this.professionalsService.getProfessionals({ institutionId: id, pageSize: 100 }),
-    }).subscribe({
-      next: ({ institution, admins, professionals }) => {
+    this.institutionsService.getById(id).subscribe({
+      next: (institution) => {
         if (!institution) {
           this.toastService.error('Institución no encontrada');
           this.router.navigate([AppRoutes.Admin.Institutions]);
           return;
         }
         this.institution = institution;
-        this.admins = admins.filter((a) =>
-          a.institutions.some((i) => i.institutionId === id),
-        );
-        this.professionals = professionals.data;
-        this.loading = false;
+        forkJoin({
+          admins: this.adminInstitutionsService.getAdmins(1, 500),
+          professionals: this.professionalsService.getProfessionals({ institutionId: institution.id, pageSize: 100 }),
+        }).subscribe({
+          next: ({ admins, professionals }) => {
+            this.admins = admins.data.filter((a) =>
+              a.institutions.some((i) => i.institutionId === institution.id),
+            );
+            this.professionals = professionals.data;
+            this.loading = false;
+          },
+          error: () => {
+            this.toastService.error('Error al cargar los datos de la institución');
+            this.router.navigate([AppRoutes.Admin.Institutions]);
+          },
+        });
       },
       error: () => {
         this.toastService.error('Error al cargar los datos de la institución');
@@ -121,7 +128,7 @@ export class DetailComponent implements OnInit {
     if (!this.institution) return;
     this.deactivateLoading = true;
 
-    this.institutionsService.patchStatus(this.institution.id, false).subscribe({
+    this.institutionsService.patchStatus(this.institution.id.toString(), false).subscribe({
       next: (updated) => {
         this.institution = updated;
         this.showConfirmModal = false;
@@ -149,7 +156,7 @@ export class DetailComponent implements OnInit {
     if (!this.institution) return;
     this.reactivateLoading = true;
 
-    this.institutionsService.patchStatus(this.institution.id, true).subscribe({
+    this.institutionsService.patchStatus(this.institution.id.toString(), true).subscribe({
       next: (updated) => {
         this.institution = updated;
         this.showReactivateModal = false;

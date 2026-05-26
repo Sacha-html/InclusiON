@@ -5,8 +5,7 @@ import { ActivitiesService } from '@services/activities.service';
 import { AssignmentsService } from '@services/assignments.service';
 import { ProfessionalsService } from '@services/professionals.service';
 import { ToastService } from '@services';
-import { ActivityListItemResponse } from '@models/responses/activity.response';
-import { ProfessionalPersonResponse } from '@models';
+import { ActivityListItemResponse, ProfessionalPersonResponse } from '@models';
 import {
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
   ButtonDirective, SpinnerComponent,
@@ -76,7 +75,7 @@ export class AssignActivityModalComponent implements OnChanges {
       switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
     ).subscribe({
       next:  (persons) => { this.persons.set(persons); this.isLoadingPersons.set(false); },
-      error: ()        => this.isLoadingPersons.set(false),
+      error: ()        => { this.isLoadingPersons.set(false); this.toastService.error('Error al cargar personas'); },
     });
   }
 
@@ -85,7 +84,7 @@ export class AssignActivityModalComponent implements OnChanges {
     this.isSaving.set(true);
 
     this.activitiesService.createAssignment({
-      activityId:           this.activity.id,
+      encryptedActivityId:  this.activity.encryptedId,
       personId:             this.form.personId,
       dueDate:              this.form.dueDate || undefined,
       isEvaluationActivity: this.form.isEvaluationActivity,

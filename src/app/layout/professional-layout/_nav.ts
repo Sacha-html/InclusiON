@@ -6,10 +6,6 @@ export const professionalNavItems: INavData[] = [
     name: 'Dashboard',
     url: AppRoutes.Pro.Root,
     iconComponent: { name: 'cil-speedometer' },
-    badge: {
-      color: 'info',
-      text: 'PRO'
-    }
   },
   {
     title: true,

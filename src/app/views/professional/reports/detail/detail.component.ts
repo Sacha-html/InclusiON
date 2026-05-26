@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportResponse, ReportStatus } from '@models';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
@@ -54,11 +54,11 @@ export class DetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.loadReport(+id);
+      this.loadReport(id);
     }
   }
 
-  loadReport(id: number): void {
+  loadReport(id: string): void {
     this.reportsService.getById(id).subscribe({
       next: (data) => {
         this.report.set(data);
@@ -83,7 +83,7 @@ export class DetailComponent implements OnInit {
     const r = this.report();
     if (!r) return;
     this.isSubmitting = true;
-    this.reportsService.submitReport(r.id).subscribe({
+    this.reportsService.submitReport(r.encryptedId).subscribe({
       next: (updated) => {
         this.report.set(updated);
         this.toastService.success('Reporte enviado al administrador para revisión.');
@@ -103,7 +103,7 @@ export class DetailComponent implements OnInit {
 
   onEditClick(): void {
     const r = this.report();
-    if (r) this.router.navigate([AppRoutes.Pro.Reports, r.id, 'edit']);
+    if (r) this.router.navigate([AppRoutes.Pro.Reports, r.encryptedId, 'edit']);
   }
 
   onDeactivateClick(): void {
@@ -114,7 +114,7 @@ export class DetailComponent implements OnInit {
     const r = this.report();
     if (!r) return;
     this.isDeactivating = true;
-    this.reportsService.deactivate(r.id).subscribe({
+    this.reportsService.deactivate(r.encryptedId).subscribe({
       next: () => {
         this.toastService.success('Reporte dado de baja exitosamente.');
         this.router.navigate([AppRoutes.Pro.Reports]);
@@ -132,23 +132,10 @@ export class DetailComponent implements OnInit {
     this.showDeactivateModal = false;
   }
 
-  getStatusColor(status: ReportStatus): string {
-    const map: Record<ReportStatus, string> = {
-      [ReportStatus.Draft]:     'secondary',
-      [ReportStatus.Submitted]: 'warning',
-      [ReportStatus.Approved]:  'success',
-      [ReportStatus.Rejected]:  'danger',
-    };
-    return map[status] ?? 'secondary';
-  }
-
-  getStatusLabel(status: ReportStatus): string {
-    const map: Record<ReportStatus, string> = {
-      [ReportStatus.Draft]:     ReportStatusLabels.Borrador,
-      [ReportStatus.Submitted]: ReportStatusLabels.Enviado,
-      [ReportStatus.Approved]:  ReportStatusLabels.Aprobado,
-      [ReportStatus.Rejected]:  ReportStatusLabels.Rechazado,
-    };
-    return map[status] ?? status.toString();
-  }
+  readonly statusMap: Partial<Record<string, { color: string; label: string }>> = {
+    [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador  },
+    [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado   },
+    [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado  },
+    [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
+  };
 }

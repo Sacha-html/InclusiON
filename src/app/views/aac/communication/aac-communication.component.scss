@@ -3,7 +3,7 @@
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--a11y-text, #1a1a1a);
   margin: 0 0 24px;
@@ -11,7 +11,7 @@
 }
 
 .section-title {
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 600;
   color: var(--a11y-text, #1a1a1a);
   margin: 0 0 16px;
@@ -71,6 +71,7 @@
 
 .feeling-btn:focus {
   outline: none;
+  outline-offset: 0;
 }
 
 .feeling-btn:focus-visible {
@@ -79,12 +80,12 @@
 }
 
 .feeling-emoji {
-  font-size: 48px;
+  font-size: 3rem;
   line-height: 1;
 }
 
 .feeling-label {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--a11y-text, #1a1a1a);
 }

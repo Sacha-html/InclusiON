@@ -8,7 +8,7 @@
       style="margin-inline-start: -14px"
       aria-label="Toggle sidebar navigation"
     >
-      <svg cIcon name="cilMenu" size="lg"></svg>
+      <svg cIcon name="cilMenu" size="lg" aria-hidden="true"></svg>
     </button>
     <c-header-nav class="d-none d-md-flex">
       <c-nav-item>
@@ -19,9 +19,7 @@
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto">
-      <a cNavLink>
-        <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
-      </a>
+      <app-notification-bell />
     </c-header-nav>
 
     <c-header-nav class="ms-auto ms-md-0">
@@ -92,25 +90,25 @@
 
       <li>
         <a cDropdownItem routerLink="">
-          <svg cIcon class="me-2" name="cilUser"></svg>
+          <svg cIcon class="me-2" aria-hidden="true" name="cilUser"></svg>
           Perfil
         </a>
       </li>
       <li>
         <a cDropdownItem routerLink="/change-password">
-          <svg cIcon class="me-2" name="cilNotes"></svg>
+          <svg cIcon class="me-2" aria-hidden="true" name="cilNotes"></svg>
           Cambiar contraseña
         </a>
       </li>
       <li>
         <a cDropdownItem routerLink="">
-          <svg cIcon class="me-2" name="cilSettings"></svg>
+          <svg cIcon class="me-2" aria-hidden="true" name="cilSettings"></svg>
           Ajustes
         </a>
       </li>
       <li>
         <a cDropdownItem (click)="logout()" style="cursor: pointer">
-          <svg cIcon class="me-2" name="cilAccountLogout"></svg>
+          <svg cIcon class="me-2" aria-hidden="true" name="cilAccountLogout"></svg>
           Cerrar Sesión
         </a>
       </li>
@@ -126,7 +124,7 @@
       aria-label="Seleccionar tema de accesibilidad"
       cTooltip="Accesibilidad"
     >
-      <svg cIcon [name]="accessibilityIcon()" size="lg"></svg>
+      <svg cIcon [name]="accessibilityIcon()" size="lg" aria-hidden="true"></svg>
     </button>
     <div cDropdownMenu>
       <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
@@ -139,7 +137,7 @@
         cDropdownItem
         class="d-flex align-items-center"
       >
-        <svg cIcon class="me-2" [name]="theme.icon" size="lg"></svg>
+        <svg cIcon class="me-2" aria-hidden="true" [name]="theme.icon" size="lg"></svg>
         <div class="d-flex flex-column">
           <span>{{ theme.name }}</span>
           <small class="text-body-secondary">{{ theme.description }}</small>
@@ -158,7 +156,7 @@
       aria-label="Cambiar modo de color"
       cTooltip="Modo de color"
     >
-      <svg cIcon [name]="colorModeIcon()" size="lg"></svg>
+      <svg cIcon [name]="colorModeIcon()" size="lg" aria-hidden="true"></svg>
     </button>
     <div cDropdownMenu>
       <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
@@ -171,7 +169,7 @@
         cDropdownItem
         class="d-flex align-items-center"
       >
-        <svg cIcon class="me-2" [name]="mode.icon" size="lg"></svg>
+        <svg cIcon class="me-2" aria-hidden="true" [name]="mode.icon" size="lg"></svg>
         {{ mode.name }}
       </button>
       }

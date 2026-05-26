@@ -24,13 +24,15 @@
             }
           </c-col>
           <c-col sm="6">
-            <label cLabel for="email">Email</label>
-            <input cFormControl id="email" formControlName="email" type="email" />
-            @if (submitted && f['email'].errors) {
-              <c-form-feedback [valid]="false">
-                @if (f['email'].errors['email']) { Ingrese un email valido. }
-              </c-form-feedback>
-            }
+          <label cLabel for="email">Email *</label>
+          <input cFormControl id="email" formControlName="email" type="email"
+                 [valid]="submitted ? f['email'].valid : undefined" />
+          @if (submitted && f['email'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['email'].errors['required']) { El email es obligatorio. }
+              @if (f['email'].errors['email']) { Ingrese un email valido. }
+            </c-form-feedback>
+          }
           </c-col>
         </c-row>
 

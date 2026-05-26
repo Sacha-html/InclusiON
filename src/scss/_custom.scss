@@ -410,17 +410,17 @@
     color: var(--a11y-danger-text);
   }
 
-  // Botón accesible en tablas
-  td .btn {
+  // Botón accesible en tablas (excluye btn-link para no pisar su estilo)
+  td .btn:not(.btn-link) {
     background-color: var(--a11y-primary);
-    color: var(--a11y-primary-text);
+    color: var(--a11y-primary-text, #FFFFFF);
     border-color: var(--a11y-primary);
 
     &:hover,
     &:focus {
       background-color: var(--a11y-primary-dark);
       border-color: var(--a11y-primary-dark);
-      color: var(--a11y-primary-text);
+      color: var(--a11y-primary-text, #FFFFFF);
     }
   }
 }
@@ -438,15 +438,14 @@
 }
 
 // ========================================
-// READING MODE - TABLES & MODALS
+// FOCUS VISIBLE — WCAG 2.4.7 Focus Visible
 // ========================================
-[data-reading-mode="true"] {
-  .table-responsive,
-  table {
-    max-width: 100%;
-    overflow-x: auto;
-    display: block;
-  }
+// Bootstrap usa box-shadow para foco en botones/inputs, pero algunos elementos
+// no lo tienen. Esta regla garantiza outline en :focus-visible para todos,
+// sin interferir con el comportamiento normal (mouse).
+:focus-visible {
+  outline: 3px solid var(--a11y-focus-color, #1565C0) !important;
+  outline-offset: 2px !important;
 }
 
 // ========================================

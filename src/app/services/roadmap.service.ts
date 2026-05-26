@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
-import { ApiResponse } from '@models';
-import { RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse } from '@models/responses/roadmap.response';
-import { AddRoadmapActivityRequest, ReorderActivityItem } from '@models/requests/roadmap';
+import { ApiResponse, RoadmapResponse, RoadmapAreaResponse, RoadmapActivityResponse, AddRoadmapActivityRequest, ReorderActivityItem, AdaptiveAdjustmentLogResponse, SkillRadarPointResponse, AdaptiveEngineConfigResponse, ActivityAssignmentResponse } from '@models';
 
 @Injectable({ providedIn: 'root' })
 export class RoadmapService {
@@ -45,25 +44,25 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  removeArea(personId: string, areaId: number): Observable<unknown> {
+  removeArea(personId: string, areaId: string): Observable<unknown> {
     return this.http
       .delete<ApiResponse<unknown>>(`${this.url(personId)}/areas/${areaId}`)
       .pipe(unwrapResponse());
   }
 
-  addActivity(personId: string, areaId: number, request: AddRoadmapActivityRequest): Observable<RoadmapActivityResponse> {
+  addActivity(personId: string, areaId: string, request: AddRoadmapActivityRequest): Observable<RoadmapActivityResponse> {
     return this.http
       .post<ApiResponse<RoadmapActivityResponse>>(`${this.url(personId)}/areas/${areaId}/activities`, request)
       .pipe(unwrapResponse());
   }
 
-  removeActivity(personId: string, areaId: number, activityEntryId: number): Observable<unknown> {
+  removeActivity(personId: string, areaId: string, activityEntryId: string): Observable<unknown> {
     return this.http
       .delete<ApiResponse<unknown>>(`${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}`)
       .pipe(unwrapResponse());
   }
 
-  reorderActivities(personId: string, areaId: number, activities: ReorderActivityItem[]): Observable<unknown> {
+  reorderActivities(personId: string, areaId: string, activities: ReorderActivityItem[]): Observable<unknown> {
     return this.http
       .put<ApiResponse<unknown>>(
         `${this.url(personId)}/areas/${areaId}/activities/reorder`,
@@ -72,12 +71,74 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  unlockActivity(personId: string, areaId: number, activityEntryId: number): Observable<RoadmapActivityResponse> {
+  unlockActivity(personId: string, areaId: string, activityEntryId: string): Observable<RoadmapActivityResponse> {
     return this.http
       .put<ApiResponse<RoadmapActivityResponse>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/unlock`,
         {}
       )
       .pipe(unwrapResponse());
+  }
+
+  getAdjustmentHistory(personId: string, areaId: number, activityEntryId: number): Observable<AdaptiveAdjustmentLogResponse[]> {
+    return this.http
+      .get<ApiResponse<AdaptiveAdjustmentLogResponse[]>>(
+        `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adjustments`
+      )
+      .pipe(map(r => r.data ?? []));
+  }
+
+  getSkillRadar(personId: string): Observable<SkillRadarPointResponse[]> {
+    return this.http
+      .get<ApiResponse<SkillRadarPointResponse[]>>(`${this.url(personId)}/skill-radar`)
+      .pipe(map(r => r.data ?? []));
+  }
+
+  // ── Adaptive Engine Config (IN-116) ──────────────────────────────────────
+
+  getAdaptiveConfig(personId: string, areaId: number, activityEntryId: number): Observable<AdaptiveEngineConfigResponse | null> {
+    return this.http
+      .get<ApiResponse<AdaptiveEngineConfigResponse | null>>(
+        `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adaptive-config`
+      )
+      .pipe(map(r => r.data ?? null));
+  }
+
+  upsertAdaptiveConfig(
+    personId: string,
+    areaId: number,
+    activityEntryId: number,
+    payload: Partial<AdaptiveEngineConfigResponse>
+  ): Observable<AdaptiveEngineConfigResponse> {
+    return this.http
+      .put<ApiResponse<AdaptiveEngineConfigResponse>>(
+        `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adaptive-config`,
+        payload
+      )
+      .pipe(unwrapResponse());
+  }
+
+  // ── Assign from Roadmap (IN-150) ─────────────────────────────────────────
+
+  assignFromRoadmap(
+    personId: string,
+    areaId: number,
+    activityEntryId: number,
+    payload: { dueDate?: string; isEvaluationActivity: boolean }
+  ): Observable<ActivityAssignmentResponse> {
+    return this.http
+      .post<ApiResponse<ActivityAssignmentResponse>>(
+        `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/assign`,
+        payload
+      )
+      .pipe(unwrapResponse());
+  }
+
+  deleteAdaptiveConfig(personId: string, areaId: number, activityEntryId: number): Observable<unknown> {
+    return this.http
+      .delete<ApiResponse<unknown>>(
+        `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adaptive-config`
+      )
+      .pipe(map(r => r));
   }
 }

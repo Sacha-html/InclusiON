@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AssignmentsService, ProfessionalsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ProfessionalInstitutionResponse, ProfessionalPersonResponse, ProfessionalResponse } from '../../../../models';
+import { ProfessionalInstitutionResponse, ProfessionalPersonResponse, ProfessionalResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -29,6 +30,7 @@ import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderCo
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
+    FormsModule,
     ProfessionalBasicInfoComponent,
     ProfessionalPersonsComponent,
     ProfessionalInstitutionsComponent,
@@ -48,6 +50,13 @@ export class DetailComponent implements OnInit {
 
   professional: ProfessionalResponse | null = null;
   showConfirmModal = false;
+
+  // Validate / reactivate
+  showValidateModal = false;
+  showReactivateModal = false;
+  validateApprove = true;
+  validateObservation = '';
+  isValidating = false;
 
   assignedPersons: ProfessionalPersonResponse[] = [];
   assignedInstitutions: ProfessionalInstitutionResponse[] = [];
@@ -103,5 +112,56 @@ export class DetailComponent implements OnInit {
 
   cancelDeactivate(): void {
     this.showConfirmModal = false;
+  }
+
+  openValidate(approve: boolean): void {
+    this.validateApprove = approve;
+    this.validateObservation = '';
+    this.showValidateModal = true;
+  }
+
+  confirmValidate(): void {
+    if (!this.professional) return;
+    this.isValidating = true;
+    this.professionalsService.validateProfessional(this.professional.id, {
+      isApproved: this.validateApprove,
+      observation: this.validateObservation || undefined,
+    }).subscribe({
+      next: () => {
+        this.professional!.statusName = this.validateApprove ? 'Aprobado' : 'Rechazado';
+        this.professional!.isActive = this.validateApprove;
+        this.showValidateModal = false;
+        this.isValidating = false;
+        this.toastService.success(this.validateApprove ? 'Profesional aprobado exitosamente' : 'Profesional rechazado');
+      },
+      error: () => {
+        this.showValidateModal = false;
+        this.isValidating = false;
+        this.toastService.error('Error al procesar la validación');
+      },
+    });
+  }
+
+  openReactivate(): void {
+    this.showReactivateModal = true;
+  }
+
+  confirmReactivate(): void {
+    if (!this.professional) return;
+    this.isValidating = true;
+    this.professionalsService.reactivateProfessional(this.professional.id).subscribe({
+      next: () => {
+        this.professional!.statusName = 'Aprobado';
+        this.professional!.isActive = true;
+        this.showReactivateModal = false;
+        this.isValidating = false;
+        this.toastService.success('Profesional reactivado exitosamente');
+      },
+      error: () => {
+        this.showReactivateModal = false;
+        this.isValidating = false;
+        this.toastService.error('Error al reactivar el profesional');
+      },
+    });
   }
 }

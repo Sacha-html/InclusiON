@@ -1,11 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { PersonsService, ToastService } from '@services';
+import { PersonsService, ToastService, FamilyService } from '@services';
 import { DiagnosesService } from '@services/diagnoses.service';
 import {
   PersonResponse,
   PersonSkillProfileResponse,
+  DiagnosisListItemResponse,
+  PersonRepresentativeResponse,
 } from '@models';
 import {
   BadgeComponent,
@@ -18,18 +19,18 @@ import { ProfessionalPersonDataComponent } from './components/professional-perso
 import { ProfessionalFunctionalProfileComponent } from './components/professional-functional-profile.component';
 import { ProfessionalSkillsComponent } from './components/professional-skills.component';
 import { ProfessionalDiagnosesComponent } from './components/professional-diagnoses.component';
-import { FamilyService } from '@services';
-import { PersonRepresentativeResponse } from '@models';
+
 import { ProfessionalFamilyTabComponent } from './components/professional-family-tab.component';
 import { ProfessionalActivitiesTabComponent } from './components/professional-activities-tab.component';
 import { ProfessionalRoadmapTabComponent } from './components/professional-roadmap-tab.component';
+import { ProfessionalReportsTabComponent } from './components/professional-reports-tab.component';
+import { ProfessionalAccessibilityComponent } from './components/professional-accessibility.component';
 import { AppRoutes } from '@shared/constants/app-routes';
 
 @Component({
   selector: 'app-person-detail',
   standalone: true,
   imports: [
-    CommonModule,
     BadgeComponent,
     CardComponent,
     CardBodyComponent,
@@ -42,6 +43,8 @@ import { AppRoutes } from '@shared/constants/app-routes';
     ProfessionalFamilyTabComponent,
     ProfessionalActivitiesTabComponent,
     ProfessionalRoadmapTabComponent,
+    ProfessionalReportsTabComponent,
+    ProfessionalAccessibilityComponent,
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -55,10 +58,34 @@ export class PersonDetailComponent implements OnInit {
   private readonly diagnosesService = inject(DiagnosesService);
 
   person: PersonResponse | null = null;
-  activeTab: 'datos' | 'funcional' | 'habilidades' | 'diagnosticos' | 'familiares' | 'actividades' | 'roadmap' = 'datos';
+  activeTab:
+    | 'datos'
+    | 'funcional'
+    | 'habilidades'
+    | 'diagnosticos'
+    | 'familiares'
+    | 'actividades'
+    | 'roadmap'
+    | 'reportes'
+    | 'accesibilidad' = 'datos';
+
+  readonly tabs = ['datos', 'funcional', 'habilidades', 'diagnosticos', 'familiares', 'actividades', 'roadmap', 'reportes', 'accesibilidad'];
+
+  onTabKeydown(event: KeyboardEvent): void {
+    const idx = this.tabs.indexOf(this.activeTab);
+    let newIdx = idx;
+    if (event.key === 'ArrowRight') newIdx = (idx + 1) % this.tabs.length;
+    else if (event.key === 'ArrowLeft') newIdx = (idx - 1 + this.tabs.length) % this.tabs.length;
+    else if (event.key === 'Home') newIdx = 0;
+    else if (event.key === 'End') newIdx = this.tabs.length - 1;
+    else return;
+    event.preventDefault();
+    this.activeTab = this.tabs[newIdx] as any;
+    setTimeout(() => document.getElementById(`tab-${this.activeTab}`)?.focus());
+  }
 
   skillProfile = signal<PersonSkillProfileResponse[]>([]);
-  diagnoses = signal<any[]>([]);
+  diagnoses = signal<DiagnosisListItemResponse[]>([]);
 
   representatives: PersonRepresentativeResponse[] = [];
   loadingRepresentatives = false;
@@ -81,7 +108,8 @@ export class PersonDetailComponent implements OnInit {
     if (!this.person) return;
     this.personsService.getSkillProfile(this.person.id).subscribe({
       next: (data) => this.skillProfile.set(data ?? []),
-      error: () => this.toastService.error('Error al cargar el perfil de habilidades'),
+      error: () =>
+        this.toastService.error('Error al cargar el perfil de habilidades'),
     });
   }
 
@@ -105,7 +133,7 @@ export class PersonDetailComponent implements OnInit {
     this.skillProfile.set(data);
   }
 
-  onDiagnosesChange(data: any[]): void {
+  onDiagnosesChange(data: DiagnosisListItemResponse[]): void {
     this.diagnoses.set(data);
   }
 
@@ -128,5 +156,3 @@ export class PersonDetailComponent implements OnInit {
     this.loadRepresentatives();
   }
 }
-
-
