@@ -57,7 +57,6 @@ export interface AccessibilitySettings {
   reducedMotion: boolean;
   readingGuide: boolean;
   largeCursor: boolean;
-  readingMode: boolean;
   textToSpeechEnabled: boolean;
   textToSpeechRate: number;
 }
@@ -73,7 +72,6 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   reducedMotion: false,
   readingGuide: false,
   largeCursor: false,
-  readingMode: false,
   textToSpeechEnabled: false,
   textToSpeechRate: 1.0
 };
@@ -181,7 +179,6 @@ export class AccessibilityService {
   readonly reducedMotion = computed(() => this.settings().reducedMotion);
   readonly readingGuide = computed(() => this.settings().readingGuide);
   readonly largeCursor = computed(() => this.settings().largeCursor);
-  readonly readingMode = computed(() => this.settings().readingMode);
   readonly textToSpeechEnabled = computed(() => this.settings().textToSpeechEnabled);
   readonly textToSpeechRate = computed(() => this.settings().textToSpeechRate);
 
@@ -271,13 +268,16 @@ export class AccessibilityService {
    */
   setProfile(profile: AccessibilityProfile): void {
     const profileFontSize: Partial<Record<AccessibilityProfile, FontSize>> = {
-      'low-vision': 'large',
+      'low-vision': 'x-large',
     };
     this.settings.update(current => ({
       ...current,
       profile,
       ...(profileFontSize[profile] ? { fontSize: profileFontSize[profile] as FontSize } : {}),
     }));
+    this.saveSettings();
+    const profileInfo = this.profiles.find(p => p.id === profile);
+    this.announce(`Perfil de accesibilidad: ${profileInfo?.name ?? profile}`);
   }
 
   /**
@@ -374,10 +374,6 @@ export class AccessibilityService {
     overrides.fontSize = prefs.requiresLargeFont ? 'large' : 'medium';
     overrides.reducedMotion = !!prefs.visualNoiseSensitivity;
 
-    if (prefs.visualNoiseSensitivity) {
-      overrides.readingMode = false;
-    }
-
     if (prefs.soundSensitivity) {
       overrides.textToSpeechEnabled = false;
     }
@@ -430,6 +426,10 @@ export class AccessibilityService {
     root.setAttribute('data-color-mode', settings.colorMode);
     body.setAttribute('data-color-mode', settings.colorMode);
 
+    // data-coreui-theme activa los overrides de componentes de CoreUI
+    // ([data-coreui-theme="dark"] .card, .nav, .dropdown, etc.)
+    root.setAttribute('data-coreui-theme', settings.colorMode);
+
     // Clase para CoreUI dark mode
     if (settings.colorMode === 'dark') {
       root.classList.add('dark-theme');
@@ -471,7 +471,6 @@ export class AccessibilityService {
     body.classList.toggle('a11y-reduced-motion', settings.reducedMotion);
     body.classList.toggle('a11y-reading-guide', settings.readingGuide);
     body.classList.toggle('a11y-large-cursor', settings.largeCursor);
-    body.classList.toggle('a11y-reading-mode', settings.readingMode);
     body.classList.toggle('a11y-tts-enabled', settings.textToSpeechEnabled);
   }
 
@@ -489,7 +488,9 @@ export class AccessibilityService {
     document.body.appendChild(announcement);
 
     setTimeout(() => {
-      document.body.removeChild(announcement);
+      if (document.body.contains(announcement)) {
+        document.body.removeChild(announcement);
+      }
     }, 1000);
   }
 
@@ -526,8 +527,6 @@ export class AccessibilityService {
         return value ? 'Guía de lectura activada' : 'Guía de lectura desactivada';
       case 'largeCursor':
         return value ? 'Cursor grande activado' : 'Cursor grande desactivado';
-      case 'readingMode':
-        return value ? 'Modo lectura activado' : 'Modo lectura desactivado';
       case 'textToSpeechEnabled':
         return value ? 'Texto a voz activado' : 'Texto a voz desactivado';
       case 'textToSpeechRate':
@@ -649,7 +648,10 @@ export class AccessibilityService {
 
     utterance.onerror = (event) => {
       this.isSpeaking.set(false);
-      this.announce('Error al leer el texto');
+      // 'interrupted' / 'canceled' fires when cancel() is called deliberately — not a real error
+      if (event.error !== 'interrupted' && event.error !== 'canceled') {
+        this.announce('Error al leer el texto');
+      }
     };
 
     this.currentUtterance = utterance;
@@ -674,7 +676,9 @@ export class AccessibilityService {
   speakMainContent(): void {
     const mainContent = document.querySelector('main, [role="main"], .main-content, .body');
     if (mainContent) {
-      const text = mainContent.textContent || '';
+      // innerText respects CSS visibility (display:none, visibility:hidden)
+      // so nav menus, tooltips, hidden elements are excluded
+      const text = (mainContent as HTMLElement).innerText || '';
       if (text.trim()) {
         this.speak(text.trim());
       }
@@ -718,13 +722,6 @@ export class AccessibilityService {
   }
 
   /**
-   * Activa/desactiva el modo lectura
-   */
-  toggleReadingMode(): void {
-    this.updateSetting('readingMode', !this.readingMode());
-  }
-
-  /**
    * Activa/desactiva texto a voz
    */
   toggleTextToSpeech(): void {
@@ -740,10 +737,13 @@ export class AccessibilityService {
    */
   private loadSettings(): AccessibilitySettings {
     const saved = this.storage.getAccessibilitySettings<Partial<AccessibilitySettings>>();
+    const prefersDark =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (saved) {
       return { ...DEFAULT_SETTINGS, ...saved };
     }
-    return { ...DEFAULT_SETTINGS };
+    return { ...DEFAULT_SETTINGS, colorMode: prefersDark ? 'dark' : 'light' };
   }
 
   /**

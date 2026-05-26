@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { permissionGuard } from '../../guards/permission.guard';
+import { permissionGuard } from '@guards/permission.guard';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants/app-routes';
 
@@ -44,6 +44,14 @@ export const professionalRoutes: Routes = [
       ),
     canActivate: [permissionGuard],
     data: { title: 'Nueva Actividad', permission: Permissions.Activities.Create, redirectTo: AppRoutes.Pro.Activities }
+  },
+  {
+    path: 'activities/:id',
+    loadComponent: () =>
+      import('./activities/detail/detail.component').then(
+        (m) => m.DetailComponent
+      ),
+    data: { title: 'Detalle de Actividad' }
   },
   {
     path: 'activities/:id/edit',

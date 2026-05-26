@@ -1,12 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AssignmentsService, ProfessionalsService, ReportsService, ToastService } from '@services';
+import { AssignmentsService, CatalogsService, ProfessionalsService, ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportListItemResponse, ReportStatus, GetReportsRequest, CatalogItem, ProfessionalPersonResponse } from '@models';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
-import { ProfessionalPersonResponse } from '@models';
-import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
@@ -39,7 +37,9 @@ export class ListComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
+  private readonly catalogsService = inject(CatalogsService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   reports = signal<ReportListItemResponse[]>([]);
   persons = signal<ProfessionalPersonResponse[]>([]);
@@ -49,9 +49,14 @@ export class ListComponent implements OnInit {
   totalRecords = signal(0);
   totalPages = signal(0);
   searchTerm = signal('');
+  sortBy = signal('createdAt');
+  sortDirection = signal('DESC');
+
+  // ID del profesional autenticado — se carga en ngOnInit antes de loadReports
+  private professionalId = '';
 
   // Filtros
-  selectedPersonId = '';
+  selectedPersonIds: string[] = [];
   statusFilter = '';
   typeFilter = '';
   dateFrom = '';
@@ -62,12 +67,7 @@ export class ListComponent implements OnInit {
   reportToSubmit: ReportListItemResponse | null = null;
   isSubmitting = false;
 
-  readonly reportTypes = [
-    { id: 1, name: 'Evaluación Mensual' },
-    { id: 2, name: 'Informe de Progreso' },
-    { id: 3, name: 'Evaluación Trimestral' },
-    { id: 4, name: 'Informe Anual' },
-  ];
+  reportTypes = signal<CatalogItem[]>([]);
 
   columns: TableColumn[] = [
     {
@@ -75,9 +75,9 @@ export class ListComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
 actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.status === ReportStatus.Draft },
-        { action: 'submit', label: 'Enviar', icon: 'cil-send', visible: (item) => item.status === ReportStatus.Draft },
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.status === ReportStatus.Draft },
+        { action: 'submit', label: 'Enviar', icon: 'cilSend', visible: (item) => item.status === ReportStatus.Draft },
       ],
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
@@ -103,13 +103,18 @@ actions: [
   ];
 
   ngOnInit(): void {
-    this.loadReports();
-    this.loadPersons();
-  }
+    // Aplicar filtros desde queryParams (ej: llegando desde el dashboard o detalle de persona)
+    const statusParam = this.route.snapshot.queryParamMap.get('status');
+    if (statusParam) this.statusFilter = statusParam;
+    const personIdParam = this.route.snapshot.queryParamMap.get('personId');
+    if (personIdParam) this.selectedPersonIds = [personIdParam];
 
-  private loadPersons(): void {
+    // Cargar perfil primero para filtrar reportes solo del profesional autenticado
     this.professionalsService.getMyProfile().subscribe({
       next: (profile) => {
+        this.professionalId = profile.id;
+        this.loadReports();
+        this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
         this.assignmentsService.getPersonsByProfessional(profile.id).subscribe({
           next: (persons) => this.persons.set(persons.filter(p => p.isActive)),
         });
@@ -118,15 +123,17 @@ actions: [
   }
 
   loadReports(): void {
+    if (!this.professionalId) return;
     this.isLoading.set(true);
 
     const request: GetReportsRequest = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
       search: this.searchTerm() || undefined,
-      sortBy: 'reportDate',
-      sortDirection: 'desc',
-      personId: this.selectedPersonId || undefined,
+      sortBy: this.sortBy(),
+      sortDirection: this.sortDirection(),
+      professionalId: this.professionalId,
+      personIds: this.selectedPersonIds.length ? this.selectedPersonIds : undefined,
       status: this.statusFilter || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
@@ -144,13 +151,18 @@ actions: [
     });
   }
 
-  onPersonFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
+  onPersonFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedPersonIds = Array.from(select.selectedOptions).map(o => o.value);
+    this.currentPage.set(1);
+    this.loadReports();
+  }
   onStatusFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
   onTypeFilterChange(): void   { this.currentPage.set(1); this.loadReports(); }
   onDateChange(): void         { this.currentPage.set(1); this.loadReports(); }
 
   clearFilters(): void {
-    this.selectedPersonId = '';
+    this.selectedPersonIds = [];
     this.statusFilter = '';
     this.typeFilter = '';
     this.dateFrom = '';
@@ -170,13 +182,17 @@ actions: [
     this.loadReports();
   }
 
-  onSort(_event: { sortBy: string; sortDirection: string }): void {
+  onSort(event: { sortBy: string; sortDirection: string }): void {
+    this.sortBy.set(event.sortBy);
+    this.sortDirection.set(event.sortDirection);
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     if (event.action === 'view') {
-      this.router.navigate([AppRoutes.Pro.Reports, event.item.id]);
+      this.router.navigate([AppRoutes.Pro.Reports, event.item.encryptedId]);
+    } else if (event.action === 'edit') {
+      this.router.navigate([AppRoutes.Pro.Reports, event.item.encryptedId, 'edit']);
     } else if (event.action === 'submit') {
       this.reportToSubmit = event.item;
       this.showSubmitModal = true;
@@ -192,7 +208,7 @@ actions: [
   confirmSubmit(): void {
     if (!this.reportToSubmit) return;
     this.isSubmitting = true;
-    this.reportsService.submitReport(this.reportToSubmit.id).subscribe({
+    this.reportsService.submitReport(this.reportToSubmit.encryptedId).subscribe({
       next: () => {
         this.toastService.success('Reporte enviado al administrador para revisión.');
         this.showSubmitModal = false;

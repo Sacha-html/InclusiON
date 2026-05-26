@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { PersonsService, ToastService } from '@services';
 import { PersonResponse, UpdatePersonRequest } from '@models';
 import { toDisplayDate, toIsoDate } from '@shared/utils';
@@ -16,7 +16,7 @@ import {
   selector: 'app-professional-person-data',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     ColComponent,
     FormControlDirective,
     FormLabelDirective,
@@ -35,6 +35,7 @@ export class ProfessionalPersonDataComponent {
 
   editingField = signal<string | null>(null);
   isSaving     = signal(false);
+  fieldError   = signal<string | null>(null);
   private _cancelling = false;
 
   draft = { firstName: '', lastName: '', documentNumber: '', birthDate: '' };
@@ -42,6 +43,7 @@ export class ProfessionalPersonDataComponent {
   startField(field: string): void {
     if (this.isSaving()) return;
     this._cancelling = false;
+    this.fieldError.set(null);
     this.draft = {
       firstName:      this.person.firstName,
       lastName:       this.person.lastName,
@@ -53,6 +55,7 @@ export class ProfessionalPersonDataComponent {
 
   cancelField(): void {
     this._cancelling = true;
+    this.fieldError.set(null);
     this.editingField.set(null);
   }
 
@@ -64,6 +67,19 @@ export class ProfessionalPersonDataComponent {
   saveField(): void {
     if (this._cancelling) { this._cancelling = false; return; }
     if (!this.editingField()) return;
+
+    if (this.editingField() === 'documentNumber' && this.draft.documentNumber) {
+      const doc = this.draft.documentNumber;
+      if (!/^[a-zA-Z0-9]+$/.test(doc)) {
+        this.fieldError.set('Solo letras y números, sin espacios ni caracteres especiales');
+        return;
+      }
+      if (doc.length < 6 || doc.length > 20) {
+        this.fieldError.set('El documento debe tener entre 6 y 20 caracteres');
+        return;
+      }
+    }
+    this.fieldError.set(null);
     this.isSaving.set(true);
     const request: UpdatePersonRequest = {
       firstName:      this.draft.firstName,

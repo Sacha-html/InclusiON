@@ -1,78 +1,48 @@
-<c-card class="mb-4">
-  <c-card-header class="d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Administradores del Sistema</h5>
-    <button cButton color="primary" size="sm" (click)="goToNew()">
-      Agregar
-    </button>
-  </c-card-header>
-  <c-card-body>
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label cLabel>Tipo</label>
+      <select cSelect [(ngModel)]="filterRole" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        <option value="GlobalAdmin">Global</option>
+        <option value="InstitutionalAdmin">Institucional</option>
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Institución</label>
+      <select cSelect [(ngModel)]="filterInstitutionId" (ngModelChange)="onFilterChange()">
+        <option value="">Todas</option>
+        @for (inst of institutions; track inst.id) {
+          <option [value]="inst.id">{{ inst.name }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="filterIsActive" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
+  </c-row>
+</fieldset>
 
-    @if (isLoading) {
-      <div class="text-center p-4">
-        <c-spinner color="primary"></c-spinner>
-      </div>
-    }
-
-    @if (!isLoading && admins.length === 0) {
-      <div class="text-center text-body-secondary p-4">
-        <p>No hay administradores registrados.</p>
-      </div>
-    }
-
-    @if (!isLoading && admins.length > 0) {
-      <table cTable hover responsive>
-        <thead>
-          <tr>
-            <th>Acciones</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Tipo</th>
-            <th>Instituciones</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (admin of admins; track admin.id) {
-            <tr>
-              <td>
-                @if (admin.id === currentUserId) {
-                  <button cButton color="primary" size="sm"
-                          (click)="goToEdit()"
-                          [attr.aria-label]="'Editar mis datos'">
-                    Editar
-                  </button>
-                }
-              </td>
-              <td>{{ admin.fullName }}</td>
-              <td>{{ admin.email }}</td>
-              <td>
-                <c-badge [color]="getTypeColor(admin)">
-                  {{ getTypeLabel(admin) }}
-                </c-badge>
-              </td>
-              <td>
-                @if (admin.institutions.length === 0) {
-                  <span class="text-body-secondary">Todas</span>
-                } @else {
-                  @for (inst of admin.institutions; track inst.institutionId) {
-                    <c-badge color="light" class="me-1 text-dark">
-                      {{ inst.institutionName }}
-                    </c-badge>
-                  }
-                }
-              </td>
-              <td>
-                <c-badge [color]="getStatusColor(admin.isActive)">
-                  {{ admin.isActive ? 'Activo' : 'Inactivo' }}
-                </c-badge>
-              </td>
-              <td>{{ admin.createdAt | date:'dd/MM/yyyy' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
-
-  </c-card-body>
-</c-card>
+<app-data-table
+  title="Administradores del Sistema"
+  [columns]="cols"
+  [items]="admins"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [loading]="isLoading"
+  [headerButtons]="[{action: 'new', label: 'Agregar'}]"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>

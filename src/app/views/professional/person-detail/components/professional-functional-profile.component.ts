@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { PersonsService, ToastService } from '@services';
 import { PersonResponse, UpdatePersonRequest } from '@models';
 import {
+  BadgeComponent,
   ButtonDirective,
   ColComponent,
   FormCheckComponent,
@@ -19,6 +20,7 @@ import {
   selector: 'app-professional-functional-profile',
   standalone: true,
   imports: [
+    BadgeComponent,
     ButtonDirective,
     ColComponent,
     FormCheckComponent,
@@ -58,6 +60,28 @@ export class ProfessionalFunctionalProfileComponent {
     visualNoiseSensitivity: false,
     soundSensitivity: false,
   };
+
+  /** Percentage of informational profile fields filled (7 total). */
+  get profileCompletion(): number {
+    const p = this.person;
+    const filled = [
+      (p.attentionLevel ?? 0) > 0,
+      (p.communicationLevel ?? 0) > 0,
+      (p.motorSkillLevel ?? 0) > 0,
+      !!(p.interestsAndMotivators?.trim()),
+      !!(p.learningStyle?.trim()),
+      !!(p.availableResources?.trim()),
+      !!(p.additionalTherapies?.trim()),
+    ].filter(Boolean).length;
+    return Math.round((filled / 7) * 100);
+  }
+
+  get profileCompletionColor(): string {
+    const pct = this.profileCompletion;
+    if (pct >= 80) return 'success';
+    if (pct >= 40) return 'warning';
+    return 'danger';
+  }
 
   levels = [
     { value: 0, label: 'Sin evaluar' },

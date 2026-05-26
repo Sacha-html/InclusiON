@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   CardModule,
@@ -11,14 +10,13 @@ import {
   BadgeModule
 } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
-import { AuthService, UpdateLoginMethodApiResponse } from '../../../services/auth.service';
-import { LoginMethod, UpdateLoginMethodRequest } from '../../../models';
+import { AuthService, UpdateLoginMethodApiResponse } from '@services/auth.service';
+import { LoginMethod, UpdateLoginMethodRequest } from '@models';
 
 @Component({
   selector: 'app-login-method-selector',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     CardModule,
     FormModule,

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { UserRoles } from '@shared/constants/roles';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 import { FormsModule } from '@angular/forms';
 import {
   CardBodyComponent, CardComponent, CardHeaderComponent,
@@ -10,12 +11,13 @@ import {
   ModalBodyComponent, ModalFooterComponent, ModalTitleDirective,
   AlertComponent,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 import {
   MessagesService,
   MessageListItemResponse,
   MessageDetailResponse,
   MessageContactResponse,
-} from '../../services/messages.service';
+} from '@services/messages.service';
 import { ToastService } from '@services';
 
 type ActiveTab = 'inbox' | 'sent';
@@ -24,8 +26,8 @@ type ActiveTab = 'inbox' | 'sent';
   selector: 'app-messages',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
+    ActorAvatarComponent,
     DatePipe,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent,
@@ -35,8 +37,10 @@ type ActiveTab = 'inbox' | 'sent';
     ModalComponent, ModalHeaderComponent, ModalBodyComponent,
     ModalFooterComponent, ModalTitleDirective,
     AlertComponent,
+    IconDirective,
   ],
   templateUrl: './messages.component.html',
+  styleUrl: './messages.component.scss',
 })
 export class MessagesComponent implements OnInit {
   private readonly messagesService = inject(MessagesService);
@@ -63,7 +67,7 @@ export class MessagesComponent implements OnInit {
   showCompose     = false;
   contacts        = signal<MessageContactResponse[]>([]);
   loadingContacts = false;
-  compose         = { receiverId: '', subject: '', body: '' };
+  compose         = { receiverId: '', subject: '', content: '' };
   composeError    = '';
 
   // Reply
@@ -121,14 +125,14 @@ export class MessagesComponent implements OnInit {
   openMessage(msg: MessageListItemResponse): void {
     this.loadingDetail.set(true);
     this.replyBody = '';
-    this.messagesService.getById(msg.id).subscribe({
+    this.messagesService.getById(msg.encryptedId).subscribe({
       next: (detail) => {
         this.selectedDetail.set(detail);
         this.loadingDetail.set(false);
         // Backend auto-marks as read on getById; update local list to reflect
         if (!msg.isRead && this.activeTab === 'inbox') {
           this.inboxMessages.update(list =>
-            list.map(m => m.id === msg.id ? { ...m, isRead: true } : m)
+            list.map(m => m.encryptedId === msg.encryptedId ? { ...m, isRead: true } : m)
           );
         }
       },
@@ -150,7 +154,7 @@ export class MessagesComponent implements OnInit {
     if (!detail || !this.replyBody.trim()) return;
 
     this.sendingReply.set(true);
-    this.messagesService.reply(detail.id, this.replyBody.trim()).subscribe({
+    this.messagesService.reply(detail.encryptedId, this.replyBody.trim()).subscribe({
       next: (updated) => {
         this.selectedDetail.set(updated);
         this.replyBody = '';
@@ -166,7 +170,7 @@ export class MessagesComponent implements OnInit {
 
   // ── Compose ────────────────────────────────────────────────────────────
   openCompose(): void {
-    this.compose     = { receiverId: '', subject: '', body: '' };
+    this.compose     = { receiverId: '', subject: '', content: '' };
     this.composeError = '';
     this.showCompose  = true;
   }
@@ -176,7 +180,7 @@ export class MessagesComponent implements OnInit {
   }
 
   sendNew(): void {
-    if (!this.compose.receiverId || !this.compose.subject.trim() || !this.compose.body.trim()) {
+    if (!this.compose.receiverId || !this.compose.subject.trim() || !this.compose.content.trim()) {
       this.composeError = 'Todos los campos son obligatorios.';
       return;
     }
@@ -185,7 +189,7 @@ export class MessagesComponent implements OnInit {
     this.messagesService.send({
       receiverId: this.compose.receiverId,
       subject:    this.compose.subject.trim(),
-      body:       this.compose.body.trim(),
+      content:    this.compose.content.trim(),
     }).subscribe({
       next: () => {
         this.showCompose = false;
@@ -243,4 +247,5 @@ export class MessagesComponent implements OnInit {
     const type = c.userType === UserRoles.Professional ? 'Profesional' : 'Familiar';
     return `${c.fullName} (${type})`;
   }
+
 }

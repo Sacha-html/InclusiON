@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
-import { ApiResponse, RoleResponse } from '../models';
+import { ApiResponse, RoleResponse } from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse } from '@shared/utils';
 

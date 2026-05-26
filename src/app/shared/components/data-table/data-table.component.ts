@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ActiveStatus } from '@shared/constants/status-labels';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ActionItem, HeaderButton, TableColumn } from './data-table.models';
@@ -8,7 +9,6 @@ import {
   CardBodyComponent,
   CardComponent,
   CardHeaderComponent,
-  ColComponent,
   DropdownComponent,
   DropdownItemDirective,
   DropdownMenuDirective,
@@ -19,7 +19,6 @@ import {
   PageItemComponent,
   PageLinkDirective,
   PaginationComponent,
-  RowComponent,
   TableDirective,
   SpinnerComponent,
 } from '@coreui/angular';
@@ -28,6 +27,7 @@ import { IconDirective } from '@coreui/icons-angular';
 @Component({
   selector: 'app-data-table',
   imports: [
+    NgTemplateOutlet,
     BadgeComponent,
     TableDirective,
     CardComponent,
@@ -40,8 +40,6 @@ import { IconDirective } from '@coreui/icons-angular';
     InputGroupComponent,
     InputGroupTextDirective,
     FormControlDirective,
-    RowComponent,
-    ColComponent,
     DropdownComponent,
     DropdownToggleDirective,
     DropdownMenuDirective,
@@ -53,6 +51,7 @@ import { IconDirective } from '@coreui/icons-angular';
   styleUrl: './data-table.component.scss',
 })
 export class DataTableComponent implements OnInit, OnDestroy {
+  readonly fixedDropdown = { strategy: 'fixed' as const };
   @Input() title: string = '';
   @Input() showTitle: boolean = true;
   @Input() columns: TableColumn[] = [];
@@ -66,6 +65,10 @@ export class DataTableComponent implements OnInit, OnDestroy {
   @Input() debounceMs: number = 400;
   @Input() sortable: boolean = false;
   @Input() loading: boolean = false;
+  @Input() emptyMessage = 'Sin registros';
+  @Input() emptyIcon    = '';
+  @Input() emptyDetail  = '';
+  @Input() showCard = true;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() searchAction = new EventEmitter<string>();
@@ -136,6 +139,13 @@ export class DataTableComponent implements OnInit, OnDestroy {
     return Math.min(this.currentPage * this.pageSize, this.totalItems);
   }
 
+  /** Actions column always renders first, then the rest in declared order. */
+  get orderedColumns(): TableColumn[] {
+    const actions = this.columns.filter(c => c.type === 'actions');
+    const rest    = this.columns.filter(c => c.type !== 'actions');
+    return [...actions, ...rest];
+  }
+
   getVisibleActions(col: TableColumn, item: any): ActionItem[] {
     if (!col.actions) return [];
     return col.actions.filter(a => !a.visible || a.visible(item));
@@ -160,8 +170,12 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
   getBadgeColor(value: any, col?: TableColumn): string {
     if (col?.badgeMap) {
-      const key = String(value);
-      return col.badgeMap[key]?.color || 'secondary';
+      const strVal = String(value);
+      const entry = col.badgeMap[strVal] ?? col.badgeMap[strVal.toLowerCase()];
+      if (!entry && (value === null || value === undefined) && col.badgeMap['false']) {
+        return col.badgeMap['false'].color;
+      }
+      return entry?.color || 'secondary';
     }
     if (typeof value === 'boolean') return value ? 'success' : 'danger';
     switch (value?.toLowerCase()) {
@@ -179,8 +193,12 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
   getBadgeLabel(value: any, col?: TableColumn): string {
     if (col?.badgeMap) {
-      const key = String(value);
-      return col.badgeMap[key]?.label || '-';
+      const strVal = String(value);
+      const entry = col.badgeMap[strVal] ?? col.badgeMap[strVal.toLowerCase()];
+      if (!entry && (value === null || value === undefined) && col.badgeMap['false']) {
+        return col.badgeMap['false'].label;
+      }
+      return entry?.label || '-';
     }
     if (typeof value === 'boolean') return value ? ActiveStatus.Activo : ActiveStatus.Inactivo;
     switch (value?.toLowerCase()) {
@@ -193,6 +211,17 @@ export class DataTableComponent implements OnInit, OnDestroy {
       case 'familyrepresentative': return 'Familiar';
       case 'personwithdisability': return 'Persona';
       default: return value ?? '';
+    }
+  }
+
+  formatDate(val: any): string {
+    if (!val) return '-';
+    try {
+      return new Date(val).toLocaleDateString('es-AR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+      });
+    } catch {
+      return String(val);
     }
   }
 }

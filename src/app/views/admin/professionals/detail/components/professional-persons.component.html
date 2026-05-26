@@ -1,95 +1,44 @@
 <div class="d-flex justify-content-end mb-3">
   <button cButton color="primary" size="sm" (click)="openAssignPersonModal()">
-    <svg cIcon name="cil-user-follow" class="me-1" aria-hidden="true"></svg>
+    <svg cIcon name="cilUserFollow" class="me-1" aria-hidden="true"></svg>
     Asignar persona
   </button>
 </div>
 
-@if (persons.length === 0) {
-  <div class="text-center text-body-secondary py-4">
-    <svg cIcon name="cil-people" size="3xl" class="mb-2 d-block mx-auto opacity-50" aria-hidden="true"></svg>
-    <p class="mb-0">No hay personas asignadas.</p>
-  </div>
-} @else {
-  <table cTable hover responsive>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th class="text-center">Principal</th>
-        <th class="text-center">Supervisa login</th>
-        <th class="text-center">Estado</th>
-        <th class="text-end">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (person of persons; track person.personId) {
-        <tr>
-          <td class="align-middle">{{ person.personFullName }}</td>
-          <td class="text-center align-middle">
-            <c-badge [color]="person.isPrimaryProfessional ? 'success' : 'secondary'">
-              {{ person.isPrimaryProfessional ? 'Sí' : 'No' }}
-            </c-badge>
-          </td>
-          <td class="text-center align-middle">
-            <c-badge [color]="person.canSuperviseLogin ? 'success' : 'secondary'">
-              {{ person.canSuperviseLogin ? 'Sí' : 'No' }}
-            </c-badge>
-          </td>
-          <td class="text-center align-middle">
-            <c-badge [color]="person.isActive ? 'success' : 'danger'">
-              {{ person.isActive ? 'Activo' : 'Inactivo' }}
-            </c-badge>
-          </td>
-          <td class="text-end align-middle">
-            @if (person.isActive) {
-              <button cButton color="danger" size="sm" variant="ghost" (click)="openDeactivatePersonModal(person)">
-                <svg cIcon name="cil-user-unfollow" class="me-1" aria-hidden="true"></svg>
-                Desasignar
-              </button>
-            }
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
+<app-data-table
+  [columns]="columns"
+  [items]="persons"
+  [showSearch]="false"
+  [currentPage]="1"
+  [pageSize]="persons.length || 1"
+  [totalItems]="persons.length"
+  emptyMessage="No hay personas asignadas."
+  emptyIcon="cil-people"
+  (rowAction)="onRowAction($event)"
+/>
 
 <!-- Modal asignar persona -->
 <c-modal [visible]="showAssignPersonModal()" (visibleChange)="showAssignPersonModal.set($event)" alignment="center" size="lg">
   <c-modal-header>
     <h5 cModalTitle>
-      <svg cIcon name="cil-user-follow" class="me-2" aria-hidden="true"></svg>
+      <svg cIcon name="cilUserFollow" class="me-2" aria-hidden="true"></svg>
       Asignar persona
     </h5>
   </c-modal-header>
   <c-modal-body>
     <form [formGroup]="assignPersonForm">
       <div class="mb-4">
-        <label cLabel class="fw-semibold mb-1" id="persona-label">Persona</label>
-        <ng-select
-          [items]="availablePersons"
-          bindValue="id"
+        <label class="form-label fw-semibold mb-1" [for]="'ss-input'">Persona</label>
+        <app-searchable-select
           formControlName="personId"
+          [searchFn]="searchPersonsFn"
+          [displayFn]="displayPerson"
+          [subDisplayFn]="subDisplayPerson"
+          [valueFn]="valueFromPerson"
           placeholder="Buscar por nombre o documento..."
-          [searchFn]="searchPersonFn"
-          notFoundText="No se encontraron personas"
-          loadingText="Cargando..."
-          appendTo="body"
-          aria-labelledby="persona-label"
-          aria-required="true"
-        >
-          <ng-template ng-label-tmp let-item="item">
-            <strong>{{ item.fullName }}</strong>
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item">
-            <div class="d-flex flex-column py-1">
-              <strong>{{ item.fullName }}</strong>
-              <small class="text-body-secondary">
-                {{ item.disabilityTypeName ?? 'Sin tipo' }}{{ item.documentNumber ? ' · DNI ' + item.documentNumber : '' }}
-              </small>
-            </div>
-          </ng-template>
-        </ng-select>
+          hintText="Escriba al menos 2 caracteres para buscar"
+          noResultsText="No se encontraron personas disponibles"
+        />
       </div>
 
       <div class="border rounded p-3 bg-body-tertiary permissions-box">
@@ -115,7 +64,7 @@
     <button cButton color="secondary" (click)="cancelAssignPerson()" [disabled]="isSubmitting()">Cancelar</button>
     <button cButton color="primary" (click)="confirmAssignPerson()" [disabled]="!assignPersonForm.value.personId || isSubmitting()">
       @if (isSubmitting()) {
-        <c-spinner size="sm" class="me-1"></c-spinner>
+        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
         Asignando...
       } @else {
         Asignar
@@ -124,21 +73,14 @@
   </c-modal-footer>
 </c-modal>
 
-<!-- Modal desasignar persona -->
-<c-modal [visible]="showDeactivatePersonModal()" (visibleChange)="showDeactivatePersonModal.set($event)" alignment="center">
-  <c-modal-header>
-    <h5 cModalTitle>Confirmar desasignación</h5>
-  </c-modal-header>
-  <c-modal-body>
-    @if (personToDeactivate()) {
-      <p class="mb-0">
-        ¿Está seguro de que desea desasignar a
-        <strong>{{ personToDeactivate()!.personFullName }}</strong>?
-      </p>
-    }
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="cancelDeactivatePerson()">Cancelar</button>
-    <button cButton color="danger" (click)="confirmDeactivatePerson()">Desasignar</button>
-  </c-modal-footer>
-</c-modal>
+<app-confirm-modal
+  [visible]="showDeactivatePersonModal()"
+  title="Confirmar desasignación"
+  [itemName]="personToDeactivate()?.personFullName ?? ''"
+  messagePrefix="¿Desasignar a "
+  messageSuffix="?"
+  confirmLabel="Desasignar"
+  confirmColor="danger"
+  (confirm)="confirmDeactivatePerson()"
+  (cancel)="cancelDeactivatePerson()"
+/>

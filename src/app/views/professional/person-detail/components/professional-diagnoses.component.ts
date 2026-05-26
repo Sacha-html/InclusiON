@@ -1,11 +1,10 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit, signal, computed } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { DiagnosesService } from '@services/diagnoses.service';
 import { AuthService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
-import { CreateDiagnosisRequest } from '@models/requests/diagnoses/create-diagnosis.request';
-import { DiagnosisListItemResponse, DiagnosisResponse } from '@models/responses/diagnosis.response';
+import { CreateDiagnosisRequest, DiagnosisListItemResponse, DiagnosisResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -24,12 +23,13 @@ import {
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-professional-diagnoses',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     FormsModule,
     BadgeComponent,
     ButtonDirective,
@@ -45,6 +45,7 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
     SpinnerComponent,
     IconDirective,
     ConfirmModalComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './professional-diagnoses.component.html',
   styleUrl: './professional-diagnoses.component.scss',
@@ -125,7 +126,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
 
   openEdit(item: DiagnosisListItemResponse): void {
     this.editingIsCreator.set(this.isCreator(item));
-    this.diagnosesService.getById(item.id).subscribe({
+    this.diagnosesService.getById(item.encryptedId).subscribe({
       next: (d) => {
         this.editing.set(d);
         this.submitted = false;
@@ -157,7 +158,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
     this.saving.set(true);
 
     const op = this.editing()
-      ? this.diagnosesService.update(this.editing()!.id, this.form)
+      ? this.diagnosesService.update(this.editing()!.encryptedId, this.form)
       : this.diagnosesService.create(this.personId, this.form);
 
     op.subscribe({
@@ -186,7 +187,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
     const diag = this.deactivatingDiag();
     if (!diag) return;
     this.isDeactivating.set(true);
-    this.diagnosesService.patchStatus(diag.id, false).subscribe({
+    this.diagnosesService.patchStatus(diag.encryptedId, false).subscribe({
       next: () => {
         this.toastService.success('Diagnóstico dado de baja exitosamente.');
         this.showDeactivateModal.set(false);
