@@ -39,13 +39,13 @@ Los mensajes se agrupan en hilos cuando son respuestas, permitiendo seguir la co
 
 ## Criterios de Aceptación
 
-- [ ] Cada usuario solo puede ver los mensajes donde es remitente o destinatario
-- [ ] Al abrir un mensaje no leído, se marca automáticamente como leído
-- [ ] Los mensajes se pueden vincular a una persona con discapacidad para dar contexto
-- [ ] Las respuestas mantienen el hilo de conversación
-- [ ] El badge de no leídos se actualiza automáticamente
-- [ ] La bandeja de entrada permite filtrar solo mensajes no leídos
-- [ ] Los hilos agrupan la conversación de forma cronológica
-- [ ] Solo Profesional ↔ Familiar pueden intercambiar mensajes; mismo tipo bloqueado
-- [ ] El vínculo activo (persona compartida) es requisito para enviar
-- [ ] Las personas con discapacidad no participan en mensajería
+- [x] Cada usuario solo puede ver los mensajes donde es remitente o destinatario
+- [x] Al abrir un mensaje no leído, se marca automáticamente como leído
+- [x] Los mensajes se pueden vincular a una persona con discapacidad para dar contexto
+- [x] Las respuestas mantienen el hilo de conversación
+- [x] El badge de no leídos se actualiza automáticamente (SignalR real-time)
+- [x] La bandeja de entrada permite filtrar solo mensajes no leídos
+- [x] Los hilos agrupan la conversación de forma cronológica
+- [x] Solo Profesional ↔ Familiar pueden intercambiar mensajes; mismo tipo bloqueado
+- [x] El vínculo activo (persona compartida) es requisito para enviar
+- [x] Las personas con discapacidad no participan en mensajería

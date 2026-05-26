@@ -31,11 +31,11 @@ Las actividades creadas quedan en el catálogo personal del profesional. Tambié
 
 ## Criterios de Aceptación
 
-- [ ] El profesional puede crear actividades paso a paso sin conocimientos técnicos
-- [ ] El formulario de contenido se adapta dinámicamente según la plantilla seleccionada
+- [x] El profesional puede crear actividades paso a paso sin conocimientos técnicos
+- [x] El formulario de contenido se adapta dinámicamente según la plantilla seleccionada
 - [ ] Se pueden buscar e integrar pictogramas de ARASAAC desde el formulario
-- [ ] El profesional puede ver su catálogo de actividades y filtrar por área, plantilla o complejidad
-- [ ] Las actividades estándar del sistema son visibles pero no editables por el profesional
-- [ ] Solo el creador de una actividad puede editarla
+- [x] El profesional puede ver su catálogo de actividades y filtrar por área, plantilla o complejidad
+- [x] Las actividades estándar del sistema son visibles pero no editables por el profesional
+- [x] Solo el creador de una actividad puede editarla
 - [ ] No se puede desactivar una actividad que tenga asignaciones activas
-- [ ] El catálogo muestra el área con su color distintivo, la complejidad con estrellas y la duración estimada
+- [x] El catálogo muestra el área con su color distintivo, la complejidad con estrellas y la duración estimada

@@ -41,14 +41,14 @@ La persona ve su roadmap como un camino visual estilo Duolingo:
 
 ### Profesional
 - [ ] Solo se pueden agregar actividades de las áreas del perfil de habilidades de la persona
-- [ ] El orden dentro de cada área es único y secuencial
-- [ ] La primera actividad de cada área se desbloquea automáticamente al agregarla
+- [x] El orden dentro de cada área es único y secuencial
+- [x] La primera actividad de cada área se desbloquea automáticamente al agregarla
 - [ ] No se puede reordenar ni eliminar una actividad que ya tiene respuestas
 - [ ] El desbloqueo manual también crea la asignación de actividad correspondiente
-- [ ] No se puede agregar la misma actividad dos veces en la misma área
+- [x] No se puede agregar la misma actividad dos veces en la misma área
 
 ### Estudiante
-- [ ] Los nodos bloqueados muestran solo "Bloqueada" sin revelar el título
-- [ ] Al tocar un nodo desbloqueado se abre la actividad correspondiente
-- [ ] La interfaz respeta el perfil de accesibilidad configurado (contraste, tamaño de fuente)
-- [ ] Las animaciones respetan la preferencia de movimiento reducido del sistema operativo
+- [x] Los nodos bloqueados muestran solo "Bloqueada" sin revelar el título
+- [x] Al tocar un nodo desbloqueado se abre la actividad correspondiente
+- [x] La interfaz respeta el perfil de accesibilidad configurado (contraste, tamaño de fuente)
+- [x] Las animaciones respetan la preferencia de movimiento reducido del sistema operativo

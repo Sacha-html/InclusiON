@@ -71,33 +71,33 @@ Config guardada por profesional (backend)
 
 ### Configuración por el profesional
 
-- [ ] La pantalla de detalle de persona tiene una pestaña "Accesibilidad" visible solo para el profesional asignado
-- [ ] El profesional puede seleccionar perfil visual, modo de color, tamaño de fuente, guía de lectura y texto a voz
+- [x] La pantalla de detalle de persona tiene una pestaña "Accesibilidad" visible solo para el profesional asignado
+- [x] El profesional puede seleccionar perfil visual, modo de color, tamaño de fuente, guía de lectura y texto a voz
 - [ ] Al hacer clic en "Previsualizar" la configuración se aplica en tiempo real en la pantalla actual del profesional (sin guardar)
-- [ ] Al guardar, la configuración se persiste en el backend asociada a esa persona
-- [ ] Se muestra toast de confirmación al guardar
-- [ ] El botón "Restaurar" vuelve a los valores por defecto del sistema
-- [ ] Si la persona no tiene configuración guardada, se muestran los valores por defecto del sistema
+- [x] Al guardar, la configuración se persiste en el backend asociada a esa persona
+- [x] Se muestra toast de confirmación al guardar
+- [x] El botón "Restaurar" vuelve a los valores por defecto del sistema
+- [x] Si la persona no tiene configuración guardada, se muestran los valores por defecto del sistema
 
 ### Carga automática al iniciar sesión
 
-- [ ] Al completar el login, el frontend carga la configuración de accesibilidad de la persona desde el backend
-- [ ] La configuración se aplica antes de mostrar el portal (sin flash visual del tema por defecto)
-- [ ] Funciona para todos los métodos de login: PIN, asistido, familiar, estándar visual
-- [ ] Si el backend no devuelve configuración, se aplica el perfil por defecto sin error
+- [x] Al completar el login, el frontend carga la configuración de accesibilidad de la persona desde el backend
+- [x] La configuración se aplica antes de mostrar el portal (sin flash visual del tema por defecto)
+- [x] Funciona para todos los métodos de login: PIN, asistido, familiar, estándar visual
+- [x] Si el backend no devuelve configuración, se aplica el perfil por defecto sin error
 
 ### Backend
 
-- [ ] Existe endpoint `GET /api/Persons/{id}/accessibility` que devuelve la configuración guardada (o 404 si no hay)
-- [ ] Existe endpoint `PUT /api/Persons/{id}/accessibility` para guardar/actualizar la configuración
-- [ ] Solo el profesional asignado a esa persona puede leer y escribir su configuración (validación de asignación)
-- [ ] La respuesta de login incluye o referencia la configuración de accesibilidad de la persona
+- [x] Existe endpoint `GET /api/Persons/{id}/accessibility` que devuelve la configuración guardada (o 404 si no hay)
+- [x] Existe endpoint `PUT /api/Persons/{id}/accessibility` para guardar/actualizar la configuración
+- [x] Solo el profesional asignado a esa persona puede leer y escribir su configuración (validación de asignación)
+- [x] La respuesta de login incluye o referencia la configuración de accesibilidad de la persona
 
 ### Accesibilidad de la feature
 
-- [ ] La pestaña y controles respetan el perfil de accesibilidad activo del profesional mientras configura
-- [ ] Los labels de las opciones son descriptivos (no solo íconos de color)
-- [ ] El formulario es completamente navegable por teclado
+- [x] La pestaña y controles respetan el perfil de accesibilidad activo del profesional mientras configura
+- [x] Los labels de las opciones son descriptivos (no solo íconos de color)
+- [x] El formulario es completamente navegable por teclado
 
 ---
 

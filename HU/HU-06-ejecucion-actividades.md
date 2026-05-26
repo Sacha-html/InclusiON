@@ -40,14 +40,14 @@ Si la persona acumula más de 3 intentos fallidos, el sistema muestra una pausa 
 
 ## Criterios de Aceptación
 
-- [ ] La actividad se carga completa en una sola pantalla sin necesidad de navegación adicional
-- [ ] El tipo de actividad se determina automáticamente según la plantilla, sin que la persona tenga que elegir
-- [ ] Si el tipo de actividad no es reconocido, el sistema muestra un mensaje de error amigable
-- [ ] Durante la ejecución se registran los intentos, tiempos y patrones de respuesta
-- [ ] Al completar, el sistema evalúa el resultado y lo compara con el umbral de desbloqueo
-- [ ] Si el resultado supera el umbral, la siguiente actividad del roadmap se desbloquea automáticamente
-- [ ] Si no supera el umbral, la actividad se marca como completada pero no se desbloquea la siguiente
-- [ ] La persona solo ve sus propias actividades asignadas
-- [ ] La interfaz respeta el perfil de accesibilidad de la persona
-- [ ] Las animaciones respetan la preferencia de movimiento reducido
-- [ ] Se soporta audio mediante síntesis de voz
+- [x] La actividad se carga completa en una sola pantalla sin necesidad de navegación adicional
+- [x] El tipo de actividad se determina automáticamente según la plantilla, sin que la persona tenga que elegir
+- [x] Si el tipo de actividad no es reconocido, el sistema muestra un mensaje de error amigable
+- [x] Durante la ejecución se registran los intentos, tiempos y patrones de respuesta
+- [x] Al completar, el sistema evalúa el resultado y lo compara con el umbral de desbloqueo
+- [x] Si el resultado supera el umbral, la siguiente actividad del roadmap se desbloquea automáticamente
+- [x] Si no supera el umbral, la actividad se marca como completada pero no se desbloquea la siguiente
+- [x] La persona solo ve sus propias actividades asignadas
+- [x] La interfaz respeta el perfil de accesibilidad de la persona
+- [x] Las animaciones respetan la preferencia de movimiento reducido
+- [x] Se soporta audio mediante síntesis de voz
