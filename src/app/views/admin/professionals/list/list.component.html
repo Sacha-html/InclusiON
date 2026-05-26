@@ -2,26 +2,25 @@
 
 <!-- Tabs: Activos y Pendientes -->
 <div class="mb-3">
-  <ul class="nav nav-tabs" role="tablist">
-    <li class="nav-item">
-      <button class="nav-link" [class.active]="activeTab==='active'" (click)="switchTab('active')" type="button">Activos</button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link" [class.active]="activeTab==='validations'" (click)="switchTab('validations')" type="button">
-        Pendientes
-        <span class="badge bg-warning ms-2" *ngIf="pendingCount>0">{{ pendingCount }}</span>
-      </button>
-    </li>
-  </ul>
+  <div class="nav nav-tabs" role="tablist">
+    <button class="nav-link" [class.active]="activeTab==='active'" (click)="switchTab('active')" type="button">Activos</button>
+    <button class="nav-link" [class.active]="activeTab==='validations'" (click)="switchTab('validations')" type="button">
+      Pendientes
+      @if (pendingCount > 0) {
+        <span class="badge bg-warning ms-2">{{ pendingCount }}</span>
+      }
+    </button>
+  </div>
 </div>
 
-<div *ngIf="activeTab==='active'" class="mb-3">
+@if (activeTab === 'active') {
+<div class="mb-3">
   <fieldset class="p-3 border rounded mb-4">
     <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
     <c-row class="align-items-end">
       <c-col sm="3">
-        <label cLabel>Estado</label>
-        <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
+        <label cLabel for="statusFilter">Estado</label>
+        <select cSelect id="statusFilter" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
           <option value="">Todos</option>
           <option value="active">Activos</option>
           <option value="suspended">Suspendidos</option>
@@ -61,8 +60,10 @@
     </div>
   }
 </div>
+}
 
-<div *ngIf="activeTab==='validations'" class="mb-3">
+@if (activeTab === 'validations') {
+<div class="mb-3">
   <app-data-table
     title="Solicitudes Pendientes"
     [columns]="pendingCols"
@@ -85,6 +86,7 @@
     </div>
   }
 </div>
+}
 
 <!-- Modal desactivar -->
 <app-confirm-modal
@@ -154,14 +156,14 @@
 <c-modal [visible]="showHistoryModal" (visibleChange)="showHistoryModal = $event" alignment="center" size="lg">
   <c-modal-header>
     <h5 cModalTitle>
-      <svg cIcon name="cilHistory" class="me-2"></svg>
+      <svg cIcon name="cilHistory" class="me-2" aria-hidden="true"></svg>
       Historial de Estados
     </h5>
   </c-modal-header>
   <c-modal-body>
     @if (statusHistoryLoading) {
       <div class="text-center py-3">
-        <c-spinner size="sm"></c-spinner>
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
         <span class="ms-2">Cargando historial...</span>
       </div>
     } @else if (statusHistory.length) {
@@ -180,12 +182,12 @@
               <td class="text-nowrap">{{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
                 @if (h.oldStatus) {
-                  <c-badge [color]="getBadgeColor(h.oldStatus)">{{ getBadgeLabel(h.oldStatus) }}</c-badge>
+                  <c-badge [color]="statusMap[h.oldStatus].color">{{ statusMap[h.oldStatus].label }}</c-badge>
                 } @else {
                   <span class="text-muted">—</span>
                 }
               </td>
-              <td><c-badge [color]="getBadgeColor(h.newStatus)">{{ getBadgeLabel(h.newStatus) }}</c-badge></td>
+              <td><c-badge [color]="statusMap[h.newStatus].color">{{ statusMap[h.newStatus].label }}</c-badge></td>
               <td>{{ h.observation || '—' }}</td>
             </tr>
           }

@@ -8,11 +8,11 @@
         <c-card class="p-4 shadow">
           <c-card-body>
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-              <div class="text-center mb-4">
+              <header class="text-center mb-4">
                 <svg cIcon name="cilLockLocked" size="3xl" class="mb-3" style="color: var(--a11y-text-secondary)" aria-hidden="true"></svg>
                 <h1 class="h3" style="color: var(--a11y-text)">{{ pageTitle }}</h1>
                 <p class="mb-0" style="color: var(--a11y-text-muted)">{{ pageSubtitle }}</p>
-              </div>
+              </header>
 
               <!-- Error Alert -->
               @if (errorMessage) {
@@ -24,14 +24,14 @@
               <!-- Email -->
               <c-input-group class="mb-3">
                 <span cInputGroupText>
-                  <svg cIcon name="cilUser"></svg>
+                  <svg cIcon name="cilUser" aria-hidden="true"></svg>
                 </span>
                 <input
                   cFormControl
                   type="email"
                   formControlName="email"
                   placeholder="Email"
-                  autocomplete="username"
+                  autocomplete="email"
                   aria-label="Email"
                   aria-required="true"
                   autofocus
@@ -41,7 +41,7 @@
               <!-- Password -->
               <c-input-group class="mb-4">
                 <span cInputGroupText>
-                  <svg cIcon name="cilLockLocked"></svg>
+                  <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
                 </span>
                 <input
                   cFormControl
@@ -52,14 +52,17 @@
                   aria-label="Contraseña"
                   aria-required="true"
                 />
-                <span
+                <button
+                  type="button"
                   cInputGroupText
                   class="cursor-pointer"
                   (click)="togglePasswordVisibility()"
                   style="min-width: 55px; justify-content: center;"
+                  [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="showPassword"
                 >
-                  <small>{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
-                </span>
+                  <small aria-hidden="true">{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </button>
               </c-input-group>
 
               <!-- Remember Me -->
@@ -75,6 +78,13 @@
                 </label>
               </c-form-check>
 
+              <!-- Olvidé mi contraseña -->
+              <div class="text-end mb-3">
+                <a [routerLink]="['/forgot-password']" style="color: var(--a11y-primary); font-size: 0.875rem;">
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
+
               <!-- Botón de Login -->
               <div class="d-grid mb-3">
                 <button
@@ -85,10 +95,10 @@
                   [disabled]="isLoading || loginForm.invalid"
                 >
                   @if (!isLoading) {
-                    <svg cIcon name="cilLockUnlocked" class="me-2"></svg>
+                    <svg cIcon name="cilLockUnlocked" class="me-2" aria-hidden="true"></svg>
                     Ingresar
                   } @else {
-                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
                     Ingresando...
                   }
                 </button>
@@ -102,7 +112,7 @@
                   type="button"
                   (click)="goToVisualLogin()"
                 >
-                  <svg cIcon name="cilArrowLeft" class="me-1"></svg>
+                  <svg cIcon name="cilArrowLeft" class="me-1" aria-hidden="true"></svg>
                   Volver al inicio de sesión
                 </button>
               </div>
@@ -116,7 +126,7 @@
                   color="outline-primary"
                   [routerLink]="['/register-professional']"
                 >
-                  <svg cIcon name="cilUserPlus" class="me-2"></svg>
+                  <svg cIcon name="cilUserPlus" class="me-2" aria-hidden="true"></svg>
                   Registrarme
                 </a>
               </div>

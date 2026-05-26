@@ -5,9 +5,9 @@ import { ButtonDirective, FormControlDirective, FormLabelDirective, FormSelectDi
 import { AuthService, FamilyService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { FamilyListItemResponse } from '../../../../models';
-import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { FamilyListItemResponse } from '@models';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 
@@ -52,19 +52,19 @@ export class ListComponent {
   itemToDeactivate: FamilyListItemResponse | null = null;
 
   public cols: TableColumn[] = [
-    {
-      key: 'actions', label: 'Acciones', type: 'actions',
-      actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cil-x', visible: (item) => item.isActive },
-      ],
-    },
     { key: 'fullName', label: 'Nombre', sortable: true },
     { key: 'linkedPersonNames', label: 'Familiar de' },
     { key: 'relationship', label: 'Parentesco' },
     { key: 'phone', label: 'Telefono' },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
+    {
+      key: 'actions', label: 'Acciones', type: 'actions',
+      actions: [
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.isActive },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.isActive },
+      ],
+    },
   ];
 
   onInstitutionFilterChange(institutionId: number | undefined): void {

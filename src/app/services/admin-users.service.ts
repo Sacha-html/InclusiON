@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
-import { AdminUserResponse, AdminDashboardResponse, ApiResponse, CreateAdminUserResponse } from '../models';
+import { AdminUserResponse, AdminDashboardResponse, ApiResponse, CreateAdminUserResponse, PagedResponse } from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
@@ -25,9 +25,24 @@ export class AdminUsersService {
     return `${environment.apiUrl}/admin/users`;
   }
 
-  getAdmins(): Observable<AdminUserResponse[]> {
+  getAdmins(
+    page = 1,
+    pageSize = 10,
+    search?: string,
+    role?: string,
+    isActive?: boolean,
+    institutionId?: number,
+  ): Observable<PagedResponse<AdminUserResponse>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+    if (search)                    params = params.set('search', search);
+    if (role)                      params = params.set('role', role);
+    if (isActive !== undefined)    params = params.set('isActive', isActive.toString());
+    if (institutionId)             params = params.set('institutionId', institutionId.toString());
+
     return this.http
-      .get<ApiResponse<AdminUserResponse[]>>(`${this.apiUrl}/admins`)
+      .get<ApiResponse<PagedResponse<AdminUserResponse>>>(`${this.apiUrl}/admins`, { params })
       .pipe(unwrapResponse());
   }
 

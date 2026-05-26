@@ -140,8 +140,8 @@
                     <td>{{ session.ipAddress ?? '—' }}</td>
                     <td>{{ formatUserAgent(session.userAgent) }}</td>
                     <td>
-                      <c-badge [color]="getSessionStatusColor(session)">
-                        {{ getSessionStatusLabel(session) }}
+                      <c-badge [color]="getSessionStatus(session).color">
+                        {{ getSessionStatus(session).label }}
                       </c-badge>
                     </td>
                     <td>{{ session.revokedAt ? (session.revokedAt | date:'dd/MM/yyyy HH:mm') : '—' }}</td>

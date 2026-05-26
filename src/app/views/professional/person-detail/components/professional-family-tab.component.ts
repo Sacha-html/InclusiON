@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GridModule } from '@coreui/angular';
 import { FamilyService, AuthService, ToastService } from '@services';
@@ -31,7 +30,6 @@ import { TableColumn, HeaderButton } from '@shared/components/data-table/data-ta
   selector: 'app-professional-family-tab',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     GridModule,
     BadgeComponent,
@@ -68,14 +66,6 @@ export class ProfessionalFamilyTabComponent {
   canUnlinkFamily = this.authService.hasPermission(Permissions.Professionals.UnlinkFamily) || this.authService.hasPermission(Permissions.Family.Unlink);
 
   familyCols: TableColumn[] = [
-    {
-      key: 'actions',
-      label: '',
-      type: 'actions',
-      actions: [
-        { action: 'unlink', label: 'Desvincular', icon: 'cil-x', visible: (item) => this.canUnlinkFamily && item.isActive },
-      ],
-    },
     { key: 'representativeFullName', label: 'Nombre' },
     { key: 'relationship', label: 'Relación' },
     {
@@ -90,11 +80,19 @@ export class ProfessionalFamilyTabComponent {
       type: 'badge',
       badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } }
     },
+    {
+      key: 'actions',
+      label: '',
+      type: 'actions',
+      actions: [
+        { action: 'unlink', label: 'Desvincular', icon: 'cilX', visible: (item) => this.canUnlinkFamily && item.isActive },
+      ],
+    },
   ];
 
   get familyHeaderButtons(): HeaderButton[] {
     return this.canLinkFamily
-      ? [{ action: 'link', label: 'Vincular', icon: 'cil-plus', color: 'primary' }]
+      ? [{ action: 'link', label: 'Vincular', icon: 'cilPlus', color: 'primary' }]
       : [];
   }
 

@@ -67,6 +67,13 @@ export class RolesComponent implements OnInit {
   // Permission groups for UI
   permissionGroups: { module: string; permissions: string[] }[] = [];
 
+  readonly roleMap: Partial<Record<string, { color: string; label: string }>> = {
+    Admin:                  { color: 'danger',  label: 'Administrador'            },
+    Professional:           { color: 'primary', label: 'Profesional'              },
+    FamilyRepresentative:   { color: 'success', label: 'Representante Familiar'   },
+    PersonWithDisability:   { color: 'info',    label: 'Persona con Discapacidad' },
+  };
+
   ngOnInit(): void {
     this.loadData();
   }
@@ -229,23 +236,4 @@ export class RolesComponent implements OnInit {
     });
   }
 
-  getRoleLabel(name: string): string {
-    const labels: Record<string, string> = {
-      Admin: 'Administrador',
-      Professional: 'Profesional',
-      FamilyRepresentative: 'Representante Familiar',
-      PersonWithDisability: 'Persona con Discapacidad',
-    };
-    return labels[name] || name;
-  }
-
-  getRoleBadgeColor(name: string): string {
-    const colors: Record<string, string> = {
-      Admin: 'danger',
-      Professional: 'primary',
-      FamilyRepresentative: 'success',
-      PersonWithDisability: 'info',
-    };
-    return colors[name] || 'secondary';
-  }
 }

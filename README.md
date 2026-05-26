@@ -69,9 +69,10 @@ src/
 | Servicio | Uso |
 |----------|-----|
 | `AuthService` | Login, JWT, refresh token, cambio de método de login |
-| `PersonsService` | CRUD Personas, asignación de profesionales |
+| `PersonsService` | CRUD Personas, asignación de profesionales, actividades recomendadas |
 | `ProfessionalsService` | CRUD Profesionales, validación, historial de estados |
 | `FamilyService` | CRUD Representantes familiares |
+| `ActivitiesService` | CRUD Actividades, búsqueda semántica, personas compatibles |
 | `ReportsService` | Informes (admin, profesional, familiar) |
 | `InstitutionsService` | Instituciones educativas |
 | `AssignmentsService` | Asignaciones profesional ↔ persona |
@@ -119,6 +120,9 @@ export const environment = {
 | `/admin/users` | GET | Usuarios del sistema |
 | `/catalogs/login-methods` | GET | Métodos de login activos |
 | `/catalogs/avatar-colors` | GET | Colores de avatar |
+| `/activities/{id}/similar` | GET | Actividades similares (búsqueda semántica) |
+| `/activities/{id}/compatible-persons` | GET | Personas compatibles para una actividad |
+| `/persons/{id}/recommended-activities` | GET | Actividades recomendadas para una persona |
 
 ---
 

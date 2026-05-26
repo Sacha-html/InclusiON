@@ -2,11 +2,12 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogsService, ReportsService, ToastService } from '@services';
+import { PersonsService } from '@services/persons.service';
+import { ProfessionalsService } from '@services/professionals.service';
+import { InstitutionsService } from '@services/institutions.service';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportListItemResponse, ReportStatus, GetReportsRequest, CatalogItem, PersonListItemResponse, ProfessionalListItemResponse, InstitutionResponse } from '@models';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
-import { CatalogItem } from '@models';
-import { GetReportsRequest } from '@models/requests/reports/get-reports.request';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
@@ -35,22 +36,35 @@ import {
   styleUrl: './list.component.scss',
 })
 export class ListComponent implements OnInit {
-  private readonly reportsService  = inject(ReportsService);
-  private readonly toastService    = inject(ToastService);
-  private readonly catalogsService = inject(CatalogsService);
-  private readonly router          = inject(Router);
+  private readonly reportsService       = inject(ReportsService);
+  private readonly toastService         = inject(ToastService);
+  private readonly catalogsService      = inject(CatalogsService);
+  private readonly personsService       = inject(PersonsService);
+  private readonly professionalsService = inject(ProfessionalsService);
+  private readonly institutionsService  = inject(InstitutionsService);
+  private readonly router               = inject(Router);
 
-  reports = signal<ReportListItemResponse[]>([]);
+  reports       = signal<ReportListItemResponse[]>([]);
+  persons       = signal<PersonListItemResponse[]>([]);
+  professionals = signal<ProfessionalListItemResponse[]>([]);
+  institutions  = signal<InstitutionResponse[]>([]);
   isLoading = signal(true);
   currentPage = signal(1);
   pageSize = signal(10);
   totalRecords = signal(0);
+
+  sortBy = 'createdAt';
+  sortDirection = 'DESC';
 
   // Filtros
   statusFilter = 'Submitted'; // Por defecto: pendientes de revisión
   typeFilter = '';
   dateFrom = '';
   dateTo = '';
+  searchTerm = '';
+  selectedPersonIds: string[] = [];
+  filterProfessionalId = '';
+  filterInstitutionId  = '';
 
   // Modales
   showApproveModal = false;
@@ -61,26 +75,6 @@ export class ListComponent implements OnInit {
   reportTypes = signal<CatalogItem[]>([]);
 
   columns: TableColumn[] = [
-    {
-      key: 'actions',
-      label: 'Acciones',
-      type: 'actions',
-      actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        {
-          action: 'approve',
-          label: 'Aprobar',
-          icon: 'cil-check-circle',
-          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
-        },
-        {
-          action: 'reject',
-          label: 'Rechazar',
-          icon: 'cil-x-circle',
-          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
-        },
-      ],
-    },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
     { key: 'title', label: 'Título', sortable: true },
     { key: 'personName', label: 'Persona', sortable: true },
@@ -97,11 +91,34 @@ export class ListComponent implements OnInit {
         [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
       },
     },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      type: 'actions',
+      actions: [
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        {
+          action: 'approve',
+          label: 'Aprobar',
+          icon: 'cilCheckCircle',
+          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
+        },
+        {
+          action: 'reject',
+          label: 'Rechazar',
+          icon: 'cilXCircle',
+          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
+        },
+      ],
+    },
   ];
 
   ngOnInit(): void {
     this.loadReports();
     this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
+    this.personsService.getPersons({ pageSize: 500 }).subscribe(r => this.persons.set(r.data));
+    this.professionalsService.getProfessionals({ pageSize: 500, isActive: true }).subscribe(r => this.professionals.set(r.data));
+    this.institutionsService.getAll().subscribe(list => this.institutions.set(list));
   }
 
   loadReports(): void {
@@ -109,12 +126,16 @@ export class ListComponent implements OnInit {
     const request: GetReportsRequest = {
       page: this.currentPage(),
       pageSize: this.pageSize(),
-      sortBy: 'reportDate',
-      sortDirection: 'desc',
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
       status: this.statusFilter || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
       dateTo: this.dateTo || undefined,
+      search: this.searchTerm || undefined,
+      personIds:       this.selectedPersonIds.length ? this.selectedPersonIds : undefined,
+      professionalId:  this.filterProfessionalId  || undefined,
+      institutionId:   this.filterInstitutionId   ? +this.filterInstitutionId : undefined,
     };
 
     this.reportsService.getReports(request).subscribe({
@@ -127,15 +148,26 @@ export class ListComponent implements OnInit {
     });
   }
 
+  onPersonFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedPersonIds = Array.from(select.selectedOptions).map(o => o.value);
+    this.currentPage.set(1);
+    this.loadReports();
+  }
   onStatusFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
   onTypeFilterChange(): void   { this.currentPage.set(1); this.loadReports(); }
   onDateChange(): void         { this.currentPage.set(1); this.loadReports(); }
 
+  onFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
+
   clearFilters(): void {
-    this.statusFilter = 'Submitted';
-    this.typeFilter = '';
-    this.dateFrom = '';
-    this.dateTo = '';
+    this.statusFilter        = 'Submitted';
+    this.typeFilter          = '';
+    this.dateFrom            = '';
+    this.dateTo              = '';
+    this.selectedPersonIds   = [];
+    this.filterProfessionalId = '';
+    this.filterInstitutionId  = '';
     this.currentPage.set(1);
     this.loadReports();
   }
@@ -146,18 +178,21 @@ export class ListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
+    this.searchTerm = term;
     this.currentPage.set(1);
     this.loadReports();
   }
 
-  onSort(_event: { sortBy: string; sortDirection: string }): void {
+  onSort(event: { sortBy: string; sortDirection: string }): void {
+    this.sortBy = event.sortBy;
+    this.sortDirection = event.sortDirection;
     this.loadReports();
   }
 
   onRowAction(event: { action: string; item: ReportListItemResponse }): void {
     this.selectedReport = event.item;
     if (event.action === 'view') {
-      this.router.navigate([AppRoutes.Admin.Reports, event.item.id]);
+      this.router.navigate([AppRoutes.Admin.Reports, event.item.encryptedId]);
     } else if (event.action === 'approve') {
       this.showApproveModal = true;
     } else if (event.action === 'reject') {
@@ -168,7 +203,7 @@ export class ListComponent implements OnInit {
   confirmApprove(): void {
     if (!this.selectedReport) return;
     this.isActioning = true;
-    this.reportsService.approveReport(this.selectedReport.id).subscribe({
+    this.reportsService.approveReport(this.selectedReport.encryptedId).subscribe({
       next: () => {
         this.toastService.success('Reporte aprobado. El familiar ya puede consultarlo.');
         this.showApproveModal = false;
@@ -186,7 +221,7 @@ export class ListComponent implements OnInit {
   confirmReject(comment: string): void {
     if (!this.selectedReport) return;
     this.isActioning = true;
-    this.reportsService.rejectReport(this.selectedReport.id, comment).subscribe({
+    this.reportsService.rejectReport(this.selectedReport.encryptedId, comment).subscribe({
       next: () => {
         this.toastService.success('Reporte rechazado. El profesional fue notificado.');
         this.showRejectModal = false;

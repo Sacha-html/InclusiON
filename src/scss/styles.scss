@@ -45,6 +45,18 @@
 // Temas de accesibilidad
 @use "accessibility-themes";
 
+// Fuentes auto-hospedadas (sin dependencia de Google Fonts CDN)
+@import '@fontsource/atkinson-hyperlegible/400.css';
+@import '@fontsource/atkinson-hyperlegible/700.css';
+@import '@fontsource/atkinson-hyperlegible/400-italic.css';
+@import '@fontsource/atkinson-hyperlegible/700-italic.css';
+@import '@fontsource/lexend/300.css';
+@import '@fontsource/lexend/400.css';
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+@import '@fontsource/lexend/700.css';
+@import 'material-icons/iconfont/material-icons.css';
+
 // -----------------------------------------
 // Estilos de Accesibilidad Adicionales
 // -----------------------------------------
@@ -145,7 +157,7 @@
   fill: var(--a11y-primary-text) !important;
 }
 
-// Links accesibles (no solo color)
+// Links accesibles (no solo color — WCAG 1.4.1)
 a {
   color: var(--a11y-primary);
   text-decoration: underline;
@@ -153,22 +165,8 @@ a {
   &:hover,
   &:focus {
     color: var(--a11y-primary-dark);
-    text-decoration: none;
+    text-decoration-thickness: 2px;
   }
 }
 
-// Texto de error con icono (no solo color)
-.invalid-feedback,
-.text-danger {
-  &::before {
-    content: "⚠ ";
-  }
-}
-
-// Texto de éxito con icono
-.valid-feedback,
-.text-success {
-  &::before {
-    content: "✓ ";
-  }
-}
+// Iconos de validación via DOM — no usar CSS content (no confiable en lectores de pantalla)

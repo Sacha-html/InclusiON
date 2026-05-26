@@ -19,10 +19,10 @@
     </div>
 
     <!-- Main Card -->
-    <main class="pin-card card shadow" role="main">
+    <section class="pin-card card shadow" aria-labelledby="pin-heading">
       <div class="card-body p-4 p-md-5">
         <!-- User Avatar -->
-        <header class="text-center mb-4">
+        <div class="text-center mb-4">
           <div
             class="user-avatar mx-auto mb-3"
             [style.background-color]="avatarColor"
@@ -31,9 +31,9 @@
           >
             {{ initial }}
           </div>
-          <h1 class="h4 fw-bold mb-1" style="color: var(--a11y-text)">Hola, {{ displayName }}</h1>
+          <h1 id="pin-heading" class="h4 fw-bold mb-1" style="color: var(--a11y-text)">Hola, {{ displayName }}</h1>
           <p class="mb-0" id="pin-instructions" style="color: var(--a11y-text-muted)">Toca los números de tu PIN</p>
-        </header>
+        </div>
 
         <!-- Error Alert -->
         @if (errorMessage) {
@@ -137,7 +137,7 @@
           aria-describedby="pin-instructions"
         >
           @for (row of pinPad; track $index) {
-            <div class="pin-row" role="group">
+            <div class="pin-row">
               @for (key of row; track key) {
                 <button
                   class="pin-key"
@@ -178,13 +178,13 @@
         </div>
 
         <!-- Help -->
-        <footer class="text-center mt-4">
+        <div class="text-center mt-4">
           <p class="small mb-0" style="color: var(--a11y-text-muted)">
             <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
             ¿Lo olvidaste? Pide ayuda a un familiar o profesional
           </p>
-        </footer>
+        </div>
       </div>
-    </main>
+    </section>
   </div>
 </div>
