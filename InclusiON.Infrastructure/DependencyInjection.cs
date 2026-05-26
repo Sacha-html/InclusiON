@@ -11,6 +11,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Domain.Models;
+using InclusiON.Domain.Models.BaseEntities;
 using InclusiON.Infrastructure.Authentication;
 using InclusiON.Infrastructure.Configuration;
 using InclusiON.Infrastructure.Authorization;
@@ -39,6 +40,22 @@ namespace InclusiON.Infrastructure
 
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+            services.Configure<BackgroundJobSettings>(configuration.GetSection("BackgroundJobs"));
+            services.Configure<PasswordResetSettings>(configuration.GetSection("PasswordResetSettings"));
+            services.AddScoped<IPasswordResetConfig, PasswordResetConfig>();
+
+            // Python agent HTTP client
+            var pythonUrl = configuration.GetSection("BackgroundJobs:PythonAgent:Url")?.Value
+                ?? "http://localhost:5001";
+            var pythonTimeout = configuration.GetValue("BackgroundJobs:PythonAgent:TimeoutSeconds", 60);
+            services.AddHttpClient("PythonAgent", client =>
+            {
+                client.BaseAddress = new Uri(pythonUrl);
+                client.Timeout = TimeSpan.FromSeconds(pythonTimeout);
+            });
+
+            // IEmbeddingService — reemplaza al ONNX local, llama al agente Python vía HTTP
+            services.AddSingleton<IEmbeddingService, HttpEmbeddingService>();
 
             var encryptionService = new AesGcmEncryptionService(configuration);
             EncryptionAccessor.Initialize(encryptionService.Encrypt, encryptionService.Decrypt);
@@ -61,33 +78,62 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<InclusiON.Application.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
             services.AddScoped<IPinHasher, Argon2idPinHasher>();
-            services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
             services.AddScoped<TokenServices>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRawDbExecutor, RawDbExecutor>();
-            services.AddScoped<IUsersRepository, UsersRepository>();
-            services.AddScoped<IVisualLoginRepository, VisualLoginRepository>();
-            services.AddScoped<IPersonsRepository, PersonsRepository>();
-            services.AddScoped<IProfessionalsRepository, ProfessionalsRepository>();
-            services.AddScoped<IInvitationsRepository, InvitationsRepository>();
-            services.AddScoped<IFamilyRepository, FamilyRepository>();
-            services.AddScoped<IAssignmentsRepository, AssignmentsRepository>();
-            services.AddScoped<IInstitutionsRepository, InstitutionsRepository>();
-            services.AddScoped<IAdminInstitutionRepository, AdminInstitutionRepository>();
-            services.AddScoped<IDiagnosesRepository, DiagnosesRepository>();
-            services.AddScoped<IReportsRepository, ReportsRepository>();
+
+            // Repositorios — auto-registrado por convención: clase concreta *Repository → interfaz I*Repository
+            var readOnlyRepoOpenType = typeof(IReadOnlyRepository<>);
+            var infraAssembly = typeof(UsersRepository).Assembly;
+
+            var repoImplementations = infraAssembly
+                .GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericTypeDefinition
+                            && t.Name.EndsWith("Repository"));
+
+            foreach (var impl in repoImplementations)
+            {
+                var repoInterface = impl.GetInterfaces()
+                    .FirstOrDefault(i => i.Name.StartsWith("I")
+                                        && i.Name.EndsWith("Repository")
+                                        && !(i.IsGenericType && i.GetGenericTypeDefinition() == readOnlyRepoOpenType));
+
+                if (repoInterface != null)
+                    services.AddScoped(repoInterface, impl);
+            }
 
             // Email
             services.AddScoped<IEmailService, EmailService>();
 
-            // Repositorios read-only para catalogos
-            services.AddScoped<IReadOnlyRepository<DisabilityType>, ReadOnlyRepository<DisabilityType>>();
-            services.AddScoped<IReadOnlyRepository<ActivityCategory>, ReadOnlyRepository<ActivityCategory>>();
-            services.AddScoped<IReadOnlyRepository<AutonomyLevel>, ReadOnlyRepository<AutonomyLevel>>();
-            services.AddScoped<IReadOnlyRepository<LoginMethod>, ReadOnlyRepository<LoginMethod>>();
-            services.AddScoped<IReadOnlyRepository<SkillArea>, ReadOnlyRepository<SkillArea>>();
-            services.AddScoped<IReadOnlyRepository<ActivityTemplateType>, ReadOnlyRepository<ActivityTemplateType>>();
+            // Generación de PDF (QuestPDF)
+            services.AddScoped<IReportPdfService, Services.ReportPdfService>();
+
+            // Gestión de roles e Identity RoleClaims
+            services.AddScoped<IRoleService, RoleService>();
+
+            // Administración de catálogos (Create/Update/PatchStatus genérico)
+            services.AddScoped<ICatalogAdminService, CatalogAdminService>();
+
+            // Repositorios read-only — auto-registrado para todo tipo que implemente IActivatable e IHasIntId
+            // (IReadOnlyRepository<TEntity> tiene constraint where TEntity : class, IActivatable, IHasIntId)
+            var activatableType = typeof(IActivatable);
+            var hasIntIdType    = typeof(IHasIntId);
+            var readOnlyRepoOpen = typeof(IReadOnlyRepository<>);
+            var readOnlyRepoImplOpen = typeof(ReadOnlyRepository<>);
+
+            var domainTypes = typeof(DisabilityType).Assembly
+                .GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract
+                            && activatableType.IsAssignableFrom(t)
+                            && hasIntIdType.IsAssignableFrom(t));
+
+            foreach (var domainType in domainTypes)
+            {
+                var serviceType = readOnlyRepoOpen.MakeGenericType(domainType);
+                var implType = readOnlyRepoImplOpen.MakeGenericType(domainType);
+                services.AddScoped(serviceType, implType);
+            }
 
             // Proveedor de fecha/hora (zona horaria Argentina)
             services.AddSingleton<IDateTimeProvider, ArgentinaDateTimeProvider>();
@@ -141,6 +187,20 @@ namespace InclusiON.Infrastructure
 
                     options.Events = new JwtBearerEvents
                     {
+                        // SignalR no puede enviar Authorization header en WebSocket/SSE.
+                        // El cliente pasa el token como query param ?access_token=...
+                        OnMessageReceived = ctx =>
+                        {
+                            var accessToken = ctx.Request.Query["access_token"];
+                            var path = ctx.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken)
+                                && path.StartsWithSegments("/hubs"))
+                            {
+                                ctx.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        },
+
                         OnTokenValidated = ctx =>
                         {
                             // Verifica el claim isActive embebido en el token.

@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Application.Extensions;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
@@ -90,6 +90,43 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .ConfigureAwait(false);
         }
 
+        public async Task<List<PersonSkillProfile>> GetSkillProfileAsync(
+            Guid personId,
+            bool activeOnly,
+            CancellationToken cancellationToken = default)
+        {
+            var query = _context.PersonSkillProfiles
+                .Include(psp => psp.SkillArea)
+                .Where(psp => psp.PersonId == personId);
+
+            if (activeOnly)
+                query = query.Where(psp => psp.IsActive);
+
+            return await query
+                .OrderBy(psp => psp.SkillArea.DisplayOrder)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<PersonSkillProfile?> GetSkillProfileEntryAsync(
+            Guid personId,
+            int skillAreaId,
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonSkillProfiles
+                .Include(psp => psp.SkillArea)
+                .FirstOrDefaultAsync(
+                    psp => psp.PersonId == personId && psp.SkillAreaId == skillAreaId,
+                    cancellationToken);
+        }
+
+        public async Task AddSkillProfileEntryAsync(
+            PersonSkillProfile entry,
+            CancellationToken cancellationToken = default)
+        {
+            await _context.PersonSkillProfiles.AddAsync(entry, cancellationToken);
+        }
+
         public async Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
             int page,
             int pageSize,
@@ -111,6 +148,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.LoginMethod)
                 .Include(p => p.PersonRepresentatives.Where(pr => pr.IsActive))
                     .ThenInclude(pr => pr.Representative)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -121,6 +159,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(p =>
                     EF.Functions.ILike(p.FirstName, pattern) ||
                     EF.Functions.ILike(p.LastName, pattern) ||
+                    EF.Functions.ILike(p.FirstName + " " + p.LastName, pattern) ||
+                    EF.Functions.ILike(p.LastName + " " + p.FirstName, pattern) ||
+                    EF.Functions.ILike(p.LastName + ", " + p.FirstName, pattern) ||
                     (p.DocumentNumber != null && EF.Functions.ILike(p.DocumentNumber, pattern)));
             }
 
@@ -180,6 +221,22 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 sortBy, sortDirection,
                 sortMappings,
                 cancellationToken);
+        }
+
+        public async Task<List<PersonWithDisability>> GetByIdsAsync(
+            List<Guid> ids,
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonsWithDisability
+                .Include(p => p.DisabilityType)
+                .Include(p => p.AutonomyLevel)
+                .Include(p => p.LoginMethod)
+                .Include(p => p.User)
+                .Include(p => p.PersonRepresentatives)
+                    .ThenInclude(pr => pr.Representative)
+                .Where(p => ids.Contains(p.Id))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
     }
 }

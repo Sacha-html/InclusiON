@@ -5,6 +5,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
     public class ActivityTemplateTypeResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string Code { get; set; } = string.Empty;
@@ -14,6 +15,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
         public bool UsesPictograms { get; set; }
         public bool HasAudio { get; set; }
         public int DisplayOrder { get; set; }
+        public bool IsActive { get; set; }
 
         public static ActivityTemplateTypeResponse MapToResponse(ActivityTemplateType x)
         {
@@ -28,7 +30,8 @@ namespace InclusiON.DTOs.Responses.Catalogs
                 ComponentName = x.ComponentName,
                 UsesPictograms = x.UsesPictograms,
                 HasAudio = x.HasAudio,
-                DisplayOrder = x.DisplayOrder
+                DisplayOrder = x.DisplayOrder,
+                IsActive = x.IsActive
             };
         }
     }

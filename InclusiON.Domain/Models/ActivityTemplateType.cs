@@ -5,9 +5,10 @@ namespace InclusiON.Domain.Models
     /// <summary>
     /// Tipo de plantilla que define la estructura y comportamiento de una actividad interactiva.
     /// Cada tipo mapea a un componente Angular especifico y tiene un JSON Schema para validar el contenido.
-    /// Valores de Code: SELECT_FIGURE, VISUAL_SUM, COMPLETE_LETTER, ORDER_SEQUENCE, MATCH_IMAGE_WORD.
+    /// Valores de Code en DB: PICTOGRAM_SELECT, OPTION_SELECT, GLOBAL_READING, SOUND_RECOGNITION,
+    /// BUILD_WORD, CLASSIFY, ORDER_SEQUENCE, NUMERATION.
     /// </summary>
-    public class ActivityTemplateType : AuditableBaseEntity
+    public class ActivityTemplateType : AuditableBaseEntity, IHasIntId
     {
         /// <summary>
         /// Identificador unico del tipo de plantilla.
@@ -26,7 +27,8 @@ namespace InclusiON.Domain.Models
 
         /// <summary>
         /// Codigo unico que identifica el tipo de plantilla.
-        /// Valores: SELECT_FIGURE | VISUAL_SUM | COMPLETE_LETTER | ORDER_SEQUENCE | MATCH_IMAGE_WORD.
+        /// Valores: PICTOGRAM_SELECT | OPTION_SELECT | GLOBAL_READING | SOUND_RECOGNITION
+        ///          | BUILD_WORD | CLASSIFY | ORDER_SEQUENCE | NUMERATION.
         /// </summary>
         public string Code { get; set; } = string.Empty;
 

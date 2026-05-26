@@ -19,6 +19,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public CreateReportCommandHandler(
             IReportsRepository repository,
@@ -26,7 +27,8 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             IProfessionalsRepository professionalsRepository,
             IUnitOfWork unitOfWork,
             ILogger<CreateReportCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _repository = repository;
             _personsRepository = personsRepository;
@@ -34,6 +36,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -83,7 +86,12 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 "Report created: {ReportId} for person {PersonId} by professional {ProfessionalId}",
                 created.Id, created.PersonId, created.ProfessionalId);
 
-            return ApiResponse<ReportResponse>.SuccessResult(ReportResponse.MapToResponse(created));
+            var response = ReportResponse.MapToResponse(created);
+            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(created.Id.ToString()));
+            return ApiResponse<ReportResponse>.SuccessResult(response);
         }
+
+        private static string ToUrlSafeBase64(string s)
+            => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

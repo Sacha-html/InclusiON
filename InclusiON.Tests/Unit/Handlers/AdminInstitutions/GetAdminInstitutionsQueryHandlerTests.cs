@@ -1,17 +1,20 @@
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.AdminInstitutions.Handlers;
 using InclusiON.Application.UseCases.AdminInstitutions.Queries;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
 {
     public class GetAdminInstitutionsQueryHandlerTests
     {
         private readonly IAdminInstitutionRepository _repository = Substitute.For<IAdminInstitutionRepository>();
-        private GetAdminInstitutionsQueryHandler BuildSut() => new(_repository);
+        private readonly IEncryptionService          _encryption = Substitute.For<IEncryptionService>();
+        private GetAdminInstitutionsQueryHandler BuildSut() => new(_repository, _encryption);
 
         [Fact]
         public async Task HandleAsync_AdminWithNoAssignments_ReturnsEmptyList()
@@ -26,7 +29,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
 
             // Assert
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
         }
 
         [Fact]
@@ -52,7 +55,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
             var result = await BuildSut().HandleAsync(new GetAdminInstitutionsQuery(adminId), default);
 
             // Assert
-            var dto = result.Data!.Single();
+            var dto = result.Data!.Data.Single();
             dto.AdminUserId.Should().Be(adminId);
             dto.InstitutionId.Should().Be(5);
             dto.InstitutionName.Should().Be("Escuela Cervantes");

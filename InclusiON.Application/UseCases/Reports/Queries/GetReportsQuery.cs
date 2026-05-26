@@ -15,6 +15,7 @@ namespace InclusiON.Application.UseCases.Reports.Queries
         DateTime? DateTo,
         SortField? SortBy,
         string SortDirection,
-        List<int>? InstitutionIds = null
+        List<int>? InstitutionIds = null,
+        List<string>? PersonIds = null
     );
 }

@@ -28,8 +28,10 @@ namespace InclusiON.Tests.Integration.TestSupport
         public int  DiagnosisId { get; private set; }
         public int  ReportId    { get; private set; }
 
-        public async Task InitializeAsync()
+        public override async Task InitializeAsync()
         {
+            await base.InitializeAsync();
+
             using var scope = Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -50,7 +52,7 @@ namespace InclusiON.Tests.Integration.TestSupport
                 UserId    = personUserId,
                 FirstName = "Test",
                 LastName  = "Person",
-                BirthDate = new DateTime(2000, 1, 1)
+                BirthDate = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             });
 
             // ── Profesional asignado ──────────────────────────────────────────
@@ -110,7 +112,7 @@ namespace InclusiON.Tests.Integration.TestSupport
                 Id               = 101,
                 PersonId         = PersonId,
                 ProfessionalId   = assignedProfId,
-                DiagnosisDate    = new DateTime(2026, 1, 10),
+                DiagnosisDate    = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc),
                 PrimaryDiagnosis = "TEA leve"
             };
             db.Diagnoses.Add(diagnosis);
@@ -124,7 +126,7 @@ namespace InclusiON.Tests.Integration.TestSupport
                 ReportTypeId   = 1,
                 Title          = "Reporte de seguimiento",
                 Content        = "Contenido de prueba",
-                ReportDate     = new DateTime(2026, 1, 15),
+                ReportDate     = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc),
                 Status         = ReportStatus.Approved
             };
             db.Reports.Add(report);
@@ -135,7 +137,7 @@ namespace InclusiON.Tests.Integration.TestSupport
             ReportId    = report.Id;
         }
 
-        public new Task DisposeAsync() => Task.CompletedTask;
+        public override async Task DisposeAsync() => await base.DisposeAsync();
 
         private static User BuildUser(Guid id, string email) => new()
         {

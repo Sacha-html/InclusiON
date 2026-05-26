@@ -1,40 +1,49 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
+using Testcontainers.PostgreSql;
+using Xunit;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Data;
 
 namespace InclusiON.Tests.Integration.TestSupport
 {
-    /// <summary>
-    /// Factory de <see cref="WebApplicationFactory{TEntryPoint}"/> para integration tests.
-    /// Reemplaza la registracion de <see cref="AppDbContext"/> por una instancia en memoria
-    /// para que los tests no requieran Postgres ni conexion externa.
-    ///
-    /// Uso tipico:
-    /// <code>
-    /// public class MyTests : IClassFixture&lt;IntegrationTestFactory&gt;
-    /// {
-    ///     private readonly HttpClient _client;
-    ///     public MyTests(IntegrationTestFactory factory) =&gt; _client = factory.CreateClient();
-    /// }
-    /// </code>
-    /// </summary>
-    public class IntegrationTestFactory : WebApplicationFactory<Program>
+    public class IntegrationTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
-        private readonly string _dbName = Guid.NewGuid().ToString();
+        private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
+            .WithImage("pgvector/pgvector:pg17")
+            .Build();
+
+        public virtual async Task InitializeAsync()
+        {
+            await _postgres.StartAsync();
+        }
+
+        public new virtual async Task DisposeAsync()
+        {
+            await _postgres.DisposeAsync();
+        }
+
+        protected override IHost CreateHost(IHostBuilder builder)
+        {
+            var host = base.CreateHost(builder);
+            using var scope = host.Services.CreateScope();
+            scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+            return host;
+        }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("IntegrationTests");
 
-            // Configuracion minima que satisface los requires de startup (AddInfrastructure
-            // exige connection string y JwtSettings). UseSetting precede a appsettings.json
-            // en la cadena de resolucion de IConfiguration.
-            builder.UseSetting("ConnectionStrings:PostgreSqlConn", "Host=tests;Database=tests;Username=tests;Password=tests");
+            builder.UseSetting("ConnectionStrings:PostgreSqlConn", _postgres.GetConnectionString());
             builder.UseSetting("JwtSettings:Secret", "this-is-a-test-only-jwt-secret-key-with-enough-length-for-hmac-256");
             builder.UseSetting("JwtSettings:Issuer", "InclusiONTests");
             builder.UseSetting("JwtSettings:Audience", "InclusiONTests");
@@ -43,36 +52,26 @@ namespace InclusiON.Tests.Integration.TestSupport
 
             builder.ConfigureServices(services =>
             {
-                // Quitar registracion previa de AppDbContext (viene de AddPersistence con Npgsql).
                 var toRemove = services
                     .Where(d =>
                         d.ServiceType == typeof(DbContextOptions<AppDbContext>)
                         || d.ServiceType == typeof(DbContextOptions)
-                        || d.ServiceType == typeof(AppDbContext))
+                        || d.ServiceType == typeof(AppDbContext)
+                        || d.ServiceType == typeof(NpgsqlDataSource))
                     .ToList();
 
                 foreach (var descriptor in toRemove)
-                {
                     services.Remove(descriptor);
-                }
 
-                // InMemory en un service provider aislado para evitar el clash con los servicios
-                // de Npgsql ya registrados a nivel de IServiceCollection principal.
-                var efServiceProvider = new ServiceCollection()
-                    .AddEntityFrameworkInMemoryDatabase()
-                    .BuildServiceProvider();
+                var dsBuilder = new NpgsqlDataSourceBuilder(_postgres.GetConnectionString());
+                dsBuilder.UseVector();
+                services.AddSingleton(dsBuilder.Build());
 
-                services.AddDbContext<AppDbContext>(options =>
+                services.AddDbContext<AppDbContext>((sp, options) =>
                 {
-                    options.UseInMemoryDatabase(_dbName);
-                    options.UseInternalServiceProvider(efServiceProvider);
+                    options.UseNpgsql(sp.GetRequiredService<NpgsqlDataSource>());
                 });
 
-                // PostConfigure garantiza que la clave de firma JWT usada para validar tokens
-                // coincida con la que usa TokenHelper — independientemente del orden en que
-                // AddInfrastructure leyó la IConfiguration en Program.cs.
-                // UseSetting afecta la configuración del host, no la app configuration en
-                // el modelo de hosting mínimo, por eso sobreescribimos directamente en options.
                 services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, opts =>
                 {
                     var key = new SymmetricSecurityKey(
@@ -80,6 +79,14 @@ namespace InclusiON.Tests.Integration.TestSupport
                     opts.TokenValidationParameters.IssuerSigningKey = key;
                     opts.TokenValidationParameters.ValidIssuer      = "InclusiONTests";
                     opts.TokenValidationParameters.ValidAudience     = "InclusiONTests";
+                });
+
+                services.PostConfigure<MvcOptions>(opts =>
+                {
+                    var provider = opts.ModelBinderProviders
+                        .FirstOrDefault(p => p is EncryptedGuidModelBinderProvider);
+                    if (provider != null)
+                        opts.ModelBinderProviders.Remove(provider);
                 });
             });
         }

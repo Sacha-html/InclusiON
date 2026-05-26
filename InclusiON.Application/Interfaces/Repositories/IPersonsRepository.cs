@@ -46,6 +46,30 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<IReadOnlyList<PersonRepresentative>> GetActiveRepresentativesAsync(Guid personId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Obtiene el perfil de habilidades de una persona.
+        /// </summary>
+        Task<List<PersonSkillProfile>> GetSkillProfileAsync(
+            Guid personId,
+            bool activeOnly,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Obtiene una entrada concreta del perfil de habilidades (con tracking para mutaciones).
+        /// Incluye la SkillArea para el mapeo de respuesta.
+        /// </summary>
+        Task<PersonSkillProfile?> GetSkillProfileEntryAsync(
+            Guid personId,
+            int skillAreaId,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Agrega una nueva entrada al perfil de habilidades de una persona.
+        /// </summary>
+        Task AddSkillProfileEntryAsync(
+            PersonSkillProfile entry,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Obtiene lista paginada de personas con filtros.
         /// </summary>
         Task<PagedResponse<PersonWithDisability>> GetPagedAsync(
@@ -60,6 +84,13 @@ namespace InclusiON.Application.Interfaces.Repositories
             List<int>? institutionIds = null,
             string? representativeSearch = null,
             IReadOnlyList<Guid>? accessiblePersonIds = null,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Obtiene múltiples personas por sus IDs (preservando orden).
+        /// </summary>
+        Task<List<PersonWithDisability>> GetByIdsAsync(
+            List<Guid> ids,
             CancellationToken cancellationToken = default);
     }
 }
