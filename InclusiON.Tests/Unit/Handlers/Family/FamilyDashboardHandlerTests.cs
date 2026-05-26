@@ -68,10 +68,18 @@ namespace InclusiON.Tests.Unit.Handlers.Family
                    .Returns(new List<PersonWithDisability> { person });
             _messages.GetUnreadCountAsync(FamilyUserId, Arg.Any<CancellationToken>())
                      .Returns(0);
-            _assignments.GetRecentCompletedResponsesAsync(PersonId, 3, Arg.Any<CancellationToken>())
-                        .Returns(new List<ActivityResponse>());
-            _reports.GetApprovedReportsSummaryAsync(PersonId, Arg.Any<CancellationToken>())
-                    .Returns((0, (Report?)null));
+            _assignments.GetRecentCompletedResponsesByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), 3, Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, List<ActivityResponse>>
+                {
+                    [PersonId] = []
+                });
+            _reports.GetApprovedReportsSummaryByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, (int Count, Report? Latest)>
+                {
+                    [PersonId] = (0, null)
+                });
 
             var result = await BuildSut().HandleAsync(new GetFamilyDashboardQuery(FamilyUserId), default);
 
@@ -91,14 +99,18 @@ namespace InclusiON.Tests.Unit.Handlers.Family
                    .Returns(new List<PersonWithDisability> { APerson(PersonId) });
             _messages.GetUnreadCountAsync(FamilyUserId, Arg.Any<CancellationToken>())
                      .Returns(0);
-            _assignments.GetRecentCompletedResponsesAsync(PersonId, 3, Arg.Any<CancellationToken>())
-                        .Returns(new List<ActivityResponse>
-                        {
-                            ACompletedResponse(1, 10),
-                            ACompletedResponse(2, 11)
-                        });
-            _reports.GetApprovedReportsSummaryAsync(PersonId, Arg.Any<CancellationToken>())
-                    .Returns((0, (Report?)null));
+            _assignments.GetRecentCompletedResponsesByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), 3, Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, List<ActivityResponse>>
+                {
+                    [PersonId] = [ACompletedResponse(1, 10), ACompletedResponse(2, 11)]
+                });
+            _reports.GetApprovedReportsSummaryByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, (int Count, Report? Latest)>
+                {
+                    [PersonId] = (0, null)
+                });
 
             var result = await BuildSut().HandleAsync(new GetFamilyDashboardQuery(FamilyUserId), default);
 
@@ -123,10 +135,18 @@ namespace InclusiON.Tests.Unit.Handlers.Family
                    .Returns(new List<PersonWithDisability> { APerson(PersonId) });
             _messages.GetUnreadCountAsync(FamilyUserId, Arg.Any<CancellationToken>())
                      .Returns(0);
-            _assignments.GetRecentCompletedResponsesAsync(PersonId, 3, Arg.Any<CancellationToken>())
-                        .Returns(new List<ActivityResponse>());
-            _reports.GetApprovedReportsSummaryAsync(PersonId, Arg.Any<CancellationToken>())
-                    .Returns((3, (Report?)latestReport));
+            _assignments.GetRecentCompletedResponsesByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), 3, Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, List<ActivityResponse>>
+                {
+                    [PersonId] = []
+                });
+            _reports.GetApprovedReportsSummaryByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, (int Count, Report? Latest)>
+                {
+                    [PersonId] = (3, latestReport)
+                });
 
             var result = await BuildSut().HandleAsync(new GetFamilyDashboardQuery(FamilyUserId), default);
 

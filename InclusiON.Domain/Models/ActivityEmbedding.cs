@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using InclusiON.Domain.Models.BaseEntities;
 
 namespace InclusiON.Domain.Models
@@ -10,8 +9,8 @@ namespace InclusiON.Domain.Models
         public string Model { get; set; } = "paraphrase-multilingual-MiniLM-L12-v2";
         public int Dimensions { get; set; } = 384;
 
-        // EF does not map this column — it is managed via raw SQL (pgvector type)
-        [NotMapped]
+        // EF ignores this property — configured via Fluent API in ActivityEmbeddingConfiguration
+        // (vector(384) managed via raw SQL / pgvector, not mapped by EF)
         public float[] Embedding { get; set; } = [];
     }
 }

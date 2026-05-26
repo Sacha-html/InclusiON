@@ -1,6 +1,7 @@
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Messages.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -9,7 +10,7 @@ using InclusiON.DTOs.Responses.Messages;
 namespace InclusiON.Application.UseCases.Messages.Handlers
 {
     public class GetMessageContactsQueryHandler
-        : IQueryHandler<GetMessageContactsQuery, ApiResponse<List<MessageContactResponse>>>
+        : IQueryHandler<GetMessageContactsQuery, ApiResponse<PagedResponse<MessageContactResponse>>>
     {
         private readonly IUsersRepository       _users;
         private readonly IAssignmentsRepository _assignments;
@@ -22,54 +23,47 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             _assignments = assignments;
         }
 
-        public async Task<ApiResponse<List<MessageContactResponse>>> HandleAsync(
+        public async Task<ApiResponse<PagedResponse<MessageContactResponse>>> HandleAsync(
             GetMessageContactsQuery query, CancellationToken cancellationToken)
         {
             var user = await _users.GetByIdWithProfileAsync(query.UserId, cancellationToken);
 
             if (user is null)
-                return ApiResponse<List<MessageContactResponse>>.NotFound("Usuario");
+                return ApiResponse<PagedResponse<MessageContactResponse>>.NotFound("Usuario");
 
-            // PwD no participa en mensajería
             if (user.PersonWithDisability is not null)
-                return ApiResponse<List<MessageContactResponse>>.SuccessResult(
-                    new List<MessageContactResponse>());
+                return ApiResponse<PagedResponse<MessageContactResponse>>.SuccessResult(
+                    new PagedResponse<MessageContactResponse> { Data = new(), TotalRecords = 0, TotalPages = 0, CurrentPage = query.Page, PageSize = query.PageSize });
 
-            List<MessageContactResponse> contacts;
+            List<MessageContactResponse> all;
 
             if (user.Professional is not null)
             {
-                var families = await _assignments.GetContactsForProfessionalAsync(
-                    query.UserId, cancellationToken);
-
-                contacts = families
-                    .Select(u => new MessageContactResponse
-                    {
-                        UserId   = u.Id,
-                        FullName = MessageMapper.FullName(u),
-                        Email    = u.Email ?? string.Empty,
-                        UserType = RoleNames.FamilyRepresentative
-                    })
-                    .ToList();
+                var families = await _assignments.GetContactsForProfessionalAsync(query.UserId, cancellationToken);
+                all = families.Select(u => MessageMapper.ToContactResponse(u, RoleNames.FamilyRepresentative)).ToList();
             }
             else
             {
-                // FamilyRepresentative
-                var professionals = await _assignments.GetContactsForFamilyAsync(
-                    query.UserId, cancellationToken);
-
-                contacts = professionals
-                    .Select(u => new MessageContactResponse
-                    {
-                        UserId   = u.Id,
-                        FullName = MessageMapper.FullName(u),
-                        Email    = u.Email ?? string.Empty,
-                        UserType = RoleNames.Professional
-                    })
-                    .ToList();
+                var professionals = await _assignments.GetContactsForFamilyAsync(query.UserId, cancellationToken);
+                all = professionals.Select(u => MessageMapper.ToContactResponse(u, RoleNames.Professional)).ToList();
             }
 
-            return ApiResponse<List<MessageContactResponse>>.SuccessResult(contacts);
+            var totalRecords = all.Count;
+            var totalPages   = (int)Math.Ceiling(totalRecords / (double)query.PageSize);
+            var data         = all.Skip((query.Page - 1) * query.PageSize).Take(query.PageSize).ToList();
+
+            var response = new PagedResponse<MessageContactResponse>
+            {
+                Data            = data,
+                TotalRecords    = totalRecords,
+                TotalPages      = totalPages,
+                CurrentPage     = query.Page,
+                PageSize        = query.PageSize,
+                HasNextPage     = query.Page < totalPages,
+                HasPreviousPage = query.Page > 1
+            };
+
+            return ApiResponse<PagedResponse<MessageContactResponse>>.SuccessResult(response);
         }
     }
 }

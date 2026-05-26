@@ -1,11 +1,14 @@
-﻿using InclusiON.Application.Interfaces.Common;
+﻿using System.Text.Json;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
 using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Reports;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace InclusiON.Application.UseCases.Reports.Handlers
@@ -13,26 +16,26 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
     public class ApproveReportCommandHandler : ICommandHandler<ApproveReportCommand, ApiResponse<ReportResponse>>
     {
         private readonly IReportsRepository _repository;
-        private readonly IFamilyRepository _familyRepository;
-        private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ApproveReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IEncryptionService _encryption;
 
         public ApproveReportCommandHandler(
             IReportsRepository repository,
-            IFamilyRepository familyRepository,
-            IEmailService emailService,
             IUnitOfWork unitOfWork,
             ILogger<ApproveReportCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IServiceScopeFactory scopeFactory,
+            IEncryptionService encryption)
         {
-            _repository = repository;
-            _familyRepository = familyRepository;
-            _emailService = emailService;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
+            _repository   = repository;
+            _unitOfWork   = unitOfWork;
+            _logger       = logger;
+            _dateTime     = dateTime;
+            _scopeFactory = scopeFactory;
+            _encryption   = encryption;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -73,42 +76,74 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _ = Task.Run(async () =>
             {
+                // Crear scope propio: el scope del request ya está dispuesto cuando Task.Run ejecuta
+                using var scope = _scopeFactory.CreateScope();
+                var familyRepository = scope.ServiceProvider.GetRequiredService<IFamilyRepository>();
+                var bgJobRepo        = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
+
                 try
                 {
-                    var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(personId);
+                    var representatives = await familyRepository.GetPersonRepresentativesByPersonIdAsync(personId);
                     var activeReps = representatives.Where(r => r.IsActive).ToList();
 
                     foreach (var rep in activeReps)
                     {
-                        // La navegación a User debe estar cargada o se busca por otro medio
-                        var familyEmail = rep.Representative?.User?.Email;
+                        var familyEmail     = rep.Representative?.User?.Email;
                         var familyFirstName = rep.Representative?.FirstName ?? "Familiar";
+                        var familyUserId    = rep.Representative?.UserId;
 
                         if (string.IsNullOrWhiteSpace(familyEmail)) continue;
 
-                        await _emailService.SendTemplatedEmailAsync(
-                            familyEmail,
-                            $"Nuevo reporte disponible sobre {personName}",
-                            "ReportApproved",
-                            new Dictionary<string, string?>
+                        // Email via job queue (retry automático)
+                        await bgJobRepo.CreateAsync(
+                            JobTypes.Email,
+                            JsonSerializer.Serialize(new EmailPayload
                             {
-                                { "FamilyName", familyFirstName },
-                                { "PersonName", personName },
-                                { "ReportTitle", reportTitle },
-                                { "ReportType", reportType },
-                                { "ReportDate", reportDate },
-                                { "ProfessionalName", professionalName },
-                                { "Year", year }
-                            });
+                                To           = familyEmail,
+                                Subject      = $"Nuevo reporte disponible sobre {personName}",
+                                TemplateName = "ReportApproved",
+                                Replacements = new Dictionary<string, string?>
+                                {
+                                    { "FamilyName", familyFirstName },
+                                    { "PersonName", personName },
+                                    { "ReportTitle", reportTitle },
+                                    { "ReportType", reportType },
+                                    { "ReportDate", reportDate },
+                                    { "ProfessionalName", professionalName },
+                                    { "Year", year }
+                                }
+                            }),
+                            maxRetries: 2);
+
+                        // SignalR in-app toast para el familiar
+                        if (familyUserId.HasValue && familyUserId.Value != Guid.Empty)
+                        {
+                            await bgJobRepo.CreateAsync(
+                                JobTypes.Push,
+                                JsonSerializer.Serialize(new NotificationPayload
+                                {
+                                    UserId           = familyUserId.Value.ToString(),
+                                    Title            = $"Nuevo reporte de {personName}",
+                                    Message          = $"El reporte \"{reportTitle}\" ya está disponible.",
+                                    ActionUrl        = "/#/family/reports",
+                                    SendEmailFallback = false
+                                }),
+                                maxRetries: 3);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error enviando emails de aprobación para reporte {ReportId}", command.ReportId);
+                    _logger.LogError(ex, "Error encolando notificaciones de aprobación para reporte {ReportId}", command.ReportId);
                 }
             });
 
-            return ApiResponse<ReportResponse>.SuccessResult(ReportResponse.MapToResponse(report));
+            var response = ReportResponse.MapToResponse(report);
+            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+            return ApiResponse<ReportResponse>.SuccessResult(response);
         }
+
+        private static string ToUrlSafeBase64(string s)
+            => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

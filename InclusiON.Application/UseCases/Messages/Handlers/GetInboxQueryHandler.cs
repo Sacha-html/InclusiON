@@ -1,6 +1,8 @@
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Messages.Queries;
+using InclusiON.Application.Mappers;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Messages;
@@ -11,19 +13,19 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
         : IQueryHandler<GetInboxQuery, ApiResponse<PagedResponse<MessageListItemResponse>>>
     {
         private readonly IMessagesRepository _messages;
+        private readonly IEncryptionService  _encryption;
 
-        public GetInboxQueryHandler(IMessagesRepository messages)
+        public GetInboxQueryHandler(IMessagesRepository messages, IEncryptionService encryption)
         {
-            _messages = messages;
+            _messages   = messages;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<PagedResponse<MessageListItemResponse>>> HandleAsync(
             GetInboxQuery query, CancellationToken cancellationToken)
         {
-            var skip = (query.Page - 1) * query.PageSize;
-
             var (items, total) = await _messages.GetInboxAsync(
-                query.UserId, skip, query.PageSize,
+                query.UserId, query.Page, query.PageSize,
                 query.IsRead, query.RelatedPersonId, query.SenderId,
                 cancellationToken);
 
@@ -31,7 +33,12 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
 
             var data = new PagedResponse<MessageListItemResponse>
             {
-                Data            = items.Select(MessageMapper.ToListItem).ToList(),
+                Data = items.Select(m =>
+                {
+                    var item = MessageMapper.ToListItem(m);
+                    item.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(m.Id.ToString()));
+                    return item;
+                }).ToList(),
                 TotalRecords    = total,
                 TotalPages      = totalPages,
                 CurrentPage     = query.Page,
@@ -42,5 +49,7 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
 
             return ApiResponse<PagedResponse<MessageListItemResponse>>.SuccessResult(data);
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

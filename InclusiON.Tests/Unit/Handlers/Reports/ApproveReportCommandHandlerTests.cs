@@ -5,6 +5,7 @@ using Xunit;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 using InclusiON.Application.UseCases.Reports.Commands;
 using InclusiON.Application.UseCases.Reports.Handlers;
 using InclusiON.Domain.Enums;
@@ -15,15 +16,16 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
 {
     public class ApproveReportCommandHandlerTests
     {
-        private readonly IReportsRepository  _reportsRepo  = Substitute.For<IReportsRepository>();
-        private readonly IFamilyRepository   _familyRepo   = Substitute.For<IFamilyRepository>();
-        private readonly IEmailService       _emailService = Substitute.For<IEmailService>();
-        private readonly IUnitOfWork         _uow          = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider   _dateTime     = Substitute.For<IDateTimeProvider>();
+        private readonly IReportsRepository    _reportsRepo  = Substitute.For<IReportsRepository>();
+        private readonly IEmailService         _emailService = Substitute.For<IEmailService>();
+        private readonly IUnitOfWork           _uow          = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider     _dateTime     = Substitute.For<IDateTimeProvider>();
+        private readonly IServiceScopeFactory  _scopeFactory = Substitute.For<IServiceScopeFactory>();
+        private readonly IEncryptionService    _encryption   = Substitute.For<IEncryptionService>();
 
         private ApproveReportCommandHandler BuildSut() =>
-            new(_reportsRepo, _familyRepo, _emailService, _uow,
-                NullLogger<ApproveReportCommandHandler>.Instance, _dateTime);
+            new(_reportsRepo, _uow,
+                NullLogger<ApproveReportCommandHandler>.Instance, _dateTime, _scopeFactory, _encryption);
 
         private static readonly Guid AdminId = Guid.NewGuid();
 
@@ -77,8 +79,6 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
             var now    = DateTime.UtcNow;
             _reportsRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(report);
             _dateTime.UtcNow.Returns(now);
-            _familyRepo.GetPersonRepresentativesByPersonIdAsync(Arg.Any<Guid>())
-                       .Returns([]);
 
             var result = await BuildSut().HandleAsync(Cmd(), default);
 

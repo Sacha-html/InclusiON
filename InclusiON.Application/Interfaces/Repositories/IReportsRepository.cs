@@ -23,6 +23,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             SortField? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
+            List<string>? personIds = null,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -31,6 +32,13 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// </summary>
         Task<(int Count, Report? Latest)> GetApprovedReportsSummaryAsync(
             Guid personId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Bulk: cuenta y devuelve el reporte aprobado más reciente para un conjunto de personas.
+        /// Devuelve un diccionario PersonId → (Count, Latest). Personas sin reportes no aparecen en el dict.
+        /// </summary>
+        Task<Dictionary<Guid, (int Count, Report? Latest)>> GetApprovedReportsSummaryByPersonIdsAsync(
+            IEnumerable<Guid> personIds, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Reportes aprobados visibles para un familiar (filtra por las personas a cargo del familiar).

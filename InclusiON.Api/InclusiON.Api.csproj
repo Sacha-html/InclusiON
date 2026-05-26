@@ -19,25 +19,15 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.0.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.4.1" />
-<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
+<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1" />
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.11.0-beta.1" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
     <PackageReference Include="AspNetCore.HealthChecks.Npgsql" Version="9.0.0" />
   </ItemGroup>
 
-  <!-- Archivos del modelo ONNX → descargados manualmente a InclusiON.SemanticSearch/Model/, no versionados en git -->
-  <ItemGroup>
-    <Content Include="..\InclusiON.SemanticSearch\Model\model.onnx" Condition="Exists('..\InclusiON.SemanticSearch\Model\model.onnx')">
-      <Link>Model\model.onnx</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\InclusiON.SemanticSearch\Model\sentencepiece.bpe.model" Condition="Exists('..\InclusiON.SemanticSearch\Model\sentencepiece.bpe.model')">
-      <Link>Model\sentencepiece.bpe.model</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\InclusiON.Application\InclusiON.Application.csproj" />
@@ -45,7 +35,7 @@
     <ProjectReference Include="..\InclusiON.Infrastructure\InclusiON.Infrastructure.csproj" />
     <ProjectReference Include="..\InclusiON.Infrastructure.Telemetry\InclusiON.Infrastructure.Telemetry.csproj" />
     <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
-    <ProjectReference Include="..\InclusiON.SemanticSearch\InclusiON.SemanticSearch.csproj" />
+    <ProjectReference Include="..\InclusiON.Workers\InclusiON.Workers.csproj" />
   </ItemGroup>
 
 </Project>

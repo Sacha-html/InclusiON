@@ -11,7 +11,13 @@ using InclusiON.Api.Scalar;
 using InclusiON.Infrastructure;
 using InclusiON.Infrastructure.Seeders;
 using InclusiON.Infrastructure.Telemetry;
-using InclusiON.SemanticSearch.Extensions;
+using InclusiON.Workers;
+using InclusiON.Api.Hubs;
+using InclusiON.Api.Services;
+using InclusiON.Application.Interfaces.Infrastructure;
+
+// QuestPDF — Community license (open-source use)
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,14 +49,19 @@ builder.Host.UseSerilog((context, config) =>
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
         .WriteTo.File("logs/inclusion-.log",
                         rollingInterval: RollingInterval.Day,
-                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}",
+                         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
 });
 
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealTimeNotifier, SignalRNotifier>();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
     options.Filters.Add<InclusiON.Api.Filters.InstitutionAccessFilter>();
+    options.Filters.Add<InclusiON.Api.Filters.PaginationHeadersFilter>();
     options.ModelBinderProviders.Insert(0, new InclusiON.Api.ModelBinders.EncryptedGuidModelBinderProvider());
+    options.ModelBinderProviders.Insert(1, new InclusiON.Api.ModelBinders.EncryptedIntModelBinderProvider());
 })
 .AddJsonOptions(options =>
 {
@@ -69,7 +80,7 @@ var connectionString = builder.Configuration.GetConnectionString("PostgreSqlConn
 builder.Services.AddInfrastructureTelemetry(builder.Configuration, connectionString);
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplicationServices();
-builder.Services.AddSemanticSearch(builder.Configuration);
+builder.Services.AddAgents();
 
 builder.Services.AddTransient<OpenApiExamplesTransformer>();
 
@@ -132,7 +143,8 @@ builder.Services.AddCors(options =>
             policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod()
                   .AllowAnyHeader()
-                  .AllowCredentials();
+                  .AllowCredentials()
+                  .WithExposedHeaders("X-Total-Count", "X-Total-Pages", "X-Current-Page");
         // Si AllowedOrigins está vacío no se llama a ningún método — CORS queda bloqueado.
     });
 });
@@ -166,13 +178,15 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontendClient");
 
-app.UseRateLimiter();
+if (!builder.Configuration.GetValue<bool>("RateLimiter:Disabled"))
+    app.UseRateLimiter();
 app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.MapPrometheusScrapingEndpoint("/metrics");
 app.MapHealthChecks("/health");
@@ -208,8 +222,12 @@ if (!app.Environment.IsEnvironment("IntegrationTests"))
     await DatabaseSeeder.SeedAsync(app.Services);
 }
 
-Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
-Log.Information("API Docs: {Url}/scalar/v1", app.Urls.FirstOrDefault());
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Log.Information("API running on: {Urls}", string.Join(", ", app.Urls));
+    if (app.Environment.IsDevelopment())
+        Log.Information("API Docs: {Url}/scalar/v1", app.Urls.FirstOrDefault());
+});
 
 app.Run();
 

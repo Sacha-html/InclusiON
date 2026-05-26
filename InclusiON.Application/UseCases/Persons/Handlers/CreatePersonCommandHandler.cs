@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
@@ -9,6 +10,7 @@ using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Persons;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.Shared.Constants;
 using InclusiON.Shared.Resources;
@@ -22,6 +24,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IPasswordHasher _passwordHasher;
         private readonly IPinHasher _pinHasher;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly ILogger<CreatePersonCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
 
@@ -31,6 +34,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             IPasswordHasher passwordHasher,
             IPinHasher pinHasher,
             IUnitOfWork unitOfWork,
+            IBackgroundJobRepository backgroundJobs,
             ILogger<CreatePersonCommandHandler> logger,
             IDateTimeProvider dateTime)
         {
@@ -39,6 +43,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             _passwordHasher = passwordHasher;
             _pinHasher = pinHasher;
             _unitOfWork = unitOfWork;
+            _backgroundJobs = backgroundJobs;
             _logger = logger;
             _dateTime = dateTime;
         }
@@ -116,6 +121,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     person.PinCodeHash = _pinHasher.Hash(command.Pin);
                 }
 
+                person.Embedding = new PersonEmbedding();
+
                 // Crear usuario, asignar rol y persona en transaccion
                 await _unitOfWork.ExecuteInTransactionAsync(async ct =>
                 {
@@ -131,6 +138,12 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     await _repository.CreateAsync(person, ct);
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
+
+                await _backgroundJobs.CreateAsync(
+                    JobTypes.Embedding,
+                    BuildEmbeddingPayload(person, command),
+                    maxRetries: 3,
+                    cancellationToken: cancellationToken);
 
                 _logger.LogInformation("Persona creada: {PersonId}, Usuario: {UserId}", person.Id, user.Id);
 
@@ -153,5 +166,25 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             return $"{baseUsername}{timestamp}";
         }
 
+        private static string BuildEmbeddingPayload(PersonWithDisability person, CreatePersonCommand command) =>
+            JsonSerializer.Serialize(new
+            {
+                entity_type = "person",
+                entity_id   = person.Id.ToString(),
+                description = string.Join(" ", new[] { command.InterestsAndMotivators, command.LearningStyle }
+                                  .Where(s => !string.IsNullOrWhiteSpace(s))),
+                instructions = string.Join(" ", new[] { command.AdditionalTherapies, command.AvailableResources }
+                                  .Where(s => !string.IsNullOrWhiteSpace(s))),
+                content_json = JsonSerializer.Serialize(new
+                {
+                    uses_aac             = command.UsesAAC,
+                    uses_sign_language   = command.UsesSignLanguage,
+                    attention_level      = command.AttentionLevel,
+                    communication_level  = command.CommunicationLevel,
+                    motor_skill_level    = command.MotorSkillLevel,
+                    autonomy_level_id    = command.AutonomyLevelId,
+                    disability_type_id   = command.DisabilityTypeId,
+                }),
+            });
     }
 }

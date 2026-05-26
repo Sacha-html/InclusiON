@@ -1,9 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using InclusiON.Application.Auditing;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.AdminUsers.Commands;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Admin;
@@ -14,28 +18,31 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
     {
         private readonly IIdentityService _identityService;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
-        private readonly IEmailService _emailService;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly ILogger<AdminResetPasswordCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IAccessAuditLogger _audit;
 
         public AdminResetPasswordCommandHandler(
             IIdentityService identityService,
             IRefreshTokensRepository refreshTokensRepository,
-            IEmailService emailService,
+            IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             IAdminInstitutionRepository adminInstitutionRepository,
             ILogger<AdminResetPasswordCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IAccessAuditLogger audit)
         {
             _identityService = identityService;
             _refreshTokensRepository = refreshTokensRepository;
-            _emailService = emailService;
+            _backgroundJobs = backgroundJobs;
             _unitOfWork = unitOfWork;
             _adminInstitutionRepository = adminInstitutionRepository;
             _logger = logger;
             _dateTime = dateTime;
+            _audit = audit;
         }
 
         public async Task<ApiResponse<ResetPasswordResultResponse>> HandleAsync(
@@ -96,29 +103,34 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 "Password reset by admin {AdminId} for user {UserId} ({Email})",
                 command.RequestedByUserId, user.Id, user.Email);
 
-            // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-            // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-            // Enviar email con contraseña temporal (si el usuario tiene email)
+            await _audit.LogAsync(new AccessAuditEntry
+            {
+                UserId           = command.RequestedByUserId,
+                ActionType       = AccessAuditValues.Action.Update,
+                Result           = AccessAuditValues.Result.Allowed,
+                AffectedTable    = "Users",
+                AffectedRecordId = user.Id.ToString(),
+                Details          = "Admin reset user password",
+            }, cancellationToken);
+
             if (!string.IsNullOrEmpty(user.Email))
             {
-                try
-                {
-                    await _emailService.SendTemplatedEmailAsync(
-                        user.Email,
-                        "Tu contraseña ha sido reseteada — InclusiON",
-                        "PasswordReset",
-                        new Dictionary<string, string?>
+                await _backgroundJobs.CreateAsync(
+                    JobTypes.Email,
+                    JsonSerializer.Serialize(new EmailPayload
+                    {
+                        To           = user.Email,
+                        Subject      = "Tu contraseña ha sido reseteada — InclusiON",
+                        TemplateName = "PasswordReset",
+                        Replacements = new Dictionary<string, string?>
                         {
                             { "UserName", user.Name ?? "Usuario" },
                             { "TemporaryPassword", tempPassword },
                             { "Year", _dateTime.UtcNow.Year.ToString() }
-                        },
-                        cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "No se pudo enviar email de reset a {Email}", user.Email);
-                }
+                        }
+                    }),
+                    maxRetries: 2,
+                    cancellationToken: cancellationToken);
             }
 
             return ApiResponse<ResetPasswordResultResponse>.SuccessResult(

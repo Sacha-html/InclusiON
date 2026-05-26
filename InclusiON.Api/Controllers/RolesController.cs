@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Caching.Memory;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Constants;
@@ -19,16 +20,19 @@ namespace InclusiON.Api.Controllers
     public class RolesController : ControllerBase
     {
         private readonly IMemoryCache _cache;
+        private readonly IOutputCacheStore _cacheStore;
 
-        public RolesController(IMemoryCache cache)
+        public RolesController(IMemoryCache cache, IOutputCacheStore cacheStore)
         {
-            _cache = cache;
+            _cache      = cache;
+            _cacheStore = cacheStore;
         }
 
         /// <summary>
         /// Obtiene todos los roles con sus permisos.
         /// </summary>
         [HttpGet]
+        [OutputCache(PolicyName = "roles")]
         [ProducesResponseType(typeof(ApiResponse<List<RoleResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<RoleResponse>>>> GetRoles(
             [FromServices] IQueryHandler<GetRolesQuery, ApiResponse<List<RoleResponse>>> handler,
@@ -42,6 +46,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los permisos de un rol específico.
         /// </summary>
         [HttpGet("{roleId}")]
+        [OutputCache(PolicyName = "roles")]
         [ProducesResponseType(typeof(ApiResponse<RoleResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<RoleResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<RoleResponse>>> GetRoleById(
@@ -57,6 +62,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene la lista de todos los permisos disponibles en el sistema.
         /// </summary>
         [HttpGet("available-permissions")]
+        [OutputCache(PolicyName = "static")]
         [ProducesResponseType(typeof(ApiResponse<List<string>>), StatusCodes.Status200OK)]
         public ActionResult<ApiResponse<List<string>>> GetAvailablePermissions()
         {
@@ -87,6 +93,7 @@ namespace InclusiON.Api.Controllers
                 // Invalidar cache de permisos para que el próximo request recargue desde DB.
                 // La clave usa NormalizedName; al no tenerla aquí la removemos por el nombre del rol.
                 _cache.Remove($"RolePermissions_{result.Data!.Name.ToUpperInvariant()}");
+                await _cacheStore.EvictByTagAsync("roles", cancellationToken);
             }
 
             return result.ToActionResult();
