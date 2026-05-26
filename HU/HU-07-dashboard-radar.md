@@ -45,16 +45,16 @@ Al ingresar al portal, el familiar ve:
 ## Criterios de Aceptación
 
 ### Dashboard Profesional
-- [ ] Muestra contadores reales calculados desde las asignaciones y actividades
-- [ ] Si no hay datos, cada sección muestra un estado vacío con acción sugerida
-- [ ] La carga es rápida (< 2 segundos) con indicadores de carga visual
+- [x] Muestra contadores reales calculados desde las asignaciones y actividades
+- [x] Si no hay datos, cada sección muestra un estado vacío con acción sugerida
+- [x] La carga es rápida (< 2 segundos) con indicadores de carga visual
 
 ### Radar Chart
-- [ ] Solo muestra áreas de habilidad activas del perfil de la persona
-- [ ] El puntaje se calcula como promedio de los porcentajes de éxito de actividades completadas
-- [ ] Sin respuestas en un área: puntaje 0, indicador visual de "Sin datos"
-- [ ] El gráfico se adapta a perfiles de alto contraste
+- [x] Solo muestra áreas de habilidad activas del perfil de la persona
+- [x] El puntaje se calcula como promedio de los porcentajes de éxito de actividades completadas
+- [x] Sin respuestas en un área: puntaje 0, indicador visual de "Sin datos"
+- [x] El gráfico se adapta a perfiles de alto contraste
 
 ### Dashboard Familiar
-- [ ] El familiar solo ve datos de su persona vinculada
-- [ ] Muestra estados vacíos cuando no hay actividades, mensajes o reportes
+- [x] El familiar solo ve datos de su persona vinculada
+- [x] Muestra estados vacíos cuando no hay actividades, mensajes o reportes

@@ -53,11 +53,11 @@ Los reportes siguen un flujo de aprobación antes de quedar visibles para la fam
 ## Criterios de Aceptación
 
 ### Diagnósticos
-- [ ] Se pueden registrar múltiples diagnósticos por persona a lo largo del tiempo
-- [ ] Solo el creador puede editar su diagnóstico
-- [ ] Los diagnósticos de otros profesionales se muestran con indicador "Solo lectura — creado por [nombre]"
-- [ ] Solo la fecha y el diagnóstico principal son campos obligatorios
-- [ ] El historial se muestra en orden cronológico descendente
+- [x] Se pueden registrar múltiples diagnósticos por persona a lo largo del tiempo
+- [x] Solo el creador puede editar su diagnóstico
+- [x] Los diagnósticos de otros profesionales se muestran con indicador "Solo lectura — creado por [nombre]"
+- [x] Solo la fecha y el diagnóstico principal son campos obligatorios
+- [x] El historial se muestra en orden cronológico descendente
 
 ### Reportes — Flujo de aprobación
 - [x] El profesional puede crear un reporte en estado `Draft`
@@ -73,8 +73,8 @@ Los reportes siguen un flujo de aprobación antes de quedar visibles para la fam
 - [x] Filtros por `dateFrom`, `dateTo` y `reportTypeId` en la vista del familiar
 - [x] Al crear un reporte, se muestra un modal preguntando si enviarlo al admin de inmediato o revisarlo primero (backdrop estático, el usuario debe elegir)
 - [x] El admin puede ver los reportes de un profesional y aprobar/rechazar directamente desde el tab "Reportes" en el detalle del profesional
-- [ ] Los reportes se pueden exportar a PDF
-- [ ] Los reportes nuevos se marcan con indicador "Nuevo" que desaparece al abrirlo
+- [x] Los reportes se pueden exportar a PDF
+- [x] Los reportes nuevos se marcan con indicador "Nuevo" que desaparece al abrirlo
 
 ---
 

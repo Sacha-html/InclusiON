@@ -33,13 +33,13 @@ El profesional puede consultar el estado de sus invitaciones. El administrador v
 
 ## Criterios de Aceptación
 
-- [ ] El profesional puede generar invitaciones desde su portal
-- [ ] El sistema envía un email con link único al familiar
-- [ ] El link de invitación es accesible sin necesidad de tener cuenta (ruta pública)
-- [ ] Los datos del familiar aparecen pre-llenados y en modo solo lectura
-- [ ] La contraseña debe tener mínimo 8 caracteres, 1 mayúscula y 1 número
-- [ ] Al aceptar la invitación, se crea la cuenta, el perfil familiar y la vinculación con la persona automáticamente
-- [ ] Una invitación no puede usarse dos veces
-- [ ] Una invitación expira a los 7 días si no se acepta
-- [ ] El profesional puede ver el estado de sus invitaciones
-- [ ] El administrador puede ver todas las invitaciones con filtro por institución
+- [x] El profesional puede generar invitaciones desde su portal
+- [x] El sistema envía un email con link único al familiar
+- [x] El link de invitación es accesible sin necesidad de tener cuenta (ruta pública)
+- [x] Los datos del familiar aparecen pre-llenados y en modo solo lectura
+- [x] La contraseña debe tener mínimo 8 caracteres, 1 mayúscula y 1 número
+- [x] Al aceptar la invitación, se crea la cuenta, el perfil familiar y la vinculación con la persona automáticamente
+- [x] Una invitación no puede usarse dos veces
+- [x] Una invitación expira a los 7 días si no se acepta
+- [x] El profesional puede ver el estado de sus invitaciones
+- [x] El administrador puede ver todas las invitaciones con filtro por institución
