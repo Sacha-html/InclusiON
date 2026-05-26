@@ -36,7 +36,8 @@ namespace InclusiON.DTOs.Responses.Family
                         PersonId = pr.PersonId,
                         FullName = $"{pr.Person.FirstName} {pr.Person.LastName}".Trim(),
                         DisabilityType = pr.Person.DisabilityType?.Name,
-                        IsPrimary = pr.IsPrimary
+                        IsPrimary = pr.IsPrimary,
+                        Relationship = pr.Relationship
                     }).ToList()
             };
         }

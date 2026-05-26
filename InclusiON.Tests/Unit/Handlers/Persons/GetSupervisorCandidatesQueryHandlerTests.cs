@@ -5,6 +5,7 @@ using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Handlers;
 using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 
 namespace InclusiON.Tests.Unit.Handlers.Persons
 {
@@ -46,13 +47,13 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
             var result = await BuildSut().HandleAsync(new GetSupervisorCandidatesQuery(PersonId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().HaveCount(2);
+            result.Data!.Data.Should().HaveCount(2);
             // Sorted by FullName: "Ana López" < "Zara Gómez"
-            result.Data![0].FullName.Should().Be("Ana López");
-            result.Data[0].Type.Should().Be("Family");
-            result.Data[0].Relationship.Should().Be("Madre");
-            result.Data[1].FullName.Should().Be("Zara Gómez");
-            result.Data[1].Type.Should().Be("Professional");
+            result.Data!.Data[0].FullName.Should().Be("Ana López");
+            result.Data!.Data[0].Type.Should().Be("Family");
+            result.Data!.Data[0].Relationship.Should().Be("Madre");
+            result.Data!.Data[1].FullName.Should().Be("Zara Gómez");
+            result.Data!.Data[1].Type.Should().Be("Professional");
         }
 
         [Fact]
@@ -66,7 +67,7 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
             var result = await BuildSut().HandleAsync(new GetSupervisorCandidatesQuery(PersonId), default);
 
             result.Success.Should().BeTrue();
-            result.Data.Should().BeEmpty();
+            result.Data!.Data.Should().BeEmpty();
         }
     }
 }

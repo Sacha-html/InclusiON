@@ -14,15 +14,18 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
         private readonly IInstitutionsRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IEncryptionService _encryption;
 
         public PatchInstitutionStatusCommandHandler(
             IInstitutionsRepository repository,
             IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IEncryptionService encryption)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
             _dateTime = dateTime;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<InstitutionResponse>> HandleAsync(
@@ -63,7 +66,10 @@ namespace InclusiON.Application.UseCases.Institutions.Handlers
                 : "Institución dada de baja exitosamente.";
 
             var response = InstitutionResponse.MapToResponse(institution);
+            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(institution.Id.ToString()));
             return ApiResponse<InstitutionResponse>.SuccessResult(response, mensaje);
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

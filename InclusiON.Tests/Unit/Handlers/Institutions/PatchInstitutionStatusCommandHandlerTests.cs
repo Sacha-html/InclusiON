@@ -16,9 +16,10 @@ namespace InclusiON.Tests.Unit.Handlers.Institutions
         private readonly IInstitutionsRepository _repository  = Substitute.For<IInstitutionsRepository>();
         private readonly IUnitOfWork             _unitOfWork  = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider       _dateTime    = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService      _encryption  = Substitute.For<IEncryptionService>();
 
         private PatchInstitutionStatusCommandHandler BuildSut() =>
-            new(_repository, _unitOfWork, _dateTime);
+            new(_repository, _unitOfWork, _dateTime, _encryption);
 
         private static readonly DateTime FixedNow =
             new(2026, 4, 28, 12, 0, 0, DateTimeKind.Utc);

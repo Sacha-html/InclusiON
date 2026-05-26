@@ -1,4 +1,5 @@
 using InclusiON.Api.Extensions;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -9,6 +10,7 @@ using InclusiON.DTOs.Requests.Activities;
 using InclusiON.DTOs.Requests.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Activities;
+using InclusiON.DTOs.Responses.Persons;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,6 +56,48 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>Obtiene actividades similares a una actividad existente.</summary>
+        [HttpGet("{id}/similar")]
+        [Authorize(Policy = Permissions.Activities.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<ActivityListItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<ActivityListItemResponse>>>> GetSimilarActivities(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
+            [FromServices] IQueryHandler<GetSimilarActivitiesQuery, ApiResponse<List<ActivityListItemResponse>>> handler,
+            [FromQuery] int limit = 5,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<List<ActivityListItemResponse>>.NotFound("Profesional"));
+
+            var result = await handler.HandleAsync(
+                new GetSimilarActivitiesQuery(professionalId.Value, id, limit),
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        /// <summary>Obtiene personas compatibles con una actividad (ordenadas por compatibilidad).</summary>
+        [HttpGet("{id}/compatible-persons")]
+        [Authorize(Policy = Permissions.Activities.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<PersonListItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<PersonListItemResponse>>>> GetCompatiblePersons(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
+            [FromServices] IQueryHandler<GetCompatiblePersonsQuery, ApiResponse<List<PersonListItemResponse>>> handler,
+            [FromQuery] int limit = 10,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<List<PersonListItemResponse>>.NotFound("Profesional"));
+
+            var result = await handler.HandleAsync(
+                new GetCompatiblePersonsQuery(id, professionalId.Value, limit),
+                cancellationToken);
+
+            return Ok(result);
+        }
+
         /// <summary>Lista paginada de actividades (propias + estándar).</summary>
         [HttpGet]
         [Authorize(Policy = Permissions.Activities.Read)]
@@ -85,12 +129,12 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Detalle de una actividad por ID.</summary>
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         [Authorize(Policy = Permissions.Activities.Read)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ActivityResponse>>> GetActivity(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromServices] IQueryHandler<GetActivityByIdQuery, ApiResponse<ActivityResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -153,7 +197,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ActivityResponse>>> UpdateActivity(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromBody] UpdateActivityRequest request,
             [FromServices] ICommandHandler<UpdateActivityCommand, ApiResponse<ActivityResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -189,12 +233,12 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Activa o da de baja una actividad (máquina de estados).</summary>
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{id}")]
         [Authorize(Policy = Permissions.Activities.Update)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<ActivityResponse>>> PatchActivityStatus(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromBody] PatchStatusRequest request,
             [FromServices] ICommandHandler<PatchActivityStatusCommand, ApiResponse<ActivityResponse>> handler,
             CancellationToken cancellationToken = default)

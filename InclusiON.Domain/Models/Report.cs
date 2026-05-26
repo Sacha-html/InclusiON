@@ -42,6 +42,12 @@ namespace InclusiON.Domain.Models
         /// <summary>ID del admin que aprobó el reporte.</summary>
         public Guid? ApprovedBy { get; set; }
 
+        /// <summary>
+        /// Indica si el familiar ya leyó el reporte aprobado.
+        /// Se pone en false cuando el admin aprueba; pasa a true al abrir el detalle.
+        /// </summary>
+        public bool IsReadByFamily { get; set; } = false;
+
         // ── Navegación ──────────────────────────────────────────────────
         public virtual PersonWithDisability Person { get; set; } = null!;
         public virtual Professional Professional { get; set; } = null!;

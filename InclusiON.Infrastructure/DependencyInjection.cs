@@ -40,6 +40,22 @@ namespace InclusiON.Infrastructure
 
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+            services.Configure<BackgroundJobSettings>(configuration.GetSection("BackgroundJobs"));
+            services.Configure<PasswordResetSettings>(configuration.GetSection("PasswordResetSettings"));
+            services.AddScoped<IPasswordResetConfig, PasswordResetConfig>();
+
+            // Python agent HTTP client
+            var pythonUrl = configuration.GetSection("BackgroundJobs:PythonAgent:Url")?.Value
+                ?? "http://localhost:5001";
+            var pythonTimeout = configuration.GetValue("BackgroundJobs:PythonAgent:TimeoutSeconds", 60);
+            services.AddHttpClient("PythonAgent", client =>
+            {
+                client.BaseAddress = new Uri(pythonUrl);
+                client.Timeout = TimeSpan.FromSeconds(pythonTimeout);
+            });
+
+            // IEmbeddingService — reemplaza al ONNX local, llama al agente Python vía HTTP
+            services.AddSingleton<IEmbeddingService, HttpEmbeddingService>();
 
             var encryptionService = new AesGcmEncryptionService(configuration);
             EncryptionAccessor.Initialize(encryptionService.Encrypt, encryptionService.Decrypt);
@@ -90,20 +106,27 @@ namespace InclusiON.Infrastructure
             // Email
             services.AddScoped<IEmailService, EmailService>();
 
+            // Generación de PDF (QuestPDF)
+            services.AddScoped<IReportPdfService, Services.ReportPdfService>();
+
             // Gestión de roles e Identity RoleClaims
             services.AddScoped<IRoleService, RoleService>();
 
             // Administración de catálogos (Create/Update/PatchStatus genérico)
             services.AddScoped<ICatalogAdminService, CatalogAdminService>();
 
-            // Repositorios read-only — auto-registrado para todo tipo que implemente IActivatable
+            // Repositorios read-only — auto-registrado para todo tipo que implemente IActivatable e IHasIntId
+            // (IReadOnlyRepository<TEntity> tiene constraint where TEntity : class, IActivatable, IHasIntId)
             var activatableType = typeof(IActivatable);
+            var hasIntIdType    = typeof(IHasIntId);
             var readOnlyRepoOpen = typeof(IReadOnlyRepository<>);
             var readOnlyRepoImplOpen = typeof(ReadOnlyRepository<>);
 
             var domainTypes = typeof(DisabilityType).Assembly
                 .GetTypes()
-                .Where(t => t.IsClass && !t.IsAbstract && activatableType.IsAssignableFrom(t));
+                .Where(t => t.IsClass && !t.IsAbstract
+                            && activatableType.IsAssignableFrom(t)
+                            && hasIntIdType.IsAssignableFrom(t));
 
             foreach (var domainType in domainTypes)
             {
@@ -164,6 +187,20 @@ namespace InclusiON.Infrastructure
 
                     options.Events = new JwtBearerEvents
                     {
+                        // SignalR no puede enviar Authorization header en WebSocket/SSE.
+                        // El cliente pasa el token como query param ?access_token=...
+                        OnMessageReceived = ctx =>
+                        {
+                            var accessToken = ctx.Request.Query["access_token"];
+                            var path = ctx.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken)
+                                && path.StartsWithSegments("/hubs"))
+                            {
+                                ctx.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        },
+
                         OnTokenValidated = ctx =>
                         {
                             // Verifica el claim isActive embebido en el token.

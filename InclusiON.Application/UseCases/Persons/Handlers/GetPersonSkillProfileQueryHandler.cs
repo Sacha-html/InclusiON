@@ -1,7 +1,9 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Persons;
 
 namespace InclusiON.Application.UseCases.Persons.Handlers
 {
@@ -21,15 +23,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             var profiles = await _persons.GetSkillProfileAsync(
                 query.PersonId, activeOnly: !query.All, cancellationToken);
 
-            var response = profiles.Select(psp => new PersonSkillProfileResponse
-            {
-                SkillAreaId   = psp.SkillAreaId,
-                SkillAreaName = psp.SkillArea.Name,
-                Color         = psp.SkillArea.Color,
-                Icon          = psp.SkillArea.Icon,
-                IsActive      = psp.IsActive,
-                AssignedAt    = psp.AssignedAt
-            }).ToList();
+            var response = profiles.Select(PersonMapper.ToSkillProfileResponse).ToList();
 
             return ApiResponse<List<PersonSkillProfileResponse>>.SuccessResult(response);
         }

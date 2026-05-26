@@ -23,6 +23,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(r => r.Areas)
                     .ThenInclude(a => a.Activities)
                         .ThenInclude(act => act.Activity)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(r => r.PersonId == personId, cancellationToken);
         }
 
@@ -109,6 +110,19 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(a => a.PersonRoadmapAreaId == areaId && a.SequenceOrder > currentSequenceOrder)
                 .OrderBy(a => a.SequenceOrder)
                 .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<bool> HasResponsesAsync(int roadmapActivityId, CancellationToken ct = default)
+        {
+            return await _context.ActivityResults
+                .AnyAsync(r => r.PersonRoadmapActivityId == roadmapActivityId, ct);
+        }
+
+        public async Task<bool> AnyHaveResponsesAsync(IEnumerable<int> roadmapActivityIds, CancellationToken ct = default)
+        {
+            var ids = roadmapActivityIds.ToList();
+            return await _context.ActivityResults
+                .AnyAsync(r => ids.Contains(r.PersonRoadmapActivityId), ct);
         }
     }
 }

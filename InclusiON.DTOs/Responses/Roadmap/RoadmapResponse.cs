@@ -7,6 +7,7 @@ namespace InclusiON.DTOs.Responses.Roadmap
     {
         /// <summary>ID del roadmap.</summary>
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
 
         /// <summary>ID de la persona a la que pertenece el roadmap.</summary>
         public Guid PersonId { get; set; }

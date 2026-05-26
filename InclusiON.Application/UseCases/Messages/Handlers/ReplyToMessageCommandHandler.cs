@@ -1,7 +1,10 @@
+using System.Text.Json;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Messages.Commands;
+using InclusiON.Application.Mappers;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -12,18 +15,24 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
     public class ReplyToMessageCommandHandler
         : ICommandHandler<ReplyToMessageCommand, ApiResponse<MessageResponse>>
     {
-        private readonly IMessagesRepository _messages;
-        private readonly IUsersRepository    _users;
-        private readonly IUnitOfWork         _uow;
+        private readonly IMessagesRepository     _messages;
+        private readonly IUsersRepository        _users;
+        private readonly IUnitOfWork             _uow;
+        private readonly IEncryptionService      _encryption;
+        private readonly IBackgroundJobRepository _bgJobs;
 
         public ReplyToMessageCommandHandler(
             IMessagesRepository messages,
             IUsersRepository users,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IEncryptionService encryption,
+            IBackgroundJobRepository bgJobs)
         {
-            _messages = messages;
-            _users    = users;
-            _uow      = uow;
+            _messages   = messages;
+            _users      = users;
+            _uow        = uow;
+            _encryption = encryption;
+            _bgJobs     = bgJobs;
         }
 
         public async Task<ApiResponse<MessageResponse>> HandleAsync(
@@ -54,6 +63,10 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
                 return ApiResponse<MessageResponse>.NotFound("Usuario");
 
             // 4. Crear la respuesta (hereda subject y relatedPersonId del padre)
+            // Note: do NOT assign Sender/Receiver navigation properties here.
+            // Both were loaded via AsNoTracking; assigning them would make EF try to INSERT
+            // existing User rows, causing a PK duplicate-key violation on SaveChangesAsync.
+            // Setting only the FK fields (SenderId/ReceiverId) is sufficient.
             var reply = new Message
             {
                 SenderId        = command.SenderId,
@@ -65,16 +78,38 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
                 SentAt          = DateTime.UtcNow,
                 IsRead          = false,
                 IsActive        = true,
-                Sender          = sender,
-                Receiver        = receiver
             };
 
             await _messages.CreateAsync(reply, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<MessageResponse>.SuccessResult(
-                MessageMapper.ToDetail(reply),
-                "Respuesta enviada exitosamente.");
+            // Assign navigation properties AFTER save — in-memory only, safe for DTO mapping.
+            reply.Sender   = sender;
+            reply.Receiver = receiver;
+
+            // Push SignalR al destinatario — fire and forget
+            var senderName    = $"{sender!.Name} {sender.Surname}".Trim();
+            var receiverIdStr = receiver!.Id.ToString();
+            _ = Task.Run(async () =>
+            {
+                await _bgJobs.CreateAsync(
+                    JobTypes.Push,
+                    JsonSerializer.Serialize(new NotificationPayload
+                    {
+                        UserId           = receiverIdStr,
+                        Title            = "Nueva respuesta",
+                        Message          = $"{senderName} respondió un mensaje.",
+                        ActionUrl        = "/#/pro/messages",
+                        SendEmailFallback = false
+                    }),
+                    maxRetries: 3);
+            });
+
+            var dto = MessageMapper.ToDetail(reply);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(reply.Id.ToString()));
+            return ApiResponse<MessageResponse>.SuccessResult(dto, "Respuesta enviada exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

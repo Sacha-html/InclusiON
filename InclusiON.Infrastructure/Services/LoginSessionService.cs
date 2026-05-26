@@ -1,9 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Interfaces.Telemetry;
-using InclusiON.DTOs.Auth;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
@@ -266,11 +266,6 @@ namespace InclusiON.Infrastructure.Services
                     _logger.LogDebug("Revoked {RevokedCount} previous tokens for user {UserId}", revokedCount, user.Id);
                 }
 
-                user.LastLoginDate = _dateTime.UtcNow;
-                user.LastLoginIpAddress = ipAddress;
-                user.LastLoginUserAgent = userAgent;
-                await _identityService.UpdateUserAsync(user);
-
                 await _tokenServices.RefreshTokensRepository.CreateAsync(refreshTokenEntity, ct);
 
                 if (rememberDevice && !string.IsNullOrEmpty(deviceId))
@@ -290,6 +285,29 @@ namespace InclusiON.Infrastructure.Services
 
                 await _unitOfWork.SaveChangesAsync(ct);
             }, cancellationToken);
+
+            // Update login metadata outside the token transaction — Identity regenerates
+            // ConcurrencyStamp on UpdateAsync, causing DbUpdateConcurrencyException when
+            // concurrent logins race on the same user (e.g. parallel E2E test workers).
+            //
+            // Re-fetch via FindByIdAsync: EF ChangeTracker may have tracked the User during
+            // SaveChangesAsync (relationship fixup through RefreshToken.User navigation).
+            // Using the original AsNoTracking instance would throw InvalidOperationException
+            // ("another instance with the same key value is already being tracked").
+            // FindByIdAsync hits the ChangeTracker cache first (O(1)) — no extra DB round-trip
+            // when the entity is already tracked, which is the common path after SaveChangesAsync.
+            try
+            {
+                var trackedUser = await _identityService.FindByIdAsync(user.Id) ?? user;
+                trackedUser.LastLoginDate = _dateTime.UtcNow;
+                trackedUser.LastLoginIpAddress = ipAddress;
+                trackedUser.LastLoginUserAgent = userAgent;
+                await _identityService.UpdateUserAsync(trackedUser);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                _logger.LogWarning("Concurrent login for user {UserId} — LastLoginDate update skipped", user.Id);
+            }
 
             var expiresAt = _tokenServices.JwtTokenService.GetTokenExpiration(accessToken);
             return new SessionTokens(accessToken, refreshToken, expiresAt);

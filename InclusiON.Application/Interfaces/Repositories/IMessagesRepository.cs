@@ -13,7 +13,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Orden: no leídos primero, luego SentAt DESC.
         /// </summary>
         Task<(List<Message> Items, int Total)> GetInboxAsync(
-            Guid userId, int skip, int take,
+            Guid userId, int page, int pageSize,
             bool? isRead = null,
             Guid? relatedPersonId = null,
             Guid? senderId = null,
@@ -25,7 +25,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Ordenados por SentAt DESC.
         /// </summary>
         Task<(List<Message> Items, int Total)> GetSentAsync(
-            Guid userId, int skip, int take,
+            Guid userId, int page, int pageSize,
             bool? isRead = null,
             Guid? relatedPersonId = null,
             Guid? receiverId = null,

@@ -5,6 +5,7 @@ namespace InclusiON.DTOs.Responses.Diagnoses
     public class DiagnosisResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
         public Guid PersonId { get; set; }
         public Guid ProfessionalId { get; set; }
         public string ProfessionalName { get; set; } = string.Empty;

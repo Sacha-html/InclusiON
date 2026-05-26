@@ -1,4 +1,7 @@
+using Microsoft.Extensions.Caching.Memory;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Application.UseCases.Catalogs.Queries;
 using InclusiON.Domain.Models;
@@ -11,20 +14,39 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
         : IQueryHandler<GetActivityCategoriesQuery, ApiResponse<List<CatalogItemResponse>>>
     {
         private readonly IReadOnlyRepository<ActivityCategory> _repository;
+        private readonly IMemoryCache _cache;
+        private readonly IEncryptionService _encryption;
 
-        public GetActivityCategoriesQueryHandler(IReadOnlyRepository<ActivityCategory> repository)
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
+
+        public GetActivityCategoriesQueryHandler(IReadOnlyRepository<ActivityCategory> repository, IMemoryCache cache, IEncryptionService encryption)
         {
             _repository = repository;
+            _cache = cache;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<List<CatalogItemResponse>>> HandleAsync(
             GetActivityCategoriesQuery query, CancellationToken cancellationToken)
         {
-            var items = await _repository.GetAllActiveAsync(cancellationToken);
+            if (_cache.TryGetValue(CatalogCacheKeys.ActivityCategories, out List<CatalogItemResponse>? cached) && cached is not null)
+                return ApiResponse<List<CatalogItemResponse>>.SuccessResult(cached);
 
-            var response = items.Select(CatalogItemResponse.MapToResponse).ToList();
+            var items = await _repository.GetAllActiveAsync(cancellationToken);
+            var response = items.Select(x =>
+            {
+                var item = CatalogItemResponse.MapToResponse(x);
+                item.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(x.Id.ToString()));
+                return item;
+            }).ToList();
+
+            _cache.Set(CatalogCacheKeys.ActivityCategories, response, new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(CacheDuration)
+                .SetPriority(CacheItemPriority.Normal));
 
             return ApiResponse<List<CatalogItemResponse>>.SuccessResult(response);
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

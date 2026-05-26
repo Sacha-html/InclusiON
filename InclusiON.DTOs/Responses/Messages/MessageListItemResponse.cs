@@ -6,6 +6,7 @@ namespace InclusiON.DTOs.Responses.Messages
     public class MessageListItemResponse
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; } = string.Empty;
 
         /// <summary>Asunto del mensaje.</summary>
         public string? Subject { get; set; }

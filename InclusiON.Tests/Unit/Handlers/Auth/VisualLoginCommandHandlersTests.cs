@@ -76,6 +76,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             var user = AUser();
             _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>())
                 .Returns(APerson(user));
+            _identity.FindByIdAsync(UserId).Returns(user);
             _identity.IsLockedOutAsync(user).Returns(true);
             _identity.GetLockoutEndDateAsync(user)
                 .Returns(DateTimeOffset.UtcNow.AddMinutes(5));
@@ -95,6 +96,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             person.PinCodeHash = null;
 
             _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(person);
+            _identity.FindByIdAsync(UserId).Returns(user);
             _identity.IsLockedOutAsync(user).Returns(false);
 
             var result = await BuildPin().HandleAsync(PinCmd(), default);
@@ -111,6 +113,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             person.PinCodeHash = "hash";
 
             _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(person);
+            _identity.FindByIdAsync(UserId).Returns(user);
             _identity.IsLockedOutAsync(user).Returns(false);
 
             bool needsRehash;
@@ -133,6 +136,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             person.PinCodeHash = "hash";
 
             _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(person);
+            _identity.FindByIdAsync(UserId).Returns(user);
             _identity.IsLockedOutAsync(user).Returns(false);
 
             bool needsRehash;

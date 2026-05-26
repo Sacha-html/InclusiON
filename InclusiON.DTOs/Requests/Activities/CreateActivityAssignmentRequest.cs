@@ -5,7 +5,7 @@ namespace InclusiON.DTOs.Requests.Activities
     public class CreateActivityAssignmentRequest
     {
         [Required(ErrorMessage = "La actividad es requerida")]
-        public int ActivityId { get; set; }
+        public string EncryptedActivityId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La persona es requerida")]
         public Guid PersonId { get; set; }

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Handlers;
 using InclusiON.Application.UseCases.Reports.Queries;
@@ -13,8 +14,13 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
     public class GetReportByIdQueryHandlerTests
     {
         private readonly IReportsRepository _reportsRepo = Substitute.For<IReportsRepository>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
-        private GetReportByIdQueryHandler BuildSut() => new(_reportsRepo);
+        private GetReportByIdQueryHandler BuildSut()
+        {
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+            return new(_reportsRepo, _encryption);
+        }
 
         private static Report AReport() => new()
         {

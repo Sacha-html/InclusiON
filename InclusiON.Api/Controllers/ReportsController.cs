@@ -1,5 +1,6 @@
 using InclusiON.Api.Extensions;
 using InclusiON.Api.Filters;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -45,6 +46,7 @@ namespace InclusiON.Api.Controllers
 
         /// <summary>Lista paginada de reportes con filtros.</summary>
         [HttpGet]
+        [HttpHead]
         [Authorize(Policy = "reports:read")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<ReportsListItemReponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<PagedResponse<ReportsListItemReponse>>>> GetReports(
@@ -61,6 +63,16 @@ namespace InclusiON.Api.Controllers
                 return BuildDeniedResponse<PagedResponse<ReportsListItemReponse>>("Persona").ToActionResult();
             }
 
+            var entityId = _httpContextService.GetCurrentEntityId();
+            var role     = _httpContextService.GetCurrentUserRole();
+
+            // Profesionales solo ven sus propios reportes — forzar siempre, ignorar lo que mande el frontend.
+            // Admins pueden filtrar por cualquier profesional (o ver todos si no filtran).
+            if (role == nameof(IdentityRoles.Professional) && entityId.HasValue)
+                request.ProfessionalId = entityId.Value.ToString();
+            else if (entityId.HasValue && string.IsNullOrWhiteSpace(request.ProfessionalId))
+                request.ProfessionalId = entityId.Value.ToString();
+
             var query = new GetReportsQuery(
                 request.Page,
                 request.PageSize,
@@ -74,7 +86,8 @@ namespace InclusiON.Api.Controllers
                 request.DateTo,
                 request.SortBy,
                 request.SortDirection,
-                request.InstitutionIds
+                request.InstitutionIds,
+                request.PersonIds
             );
 
             var result = await handler.HandleAsync(query, cancellationToken);
@@ -112,13 +125,13 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Obtiene un reporte por ID.</summary>
-        [HttpGet("{reportId:int}")]
+        [HttpGet("{reportId}")]
         [Authorize(Policy = "reports:read")]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         [ReportAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> GetReportById(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] IQueryHandler<GetReportByIdQuery, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -168,14 +181,14 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Edita un reporte. Solo permitido cuando Status == Draft.</summary>
-        [HttpPut("{reportId:int}")]
+        [HttpPut("{reportId}")]
         [Authorize(Policy = "reports:create")]
         [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> UpdateReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromBody] UpdateReportRequest request,
             [FromServices] ICommandHandler<UpdateReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -207,14 +220,14 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Profesional envía el borrador al admin para revisión.</summary>
-        [HttpPatch("{reportId:int}/submit")]
+        [HttpPatch("{reportId}/submit")]
         [Authorize(Policy = "reports:submit")]
         [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> SubmitReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] ICommandHandler<SubmitReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -227,13 +240,15 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Admin aprueba el reporte. El familiar podrá consultarlo.</summary>
-        [HttpPatch("{reportId:int}/approve")]
+        [HttpPatch("{reportId}/approve")]
         [Authorize(Policy = "reports:approve")]
+        [ReportAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> ApproveReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] ICommandHandler<ApproveReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -243,14 +258,14 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Profesional da de baja su reporte (baja lógica). No permitido en estado Enviado.</summary>
-        [HttpPut("{reportId:int}/deactivate")]
+        [HttpPut("{reportId}/deactivate")]
         [Authorize(Policy = "reports:create")]
         [ReportAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<object>>> DeactivateReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromServices] ICommandHandler<DeactivateReportCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -263,13 +278,15 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Admin rechaza el reporte con un motivo para el profesional.</summary>
-        [HttpPatch("{reportId:int}/reject")]
+        [HttpPatch("{reportId}/reject")]
         [Authorize(Policy = "reports:reject")]
+        [ReportAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<ReportResponse>>> RejectReport(
-            int reportId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
             [FromBody] RejectReportRequest request,
             [FromServices] ICommandHandler<RejectReportCommand, ApiResponse<ReportResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -280,6 +297,44 @@ namespace InclusiON.Api.Controllers
             var adminUserId = _httpContextService.GetCurrentUserId()!.Value;
             var result = await handler.HandleAsync(new RejectReportCommand(reportId, adminUserId, request.Comment), cancellationToken);
             return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// El familiar marca el reporte como leído. El indicador "Nuevo" desaparece en la UI.
+        /// Operación idempotente: si ya estaba leído no hace nada.
+        /// </summary>
+        [HttpPatch("{reportId}/mark-read")]
+        [Authorize(Policy = "reports:read")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> MarkReportRead(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
+            [FromServices] ICommandHandler<MarkReportReadCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new MarkReportReadCommand(reportId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>Exporta un reporte aprobado como archivo PDF.</summary>
+        [HttpGet("{reportId}/export-pdf")]
+        [Authorize(Policy = "reports:export")]
+        [ReportAccess(AccessMode.Read)]
+        [Produces("application/pdf")]
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ExportReportPdf(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
+            [FromServices] IQueryHandler<ExportReportPdfQuery, ApiResponse<byte[]>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new ExportReportPdfQuery(reportId), cancellationToken);
+
+            if (!result.Success)
+                return result.ToActionResult().Result!;
+
+            var filename = $"reporte-{reportId}-{DateTime.UtcNow:yyyyMMdd}.pdf";
+            return File(result.Data!, "application/pdf", filename);
         }
     }
 }

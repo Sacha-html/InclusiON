@@ -77,5 +77,16 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Obtiene la siguiente actividad en secuencia dentro del mismo área del roadmap.
         /// </summary>
         Task<PersonRoadmapActivity?> GetNextInAreaAsync(int areaId, int currentSequenceOrder, CancellationToken ct = default);
+
+        /// <summary>
+        /// Indica si una entrada del roadmap tiene al menos un resultado registrado.
+        /// Usado para bloquear la eliminación y el reordenamiento.
+        /// </summary>
+        Task<bool> HasResponsesAsync(int roadmapActivityId, CancellationToken ct = default);
+
+        /// <summary>
+        /// Indica si alguna de las entradas del roadmap (por IDs) tiene resultados registrados.
+        /// </summary>
+        Task<bool> AnyHaveResponsesAsync(IEnumerable<int> roadmapActivityIds, CancellationToken ct = default);
     }
 }

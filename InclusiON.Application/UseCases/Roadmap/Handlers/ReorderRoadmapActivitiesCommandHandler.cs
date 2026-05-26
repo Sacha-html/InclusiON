@@ -38,6 +38,13 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
                     ErrorCode.ValidationFailed,
                     "Una o más actividades no pertenecen a este área.");
 
+            // No se puede reordenar si alguna actividad ya tiene respuestas
+            var allIds = command.Activities.Select(a => a.Id);
+            if (await _roadmaps.AnyHaveResponsesAsync(allIds, cancellationToken))
+                return ApiResponse<object>.ErrorResult(
+                    ErrorCode.InvalidOperation,
+                    "No se puede reordenar: al menos una actividad ya tiene respuestas registradas.");
+
             foreach (var item in command.Activities)
             {
                 var activity = activities.First(a => a.Id == item.Id);

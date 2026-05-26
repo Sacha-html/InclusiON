@@ -35,3 +35,30 @@ jobs:
 
       - name: Run integration tests
         run: dotnet test InclusiON.Tests/Integration/InclusiON.Tests.Integration.csproj --no-build --configuration Release --verbosity normal
+
+  python:
+    name: Python Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Inclusion.Agent
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Check syntax
+        run: python -m py_compile main.py services/*.py
+
+  docker:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build server image
+        run: docker build -t inclusion-api InclusiON.Server
+      - name: Build Python agent image
+        run: docker build -t inclusion-agent Inclusion.Agent

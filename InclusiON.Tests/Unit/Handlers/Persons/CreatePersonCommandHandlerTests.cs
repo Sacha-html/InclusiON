@@ -14,15 +14,16 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
 {
     public class CreatePersonCommandHandlerTests
     {
-        private readonly IPersonsRepository _personsRepo   = Substitute.For<IPersonsRepository>();
-        private readonly IIdentityService   _identity      = Substitute.For<IIdentityService>();
-        private readonly IPasswordHasher    _pwdHasher     = Substitute.For<IPasswordHasher>();
-        private readonly IPinHasher         _pinHasher     = Substitute.For<IPinHasher>();
-        private readonly IUnitOfWork        _uow           = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider  _dateTime      = Substitute.For<IDateTimeProvider>();
+        private readonly IPersonsRepository      _personsRepo   = Substitute.For<IPersonsRepository>();
+        private readonly IIdentityService        _identity      = Substitute.For<IIdentityService>();
+        private readonly IPasswordHasher         _pwdHasher     = Substitute.For<IPasswordHasher>();
+        private readonly IPinHasher              _pinHasher     = Substitute.For<IPinHasher>();
+        private readonly IUnitOfWork             _uow           = Substitute.For<IUnitOfWork>();
+        private readonly IBackgroundJobRepository _bgJobs       = Substitute.For<IBackgroundJobRepository>();
+        private readonly IDateTimeProvider       _dateTime      = Substitute.For<IDateTimeProvider>();
 
         private CreatePersonCommandHandler BuildSut() =>
-            new(_personsRepo, _identity, _pwdHasher, _pinHasher, _uow,
+            new(_personsRepo, _identity, _pwdHasher, _pinHasher, _uow, _bgJobs,
                 NullLogger<CreatePersonCommandHandler>.Instance, _dateTime);
 
         private static CreatePersonCommand Cmd(string? doc = null) =>

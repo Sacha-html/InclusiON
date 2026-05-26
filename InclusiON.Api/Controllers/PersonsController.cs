@@ -1,16 +1,20 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Api.Extensions;
 using InclusiON.Api.Filters;
 using InclusiON.Application.Authorization;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Persons.Commands;
 using InclusiON.Application.UseCases.Persons.Queries;
 using InclusiON.Application.UseCases.Family.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Persons;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Activities;
 using InclusiON.DTOs.Responses.Family;
 using InclusiON.DTOs.Responses.Persons;
 using InclusiON.Shared.Resources;
@@ -27,13 +31,16 @@ namespace InclusiON.Api.Controllers
     {
         private readonly IHttpContextService _httpContextService;
         private readonly IResourceAuthorizationService _resourceAuthz;
+        private readonly IPersonsRepository _personsRepository;
 
         public PersonsController(
             IHttpContextService httpContextService,
-            IResourceAuthorizationService resourceAuthz)
+            IResourceAuthorizationService resourceAuthz,
+            IPersonsRepository personsRepository)
         {
             _httpContextService = httpContextService;
             _resourceAuthz      = resourceAuthz;
+            _personsRepository  = personsRepository;
         }
 
         #region Queries
@@ -122,6 +129,7 @@ namespace InclusiON.Api.Controllers
         /// Obtiene el historial de vinculaciones de una persona.
         /// </summary>
         [HttpGet("{personId}/link-history")]
+        [OutputCache(PolicyName = "history")]
         [Authorize(Policy = "family:read")]
         [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<PersonRepresentativeHistoryResponse>>), StatusCodes.Status200OK)]
@@ -235,13 +243,15 @@ namespace InclusiON.Api.Controllers
         [HttpGet("{personId}/supervisor-candidates")]
         [Authorize(Policy = "persons:read")]
         [PersonAccess(AccessMode.Read)]
-        [ProducesResponseType(typeof(ApiResponse<List<SupervisorCandidateResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<SupervisorCandidateResponse>>>> GetSupervisorCandidates(
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<SupervisorCandidateResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<SupervisorCandidateResponse>>>> GetSupervisorCandidates(
             Guid personId,
-            [FromServices] IQueryHandler<GetSupervisorCandidatesQuery, ApiResponse<List<SupervisorCandidateResponse>>> handler,
+            [FromServices] IQueryHandler<GetSupervisorCandidatesQuery, ApiResponse<PagedResponse<SupervisorCandidateResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
             CancellationToken cancellationToken = default)
         {
-            var result = await handler.HandleAsync(new GetSupervisorCandidatesQuery(personId), cancellationToken);
+            var result = await handler.HandleAsync(new GetSupervisorCandidatesQuery(personId, page, pageSize), cancellationToken);
             return Ok(result);
         }
 
@@ -261,6 +271,13 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<UpdateLoginMethodCommand, ApiResponse<UpdateLoginMethodResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var person = await _personsRepository.GetByUserIdAsync(userId, cancellationToken);
+            if (person is null)
+                return ApiResponse<UpdateLoginMethodResponse>.NotFound("Persona").ToActionResult();
+
+            if (!await _resourceAuthz.CanAccessPersonAsync(person.Id, AccessMode.Write, cancellationToken))
+                return ApiResponse<UpdateLoginMethodResponse>.Forbidden().ToActionResult();
+
             var command = new UpdateLoginMethodCommand(userId, request.LoginMethodId, request.Pin, request.SupervisorUserId);
             var result  = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
@@ -311,6 +328,30 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Obtiene actividades recomendadas para una persona (ordenadas por compatibilidad).
+        /// </summary>
+        [HttpGet("{personId}/recommended-activities")]
+        [Authorize(Policy = "persons:read")]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<List<ActivityListItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<ActivityListItemResponse>>>> GetRecommendedActivities(
+            Guid personId,
+            [FromServices] IQueryHandler<GetRecommendedActivitiesQuery, ApiResponse<List<ActivityListItemResponse>>> handler,
+            [FromQuery] int limit = 10,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<List<ActivityListItemResponse>>.NotFound("Profesional"));
+
+            var result = await handler.HandleAsync(
+                new GetRecommendedActivitiesQuery(personId, professionalId.Value, limit),
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Asigna un area de habilidad a una persona.
         /// </summary>
         [HttpPost("{personId}/skill-profile")]
@@ -345,6 +386,74 @@ namespace InclusiON.Api.Controllers
         {
             var result = await handler.HandleAsync(new DeactivateSkillAreaCommand(personId, areaId), cancellationToken);
             return result.ToActionResult();
+        }
+
+        #endregion
+
+        #region Help Request
+
+        /// <summary>
+        /// Obtiene la configuración de accesibilidad de una persona.
+        /// </summary>
+        [HttpGet("{personId}/accessibility")]
+        [Authorize(Policy = Permissions.Persons.Read)]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PersonAccessibilityResponse>>> GetAccessibility(
+            Guid personId,
+            [FromServices] IQueryHandler<GetPersonAccessibilityQuery, ApiResponse<PersonAccessibilityResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetPersonAccessibilityQuery(personId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Actualiza la configuración de accesibilidad de una persona.
+        /// </summary>
+        [HttpPut("{personId}/accessibility")]
+        [Authorize(Policy = Permissions.Persons.Update)]
+        [PersonAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PersonAccessibilityResponse>>> UpdateAccessibility(
+            Guid personId,
+            [FromBody] UpdatePersonAccessibilityRequest request,
+            [FromServices] ICommandHandler<UpdatePersonAccessibilityCommand, ApiResponse<PersonAccessibilityResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(
+                new UpdatePersonAccessibilityCommand(
+                    personId,
+                    request.RequiresLargeFont,
+                    request.RequiresHighContrast,
+                    request.VisualNoiseSensitivity,
+                    request.SoundSensitivity,
+                    request.ColorBlindnessType),
+                cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Solicitud de ayuda urgente desde el portal AAC.
+        /// Notifica vía SignalR a todos los profesionales supervisores activos de la persona.
+        /// </summary>
+        [HttpPost("me/help-request")]
+        [Authorize(Policy = Permissions.Activities.Respond)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> RequestHelp(
+            [FromServices] ICommandHandler<RequestHelpCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var personId = _httpContextService.GetCurrentEntityId();
+            if (personId is null)
+                return NotFound(ApiResponse<object>.NotFound("Persona"));
+
+            var result = await handler.HandleAsync(new RequestHelpCommand(personId.Value), cancellationToken);
+            return Ok(result);
         }
 
         #endregion

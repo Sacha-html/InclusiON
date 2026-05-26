@@ -16,15 +16,18 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
         private readonly IRoadmapRepository             _roadmaps;
         private readonly IReadOnlyRepository<SkillArea> _skillAreas;
         private readonly IUnitOfWork                    _uow;
+        private readonly IEncryptionService             _encryption;
 
         public AddRoadmapAreaCommandHandler(
             IRoadmapRepository roadmaps,
             IReadOnlyRepository<SkillArea> skillAreas,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IEncryptionService encryption)
         {
             _roadmaps   = roadmaps;
             _skillAreas = skillAreas;
             _uow        = uow;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<RoadmapAreaResponse>> HandleAsync(
@@ -47,29 +50,36 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
                     "El area de habilidad ya forma parte del roadmap.");
 
             // 4. Crear el area
+            // Note: do NOT assign the SkillArea navigation property here.
+            // skillArea was loaded via ReadOnlyRepository (AsNoTracking), so it is
+            // detached. Assigning it to the new entity would make EF try to INSERT it,
+            // causing a PK_SkillAreas duplicate-key violation on SaveChangesAsync.
+            // Setting only the FK (SkillAreaId) is sufficient.
             var area = new PersonRoadmapArea
             {
                 PersonRoadmapId = roadmap.Id,
                 SkillAreaId     = command.SkillAreaId,
                 DisplayOrder    = command.DisplayOrder,
-                SkillArea       = skillArea
             };
 
             await _roadmaps.AddAreaAsync(area, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<RoadmapAreaResponse>.SuccessResult(
-                new RoadmapAreaResponse
-                {
-                    Id            = area.Id,
-                    SkillAreaId   = area.SkillAreaId,
-                    SkillAreaName = skillArea.Name,
-                    Color         = skillArea.Color,
-                    Icon          = skillArea.Icon,
-                    DisplayOrder  = area.DisplayOrder,
-                    Activities    = new List<RoadmapActivityResponse>()
-                },
+            var areaDto = new RoadmapAreaResponse
+            {
+                Id            = area.Id,
+                EncryptedId   = ToUrlSafeBase64(_encryption.Encrypt(area.Id.ToString())),
+                SkillAreaId   = area.SkillAreaId,
+                SkillAreaName = skillArea.Name,
+                Color         = skillArea.Color,
+                Icon          = skillArea.Icon,
+                DisplayOrder  = area.DisplayOrder,
+                Activities    = new List<RoadmapActivityResponse>()
+            };
+            return ApiResponse<RoadmapAreaResponse>.SuccessResult(areaDto,
                 "Area de habilidad agregada al roadmap exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

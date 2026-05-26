@@ -18,16 +18,17 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
         private readonly IProfessionalsRepository _proRepo = Substitute.For<IProfessionalsRepository>();
         private readonly IPersonsRepository _personRepo = Substitute.For<IPersonsRepository>();
         private readonly IFamilyRepository _familyRepo = Substitute.For<IFamilyRepository>();
-        private readonly IEmailService _email = Substitute.For<IEmailService>();
+        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IAccessAuditLogger _audit = Substitute.For<IAccessAuditLogger>();
 
         private static readonly Guid TargetId = Guid.NewGuid();
         private static readonly Guid AdminId = Guid.NewGuid();
 
         private AdminReactivateUserCommandHandler BuildSut() =>
-            new(_identity, _proRepo, _personRepo, _familyRepo, _email, _uow,
-                NullLogger<AdminReactivateUserCommandHandler>.Instance, _dateTime);
+            new(_identity, _proRepo, _personRepo, _familyRepo, _backgroundJobs, _uow,
+                NullLogger<AdminReactivateUserCommandHandler>.Instance, _dateTime, _audit);
 
         private static AdminReactivateUserCommand Cmd() => new(TargetId, AdminId);
 

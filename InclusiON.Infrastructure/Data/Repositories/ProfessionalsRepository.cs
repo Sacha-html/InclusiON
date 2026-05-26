@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using InclusiON.Application.Extensions;
+using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Enums;
@@ -82,7 +82,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public Task UpdateAsync(Professional professional, CancellationToken cancellationToken = default)
         {
-            _context.Professionals.Update(professional);
+            _context.Entry(professional).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             return Task.CompletedTask;
         }
 
@@ -268,6 +268,15 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(p => p.Status == ProfessionalStatusEnum.Approved
                     && p.User.IsActive
                     && (p.User.LastLoginDate == null || p.User.LastLoginDate < cutoffDate))
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Professional>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Professionals
+                .AsNoTracking()
+                .Include(p => p.User)
+                .Where(p => p.Status == ProfessionalStatusEnum.Approved && p.IsActive && p.User.IsActive)
                 .ToListAsync(cancellationToken);
         }
     }

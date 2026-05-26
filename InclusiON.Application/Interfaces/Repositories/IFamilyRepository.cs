@@ -17,7 +17,10 @@ namespace InclusiON.Application.Interfaces.Repositories
             string? linkedPersonSearch = null,
             CancellationToken cancellationToken = default);
 
-        Task<List<(FamilyRepresentative Family, bool WasPreviouslyLinked)>> GetAvailableFamiliesAsync(string? search = null, Guid? personId = null, CancellationToken cancellationToken = default);
+        Task<(List<(FamilyRepresentative Family, bool WasPreviouslyLinked)> Items, int Total)> GetAvailableFamiliesAsync(
+            string? search = null, Guid? personId = null,
+            int page = 1, int pageSize = 50,
+            CancellationToken cancellationToken = default);
         Task<List<PersonRepresentative>> GetPersonRepresentativesByPersonIdAsync(Guid personId, CancellationToken cancellationToken = default);
         Task<List<PersonRepresentative>> GetPersonRepresentativesByFamilyIdAsync(Guid familyId, CancellationToken cancellationToken = default);
         Task<PersonRepresentative?> GetPersonRepresentativeAsync(Guid personId, Guid representativeId, CancellationToken cancellationToken = default);

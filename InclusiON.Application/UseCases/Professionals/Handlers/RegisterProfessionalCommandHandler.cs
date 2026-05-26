@@ -1,15 +1,16 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Professionals.Commands;
 using InclusiON.Application.UseCases.Professionals.Queries;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Professionals;
-using InclusiON.Domain.Enums;
-using InclusiON.Domain.Models;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Professionals.Handlers
@@ -23,7 +24,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
     {
         private readonly IProfessionalsRepository _repository;
         private readonly IIdentityService _identityService;
-        private readonly IEmailService _emailService;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RegisterProfessionalCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
@@ -31,14 +32,14 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         public RegisterProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IIdentityService identityService,
-            IEmailService emailService,
+            IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             ILogger<RegisterProfessionalCommandHandler> logger,
             IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
-            _emailService = emailService;
+            _backgroundJobs = backgroundJobs;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
@@ -128,26 +129,22 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 _logger.LogInformation("Profesional registrado (pendiente): {ProfessionalId}, UserId: {UserId}, Email: {Email}", 
                     professional.Id, userId, command.Email);
 
-                // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-                // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-                try
-                {
-                    await _emailService.SendTemplatedEmailAsync(
-                        command.Email,
-                        "Tu registro en InclusiON está pendiente de validación",
-                        "ProfessionalPendingRegistration",
-                        new Dictionary<string, string?>
+                await _backgroundJobs.CreateAsync(
+                    JobTypes.Email,
+                    JsonSerializer.Serialize(new EmailPayload
+                    {
+                        To           = command.Email,
+                        Subject      = "Tu registro en InclusiON está pendiente de validación",
+                        TemplateName = "ProfessionalPendingRegistration",
+                        Replacements = new Dictionary<string, string?>
                         {
                             { "FirstName", command.FirstName },
                             { "LastName", command.LastName },
                             { "Year", _dateTime.UtcNow.Year.ToString() }
-                        },
-                        cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "No se pudo enviar email de registro pendiente a {Email}", command.Email);
-                }
+                        }
+                    }),
+                    maxRetries: 2,
+                    cancellationToken: cancellationToken);
 
                 var response = ProfessionalResponse.MapToResponse(professional);
                 return ApiResponse<ProfessionalResponse>.SuccessResult(response, SuccessMessages.ProfessionalPendingApproval);

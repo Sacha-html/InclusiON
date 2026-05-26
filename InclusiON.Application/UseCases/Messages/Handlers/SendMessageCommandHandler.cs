@@ -1,7 +1,10 @@
+using System.Text.Json;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Messages.Commands;
+using InclusiON.Application.Mappers;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -16,17 +19,23 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
         private readonly IUsersRepository       _users;
         private readonly IAssignmentsRepository _assignments;
         private readonly IUnitOfWork            _uow;
+        private readonly IEncryptionService     _encryption;
+        private readonly IBackgroundJobRepository _bgJobs;
 
         public SendMessageCommandHandler(
             IMessagesRepository messages,
             IUsersRepository users,
             IAssignmentsRepository assignments,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IEncryptionService encryption,
+            IBackgroundJobRepository bgJobs)
         {
             _messages    = messages;
             _users       = users;
             _assignments = assignments;
             _uow         = uow;
+            _encryption  = encryption;
+            _bgJobs      = bgJobs;
         }
 
         public async Task<ApiResponse<MessageResponse>> HandleAsync(
@@ -92,16 +101,39 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
                 SentAt          = DateTime.UtcNow,
                 IsRead          = false,
                 IsActive        = true,
-                Sender          = sender,
-                Receiver        = receiver
             };
 
             await _messages.CreateAsync(message, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<MessageResponse>.SuccessResult(
-                MessageMapper.ToDetail(message),
-                "Mensaje enviado exitosamente.");
+            // Populate nav properties after save — setting them before EF Core's Add()
+            // causes a PK_Users violation when the users were loaded with AsNoTracking.
+            message.Sender   = sender;
+            message.Receiver = receiver;
+
+            // Push SignalR al destinatario — fire and forget
+            var senderName   = $"{sender!.Name} {sender.Surname}".Trim();
+            var receiverIdStr = receiver!.Id.ToString();
+            _ = Task.Run(async () =>
+            {
+                await _bgJobs.CreateAsync(
+                    JobTypes.Push,
+                    JsonSerializer.Serialize(new NotificationPayload
+                    {
+                        UserId           = receiverIdStr,
+                        Title            = "Nuevo mensaje",
+                        Message          = $"Tenés un nuevo mensaje de {senderName}.",
+                        ActionUrl        = "/#/pro/messages",
+                        SendEmailFallback = false
+                    }),
+                    maxRetries: 3);
+            });
+
+            var dto = MessageMapper.ToDetail(message);
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(message.Id.ToString()));
+            return ApiResponse<MessageResponse>.SuccessResult(dto, "Mensaje enviado exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

@@ -78,10 +78,18 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 
 ```bash
 cd InclusiON.Api
+
+# Normal (rate limiter activo)
 dotnet run
-# API disponible en http://localhost:5000
+
+# Con rate limiter deshabilitado — útil para tests E2E o desarrollo intensivo
+dotnet run -- --RateLimiter:Disabled=true
+
+# API disponible en http://localhost:5000 / https://localhost:5001
 # Documentación Scalar en http://localhost:5000/scalar
 ```
+
+> **Rate Limiter**: habilitado por defecto en todos los entornos. Para deshabilitarlo sin tocar archivos de config, pasarlo como argumento CLI (`--RateLimiter:Disabled=true`). El flag CLI tiene mayor prioridad que `appsettings.json`.
 
 ### Build
 
@@ -365,6 +373,9 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 | `/messages/{id}/reply` | POST | Responder mensaje |
 | `/messages/{id}/read` | PATCH | Marcar como leído |
 | `/messages/{id}` | DELETE | Eliminar mensaje (soft delete) |
+| `/activities/{id}/similar` | GET | Actividades similares (búsqueda semántica) |
+| `/activities/{id}/compatible-persons` | GET | Personas compatibles para una actividad |
+| `/persons/{id}/recommended-activities` | GET | Actividades recomendadas para una persona |
 
 ---
 

@@ -1,6 +1,7 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.Roadmap.Commands;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
@@ -15,15 +16,18 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
         private readonly IRoadmapRepository    _roadmaps;
         private readonly IActivitiesRepository _activities;
         private readonly IUnitOfWork           _uow;
+        private readonly IEncryptionService    _encryption;
 
         public AddRoadmapActivityCommandHandler(
             IRoadmapRepository roadmaps,
             IActivitiesRepository activities,
-            IUnitOfWork uow)
+            IUnitOfWork uow,
+            IEncryptionService encryption)
         {
             _roadmaps   = roadmaps;
             _activities = activities;
             _uow        = uow;
+            _encryption = encryption;
         }
 
         public async Task<ApiResponse<RoadmapActivityResponse>> HandleAsync(
@@ -42,6 +46,12 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
             // 2b. Verificar que el profesional puede usar la actividad (propia o estandar)
             if (!activity.IsStandardActivity && activity.ProfessionalId != command.ProfessionalId)
                 return ApiResponse<RoadmapActivityResponse>.Forbidden();
+
+            // 2c. Verificar que la actividad pertenece al mismo SkillArea que el área del roadmap
+            if (activity.SkillAreaId.HasValue && activity.SkillAreaId.Value != area.SkillAreaId)
+                return ApiResponse<RoadmapActivityResponse>.ErrorResult(
+                    ErrorCode.InvalidOperation,
+                    "La actividad no pertenece al área de habilidad de este tramo del roadmap.");
 
             // 3. Verificar que la actividad no este ya en el area
             if (await _roadmaps.ActivityExistsInAreaAsync(command.AreaId, command.ActivityId, cancellationToken))
@@ -64,15 +74,21 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
                 MaxAttempts            = command.MaxAttempts,
                 ShowHints              = command.ShowHints,
                 DifficultyLevel        = command.DifficultyLevel,
-                Activity               = activity
+                // No asignar Activity — viene de AsNoTracking y EF la marcaría Added causando PK duplicado
             };
 
             await _roadmaps.AddActivityAsync(entry, cancellationToken);
             await _uow.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse<RoadmapActivityResponse>.SuccessResult(
-                GetPersonRoadmapQueryHandler.MapActivity(entry),
+            // Asignar después del save solo para el mapeo de la respuesta
+            entry.Activity = activity;
+
+            var actDto = RoadmapMapper.ToActivityResponse(entry);
+            actDto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(entry.Id.ToString()));
+            return ApiResponse<RoadmapActivityResponse>.SuccessResult(actDto,
                 "Actividad agregada al roadmap exitosamente.");
         }
+
+        private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 }

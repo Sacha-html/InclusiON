@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Handlers;
 using InclusiON.Application.UseCases.Reports.Queries;
@@ -12,6 +13,7 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
     public class GetReportsQueryHandlerTests
     {
         private readonly IReportsRepository _repo = Substitute.For<IReportsRepository>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         private static Report AReport() => new()
         {
@@ -29,14 +31,15 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
                 Arg.Any<bool?>(), Arg.Any<string?>(),
                 Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
                 Arg.Any<SortField?>(), Arg.Any<string>(), Arg.Any<List<int>?>(),
-                Arg.Any<CancellationToken>())
+                Arg.Any<List<string>?>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResponse<Report>
             {
                 Data = new List<Report> { AReport() },
                 TotalRecords = 1, TotalPages = 1, CurrentPage = 1, PageSize = 10,
             });
 
-            var handler = new GetReportsQueryHandler(_repo);
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+            var handler = new GetReportsQueryHandler(_repo, _encryption);
             var result = await handler.HandleAsync(
                 new GetReportsQuery(1, 10, null, null, null, null, null, null, null, null, null, "asc", null), default);
 
@@ -63,7 +66,8 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
                 TotalRecords = 1, TotalPages = 1, CurrentPage = 1, PageSize = 10,
             });
 
-            var handler = new GetFamilyReportsQueryHandler(_repo);
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
+            var handler = new GetFamilyReportsQueryHandler(_repo, _encryption);
             var result = await handler.HandleAsync(
                 new GetFamilyReportsQuery(familyId, 1, 10, null, null, null, null, "asc"), default);
 

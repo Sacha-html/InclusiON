@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Api.Extensions;
+using InclusiON.Application.Extensions;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.AdminInstitutions.Commands;
@@ -10,6 +12,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Admin;
 using InclusiON.DTOs.Requests.Assignments;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Api.Controllers
 {
@@ -20,76 +23,105 @@ namespace InclusiON.Api.Controllers
     public class AdminInstitutionsController : ControllerBase
     {
         private readonly IHttpContextService _httpContextService;
+        private readonly IOutputCacheStore _cacheStore;
+        private readonly IEncryptionService _encryption;
 
-        public AdminInstitutionsController(IHttpContextService httpContextService)
+        public AdminInstitutionsController(IHttpContextService httpContextService, IOutputCacheStore cacheStore, IEncryptionService encryption)
         {
             _httpContextService = httpContextService;
+            _cacheStore         = cacheStore;
+            _encryption         = encryption;
         }
 
         [HttpGet("admins")]
+        [OutputCache(PolicyName = "admins")]
         [Authorize(Policy = Permissions.GlobalAdmin)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminUserResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse<List<AdminUserResponse>>>> GetAllAdmins(
-            [FromServices] IQueryHandler<GetAllAdminsQuery, ApiResponse<List<AdminUserResponse>>> handler,
-            CancellationToken cancellationToken)
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminUserResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<AdminUserResponse>>>> GetAllAdmins(
+            [FromServices] IQueryHandler<GetAllAdminsQuery, ApiResponse<PagedResponse<AdminUserResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            CancellationToken cancellationToken = default)
         {
-            var result = await handler.HandleAsync(new GetAllAdminsQuery(), cancellationToken);
+            var result = await handler.HandleAsync(new GetAllAdminsQuery(page, pageSize, search), cancellationToken);
             return Ok(result);
         }
 
         [HttpGet("me")]
         [Authorize]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<ApiResponse<List<AdminInstitutionResponse>>>> GetMyInstitutions(
-            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<List<AdminInstitutionResponse>>> handler,
-            CancellationToken cancellationToken)
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<AdminInstitutionResponse>>>> GetMyInstitutions(
+            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<PagedResponse<AdminInstitutionResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
+            CancellationToken cancellationToken = default)
         {
             var userId = _httpContextService.GetCurrentUserId();
-            if (userId is null) return Unauthorized(ApiResponse<List<AdminInstitutionResponse>>.Unauthorized());
+            if (userId is null) return Unauthorized(ApiResponse<PagedResponse<AdminInstitutionResponse>>.Unauthorized());
 
-            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(userId.Value), cancellationToken);
+            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(userId.Value, page, pageSize), cancellationToken);
             return Ok(result);
         }
 
         [HttpGet("{adminUserId}")]
         [Authorize(Policy = Permissions.GlobalAdmin)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<List<AdminInstitutionResponse>>), StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<ApiResponse<List<AdminInstitutionResponse>>>> GetAdminInstitutions(
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PagedResponse<AdminInstitutionResponse>>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PagedResponse<AdminInstitutionResponse>>>> GetAdminInstitutions(
             Guid adminUserId,
-            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<List<AdminInstitutionResponse>>> handler,
-            CancellationToken cancellationToken)
+            [FromServices] IQueryHandler<GetAdminInstitutionsQuery, ApiResponse<PagedResponse<AdminInstitutionResponse>>> handler,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
+            CancellationToken cancellationToken = default)
         {
-            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(adminUserId), cancellationToken);
+            var result = await handler.HandleAsync(new GetAdminInstitutionsQuery(adminUserId, page, pageSize), cancellationToken);
             return Ok(result);
         }
 
         [HttpPost("{adminUserId}")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<AdminInstitutionResponse>>> AssignInstitution(
             Guid adminUserId,
-            [FromBody] AssignInstitutionRequest request,
+            [FromBody] AssignInstitutionToAdminRequest request,
             [FromServices] ICommandHandler<AssignInstitutionToAdminCommand, ApiResponse<AdminInstitutionResponse>> handler,
             CancellationToken cancellationToken)
         {
-            var command = new AssignInstitutionToAdminCommand(adminUserId, request.InstitutionId);
+            if (!_encryption.TryDecryptId(request.InstitutionId, out var institutionId))
+                return BadRequest(ApiResponse<AdminInstitutionResponse>.ErrorResult("ID de institución inválido."));
+
+            var command = new AssignInstitutionToAdminCommand(adminUserId, institutionId);
             var result  = await handler.HandleAsync(command, cancellationToken);
+
+            if (result.Success)
+                await _cacheStore.EvictByTagAsync("admins", cancellationToken);
+
             return result.ToActionResult();
         }
 
-        [HttpDelete("{adminUserId}/{institutionId:int}")]
+        [HttpDelete("{adminUserId}/{encryptedInstitutionId}")]
+        [Authorize(Policy = Permissions.GlobalAdmin)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<AdminInstitutionResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<AdminInstitutionResponse>>> RemoveAssignment(
             Guid adminUserId,
-            int institutionId,
+            string encryptedInstitutionId,
             [FromServices] ICommandHandler<RemoveAdminInstitutionCommand, ApiResponse<AdminInstitutionResponse>> handler,
             CancellationToken cancellationToken)
         {
+            if (!_encryption.TryDecryptId(encryptedInstitutionId, out var institutionId))
+                return BadRequest(ApiResponse<AdminInstitutionResponse>.ErrorResult("ID de institución inválido."));
+
             var command = new RemoveAdminInstitutionCommand(adminUserId, institutionId);
             var result  = await handler.HandleAsync(command, cancellationToken);
+
+            if (result.Success)
+                await _cacheStore.EvictByTagAsync("admins", cancellationToken);
+
             return result.ToActionResult();
         }
 

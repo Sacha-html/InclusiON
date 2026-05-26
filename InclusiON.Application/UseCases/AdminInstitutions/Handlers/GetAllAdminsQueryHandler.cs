@@ -1,12 +1,14 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Mappers;
 using InclusiON.Application.UseCases.AdminInstitutions.Queries;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Admin;
 
 namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
 {
-    public class GetAllAdminsQueryHandler : IQueryHandler<GetAllAdminsQuery, ApiResponse<List<AdminUserResponse>>>
+    public class GetAllAdminsQueryHandler : IQueryHandler<GetAllAdminsQuery, ApiResponse<PagedResponse<AdminUserResponse>>>
     {
         private readonly IAdminInstitutionRepository _repository;
 
@@ -15,28 +17,23 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
             _repository = repository;
         }
 
-        public async Task<ApiResponse<List<AdminUserResponse>>> HandleAsync(
+        public async Task<ApiResponse<PagedResponse<AdminUserResponse>>> HandleAsync(
             GetAllAdminsQuery query, CancellationToken cancellationToken)
         {
-            var admins = await _repository.GetAllAdminsWithInstitutionsAsync(cancellationToken);
+            var paged = await _repository.GetAllAdminsPagedAsync(query.Page, query.PageSize, query.Search, cancellationToken);
 
-            var response = admins.Select(u => new AdminUserResponse
+            var response = new PagedResponse<AdminUserResponse>
             {
-                Id          = u.Id,
-                Name        = u.Name ?? string.Empty,
-                Surname     = u.Surname ?? string.Empty,
-                Email       = u.Email!,
-                IsActive    = u.IsActive,
-                CreatedAt   = u.CreatedAt,
-                IsGlobalAdmin = !u.AdminInstitutions.Any(),
-                Institutions = u.AdminInstitutions.Select(ai => new AdminInstitutionInfo
-                {
-                    InstitutionId   = ai.InstitutionId,
-                    InstitutionName = ai.Institution.Name
-                }).ToList()
-            }).ToList();
+                Data            = paged.Data.Select(AdminInstitutionMapper.ToAdminUserResponse).ToList(),
+                TotalRecords    = paged.TotalRecords,
+                TotalPages      = paged.TotalPages,
+                CurrentPage     = paged.CurrentPage,
+                PageSize        = paged.PageSize,
+                HasNextPage     = paged.HasNextPage,
+                HasPreviousPage = paged.HasPreviousPage,
+            };
 
-            return ApiResponse<List<AdminUserResponse>>.SuccessResult(response);
+            return ApiResponse<PagedResponse<AdminUserResponse>>.SuccessResult(response);
         }
     }
 }
