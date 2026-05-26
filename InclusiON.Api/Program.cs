@@ -16,6 +16,9 @@ using InclusiON.Api.Hubs;
 using InclusiON.Api.Services;
 using InclusiON.Application.Interfaces.Infrastructure;
 
+// QuestPDF — Community license (open-source use)
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // No revelar que el servidor es Kestrel ni su versión en el header "Server".
@@ -46,7 +49,8 @@ builder.Host.UseSerilog((context, config) =>
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
         .WriteTo.File("logs/inclusion-.log",
                         rollingInterval: RollingInterval.Day,
-                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
+                         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}",
+                         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning);
 });
 
 builder.Services.AddSignalR();
@@ -55,6 +59,7 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<InclusiON.Api.Filters.ValidationFilter>();
     options.Filters.Add<InclusiON.Api.Filters.InstitutionAccessFilter>();
+    options.Filters.Add<InclusiON.Api.Filters.PaginationHeadersFilter>();
     options.ModelBinderProviders.Insert(0, new InclusiON.Api.ModelBinders.EncryptedGuidModelBinderProvider());
     options.ModelBinderProviders.Insert(1, new InclusiON.Api.ModelBinders.EncryptedIntModelBinderProvider());
 })
@@ -138,7 +143,8 @@ builder.Services.AddCors(options =>
             policy.WithOrigins(allowedOrigins)
                   .AllowAnyMethod()
                   .AllowAnyHeader()
-                  .AllowCredentials();
+                  .AllowCredentials()
+                  .WithExposedHeaders("X-Total-Count", "X-Total-Pages", "X-Current-Page");
         // Si AllowedOrigins está vacío no se llama a ningún método — CORS queda bloqueado.
     });
 });

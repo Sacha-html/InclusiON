@@ -16,17 +16,18 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
     {
         private readonly IIdentityService _identity = Substitute.For<IIdentityService>();
         private readonly IRefreshTokensRepository _tokens = Substitute.For<IRefreshTokensRepository>();
-        private readonly IEmailService _email = Substitute.For<IEmailService>();
+        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IAdminInstitutionRepository _adminInstitRepo = Substitute.For<IAdminInstitutionRepository>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IAccessAuditLogger _audit = Substitute.For<IAccessAuditLogger>();
 
         private static readonly Guid TargetUserId = Guid.NewGuid();
         private static readonly Guid AdminUserId = Guid.NewGuid();
 
         private AdminResetPasswordCommandHandler BuildSut() =>
-            new(_identity, _tokens, _email, _uow, _adminInstitRepo,
-                NullLogger<AdminResetPasswordCommandHandler>.Instance, _dateTime);
+            new(_identity, _tokens, _backgroundJobs, _uow, _adminInstitRepo,
+                NullLogger<AdminResetPasswordCommandHandler>.Instance, _dateTime, _audit);
 
         private static AdminResetPasswordCommand Cmd() =>
             new(TargetUserId, AdminUserId);

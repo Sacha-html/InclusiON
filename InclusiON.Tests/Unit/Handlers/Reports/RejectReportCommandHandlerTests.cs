@@ -24,7 +24,7 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
         private readonly IEncryptionService    _encryption   = Substitute.For<IEncryptionService>();
 
         private RejectReportCommandHandler BuildSut() =>
-            new(_reportsRepo, _emailService, _uow,
+            new(_reportsRepo, _uow,
                 NullLogger<RejectReportCommandHandler>.Instance, _dateTime, _scopeFactory, _encryption);
 
         private static readonly Guid AdminId = Guid.NewGuid();

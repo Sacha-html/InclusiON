@@ -111,5 +111,18 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .OrderBy(a => a.SequenceOrder)
                 .FirstOrDefaultAsync(ct);
         }
+
+        public async Task<bool> HasResponsesAsync(int roadmapActivityId, CancellationToken ct = default)
+        {
+            return await _context.ActivityResults
+                .AnyAsync(r => r.PersonRoadmapActivityId == roadmapActivityId, ct);
+        }
+
+        public async Task<bool> AnyHaveResponsesAsync(IEnumerable<int> roadmapActivityIds, CancellationToken ct = default)
+        {
+            var ids = roadmapActivityIds.ToList();
+            return await _context.ActivityResults
+                .AnyAsync(r => ids.Contains(r.PersonRoadmapActivityId), ct);
+        }
     }
 }

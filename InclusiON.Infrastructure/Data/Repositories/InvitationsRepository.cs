@@ -58,38 +58,78 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<PagedResponse<Invitation>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<PagedResponse<Invitation>> GetPagedAsync(int page, int pageSize, string? search = null, string? status = null, CancellationToken cancellationToken = default)
         {
-            return await _context.Invitations
+            var now = DateTime.UtcNow;
+            var query = _context.Invitations
                 .Include(i => i.ForPerson)
                 .Include(i => i.CreatedByProfessional)
-                .AsNoTracking()
+                .AsNoTracking();
+
+            query = ApplySearchAndStatus(query, search, status, now);
+
+            return await query
                 .OrderByDescending(i => i.CreatedAt)
                 .ToPagedAsync(page, pageSize, cancellationToken);
         }
 
-        public async Task<PagedResponse<Invitation>> GetPagedByProfessionalIdAsync(Guid professionalId, int page, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<PagedResponse<Invitation>> GetPagedByProfessionalIdAsync(Guid professionalId, int page, int pageSize, string? search = null, string? status = null, CancellationToken cancellationToken = default)
         {
-            return await _context.Invitations
+            var now = DateTime.UtcNow;
+            var query = _context.Invitations
                 .Include(i => i.ForPerson)
                 .AsNoTracking()
-                .Where(i => i.CreatedByProfessionalId == professionalId)
+                .Where(i => i.CreatedByProfessionalId == professionalId);
+
+            query = ApplySearchAndStatus(query, search, status, now);
+
+            return await query
                 .OrderByDescending(i => i.CreatedAt)
                 .ToPagedAsync(page, pageSize, cancellationToken);
         }
 
-        public async Task<PagedResponse<Invitation>> GetPagedByInstitutionIdsAsync(List<int> institutionIds, int page, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<PagedResponse<Invitation>> GetPagedByInstitutionIdsAsync(List<int> institutionIds, int page, int pageSize, string? search = null, string? status = null, CancellationToken cancellationToken = default)
         {
-            return await _context.Invitations
+            var now = DateTime.UtcNow;
+            var query = _context.Invitations
                 .Include(i => i.ForPerson)
                 .Include(i => i.CreatedByProfessional)
                 .AsNoTracking()
                 .Where(i => _context.ProfessionalInstitutions.Any(pi =>
                     pi.ProfessionalId == i.CreatedByProfessionalId &&
                     institutionIds.Contains(pi.InstitutionId) &&
-                    pi.IsActive))
+                    pi.IsActive));
+
+            query = ApplySearchAndStatus(query, search, status, now);
+
+            return await query
                 .OrderByDescending(i => i.CreatedAt)
                 .ToPagedAsync(page, pageSize, cancellationToken);
+        }
+
+        private static IQueryable<Invitation> ApplySearchAndStatus(IQueryable<Invitation> query, string? search, string? status, DateTime now)
+        {
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.ToLower();
+                query = query.Where(i =>
+                    i.Email.ToLower().Contains(term) ||
+                    (i.FirstName != null && i.FirstName.ToLower().Contains(term)) ||
+                    (i.LastName  != null && i.LastName.ToLower().Contains(term)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = status switch
+                {
+                    "Aceptada" => query.Where(i => i.IsUsed),
+                    "Expirada" => query.Where(i => !i.IsUsed && i.ExpiresAt < now),
+                    "Enviada"  => query.Where(i => !i.IsUsed && i.ExpiresAt >= now),
+                    _          => query,
+                };
+            }
+
+            return query;
         }
 
         public async Task<Invitation> CreateAsync(Invitation invitation, CancellationToken cancellationToken = default)

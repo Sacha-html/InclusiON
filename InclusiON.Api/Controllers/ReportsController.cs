@@ -46,6 +46,7 @@ namespace InclusiON.Api.Controllers
 
         /// <summary>Lista paginada de reportes con filtros.</summary>
         [HttpGet]
+        [HttpHead]
         [Authorize(Policy = "reports:read")]
         [ProducesResponseType(typeof(ApiResponse<PagedResponse<ReportsListItemReponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<PagedResponse<ReportsListItemReponse>>>> GetReports(
@@ -63,7 +64,13 @@ namespace InclusiON.Api.Controllers
             }
 
             var entityId = _httpContextService.GetCurrentEntityId();
-            if (entityId.HasValue && string.IsNullOrWhiteSpace(request.ProfessionalId))
+            var role     = _httpContextService.GetCurrentUserRole();
+
+            // Profesionales solo ven sus propios reportes — forzar siempre, ignorar lo que mande el frontend.
+            // Admins pueden filtrar por cualquier profesional (o ver todos si no filtran).
+            if (role == nameof(IdentityRoles.Professional) && entityId.HasValue)
+                request.ProfessionalId = entityId.Value.ToString();
+            else if (entityId.HasValue && string.IsNullOrWhiteSpace(request.ProfessionalId))
                 request.ProfessionalId = entityId.Value.ToString();
 
             var query = new GetReportsQuery(
@@ -79,7 +86,8 @@ namespace InclusiON.Api.Controllers
                 request.DateTo,
                 request.SortBy,
                 request.SortDirection,
-                request.InstitutionIds
+                request.InstitutionIds,
+                request.PersonIds
             );
 
             var result = await handler.HandleAsync(query, cancellationToken);
@@ -289,6 +297,44 @@ namespace InclusiON.Api.Controllers
             var adminUserId = _httpContextService.GetCurrentUserId()!.Value;
             var result = await handler.HandleAsync(new RejectReportCommand(reportId, adminUserId, request.Comment), cancellationToken);
             return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// El familiar marca el reporte como leído. El indicador "Nuevo" desaparece en la UI.
+        /// Operación idempotente: si ya estaba leído no hace nada.
+        /// </summary>
+        [HttpPatch("{reportId}/mark-read")]
+        [Authorize(Policy = "reports:read")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> MarkReportRead(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
+            [FromServices] ICommandHandler<MarkReportReadCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new MarkReportReadCommand(reportId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>Exporta un reporte aprobado como archivo PDF.</summary>
+        [HttpGet("{reportId}/export-pdf")]
+        [Authorize(Policy = "reports:export")]
+        [ReportAccess(AccessMode.Read)]
+        [Produces("application/pdf")]
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ExportReportPdf(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
+            [FromServices] IQueryHandler<ExportReportPdfQuery, ApiResponse<byte[]>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new ExportReportPdfQuery(reportId), cancellationToken);
+
+            if (!result.Success)
+                return result.ToActionResult().Result!;
+
+            var filename = $"reporte-{reportId}-{DateTime.UtcNow:yyyyMMdd}.pdf";
+            return File(result.Data!, "application/pdf", filename);
         }
     }
 }

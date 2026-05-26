@@ -14,13 +14,15 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
 {
     public class AcceptInvitationCommandHandlerTests
     {
-        private readonly IInvitationsRepository _invRepo  = Substitute.For<IInvitationsRepository>();
-        private readonly IIdentityService       _identity = Substitute.For<IIdentityService>();
-        private readonly IUnitOfWork            _uow      = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider      _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IInvitationsRepository  _invRepo   = Substitute.For<IInvitationsRepository>();
+        private readonly IProfessionalsRepository _profsRepo = Substitute.For<IProfessionalsRepository>();
+        private readonly IBackgroundJobRepository _bgJobs    = Substitute.For<IBackgroundJobRepository>();
+        private readonly IIdentityService         _identity  = Substitute.For<IIdentityService>();
+        private readonly IUnitOfWork              _uow       = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider        _dateTime  = Substitute.For<IDateTimeProvider>();
 
         private AcceptInvitationCommandHandler BuildSut() =>
-            new(_invRepo, _identity, _uow,
+            new(_invRepo, _profsRepo, _bgJobs, _identity, _uow,
                 NullLogger<AcceptInvitationCommandHandler>.Instance, _dateTime);
 
         private static AcceptInvitationCommand Cmd(

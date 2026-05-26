@@ -1,3 +1,4 @@
+using System.Text.Json;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -15,6 +16,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
     {
         private readonly IActivityAssignmentRepository _repository;
         private readonly IRoadmapRepository _roadmapRepository;
+        private readonly IProfessionalsRepository _professionalsRepository;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
         private readonly IEncryptionService _encryption;
@@ -22,15 +25,19 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         public CompleteActivityResponseCommandHandler(
             IActivityAssignmentRepository repository,
             IRoadmapRepository roadmapRepository,
+            IProfessionalsRepository professionalsRepository,
+            IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
             IEncryptionService encryption)
         {
-            _repository = repository;
-            _roadmapRepository = roadmapRepository;
-            _unitOfWork = unitOfWork;
-            _dateTime = dateTime;
-            _encryption = encryption;
+            _repository              = repository;
+            _roadmapRepository       = roadmapRepository;
+            _professionalsRepository = professionalsRepository;
+            _backgroundJobs          = backgroundJobs;
+            _unitOfWork              = unitOfWork;
+            _dateTime                = dateTime;
+            _encryption              = encryption;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -96,6 +103,54 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             // Single save — all mutations committed atomically
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Ajuste adaptativo — fire and forget, solo si la actividad esta en roadmap
+            if (roadmapEntry?.Id > 0)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var prof = await _professionalsRepository.GetByIdAsync(
+                            assignment.AssignedByProfessionalId, CancellationToken.None);
+                        await _backgroundJobs.CreateAsync(
+                            JobTypes.AdaptiveAdjustment,
+                            JsonSerializer.Serialize(new
+                            {
+                                PersonRoadmapActivityId = roadmapEntry.Id,
+                                ActivityResponseId      = response.Id,
+                                AssignmentId            = assignment.Id,
+                                ProfessionalUserId      = prof?.UserId.ToString() ?? string.Empty
+                            }),
+                            maxRetries: 3);
+                    }
+                    catch { /* fire and forget */ }
+                });
+            }
+
+            // Notificar al profesional — fire and forget
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var prof = await _professionalsRepository.GetByIdAsync(
+                        assignment.AssignedByProfessionalId, CancellationToken.None);
+                    if (prof is not null)
+                    {
+                        await _backgroundJobs.CreateAsync(
+                            JobTypes.Push,
+                            JsonSerializer.Serialize(new NotificationPayload
+                            {
+                                UserId    = prof.UserId.ToString(),
+                                Title     = "Actividad completada",
+                                Message   = $"Una persona completó una actividad asignada por vos ({command.SuccessPercentage:F0}% de éxito).",
+                                ActionUrl = "/#/pro/persons"
+                            }),
+                            maxRetries: 3);
+                    }
+                }
+                catch { /* fire and forget */ }
+            });
 
             var updated = await _repository.GetByIdAsync(command.AssignmentId, cancellationToken);
 

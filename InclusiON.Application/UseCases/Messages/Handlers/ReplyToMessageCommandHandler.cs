@@ -1,8 +1,10 @@
+using System.Text.Json;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Messages.Commands;
 using InclusiON.Application.Mappers;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -13,21 +15,24 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
     public class ReplyToMessageCommandHandler
         : ICommandHandler<ReplyToMessageCommand, ApiResponse<MessageResponse>>
     {
-        private readonly IMessagesRepository _messages;
-        private readonly IUsersRepository    _users;
-        private readonly IUnitOfWork         _uow;
-        private readonly IEncryptionService  _encryption;
+        private readonly IMessagesRepository     _messages;
+        private readonly IUsersRepository        _users;
+        private readonly IUnitOfWork             _uow;
+        private readonly IEncryptionService      _encryption;
+        private readonly IBackgroundJobRepository _bgJobs;
 
         public ReplyToMessageCommandHandler(
             IMessagesRepository messages,
             IUsersRepository users,
             IUnitOfWork uow,
-            IEncryptionService encryption)
+            IEncryptionService encryption,
+            IBackgroundJobRepository bgJobs)
         {
             _messages   = messages;
             _users      = users;
             _uow        = uow;
             _encryption = encryption;
+            _bgJobs     = bgJobs;
         }
 
         public async Task<ApiResponse<MessageResponse>> HandleAsync(
@@ -81,6 +86,24 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             // Assign navigation properties AFTER save — in-memory only, safe for DTO mapping.
             reply.Sender   = sender;
             reply.Receiver = receiver;
+
+            // Push SignalR al destinatario — fire and forget
+            var senderName    = $"{sender!.Name} {sender.Surname}".Trim();
+            var receiverIdStr = receiver!.Id.ToString();
+            _ = Task.Run(async () =>
+            {
+                await _bgJobs.CreateAsync(
+                    JobTypes.Push,
+                    JsonSerializer.Serialize(new NotificationPayload
+                    {
+                        UserId           = receiverIdStr,
+                        Title            = "Nueva respuesta",
+                        Message          = $"{senderName} respondió un mensaje.",
+                        ActionUrl        = "/#/pro/messages",
+                        SendEmailFallback = false
+                    }),
+                    maxRetries: 3);
+            });
 
             var dto = MessageMapper.ToDetail(reply);
             dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(reply.Id.ToString()));

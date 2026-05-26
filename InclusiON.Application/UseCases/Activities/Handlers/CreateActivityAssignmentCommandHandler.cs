@@ -1,8 +1,10 @@
+using System.Text.Json;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Activities.Commands;
 using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Activities;
@@ -15,6 +17,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
     {
         private readonly IActivityAssignmentRepository _repository;
         private readonly IActivitiesRepository _activitiesRepository;
+        private readonly IPersonsRepository _personsRepository;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
         private readonly IEncryptionService _encryption;
@@ -22,15 +26,19 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         public CreateActivityAssignmentCommandHandler(
             IActivityAssignmentRepository repository,
             IActivitiesRepository activitiesRepository,
+            IPersonsRepository personsRepository,
+            IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
             IEncryptionService encryption)
         {
-            _repository = repository;
+            _repository           = repository;
             _activitiesRepository = activitiesRepository;
-            _unitOfWork = unitOfWork;
-            _dateTime = dateTime;
-            _encryption = encryption;
+            _personsRepository    = personsRepository;
+            _backgroundJobs       = backgroundJobs;
+            _unitOfWork           = unitOfWork;
+            _dateTime             = dateTime;
+            _encryption           = encryption;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -63,12 +71,45 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             await _repository.CreateAsync(assignment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var created = await _repository.GetByIdAsync(assignment.Id, cancellationToken);
+            // Notificar a la persona — fire and forget (job INSERT rápido)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var person = await _personsRepository.GetByIdAsync(command.PersonId, CancellationToken.None);
+                    if (person is not null)
+                    {
+                        await _backgroundJobs.CreateAsync(
+                            JobTypes.Push,
+                            JsonSerializer.Serialize(new NotificationPayload
+                            {
+                                UserId    = person.UserId.ToString(),
+                                Title     = "Nueva actividad asignada",
+                                Message   = $"Tenés una nueva actividad: {activity.Title}",
+                                ActionUrl = "/#/app/activities"
+                            }),
+                            maxRetries: 3);
+                    }
+                }
+                catch { /* fire and forget — no bloquea respuesta */ }
+            });
 
-            var dto = ActivityAssignmentResponse.From(created!);
-            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(created!.Id.ToString()));
-            foreach (var attempt in dto.Responses)
-                attempt.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(attempt.Id.ToString()));
+            // Build response from in-memory data — avoids re-fetching after save
+            var dto = new ActivityAssignmentResponse
+            {
+                Id                   = assignment.Id,
+                ActivityId           = assignment.ActivityId,
+                ActivityTitle        = activity.Title,
+                TemplateTypeCode     = activity.Content?.TemplateType?.Code ?? string.Empty,
+                ContentJson          = activity.Content?.ContentJson ?? string.Empty,
+                PersonId             = assignment.PersonId,
+                Status               = "Pendiente",
+                AssignedAt           = assignment.AssignedAt,
+                DueDate              = assignment.DueDate,
+                IsEvaluationActivity = assignment.IsEvaluationActivity,
+                Responses            = [],
+            };
+            dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(assignment.Id.ToString()));
             return ApiResponse<ActivityAssignmentResponse>.SuccessResult(dto, "Actividad asignada exitosamente.");
         }
 

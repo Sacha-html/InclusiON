@@ -32,6 +32,12 @@ namespace InclusiON.Tests.Integration.TestSupport
                 Permissions.Persons.Read,
                 Permissions.Reports.Read);
 
+        public static string ForFamilyRepresentativeWithExport(Guid userId) =>
+            Build(userId, nameof(IdentityRoles.FamilyRepresentative), false, null,
+                Permissions.Persons.Read,
+                Permissions.Reports.Read,
+                Permissions.Reports.Export);
+
         public static string ForGlobalAdmin(Guid userId) =>
             Build(userId, nameof(IdentityRoles.Admin), true, null,
                 Permissions.Persons.Read,

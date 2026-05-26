@@ -20,5 +20,18 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task UpdateAsync(Activity activity, CancellationToken cancellationToken = default);
         Task<bool> HasActiveAssignmentsAsync(int activityId, CancellationToken cancellationToken = default);
         Task<List<Activity>> GetByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default);
+        Task<List<ActivityEmbeddingProjection>> GetAllActiveForEmbeddingAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Devuelve las actividades estándar activas (IsStandardActivity = true) para regeneración nocturna de embeddings.
+        /// </summary>
+        Task<List<ActivityEmbeddingProjection>> GetStandardActivitiesForEmbeddingAsync(CancellationToken cancellationToken = default);
     }
+
+    public record ActivityEmbeddingProjection(
+        int Id,
+        string Title,
+        string? Description,
+        string? Instructions,
+        string? ContentJson);
 }

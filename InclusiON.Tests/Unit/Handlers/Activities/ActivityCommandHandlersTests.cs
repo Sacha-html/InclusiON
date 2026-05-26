@@ -350,6 +350,8 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
     {
         private readonly IActivityAssignmentRepository _repo = Substitute.For<IActivityAssignmentRepository>();
         private readonly IActivitiesRepository _activitiesRepo = Substitute.For<IActivitiesRepository>();
+        private readonly IPersonsRepository _personsRepo = Substitute.For<IPersonsRepository>();
+        private readonly IBackgroundJobRepository _bgJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
         private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
@@ -371,7 +373,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         private CreateActivityAssignmentCommandHandler BuildSut() =>
-            new(_repo, _activitiesRepo, _uow, _dateTime, _encryption);
+            new(_repo, _activitiesRepo, _personsRepo, _bgJobs, _uow, _dateTime, _encryption);
 
         private static CreateActivityAssignmentCommand Cmd(Guid? profId = null) => new(
             EncryptedActivityId, PersonId, profId ?? ProfId,
@@ -580,11 +582,13 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
 
     public class CompleteActivityResponseCommandHandlerTests
     {
-        private readonly IActivityAssignmentRepository _repo     = Substitute.For<IActivityAssignmentRepository>();
-        private readonly IRoadmapRepository           _roadmaps = Substitute.For<IRoadmapRepository>();
-        private readonly IUnitOfWork                  _uow      = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider            _dateTime = Substitute.For<IDateTimeProvider>();
-        private readonly IEncryptionService           _encryption = Substitute.For<IEncryptionService>();
+        private readonly IActivityAssignmentRepository _repo           = Substitute.For<IActivityAssignmentRepository>();
+        private readonly IRoadmapRepository            _roadmaps       = Substitute.For<IRoadmapRepository>();
+        private readonly IProfessionalsRepository      _profsRepo      = Substitute.For<IProfessionalsRepository>();
+        private readonly IBackgroundJobRepository      _bgJobs         = Substitute.For<IBackgroundJobRepository>();
+        private readonly IUnitOfWork                   _uow            = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider             _dateTime       = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService            _encryption     = Substitute.For<IEncryptionService>();
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid OtherPersonId = Guid.NewGuid();
@@ -598,7 +602,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         private CompleteActivityResponseCommandHandler BuildSut() =>
-            new(_repo, _roadmaps, _uow, _dateTime, _encryption);
+            new(_repo, _roadmaps, _profsRepo, _bgJobs, _uow, _dateTime, _encryption);
 
         private static CompleteActivityResponseCommand Cmd(
             Guid? personId = null, decimal success = 85m) => new(

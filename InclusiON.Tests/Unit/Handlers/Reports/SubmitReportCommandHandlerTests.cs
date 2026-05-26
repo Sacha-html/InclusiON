@@ -10,20 +10,22 @@ using InclusiON.Application.UseCases.Reports.Handlers;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace InclusiON.Tests.Unit.Handlers.Reports
 {
     public class SubmitReportCommandHandlerTests
     {
-        private readonly IReportsRepository       _reportsRepo = Substitute.For<IReportsRepository>();
-        private readonly IProfessionalsRepository _prosRepo    = Substitute.For<IProfessionalsRepository>();
-        private readonly IUnitOfWork              _uow         = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider        _dateTime    = Substitute.For<IDateTimeProvider>();
-        private readonly IEncryptionService       _encryption  = Substitute.For<IEncryptionService>();
+        private readonly IReportsRepository       _reportsRepo  = Substitute.For<IReportsRepository>();
+        private readonly IProfessionalsRepository _prosRepo     = Substitute.For<IProfessionalsRepository>();
+        private readonly IUnitOfWork              _uow          = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider        _dateTime     = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService       _encryption   = Substitute.For<IEncryptionService>();
+        private readonly IServiceScopeFactory     _scopeFactory = Substitute.For<IServiceScopeFactory>();
 
         private SubmitReportCommandHandler BuildSut() =>
             new(_reportsRepo, _prosRepo, _uow,
-                NullLogger<SubmitReportCommandHandler>.Instance, _dateTime, _encryption);
+                NullLogger<SubmitReportCommandHandler>.Instance, _dateTime, _encryption, _scopeFactory);
 
         private static readonly Guid ProfId      = Guid.NewGuid();
         private static readonly Guid OtherProfId = Guid.NewGuid();

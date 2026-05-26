@@ -45,8 +45,9 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 var similarIds = await _embeddingRepository.SearchAsync(
                     activityEmbedding,
                     query.ProfessionalId,
-                    query.Limit + 1, // +1 por si devuelve la misma
-                    [query.ActivityId], // excludeIds
+                    query.Limit + 1,
+                    [query.ActivityId],
+                    minSimilarity: 0.25f,
                     cancellationToken);
 
                 // Remover la actividad original si está en la lista

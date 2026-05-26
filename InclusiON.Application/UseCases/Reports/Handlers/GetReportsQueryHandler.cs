@@ -37,6 +37,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 query.SortBy,
                 query.SortDirection,
                 query.InstitutionIds,
+                query.PersonIds,
                 cancellationToken);
 
             var response = new PagedResponse<ReportsListItemReponse>

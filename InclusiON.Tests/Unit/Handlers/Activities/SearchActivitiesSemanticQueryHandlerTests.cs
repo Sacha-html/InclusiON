@@ -46,7 +46,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         {
             _embeddingService.GenerateEmbeddingAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
                              .Returns(FakeEmbedding);
-            _embeddingRepo.SearchAsync(FakeEmbedding, ProfId, 10, null, Arg.Any<CancellationToken>())
+            _embeddingRepo.SearchAsync(FakeEmbedding, ProfId, 10, null, Arg.Any<float>(), Arg.Any<CancellationToken>())
                           .Returns(new List<int>());
 
             var result = await BuildSut().HandleAsync(AQuery(), default);
@@ -63,7 +63,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             var ids = new List<int> { 1, 2 };
             _embeddingService.GenerateEmbeddingAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
                              .Returns(FakeEmbedding);
-            _embeddingRepo.SearchAsync(FakeEmbedding, ProfId, 10, null, Arg.Any<CancellationToken>())
+            _embeddingRepo.SearchAsync(FakeEmbedding, ProfId, 10, null, Arg.Any<float>(), Arg.Any<CancellationToken>())
                           .Returns(ids);
             _activitiesRepo.GetByIdsAsync(ids, Arg.Any<CancellationToken>())
                            .Returns(new List<Activity> { AnActivity(1), AnActivity(2) });

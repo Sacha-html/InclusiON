@@ -26,6 +26,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             Guid professionalId,
             int limit = 10,
             List<int>? excludeIds = null,
+            float minSimilarity = 0.25f,
             CancellationToken cancellationToken = default);
 
         /// <summary>

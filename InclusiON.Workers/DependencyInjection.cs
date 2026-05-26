@@ -13,6 +13,9 @@ public static class DependencyInjection
         services.AddScoped<IJobHandler, EmailAgent>();
         services.AddScoped<IJobHandler, NotificationAgent>();
         services.AddScoped<IJobHandler, EmbeddingAgent>();
+        services.AddScoped<IJobHandler, AdaptiveAdjustmentAgent>();
+        services.AddScoped<IJobHandler, TemplateGenerationAgent>();
+        services.AddScoped<IJobHandler, WeeklyProgressReportAgent>();
 
         // Executor (scoped — depends on IJobHandler and IBackgroundJobRepository)
         services.AddScoped<JobExecutor>();
@@ -21,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<ICleanupStep, DeleteCompletedJobsStep>();
         services.AddScoped<ICleanupStep, SuspendInactiveProfessionalsStep>();
         services.AddScoped<ICleanupStep, GenerateTemplateCentroidsStep>();
+        services.AddScoped<ICleanupStep, WeeklyReportCleanupStep>();
 
         // Workers (singleton BackgroundService — create scope per cycle)
         services.AddHostedService<PendingJobsWorker>();

@@ -4,6 +4,8 @@ namespace InclusiON.Application.UseCases.Invitations.Queries
         Guid? ProfessionalId = null,
         List<int>? InstitutionIds = null,
         int Page = 1,
-        int PageSize = 10
+        int PageSize = 10,
+        string? Search = null,
+        string? Status = null
     );
 }

@@ -23,6 +23,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             SortField? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
+            List<string>? personIds = null,
             CancellationToken cancellationToken = default);
 
         /// <summary>

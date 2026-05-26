@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.OutputCaching;
 using InclusiON.Api.Extensions;
 using InclusiON.Api.Filters;
 using InclusiON.Application.Authorization;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -385,6 +386,74 @@ namespace InclusiON.Api.Controllers
         {
             var result = await handler.HandleAsync(new DeactivateSkillAreaCommand(personId, areaId), cancellationToken);
             return result.ToActionResult();
+        }
+
+        #endregion
+
+        #region Help Request
+
+        /// <summary>
+        /// Obtiene la configuración de accesibilidad de una persona.
+        /// </summary>
+        [HttpGet("{personId}/accessibility")]
+        [Authorize(Policy = Permissions.Persons.Read)]
+        [PersonAccess(AccessMode.Read)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PersonAccessibilityResponse>>> GetAccessibility(
+            Guid personId,
+            [FromServices] IQueryHandler<GetPersonAccessibilityQuery, ApiResponse<PersonAccessibilityResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new GetPersonAccessibilityQuery(personId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Actualiza la configuración de accesibilidad de una persona.
+        /// </summary>
+        [HttpPut("{personId}/accessibility")]
+        [Authorize(Policy = Permissions.Persons.Update)]
+        [PersonAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PersonAccessibilityResponse>>> UpdateAccessibility(
+            Guid personId,
+            [FromBody] UpdatePersonAccessibilityRequest request,
+            [FromServices] ICommandHandler<UpdatePersonAccessibilityCommand, ApiResponse<PersonAccessibilityResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(
+                new UpdatePersonAccessibilityCommand(
+                    personId,
+                    request.RequiresLargeFont,
+                    request.RequiresHighContrast,
+                    request.VisualNoiseSensitivity,
+                    request.SoundSensitivity,
+                    request.ColorBlindnessType),
+                cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Solicitud de ayuda urgente desde el portal AAC.
+        /// Notifica vía SignalR a todos los profesionales supervisores activos de la persona.
+        /// </summary>
+        [HttpPost("me/help-request")]
+        [Authorize(Policy = Permissions.Activities.Respond)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> RequestHelp(
+            [FromServices] ICommandHandler<RequestHelpCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var personId = _httpContextService.GetCurrentEntityId();
+            if (personId is null)
+                return NotFound(ApiResponse<object>.NotFound("Persona"));
+
+            var result = await handler.HandleAsync(new RequestHelpCommand(personId.Value), cancellationToken);
+            return Ok(result);
         }
 
         #endregion

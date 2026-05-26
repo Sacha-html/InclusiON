@@ -9,6 +9,7 @@ namespace InclusiON.DTOs.Requests.Reports
     {
         public string? Search { get; set; }
         public string? PersonId { get; set; }
+        public List<string>? PersonIds { get; set; }
         public string? ProfessionalId { get; set; }
         public string? ReportTypeId { get; set; }
         public bool? IsActive { get; set; }

@@ -10,6 +10,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Professionals;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Professionals;
+using InclusiON.Domain.Enums;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Api.Controllers
@@ -140,6 +141,31 @@ namespace InclusiON.Api.Controllers
             }
 
             var query = new GetProfessionalByIdQuery(professionalId.Value);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Devuelve el resumen de progreso semanal del profesional autenticado (últimos 7 días).
+        /// </summary>
+        [HttpGet("me/weekly-progress")]
+        [Authorize(Roles = "Professional")]
+        [ProducesResponseType(typeof(ApiResponse<WeeklyProgressResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<WeeklyProgressResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<WeeklyProgressResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<WeeklyProgressResponse>>> GetWeeklyProgress(
+            [FromServices] IQueryHandler<GetWeeklyProgressQuery, ApiResponse<WeeklyProgressResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+            {
+                return Unauthorized(ApiResponse<WeeklyProgressResponse>.ErrorResult(
+                    ErrorCode.Unauthorized,
+                    "No autenticado"));
+            }
+
+            var query  = new GetWeeklyProgressQuery(professionalId.Value);
             var result = await handler.HandleAsync(query, cancellationToken);
             return result.ToActionResult();
         }

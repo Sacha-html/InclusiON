@@ -31,14 +31,14 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
         public async Task HandleAsync_ByProfessional_CallsGetByProfessional()
         {
             var list = new List<Invitation> { AnInvitation() };
-            _repo.GetPagedByProfessionalIdAsync(ProfId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            _repo.GetPagedByProfessionalIdAsync(ProfId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
                  .Returns(new PagedResponse<Invitation> { Data = list, TotalRecords = list.Count, TotalPages = 1, CurrentPage = 1, PageSize = 10 });
 
             var result = await BuildSut().HandleAsync(new GetInvitationsQuery(ProfId), default);
 
             result.Success.Should().BeTrue();
             result.Data!.TotalRecords.Should().Be(1);
-            await _repo.Received(1).GetPagedByProfessionalIdAsync(ProfId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+            await _repo.Received(1).GetPagedByProfessionalIdAsync(ProfId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
         }
 
         // ── Por instituciones ────────────────────────────────────────────────
@@ -48,14 +48,14 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
         {
             var ids = new List<int> { 1, 2 };
             var list2 = new List<Invitation> { AnInvitation(), AnInvitation() };
-            _repo.GetPagedByInstitutionIdsAsync(ids, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            _repo.GetPagedByInstitutionIdsAsync(ids, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
                  .Returns(new PagedResponse<Invitation> { Data = list2, TotalRecords = list2.Count, TotalPages = 1, CurrentPage = 1, PageSize = 10 });
 
             var result = await BuildSut().HandleAsync(new GetInvitationsQuery(null, ids), default);
 
             result.Success.Should().BeTrue();
             result.Data!.TotalRecords.Should().Be(2);
-            await _repo.Received(1).GetPagedByInstitutionIdsAsync(ids, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+            await _repo.Received(1).GetPagedByInstitutionIdsAsync(ids, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
         }
 
         // ── Todas ────────────────────────────────────────────────────────────
@@ -63,13 +63,13 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
         [Fact]
         public async Task HandleAsync_NoFilter_CallsGetAll()
         {
-            _repo.GetPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            _repo.GetPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
                  .Returns(new PagedResponse<Invitation>());
 
             var result = await BuildSut().HandleAsync(new GetInvitationsQuery(), default);
 
             result.Success.Should().BeTrue();
-            await _repo.Received(1).GetPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+            await _repo.Received(1).GetPagedAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
         }
     }
 }
