@@ -135,6 +135,58 @@
                 }
               </div>
 
+              <!-- Historial + config motor adaptativo + asignar -->
+              <div class="w-100 d-flex align-items-center gap-3 mt-1">
+                <button type="button" cButton color="link" size="sm"
+                        (click)="loadAdjustmentHistory(area.id, activity.id)"
+                        class="p-0"
+                        [attr.aria-label]="'Historial de ajustes para ' + activity.activityTitle">
+                  <small>{{ showingHistoryForActivityId() === activity.id ? 'Ocultar historial' : 'Ver historial MDA' }}</small>
+                </button>
+                @if (canUpdate) {
+                  <button type="button" cButton color="link" size="sm"
+                          (click)="openAdaptiveConfigModal(area, activity)"
+                          class="p-0"
+                          [attr.aria-label]="'Configurar motor adaptativo para ' + activity.activityTitle">
+                    <small>⚙ Motor MDA</small>
+                  </button>
+                  <button type="button" cButton color="link" size="sm"
+                          (click)="openAssignModal(area, activity)"
+                          class="p-0"
+                          [attr.aria-label]="'Asignar actividad: ' + activity.activityTitle">
+                    <small>📋 Asignar</small>
+                  </button>
+                }
+              </div>
+
+              @if (showingHistoryForActivityId() === activity.id) {
+                  <div class="adjustment-history mt-2" role="region" [attr.aria-label]="'Historial MDA: ' + activity.activityTitle">
+                    @if (loadingHistory()) {
+                      <c-spinner size="sm" />
+                    } @else if (adjustmentHistory().length === 0) {
+                      <small class="text-muted">Sin ajustes registrados.</small>
+                    } @else {
+                      <div class="d-flex justify-content-end mb-1">
+                        <button type="button" cButton color="link" size="sm" class="p-0"
+                                (click)="exportHistoryToCsv(activity.activityTitle)"
+                                [attr.aria-label]="'Exportar historial MDA de ' + activity.activityTitle + ' a CSV'">
+                          <small>⬇ Exportar CSV</small>
+                        </button>
+                      </div>
+                      <ul class="list-unstyled mb-0">
+                        @for (log of adjustmentHistory(); track log.id) {
+                          <li class="d-flex gap-2 align-items-start mb-1">
+                            <c-badge [color]="log.adjustmentType === 'DifficultyUp' ? 'success' : log.adjustmentType === 'FrustrationIntervention' ? 'danger' : 'warning'" shape="rounded-pill">
+                              {{ log.adjustmentType }}
+                            </c-badge>
+                            <small class="text-muted">{{ log.reason }} — {{ log.adjustedAt | date:'dd/MM/yy HH:mm' }}</small>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                }
+
               <!-- Drag preview placeholder -->
               <div *cdkDragPlaceholder class="drag-placeholder"></div>
             </div>
@@ -318,3 +370,144 @@
   (confirm)="submitRemoveActivity()"
   (cancel)="confirmRemoveActivity = null">
 </app-confirm-modal>
+
+<!-- Modal: Configuración del motor adaptativo (IN-116) -->
+<c-modal [visible]="showAdaptiveConfigModal" (visibleChange)="!$event && closeAdaptiveConfigModal()" size="lg">
+  <c-modal-header>
+    <strong>Motor Adaptativo</strong>
+    @if (adaptiveConfigTarget) {
+      <span class="ms-2 text-body-secondary">— {{ adaptiveConfigTarget.activity.activityTitle }}</span>
+    }
+  </c-modal-header>
+  <c-modal-body>
+    @if (loadingAdaptiveConfig) {
+      <div class="text-center py-3">
+        <c-spinner size="sm" aria-label="Cargando configuración"></c-spinner>
+        <span class="ms-2">Cargando...</span>
+      </div>
+    } @else {
+      <!-- Estado actual -->
+      @if (adaptiveConfig) {
+        <div class="alert alert-success d-flex align-items-center gap-2 mb-3" role="status">
+          <span>Motor <strong>configurado</strong> — actualmente <strong>{{ adaptiveConfig.isEnabled ? 'habilitado' : 'deshabilitado' }}</strong></span>
+        </div>
+      } @else {
+        <div class="alert alert-info mb-3" role="status">
+          Esta actividad no tiene motor adaptativo configurado. Completá el formulario para habilitarlo.
+        </div>
+      }
+
+      <!-- Habilitado toggle -->
+      <c-form-check class="mb-4">
+        <input cFormCheckInput type="checkbox" id="mda-enabled" [(ngModel)]="adaptiveForm.isEnabled" />
+        <label cFormCheckLabel for="mda-enabled"><strong>Habilitar motor adaptativo</strong></label>
+      </c-form-check>
+
+      <c-row>
+        <!-- Rango de dificultad -->
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-min-diff">Dificultad mínima (1-10)</label>
+          <input cFormControl type="number" id="mda-min-diff"
+                 [(ngModel)]="adaptiveForm.minDifficultyLevel" min="1" max="10" />
+        </c-col>
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-max-diff">Dificultad máxima (1-10)</label>
+          <input cFormControl type="number" id="mda-max-diff"
+                 [(ngModel)]="adaptiveForm.maxDifficultyLevel" min="1" max="10" />
+        </c-col>
+
+        <!-- Éxitos / fallos consecutivos -->
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-success-up">Éxitos consecutivos para subir dificultad</label>
+          <input cFormControl type="number" id="mda-success-up"
+                 [(ngModel)]="adaptiveForm.consecutiveSuccessToUpgrade" min="1" max="20" />
+        </c-col>
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-fail-down">Fallos consecutivos para bajar dificultad</label>
+          <input cFormControl type="number" id="mda-fail-down"
+                 [(ngModel)]="adaptiveForm.consecutiveFailuresToDowngrade" min="1" max="20" />
+        </c-col>
+
+        <!-- Umbral de éxito -->
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-success-pct">% mínimo para considerar éxito</label>
+          <input cFormControl type="number" id="mda-success-pct"
+                 [(ngModel)]="adaptiveForm.successThresholdPercent" min="1" max="100" />
+        </c-col>
+
+        <!-- Umbral de frustración -->
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-frustration">Nivel de frustración que dispara alerta (1-5)</label>
+          <input cFormControl type="number" id="mda-frustration"
+                 [(ngModel)]="adaptiveForm.frustrationThreshold" min="1" max="5" />
+        </c-col>
+
+        <!-- Tiempo límite (opcionales) -->
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-min-time">Tiempo mínimo en seg (vacío = sin límite)</label>
+          <input cFormControl type="number" id="mda-min-time"
+                 [ngModel]="adaptiveForm.minTimeLimitSeconds"
+                 (ngModelChange)="adaptiveForm.minTimeLimitSeconds = $event || null"
+                 min="0" />
+        </c-col>
+        <c-col [md]="6" class="mb-3">
+          <label cFormLabel for="mda-max-time">Tiempo máximo en seg (vacío = sin límite)</label>
+          <input cFormControl type="number" id="mda-max-time"
+                 [ngModel]="adaptiveForm.maxTimeLimitSeconds"
+                 (ngModelChange)="adaptiveForm.maxTimeLimitSeconds = $event || null"
+                 min="0" />
+        </c-col>
+      </c-row>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    @if (adaptiveConfig) {
+      <button cButton color="danger" variant="outline"
+              (click)="confirmDeleteAdaptiveConfig()" [disabled]="deletingAdaptiveConfig || savingAdaptiveConfig">
+        @if (deletingAdaptiveConfig) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+        Quitar motor
+      </button>
+    }
+    <button cButton color="secondary" (click)="closeAdaptiveConfigModal()">Cancelar</button>
+    <button cButton color="primary"
+            (click)="submitAdaptiveConfig()"
+            [disabled]="savingAdaptiveConfig || loadingAdaptiveConfig">
+      @if (savingAdaptiveConfig) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+      Guardar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal: Asignar actividad desde roadmap (IN-150) -->
+<c-modal [visible]="showAssignModal" (visibleChange)="showAssignModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>Asignar actividad</h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (assignTarget) {
+      <p class="mb-3">
+        <strong>{{ assignTarget.activity.activityTitle }}</strong>
+      </p>
+    }
+    <div class="mb-3">
+      <label cFormLabel for="assign-due-date">Fecha límite (opcional)</label>
+      <input cFormControl id="assign-due-date" type="date"
+             [(ngModel)]="assignForm.dueDate"
+             [min]="assignToday" />
+    </div>
+    <div class="mb-3">
+      <c-form-check>
+        <input cFormCheckInput id="assign-is-eval" type="checkbox"
+               [(ngModel)]="assignForm.isEvaluationActivity" />
+        <label cFormCheckLabel for="assign-is-eval">Contar como evaluación</label>
+      </c-form-check>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeAssignModal()">Cancelar</button>
+    <button cButton color="primary" (click)="submitAssign()" [disabled]="assigning">
+      @if (assigning) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+      Asignar
+    </button>
+  </c-modal-footer>
+</c-modal>

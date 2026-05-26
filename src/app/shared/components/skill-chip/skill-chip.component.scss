@@ -8,7 +8,7 @@
   gap: 0.25rem;
   padding: 0.25rem 0.75rem;
   border-radius: 50rem;
-  color: #fff;
+  /* color set via [style.color] binding — computed via contrastTextColor() */
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.5;
@@ -17,11 +17,11 @@
   &__icon {
     font-size: 1rem;
     line-height: 1;
-    color: #fff;
+    /* inherits color from host span */
   }
 
   &__name {
-    color: #fff;
+    /* inherits color from host span */
   }
 
   &__close {

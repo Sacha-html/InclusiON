@@ -19,10 +19,12 @@ export abstract class PlayerBaseComponent {
   private readonly el = inject(ElementRef<HTMLElement>);
 
   // Estado compartido
-  phase      = signal<PlayerPhase>('intro');
-  isLoading  = signal(false);
-  responseId = signal<string | null>(null);
-  isCorrect  = signal<boolean | null>(null);
+  phase       = signal<PlayerPhase>('intro');
+  isLoading   = signal(false);
+  hasError    = signal(false);
+  errorMsg    = signal('');
+  responseId  = signal<string | null>(null);
+  isCorrect   = signal<boolean | null>(null);
 
   private _startTime = 0;
 
@@ -49,7 +51,7 @@ export abstract class PlayerBaseComponent {
           heading?.focus();
         }, 80);
       },
-      error: () => this.isLoading.set(false),
+      error: () => { this.isLoading.set(false); this.hasError.set(true); this.errorMsg.set('No se pudo iniciar la actividad. Volvé a intentar.'); },
     });
   }
 
@@ -68,7 +70,7 @@ export abstract class PlayerBaseComponent {
       observations:      result.observations,
     }).subscribe({
       next:  () => { this.isLoading.set(false); this.completed.emit(); },
-      error: () => { this.isLoading.set(false); this.completed.emit(); },
+      error: () => { this.isLoading.set(false); this.hasError.set(true); this.errorMsg.set('No se pudo guardar tu progreso. Intentá de nuevo.'); },
     });
   }
 

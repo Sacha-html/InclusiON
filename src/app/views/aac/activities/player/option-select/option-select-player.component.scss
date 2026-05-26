@@ -1,0 +1,114 @@
+:host {
+  display: block;
+  padding: 1.5rem 1rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.player-game {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.game-instruction-small {
+  font-size: 1rem;
+  color: var(--a11y-text-muted, #757575);
+  text-align: center;
+  margin: 0;
+}
+
+.game-question {
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--a11y-text, #212121);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: .75rem;
+}
+
+.option-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: 1rem .75rem;
+  border: 3px solid var(--a11y-border, #E0E0E0);
+  border-radius: 16px;
+  background: var(--a11y-surface, #fff);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .1s, box-shadow .1s;
+  min-height: 80px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+
+  &:focus-visible { outline: 4px solid var(--a11y-primary, #2196F3); outline-offset: 2px; }
+
+  &:hover:not(:disabled):not(.option-btn--correct):not(.option-btn--wrong):not(.option-btn--reveal):not(.option-btn--dimmed) {
+    border-color: var(--a11y-primary, #2196F3);
+    background: rgba(33,150,243,.05);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(33,150,243,.2);
+  }
+
+  &--none { /* default */ }
+
+  &--correct {
+    border-color: var(--a11y-success, #4CAF50);
+    background: rgba(76,175,80,.1);
+  }
+
+  &--wrong {
+    border-color: var(--a11y-danger, #F44336);
+    background: rgba(244,67,54,.08);
+  }
+
+  &--reveal {
+    border-color: var(--a11y-success, #4CAF50);
+    background: rgba(76,175,80,.06);
+    border-style: dashed;
+  }
+
+  &--dimmed {
+    opacity: .45;
+  }
+
+  &:disabled { cursor: not-allowed; }
+}
+
+.option-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.option-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--a11y-text, #212121);
+  line-height: 1.25;
+}
+
+.option-badge {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+@media (max-width: 480px) {
+  .game-question { font-size: 1.25rem; }
+  .options-grid  { grid-template-columns: 1fr 1fr; }
+  .option-text   { font-size: .95rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

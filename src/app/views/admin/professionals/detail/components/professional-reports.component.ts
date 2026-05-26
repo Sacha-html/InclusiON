@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse } from '@models';
+import { ReportListItemResponse, ReportStatus } from '@models';
 import {
   FormSelectDirective,
   ModalBodyComponent,
@@ -59,10 +59,10 @@ export class ProfessionalReportsComponent implements OnInit {
     {
       key: 'status', label: 'Estado', type: 'badge',
       badgeMap: {
-        'Draft':     { color: 'secondary', label: 'Borrador'  },
-        'Submitted': { color: 'warning',   label: 'Enviado'   },
-        'Approved':  { color: 'success',   label: 'Aprobado'  },
-        'Rejected':  { color: 'danger',    label: 'Rechazado' },
+        [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador'  },
+        [ReportStatus.Submitted]: { color: 'warning',   label: 'Enviado'   },
+        [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado'  },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
       },
     },
     {

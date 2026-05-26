@@ -12,6 +12,7 @@ import {
   RegisterProfessionalRequest,
   UpdateProfessionalRequest,
   ValidateProfessionalRequest,
+  WeeklyProgressResponse,
 } from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
@@ -68,6 +69,12 @@ export class ProfessionalsService {
   getMyProfile(): Observable<ProfessionalResponse> {
     return this.http
       .get<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/me`)
+      .pipe(unwrapResponse());
+  }
+
+  getWeeklyProgress(): Observable<WeeklyProgressResponse> {
+    return this.http
+      .get<ApiResponse<WeeklyProgressResponse>>(`${this.apiUrl}/me/weekly-progress`)
       .pipe(unwrapResponse());
   }
 

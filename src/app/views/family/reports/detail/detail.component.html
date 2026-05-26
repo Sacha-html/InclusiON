@@ -73,7 +73,12 @@
       </dl>
 
       <hr />
-      <button cButton color="secondary" (click)="onBack()">Volver a reportes</button>
+      <div class="d-flex gap-2">
+        <button cButton color="secondary" (click)="onBack()">Volver a reportes</button>
+        <button cButton color="primary" variant="outline" (click)="downloadPdf()">
+          Descargar PDF
+        </button>
+      </div>
     </c-card-body>
   </c-card>
 }

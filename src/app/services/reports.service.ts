@@ -22,7 +22,11 @@ export class ReportsService {
     if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
     if (request.search) params = params.set('search', request.search);
     if (request.personId) params = params.set('personId', request.personId);
+    if (request.personIds?.length) {
+      request.personIds.forEach(id => { params = params.append('personIds', id); });
+    }
     if (request.professionalId) params = params.set('professionalId', request.professionalId);
+    if (request.institutionId)  params = params.set('institutionId', request.institutionId.toString());
     if (request.reportTypeId) params = params.set('reportTypeId', request.reportTypeId.toString());
     if (request.isActive !== undefined && request.isActive !== null) {
       params = params.set('isActive', request.isActive.toString());
@@ -72,6 +76,18 @@ export class ReportsService {
     return this.http
       .patch<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}/submit`, {})
       .pipe(unwrapResponse());
+  }
+
+  /** Familiar marca el reporte como leído — el badge "Nuevo" desaparece */
+  markAsRead(id: string): Observable<unknown> {
+    return this.http
+      .patch(`${this.baseUrl}/${id}/mark-read`, {});
+  }
+
+  /** Descarga el reporte como PDF generado en el backend */
+  exportPdf(id: string): Observable<Blob> {
+    return this.http
+      .get(`${this.baseUrl}/${id}/export-pdf`, { responseType: 'blob' });
   }
 
   /** Admin aprueba el reporte */

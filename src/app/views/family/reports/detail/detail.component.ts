@@ -45,8 +45,28 @@ export class DetailComponent implements OnInit {
 
   loadReport(id: string): void {
     this.reportsService.getById(id).subscribe({
-      next: (data) => { this.report.set(data); this.isLoading.set(false); },
+      next: (data) => {
+        this.report.set(data);
+        this.isLoading.set(false);
+        // Marcar como leído fire-and-forget — el badge "Nuevo" desaparece en próxima carga
+        if (!data.isReadByFamily) {
+          this.reportsService.markAsRead(id).subscribe();
+        }
+      },
       error: () => { this.isLoading.set(false); this.router.navigate([AppRoutes.Family.Reports]); },
+    });
+  }
+
+  downloadPdf(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+    this.reportsService.exportPdf(id).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = `reporte-${id}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
     });
   }
 

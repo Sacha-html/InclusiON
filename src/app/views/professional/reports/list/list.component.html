@@ -2,13 +2,19 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end g-2">
     <c-col sm="3">
-      <label cLabel>Persona</label>
-      <select cSelect [(ngModel)]="selectedPersonId" (ngModelChange)="onPersonFilterChange()">
-        <option value="">Todas</option>
+      <label cLabel>Personas</label>
+      <select cSelect multiple style="height: 120px"
+              (change)="onPersonFilterChange($event)">
         @for (p of persons(); track p.personId) {
-          <option [value]="p.personId">{{ p.personFullName }}</option>
+          <option [value]="p.personId"
+                  [selected]="selectedPersonIds.includes(p.personId)">
+            {{ p.personFullName }}
+          </option>
         }
       </select>
+      @if (selectedPersonIds.length > 0) {
+        <small class="text-body-secondary">{{ selectedPersonIds.length }} seleccionada(s)</small>
+      }
     </c-col>
     <c-col sm="2">
       <label cLabel>Estado</label>

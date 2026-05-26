@@ -9,7 +9,6 @@ import {
   CardBodyComponent,
   CardComponent,
   CardHeaderComponent,
-  ColComponent,
   DropdownComponent,
   DropdownItemDirective,
   DropdownMenuDirective,
@@ -20,7 +19,6 @@ import {
   PageItemComponent,
   PageLinkDirective,
   PaginationComponent,
-  RowComponent,
   TableDirective,
   SpinnerComponent,
 } from '@coreui/angular';
@@ -42,8 +40,6 @@ import { IconDirective } from '@coreui/icons-angular';
     InputGroupComponent,
     InputGroupTextDirective,
     FormControlDirective,
-    RowComponent,
-    ColComponent,
     DropdownComponent,
     DropdownToggleDirective,
     DropdownMenuDirective,
@@ -174,8 +170,12 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
   getBadgeColor(value: any, col?: TableColumn): string {
     if (col?.badgeMap) {
-      const key = String(value).toLowerCase();
-      return col.badgeMap[key]?.color || 'secondary';
+      const strVal = String(value);
+      const entry = col.badgeMap[strVal] ?? col.badgeMap[strVal.toLowerCase()];
+      if (!entry && (value === null || value === undefined) && col.badgeMap['false']) {
+        return col.badgeMap['false'].color;
+      }
+      return entry?.color || 'secondary';
     }
     if (typeof value === 'boolean') return value ? 'success' : 'danger';
     switch (value?.toLowerCase()) {
@@ -193,8 +193,12 @@ export class DataTableComponent implements OnInit, OnDestroy {
 
   getBadgeLabel(value: any, col?: TableColumn): string {
     if (col?.badgeMap) {
-      const key = String(value).toLowerCase();
-      return col.badgeMap[key]?.label || '-';
+      const strVal = String(value);
+      const entry = col.badgeMap[strVal] ?? col.badgeMap[strVal.toLowerCase()];
+      if (!entry && (value === null || value === undefined) && col.badgeMap['false']) {
+        return col.badgeMap['false'].label;
+      }
+      return entry?.label || '-';
     }
     if (typeof value === 'boolean') return value ? ActiveStatus.Activo : ActiveStatus.Inactivo;
     switch (value?.toLowerCase()) {

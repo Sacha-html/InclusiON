@@ -10,18 +10,21 @@
   </c-alert>
 } @else {
 
+  <h1 id="progress-title" class="visually-hidden" tabindex="-1">Progreso Familiar</h1>
+
   <!-- Selector de persona (si hay más de una) -->
   @if (persons().length > 1) {
     <fieldset class="person-selector">
       <legend class="visually-hidden">Seleccionar persona</legend>
       <p class="selector-label">¿De quién querés ver el progreso?</p>
-      <div class="person-pills">
+      <div class="person-pills" role="radiogroup" aria-label="Seleccionar persona">
         @for (person of persons(); track person.personId) {
           <button
             class="person-pill"
             [class.person-pill--active]="selectedPersonId() === person.personId"
             (click)="selectPerson(person.personId)"
-            [attr.aria-pressed]="selectedPersonId() === person.personId"
+            role="radio"
+            [attr.aria-checked]="selectedPersonId() === person.personId"
           >
             <app-actor-avatar
               [name]="person.fullName"
@@ -69,7 +72,7 @@
                 <c-progress-bar
                   [value]="completionPercent()"
                   color="success"
-                  [animated]="true"
+                  [animated]="!reducedMotion"
                 />
               </c-progress>
               <p class="stat-sub mt-1">{{ completionPercent() }}% completado</p>
@@ -90,7 +93,7 @@
                   <c-progress-bar
                     [value]="stats().avgScore!"
                     [color]="scoreColor(stats().avgScore!)"
-                    [animated]="true"
+                    [animated]="!reducedMotion"
                   />
                 </c-progress>
               } @else {
@@ -129,6 +132,18 @@
         </c-col>
 
       </c-row>
+
+      <!-- ── Radar de habilidades ───────────────────────────────────────────── -->
+      @if (!isLoadingRadar() && radarPoints().length > 0) {
+        <c-card class="mb-4">
+          <c-card-header>
+            <h2 class="h6 mb-0">Rendimiento por área de habilidad</h2>
+          </c-card-header>
+          <c-card-body>
+            <app-skill-radar-chart [points]="radarPoints()" />
+          </c-card-body>
+        </c-card>
+      }
 
       <!-- ── Historial de intentos ─────────────────────────────────────────── -->
       <c-card>
@@ -174,3 +189,4 @@
     }
   }
 }
+

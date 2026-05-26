@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { contrastTextColor } from '@shared/utils';
 
 @Component({
   selector: 'app-skill-chip',
@@ -13,4 +14,8 @@ export class SkillChipComponent {
   /** Show × remove button */
   @Input() removable = false;
   @Output() remove = new EventEmitter<void>();
+
+  get textColor(): string {
+    return contrastTextColor(this.color);
+  }
 }

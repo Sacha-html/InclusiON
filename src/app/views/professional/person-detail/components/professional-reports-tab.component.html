@@ -1,0 +1,72 @@
+<!-- Loading -->
+@if (isLoading()) {
+  <div class="text-center py-5">
+    <c-spinner aria-label="Cargando reportes"></c-spinner>
+  </div>
+}
+
+<!-- Error -->
+@else if (hasError()) {
+  <app-empty-state
+    icon="cil-warning"
+    message="Error al cargar reportes"
+    detail="No se pudieron cargar los reportes de esta persona."
+  />
+}
+
+<!-- Vacío -->
+@else if (reports().length === 0) {
+  <app-empty-state
+    icon="cil-notes"
+    message="Sin reportes"
+    detail="No hay reportes registrados para esta persona."
+  />
+}
+
+<!-- Tabla -->
+@else {
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Fecha</th>
+          <th>Título</th>
+          <th>Tipo</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of reports(); track r.encryptedId) {
+          <tr>
+            <td class="text-nowrap small text-body-secondary">{{ formatDate(r.reportDate) }}</td>
+            <td class="fw-semibold">{{ r.title }}</td>
+            <td class="small text-body-secondary">{{ r.reportTypeName }}</td>
+            <td>
+              <c-badge [color]="statusColor(r.status)">{{ statusLabel(r.status) }}</c-badge>
+            </td>
+            <td>
+              <button cButton color="link" size="sm" class="p-0" (click)="viewReport(r)">
+                Ver
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-2 small text-body-secondary">
+    <span>{{ totalRecords() }} reporte{{ totalRecords() !== 1 ? 's' : '' }} en total</span>
+    @if (pages.length > 1) {
+      <div class="d-flex gap-1">
+        @for (p of pages; track p) {
+          <button cButton [color]="p === currentPage() ? 'primary' : 'secondary'"
+                  size="sm" (click)="onPageChange(p)">
+            {{ p }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

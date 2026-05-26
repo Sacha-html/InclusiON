@@ -1,8 +1,15 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
 import { environment } from '@env';
+
+export interface SignalRNotification {
+  title: string;
+  message: string;
+  actionUrl?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SignalrService implements OnDestroy {
@@ -10,6 +17,9 @@ export class SignalrService implements OnDestroy {
   readonly #toast = inject(ToastService);
 
   #connection: HubConnection | null = null;
+
+  /** Emits each time a 'Notification' push is received from the hub. */
+  readonly notification$ = new Subject<SignalRNotification>();
 
   start(): void {
     if (this.#connection) return;
@@ -25,8 +35,9 @@ export class SignalrService implements OnDestroy {
       .configureLogging(LogLevel.Warning)
       .build();
 
-    this.#connection.on('Notification', (data: { title: string; message: string; actionUrl?: string }) => {
+    this.#connection.on('Notification', (data: SignalRNotification) => {
       this.#toast.info(data.message, data.title);
+      this.notification$.next(data);
     });
 
     this.#connection.start().catch(() => this.#connection = null);

@@ -23,6 +23,7 @@ import {
 import { IconDirective } from '@coreui/icons-angular';
 import { AuthService, AccessibilityService } from '@services';
 import { User } from '@models';
+import { NotificationBellComponent } from '@shared/components/notification-bell/notification-bell.component';
 
 @Component({
   selector: 'app-default-header',
@@ -46,6 +47,7 @@ import { User } from '@models';
     DropdownHeaderDirective,
     DropdownItemDirective,
     TooltipDirective,
+    NotificationBellComponent,
   ],
 })
 export class DefaultHeaderComponent extends HeaderComponent implements OnInit {

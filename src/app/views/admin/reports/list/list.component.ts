@@ -2,8 +2,11 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogsService, ReportsService, ToastService } from '@services';
+import { PersonsService } from '@services/persons.service';
+import { ProfessionalsService } from '@services/professionals.service';
+import { InstitutionsService } from '@services/institutions.service';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse, ReportStatus, GetReportsRequest, CatalogItem } from '@models';
+import { ReportListItemResponse, ReportStatus, GetReportsRequest, CatalogItem, PersonListItemResponse, ProfessionalListItemResponse, InstitutionResponse } from '@models';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
@@ -33,12 +36,18 @@ import {
   styleUrl: './list.component.scss',
 })
 export class ListComponent implements OnInit {
-  private readonly reportsService  = inject(ReportsService);
-  private readonly toastService    = inject(ToastService);
-  private readonly catalogsService = inject(CatalogsService);
-  private readonly router          = inject(Router);
+  private readonly reportsService       = inject(ReportsService);
+  private readonly toastService         = inject(ToastService);
+  private readonly catalogsService      = inject(CatalogsService);
+  private readonly personsService       = inject(PersonsService);
+  private readonly professionalsService = inject(ProfessionalsService);
+  private readonly institutionsService  = inject(InstitutionsService);
+  private readonly router               = inject(Router);
 
-  reports = signal<ReportListItemResponse[]>([]);
+  reports       = signal<ReportListItemResponse[]>([]);
+  persons       = signal<PersonListItemResponse[]>([]);
+  professionals = signal<ProfessionalListItemResponse[]>([]);
+  institutions  = signal<InstitutionResponse[]>([]);
   isLoading = signal(true);
   currentPage = signal(1);
   pageSize = signal(10);
@@ -53,6 +62,9 @@ export class ListComponent implements OnInit {
   dateFrom = '';
   dateTo = '';
   searchTerm = '';
+  selectedPersonIds: string[] = [];
+  filterProfessionalId = '';
+  filterInstitutionId  = '';
 
   // Modales
   showApproveModal = false;
@@ -104,6 +116,9 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.loadReports();
     this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
+    this.personsService.getPersons({ pageSize: 500 }).subscribe(r => this.persons.set(r.data));
+    this.professionalsService.getProfessionals({ pageSize: 500, isActive: true }).subscribe(r => this.professionals.set(r.data));
+    this.institutionsService.getAll().subscribe(list => this.institutions.set(list));
   }
 
   loadReports(): void {
@@ -118,6 +133,9 @@ export class ListComponent implements OnInit {
       dateFrom: this.dateFrom || undefined,
       dateTo: this.dateTo || undefined,
       search: this.searchTerm || undefined,
+      personIds:       this.selectedPersonIds.length ? this.selectedPersonIds : undefined,
+      professionalId:  this.filterProfessionalId  || undefined,
+      institutionId:   this.filterInstitutionId   ? +this.filterInstitutionId : undefined,
     };
 
     this.reportsService.getReports(request).subscribe({
@@ -130,15 +148,26 @@ export class ListComponent implements OnInit {
     });
   }
 
+  onPersonFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedPersonIds = Array.from(select.selectedOptions).map(o => o.value);
+    this.currentPage.set(1);
+    this.loadReports();
+  }
   onStatusFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
   onTypeFilterChange(): void   { this.currentPage.set(1); this.loadReports(); }
   onDateChange(): void         { this.currentPage.set(1); this.loadReports(); }
 
+  onFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
+
   clearFilters(): void {
-    this.statusFilter = 'Submitted';
-    this.typeFilter = '';
-    this.dateFrom = '';
-    this.dateTo = '';
+    this.statusFilter        = 'Submitted';
+    this.typeFilter          = '';
+    this.dateFrom            = '';
+    this.dateTo              = '';
+    this.selectedPersonIds   = [];
+    this.filterProfessionalId = '';
+    this.filterInstitutionId  = '';
     this.currentPage.set(1);
     this.loadReports();
   }

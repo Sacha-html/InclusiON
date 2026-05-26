@@ -1,0 +1,11 @@
+:host-context([data-profile="high-contrast"]) {
+  .stat-card { border: 2px solid var(--a11y-border, #fff); }
+}
+
+:host-context([data-color-mode="dark"]) {
+  .stat-card { background: var(--a11y-surface, #2a2a3e); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
