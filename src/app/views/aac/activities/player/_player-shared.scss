@@ -45,6 +45,7 @@
 .intro-icon        { font-size: 3rem; }
 .intro-instruction { font-size: 1.3rem; font-weight: 600; color: var(--a11y-text, #212121); margin: 0; }
 .intro-hint        { font-size: 1rem; color: var(--a11y-text-muted, #757575); margin: 0; }
+.intro-error       { font-size: 1rem; color: var(--a11y-danger, #c62828); background: color-mix(in srgb, var(--a11y-danger, #c62828) 10%, transparent); padding: .75rem 1rem; border-radius: 12px; margin: 0; }
 
 // ── Buttons ──────────────────────────────────────────────────────────────────
 .action-btn {
@@ -161,7 +162,7 @@
 }
 
 // ── A11y overrides ───────────────────────────────────────────────────────────
-[data-profile="high-contrast"] {
+:host-context([data-profile="high-contrast"]) {
   .action-btn--primary { background: #000; color: #FFFF00; border: 2px solid #FFFF00; }
 }
 

@@ -1,0 +1,54 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || 'Leé la palabra y elegí la imagen correcta.'"
+    [hint]="hint"
+    [loading]="isLoading()"
+    [error]="errorMsg()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="region" aria-labelledby="game-word">
+
+    <!-- Instrucción pequeña -->
+    @if (content.instruction) {
+      <p class="game-instruction-small">{{ content.instruction }}</p>
+    }
+
+    <!-- Palabra prominente -->
+    <div class="word-display" id="game-word" tabindex="-1" aria-live="polite">
+      {{ content.word }}
+    </div>
+
+    <!-- Grid de pictogramas -->
+    <div class="items-grid"
+         role="group"
+         aria-label="Opciones de imágenes"
+         [attr.aria-disabled]="selectedItemId() !== null">
+      @for (item of items; track item.id) {
+        <app-pictogram-card
+          [label]="item.label"
+          [pictogramId]="item.pictogramId"
+          [disabled]="selectedItemId() !== null"
+          [state]="itemState(item)"
+          [badge]="itemBadge(item)"
+          (cardClick)="selectItem(item)"
+        />
+      }
+    </div>
+
+  </div>
+}
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="!!isCorrect()"
+    [message]="resultMessage"
+    [loading]="isLoading()"
+    [canRetry]="!isCorrect()"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

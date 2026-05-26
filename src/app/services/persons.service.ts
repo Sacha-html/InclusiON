@@ -220,6 +220,7 @@ export class PersonsService {
 
   /**
    * Actualiza solo la configuración de accesibilidad de una persona.
+   * @deprecated Usar updateAccessibility con el endpoint dedicado.
    */
   updateAccessibilityConfig(
     personId: string,
@@ -236,6 +237,35 @@ export class PersonsService {
       .pipe(unwrapResponse());
   }
 
+  /** Obtiene la configuración de accesibilidad de una persona. */
+  getAccessibility(personId: string): Observable<{
+    requiresLargeFont: boolean;
+    requiresHighContrast: boolean;
+    visualNoiseSensitivity: boolean;
+    soundSensitivity: boolean;
+    colorBlindnessType: string | null;
+  }> {
+    return this.http
+      .get<ApiResponse<any>>(`${this.apiUrl}/${personId}/accessibility`)
+      .pipe(unwrapResponse());
+  }
+
+  /** Actualiza la configuración de accesibilidad de una persona (endpoint dedicado). */
+  updateAccessibility(
+    personId: string,
+    config: {
+      requiresLargeFont: boolean;
+      requiresHighContrast: boolean;
+      visualNoiseSensitivity: boolean;
+      soundSensitivity: boolean;
+      colorBlindnessType: string | null;
+    }
+  ): Observable<any> {
+    return this.http
+      .put<ApiResponse<any>>(`${this.apiUrl}/${personId}/accessibility`, config)
+      .pipe(unwrapResponse());
+  }
+
   /**
    * Cambia el método de login de una persona. Si el método nuevo es STANDARD,
    * la respuesta incluye una contraseña temporal de un solo uso.
@@ -243,6 +273,16 @@ export class PersonsService {
   updateLoginMethod(userId: string, request: UpdateLoginMethodRequest): Observable<UpdateLoginMethodResponse> {
     return this.http
       .put<ApiResponse<UpdateLoginMethodResponse>>(`${this.apiUrl}/${userId}/login-method`, request)
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Solicitud de ayuda urgente desde el portal AAC.
+   * Notifica vía SignalR a los profesionales supervisores de la persona autenticada.
+   */
+  requestHelp(): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.apiUrl}/me/help-request`, {})
       .pipe(unwrapResponse());
   }
 

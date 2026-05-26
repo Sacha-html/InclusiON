@@ -6,6 +6,7 @@ import { AppRoutes } from '@shared/constants/app-routes';
 import { AuthService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
 import {
+  AlertComponent,
   CardComponent,
   CardBodyComponent,
   CardHeaderComponent,
@@ -19,6 +20,7 @@ import {
   standalone: true,
   imports: [
     RouterModule,
+    AlertComponent,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
@@ -41,6 +43,7 @@ export class DetailComponent implements OnInit {
 
   activity = signal<any>(null);
   isLoading = signal(true);
+  hasError = signal(false);
 
   compatiblePersons = signal<PersonListItemResponse[]>([]);
   personsLoading = signal(false);
@@ -56,10 +59,14 @@ export class DetailComponent implements OnInit {
       next: (data) => {
         this.activity.set(data);
         this.isLoading.set(false);
+        setTimeout(() => {
+          const el = document.getElementById('activity-detail-title');
+          el?.focus();
+        }, 80);
       },
       error: () => {
-        this.toastService.error('Error al cargar la actividad');
-        this.router.navigate([AppRoutes.Pro.Activities]);
+        this.hasError.set(true);
+        this.isLoading.set(false);
       },
     });
   }

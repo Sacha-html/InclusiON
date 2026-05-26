@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { contrastTextColor } from '@shared/utils';
 /**
  * Componente de avatar para login visual con seleccion de perfil.
  * Muestra inicial del nombre con color de fondo configurable.
@@ -40,6 +41,16 @@ export class AvatarComponent implements OnInit {
   /** Tamanio de fuente calculado segun el tamanio del avatar */
   get fontSize(): number {
     return Math.round(this.size * 0.4);
+  }
+
+  /**
+   * Text color for the initial letter.
+   * For hex colors: computed via WCAG luminance.
+   * For CSS-var colors (e.g. var(--a11y-primary)): returns null so the
+   * stylesheet's paired var(--a11y-primary-text) applies instead.
+   */
+  get textColor(): string | null {
+    return this.color.startsWith('#') ? contrastTextColor(this.color) : null;
   }
 
   /** Inicial calculada del nombre si no se proporciona */

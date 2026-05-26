@@ -15,7 +15,7 @@
       <p>No tenés actividades asignadas por el momento.</p>
     </div>
   } @else {
-    <div class="activities-list" role="list">
+    <div class="activities-list" role="list" aria-live="polite">
       @for (a of assignments(); track a.id) {
         <div role="listitem">
           <app-visual-card
@@ -24,6 +24,7 @@
             [variant]="statusVariant(a.status)"
             [badge]="statusLabel(a.status)"
             [interactive]="isPlayable(a)"
+            [done]="!isPlayable(a)"
             [ariaLabel]="a.activityTitle + ', estado: ' + statusLabel(a.status)"
             (cardClick)="openActivity(a)"
           />

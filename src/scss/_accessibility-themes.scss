@@ -1765,9 +1765,11 @@ a {
     color: var(--a11y-primary-text) !important;
   }
 
+  /* Badge success: sólido — fondo --a11y-success, texto --a11y-success-text (blanco/negro según tema). */
   &.bg-success {
     background-color: var(--a11y-success) !important;
-    color: var(--a11y-success-text) !important;
+    color:            var(--a11y-success-text, #FFFFFF) !important;
+    border:           none !important;
   }
 
   &.bg-danger {
@@ -1799,7 +1801,8 @@ a {
     }
 
     &.badge-success::before {
-      background-color: var(--a11y-success-text);
+      /* Outlined badge: ícono usa --a11y-success (verde) para coincidir con el texto */
+      background-color: var(--a11y-success);
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
       -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
       mask-size: contain;

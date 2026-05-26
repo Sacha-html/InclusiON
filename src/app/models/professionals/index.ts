@@ -6,3 +6,4 @@ export * from './get-professionals.request';
 export * from './register-professional.request';
 export * from './update-professional.request';
 export * from './validate-professional.request';
+export * from './weekly-progress.response';

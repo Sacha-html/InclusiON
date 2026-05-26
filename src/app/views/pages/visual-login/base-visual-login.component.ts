@@ -276,7 +276,7 @@ export abstract class BaseVisualLoginComponent implements OnInit, OnDestroy {
       this.router.navigate([AppRoutes.ChangePassword]);
     } else {
       const role = this.authService.getUserRole();
-      const target = role ? (RoleRoutes[role] || '/dashboard') : '/dashboard';
+      const target = role ? (RoleRoutes[role] || '/') : '/';
       this.router.navigate([target]);
     }
   }

@@ -3,8 +3,8 @@
     [title]="assignment.activityTitle"
     [instruction]="content.instruction || 'Completá las letras que faltan.'"
     [hint]="hint"
-    icon="✏️"
     [loading]="isLoading()"
+    [error]="errorMsg()"
     (start)="startActivity()"
   />
 }
@@ -26,8 +26,11 @@
             (click)="selectSlot(token.slotIdx)"
             (keydown.backspace)="$event.preventDefault(); clearSlot(token.slotIdx)"
             (keydown.delete)="$event.preventDefault(); clearSlot(token.slotIdx)"
+            (keydown.arrowLeft)="$event.preventDefault(); prevSlot()"
+            (keydown.arrowRight)="$event.preventDefault(); nextSlot()"
             [attr.aria-label]="'Hueco ' + (token.slotIdx + 1) + (token.letter ? ': ' + token.letter + '. Retroceso para borrar.' : ': vacío')"
             [attr.aria-pressed]="activeSlot() === token.slotIdx"
+            [attr.aria-current]="activeSlot() === token.slotIdx ? 'step' : null"
           >
             {{ token.letter }}
             @if (token.letter) {

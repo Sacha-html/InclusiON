@@ -59,10 +59,10 @@ export class AdminPersonReportsComponent implements OnInit {
     {
       key: 'status', label: 'Estado', type: 'badge',
       badgeMap: {
-        'Draft':     { color: 'secondary', label: 'Borrador'  },
-        'Submitted': { color: 'warning',   label: 'Enviado'   },
-        'Approved':  { color: 'success',   label: 'Aprobado'  },
-        'Rejected':  { color: 'danger',    label: 'Rechazado' },
+        [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador'  },
+        [ReportStatus.Submitted]: { color: 'warning',   label: 'Enviado'   },
+        [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado'  },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
       },
     },
     {

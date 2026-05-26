@@ -116,7 +116,8 @@
   height: 18px;
   padding: 0 4px;
   border-radius: 9px;
-  background: var(--a11y-border, #E0E0E0);
+  background: var(--a11y-text-secondary, #3D3D3D);
+  color: var(--a11y-bg, #FFFFFF);
   font-size: .75rem;
   font-weight: 700;
 }
