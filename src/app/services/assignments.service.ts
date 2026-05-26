@@ -7,7 +7,7 @@ import {
   AssignPersonRequest,
   ProfessionalInstitutionResponse,
   ProfessionalPersonResponse,
-} from '../models';
+} from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
@@ -51,7 +51,7 @@ export class AssignmentsService {
       .pipe(unwrapResponse());
   }
 
-  removeInstitutionAssignment(profId: string, instId: number): Observable<void> {
+  removeInstitutionAssignment(profId: string, instId: string): Observable<void> {
     return this.http
       .delete<void>(`${this.professionalsUrl(profId)}/institutions/${instId}`)
       .pipe(handleApiError());

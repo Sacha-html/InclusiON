@@ -11,20 +11,23 @@
     <c-card-body>
 
       @if (activePersons.length === 0) {
-        <div class="text-center text-body-secondary py-5">
-          <p class="fs-5">No tienes personas asignadas</p>
-          <p>Solicita al administrador que te asigne personas a cargo.</p>
-        </div>
+        <app-empty-state
+          icon="cil-people"
+          message="No tenés personas asignadas"
+          detail="Solicitá al administrador que te asigne personas a cargo."
+        />
       }
 
       <c-row>
         @for (person of activePersons; track person.personId) {
-          <c-col sm="6" md="4" lg="3" class="mb-4">
-            <div class="person-card" (click)="goToDetail(person)">
+          <c-col sm="6" md="4" lg="3" class="mb-4 d-flex">
+            <button type="button" class="person-card" (click)="goToDetail(person)" [attr.aria-label]="'Ver detalle de ' + person.personFullName" [style.--card-accent]="person.avatarColor || '#9E9E9E'">
               <!-- Avatar -->
-              <div class="person-avatar" [style.background-color]="getAvatarColor(person)">
-                <span class="avatar-initial" [style.color]="getTextColor(getAvatarColor(person))">{{ getInitial(person) }}</span>
-              </div>
+              <app-actor-avatar
+                [name]="person.personFullName"
+                [color]="person.avatarColor"
+                size="lg"
+              />
 
               <!-- Info -->
               <div class="person-info">
@@ -45,7 +48,7 @@
                   <c-badge color="primary" class="me-1">Principal</c-badge>
                 }
               </div>
-            </div>
+            </button>
           </c-col>
         }
       </c-row>

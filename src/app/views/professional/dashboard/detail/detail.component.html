@@ -9,7 +9,7 @@
     <c-col xs="12" md="8">
       <c-card>
         <c-card-body>
-          <h4 class="mb-1">{{ getGreeting() }}, {{ professional?.firstName }}!</h4>
+          <h1 class="h4 mb-1">{{ getGreeting() }}, {{ professional?.firstName }}!</h1>
           <p class="text-body-secondary mb-0">Panel de gestión profesional</p>
         </c-card-body>
       </c-card>
@@ -23,7 +23,7 @@
             </div>
             <div class="text-body-secondary small">Mensajes sin leer</div>
           </div>
-          <svg cIcon name="cil-envelope-closed" size="3xl"
+          <svg cIcon name="cil-envelope-closed" size="3xl" aria-hidden="true"
                [class.text-danger]="unreadMessages > 0"
                [class.text-body-secondary]="unreadMessages === 0">
           </svg>
@@ -41,7 +41,7 @@
             <div class="fs-4 fw-semibold">{{ personCount }}</div>
             <div class="counter-card-muted">Personas a cargo</div>
           </div>
-          <svg cIcon name="cil-people" size="3xl" class="counter-card-muted"></svg>
+          <svg cIcon name="cil-people" size="3xl" class="counter-card-muted" aria-hidden="true"></svg>
         </c-card-body>
       </c-card>
     </c-col>
@@ -52,7 +52,7 @@
             <div class="fs-4 fw-semibold">{{ pendingInvitations }}</div>
             <div class="counter-card-muted">Invitaciones pendientes</div>
           </div>
-          <svg cIcon name="cil-link" size="3xl" class="counter-card-muted"></svg>
+          <svg cIcon name="cil-link" size="3xl" class="counter-card-muted" aria-hidden="true"></svg>
         </c-card-body>
       </c-card>
     </c-col>
@@ -63,17 +63,74 @@
             <div class="fs-4 fw-semibold">{{ acceptedInvitations }}</div>
             <div class="counter-card-muted">Familias registradas</div>
           </div>
-          <svg cIcon name="cil-check-circle" size="3xl" class="counter-card-muted"></svg>
+          <svg cIcon name="cil-check-circle" size="3xl" class="counter-card-muted" aria-hidden="true"></svg>
         </c-card-body>
       </c-card>
     </c-col>
   </c-row>
 
+  <!-- Resumen semanal de progreso -->
+  @if (weeklyProgress) {
+    <c-row class="mb-4">
+      <c-col xs="12">
+        <c-card class="weekly-progress-card">
+          <c-card-body>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h5 class="mb-0">Resumen semanal</h5>
+                <small class="text-body-secondary">
+                  {{ weeklyProgress.periodStart | date:'dd/MM' }} — {{ weeklyProgress.periodEnd | date:'dd/MM/yyyy' }}
+                </small>
+              </div>
+              <svg cIcon name="cil-chart" size="2xl" class="text-body-secondary" aria-hidden="true"></svg>
+            </div>
+            <c-row class="g-3 text-center">
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value">{{ weeklyProgress.personCount }}</div>
+                  <div class="weekly-stat__label">Personas activas</div>
+                </div>
+              </c-col>
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value text-primary">{{ weeklyProgress.totalCompleted }}</div>
+                  <div class="weekly-stat__label">Actividades completadas</div>
+                </div>
+              </c-col>
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value"
+                       [class.text-success]="weeklyProgress.avgSuccess >= 70"
+                       [class.text-warning]="weeklyProgress.avgSuccess >= 40 && weeklyProgress.avgSuccess < 70"
+                       [class.text-danger]="weeklyProgress.avgSuccess < 40">
+                    {{ weeklyProgress.avgSuccess }}%
+                  </div>
+                  <div class="weekly-stat__label">Promedio de éxito</div>
+                </div>
+              </c-col>
+              <c-col xs="6" md="3">
+                <div class="weekly-stat">
+                  <div class="weekly-stat__value"
+                       [class.text-danger]="weeklyProgress.frustrationAlerts > 0"
+                       [class.text-body-secondary]="weeklyProgress.frustrationAlerts === 0">
+                    {{ weeklyProgress.frustrationAlerts }}
+                    @if (weeklyProgress.frustrationAlerts > 0) { <span class="fs-6">⚠️</span> }
+                  </div>
+                  <div class="weekly-stat__label">Alertas de frustración</div>
+                </div>
+              </c-col>
+            </c-row>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  }
+
   <!-- Reportes resumen -->
   @if (recentReports.length > 0) {
     <c-row class="mb-4">
       <c-col xs="12" sm="4">
-        <c-card class="mb-3 cursor-pointer" (click)="navigateTo('/pro/reports')">
+        <c-card class="mb-3 cursor-pointer" (click)="navigateTo('/pro/reports', { status: 'Draft' })">
           <c-card-body class="text-center">
             <div class="fs-4 fw-semibold text-body-secondary">{{ draftReportsCount }}</div>
             <div class="small text-body-secondary">Borradores</div>
@@ -83,7 +140,7 @@
       <c-col xs="12" sm="4">
         <c-card class="mb-3 cursor-pointer"
                 [style.border-color]="submittedReportsCount > 0 ? 'var(--cui-warning)' : ''"
-                (click)="navigateTo('/pro/reports')">
+                (click)="navigateTo('/pro/reports', { status: 'Submitted' })">
           <c-card-body class="text-center">
             <div class="fs-4 fw-semibold"
                  [class.text-warning]="submittedReportsCount > 0">
@@ -96,7 +153,7 @@
       <c-col xs="12" sm="4">
         <c-card class="mb-3 cursor-pointer"
                 [style.border-color]="rejectedReportsCount > 0 ? 'var(--cui-danger)' : ''"
-                (click)="navigateTo('/pro/reports')">
+                (click)="navigateTo('/pro/reports', { status: 'Rejected' })">
           <c-card-body class="text-center">
             <div class="fs-4 fw-semibold"
                  [class.text-danger]="rejectedReportsCount > 0">
@@ -170,8 +227,8 @@
                       <div class="small text-body-secondary">{{ report.personName }}</div>
                     </td>
                     <td class="text-end">
-                      <c-badge [color]="getReportStatusColor(report.status)">
-                        {{ getReportStatusLabel(report.status) }}
+                      <c-badge [color]="reportBadgeMap[report.status]?.color ?? 'secondary'">
+                        {{ reportBadgeMap[report.status]?.label ?? report.status }}
                       </c-badge>
                     </td>
                   </tr>

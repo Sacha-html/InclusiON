@@ -3,33 +3,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 @Component({
   selector: 'app-player-intro',
   standalone: true,
-  template: `
-    <div class="player-intro" role="main">
-      <h1 class="activity-title">{{ title }}</h1>
-
-      <div class="intro-card" aria-label="Instrucción de la actividad">
-        <div class="intro-icon" aria-hidden="true">{{ icon }}</div>
-        <p class="intro-instruction">{{ instruction }}</p>
-        @if (hint) {
-          <p class="intro-hint">{{ hint }}</p>
-        }
-      </div>
-
-      <button
-        class="action-btn action-btn--primary"
-        [disabled]="loading"
-        (click)="start.emit()"
-        aria-label="Iniciar actividad"
-      >
-        @if (loading) {
-          <span class="btn-spinner" aria-hidden="true"></span>
-          Iniciando...
-        } @else {
-          ▶ Jugar
-        }
-      </button>
-    </div>
-  `,
+  templateUrl: './player-intro.component.html',
 })
 export class PlayerIntroComponent {
   @Input({ required: true }) title!: string;
@@ -37,5 +11,6 @@ export class PlayerIntroComponent {
   @Input() hint?: string;
   @Input() icon = '🎯';
   @Input() loading = false;
+  @Input() error = '';
   @Output() start = new EventEmitter<void>();
 }

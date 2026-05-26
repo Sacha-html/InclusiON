@@ -10,32 +10,18 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel id="persona-label">Persona a cargo *</label>
-          <ng-select
-            inputId="personId"
-            [items]="persons()"
-            bindValue="id"
+          <label cLabel for="personId">Persona a cargo *</label>
+          <app-searchable-select
+            id="personId"
             formControlName="personId"
-            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre o documento...'"
-            [loading]="isLoadingPersons()"
-            loadingText="Cargando..."
-            notFoundText="No se encontraron personas"
-            [searchFn]="searchPersonFn"
-            [class.is-invalid]="submitted && f['personId'].errors"
-            aria-labelledby="persona-label"
-            aria-required="true"
-            ariaDescribedBy="personId-error"
-          >
-            <ng-template ng-label-tmp let-item="item">
-              {{ item.fullName }}
-            </ng-template>
-            <ng-template ng-option-tmp let-item="item">
-              {{ item.fullName }}
-              @if (item.disabilityTypeName) {
-                <span class="text-body-secondary"> — {{ item.disabilityTypeName }}</span>
-              }
-            </ng-template>
-          </ng-select>
+            [searchFn]="searchPersonsFn"
+            [displayFn]="displayPerson"
+            [subDisplayFn]="subDisplayPerson"
+            [valueFn]="valueFromPerson"
+            placeholder="Buscar por nombre o documento..."
+            hintText="Escriba al menos 2 caracteres para buscar"
+            noResultsText="No se encontraron personas disponibles"
+          />
           @if (submitted && f['personId'].errors) {
             <c-form-feedback [valid]="false" id="personId-error">
               Debe seleccionar una persona.
@@ -93,13 +79,19 @@
           <input cFormControl id="phone" formControlName="phone" />
         </c-col>
         <c-col sm="6">
-          <label cLabel for="relationship">Parentesco</label>
-          <select cSelect id="relationship" formControlName="relationship">
+          <label cLabel for="relationship">Parentesco *</label>
+          <select cSelect id="relationship" formControlName="relationship"
+                  [valid]="submitted ? f['relationship'].valid : undefined">
             <option value="">-- Seleccionar --</option>
             @for (rel of relationships; track rel) {
               <option [value]="rel">{{ rel }}</option>
             }
           </select>
+          @if (submitted && f['relationship'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['relationship'].errors['required']) { El parentesco es obligatorio. }
+            </c-form-feedback>
+          }
         </c-col>
       </c-row>
 

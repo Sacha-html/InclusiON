@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CreateProfessionalRequest } from '../../../../models';
+import { CreateProfessionalRequest } from '@models';
 import { validDate, notFutureDate, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 import {
   ButtonDirective,
@@ -16,7 +16,7 @@ import {
   FormLabelDirective,
   RowComponent,
 } from '@coreui/angular';
-import { ProfessionalResponse } from '../../../../models';
+import { ProfessionalResponse } from '@models';
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 
 @Component({
@@ -57,7 +57,7 @@ export class NewComponent {
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
-      documentNumber: ['', [Validators.maxLength(20)]],
+      documentNumber: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
       phone: ['', [Validators.maxLength(20)]],
       specialty: ['', [Validators.maxLength(100)]],
       licenseNumber: ['', [Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],

@@ -32,10 +32,10 @@
   <c-modal-body>
     <div class="mb-3">
       <label cLabel>Institucion</label>
-      <select cSelect (change)="selectedInstitutionId = $any($event.target).value ? +$any($event.target).value : null">
+      <select cSelect (change)="selectedInstitutionId = $any($event.target).value || null">
         <option value="">Seleccione una institucion...</option>
         @for (inst of availableInstitutions; track inst.id) {
-          <option [value]="inst.id">{{ inst.name }}</option>
+          <option [value]="inst.encryptedId">{{ inst.name }}</option>
         }
       </select>
     </div>

@@ -54,6 +54,28 @@ export interface VisualSumContent {
   options: VisualSumOption[];
 }
 
+// OPTION_SELECT: pregunta de múltiple choice (texto, con pictograma ilustrativo opcional)
+export interface OptionSelectOption {
+  id: string;
+  text: string;
+  pictogramId?: number;   // ilustración opcional
+}
+export interface OptionSelectContent {
+  instruction: string;
+  question:    string;    // pregunta mostrada al alumno (prominente)
+  options:     OptionSelectOption[];
+  correctOptionId: string;
+}
+
+// GLOBAL_READING: mostrar palabra → elegir pictograma correcto
+// Reutiliza la misma forma de items que SelectFigureContent para simplificar editor/player
+export interface GlobalReadingContent {
+  instruction: string;
+  word:        string;    // palabra completa mostrada al alumno
+  items:       Array<{ id: string; pictogramId: number; label: string }>;
+  correctItemId: string;
+}
+
 // options: un array de opciones por cada letra oculta
 // options[i] = letras posibles para hiddenIndices[i], la primera ES la correcta
 export interface CompleteLetterContent {

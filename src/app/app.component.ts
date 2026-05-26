@@ -6,7 +6,7 @@ import { delay, filter, map, tap } from 'rxjs/operators';
 
 import { IconSetService } from '@coreui/icons-angular';
 import { iconSubset } from './icons/icon-subset';
-import { AccessibilityService, ColorMode } from '@services';
+import { AccessibilityService, AuthService, ColorMode, SignalrService } from '@services';
 import { SpinnerOverlayComponent } from '@shared/components';
 
 @Component({
@@ -16,6 +16,7 @@ import { SpinnerOverlayComponent } from '@shared/components';
 })
 export class AppComponent implements OnInit {
   title = 'InclusiON';
+  readonly currentYear = new Date().getFullYear();
 
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
   readonly #activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -24,6 +25,8 @@ export class AppComponent implements OnInit {
 
   readonly #iconSetService = inject(IconSetService);
   readonly #accessibilityService = inject(AccessibilityService);
+  readonly #authService = inject(AuthService);
+  readonly #signalr = inject(SignalrService);
 
   constructor() {
     this.#titleService.setTitle(this.title);
@@ -32,6 +35,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
+    this.#authService.isAuthenticated$
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe(authed => authed ? this.#signalr.start() : this.#signalr.stop());
 
     this.#router.events.pipe(
         takeUntilDestroyed(this.#destroyRef)

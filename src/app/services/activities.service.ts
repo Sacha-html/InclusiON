@@ -3,18 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
-import { ApiResponse, PagedResponse } from '@models';
-import {
-  ActivityListItemResponse,
-  ActivityResponse,
-  ActivityAssignmentResponse,
-} from '@models/responses/activity.response';
-import {
-  GetActivitiesRequest,
-  CreateActivityRequest,
-  UpdateActivityRequest,
-  CreateAssignmentRequest,
-} from '@models/requests/activities';
+import { ApiResponse, PagedResponse, ActivityListItemResponse, ActivityResponse, ActivityAssignmentResponse, GetActivitiesRequest, CreateActivityRequest, UpdateActivityRequest, CreateAssignmentRequest, PersonListItemResponse } from '@models';
 
 @Injectable({ providedIn: 'root' })
 export class ActivitiesService {
@@ -48,7 +37,7 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
-  getById(id: number): Observable<ActivityResponse> {
+  getById(id: string): Observable<ActivityResponse> {
     return this.http
       .get<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`)
       .pipe(unwrapResponse());
@@ -60,13 +49,13 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
-  update(id: number, request: UpdateActivityRequest): Observable<ActivityResponse> {
+  update(id: string, request: UpdateActivityRequest): Observable<ActivityResponse> {
     return this.http
       .put<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`, request)
       .pipe(unwrapResponse());
   }
 
-  setStatus(id: number, isActive: boolean): Observable<ActivityResponse> {
+  setStatus(id: string, isActive: boolean): Observable<ActivityResponse> {
     return this.http
       .patch<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`, { isActive })
       .pipe(unwrapResponse());
@@ -103,7 +92,15 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
-  startResponse(assignmentId: number): Observable<ActivityAssignmentResponse> {
+  getAssignmentById(encryptedId: string): Observable<ActivityAssignmentResponse> {
+    return this.http
+      .get<ApiResponse<ActivityAssignmentResponse>>(
+        `${environment.apiUrl}/activity-assignments/${encryptedId}`
+      )
+      .pipe(unwrapResponse());
+  }
+
+  startResponse(assignmentId: string): Observable<ActivityAssignmentResponse> {
     return this.http
       .post<ApiResponse<ActivityAssignmentResponse>>(
         `${this.assignmentsUrl}/${assignmentId}/responses/start`,
@@ -113,8 +110,8 @@ export class ActivitiesService {
   }
 
   completeResponse(
-    assignmentId: number,
-    responseId: number,
+    assignmentId: string,
+    responseId: string,
     data: { successPercentage: number; timeSpentSeconds: number; requiredSupport: boolean; frustrationLevel?: number; responsePattern?: string; observations?: string }
   ): Observable<ActivityAssignmentResponse> {
     return this.http
@@ -122,6 +119,18 @@ export class ActivitiesService {
         `${this.assignmentsUrl}/${assignmentId}/responses/${responseId}/complete`,
         data
       )
+      .pipe(unwrapResponse());
+  }
+
+  getSimilarActivities(encryptedId: string, limit = 5): Observable<ActivityListItemResponse[]> {
+    return this.http
+      .get<ApiResponse<ActivityListItemResponse[]>>(`${this.baseUrl}/${encryptedId}/similar`, { params: { limit: limit.toString() } })
+      .pipe(unwrapResponse());
+  }
+
+  getCompatiblePersons(encryptedId: string, limit = 10): Observable<PersonListItemResponse[]> {
+    return this.http
+      .get<ApiResponse<PersonListItemResponse[]>>(`${this.baseUrl}/${encryptedId}/compatible-persons`, { params: { limit: limit.toString() } })
       .pipe(unwrapResponse());
   }
 }

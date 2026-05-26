@@ -1,30 +1,31 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { FamilyService, PersonsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '../../../../models';
+import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '@models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
   FormSelectDirective, RowComponent,
 } from '@coreui/angular';
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
+import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-family-new',
   imports: [
-    ReactiveFormsModule, NgSelectModule,
+    ReactiveFormsModule,
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective,
-    PasswordModalComponent,
+    PasswordModalComponent, SearchableSelectComponent,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
 })
-export class NewComponent implements OnInit {
+export class NewComponent {
   private readonly fb            = inject(FormBuilder);
   private readonly router        = inject(Router);
   private readonly familyService = inject(FamilyService);
@@ -35,43 +36,25 @@ export class NewComponent implements OnInit {
   showPasswordModal = false;
   createdFamily: FamilyResponse | null = null;
 
-  persons          = signal<PersonListItemResponse[]>([]);
-  isLoadingPersons = signal(true);
-
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
 
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.maxLength(20)]],
+    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
-    relationship: [''],
+    relationship: ['', [Validators.required]],
     personId: [null, [Validators.required]],
   });
 
-  searchPersonFn = (term: string, item: PersonListItemResponse): boolean => {
-    const lower = term.toLowerCase();
-    return (
-      (item.fullName?.toLowerCase().includes(lower) ||
-        item.documentNumber?.toLowerCase().includes(lower)) ??
-      false
+  readonly searchPersonsFn = (query: string) =>
+    this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
+      map(r => r.data)
     );
-  };
-
-  ngOnInit(): void {
-    this.loadPersons();
-  }
-
-  loadPersons(): void {
-    this.personsService.getPersons({ page: 1, pageSize: 200, isActive: true }).subscribe({
-      next: (response) => {
-        this.persons.set(response.data);
-        this.isLoadingPersons.set(false);
-      },
-      error: () => this.isLoadingPersons.set(false),
-    });
-  }
+  readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => p.disabilityTypeName ?? '';
+  readonly valueFromPerson = (p: PersonListItemResponse) => p.id;
 
   get f() { return this.form.controls; }
 
@@ -88,7 +71,7 @@ export class NewComponent implements OnInit {
       personId: raw.personId,
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       ...(raw.phone && { phone: raw.phone }),
-      ...(raw.relationship && { relationship: raw.relationship }),
+      relationship: raw.relationship,
     };
 
     this.familyService.createFamily(request).subscribe({

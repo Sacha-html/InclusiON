@@ -5,24 +5,25 @@
     <c-card-header>
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 cCardTitle class="mb-0">{{ report()!.title }}</h5>
-        <div class="d-flex align-items-center gap-2">
-          <c-badge [color]="getStatusColor(report()!.status)">
-            {{ getStatusLabel(report()!.status) }}
-          </c-badge>
-          @if (report()!.status === ReportStatus.Submitted) {
-            <button cButton color="success" size="sm" (click)="showApproveModal = true">
-              <svg cIcon name="cilCheckCircle" class="me-1" size="sm" aria-hidden="true"></svg>
-              Aprobar
-            </button>
-            <button cButton color="danger" size="sm" (click)="showRejectModal = true">
-              <svg cIcon name="cilXCircle" class="me-1" size="sm" aria-hidden="true"></svg>
-              Rechazar
-            </button>
-          }
-        </div>
+        <c-badge [color]="statusMap[report()!.status]?.color ?? 'secondary'">
+          {{ statusMap[report()!.status]?.label ?? report()!.status }}
+        </c-badge>
       </div>
     </c-card-header>
     <c-card-body>
+
+      @if (report()!.status === ReportStatus.Submitted) {
+        <div class="d-flex gap-2 mb-4">
+          <button cButton color="success" size="sm" (click)="showApproveModal = true">
+            <svg cIcon name="cilCheckCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+            Aprobar
+          </button>
+          <button cButton color="danger" size="sm" (click)="showRejectModal = true">
+            <svg cIcon name="cilXCircle" class="me-1" size="sm" aria-hidden="true"></svg>
+            Rechazar
+          </button>
+        </div>
+      }
 
       @if (report()!.status === ReportStatus.Rejected && report()!.adminComment) {
         <c-alert color="danger" class="mb-4">
@@ -39,22 +40,22 @@
 
       <c-row class="mb-3">
         <c-col xs="12" md="6">
-          <label class="text-muted">Fecha del reporte</label>
+          <span class="text-muted">Fecha del reporte</span>
           <p>{{ report()!.reportDate | date:'dd/MM/yyyy' }}</p>
         </c-col>
         <c-col xs="12" md="6">
-          <label class="text-muted">Tipo</label>
+          <span class="text-muted">Tipo</span>
           <p>{{ report()!.reportTypeName }}</p>
         </c-col>
       </c-row>
 
       <c-row class="mb-3">
         <c-col xs="12" md="6">
-          <label class="text-muted">Persona</label>
+          <span class="text-muted">Persona</span>
           <p>{{ report()!.personName }}</p>
         </c-col>
         <c-col xs="12" md="6">
-          <label class="text-muted">Profesional</label>
+          <span class="text-muted">Profesional</span>
           <p>{{ report()!.professionalName }}</p>
         </c-col>
       </c-row>
@@ -62,11 +63,11 @@
       @if (report()!.periodStartDate || report()!.periodEndDate) {
         <c-row class="mb-3">
           <c-col xs="12" md="6">
-            <label class="text-muted">Período desde</label>
+            <span class="text-muted">Período desde</span>
             <p>{{ report()!.periodStartDate | date:'dd/MM/yyyy' }}</p>
           </c-col>
           <c-col xs="12" md="6">
-            <label class="text-muted">Período hasta</label>
+            <span class="text-muted">Período hasta</span>
             <p>{{ report()!.periodEndDate | date:'dd/MM/yyyy' }}</p>
           </c-col>
         </c-row>
@@ -76,7 +77,7 @@
 
       <c-row class="mb-3">
         <c-col xs="12">
-          <label class="text-muted">Contenido</label>
+          <p class="text-muted mb-1">Contenido</p>
           <p class="mb-0">{{ report()!.content }}</p>
         </c-col>
       </c-row>
@@ -84,7 +85,7 @@
       @if (report()!.achievedGoals) {
         <c-row class="mb-3">
           <c-col xs="12">
-            <label class="text-muted">Objetivos alcanzados</label>
+            <p class="text-muted mb-1">Objetivos alcanzados</p>
             <p class="mb-0">{{ report()!.achievedGoals }}</p>
           </c-col>
         </c-row>
@@ -92,7 +93,7 @@
       @if (report()!.areasToReinforce) {
         <c-row class="mb-3">
           <c-col xs="12">
-            <label class="text-muted">Áreas a reforzar</label>
+            <span class="text-muted">Áreas a reforzar</span>
             <p class="mb-0">{{ report()!.areasToReinforce }}</p>
           </c-col>
         </c-row>
@@ -100,7 +101,7 @@
       @if (report()!.futureRecommendations) {
         <c-row class="mb-3">
           <c-col xs="12">
-            <label class="text-muted">Recomendaciones</label>
+            <p class="text-muted mb-1">Recomendaciones</p>
             <p class="mb-0">{{ report()!.futureRecommendations }}</p>
           </c-col>
         </c-row>
@@ -108,7 +109,7 @@
       @if (report()!.nextObjectives) {
         <c-row class="mb-3">
           <c-col xs="12">
-            <label class="text-muted">Próximos objetivos</label>
+            <span class="text-muted">Próximos objetivos</span>
             <p class="mb-0">{{ report()!.nextObjectives }}</p>
           </c-col>
         </c-row>

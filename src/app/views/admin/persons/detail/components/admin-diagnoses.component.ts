@@ -8,9 +8,10 @@ import {
   ModalFooterComponent,
   ModalHeaderComponent,
   SpinnerComponent,
-  TableDirective,
 } from '@coreui/angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 
 @Component({
   selector: 'app-admin-diagnoses',
@@ -22,7 +23,7 @@ import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-
     ModalBodyComponent,
     ModalFooterComponent,
     SpinnerComponent,
-    TableDirective,
+    DataTableComponent,
     ConfirmModalComponent,
   ],
   templateUrl: './admin-diagnoses.component.html',
@@ -44,6 +45,26 @@ export class AdminDiagnosesComponent implements OnInit {
   deactivatingDiag: DiagnosisListItemResponse | null = null;
   isDeactivating = false;
 
+  columns: TableColumn[] = [
+    { key: 'diagnosisDate', label: 'Fecha', type: 'date' },
+    { key: 'primaryDiagnosis', label: 'Diagnóstico principal' },
+    { key: 'professionalName', label: 'Profesional' },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      type: 'actions',
+      actions: [
+        { action: 'view',       label: 'Ver',         icon: 'cilSearch' },
+        { action: 'deactivate', label: 'Dar de baja', icon: 'cilBan'    },
+      ],
+    },
+  ];
+
+  onRowAction(event: { action: string; item: DiagnosisListItemResponse }): void {
+    if (event.action === 'view')       this.openDetail(event.item.encryptedId);
+    if (event.action === 'deactivate') this.openDeactivate(event.item);
+  }
+
   ngOnInit(): void {
     this.loading = true;
     this.diagnosesService.getByPerson(this.personId).subscribe({
@@ -58,7 +79,7 @@ export class AdminDiagnosesComponent implements OnInit {
     });
   }
 
-  openDetail(id: number): void {
+  openDetail(id: string): void {
     this.selected = null;
     this.loadingDetail = true;
     this.showModal = true;
@@ -88,10 +109,10 @@ export class AdminDiagnosesComponent implements OnInit {
   confirmDeactivate(): void {
     if (!this.deactivatingDiag) return;
     this.isDeactivating = true;
-    this.diagnosesService.patchStatus(this.deactivatingDiag.id, false).subscribe({
+    this.diagnosesService.patchStatus(this.deactivatingDiag.encryptedId, false).subscribe({
       next: () => {
         this.toastService.success('Diagnóstico dado de baja exitosamente.');
-        this.diagnoses = this.diagnoses.filter(d => d.id !== this.deactivatingDiag!.id);
+        this.diagnoses = this.diagnoses.filter(d => d.encryptedId !== this.deactivatingDiag!.encryptedId);
         this.showDeactivateModal = false;
         this.isDeactivating = false;
         this.deactivatingDiag = null;
@@ -117,7 +138,4 @@ export class AdminDiagnosesComponent implements OnInit {
     });
   }
 
-  truncate(text: string, max: number): string {
-    return text.length > max ? text.slice(0, max) + '…' : text;
-  }
 }

@@ -1,167 +1,191 @@
-<c-card class="mb-3">
+<ng-template #tableContent>
 
-  <!-- Header con titulo y botones -->
-  @if (showTitle && (title || headerButtons.length > 0)) {
-    <c-card-header class="d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">{{ title }}</h5>
-      <div class="d-flex gap-2">
-        @for (btn of headerButtons; track btn.action) {
-          <button
-            cButton
-            [color]="btn.color || 'primary'"
-            size="sm"
-            (click)="headerAction.emit(btn.action)"
-          >
-            @if (btn.icon) {
-              <svg cIcon [name]="btn.icon" size="sm" class="me-1"></svg>
-            }
-            {{ btn.label }}
-          </button>
-        }
-      </div>
-    </c-card-header>
+  <!-- Buscador: usa div simple, no c-row/c-col (evita negative gutters que generan overflow en mobile) -->
+  @if (showSearch) {
+    <div class="mb-3">
+      <c-input-group>
+        <label cInputGroupText for="table-search">Buscar: </label>
+        <input
+          cFormControl
+          id="table-search"
+          placeholder="Buscar..."
+          aria-label="Buscar en la tabla"
+          #searchInput
+          (input)="onSearchInput(searchInput.value)"
+        />
+      </c-input-group>
+    </div>
   }
 
-  <c-card-body>
-
-    <!-- Buscador -->
-    @if (showSearch) {
-      <c-row class="align-items-center mb-3">
-        <c-col sm="12">
-          <c-input-group>
-            <label cInputGroupText for="table-search">Buscar: </label>
-            <input
-              cFormControl
-              id="table-search"
-              placeholder="Buscar..."
-              aria-label="Buscar en la tabla"
-              #searchInput
-              (input)="onSearchInput(searchInput.value)"
-            />
-          </c-input-group>
-        </c-col>
-      </c-row>
-    }
-
-    <!-- Tabla -->
-    <div class="table-wrapper" [class.loading]="loading">
-      @if (loading) {
-        <div class="table-overlay">
-          <c-spinner size="sm"></c-spinner>
-        </div>
-      }
-      <table cTable hover striped aria-label="Tabla de datos" [attr.aria-busy]="loading">
-      <thead>
-        <tr>
-          @for (col of columns; track col.key) {
-            <th scope="col" [attr.aria-sort]="getAriaSort(col)">
-              @if (col.sortable) {
-                <button type="button" class="th-sort-btn" (click)="onSort(col)"
-                        [attr.aria-label]="'Ordenar por ' + col.label">
-                  {{ col.label }}
-                  <span class="sort-arrows ms-1" aria-hidden="true">
-                    <svg cIcon name="cil-caret-top" [class.active]="sortField === col.key && sortDirection === 'ASC'" size="sm" class="sort-arrow-up"></svg>
-                    <svg cIcon name="cil-caret-bottom" [class.active]="sortField === col.key && sortDirection === 'DESC'" size="sm" class="sort-arrow-down"></svg>
-                  </span>
-                </button>
-              } @else {
-                {{ col.label }}
-              }
-            </th>
-          }
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of items; track $index) {
-          <tr>
-            @for (col of columns; track col.key) {
-              <td>
-                @switch (col.type) {
-                  @case ('badge') {
-                    <c-badge [color]="getBadgeColor(item[col.key], col)"
-                          [attr.aria-label]="'Estado: ' + getBadgeLabel(item[col.key], col)">
-                      {{ getBadgeLabel(item[col.key], col) }}
-                    </c-badge>
-                  }
-                  @case ('actions') {
-                    @if (col.actions && getVisibleActions(col, item).length > 0) {
-                      <c-dropdown>
-                        <button cButton color="secondary" size="sm" cDropdownToggle
-                                [attr.aria-label]="'Acciones para ' + (item.fullName || item.name || 'este registro')">
-                          <svg cIcon name="cilMenu" size="sm"></svg>
-                        </button>
-                        <ul cDropdownMenu>
-                          @for (action of getVisibleActions(col, item); track action.action) {
-                            <li>
-                              <button cDropdownItem
-                                      (click)="rowAction.emit({ action: action.action, item: item })">
-                                @if (action.icon) {
-                                  <svg cIcon [name]="action.icon" size="sm" class="me-2"></svg>
-                                }
-                                {{ action.label }}
-                              </button>
-                            </li>
-                          }
-                        </ul>
-                      </c-dropdown>
-                    } @else {
-                      <span class="text-body-secondary">-</span>
-                    }
-                  }
-                  @default {
-                    {{ item[col.key] || '-' }}
-                  }
-                }
-              </td>
-            }
-          </tr>
-        }
-        @if (items.length === 0) {
-          <tr>
-            <td [attr.colspan]="columns.length" class="text-center text-body-secondary py-4" role="status" aria-live="polite">
-              Sin registros
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-    </div>
-
-    <!-- Info y paginacion -->
-    @if (totalItems > 0 && showPagination) {
-      <div class="d-flex justify-content-between align-items-center mt-3">
-        <small class="text-body-secondary">
-          Mostrando {{ showingFrom }}–{{ showingTo }} de {{ totalItems }}
-        </small>
-        @if (totalPages > 1) {
-          <nav aria-label="Paginacion de tabla">
-            <c-pagination align="end" class="mb-0">
-              <c-page-item [disabled]="currentPage === 1">
-                <button type="button" cPageLink (click)="pageChange.emit(currentPage - 1)"
-                        [disabled]="currentPage === 1" aria-label="Pagina anterior">&lsaquo;</button>
-              </c-page-item>
-              @for (page of pages; track $index) {
-                @if (page === '...') {
-                  <c-page-item [disabled]="true">
-                    <span cPageLink aria-hidden="true">…</span>
-                  </c-page-item>
-                } @else {
-                  <c-page-item [active]="page === currentPage">
-                    <button type="button" cPageLink (click)="pageChange.emit(+page)"
-                            [attr.aria-label]="'Ir a pagina ' + page"
-                            [attr.aria-current]="page === currentPage ? 'page' : null">{{ page }}</button>
-                  </c-page-item>
-                }
-              }
-              <c-page-item [disabled]="currentPage === totalPages">
-                <button type="button" cPageLink (click)="pageChange.emit(currentPage + 1)"
-                        [disabled]="currentPage === totalPages" aria-label="Pagina siguiente">&rsaquo;</button>
-              </c-page-item>
-            </c-pagination>
-          </nav>
-        }
+  <!-- Tabla -->
+  <div class="table-wrapper" [class.loading]="loading">
+    @if (loading) {
+      <div class="table-overlay">
+        <c-spinner size="sm"></c-spinner>
       </div>
     }
+    <table cTable hover striped aria-label="Tabla de datos" [attr.aria-busy]="loading">
+    <thead>
+      <tr>
+        @for (col of orderedColumns; track col.key) {
+          <th scope="col" [attr.aria-sort]="getAriaSort(col)">
+            @if (col.sortable) {
+              <button type="button" class="th-sort-btn" (click)="onSort(col)"
+                      [attr.aria-label]="'Ordenar por ' + col.label">
+                {{ col.label }}
+                <span class="sort-arrows ms-1" aria-hidden="true">
+                  <svg cIcon name="cilCaretTop" [class.active]="sortField === col.key && sortDirection === 'ASC'" size="sm" class="sort-arrow-up"></svg>
+                  <svg cIcon name="cilCaretBottom" [class.active]="sortField === col.key && sortDirection === 'DESC'" size="sm" class="sort-arrow-down"></svg>
+                </span>
+              </button>
+            } @else {
+              {{ col.label }}
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of items; track $index) {
+        <tr>
+          @for (col of orderedColumns; track col.key) {
+            <td>
+              @switch (col.type) {
+                @case ('badge') {
+                  <c-badge [color]="getBadgeColor(item[col.key], col)"
+                        [attr.aria-label]="'Estado: ' + getBadgeLabel(item[col.key], col)">
+                    {{ getBadgeLabel(item[col.key], col) }}
+                  </c-badge>
+                }
+                @case ('actions') {
+                  @if (col.actions && getVisibleActions(col, item).length > 0) {
+                    <c-dropdown [popperOptions]="fixedDropdown">
+                      <button cButton color="secondary" size="sm" cDropdownToggle
+                              [attr.aria-label]="'Acciones para ' + (item.fullName || item.name || 'este registro')">
+                        <svg cIcon name="cilMenu" size="sm"></svg>
+                      </button>
+                      <ul cDropdownMenu>
+                        @for (action of getVisibleActions(col, item); track action.action) {
+                          <li>
+                            <button cDropdownItem
+                                    (click)="rowAction.emit({ action: action.action, item: item })">
+                              @if (action.icon) {
+                                <svg cIcon [name]="action.icon" size="sm" class="me-2"></svg>
+                              }
+                              {{ action.label }}
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    </c-dropdown>
+                  } @else {
+                    <span class="text-body-secondary">-</span>
+                  }
+                }
+                @case ('date') {
+                  {{ formatDate(item[col.key]) }}
+                }
+                @case ('color') {
+                  <span class="d-inline-block rounded border"
+                        [style.backgroundColor]="item[col.key]"
+                        style="width:20px;height:20px;vertical-align:middle"></span>
+                  <small class="ms-1">{{ item[col.key] || '-' }}</small>
+                }
+                @case ('code') {
+                  <code>{{ item[col.key] || '-' }}</code>
+                }
+                @default {
+                  {{ item[col.key] ?? '-' }}
+                }
+              }
+            </td>
+          }
+        </tr>
+      }
+      @if (items.length === 0) {
+        <tr>
+          <td [attr.colspan]="orderedColumns.length" class="text-center text-body-secondary py-5">
+            @if (emptyIcon) {
+              <div><svg cIcon [name]="emptyIcon" size="3xl" class="mb-2 opacity-50"></svg></div>
+            }
+            <p class="mb-0">{{ emptyMessage }}</p>
+            @if (emptyDetail) {
+              <div><small>{{ emptyDetail }}</small></div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  </div>
 
-  </c-card-body>
-</c-card>
+  <!-- Info y paginacion -->
+  @if (totalItems > 0 && showPagination) {
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
+      <small class="text-body-secondary flex-shrink-0">
+        Mostrando {{ showingFrom }}–{{ showingTo }} de {{ totalItems }}
+      </small>
+      @if (totalPages > 1) {
+        <nav aria-label="Paginación de tabla" style="min-width: 0; overflow-x: auto;">
+          <c-pagination align="end" class="mb-0">
+            <c-page-item [disabled]="currentPage === 1">
+              <button type="button" cPageLink (click)="pageChange.emit(currentPage - 1)"
+                      [disabled]="currentPage === 1" aria-label="Página anterior">&lsaquo;</button>
+            </c-page-item>
+            @for (page of pages; track $index) {
+              @if (page === '...') {
+                <c-page-item [disabled]="true">
+                  <span cPageLink aria-hidden="true">…</span>
+                </c-page-item>
+              } @else {
+                <c-page-item [active]="page === currentPage">
+                  <button type="button" cPageLink (click)="pageChange.emit(+page)"
+                          [attr.aria-label]="'Ir a página ' + page"
+                          [attr.aria-current]="page === currentPage ? 'page' : null">{{ page }}</button>
+                </c-page-item>
+              }
+            }
+            <c-page-item [disabled]="currentPage === totalPages">
+              <button type="button" cPageLink (click)="pageChange.emit(currentPage + 1)"
+                      [disabled]="currentPage === totalPages" aria-label="Página siguiente">&rsaquo;</button>
+            </c-page-item>
+          </c-pagination>
+        </nav>
+      }
+    </div>
+  }
+
+</ng-template>
+
+@if (showCard) {
+  <c-card class="mb-3">
+
+    <!-- Header con titulo y botones -->
+    @if (showTitle && (title || headerButtons.length > 0)) {
+      <c-card-header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0" style="min-width: 0; overflow-wrap: anywhere;">{{ title }}</h5>
+        <div class="d-flex gap-2 flex-shrink-0">
+          @for (btn of headerButtons; track btn.action) {
+            <button
+              cButton
+              [color]="btn.color || 'primary'"
+              size="sm"
+              (click)="headerAction.emit(btn.action)"
+            >
+              @if (btn.icon) {
+                <svg cIcon [name]="btn.icon" size="sm" class="me-1"></svg>
+              }
+              {{ btn.label }}
+            </button>
+          }
+        </div>
+      </c-card-header>
+    }
+
+    <c-card-body>
+      <ng-container [ngTemplateOutlet]="tableContent" />
+    </c-card-body>
+  </c-card>
+} @else {
+  <ng-container [ngTemplateOutlet]="tableContent" />
+}

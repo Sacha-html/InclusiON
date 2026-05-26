@@ -56,10 +56,10 @@
 }
 
 .avatar-name {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--a11y-text, #212121);
-  max-width: 100px;
+  max-width: 8rem;   // scales with text size (WCAG 1.4.4)
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

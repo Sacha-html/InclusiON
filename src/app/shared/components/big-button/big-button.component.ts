@@ -13,6 +13,7 @@ export class BigButtonComponent {
   @Input() label = '';
   @Input() icon?: string;
   @Input() image?: string;
+  @Input() imageAlt = '';
   @Input() color = '';
   @Input() bgColor = '';
   @Input() disabled = false;

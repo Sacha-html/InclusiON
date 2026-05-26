@@ -11,25 +11,14 @@
         <c-col xs="12" md="6">
           <label class="form-label" id="report-person-label">Persona con discapacidad *</label>
 
-          <ng-select
-            inputId="report-person"
-            [items]="persons()"
-            [placeholder]="isLoadingPersons() ? 'Cargando...' : 'Buscar por nombre...'"
-            [loading]="isLoadingPersons()"
-            loadingText="Cargando..."
-            notFoundText="Sin resultados"
-            [searchFn]="searchPersonFn"
-            (change)="onPersonChange($event)"
-            aria-labelledby="report-person-label"
-            aria-required="true"
-          >
-            <ng-template ng-label-tmp let-item="item">
-              {{ item.personFirstName }} {{ item.personLastName }}
-            </ng-template>
-            <ng-template ng-option-tmp let-item="item">
-              {{ item.personFirstName }} {{ item.personLastName }}
-            </ng-template>
-          </ng-select>
+          <app-searchable-select
+            [formControl]="personControl"
+            [searchFn]="searchPersonsFn"
+            [displayFn]="displayPersonFn"
+            [valueFn]="personValueFn"
+            placeholder="Buscar por nombre..."
+            noResultsText="Sin resultados"
+          />
         </c-col>
 
         <!-- Tipo de Reporte -->
@@ -170,7 +159,7 @@
         <c-col xs="12">
           <button cButton type="submit" color="primary" [disabled]="isLoading() || !isValid">
             @if (isLoading()) {
-              <c-spinner size="sm"></c-spinner>
+              <c-spinner size="sm" aria-hidden="true"></c-spinner>
             }
             Guardar
           </button>
@@ -201,7 +190,7 @@
     </button>
     <button cButton color="primary" [disabled]="isSubmitting()" (click)="submitNow()">
       @if (isSubmitting()) {
-        <c-spinner size="sm" class="me-1"></c-spinner>
+        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
       }
       Enviar al administrador
     </button>

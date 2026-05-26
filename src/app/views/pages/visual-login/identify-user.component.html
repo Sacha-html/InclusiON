@@ -19,7 +19,7 @@
     </div>
 
     <!-- Main Card -->
-    <main class="identify-card card shadow" role="main">
+    <section class="identify-card card shadow" aria-labelledby="identify-heading">
       <div class="card-body p-4 p-md-5">
         @if (matches) {
           <!-- Multi-match: lista visual para que la persona elija -->
@@ -27,7 +27,7 @@
             <div class="user-type-badge mb-3" aria-label="Tipo de usuario seleccionado">
               {{ userTypeLabel }}
             </div>
-            <h1 class="h2 fw-bold mb-3" style="color: var(--a11y-text)">¿Cuál sos?</h1>
+            <h1 id="identify-heading" class="h2 fw-bold mb-3" style="color: var(--a11y-text)">¿Cuál sos?</h1>
             <p class="fs-5 mb-0" style="color: var(--a11y-text-muted)">Tocá tu cara para entrar</p>
           </header>
 
@@ -49,7 +49,7 @@
             <div class="user-type-badge mb-3" aria-label="Tipo de usuario seleccionado">
               {{ userTypeLabel }}
             </div>
-            <h1 class="h2 fw-bold mb-3" style="color: var(--a11y-text)">Escribe tu nombre</h1>
+            <h1 id="identify-heading" class="h2 fw-bold mb-3" style="color: var(--a11y-text)">Escribe tu nombre</h1>
             <p class="fs-5 mb-0" id="identify-instructions" style="color: var(--a11y-text-muted)">Así te encontramos</p>
           </header>
 
@@ -132,6 +132,6 @@
           </footer>
         }
       </div>
-    </main>
+    </section>
   </div>
 </div>

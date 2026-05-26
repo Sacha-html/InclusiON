@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ErrorCode, ErrorInfo, ErrorSeverity } from '../models/error-code.enum';
+import { ErrorCode, ErrorInfo, ErrorSeverity } from '@models/error-code.enum';
 
 /**
  * Servicio para mapear códigos de error del backend a mensajes amigables.

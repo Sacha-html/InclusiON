@@ -22,8 +22,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class ConfirmModalComponent {
   @Input() visible = false;
-  @Input() title = 'Confirmar accion';
-  @Input() messagePrefix = '¿Esta seguro de que desea realizar esta accion sobre ';
+  @Input() title = 'Confirmar acción';
+  @Input() messagePrefix = '¿Está seguro de que desea realizar esta acción sobre ';
   @Input() itemName = '';
   @Input() messageSuffix = '?';
   @Input() detail = '';
@@ -36,6 +36,7 @@ export class ConfirmModalComponent {
   @Output() confirm = new EventEmitter<string>();
   @Output() cancel = new EventEmitter<void>();
 
+  @ViewChild('cancelBtn') cancelBtn!: ElementRef<HTMLButtonElement>;
   @ViewChild('confirmBtn') confirmBtn!: ElementRef<HTMLButtonElement>;
   private lastFocusedElement: HTMLElement | null = null;
 
@@ -49,7 +50,7 @@ export class ConfirmModalComponent {
     this.visible = visible;
     if (visible) {
       this.lastFocusedElement = document.activeElement as HTMLElement;
-      setTimeout(() => this.confirmBtn?.nativeElement.focus(), 100);
+      setTimeout(() => this.cancelBtn?.nativeElement.focus(), 100);
     } else {
       this.observation = '';
       this.cancel.emit();

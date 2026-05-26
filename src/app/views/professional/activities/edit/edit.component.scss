@@ -73,3 +73,7 @@
     background: rgba(var(--cui-primary-rgb), 0.05);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

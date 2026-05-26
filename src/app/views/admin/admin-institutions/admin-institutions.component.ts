@@ -40,7 +40,7 @@ export class AdminInstitutionsComponent implements OnInit {
   isGlobalAdmin = false;
 
   showAssignModal = false;
-  selectedInstitutionId: number | null = null;
+  selectedInstitutionId: string | null = null;
 
   showRemoveModal = false;
   institutionToRemove: AdminInstitutionResponse | null = null;
@@ -50,8 +50,8 @@ export class AdminInstitutionsComponent implements OnInit {
   }
 
   get availableInstitutions(): InstitutionResponse[] {
-    const assignedIds = new Set(this.myInstitutions.map((i) => i.institutionId));
-    return this.allInstitutions.filter((i) => i.isActive && !assignedIds.has(i.id));
+    const assignedIds = new Set(this.myInstitutions.map((i) => i.encryptedInstitutionId));
+    return this.allInstitutions.filter((i) => i.isActive && !assignedIds.has(i.encryptedId));
   }
 
   ngOnInit(): void {
@@ -96,7 +96,7 @@ export class AdminInstitutionsComponent implements OnInit {
     if (!this.institutionToRemove || !this.currentUserId) return;
 
     this.isSaving = true;
-    this.adminInstitutionsService.remove(this.currentUserId, this.institutionToRemove.institutionId).subscribe({
+    this.adminInstitutionsService.remove(this.currentUserId, this.institutionToRemove.encryptedInstitutionId).subscribe({
       next: () => {
         this.toastService.success('Institucion desasignada exitosamente');
         this.showRemoveModal = false;

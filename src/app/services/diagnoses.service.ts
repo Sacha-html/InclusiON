@@ -1,10 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '@env';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '../models';
-import { DiagnosisResponse, DiagnosisListItemResponse } from '../models/responses/diagnosis.response';
-import { CreateDiagnosisRequest } from '../models/requests/diagnoses/create-diagnosis.request';
+import { map } from 'rxjs/operators';
+import { ApiResponse, PagedResponse, DiagnosisResponse, DiagnosisListItemResponse, CreateDiagnosisRequest } from '@models';
 import { unwrapResponse, handleApiError } from '@shared/utils';
 
 @Injectable({
@@ -17,13 +16,16 @@ export class DiagnosesService {
     return environment.apiUrl;
   }
 
-  getByPerson(personId: string): Observable<DiagnosisListItemResponse[]> {
+  getByPerson(personId: string, page = 1, pageSize = 100): Observable<DiagnosisListItemResponse[]> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     return this.http
-      .get<ApiResponse<DiagnosisListItemResponse[]>>(`${this.baseUrl}/persons/${personId}/diagnoses`)
-      .pipe(unwrapResponse());
+      .get<ApiResponse<PagedResponse<DiagnosisListItemResponse>>>(`${this.baseUrl}/persons/${personId}/diagnoses`, { params })
+      .pipe(unwrapResponse(), map((r) => r.data));
   }
 
-  getById(id: number): Observable<DiagnosisResponse> {
+  getById(id: string): Observable<DiagnosisResponse> {
     return this.http
       .get<ApiResponse<DiagnosisResponse>>(`${this.baseUrl}/diagnoses/${id}`)
       .pipe(unwrapResponse());
@@ -35,13 +37,13 @@ export class DiagnosesService {
       .pipe(unwrapResponse());
   }
 
-  update(id: number, request: CreateDiagnosisRequest): Observable<DiagnosisResponse> {
+  update(id: string, request: CreateDiagnosisRequest): Observable<DiagnosisResponse> {
     return this.http
       .put<ApiResponse<DiagnosisResponse>>(`${this.baseUrl}/diagnoses/${id}`, request)
       .pipe(unwrapResponse());
   }
 
-  patchStatus(id: number, isActive: boolean): Observable<void> {
+  patchStatus(id: string, isActive: boolean): Observable<void> {
     return this.http
       .patch<void>(`${this.baseUrl}/diagnoses/${id}`, { isActive })
       .pipe(handleApiError());

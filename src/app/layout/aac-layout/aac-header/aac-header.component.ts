@@ -23,10 +23,6 @@ export class AacHeaderComponent {
     return this.userName.charAt(0).toUpperCase();
   }
 
-  get isReadingMode(): boolean {
-    return this.a11y.readingMode();
-  }
-
   goBack(): void {
     this.location.back();
   }

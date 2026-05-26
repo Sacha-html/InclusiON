@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { PersonResponse, PersonSkillProfileResponse, SkillAreaItem } from '@models';
+import { SkillChipComponent } from '@shared/components';
 import {
   ButtonDirective,
   FormCheckComponent,
@@ -16,6 +17,7 @@ import {
   selector: 'app-person-skills',
   standalone: true,
   imports: [
+    SkillChipComponent,
     ButtonDirective,
     FormCheckComponent,
     FormCheckInputDirective,

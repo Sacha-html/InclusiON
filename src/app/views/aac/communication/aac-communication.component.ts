@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { BigButtonComponent } from '../../../shared/components/big-button/big-button.component';
-import { AccessibilityService } from '../../../services/accessibility.service';
+import { BigButtonComponent } from '@shared/components/big-button/big-button.component';
+import { AccessibilityService } from '@services/accessibility.service';
 
 @Component({
   selector: 'app-aac-communication',

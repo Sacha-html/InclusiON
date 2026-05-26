@@ -1,6 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { IconDirective } from '@coreui/icons-angular';
 import {
   CardBodyComponent,
   CardComponent,
@@ -12,14 +13,14 @@ import {
   AlertComponent,
 } from '@coreui/angular';
 import { FamilyService } from '@services';
-import { FamilyDashboardResponse, FamilyPersonSummaryResponse } from '../../../models';
+import { FamilyDashboardResponse } from '@models';
 
 @Component({
   selector: 'app-family-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
+    IconDirective,
     DatePipe,
     CardComponent,
     CardBodyComponent,
@@ -31,9 +32,11 @@ import { FamilyDashboardResponse, FamilyPersonSummaryResponse } from '../../../m
     AlertComponent,
   ],
   templateUrl: './family-dashboard.component.html',
+  styleUrl: './family-dashboard.component.scss',
 })
 export class FamilyDashboardComponent implements OnInit {
   private readonly familyService = inject(FamilyService);
+  readonly #el = inject(ElementRef<HTMLElement>);
 
   dashboard: FamilyDashboardResponse | null = null;
   loading = true;
@@ -44,6 +47,10 @@ export class FamilyDashboardComponent implements OnInit {
       next: (data) => {
         this.dashboard = data;
         this.loading = false;
+        setTimeout(() => {
+          const h = this.#el.nativeElement.querySelector('h1') as HTMLElement;
+          h?.focus();
+        }, 80);
       },
       error: () => {
         this.error = true;

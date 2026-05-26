@@ -94,3 +94,7 @@
   border-radius: 8px;
   padding: 0;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

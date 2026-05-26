@@ -1,3 +1,5 @@
+<a href="#main-content" class="skip-link">Ir al contenido principal</a>
+
 <c-sidebar
   #sidebar="cSidebar"
   class="d-print-none sidebar sidebar-fixed border-end"
@@ -46,11 +48,11 @@
     sidebarId="sidebar"
   />
 
-  <div class="body flex-grow-1">
+  <main id="main-content" tabindex="-1" class="body flex-grow-1">
     <c-container breakpoint="lg" class="h-auto px-4">
       <router-outlet />
     </c-container>
-  </div>
+  </main>
 
   <app-default-footer class="d-print-none" />
 </div>

@@ -5,8 +5,7 @@ import { ActivitiesService } from '@services/activities.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { ToastService } from '@services';
 import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem } from '@models';
-import { CreateActivityRequest } from '@models/requests/activities';
-import { ActivityListItemResponse } from '@models/responses/activity.response';
+import { CreateActivityRequest, ActivityListItemResponse } from '@models';
 import { CONTENT_EDITOR_REGISTRY } from './editors/content-editor-registry';
 import { ContentEditorBaseComponent } from './editors/content-editor-base.component';
 import { AssignActivityModalComponent } from '../assign-modal/assign-activity-modal.component';
@@ -77,6 +76,8 @@ export class NewComponent implements OnInit {
   isLoading = signal(false);
   savedActivity = signal<ActivityListItemResponse | null>(null);
   showAssignModal = false;
+  similarActivities = signal<ActivityListItemResponse[]>([]);
+  similarLoading = signal(false);
 
   get selectedTemplateName(): string {
     return this.templateTypes().find(t => t.id === +this.meta.templateTypeId)?.name ?? '';
@@ -165,15 +166,18 @@ export class NewComponent implements OnInit {
     this.activitiesService.create(request).subscribe({
       next: (activity) => {
         this.toastService.success('Actividad creada exitosamente.');
-        this.savedActivity.set({
+        const saved: ActivityListItemResponse = {
           id: activity.id,
+          encryptedId: activity.encryptedId,
           title: activity.title,
           templateTypeCode: this.selectedTemplateCode,
           templateTypeName: this.selectedTemplateName,
           isActive: true,
           isStandardActivity: false,
           createdAt: new Date().toISOString(),
-        });
+        };
+        this.savedActivity.set(saved);
+        this.loadSimilarActivities(saved.encryptedId);
         this.isLoading.set(false);
       },
       error: () => {
@@ -186,6 +190,19 @@ export class NewComponent implements OnInit {
   openAssignModal(): void { this.showAssignModal = true; }
   onAssigned(): void      { this.router.navigate([AppRoutes.Pro.Activities]); }
   skipAssign(): void      { this.router.navigate([AppRoutes.Pro.Activities]); }
+
+  private loadSimilarActivities(encryptedId: string): void {
+    this.similarLoading.set(true);
+    this.activitiesService.getSimilarActivities(encryptedId, 5).subscribe({
+      next: (results) => {
+        this.similarActivities.set(results);
+        this.similarLoading.set(false);
+      },
+      error: () => {
+        this.similarLoading.set(false);
+      },
+    });
+  }
 
   cancel(): void {
     this.router.navigate([AppRoutes.Pro.Activities]);

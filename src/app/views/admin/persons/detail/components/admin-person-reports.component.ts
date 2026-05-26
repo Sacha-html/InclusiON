@@ -3,33 +3,30 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ReportListItemResponse, ReportStatus } from '@models/responses/reports/report.response';
+import { ReportListItemResponse, ReportStatus } from '@models';
 import {
-  BadgeComponent,
-  ButtonDirective,
   FormSelectDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
   ModalHeaderComponent,
   SpinnerComponent,
-  TableDirective,
 } from '@coreui/angular';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 
 @Component({
   selector: 'app-admin-person-reports',
   standalone: true,
   imports: [
     FormsModule,
-    BadgeComponent,
-    ButtonDirective,
     FormSelectDirective,
     ModalBodyComponent,
     ModalComponent,
     ModalFooterComponent,
     ModalHeaderComponent,
     SpinnerComponent,
-    TableDirective,
+    DataTableComponent,
   ],
   templateUrl: './admin-person-reports.component.html',
 })
@@ -40,13 +37,12 @@ export class AdminPersonReportsComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
-  readonly ReportStatus = ReportStatus;
-
   reports = signal<ReportListItemResponse[]>([]);
   isLoading = signal(true);
   isProcessing = signal(false);
   currentPage = signal(1);
   totalPages = signal(1);
+  totalRecords = signal(0);
 
   statusFilter = '';
   rejectComment = '';
@@ -55,12 +51,29 @@ export class AdminPersonReportsComponent implements OnInit {
   showRejectModal = signal(false);
   selectedReport = signal<ReportListItemResponse | null>(null);
 
-  readonly badgeMap: Record<ReportStatus, { color: string; label: string }> = {
-    [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador' },
-    [ReportStatus.Submitted]: { color: 'warning',   label: 'Enviado' },
-    [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado' },
-    [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
-  };
+  readonly columns: TableColumn[] = [
+    { key: 'reportDateFmt',    label: 'Fecha',       sortable: false },
+    { key: 'title',            label: 'Título',      sortable: false },
+    { key: 'reportTypeName',   label: 'Tipo',        sortable: false },
+    { key: 'professionalName', label: 'Profesional', sortable: false },
+    {
+      key: 'status', label: 'Estado', type: 'badge',
+      badgeMap: {
+        [ReportStatus.Draft]:     { color: 'secondary', label: 'Borrador'  },
+        [ReportStatus.Submitted]: { color: 'warning',   label: 'Enviado'   },
+        [ReportStatus.Approved]:  { color: 'success',   label: 'Aprobado'  },
+        [ReportStatus.Rejected]:  { color: 'danger',    label: 'Rechazado' },
+      },
+    },
+    {
+      key: '', label: 'Acciones', type: 'actions',
+      actions: [
+        { action: 'view',    label: 'Ver',      color: 'primary' },
+        { action: 'approve', label: 'Aprobar',  color: 'success', visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted },
+        { action: 'reject',  label: 'Rechazar', color: 'danger',  visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted },
+      ],
+    },
+  ];
 
   ngOnInit(): void {
     this.loadReports();
@@ -77,8 +90,14 @@ export class AdminPersonReportsComponent implements OnInit {
       sortDirection: 'desc',
     }).subscribe({
       next: (response) => {
-        this.reports.set(response.data);
+        this.reports.set(response.data.map(r => ({
+          ...r,
+          reportDateFmt: r.reportDate
+            ? new Date(r.reportDate).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            : '—',
+        })));
         this.totalPages.set(response.totalPages);
+        this.totalRecords.set(response.totalRecords);
         this.isLoading.set(false);
       },
       error: () => {
@@ -88,13 +107,21 @@ export class AdminPersonReportsComponent implements OnInit {
     });
   }
 
-  changePage(page: number): void {
+  onPageChange(page: number): void {
     this.currentPage.set(page);
     this.loadReports();
   }
 
-  viewReport(id: number): void {
-    this.router.navigate([AppRoutes.Admin.Reports, id]);
+  onRowAction(event: { action: string; item: ReportListItemResponse }): void {
+    switch (event.action) {
+      case 'view':    this.viewReport(event.item.encryptedId); break;
+      case 'approve': this.openApproveModal(event.item); break;
+      case 'reject':  this.openRejectModal(event.item); break;
+    }
+  }
+
+  viewReport(encryptedId: string): void {
+    this.router.navigate([AppRoutes.Admin.Reports, encryptedId]);
   }
 
   openApproveModal(report: ReportListItemResponse): void {
@@ -105,7 +132,7 @@ export class AdminPersonReportsComponent implements OnInit {
   confirmApprove(): void {
     if (!this.selectedReport()) return;
     this.isProcessing.set(true);
-    this.reportsService.approveReport(this.selectedReport()!.id).subscribe({
+    this.reportsService.approveReport(this.selectedReport()!.encryptedId).subscribe({
       next: () => {
         this.toastService.success('Reporte aprobado exitosamente.');
         this.showApproveModal.set(false);
@@ -129,7 +156,7 @@ export class AdminPersonReportsComponent implements OnInit {
   confirmReject(): void {
     if (!this.selectedReport() || !this.rejectComment.trim()) return;
     this.isProcessing.set(true);
-    this.reportsService.rejectReport(this.selectedReport()!.id, this.rejectComment.trim()).subscribe({
+    this.reportsService.rejectReport(this.selectedReport()!.encryptedId, this.rejectComment.trim()).subscribe({
       next: () => {
         this.toastService.success('Reporte rechazado.');
         this.closeRejectModal();
@@ -147,12 +174,5 @@ export class AdminPersonReportsComponent implements OnInit {
     this.showRejectModal.set(false);
     this.selectedReport.set(null);
     this.rejectComment = '';
-  }
-
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('es-AR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
   }
 }

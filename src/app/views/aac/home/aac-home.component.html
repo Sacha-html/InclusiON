@@ -1,8 +1,11 @@
 <div class="aac-home" role="region" aria-labelledby="aac-home-title">
-  <h1 id="aac-home-title" class="home-greeting">{{ greeting }}</h1>
 
-  <section class="quick-actions" aria-labelledby="actions-title">
-    <h2 id="actions-title" class="section-title">Acciones rapidas</h2>
+  <header class="home-header">
+    <svg cIcon [name]="timeIcon" class="greeting-icon" aria-hidden="true" focusable="false"></svg>
+    <h1 id="aac-home-title" class="home-greeting">{{ greeting }}</h1>
+  </header>
+
+  <section class="quick-actions" aria-label="Acciones rápidas">
     <div class="actions-grid">
       <app-big-button
         label="Mi Camino"
@@ -28,27 +31,7 @@
         color="#9C27B0"
         (buttonClick)="goTo('/app/talk')"
       />
-      <app-big-button
-        label="Pedir Ayuda"
-        icon="cilBell"
-        color="#F44336"
-        (buttonClick)="requestHelp()"
-      />
     </div>
   </section>
 
-  <section class="today-activities" aria-labelledby="today-title">
-    <h2 id="today-title" class="section-title">Hoy</h2>
-    <div class="cards-list">
-      <app-visual-card
-        title="Actividad de ejemplo"
-        subtitle="10:00 AM"
-        icon="cilPuzzle"
-        accentColor="#4CAF50"
-        badge="Pendiente"
-        badgeColor="#FF9800"
-        (cardClick)="goTo('/app/activities')"
-      />
-    </div>
-  </section>
 </div>

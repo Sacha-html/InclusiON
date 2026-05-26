@@ -1,0 +1,153 @@
+:host { display: block; }
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.option-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  border: 2px solid var(--cui-border-color);
+  border-radius: 6px;
+  padding: .4rem .5rem;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+
+  &:hover { border-color: var(--cui-primary); background: rgba(var(--cui-primary-rgb), .04); }
+
+  &--correct {
+    border-color: var(--cui-success);
+    background: rgba(var(--cui-success-rgb), .08);
+  }
+}
+
+.opt-badge-correct {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--cui-success);
+  flex-shrink: 0;
+}
+
+.opt-pic-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opt-pic {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.opt-pic-clear {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  border: none;
+  background: var(--cui-danger);
+  color: #fff;
+  font-size: .55rem;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opt-pic-add {
+  border: 1px dashed var(--cui-border-color);
+  background: none;
+  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .15s;
+  &:hover { border-color: var(--cui-primary); }
+}
+
+.opt-text {
+  flex: 1;
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--cui-body-color);
+}
+
+.opt-btn-remove {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  color: var(--cui-danger);
+  font-size: .7rem;
+  padding: 2px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  &:hover { background: rgba(var(--cui-danger-rgb), .12); }
+}
+
+/* Pictogram picker overlay */
+.pic-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pic-picker {
+  background: var(--cui-body-bg, #fff);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  width: min(460px, 96vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+}
+
+.arasaac-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: .4rem;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: .5rem;
+}
+
+.arasaac-card {
+  border: 1px solid var(--cui-border-color);
+  border-radius: 4px;
+  background: none;
+  padding: .3rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+  transition: border-color .15s, background .15s;
+  img { width: 44px; height: 44px; object-fit: contain; }
+  span { font-size: .65rem; text-align: center; word-break: break-word; }
+  &:hover { border-color: var(--cui-primary); background: rgba(var(--cui-primary-rgb), .05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
