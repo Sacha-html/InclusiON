@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Auditing;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -19,6 +20,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IFamilyRepository _familyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AdminDeactivateUserCommandHandler> _logger;
+        private readonly IAccessAuditLogger _audit;
 
         public AdminDeactivateUserCommandHandler(
             IIdentityService identityService,
@@ -27,7 +29,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             IPersonsRepository personsRepository,
             IFamilyRepository familyRepository,
             IUnitOfWork unitOfWork,
-            ILogger<AdminDeactivateUserCommandHandler> logger)
+            ILogger<AdminDeactivateUserCommandHandler> logger,
+            IAccessAuditLogger audit)
         {
             _identityService = identityService;
             _refreshTokensRepository = refreshTokensRepository;
@@ -36,6 +39,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             _familyRepository = familyRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _audit = audit;
         }
 
         public async Task<ApiResponse<object>> HandleAsync(
@@ -72,6 +76,16 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             _logger.LogInformation(
                 "User {UserId} ({Email}) deactivated by admin {AdminId}",
                 user.Id, user.Email, command.RequestedByUserId);
+
+            await _audit.LogAsync(new AccessAuditEntry
+            {
+                UserId         = command.RequestedByUserId,
+                ActionType     = AccessAuditValues.Action.Update,
+                Result         = AccessAuditValues.Result.Allowed,
+                AffectedTable  = "Users",
+                AffectedRecordId = user.Id.ToString(),
+                Details        = "Admin deactivated user account",
+            }, cancellationToken);
 
             return ApiResponse<object>.SuccessResult("Usuario desactivado exitosamente.");
         }

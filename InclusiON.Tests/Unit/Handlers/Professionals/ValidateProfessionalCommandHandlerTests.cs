@@ -17,14 +17,14 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
     {
         private readonly IProfessionalsRepository     _prosRepo   = Substitute.For<IProfessionalsRepository>();
         private readonly IIdentityService             _identity   = Substitute.For<IIdentityService>();
-        private readonly IEmailService                _email      = Substitute.For<IEmailService>();
+        private readonly IBackgroundJobRepository     _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IAdminInstitutionRepository  _adminRepo  = Substitute.For<IAdminInstitutionRepository>();
         private readonly IHttpContextService          _httpCtx    = Substitute.For<IHttpContextService>();
         private readonly IUnitOfWork                  _uow        = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider            _dateTime   = Substitute.For<IDateTimeProvider>();
 
         private ValidateProfessionalCommandHandler BuildSut() =>
-            new(_prosRepo, _identity, _email, _adminRepo, _httpCtx, _uow,
+            new(_prosRepo, _identity, _backgroundJobs, _adminRepo, _httpCtx, _uow,
                 NullLogger<ValidateProfessionalCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid ProfId  = Guid.NewGuid();

@@ -17,12 +17,12 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
     {
         private readonly IProfessionalsRepository _prosRepo  = Substitute.For<IProfessionalsRepository>();
         private readonly IIdentityService         _identity  = Substitute.For<IIdentityService>();
-        private readonly IEmailService            _email     = Substitute.For<IEmailService>();
+        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork              _uow       = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider        _dateTime  = Substitute.For<IDateTimeProvider>();
 
         private CreateProfessionalCommandHandler BuildSut() =>
-            new(_prosRepo, _identity, _email, _uow,
+            new(_prosRepo, _identity, _backgroundJobs, _uow,
                 NullLogger<CreateProfessionalCommandHandler>.Instance, _dateTime);
 
         private static CreateProfessionalCommand Cmd(string? doc = null) =>

@@ -57,7 +57,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Obtiene actividades similares a una actividad existente.</summary>
-        [HttpGet("{id:int}/similar")]
+        [HttpGet("{id}/similar")]
         [Authorize(Policy = Permissions.Activities.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<ActivityListItemResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<ActivityListItemResponse>>>> GetSimilarActivities(
@@ -78,7 +78,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Obtiene personas compatibles con una actividad (ordenadas por compatibilidad).</summary>
-        [HttpGet("{id:int}/compatible-persons")]
+        [HttpGet("{id}/compatible-persons")]
         [Authorize(Policy = Permissions.Activities.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<PersonListItemResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<PersonListItemResponse>>>> GetCompatiblePersons(

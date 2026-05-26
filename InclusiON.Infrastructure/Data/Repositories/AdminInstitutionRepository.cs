@@ -84,6 +84,17 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<User>> GetAdminsByInstitutionIdsAsync(List<int> institutionIds, CancellationToken cancellationToken = default)
+        {
+            return await _context.AdminInstitutions
+                .AsNoTracking()
+                .Where(ai => institutionIds.Contains(ai.InstitutionId) && ai.IsActive)
+                .Select(ai => ai.AdminUser)
+                .Where(u => u != null && u.IsActive)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<AdminInstitution?> FindAssignmentAsync(Guid adminUserId, int institutionId, CancellationToken cancellationToken = default)
         {
             return await _context.AdminInstitutions

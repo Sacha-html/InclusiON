@@ -1556,6 +1556,48 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("Messages", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.PasswordResetToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("IsUsed");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetTokens", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.PersonEmbedding", b =>
                 {
                     b.Property<Guid>("PersonId")
@@ -2343,6 +2385,9 @@ namespace InclusiON.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsReadByFamily")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("NextObjectives")
                         .HasColumnType("text");
@@ -3160,6 +3205,17 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("RelatedPerson");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.PasswordResetToken", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PersonEmbedding", b =>

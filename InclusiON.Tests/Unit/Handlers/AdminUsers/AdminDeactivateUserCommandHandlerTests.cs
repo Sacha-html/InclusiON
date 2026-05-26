@@ -20,13 +20,14 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
         private readonly IPersonsRepository _personRepo = Substitute.For<IPersonsRepository>();
         private readonly IFamilyRepository _familyRepo = Substitute.For<IFamilyRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
+        private readonly IAccessAuditLogger _audit = Substitute.For<IAccessAuditLogger>();
 
         private static readonly Guid TargetId = Guid.NewGuid();
         private static readonly Guid AdminId = Guid.NewGuid();
 
         private AdminDeactivateUserCommandHandler BuildSut() =>
             new(_identity, _tokens, _proRepo, _personRepo, _familyRepo, _uow,
-                NullLogger<AdminDeactivateUserCommandHandler>.Instance);
+                NullLogger<AdminDeactivateUserCommandHandler>.Instance, _audit);
 
         private static AdminDeactivateUserCommand Cmd(Guid? target = null, Guid? admin = null) =>
             new(target ?? TargetId, admin ?? AdminId);

@@ -33,7 +33,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Obtiene una asignación por ID con ContentJson y TemplateTypeCode completos.</summary>
-        [HttpGet("activity-assignments/{assignmentId:int}")]
+        [HttpGet("activity-assignments/{assignmentId}")]
         [Authorize(Policy = Permissions.Activities.Read)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
@@ -139,7 +139,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Inicia un intento de actividad (el estudiante arranca a jugar).</summary>
-        [HttpPost("activity-assignments/{assignmentId:int}/responses/start")]
+        [HttpPost("activity-assignments/{assignmentId}/responses/start")]
         [Authorize(Policy = Permissions.Activities.Respond)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
@@ -163,7 +163,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Completa un intento de actividad con los resultados.</summary>
-        [HttpPost("activity-assignments/{assignmentId:int}/responses/{responseId:int}/complete")]
+        [HttpPost("activity-assignments/{assignmentId}/responses/{responseId}/complete")]
         [Authorize(Policy = Permissions.Activities.Respond)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status409Conflict)]
@@ -198,7 +198,7 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Cancela una asignación pendiente (solo el profesional que la creó).</summary>
-        [HttpPatch("activity-assignments/{assignmentId:int}/cancel")]
+        [HttpPatch("activity-assignments/{assignmentId}/cancel")]
         [Authorize(Policy = Permissions.Activities.Create)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]

@@ -270,5 +270,14 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     && (p.User.LastLoginDate == null || p.User.LastLoginDate < cutoffDate))
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<List<Professional>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Professionals
+                .AsNoTracking()
+                .Include(p => p.User)
+                .Where(p => p.Status == ProfessionalStatusEnum.Approved && p.IsActive && p.User.IsActive)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

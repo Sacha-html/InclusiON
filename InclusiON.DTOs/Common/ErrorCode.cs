@@ -25,6 +25,8 @@ namespace InclusiON.DTOs.Common
         AccountLocked = 304,
         AccountInactive = 305,
         TwoFactorRequired = 306,
+        PasswordResetTokenExpired = 307,
+        PasswordResetTokenInvalid = 308,
 
         // Autorizacion (4xx)
         Forbidden = 400,

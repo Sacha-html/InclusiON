@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Interfaces.Repositories.Base;
@@ -486,10 +487,20 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
 
     public class UnlockRoadmapActivityCommandHandlerTests
     {
-        private readonly IRoadmapRepository _roadmaps = Substitute.For<IRoadmapRepository>();
-        private readonly IUnitOfWork        _uow      = Substitute.For<IUnitOfWork>();
-        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
-        private UnlockRoadmapActivityCommandHandler BuildSut() => new(_roadmaps, _uow, _encryption);
+        private static readonly Guid PersonId       = Guid.NewGuid();
+        private static readonly Guid ProfessionalId = Guid.NewGuid();
+
+        private readonly IRoadmapRepository            _roadmaps    = Substitute.For<IRoadmapRepository>();
+        private readonly IActivityAssignmentRepository _assignments = Substitute.For<IActivityAssignmentRepository>();
+        private readonly IUnitOfWork                   _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider             _dateTime    = Substitute.For<IDateTimeProvider>();
+        private readonly IEncryptionService            _encryption  = Substitute.For<IEncryptionService>();
+
+        private UnlockRoadmapActivityCommandHandler BuildSut() =>
+            new(_roadmaps, _assignments, _uow, _dateTime, _encryption);
+
+        private UnlockRoadmapActivityCommand Cmd(int id) =>
+            new(id, PersonId, ProfessionalId);
 
         [Fact]
         public async Task HandleAsync_ActivityNotFound_ReturnsNotFound()
@@ -497,7 +508,7 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
             _roadmaps.GetActivityByIdAsync(55, Arg.Any<CancellationToken>())
                      .Returns((PersonRoadmapActivity?)null);
 
-            var result = await BuildSut().HandleAsync(new UnlockRoadmapActivityCommand(55), default);
+            var result = await BuildSut().HandleAsync(Cmd(55), default);
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.NotFound);
@@ -514,14 +525,14 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
             };
             _roadmaps.GetActivityByIdAsync(55, Arg.Any<CancellationToken>()).Returns(activity);
 
-            var result = await BuildSut().HandleAsync(new UnlockRoadmapActivityCommand(55), default);
+            var result = await BuildSut().HandleAsync(Cmd(55), default);
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.Conflict);
         }
 
         [Fact]
-        public async Task HandleAsync_Locked_SetsUnlockedAndSaves()
+        public async Task HandleAsync_Locked_SetsUnlockedAndSavesAndCreatesAssignment()
         {
             var activity = new PersonRoadmapActivity
             {
@@ -530,14 +541,16 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
                 Activity   = new Activity { Title = "Demo" }
             };
             _roadmaps.GetActivityByIdAsync(55, Arg.Any<CancellationToken>()).Returns(activity);
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
 
-            var result = await BuildSut().HandleAsync(new UnlockRoadmapActivityCommand(55), default);
+            var result = await BuildSut().HandleAsync(Cmd(55), default);
 
             result.Success.Should().BeTrue();
             activity.IsUnlocked.Should().BeTrue();
             activity.UnlockedAt.Should().NotBeNull();
             result.Data!.IsUnlocked.Should().BeTrue();
             result.Data.UnlockedAt.Should().NotBeNull();
+            await _assignments.Received(1).CreateAsync(Arg.Any<ActivityAssignment>(), Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         }
 
@@ -547,7 +560,7 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
             _roadmaps.GetActivityByIdAsync(55, Arg.Any<CancellationToken>())
                      .Returns((PersonRoadmapActivity?)null);
 
-            await BuildSut().HandleAsync(new UnlockRoadmapActivityCommand(55), default);
+            await BuildSut().HandleAsync(Cmd(55), default);
 
             await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         }

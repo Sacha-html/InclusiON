@@ -117,5 +117,35 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(a => a is not null)
                 .Select(a => a!)];
         }
+
+        public async Task<List<ActivityEmbeddingProjection>> GetAllActiveForEmbeddingAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Activities
+                .Where(a => a.IsActive)
+                .Select(a => new ActivityEmbeddingProjection(
+                    a.Id,
+                    a.Title,
+                    a.Description,
+                    a.Instructions,
+                    a.Content != null ? a.Content.ContentJson : null))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<ActivityEmbeddingProjection>> GetStandardActivitiesForEmbeddingAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Activities
+                .Where(a => a.IsActive && a.IsStandardActivity)
+                .Select(a => new ActivityEmbeddingProjection(
+                    a.Id,
+                    a.Title,
+                    a.Description,
+                    a.Instructions,
+                    a.Content != null ? a.Content.ContentJson : null))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
     }
 }

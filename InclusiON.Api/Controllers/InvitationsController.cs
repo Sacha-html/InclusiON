@@ -51,6 +51,8 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<GetInvitationsQuery, ApiResponse<PagedResponse<InvitationResponse>>> handler,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? status = null,
             CancellationToken cancellationToken = default)
         {
             var professionalId = _httpContextService.GetCurrentEntityId();
@@ -58,14 +60,14 @@ namespace InclusiON.Api.Controllers
             GetInvitationsQuery query;
             if (professionalId != null)
             {
-                query = new GetInvitationsQuery(professionalId, null, page, pageSize);
+                query = new GetInvitationsQuery(professionalId, null, page, pageSize, search, status);
             }
             else
             {
                 var institutionIds = _httpContextService.GetInstitutionIds();
                 query = institutionIds.Count > 0
-                    ? new GetInvitationsQuery(null, institutionIds, page, pageSize)
-                    : new GetInvitationsQuery(null, null, page, pageSize);
+                    ? new GetInvitationsQuery(null, institutionIds, page, pageSize, search, status)
+                    : new GetInvitationsQuery(null, null, page, pageSize, search, status);
             }
 
             var result = await handler.HandleAsync(query, cancellationToken);

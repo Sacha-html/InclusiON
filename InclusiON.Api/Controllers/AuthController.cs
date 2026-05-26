@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Api.Extensions;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -20,6 +21,13 @@ namespace InclusiON.Api.Controllers
     [Produces("application/json")]
     public class AuthController : ControllerBase
     {
+        private readonly string[] _allowedOrigins;
+
+        public AuthController(IConfiguration configuration)
+        {
+            _allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+        }
+
         /// <summary>
         /// Registra un nuevo usuario en el sistema.
         /// </summary>
@@ -223,6 +231,45 @@ namespace InclusiON.Api.Controllers
                 request.NewPassword,
                 request.ConfirmNewPassword);
 
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Solicita el envio de un email para recuperar la contrasena.
+        /// Siempre responde 200 para evitar enumeracion de usuarios.
+        /// </summary>
+        [HttpPost("forgot-password")]
+        [EnableRateLimiting("auth-sensitive")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<object>>> ForgotPassword(
+            [FromBody] ForgotPasswordRequest request,
+            [FromServices] ICommandHandler<ForgotPasswordCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var requestOrigin = Request.Headers["Origin"].FirstOrDefault();
+            var baseUrl = _allowedOrigins.Contains(requestOrigin, StringComparer.OrdinalIgnoreCase)
+                ? requestOrigin
+                : _allowedOrigins.FirstOrDefault();
+
+            var command = new ForgotPasswordCommand(request.Email, baseUrl);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Aplica la nueva contrasena usando el token recibido por email.
+        /// </summary>
+        [HttpPost("reset-password")]
+        [EnableRateLimiting("auth-sensitive")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse<object>>> ResetPassword(
+            [FromBody] ResetPasswordRequest request,
+            [FromServices] ICommandHandler<ResetPasswordCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new ResetPasswordCommand(request.Token, request.NewPassword, request.ConfirmNewPassword);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }

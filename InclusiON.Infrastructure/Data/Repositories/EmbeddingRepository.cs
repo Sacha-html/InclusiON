@@ -74,11 +74,13 @@ namespace InclusiON.Infrastructure.Data.Repositories
             Guid professionalId,
             int limit = 10,
             List<int>? excludeIds = null,
+            float minSimilarity = 0.25f,
             CancellationToken cancellationToken = default)
         {
             // Similitud coseno: 1 - distancia coseno (<=>).
             // Filtra actividades activas que el profesional puede ver:
             //   - propias (ProfessionalId = $2) o estándar (IsStandardActivity = true)
+            // $4 = minSimilarity threshold (similitud coseno mínima requerida)
             var sql = """
                 SELECT ae."ActivityId"
                 FROM   "ActivityEmbeddings" ae
@@ -86,6 +88,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 WHERE  a."IsActive" = true
                   AND  ae."Embedding" IS NOT NULL
                   AND  (a."ProfessionalId" = $2 OR a."IsStandardActivity" = true)
+                  AND  (1 - (ae."Embedding" <=> $1::vector)) >= $4
                 """;
 
             if (excludeIds is { Count: > 0 })
@@ -94,6 +97,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             }
 
             sql += """
+
                 ORDER BY ae."Embedding" <=> $1::vector
                 LIMIT  $3
                 """;
@@ -102,6 +106,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             cmd.Parameters.AddWithValue(new Vector(queryEmbedding));
             cmd.Parameters.AddWithValue(professionalId);
             cmd.Parameters.AddWithValue(limit);
+            cmd.Parameters.AddWithValue(minSimilarity);
 
             var ids = new List<int>();
             await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
