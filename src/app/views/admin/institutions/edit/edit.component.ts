@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { InstitutionsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { InstitutionResponse, UpdateInstitutionRequest } from '../../../../models';
+import { InstitutionResponse, UpdateInstitutionRequest } from '@models';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -48,7 +48,7 @@ export class EditComponent implements OnInit {
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
     address: ['', [Validators.maxLength(200)]],
     phone: ['', [Validators.maxLength(20)]],
-    email: ['', [Validators.email, Validators.maxLength(100)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
   });
 
   get f() {
@@ -60,7 +60,7 @@ export class EditComponent implements OnInit {
     if (id) {
       this.institutionsService.getAll().subscribe({
         next: (data) => {
-          this.institution = data.find((i) => i.id === Number(id)) ?? null;
+          this.institution = data.find((i) => i.id.toString() === id) ?? null;
           if (this.institution) {
             this.patchForm(this.institution);
           } else {
@@ -95,7 +95,7 @@ export class EditComponent implements OnInit {
       ...(raw.email && { email: raw.email }),
     };
 
-    this.institutionsService.update(this.institution.id, request).subscribe({
+    this.institutionsService.update(this.institution.id.toString(), request).subscribe({
       next: () => {
         this.toastService.success('Institucion actualizada exitosamente');
         this.router.navigate([AppRoutes.Admin.Institutions]);

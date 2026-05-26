@@ -41,6 +41,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       // Manejar según el código de error del backend o HTTP status
       const isAacRoute = AAC_ROUTES.some(r => router.url.startsWith(r));
 
+      // DEBUG — identificar 403s: borrar cuando ya no se necesite
+      if (error.status === 403 || errorCode === ErrorCode.Forbidden || errorCode === ErrorCode.InsufficientPermissions) {
+        console.warn('[403 DEBUG]', req.method, req.url, '| errorCode:', errorCode, '| route:', router.url);
+      }
+
       if (errorCode !== undefined) {
         handleErrorCode(errorCode, errorCodeService, toastService, router, storageService, authService, isAacRoute);
       } else {

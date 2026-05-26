@@ -20,7 +20,7 @@
     }
   </c-modal-body>
   <c-modal-footer>
-    <button cButton color="secondary" (click)="cancel.emit()" [disabled]="loading" aria-label="Cancelar acción">Cancelar</button>
+    <button #cancelBtn cButton color="secondary" (click)="cancel.emit()" [disabled]="loading" aria-label="Cancelar acción">Cancelar</button>
     <button #confirmBtn cButton [color]="confirmColor" (click)="onConfirm()"
             [disabled]="(showObservation && !observation.trim()) || loading"
             [attr.aria-describedby]="(showObservation && !observation.trim()) ? 'obs-help' : null">

@@ -46,7 +46,7 @@
 
 .connector-count {
   background: var(--a11y-primary, #2196F3);
-  color: #fff;
+  color: var(--a11y-primary-text, #fff);
   border-radius: 12px;
   padding: .2rem .5rem;
   font-size: .75rem;
@@ -140,7 +140,7 @@
 
   &--primary {
     background: var(--a11y-primary, #2196F3);
-    color: #fff;
+    color: var(--a11y-primary-text, #fff);
     box-shadow: 0 4px 12px rgba(33,150,243,.35);
     &:not(:disabled):hover { transform: translateY(-2px); }
   }

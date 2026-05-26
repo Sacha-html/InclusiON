@@ -19,7 +19,7 @@
     </div>
 
     <!-- Main Card -->
-    <main class="login-card card shadow" role="main">
+    <section class="login-card card shadow" aria-labelledby="standard-heading">
       <div class="card-body p-4 p-md-5">
         <!-- User Avatar -->
         <header class="text-center mb-4">
@@ -31,7 +31,7 @@
           >
             {{ initial }}
           </div>
-          <h1 class="h4 fw-bold mb-1" style="color: var(--a11y-text)">Hola, {{ displayName }}</h1>
+          <h1 id="standard-heading" class="h4 fw-bold mb-1" style="color: var(--a11y-text)">Hola, {{ displayName }}</h1>
           <p class="mb-0" style="color: var(--a11y-text-muted)">Ingresa tu contraseña para continuar</p>
         </header>
 
@@ -130,10 +130,11 @@
         <footer class="text-center mt-4">
           <p class="small mb-0" style="color: var(--a11y-text-muted)">
             <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
-            ¿Olvidaste tu contraseña? Pide ayuda a un familiar o profesional
+            <a [routerLink]="['/forgot-password']" style="color: var(--a11y-primary)">¿Olvidaste tu contraseña?</a>
+            Pedí ayuda a un familiar o profesional
           </p>
         </footer>
       </div>
-    </main>
+    </section>
   </div>
 </div>

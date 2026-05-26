@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { InstitutionsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { CreateInstitutionRequest } from '../../../../models';
+import { CreateInstitutionRequest } from '@models';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -46,7 +46,7 @@ export class NewComponent {
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
     address: ['', [Validators.maxLength(200)]],
     phone: ['', [Validators.maxLength(20)]],
-    email: ['', [Validators.email, Validators.maxLength(100)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
   });
 
   get f() {

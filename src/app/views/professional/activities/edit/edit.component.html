@@ -161,7 +161,7 @@
       <c-row class="mt-4">
         <c-col xs="12">
           <button cButton type="button" color="primary" [disabled]="!isValid || isLoading()" (click)="submit()">
-            @if (isLoading()) { <c-spinner size="sm" class="me-1"></c-spinner> }
+            @if (isLoading()) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
             Guardar cambios
           </button>
           <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">
@@ -169,6 +169,19 @@
           </button>
         </c-col>
       </c-row>
+
+      @if (similarActivities().length > 0) {
+        <div class="mt-4 p-3 bg-light rounded">
+          <h6 class="mb-3">Actividades similares</h6>
+          <div class="d-flex flex-wrap gap-2">
+            @for (act of similarActivities(); track act.encryptedId) {
+              <span class="badge bg-secondary-subtle text-dark fs-6">
+                {{ act.title }}
+              </span>
+            }
+          </div>
+        </div>
+      }
     </c-card-body>
   </c-card>
 }

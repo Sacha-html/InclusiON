@@ -26,13 +26,11 @@
             (click)="selectPerson(p.personId)"
             [attr.aria-pressed]="selectedPersonId() === p.personId"
           >
-            <span
-              class="person-avatar"
-              [style.background]="p.avatarColor || '#9E9E9E'"
-              aria-hidden="true"
-            >
-              {{ getInitial(p) }}
-            </span>
+            <app-actor-avatar
+              [name]="p.personFullName"
+              [color]="p.avatarColor"
+              size="sm"
+            />
             {{ p.personFullName }}
           </button>
         }

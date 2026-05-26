@@ -71,6 +71,19 @@ export class CompleteLetterPlayerComponent extends PlayerBaseComponent {
     this.activeSlot.set(slotIdx);
   }
 
+  prevSlot(): void {
+    const current = this.activeSlot();
+    if (current === null || current <= 0) return;
+    this.activeSlot.set(current - 1);
+  }
+
+  nextSlot(): void {
+    const current = this.activeSlot();
+    const answers = this.answers();
+    if (current === null || current >= answers.length - 1) return;
+    this.activeSlot.set(current + 1);
+  }
+
   /** El usuario elige una letra para el slot activo. */
   pickLetter(letter: string): void {
     const slot = this.activeSlot();

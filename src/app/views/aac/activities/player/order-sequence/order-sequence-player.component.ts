@@ -61,6 +61,10 @@ export class OrderSequencePlayerComponent extends PlayerBaseComponent {
     if (index === 0) return;
     this.swap(index, index - 1);
     this.selectedIndex.set(index - 1);
+    setTimeout(() => {
+      const items = document.querySelectorAll('.sequence-item');
+      (items[index - 1] as HTMLElement)?.focus();
+    }, 50);
   }
 
   moveDown(index: number): void {
@@ -68,6 +72,10 @@ export class OrderSequencePlayerComponent extends PlayerBaseComponent {
     if (index === items.length - 1) return;
     this.swap(index, index + 1);
     this.selectedIndex.set(index + 1);
+    setTimeout(() => {
+      const items = document.querySelectorAll('.sequence-item');
+      (items[index + 1] as HTMLElement)?.focus();
+    }, 50);
   }
 
   private swap(i: number, j: number): void {

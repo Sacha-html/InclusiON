@@ -1,12 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   ApiResponse,
   PagedResponse,
   PersonResponse,
   PersonListItemResponse,
   PersonSkillProfileResponse,
+  ActivityListItemResponse,
   CreatePersonRequest,
   UpdatePersonRequest,
   GetPersonsRequest,
@@ -207,9 +209,60 @@ export class PersonsService {
   /**
    * Lista candidatos a supervisor (profesionales asignados + familiares vinculados).
    */
-  getSupervisorCandidates(personId: string): Observable<SupervisorCandidate[]> {
+  getSupervisorCandidates(personId: string, page = 1, pageSize = 50): Observable<SupervisorCandidate[]> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     return this.http
-      .get<ApiResponse<SupervisorCandidate[]>>(`${this.apiUrl}/${personId}/supervisor-candidates`)
+      .get<ApiResponse<PagedResponse<SupervisorCandidate>>>(`${this.apiUrl}/${personId}/supervisor-candidates`, { params })
+      .pipe(unwrapResponse(), map((r) => r.data));
+  }
+
+  /**
+   * Actualiza solo la configuración de accesibilidad de una persona.
+   * @deprecated Usar updateAccessibility con el endpoint dedicado.
+   */
+  updateAccessibilityConfig(
+    personId: string,
+    config: {
+      requiresLargeFont: boolean;
+      requiresHighContrast: boolean;
+      visualNoiseSensitivity: boolean;
+      soundSensitivity: boolean;
+      colorBlindnessType: string;
+    }
+  ): Observable<PersonResponse> {
+    return this.http
+      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}`, config)
+      .pipe(unwrapResponse());
+  }
+
+  /** Obtiene la configuración de accesibilidad de una persona. */
+  getAccessibility(personId: string): Observable<{
+    requiresLargeFont: boolean;
+    requiresHighContrast: boolean;
+    visualNoiseSensitivity: boolean;
+    soundSensitivity: boolean;
+    colorBlindnessType: string | null;
+  }> {
+    return this.http
+      .get<ApiResponse<any>>(`${this.apiUrl}/${personId}/accessibility`)
+      .pipe(unwrapResponse());
+  }
+
+  /** Actualiza la configuración de accesibilidad de una persona (endpoint dedicado). */
+  updateAccessibility(
+    personId: string,
+    config: {
+      requiresLargeFont: boolean;
+      requiresHighContrast: boolean;
+      visualNoiseSensitivity: boolean;
+      soundSensitivity: boolean;
+      colorBlindnessType: string | null;
+    }
+  ): Observable<any> {
+    return this.http
+      .put<ApiResponse<any>>(`${this.apiUrl}/${personId}/accessibility`, config)
       .pipe(unwrapResponse());
   }
 
@@ -220,6 +273,27 @@ export class PersonsService {
   updateLoginMethod(userId: string, request: UpdateLoginMethodRequest): Observable<UpdateLoginMethodResponse> {
     return this.http
       .put<ApiResponse<UpdateLoginMethodResponse>>(`${this.apiUrl}/${userId}/login-method`, request)
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Solicitud de ayuda urgente desde el portal AAC.
+   * Notifica vía SignalR a los profesionales supervisores de la persona autenticada.
+   */
+  requestHelp(): Observable<unknown> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.apiUrl}/me/help-request`, {})
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Obtiene actividades recomendadas para una persona (basadas en compatibilidad semántica).
+   */
+  getRecommendedActivities(personId: string, limit = 10): Observable<ActivityListItemResponse[]> {
+    return this.http
+      .get<ApiResponse<ActivityListItemResponse[]>>(`${this.apiUrl}/${personId}/recommended-activities`, {
+        params: { limit: limit.toString() }
+      })
       .pipe(unwrapResponse());
   }
 }

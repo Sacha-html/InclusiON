@@ -9,10 +9,6 @@ import {
   CardBodyComponent,
   CardComponent,
   CardHeaderComponent,
-  ColComponent,
-  FormControlDirective,
-  FormLabelDirective,
-  RowComponent,
 } from '@coreui/angular';
 
 @Component({
@@ -23,10 +19,6 @@ import {
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
-    RowComponent,
-    ColComponent,
-    FormControlDirective,
-    FormLabelDirective,
     ButtonDirective,
   ],
   templateUrl: './person-basic-info.component.html',

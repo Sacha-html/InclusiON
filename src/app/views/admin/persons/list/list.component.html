@@ -2,23 +2,24 @@
 
 <fieldset class="p-3 border rounded mb-4">
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
-  <c-row class="align-items-end">
-    <c-col sm="3">
+  <!-- d-flex flex-wrap evita los negative gutters de c-row que causan overflow en mobile -->
+  <div class="d-flex flex-wrap align-items-end gap-3">
+    <div style="flex: 1 1 160px; min-width: 0;">
       <label cLabel for="filter-representative">Responsable</label>
       <input cFormControl id="filter-representative" type="text" [(ngModel)]="representativeSearch" (ngModelChange)="onRepresentativeSearch()" placeholder="Nombre del responsable">
-    </c-col>
-    <c-col sm="3">
+    </div>
+    <div style="flex: 1 1 130px; min-width: 0;">
       <label cLabel for="filter-status">Estado</label>
       <select cSelect id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="true">Activos</option>
         <option value="false">Inactivos</option>
       </select>
-    </c-col>
-    <c-col sm="auto">
+    </div>
+    <div class="flex-shrink-0">
       <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
-    </c-col>
-  </c-row>
+    </div>
+  </div>
 </fieldset>
 
 <app-data-table
@@ -29,6 +30,7 @@
   [pageSize]="pageSize"
   [currentPage]="currentPage"
   [headerButtons]="canCreate ? [{action: 'new', label: 'Agregar'}] : []"
+  [loading]="isLoading"
   (pageChange)="onPageChange($event)"
   (searchAction)="onSearch($event)"
   (sortAction)="onSort($event)"
@@ -58,8 +60,19 @@
         <c-alert color="success">{{ loginMethodSuccess }}</c-alert>
         @if (temporaryPassword) {
           <p>Se generó una contraseña temporal para el acceso por email y contraseña:</p>
-          <c-alert color="warning" class="d-flex align-items-center justify-content-between">
+          <c-alert color="warning" class="d-flex align-items-center justify-content-between gap-3">
             <code class="fs-5">{{ temporaryPassword }}</code>
+            <button
+              cButton
+              color="warning"
+              size="sm"
+              variant="outline"
+              (click)="copyTemporaryPassword()"
+              aria-label="Copiar contraseña temporal al portapapeles"
+            >
+              <svg cIcon name="cilCopy" class="me-1" aria-hidden="true"></svg>
+              Copiar
+            </button>
           </c-alert>
           <p class="text-body-secondary mb-0">
             Asegúrese de copiar esta contraseña. No se podrá volver a consultar.

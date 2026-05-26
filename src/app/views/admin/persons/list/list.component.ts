@@ -4,9 +4,9 @@ import { Router } from '@angular/router';
 import { AuthService, CatalogsService, PersonsService, ProfessionalsService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { LoginMethodItem, PersonListItemResponse, ProfessionalListItemResponse, UpdateLoginMethodRequest } from '../../../../models';
-import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { TableColumn } from 'src/app/shared/components/data-table/data-table.models';
+import { LoginMethodItem, PersonListItemResponse, ProfessionalListItemResponse, UpdateLoginMethodRequest } from '@models';
+import { DataTableComponent } from '@shared/components/data-table/data-table.component';
+import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { FormsModule } from '@angular/forms';
@@ -64,6 +64,7 @@ export class ListComponent {
   representativeSearch = '';
   statusFilter = '';
 
+  isLoading = false;
   persons: PersonListItemResponse[] = [];
   totalItems = 0;
   pageSize = 10;
@@ -93,20 +94,26 @@ export class ListComponent {
   }
 
   public cols: TableColumn[] = [
-    {
-      key: 'actions', label: 'Acciones', type: 'actions',
-      actions: [
-        { action: 'view', label: 'Ver', icon: 'cil-search' },
-        { action: 'edit', label: 'Editar', icon: 'cil-notes', visible: (item) => item.isActive },
-        { action: 'login-method', label: 'Método login', icon: 'cil-lock-locked', visible: (item) => item.isActive },
-      ],
-    },
     { key: 'fullName', label: 'Nombre completo', sortable: true },
     { key: 'representativeNames', label: 'Responsables' },
     { key: 'disabilityTypeName', label: 'Tipo de discapacidad' },
     { key: 'autonomyLevelName', label: 'Nivel de autonomía' },
     { key: 'age', label: 'Edad', type: 'number', sortable: true },
-    { key: 'isActive', label: 'Estado', type: 'badge' },
+    {
+      key: 'isActive', label: 'Estado', type: 'badge',
+      badgeMap: {
+        'true':  { color: 'success', label: 'Activo'   },
+        'false': { color: 'danger',  label: 'Inactivo' },
+      },
+    },
+    {
+      key: 'actions', label: 'Acciones', type: 'actions',
+      actions: [
+        { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.isActive },
+        { action: 'login-method', label: 'Método login', icon: 'cilLockLocked', visible: (item) => item.isActive },
+      ],
+    },
   ];
 
   constructor() {
@@ -264,7 +271,15 @@ export class ListComponent {
     });
   }
 
+  copyTemporaryPassword(): void {
+    if (!this.temporaryPassword) return;
+    navigator.clipboard.writeText(this.temporaryPassword).then(() => {
+      this.#toastService.success('Contraseña copiada al portapapeles');
+    });
+  }
+
   loadPersons(search?: string): void {
+    this.isLoading = true;
     const isActive = this.statusFilter === 'true' ? true
                    : this.statusFilter === 'false' ? false
                    : undefined;
@@ -284,9 +299,11 @@ export class ListComponent {
         next: (response) => {
           this.persons = response.data;
           this.totalItems = response.totalRecords;
+          this.isLoading = false;
         },
         error: () => {
           this.#toastService.error('Error al obtener personas');
+          this.isLoading = false;
         },
       });
   }

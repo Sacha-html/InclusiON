@@ -1,9 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivitiesService } from '@services/activities.service';
-import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models/responses/activity.response';
+import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { VisualCardComponent } from '../../../shared/components/visual-card/visual-card.component';
+import { VisualCardComponent } from '@shared/components/visual-card/visual-card.component';
 
 @Component({
   selector: 'app-aac-activities',
@@ -29,14 +29,16 @@ export class AacActivitiesComponent implements OnInit {
 
   openActivity(assignment: ActivityAssignmentResponse): void {
     if (assignment.status === ActivityAssignmentStatus.Completada) return;
-    this.router.navigate([AppRoutes.Aac.Activities, assignment.id]);
+    this.router.navigate([AppRoutes.Aac.Activities, assignment.encryptedId]);
   }
 
-  statusColor(status: ActivityAssignmentStatus): string {
-    return status === ActivityAssignmentStatus.Completada ? 'var(--a11y-success, #4CAF50)'
-         : status === ActivityAssignmentStatus.EnProgreso ? 'var(--a11y-warning, #FF9800)'
-         : status === ActivityAssignmentStatus.Cancelada  ? 'var(--a11y-text-muted, #9E9E9E)'
-         :                                                   'var(--a11y-primary, #2196F3)';
+  statusVariant(status: ActivityAssignmentStatus): 'success' | 'warning' | 'danger' | 'primary' | 'muted' {
+    switch (status) {
+      case ActivityAssignmentStatus.Completada:  return 'success';
+      case ActivityAssignmentStatus.EnProgreso:  return 'warning';
+      case ActivityAssignmentStatus.Cancelada:   return 'muted';
+      default:                                   return 'primary';
+    }
   }
 
   statusLabel(status: ActivityAssignmentStatus): string {

@@ -7,7 +7,7 @@ import {
   AccessibilityTheme,
   AccessibilityProfile,
   ColorMode
-} from '../../services/accessibility.service';
+} from '@services/accessibility.service';
 
 @Component({
   selector: 'app-accessibility-panel',
@@ -82,14 +82,11 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    // Escape: primero cierra el panel restaurando foco, luego sale del modo lectura
+    // Escape: cierra el panel restaurando foco
     if (event.key === 'Escape') {
       if (this.a11y.panelOpen()) {
         this.a11y.closePanel();
         setTimeout(() => this.previouslyFocusedElement?.focus(), 50);
-      } else if (this.a11y.readingMode()) {
-        event.preventDefault();
-        this.a11y.updateSetting('readingMode', false);
       }
     }
   }
@@ -264,11 +261,6 @@ export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
 
   toggleHighlightFocus(): void {
     this.a11y.updateSetting('highlightFocus', !this.a11y.highlightFocus());
-  }
-
-  // Reading Mode
-  toggleReadingMode(): void {
-    this.a11y.toggleReadingMode();
   }
 
   // Text to Speech

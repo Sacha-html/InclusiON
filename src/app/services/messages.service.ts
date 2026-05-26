@@ -9,6 +9,7 @@ import { unwrapResponse } from '@shared/utils';
 // ── List item (inbox / sent / replies list) ──────────────────────────────────
 export interface MessageListItemResponse {
   id: number;
+  encryptedId: string;
   subject?: string;
   contentPreview: string;
   sentAt: string;
@@ -23,9 +24,10 @@ export interface MessageListItemResponse {
   replyCount: number;
 }
 
-// ── Full detail (GET /messages/:id) ─────────────────────────────────────────
-export interface MessageDetailResponse {
+// ── Reply within detail (full content) ──────────────────────────────────────
+export interface MessageReplyResponse {
   id: number;
+  encryptedId: string;
   subject?: string;
   content: string;
   sentAt: string;
@@ -37,7 +39,24 @@ export interface MessageDetailResponse {
   receiverFullName: string;
   relatedPersonId?: string;
   parentMessageId?: number;
-  replies: MessageListItemResponse[];
+}
+
+// ── Full detail (GET /messages/:id) ─────────────────────────────────────────
+export interface MessageDetailResponse {
+  id: number;
+  encryptedId: string;
+  subject?: string;
+  content: string;
+  sentAt: string;
+  readAt?: string;
+  isRead: boolean;
+  senderId: string;
+  senderFullName: string;
+  receiverId: string;
+  receiverFullName: string;
+  relatedPersonId?: string;
+  parentMessageId?: number;
+  replies: MessageReplyResponse[];
 }
 
 // ── Contact ──────────────────────────────────────────────────────────────────
@@ -52,7 +71,7 @@ export interface MessageContactResponse {
 export interface SendMessageRequest {
   receiverId: string;
   subject: string;
-  body: string;
+  content: string;
   relatedPersonId?: string;
 }
 
@@ -97,16 +116,19 @@ export class MessagesService {
   }
 
   // Auto-marks as read on backend when recipient opens the message
-  getById(id: number): Observable<MessageDetailResponse> {
+  getById(id: string): Observable<MessageDetailResponse> {
     return this.http
       .get<ApiResponse<MessageDetailResponse>>(`${this.baseUrl}/${id}`)
       .pipe(unwrapResponse());
   }
 
-  getContacts(): Observable<MessageContactResponse[]> {
+  getContacts(page = 1, pageSize = 100): Observable<MessageContactResponse[]> {
+    const p = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     return this.http
-      .get<ApiResponse<MessageContactResponse[]>>(`${this.baseUrl}/contacts`)
-      .pipe(unwrapResponse());
+      .get<ApiResponse<PagedResponse<MessageContactResponse>>>(`${this.baseUrl}/contacts`, { params: p })
+      .pipe(unwrapResponse(), map((r) => r.data));
   }
 
   getUnreadCount(): Observable<number> {
@@ -121,14 +143,14 @@ export class MessagesService {
       .pipe(unwrapResponse());
   }
 
-  reply(id: number, body: string): Observable<MessageDetailResponse> {
+  reply(id: string, body: string): Observable<MessageDetailResponse> {
     return this.http
-      .post<ApiResponse<MessageDetailResponse>>(`${this.baseUrl}/${id}/reply`, { body })
+      .post<ApiResponse<MessageDetailResponse>>(`${this.baseUrl}/${id}/reply`, { content: body })
       .pipe(unwrapResponse());
   }
 
   // Manual mark-as-read (backend also does it automatically on getById for recipients)
-  markAsRead(id: number): Observable<MessageDetailResponse> {
+  markAsRead(id: string): Observable<MessageDetailResponse> {
     return this.http
       .put<ApiResponse<MessageDetailResponse>>(`${this.baseUrl}/${id}/read`, {})
       .pipe(unwrapResponse());

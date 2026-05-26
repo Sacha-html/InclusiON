@@ -52,6 +52,8 @@
 
 .table-wrapper {
   position: relative;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
   &.loading {
     opacity: 0.5;
@@ -68,4 +70,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }
