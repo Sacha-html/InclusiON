@@ -164,6 +164,7 @@ if (app.Environment.IsDevelopment())
                    scheme.Token = string.Empty;
                });
     });
+
 }
 
 app.UseForwardedHeaders();

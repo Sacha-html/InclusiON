@@ -20,8 +20,8 @@ public class OpenApiExamplesTransformer : IOpenApiOperationTransformer
         OpenApiOperationTransformerContext context,
         CancellationToken cancellationToken)
     {
-        var controller = context.Description.ActionDescriptor.RouteValues["controller"];
-        var action     = context.Description.ActionDescriptor.RouteValues["action"];
+        context.Description.ActionDescriptor.RouteValues.TryGetValue("controller", out var controller);
+        context.Description.ActionDescriptor.RouteValues.TryGetValue("action", out var action);
 
         var examples = GetExamples(controller, action);
         if (examples is null) return Task.CompletedTask;
