@@ -64,6 +64,56 @@ AzureAI__Key=
 
 ### Base de Datos
 
+#### Setup inicial — usuarios y bases de datos
+
+El script `InclusiON.Data/Scripts/db-users-setup.sql` crea los usuarios de PostgreSQL y las bases de datos por ambiente. **Ejecutar una sola vez como superusuario** (o al recrear la DB desde cero).
+
+Con Docker (configuración local):
+
+```powershell
+# Copiar el script al contenedor y ejecutarlo
+docker cp InclusiON.Data/Scripts/db-users-setup.sql postgres:/tmp/setup.sql
+docker exec postgres psql -U postgres -f /tmp/setup.sql
+```
+
+Con psql local:
+
+```bash
+psql -U postgres -f InclusiON.Data/Scripts/db-users-setup.sql
+```
+
+> **Importante:** El script usa `DROP DATABASE IF EXISTS` para `inclusion_dev` e `inclusion_test` — borra y recrea esas bases. No toca staging ni producción.
+>
+> La extensión `vector` (pgvector) requiere superusuario y **no está incluida en el script**. Ejecutar manualmente después del setup:
+> ```sql
+> -- conectado a inclusion_dev
+> CREATE EXTENSION IF NOT EXISTS vector;
+> ```
+
+#### Recrear bases desde cero
+
+```powershell
+# 1. Bajar el contenedor (si está corriendo)
+docker stop postgres && docker rm postgres
+
+# 2. Levantar docker compose de infra (pgvector)
+docker compose up -d
+
+# 3. Setup usuarios y bases
+docker cp InclusiON.Data/Scripts/db-users-setup.sql postgres:/tmp/setup.sql
+docker exec postgres psql -U postgres -f /tmp/setup.sql
+
+# 4. Extensión pgvector (una vez por base, requiere superusuario)
+docker exec postgres psql -U postgres -d inclusion_dev  -c "CREATE EXTENSION IF NOT EXISTS vector;"
+docker exec postgres psql -U postgres -d inclusion_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# 5. Migraciones + seed (desde InclusiON.Api)
+dotnet ef database update
+# o simplemente levantar la app — MigrateAsync() corre al iniciar
+```
+
+#### Migraciones EF Core
+
 ```bash
 # Crear migración
 dotnet ef migrations add NombreMigracion --project InclusiON.Data --startup-project InclusiON.Api
