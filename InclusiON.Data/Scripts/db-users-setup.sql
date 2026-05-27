@@ -19,31 +19,32 @@ BEGIN
 END$$;
 
 -- Base de datos de desarrollo
--- CREATE DATABASE inclusion_dev OWNER postgres;
+-- OWNER = inclusion_dev_app para que EF Core migrations puedan ALTER TABLE
+DROP DATABASE IF EXISTS inclusion_dev;
+CREATE DATABASE inclusion_dev OWNER inclusion_dev_app;
 
 \c inclusion_dev
 GRANT CONNECT ON DATABASE inclusion_dev TO inclusion_dev_app;
-GRANT USAGE, CREATE ON SCHEMA public TO inclusion_dev_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO inclusion_dev_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO inclusion_dev_app;
+GRANT ALL ON SCHEMA public TO inclusion_dev_app;
+ALTER SCHEMA public OWNER TO inclusion_dev_app;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
+ALTER DEFAULT PRIVILEGES FOR ROLE inclusion_dev_app IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO inclusion_dev_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
+ALTER DEFAULT PRIVILEGES FOR ROLE inclusion_dev_app IN SCHEMA public
   GRANT USAGE, SELECT ON SEQUENCES TO inclusion_dev_app;
 
 -- Base de datos de testing (Playwright E2E — separada para poder limpiar entre runs)
--- CREATE DATABASE inclusion_test OWNER postgres;
+DROP DATABASE IF EXISTS inclusion_test;
+CREATE DATABASE inclusion_test OWNER inclusion_dev_app;
 
 \c inclusion_test
 GRANT CONNECT ON DATABASE inclusion_test TO inclusion_dev_app;
-GRANT USAGE, CREATE ON SCHEMA public TO inclusion_dev_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO inclusion_dev_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO inclusion_dev_app;
+GRANT ALL ON SCHEMA public TO inclusion_dev_app;
+ALTER SCHEMA public OWNER TO inclusion_dev_app;
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
+ALTER DEFAULT PRIVILEGES FOR ROLE inclusion_dev_app IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO inclusion_dev_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
+ALTER DEFAULT PRIVILEGES FOR ROLE inclusion_dev_app IN SCHEMA public
   GRANT USAGE, SELECT ON SEQUENCES TO inclusion_dev_app;
 
 
@@ -105,11 +106,16 @@ BEGIN
   END IF;
 END$$;
 
--- Descomentar y ejecutar en la DB correspondiente:
--- GRANT CONNECT ON DATABASE inclusion_dev TO inclusion_migrations;
+-- Usuario de migraciones: necesita ser superuser para ALTER TABLE en tablas ajenas,
+-- O bien que todas las DBs tengan OWNER = inclusion_migrations / el app user.
+-- Con el nuevo esquema (OWNER = app user), inclusion_dev_app puede migrar directamente.
+-- inclusion_migrations se reserva para CI/CD en staging/prod donde el runtime user ≠ migration user.
+
+-- Para habilitar en una DB específica (reemplazar <DB>):
+-- \c <DB>
+-- GRANT CONNECT ON DATABASE <DB> TO inclusion_migrations;
 -- GRANT ALL PRIVILEGES ON SCHEMA public TO inclusion_migrations;
--- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO inclusion_migrations;
--- GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO inclusion_migrations;
+-- ALTER SCHEMA public OWNER TO inclusion_migrations;
 -- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO inclusion_migrations;
 -- ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO inclusion_migrations;
 
