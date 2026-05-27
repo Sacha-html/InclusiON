@@ -63,9 +63,25 @@ namespace InclusiON.Infrastructure.Services
                 _logger.LogInformation("Email enviado exitosamente a {To}", to);
                 return true;
             }
+            catch (MailKit.Net.Smtp.SmtpCommandException ex)
+            {
+                _logger.LogError(ex,
+                    "SMTP rechazó el comando al enviar a {To}. StatusCode: {StatusCode}, Response: {Response}",
+                    to, ex.StatusCode, ex.Message);
+                return false;
+            }
+            catch (MailKit.Net.Smtp.SmtpProtocolException ex)
+            {
+                _logger.LogError(ex,
+                    "Error de protocolo SMTP al enviar a {To}. Host: {Host}:{Port}",
+                    to, _settings.Host, _settings.Port);
+                return false;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al enviar email a {To}", to);
+                _logger.LogError(ex,
+                    "Error inesperado al enviar email a {To}. Host: {Host}:{Port}, From: {From}",
+                    to, _settings.Host, _settings.Port, _settings.FromEmail);
                 return false;
             }
         }
