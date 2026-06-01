@@ -1,8 +1,16 @@
 # HU-10 — Motor de Dificultad Adaptativa (MDA) y Búsqueda Semántica
 
-**Proceso relacionado:** 10, 11, 13
-**Prioridad:** Alta
-**Última modificación:** 2026-05-25 — Estado real actualizado: MDA y búsqueda semántica completamente implementados. TemplateGenerationAgent implementado.
+| Campo | Contenido |
+|---|---|
+| ID | HU-10 |
+| Épica | Motor Adaptativo |
+| Título | Motor de Dificultad Adaptativa y Búsqueda Semántica |
+| Prioridad | Alta |
+| Estimación | 13 puntos de historia |
+| Sprint asignado | Sprint 6 |
+| Estado | Completada |
+
+**Proceso relacionado:** 10, 11
 
 ---
 

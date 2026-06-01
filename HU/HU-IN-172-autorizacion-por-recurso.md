@@ -1,19 +1,16 @@
-# HISTORIA DE USUARIO
+# HU-IN-172 — Autorización por Recurso (Row-Level Authorization)
 
-> InclusiON — Institución Cervantes
-> _Plantilla Historia de Usuario · Uso interno del equipo_
-
----
-
-| ID | Épica / Módulo | Sprint | Prioridad | Story Points |
-|----|----------------|--------|-----------|--------------|
-| HU-IN-172 | Seguridad / Autorización (transversal — Proceso 02) | A definir | ☑ Alta · ⬜ Media · ⬜ Baja | 8 (estimado) |
-
+| Campo | Contenido |
+|---|---|
+| ID | HU-IN-172 |
+| Épica | Seguridad / Autorización |
 | Título | Autorización por Recurso (Row-Level Authorization) |
-|--------|----------------------------------------------------|
-| **Estado** | ⬜ Backlog · ⬜ En curso · ⬜ En revisión · ☑ Completada |
-| **Asignado a** | Mirko Ivo Wlk |
-| **Revisado por** | — |
+| Prioridad | Alta |
+| Estimación | 8 puntos de historia |
+| Sprint asignado | Sprint 3 |
+| Estado | Completada |
+
+**Asignado a:** Mirko Ivo Wlk
 
 ---
 

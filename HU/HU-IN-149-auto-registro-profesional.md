@@ -1,8 +1,16 @@
 # HU IN-149 — Auto-registro de Profesionales (Sign-up)
 
-**Proceso relacionado:** 04
-**Prioridad:** Alta
-**Estado:** ✅ Completada
+| Campo | Contenido |
+|---|---|
+| ID | HU-IN-149 |
+| Épica | Gestión de Usuarios |
+| Título | Auto-registro de Profesionales |
+| Prioridad | Alta |
+| Estimación | 3 puntos de historia |
+| Sprint asignado | Sprint 2 |
+| Estado | Completada |
+
+**Proceso relacionado:** 05
 
 ---
 

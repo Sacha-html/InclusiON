@@ -74,15 +74,41 @@ En `InclusiON.Application/UseCases/Persons/Queries/`:
 
 ### Repositorios
 
-`IEmbeddingRepository` con métodos:
-- `GetByActivityIdAsync` — obtener embedding de actividad
-- `GetPersonEmbeddingAsync` — obtener embedding de persona
-- `SearchPersonsForActivityAsync` — buscar personas por compatibilidad
-- `SearchActivitiesAsync` — buscar actividades similares
+`IEmbeddingRepository` (en `Application/Interfaces/Infrastructure/`) con métodos:
+
+| Método | Firma | Descripción |
+|--------|-------|-------------|
+| `GetByActivityIdAsync` | `Task<float[]?>` | Embedding de actividad por Id |
+| `GetPersonEmbeddingAsync` | `Task<float[]?>` | Embedding de persona por Id |
+| `SearchAsync` | `Task<List<(int Id, float Score)>>` | Búsqueda semántica — devuelve tuplas (Id, SimilarityScore coseno) ordenadas por similitud descendente |
+| `SearchActivitiesForPersonAsync` | `Task<List<int>>` | Actividades recomendadas para persona |
+| `SearchPersonsForActivityAsync` | `Task<List<Guid>>` | Personas compatibles con actividad |
+
+**Parámetros de threshold en búsqueda:**
+
+Los métodos de búsqueda aceptan `minSimilarity` con defaults centralizados en `EmbeddingThresholds.cs`:
+
+```csharp
+// InclusiON.Application/Constants/EmbeddingThresholds.cs
+public static class EmbeddingThresholds
+{
+    public const float SemanticSearch  = 0.25f;  // búsqueda de texto libre
+    public const float PersonActivity  = 0.20f;  // perfil persona ↔ actividad
+    public const float SimilarActivity = 0.30f;  // actividad ↔ actividad similar
+    public const float PersonForActivity = 0.20f; // actividad ↔ personas compatibles
+}
+```
+
+**Score de similitud propagado al cliente:**
+
+`ActivityListItemResponse` incluye `float? SimilarityScore` — solo presente en respuestas de búsqueda semántica, null en listados paginados normales.
 
 ### EmbeddingRepository
 
 Implementación en `InclusiON.Infrastructure/Data/Repositories/EmbeddingRepository.cs` usa raw SQL con pgvector para similarity search.
+
+- `SearchAsync` usa `= ANY($5::int[])` (parameterizado) para `excludeIds` — sin riesgo de SQL injection
+- Retorna `(1 - (ae."Embedding" <=> $1::vector)) AS "Score"` para exponer similitud coseno al caller
 
 ---
 
@@ -105,10 +131,16 @@ La generación de embeddings se ejecuta via **Python Agent** en `Inclusion.Agent
 
 ### Flujo completo
 
-1. **Backend** crea/actualiza actividad → encola job
-2. **BackgroundJob** procesa y genera embedding
-3. **EmbeddingRepository** persiste en PostgreSQL via raw SQL
-4. **Queries** de búsqueda semántica usan cosine similarity con pgvector
+1. **Backend** crea/actualiza actividad → encola job `JobTypes.Embedding`
+2. **PendingJobsWorker** (BackgroundService) despacha a **EmbeddingAgent**
+3. **EmbeddingAgent** llama `POST /embed` al agente Python
+   - **4xx del agente Python** → `PermanentJobFailureException` → `JobExecutor` llama `FailAsync` inmediatamente (sin retry)
+   - **5xx del agente Python** → retry hasta `MaxRetries = 3`
+   - **Vector con dimensiones ≠ 384** → `PermanentJobFailureException` (dato corrupto, no vale reintentar)
+4. **EmbeddingRepository** persiste en PostgreSQL via raw SQL
+5. **Queries** de búsqueda semántica usan cosine similarity con pgvector
+
+**PermanentJobFailureException** (`Application/Exceptions/`): excepción que señala al `JobExecutor` que el fallo no es transitorio — ir directo a `FailAsync` sin decrementar `RetryCount`.
 
 > **Nota:** El modelo ONNX (`paraphrase-multilingual-MiniLM-L12-v2`) se ejecuta en el agente Python,
 > no en el backend .NET. El backend solo almacena y consulta los vectores.
