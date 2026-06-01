@@ -303,8 +303,8 @@ Orientada al equipo de desarrollo:
 | [Features/CIF_ACCESIBILIDAD_ANGULAR.md](./Features/CIF_ACCESIBILIDAD_ANGULAR.md) | Referencia de accesibilidad CIF/ICF |
 | [CLAUDE_BACKEND.md](./CLAUDE_BACKEND.md) | Instrucciones para trabajar en el backend (.NET 10) |
 | [CLAUDE_FRONTEND.md](./CLAUDE_FRONTEND.md) | Instrucciones para trabajar en el frontend (Angular 20) |
-| [Test/README.md](./Test/README.md) | Setup, scripts, CI y estructura de InclusiON.Testing |
-| [Infra/README.md](./Infra/README.md) | Levantar PostgreSQL con Docker y conectar a la API |
+| [Test/README.md](./Test/README.md) | Setup, scripts, CI y estructura de InclusiON.Testing (E2E + accesibilidad) |
+| [Infra/README.md](./Infra/README.md) | Setup completo: Docker + pgvector + usuarios por ambiente + migraciones |
 
 ---
 

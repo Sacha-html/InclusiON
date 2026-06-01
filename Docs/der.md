@@ -68,8 +68,8 @@ erDiagram
         bool    IsActive                "NOT NULL"
     }
 
-    %% Catálogo de métodos de autenticación disponibles (STANDARD, PIN,
-    %% ASSISTED, FAMILY). Define qué credenciales requiere cada método.
+    %% Catálogo de métodos de autenticación disponibles (STANDARD=1, PIN=2,
+    %% ASSISTED=3). Define qué credenciales requiere cada método.
     LoginMethod {
         int    Id                  PK  "NOT NULL"
         varchar20 Code             UK  "NOT NULL"
@@ -210,8 +210,8 @@ erDiagram
         bool   IsActive             "NOT NULL"
     }
 
-    %% Auditoría de cambios de estado del familiar. Flujo análogo al del
-    %% profesional (Pending → Approved / Rejected).
+    %% Auditoría de cambios de estado del familiar (Active ↔ Terminated).
+    %% No tiene flujo de aprobación — el familiar queda Active al registrarse.
     FamilyStatusHistory {
         uuid   Id              PK  "NOT NULL"
         uuid   FamilyId        FK  "NOT NULL"
