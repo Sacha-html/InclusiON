@@ -1,7 +1,16 @@
 # HU-01 — Catálogos y Configuración Inicial del Sistema
 
+| Campo | Contenido |
+|---|---|
+| ID | HU-01 |
+| Épica | Configuración del Sistema |
+| Título | Catálogos y Configuración Inicial del Sistema |
+| Prioridad | Crítica |
+| Estimación | 8 puntos de historia |
+| Sprint asignado | Sprint 1 |
+| Estado | Completada |
+
 **Proceso relacionado:** 01, 02, 03, 04, 08
-**Prioridad:** Crítica
 
 ---
 

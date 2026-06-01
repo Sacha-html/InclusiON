@@ -1,7 +1,16 @@
 # HU-08 — Diagnósticos Funcionales y Reportes de Progreso
 
-**Proceso relacionado:** 09, 15
-**Prioridad:** Crítica (diagnósticos) / Alta (reportes)
+| Campo | Contenido |
+|---|---|
+| ID | HU-08 |
+| Épica | Diagnósticos y Reportes |
+| Título | Diagnósticos Funcionales y Reportes de Progreso |
+| Prioridad | Crítica |
+| Estimación | 8 puntos de historia |
+| Sprint asignado | Sprint 5 |
+| Estado | Completada |
+
+**Proceso relacionado:** 09b, 12, 15
 
 ---
 

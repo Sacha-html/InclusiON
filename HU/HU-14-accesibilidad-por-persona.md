@@ -1,9 +1,16 @@
 # HU-14 — Perfil de Accesibilidad Configurable por Persona
 
-**Proceso relacionado:** 5, 3 (Sprint 3 — Accesibilidad)
-**Prioridad:** Alta
-**Creada:** 2026-05-08
-**Jira (propuesto):** IN-186
+| Campo | Contenido |
+|---|---|
+| ID | HU-14 / IN-186 |
+| Épica | Accesibilidad |
+| Título | Perfil de Accesibilidad Configurable por Persona |
+| Prioridad | Alta |
+| Estimación | 5 puntos de historia |
+| Sprint asignado | Sprint 3 |
+| Estado | Completada |
+
+**Proceso relacionado:** 02, 04
 
 ---
 

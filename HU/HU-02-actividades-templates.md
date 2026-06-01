@@ -1,7 +1,16 @@
 # HU-02 — Sistema de Actividades con Templates Dinámicos
 
-**Proceso relacionado:** 03, 10
-**Prioridad:** Crítica
+| Campo | Contenido |
+|---|---|
+| ID | HU-02 |
+| Épica | Gestión de Actividades |
+| Título | Sistema de Actividades con Templates Dinámicos |
+| Prioridad | Crítica |
+| Estimación | 8 puntos de historia |
+| Sprint asignado | Sprint 6 |
+| Estado | Completada |
+
+**Proceso relacionado:** 09, 10
 
 ---
 

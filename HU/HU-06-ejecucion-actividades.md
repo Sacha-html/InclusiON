@@ -1,7 +1,16 @@
 # HU-06 — Ejecución de Actividades
 
-**Proceso relacionado:** 12
-**Prioridad:** Crítica
+| Campo | Contenido |
+|---|---|
+| ID | HU-06 |
+| Épica | Ejecución de Actividades (Core) |
+| Título | Ejecución de Actividades Terapéuticas |
+| Prioridad | Crítica |
+| Estimación | 13 puntos de historia |
+| Sprint asignado | Sprint 6 |
+| Estado | Completada |
+
+**Proceso relacionado:** 10
 
 ---
 

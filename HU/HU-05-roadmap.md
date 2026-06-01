@@ -1,7 +1,16 @@
 # HU-05 — Roadmap: Plan de Trabajo Personalizado
 
-**Proceso relacionado:** 11, 12
-**Prioridad:** Crítica
+| Campo | Contenido |
+|---|---|
+| ID | HU-05 |
+| Épica | Roadmap y Progreso |
+| Título | Roadmap: Plan de Trabajo Personalizado |
+| Prioridad | Crítica |
+| Estimación | 8 puntos de historia |
+| Sprint asignado | Sprint 6 |
+| Estado | Completada |
+
+**Proceso relacionado:** 10, 11
 
 ---
 

@@ -1,7 +1,16 @@
 # HU-03 — Perfil de Habilidades del Estudiante
 
-**Proceso relacionado:** 08, 09
-**Prioridad:** Crítica
+| Campo | Contenido |
+|---|---|
+| ID | HU-03 |
+| Épica | Gestión de Usuarios |
+| Título | Perfil de Habilidades del Estudiante |
+| Prioridad | Crítica |
+| Estimación | 3 puntos de historia |
+| Sprint asignado | Sprint 2 |
+| Estado | Completada |
+
+**Proceso relacionado:** 04, 09b
 
 ---
 

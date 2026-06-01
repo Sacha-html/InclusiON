@@ -1,7 +1,16 @@
 # HU-07 — Dashboard y Radar Chart de Habilidades
 
+| Campo | Contenido |
+|---|---|
+| ID | HU-07 |
+| Épica | Seguimiento y Reportes |
+| Título | Dashboard y Radar Chart de Habilidades |
+| Prioridad | Alta |
+| Estimación | 5 puntos de historia |
+| Sprint asignado | Sprint 4 |
+| Estado | Completada |
+
 **Proceso relacionado:** 14
-**Prioridad:** Alta
 
 ---
 

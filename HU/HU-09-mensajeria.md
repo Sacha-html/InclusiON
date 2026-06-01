@@ -1,7 +1,16 @@
 # HU-09 — Mensajería Interna
 
+| Campo | Contenido |
+|---|---|
+| ID | HU-09 |
+| Épica | Comunicación |
+| Título | Mensajería Interna entre Actores |
+| Prioridad | Alta |
+| Estimación | 5 puntos de historia |
+| Sprint asignado | Sprint 8 |
+| Estado | Completada |
+
 **Proceso relacionado:** 16
-**Prioridad:** Alta
 
 ---
 
