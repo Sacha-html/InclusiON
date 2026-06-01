@@ -1,7 +1,16 @@
 # HU-04 — Acceso Familiar e Invitaciones
 
+| Campo | Contenido |
+|---|---|
+| ID | HU-04 |
+| Épica | Gestión de Usuarios |
+| Título | Acceso Familiar e Invitaciones |
+| Prioridad | Alta |
+| Estimación | 5 puntos de historia |
+| Sprint asignado | Sprint 2 |
+| Estado | Completada |
+
 **Proceso relacionado:** 06, 07
-**Prioridad:** Alta
 
 ---
 

@@ -1,7 +1,16 @@
 # HU-13 — Soporte y Ayuda
 
+| Campo | Contenido |
+|---|---|
+| ID | HU-13 |
+| Épica | Soporte y Ayuda |
+| Título | Sistema de Soporte y Ayuda en la Plataforma |
+| Prioridad | Media |
+| Estimación | 2 puntos de historia |
+| Sprint asignado | Backlog PP3 |
+| Estado | Pendiente |
+
 **Proceso relacionado:** 19
-**Prioridad:** Media
 
 ---
 
