@@ -1,7 +1,16 @@
 # HU-12 — Onboarding de Usuarios
 
+| Campo | Contenido |
+|---|---|
+| ID | HU-12 |
+| Épica | Onboarding |
+| Título | Onboarding de Nuevos Usuarios |
+| Prioridad | Alta |
+| Estimación | 3 puntos de historia |
+| Sprint asignado | Sprint 7 |
+| Estado | Completada |
+
 **Proceso relacionado:** 18
-**Prioridad:** Alta
 
 ---
 
