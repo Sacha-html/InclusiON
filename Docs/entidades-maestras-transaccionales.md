@@ -15,7 +15,7 @@
 |---|---|
 | `DisabilityType` | Tipos de discapacidad reconocidos |
 | `AutonomyLevel` | Niveles de autonomía (define si requiere supervisión) |
-| `LoginMethod` | Métodos de autenticación disponibles (STANDARD, PIN, ASSISTED, FAMILY) |
+| `LoginMethod` | Métodos de autenticación disponibles (STANDARD=1, PIN=2, ASSISTED=3) |
 | `ActivityCategory` | Categorías temáticas de actividades |
 | `ReportType` | Tipos de reporte de progreso clínico |
 | `SkillArea` | Áreas de habilidad (eje central del radar chart) |
@@ -85,7 +85,7 @@
 | Entidad | Evento que representa |
 |---|---|
 | `ProfessionalStatusHistory` | Cambios de estado del profesional (Pending → Approved/Rejected) |
-| `FamilyStatusHistory` | Cambios de estado del familiar (flujo análogo) |
+| `FamilyStatusHistory` | Cambios de estado del familiar (Active/Terminated — sin flujo de aprobación) |
 | `PersonRepresentativeHistory` | Altas, bajas y modificaciones del vínculo persona-familiar |
 | `AccessAudit` | Registro de accesos a recursos (IN-172) — Allowed/Denied |
 | `Message` | Mensajes internos entre usuarios con soporte de hilos |
