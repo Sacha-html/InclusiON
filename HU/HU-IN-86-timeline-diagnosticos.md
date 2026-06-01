@@ -1,8 +1,17 @@
-# IN-86 — Implementación: Timeline de Diagnósticos
+# HU-IN-86 — Timeline de Diagnósticos
+
+| Campo | Contenido |
+|---|---|
+| ID | HU-IN-86 |
+| Épica | Diagnósticos y Reportes |
+| Título | Vista de Timeline de Diagnósticos Funcionales |
+| Prioridad | Alta |
+| Estimación | 3 puntos de historia |
+| Sprint asignado | Sprint 4 |
+| Estado | Completada |
 
 **Jira:** IN-86  
-**Fecha:** 2026-04-17  
-**Componente existente:** `src/app/views/professional/person-detail/components/professional-diagnoses.component.ts`
+**Componente:** `professional-diagnoses.component.ts`
 
 ---
 

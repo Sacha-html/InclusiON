@@ -35,10 +35,10 @@
 | Gestionar roles ✓ | Registrar persona ✓ | Login familiar ✓ | Desactivar actividad ✓ | Configurar umbral ✓ | | Suma visual ✓ | | | Consultar reportes ✓ |
 | Asignar permisos ✓ | Configurar login persona ✓ | Perfiles de accesibilidad ✓ | | Eliminar actividad ✓ | | Emparejar imagen-palabra ✓ | | | |
 | Crear admin institucional ✓ | Configurar perfil habilidades ✓ | Modo claro/oscuro ✓ | | Desbloqueo manual ✓ | | Ordenar secuencia ✓ | | | |
-| | Registrar familiar ✓ | Panel accesibilidad ✓ | | | | | | | |
-| | Alta familiar por invitación ✓ | | | | | | | | |
-| | Gestionar invitaciones ✓ | | | | | | | | |
-| | Asignar profesional a institución ✓ | | | | | | | | |
+| | Registrar familiar ✓ | Panel accesibilidad ✓ | | Motor adaptativo ✓ | | | | Radar chart de habilidades ✓ | Motor adaptativo ✓ |
+| | Alta familiar por invitación ✓ | | | Búsqueda semántica ✓ | | | | | Mensajería interna ✓ |
+| | Gestionar invitaciones ✓ | | | | | | | | Onboarding profesional ✓ |
+| | Asignar profesional a institución ✓ | | | | | | | | Onboarding familiar ✓ |
 | | Asignar persona a profesional ✓ | | | | | | | | |
 | | Resetear / desactivar cuenta ✓ | | | | | | | | |
 
@@ -48,10 +48,7 @@
 
 | Gestionar Sistema | Gestionar Usuarios | Crear Actividad | Ejecutar Actividad | Ver Resultado | Reportar Progreso |
 |---|---|---|---|---|---|
-| | Onboarding profesional | Integrar pictogramas ARASAAC | | Radar chart de habilidades | Motor adaptativo |
-| | Pantalla bienvenida familiar | Búsqueda semántica | | | Ajuste automático de dificultad |
-| | Pantalla bienvenida persona | | | | Mensajería interna |
-| | | | | | Portal familiar completo |
+| | | Integrar pictogramas ARASAAC | | | Portal familiar completo |
 
 ---
 

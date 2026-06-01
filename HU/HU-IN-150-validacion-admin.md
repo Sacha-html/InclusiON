@@ -1,8 +1,16 @@
 # HU IN-150 — Selección Institucional y Validación por Administrador
 
-**Proceso relacionado:** 04
-**Prioridad:** Alta
-**Estado:** ✅ Completada
+| Campo | Contenido |
+|---|---|
+| ID | HU-IN-150 |
+| Épica | Gestión de Usuarios |
+| Título | Validación de Profesionales por Administrador |
+| Prioridad | Alta |
+| Estimación | 3 puntos de historia |
+| Sprint asignado | Sprint 2 |
+| Estado | Completada |
+
+**Proceso relacionado:** 05
 
 ---
 

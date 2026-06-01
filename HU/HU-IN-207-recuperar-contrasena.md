@@ -1,8 +1,16 @@
 # HU IN-207 — Recuperar Contraseña
 
-**Proceso relacionado:** 03 (Acceso al Sistema)
-**Prioridad:** Alta
-**Estado:** 🔲 Pendiente
+| Campo | Contenido |
+|---|---|
+| ID | HU-IN-207 |
+| Épica | Acceso al Sistema |
+| Título | Recuperación de Contraseña |
+| Prioridad | Alta |
+| Estimación | 3 puntos de historia |
+| Sprint asignado | Backlog PP3 |
+| Estado | Pendiente |
+
+**Proceso relacionado:** 02  
 **Jira:** IN-207
 
 ---
