@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <mxCell id="pool" value="Proceso 06 — Gestión de Familiares y Representantes" style="shape=pool;startSize=25;horizontal=1;fillColor=#f5f5f5;strokeColor=#555555;fontColor=#333333;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="20" width="1580" height="530" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l1" value="Admin" style="swimlane;startSize=30;horizontal=0;fillColor=#f8f8f8;strokeColor=#888888;fontStyle=1;fontSize=12;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="25" width="1580" height="160" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l2" value="Profesional" style="swimlane;startSize=30;horizontal=0;fillColor=#f8f8f8;strokeColor=#888888;fontStyle=1;fontSize=12;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="185" width="1580" height="160" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="l3" value="Familiar" style="swimlane;startSize=30;horizontal=0;fillColor=#f8f8f8;strokeColor=#888888;fontStyle=1;fontSize=12;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="345" width="1580" height="160" as="geometry"/>
+    </mxCell>
+
+    <!-- LANE 1: ADMIN -->
+    <mxCell id="s1" value="Inicio&#xa;(Alta directa)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=general;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#23a027;strokeWidth=2;fontSize=12;" vertex="1" parent="l1">
+      <mxGeometry x="60" y="60" width="40" height="40" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="t1" value="Crear Familiar + Vincular a Persona&#xa;POST /api/family" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l1">
+      <mxGeometry x="160" y="45" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- LANE 2: PROFESIONAL -->
+    <mxCell id="s2" value="Inicio&#xa;(Invitación)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=general;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#23a027;strokeWidth=2;fontSize=12;" vertex="1" parent="l2">
+      <mxGeometry x="60" y="60" width="40" height="40" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="t2" value="Generar Invitación&#xa;(ver Proceso 07)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
+      <mxGeometry x="160" y="45" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- LANE 3: FAMILIAR -->
+    <mxCell id="t3" value="Registrarse vía invitación&#xa;o recibir acceso" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l3">
+      <mxGeometry x="160" y="45" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="t4" value="Login Portal Familiar&#xa;/family/login" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l3">
+      <mxGeometry x="580" y="45" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="t5" value="Ver actividades de personas&#xa;a cargo&#xa;GET /api/family/activities" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l3">
+      <mxGeometry x="800" y="10" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="t6" value="Ver reportes aprobados&#xa;GET /api/reports/family + PDF" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l3">
+      <mxGeometry x="800" y="90" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="t7" value="Enviar/recibir mensajes&#xa;al profesional" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l3">
+      <mxGeometry x="1120" y="45" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e1" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=terminate;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l3">
+      <mxGeometry x="1420" y="60" width="40" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- FLOWS -->
+    <mxCell id="f1" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="s1" target="t1" parent="l1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f2" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="s2" target="t2" parent="l2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f3" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t1" target="t3" parent="pool">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f4" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t2" target="t3" parent="pool">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f5" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t3" target="t4" parent="l3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f6" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t4" target="t5" parent="l3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f7" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t4" target="t6" parent="l3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f8" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t5" target="t7" parent="l3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f9" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t6" target="t7" parent="l3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="f10" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t7" target="e1" parent="l3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
