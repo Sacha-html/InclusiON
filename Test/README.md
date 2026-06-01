@@ -1,60 +1,188 @@
-# InclusiON.Testing — Documentación de Tests E2E
+# InclusiON.Testing — Tests E2E
 
 ## Qué es
 
-`InclusiON.Testing` es el repositorio de pruebas end-to-end (E2E) de la plataforma InclusiON. Usa [Playwright](https://playwright.dev/) para automatizar pruebas sobre el frontend Angular corriendo en un servidor local.
+`InclusiON.Testing` es el repositorio de pruebas end-to-end (E2E) y de accesibilidad de la plataforma InclusiON. Usa [Playwright](https://playwright.dev/) para automatizar pruebas sobre el frontend Angular y el backend .NET.
 
 ---
 
-## Repositorio
+## Estructura del repositorio
 
 ```
 InclusiON.Testing/
 ├── tests/
-│   └── frontend/            ← Tests E2E organizados por módulo
-│       └── homepage.spec.ts
-├── app-dist/                ← Build del frontend (copiado desde InclusiON.Client)
+│   ├── e2e/                           # Tests E2E funcionales (requieren backend + DB)
+│   │   ├── 00-auth.spec.ts
+│   │   ├── 01-instituciones.spec.ts
+│   │   └── ... (28 suites)
+│   ├── frontend/                      # Tests de frontend estático (no requieren backend)
+│   │   ├── accessibility.spec.ts      # WCAG AAA (axe-core)
+│   │   ├── coreui-validation.spec.ts  # Clases CoreUI
+│   │   ├── input-validation.spec.ts   # IDs y labels
+│   │   ├── responsive.spec.ts         # Diseño responsive
+│   │   └── light-dark.spec.ts         # Modos claro/oscuro
+│   └── helpers/                       # Utilidades compartidas
+│       ├── api.ts                     # Cliente HTTP para setup/teardown vía API
+│       ├── auth.ts                    # Login helpers
+│       ├── constants.ts               # URLs, credenciales de test
+│       ├── fixtures.ts                # Fixtures de Playwright
+│       └── test-data.ts               # Datos de prueba
+├── docs/
+│   └── FUNDAMENTACION_TESTS.md        # Justificación normativa de cada test (WCAG/CIF)
+├── app-dist/                          # Build de Angular (commiteado para CI)
 ├── scripts/
-│   └── copy-dist.js         ← Script para copiar el build del cliente
+│   └── copy-dist.js                   # Copia dist desde InclusiON.Client
 ├── .github/
 │   └── workflows/
-│       └── playwright.yml   ← GitHub Actions CI
-├── playwright.config.ts     ← Configuración de Playwright
+│       └── playwright.yml
+├── global-setup.ts                    # Setup global: seed y tokens de auth
+├── global-teardown.ts                 # Teardown: limpieza de DB post-tests
+├── playwright.config.ts
 ├── tsconfig.json
 └── package.json
 ```
 
 ---
 
-## Dependencias
+## Infraestructura requerida
 
-| Herramienta | Versión | Rol |
-|---|---|---|
-| Playwright | ^1.59.1 | Framework de tests E2E |
-| @types/node | ^25.6.0 | Tipos de Node.js para TypeScript |
-| serve | (via npx) | Servidor estático para `app-dist/` |
+### Tests E2E (`tests/e2e/`)
+
+Requieren backend corriendo + base `inclusion_test` con datos de seed.
+
+**1. Setup de base de datos** (desde `InclusiON.Server/`):
+
+```powershell
+docker cp InclusiON.Data/Scripts/db-users-setup.sql postgres:/tmp/setup.sql
+docker exec postgres psql -U postgres -f /tmp/setup.sql
+docker exec postgres psql -U postgres -d inclusion_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+
+**2. Levantar backend en modo Testing:**
+
+```bash
+# Desde InclusiON.Server/InclusiON.Api
+ASPNETCORE_ENVIRONMENT=Testing dotnet run
+# o desde Rider: seleccionar launch profile "Testing"
+```
+
+> SMTP está **deshabilitado** en Testing — los emails no se envían.
+
+### Tests de frontend (`tests/frontend/`)
+
+Solo requieren el build de Angular en `app-dist/`. No necesitan backend.
 
 ---
 
-## Cómo funciona
+## Setup del repo
 
-Los tests no levantan la app Angular en modo desarrollo. En su lugar:
+```bash
+npm ci
+npx playwright install
+```
 
-1. Se buildea `InclusiON.Client` → genera `dist/inclusion-client/browser/`
-2. Se copia ese build a `InclusiON.Testing/app-dist/`
-3. Playwright levanta `npx serve app-dist/browser -p 4200 --single` antes de correr los tests
-4. Los tests corren contra `http://localhost:4200`
+---
 
-Este enfoque permite que CI corra los tests sin necesidad de clonar ni tener acceso al repo del cliente.
+## Correr tests
+
+```bash
+# Todos los tests
+npm test
+
+# Solo E2E
+npx playwright test tests/e2e/
+
+# Solo frontend/accesibilidad
+npx playwright test tests/frontend/
+
+# Con browser visible
+npm run test:headed
+
+# UI interactiva
+npm run test:ui
+
+# Debug
+npm run test:debug
+
+# Solo Chromium
+npm run test:chromium
+```
+
+---
+
+## Scripts disponibles
+
+### General
+
+| Script | Descripción |
+|--------|-------------|
+| `npm test` | Todos los tests |
+| `npm run test:headed` | Browser visible |
+| `npm run test:ui` | UI interactiva de Playwright |
+| `npm run test:debug` | Modo debug |
+| `npm run test:chromium` | Solo Chromium |
+| `npm run report` | Abrir último reporte HTML |
+| `npm run copy-dist` | Copiar build Angular a `app-dist/` |
+| `npm run update` | Build Angular + copiar dist |
+| `npm run typecheck` | Chequeo de tipos TypeScript |
+
+### Accesibilidad
+
+| Script | Descripción |
+|--------|-------------|
+| `npm run test:a11y` | Auditoría WCAG 2.1 AAA (axe-core) |
+| `npm run test:a11y:headed` | Accesibilidad con browser visible |
+| `npm run test:coreui` | Validación de clases CoreUI |
+| `npm run test:inputs` | IDs y asociación de labels |
+| `npm run test:responsive` | Diseño responsive (mobile/tablet/desktop) |
+| `npm run test:theme` | Accesibilidad en modo claro/oscuro |
+| `npm run test:wcag-aaa` | Solo tests WCAG AAA |
+| `npm run test:contrast` | Solo tests de contraste |
+| `npm run test:all` | Todos los tests de accesibilidad |
+
+---
+
+## Suites E2E
+
+| Archivo | Funcionalidad |
+|---------|---------------|
+| `00-auth` | Login, logout, refresh token |
+| `01-instituciones` | ABM instituciones |
+| `02-roles` | Gestión de roles y permisos |
+| `03-profesionales` | ABM profesionales, validación |
+| `04-personas` | ABM personas con discapacidad |
+| `05-familiares` | ABM representantes familiares |
+| `06-invitaciones` | Invitaciones por email |
+| `07-usuarios` | Gestión centralizada de usuarios |
+| `08-reportes` | Generación y flujo de aprobación |
+| `09-mensajes` | Mensajería interna |
+| `10-actividades` | Creación de actividades |
+| `10b-actividades-por-plantilla` | Actividades con plantillas |
+| `11-diagnosticos` | Diagnósticos funcionales |
+| `12-asignacion-actividades` | Asignar actividades a personas |
+| `13-objetivos` | Gestión de objetivos |
+| `14-family-portal` | Portal familiar |
+| `15-catalogos` | ABM catálogos |
+| `16-asignacion-profesional-persona` | Vincular profesional↔persona |
+| `17-vinculacion-familiar-persona` | Vincular familiar↔persona |
+| `18-perfil-habilidades` | Perfil de habilidades |
+| `19-dashboard-profesional` | Dashboard del profesional |
+| `20-login-personas` | Login adaptativo (PIN, asistido) |
+| `21-integracion-completa` | Flujo integral |
+| `22-reportes-profesional` | Reportes desde el profesional |
+| `23-detalle-persona-profesional` | Vista detalle |
+| `24-portal-aac-persona` | Portal AAC |
+| `25-nueva-actividad` | Creación de nueva actividad |
+| `26-family-progreso-reportes` | Progreso desde el portal familiar |
+| `27-admin-dashboard` | Dashboard de administrador |
+| `28-aac-roadmap-comunicacion` | Roadmap y comunicación AAC |
 
 ---
 
 ## Configuración
 
-### playwright.config.ts
-
 | Parámetro | Valor |
-|---|---|
+|-----------|-------|
 | `baseURL` | `http://localhost:4200` |
 | `trace` | `on-first-retry` |
 | `screenshot` | `only-on-failure` |
@@ -63,64 +191,13 @@ Este enfoque permite que CI corra los tests sin necesidad de clonar ni tener acc
 | `workers` (CI) | 1 |
 | Browsers | Chromium, Microsoft Edge |
 
-### webServer
-
-```ts
-webServer: {
-  command: 'npx serve app-dist/browser -p 4200 --single',
-  url: 'http://localhost:4200',
-  reuseExistingServer: !process.env.CI,
-}
-```
-
-El flag `--single` redirige todas las rutas al `index.html`, necesario para el routing de Angular.
-
 ---
 
-## Scripts disponibles
+## CI/CD
 
-| Comando | Descripción |
-|---|---|
-| `npm test` | Corre todos los tests |
-| `npm run test:headed` | Corre los tests con el browser visible |
-| `npm run test:ui` | Abre la UI interactiva de Playwright |
-| `npm run test:debug` | Modo debug |
-| `npm run test:chromium` | Solo Chromium |
-| `npm run report` | Abre el último reporte HTML |
-| `npm run copy-dist` | Copia el build de InclusiON.Client a `app-dist/` |
-| `npm run build:client` | Buildea InclusiON.Client |
-| `npm run update` | Buildea el cliente y copia el dist (todo en uno) |
-| `npm run typecheck` | Chequeo de tipos TypeScript |
+El workflow `.github/workflows/playwright.yml` corre en cada `push` o `pull_request` a `main`/`master`/`develop`.
 
----
-
-## Flujo de trabajo local
-
-```bash
-# Desde InclusiON.Testing
-npm run update      # build del cliente + copia el dist
-npm test            # corre los tests
-npm run report      # abre el reporte HTML
-```
-
----
-
-## CI/CD — GitHub Actions
-
-El workflow `.github/workflows/playwright.yml` se ejecuta automáticamente en cada `push` o `pull_request` a las ramas `main`, `master` y `develop`.
-
-### Pasos del workflow
-
-1. Checkout del repo
-2. Setup Node.js LTS
-3. `npm ci` — instala dependencias
-4. `npx playwright install --with-deps` — instala browsers
-5. `npx playwright test` — corre los tests
-6. Sube el reporte HTML como artefacto (30 días de retención)
-
-### Importante
-
-`app-dist/` está commiteado en el repositorio. Antes de cada push que requiera reflejar cambios del frontend, correr:
+`app-dist/` está commiteado. Antes de hacer push con cambios de frontend:
 
 ```bash
 npm run update
@@ -128,43 +205,14 @@ git add app-dist
 git commit -m "chore: update app-dist"
 ```
 
----
-
-## Estructura de tests
-
-Los tests se organizan dentro de `tests/` por módulo o sección de la app:
-
-```
-tests/
-└── frontend/
-    └── homepage.spec.ts    ← Validación del título de la página principal
-```
-
-### Convención de nombres
-
-- Archivos: `<modulo>.spec.ts`
-- Tests: describen el comportamiento esperado en lenguaje natural
-- Carpeta: `tests/frontend/` para tests del cliente Angular
-
----
-
-## Generación de tests con Codegen
-
-Playwright incluye una herramienta para grabar tests interactuando con el browser:
-
-```bash
-npx playwright codegen --output tests/frontend/mi-test.spec.ts http://localhost:4200
-```
-
-Esto abre el browser y graba cada acción como código Playwright, guardándolo directamente en el archivo indicado.
+El reporte HTML se sube como artefacto con 30 días de retención.
 
 ---
 
 ## Artefactos generados (no se suben al repo)
 
 | Carpeta | Contenido |
-|---|---|
+|---------|-----------|
 | `test-results/` | Screenshots y videos de tests fallidos |
 | `playwright-report/` | Reporte HTML completo |
 | `blob-report/` | Reporte en formato blob |
-| `trace/` | Archivos de trace para debugging |
