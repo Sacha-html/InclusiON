@@ -204,9 +204,12 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - **Admin — Roles:** listado con checkboxes de permisos por módulo
 - **Portal Profesional:** dashboard con datos reales, Mi Aula (personas asignadas), lista de reportes, invitaciones
   - **Actividades** (`/pro/activities`): lista con filtros (categoría, tipo, estado, origen), acciones asignar/editar/activar/desactivar
+    - **Búsqueda semántica** (botón ⚡): modo alternativo a filtros — muestra columna "Relevancia" con porcentaje coseno (ej: "87%"). `ActivityListItemResponse.similarityScore?: number` solo presente en resultados semánticos.
+  - **Detalle actividad** (`/pro/activities/:id`): muestra sección "Actividades similares" (IA badge) con hasta 5 resultados usando `GET /api/activities/{id}/similar`, incluye score de similitud
   - **Nueva actividad** (`/pro/activities/new`): wizard 2 pasos — metadatos + contenido SELECT_FIGURE con picker ARASAAC
   - **Editar actividad** (`/pro/activities/:id/edit`): misma lógica que nueva, pre-carga datos
   - **Modal asignar** (`AssignActivityModalComponent`): selección de estudiante, fecha límite, flag evaluación
+  - **Roadmap — modal agregar actividad**: usa `app-searchable-select` con búsqueda semántica (≥2 chars → `GET /api/activities/search`; <2 chars → `GET /api/activities?pageSize=20`). Reemplazó el `pageSize:100` anterior.
 - **Portal Familiar:** registro por invitación (/invite/:code), lista de reportes, dashboard con datos reales (personas, actividades recientes, mensajes no leídos)
 - **Mensajería** (`/pro/messages`, `/family/messages`): `MessagesComponent` compartido — inbox/enviados con paginación, detalle de mensaje, hilo de respuestas, modal redactar nuevo mensaje, badge de no leídos en sidebar
 - **Próximamente** (`/pro/goals`, `/pro/evaluations`, `/pro/calendar`, `/family/activities`, `/family/calendar`, `/family/professionals`, `/family/progress`): `ComingSoonComponent` con mensaje 🚧
@@ -225,9 +228,10 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - `DataTableComponent` — Tabla paginada con sort, búsqueda, acciones y botones de header
 - `ConfirmModalComponent` — Modal de confirmación reutilizable
 - `InstitutionFilterComponent` — Selector de institución para admin global/institucional
+- `SearchableSelectComponent` — Combobox con búsqueda server-side y debounce. Acepta `searchFn`, `displayFn`, `valueFn`, `subDisplayFn`. Reemplaza el patrón `pageSize:1000 + filter` client-side.
 
 ### Servicios de datos
-- `ActivitiesService` — CRUD actividades, asignaciones, startResponse, completeResponse, getMyAssignments
+- `ActivitiesService` — CRUD actividades, asignaciones, startResponse, completeResponse, getMyAssignments, `searchSemantic(text, limit)` → `GET /api/activities/search`, `getSimilarActivities(encryptedId, limit)` → `GET /api/activities/{id}/similar`, `getCompatiblePersons(encryptedId, limit)` → `GET /api/activities/{id}/compatible-persons`
 - `ArasaacService` — `search(term)` y `getPictogramUrl(id)` para pictogramas ARASAAC
   - API: `https://api.arasaac.org/api/pictograms/es/search/{term}`
   - Imágenes: `https://static.arasaac.org/pictograms/{id}/{id}_500.png`
@@ -242,8 +246,6 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 
 ### Portal Profesional (`/pro/`)
 - Radar chart de habilidades por persona (IN-90)
-- Panel configuración motor adaptativo (MDA)
-- Timeline ajustes adaptativos
 
 ### Portal Estudiante AAC (`/app/`)
 - Players adicionales: MATCH_PAIRS, ORDER_SEQUENCE, FILL_BLANK (parcialmente implementados)
