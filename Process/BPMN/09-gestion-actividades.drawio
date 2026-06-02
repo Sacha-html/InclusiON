@@ -21,7 +21,7 @@
       <mxGeometry x="60" y="60" width="40" height="40" as="geometry"/>
     </mxCell>
 
-    <mxCell id="gw0" value="Acción" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" vertex="1" parent="l1">
+    <mxCell id="gw0" value="¿Qué acción?" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" vertex="1" parent="l1">
       <mxGeometry x="170" y="55" width="50" height="50" as="geometry"/>
     </mxCell>
 
@@ -33,16 +33,21 @@
       <mxGeometry x="360" y="90" width="160" height="70" as="geometry"/>
     </mxCell>
 
+    <!-- XOR merge: confluye Crear/Editar y Buscar antes de Activar/Desactivar -->
+    <mxCell id="gw_merge" value="" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" vertex="1" parent="l1">
+      <mxGeometry x="800" y="55" width="50" height="50" as="geometry"/>
+    </mxCell>
+
     <mxCell id="t3" value="Activar / Desactivar&#xa;actividad" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l1">
-      <mxGeometry x="800" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="1000" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
     <mxCell id="t4" value="Ver personas compatibles&#xa;(IA ranking)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l1">
-      <mxGeometry x="1200" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="1300" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <mxCell id="e1" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=terminate;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
-      <mxGeometry x="1480" y="60" width="40" height="40" as="geometry"/>
+    <mxCell id="e1" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=general;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
+      <mxGeometry x="1520" y="60" width="40" height="40" as="geometry"/>
     </mxCell>
 
     <!-- LANE 2: SISTEMA IA -->
@@ -55,11 +60,11 @@
     </mxCell>
 
     <mxCell id="t7" value="PATCH /api/activities/{id}&#xa;Actualizar estado&#xa;activo/inactivo" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=service;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
-      <mxGeometry x="800" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="1000" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
     <mxCell id="t8" value="GET /api/activities/{id}/compatible-persons&#xa;Ranking por PersonEmbedding" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=service;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
-      <mxGeometry x="1200" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="1300" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
     <!-- FLOWS -->
@@ -78,10 +83,15 @@
     <mxCell id="f5" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t2" target="t6" parent="pool">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="f6" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t5" target="t3" parent="pool">
+    <!-- Sistema → XOR merge gateway (antes de Activar/Desactivar) -->
+    <mxCell id="f6" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t5" target="gw_merge" parent="pool">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="f7" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t6" target="t3" parent="pool">
+    <mxCell id="f7" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t6" target="gw_merge" parent="pool">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- merge → Activar/Desactivar -->
+    <mxCell id="f_merge" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="gw_merge" target="t3" parent="l1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
     <mxCell id="f8" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t3" target="t7" parent="pool">
