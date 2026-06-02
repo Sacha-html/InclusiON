@@ -21,7 +21,7 @@
       <mxGeometry x="60" y="60" width="40" height="40" as="geometry"/>
     </mxCell>
 
-    <mxCell id="gw0" value="Acción" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" vertex="1" parent="l1">
+    <mxCell id="gw0" value="¿Qué acción?" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" vertex="1" parent="l1">
       <mxGeometry x="170" y="55" width="50" height="50" as="geometry"/>
     </mxCell>
 
@@ -41,11 +41,11 @@
       <mxGeometry x="800" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <mxCell id="e1" value="409 Conflict" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=terminate;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
+    <mxCell id="e1" value="409 Conflict" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=error;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
       <mxGeometry x="800" y="105" width="40" height="40" as="geometry"/>
     </mxCell>
 
-    <mxCell id="e2" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=terminate;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
+    <mxCell id="e2" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=general;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
       <mxGeometry x="1300" y="60" width="40" height="40" as="geometry"/>
     </mxCell>
 

@@ -21,7 +21,7 @@
       <mxGeometry x="60" y="60" width="40" height="40" as="geometry"/>
     </mxCell>
 
-    <mxCell id="gw0" value="Acción" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" vertex="1" parent="l1">
+    <mxCell id="gw0" value="¿Qué acción?" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" vertex="1" parent="l1">
       <mxGeometry x="170" y="55" width="50" height="50" as="geometry"/>
     </mxCell>
 
@@ -29,28 +29,33 @@
       <mxGeometry x="360" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
+    <!-- AND-split gateway: tras Alta, configurar login Y registrar diagnóstico en paralelo -->
+    <mxCell id="gw_par" value="" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=parallelGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#009900;fontSize=12;" vertex="1" parent="l1">
+      <mxGeometry x="575" y="55" width="50" height="50" as="geometry"/>
+    </mxCell>
+
     <mxCell id="t2" value="Configurar Login PCD&#xa;PUT .../login-config&#xa;(PIN, Visual, Asistido)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l1">
-      <mxGeometry x="580" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="720" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
     <mxCell id="t3" value="Editar datos / Baja lógica&#xa;PUT /api/persons/{id}" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l1">
-      <mxGeometry x="800" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="940" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <mxCell id="e1" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=terminate;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
+    <mxCell id="e1" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=general;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
       <mxGeometry x="1480" y="60" width="40" height="40" as="geometry"/>
     </mxCell>
 
-    <!-- LANE 2: PROFESIONAL -->
-    <mxCell id="t4" value="Registrar Diagnóstico&#xa;POST .../diagnoses&#xa;(CIE-10 o texto libre)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
-      <mxGeometry x="360" y="45" width="160" height="70" as="geometry"/>
+    <!-- LANE 2: PROFESIONAL — user tasks con color correcto (azul) -->
+    <mxCell id="t4" value="Registrar Diagnóstico&#xa;POST .../diagnoses&#xa;(CIE-10 o texto libre)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l2">
+      <mxGeometry x="560" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <mxCell id="t5" value="Configurar Perfil de Habilidades&#xa;POST .../skill-profile&#xa;(SkillArea[])" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
+    <mxCell id="t5" value="Configurar Perfil de Habilidades&#xa;POST .../skill-profile&#xa;(SkillArea[])" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l2">
       <mxGeometry x="800" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <mxCell id="t6" value="Ver Persona&#xa;GET /api/persons/{id}&#xa;(roadmap, actividades, skills)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
+    <mxCell id="t6" value="Ver Persona&#xa;GET /api/persons/{id}&#xa;(roadmap, actividades, skills)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l2">
       <mxGeometry x="1140" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
@@ -64,10 +69,16 @@
     <mxCell id="f3" value="Editar" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="gw0" target="t3" parent="l1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="f4" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t1" target="t2" parent="l1">
+    <!-- t1 → AND-split -->
+    <mxCell id="f4b" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t1" target="gw_par" parent="l1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="f5" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t1" target="t4" parent="pool">
+    <!-- AND-split → Configurar Login (rama l1) -->
+    <mxCell id="f4" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="gw_par" target="t2" parent="l1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- AND-split → Registrar Diagnóstico (cross-lane a l2) -->
+    <mxCell id="f5" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="gw_par" target="t4" parent="pool">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
     <mxCell id="f6" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t4" target="t5" parent="l2">
@@ -82,7 +93,11 @@
     <mxCell id="f9" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t3" target="e1" parent="l1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="f10" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t6" target="e1" parent="pool">
+    <!-- End event propio en l2: token del Profesional termina aquí (no cruza a e1 de Admin) -->
+    <mxCell id="e_prof" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=general;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l2">
+      <mxGeometry x="1400" y="60" width="40" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="f10" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t6" target="e_prof" parent="l2">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
 
