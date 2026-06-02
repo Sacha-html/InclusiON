@@ -30,32 +30,32 @@
     </mxCell>
 
     <mxCell id="t2" value="Asignar Prof. a Institución&#xa;POST .../institutions" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l1">
-      <mxGeometry x="580" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="400" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
     <mxCell id="t3" value="Asignar Prof. a Persona&#xa;POST .../persons&#xa;(IsPrimary, CanSupervise)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l1">
-      <mxGeometry x="800" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="640" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <mxCell id="e1" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=terminate;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
+    <mxCell id="e1" value="Fin" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.ellipsePerimeter;symbol=general;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=3;fontSize=12;" vertex="1" parent="l1">
       <mxGeometry x="1380" y="60" width="40" height="40" as="geometry"/>
     </mxCell>
 
     <!-- LANE 2: PROFESIONAL -->
-    <mxCell id="t4" value="Configurar Perfil de Habilidades&#xa;de Persona&#xa;POST .../skill-profile" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
-      <mxGeometry x="800" y="45" width="160" height="70" as="geometry"/>
+    <mxCell id="t4" value="Configurar Perfil de Habilidades&#xa;de Persona&#xa;POST .../skill-profile" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l2">
+      <mxGeometry x="880" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <mxCell id="t5" value="Gestionar Familiar&#xa;(invitación o alta directa)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
+    <mxCell id="t5" value="Gestionar Familiar&#xa;(invitación o alta directa)" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=user;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" vertex="1" parent="l2">
       <mxGeometry x="1120" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <!-- LANE 3: SISTEMA -->
+    <!-- LANE 3: SISTEMA — operaciones BD en un único paso secuencial -->
     <mxCell id="t6" value="Crear ProfessionalInstitution&#xa;ProfessionalPerson&#xa;PersonRepresentative&#xa;PersonSkillProfile" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rectanglePerimeter;symbol=service;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l3">
-      <mxGeometry x="580" y="45" width="160" height="70" as="geometry"/>
+      <mxGeometry x="640" y="45" width="160" height="70" as="geometry"/>
     </mxCell>
 
-    <!-- FLOWS -->
+    <!-- FLOWS — secuencia lineal sin AND-splits implícitos -->
     <mxCell id="f1" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="s1" target="t1" parent="l1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
@@ -65,16 +65,15 @@
     <mxCell id="f3" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t2" target="t3" parent="l1">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="f4" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t2" target="t6" parent="pool">
+    <!-- t3 → t6 (Admin asigna → Sistema persiste en BD) -->
+    <mxCell id="f4" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t3" target="t6" parent="pool">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
-    <mxCell id="f5" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t3" target="t4" parent="pool">
+    <!-- t6 → t4 (BD completa → Profesional configura perfil) -->
+    <mxCell id="f5" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t6" target="t4" parent="pool">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
     <mxCell id="f6" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t4" target="t5" parent="l2">
-      <mxGeometry relative="1" as="geometry"/>
-    </mxCell>
-    <mxCell id="f7" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t3" target="t6" parent="pool">
       <mxGeometry relative="1" as="geometry"/>
     </mxCell>
     <mxCell id="f8" style="endArrow=block;endFill=1;strokeColor=#333333;" edge="1" source="t5" target="e1" parent="pool">
