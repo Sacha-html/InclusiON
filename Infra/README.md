@@ -22,7 +22,10 @@ Desde esta carpeta (`Infra/`), ejecutar:
 docker compose up -d postgres
 ```
 
-Esto levanta un contenedor con:
+Postgres inicializa el volumen y ejecuta automáticamente `db-users-setup.sql`, que crea:
+- Usuarios: `inclusion_dev_app`, `inclusion_uat_app`, `inclusion_prod_app`
+- Bases: `inclusion_dev`, `inclusion_test`
+- Extensión `vector` en ambas bases
 
 | Parámetro | Valor |
 |-----------|-------|
@@ -31,38 +34,11 @@ Esto levanta un contenedor con:
 | Usuario superusuario | `postgres` |
 | Puerto | `5432` |
 
-Los datos persisten en el volumen Docker `inclusion_pgdata` — sobreviven reinicios.
+Los datos persisten en el volumen Docker `inclusion_pgdata` — sobreviven reinicios. El script de init solo corre cuando el volumen está vacío (primera vez o tras `docker compose down -v`).
 
 ---
 
-### 2. Crear usuarios y bases de datos
-
-El script `InclusiON.Server/InclusiON.Data/Scripts/db-users-setup.sql` crea los usuarios por ambiente (`inclusion_dev_app`, `inclusion_uat_app`, `inclusion_prod_app`) y las bases `inclusion_dev` e `inclusion_test`.
-
-**Ejecutar una sola vez** (o al recrear las bases desde cero):
-
-```powershell
-# Desde la raíz de InclusiON.Server
-docker cp InclusiON.Data/Scripts/db-users-setup.sql postgres:/tmp/setup.sql
-docker exec postgres psql -U postgres -f /tmp/setup.sql
-```
-
-> **⚠️ Atención:** El script hace `DROP DATABASE IF EXISTS` sobre `inclusion_dev` e `inclusion_test`. No toca staging ni producción.
-
----
-
-### 3. Instalar extensión pgvector
-
-La extensión `vector` requiere superusuario y no está incluida en el script de setup:
-
-```powershell
-docker exec postgres psql -U postgres -d inclusion_dev  -c "CREATE EXTENSION IF NOT EXISTS vector;"
-docker exec postgres psql -U postgres -d inclusion_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
-```
-
----
-
-### 4. Correr migraciones y seed
+### 2. Correr migraciones y seed
 
 La API aplica migraciones y corre el seeder automáticamente al iniciar. No es necesario correr `dotnet ef database update` manualmente.
 
@@ -80,24 +56,13 @@ O desde Rider: seleccionar el launch profile `Development`.
 Si las bases están corruptas o se quiere empezar limpio:
 
 ```powershell
-# 1. Detener el contenedor
-docker stop postgres && docker rm postgres
+# 1. Detener y eliminar contenedor + volumen
+docker compose down -v
 
-# 2. (Opcional) Eliminar volumen con datos
-docker volume rm inclusion_pgdata
-
-# 3. Volver a levantar
+# 2. Volver a levantar (init corre automáticamente: usuarios, bases, extensión vector)
 docker compose up -d postgres
 
-# 4. Setup usuarios y bases
-docker cp InclusiON.Data/Scripts/db-users-setup.sql postgres:/tmp/setup.sql
-docker exec postgres psql -U postgres -f /tmp/setup.sql
-
-# 5. Extensión pgvector
-docker exec postgres psql -U postgres -d inclusion_dev  -c "CREATE EXTENSION IF NOT EXISTS vector;"
-docker exec postgres psql -U postgres -d inclusion_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
-
-# 6. Levantar la API (aplica migraciones y seed automáticamente)
+# 3. Levantar la API (aplica migraciones y seed automáticamente)
 cd InclusiON.Server/InclusiON.Api && dotnet run
 ```
 
