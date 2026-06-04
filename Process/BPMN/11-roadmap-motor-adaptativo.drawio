@@ -13,19 +13,19 @@
                 <mxCell id="s1" value="Inicio" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#23a027;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=12;" parent="l1" vertex="1">
                     <mxGeometry x="60" y="100" width="40" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1" value="Crear Roadmap&#xa;POST .../roadmap" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                <mxCell id="t1" value="Crear Roadmap" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="160" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="t2" value="Agregar Área y Actividades&#xa;al Roadmap" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="380" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="t3" value="Configurar Motor Adaptativo&#xa;PUT .../adaptive-config" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                <mxCell id="t3" value="Configurar Motor Adaptativo" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="600" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="t4" value="Asignar Actividad&#xa;desde Roadmap" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="820" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="t5" value="Ver Skill Radar&#xa;GET .../skill-radar" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                <mxCell id="t5" value="Ver Skill Radar" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="1440" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="e1" value="Fin" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=12;" parent="l1" vertex="1">

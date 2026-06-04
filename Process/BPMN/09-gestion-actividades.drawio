@@ -42,16 +42,16 @@
                 </mxCell>
 
                 <!-- LANE 2: service tasks aligned with l1 columns -->
-                <mxCell id="t5" value="POST /api/activities&#xa;Guardar + Generar&#xa;ActivityEmbedding (IA)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                <mxCell id="t5" value="Guardar actividad&#xa;+ generar vector semántico (IA)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
                     <mxGeometry x="350" y="75" width="160" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="t6" value="GET /api/activities/search&#xa;Búsqueda semántica&#xa;por embedding" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                <mxCell id="t6" value="Búsqueda semántica&#xa;de actividades (IA)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
                     <mxGeometry x="650" y="75" width="160" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="t7" value="PATCH /api/activities/{id}&#xa;Actualizar estado&#xa;activo/inactivo" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                <mxCell id="t7" value="Actualizar estado&#xa;activo / inactivo" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
                     <mxGeometry x="950" y="75" width="160" height="90" as="geometry"/>
                 </mxCell>
-                <mxCell id="t8" value="GET .../activities/{id}/compatible-persons&#xa;Ranking PersonEmbedding" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                <mxCell id="t8" value="Buscar personas compatibles&#xa;(ranking IA)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
                     <mxGeometry x="1250" y="75" width="160" height="90" as="geometry"/>
                 </mxCell>
                 <!-- gw_merge in l2: all service completions converge here -->

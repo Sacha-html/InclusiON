@@ -46,7 +46,7 @@
     </mxCell>
 
     <!-- LANE 2: Sistema -->
-    <mxCell id="t6" value="Registrar usuario&#xa;(hash contraseña)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
+    <mxCell id="t6" value="Registrar usuario" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
       <mxGeometry x="340" y="80" width="160" height="80" as="geometry"/>
     </mxCell>
     <mxCell id="t7" value="Validar credenciales&#xa;/ método de login" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
@@ -58,7 +58,7 @@
     <mxCell id="end_err" value="Error 401&#xa;Acceso denegado" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=11;" vertex="1" parent="l2">
       <mxGeometry x="840" y="170" width="40" height="40" as="geometry"/>
     </mxCell>
-    <mxCell id="t8" value="Emitir JWT&#xa;+ Refresh Token" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
+    <mxCell id="t8" value="Emitir token de sesión" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
       <mxGeometry x="960" y="80" width="160" height="80" as="geometry"/>
     </mxCell>
     <mxCell id="t9" value="Generar token&#xa;de recuperación" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l2">
@@ -72,7 +72,7 @@
     </mxCell>
 
     <!-- LANE 3: Email SMTP -->
-    <mxCell id="t11" value="Enviar email con link&#xa;de recuperación (MailKit)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l3">
+    <mxCell id="t11" value="Enviar email con link&#xa;de recuperación" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="l3">
       <mxGeometry x="1280" y="80" width="160" height="80" as="geometry"/>
     </mxCell>
 

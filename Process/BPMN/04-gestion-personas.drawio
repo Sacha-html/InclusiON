@@ -18,16 +18,16 @@
                 <mxCell id="gw0" value="¿Qué acción?" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" parent="l1" vertex="1">
                     <mxGeometry x="160" y="95" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1" value="Alta de Persona&#xa;POST /api/persons&#xa;(disabilityType, autonomyLevel)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                <mxCell id="t1" value="Alta de Persona&#xa;(tipo discapacidad, nivel autonomía)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="360" y="72" width="160" height="95" as="geometry"/>
                 </mxCell>
                 <mxCell id="gw_par" value="" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=parallelGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#009900;fontSize=12;" parent="l1" vertex="1">
                     <mxGeometry x="580" y="95" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="t2" value="Configurar Login PCD&#xa;PUT .../login-config&#xa;(PIN, Visual, Asistido)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                <mxCell id="t2" value="Configurar Login PCD&#xa;(PIN, Visual, Asistido)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="700" y="72" width="160" height="95" as="geometry"/>
                 </mxCell>
-                <mxCell id="t3" value="Editar datos / Baja lógica&#xa;PUT /api/persons/{id}" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                <mxCell id="t3" value="Editar datos / Baja lógica" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="980" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="e1" value="Fin" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=12;" parent="l1" vertex="1">
@@ -57,13 +57,13 @@
                 <mxCell id="l2" value="Profesional" style="swimlane;startSize=30;horizontal=0;fillColor=#f8f8f8;strokeColor=#888888;fontStyle=1;fontSize=12;" parent="pool" vertex="1">
                     <mxGeometry y="265" width="1600" height="240" as="geometry"/>
                 </mxCell>
-                <mxCell id="t4" value="Registrar Diagnóstico&#xa;POST .../diagnoses&#xa;(CIE-10 o texto libre)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l2" vertex="1">
+                <mxCell id="t4" value="Registrar Diagnóstico&#xa;(CIE-10 o texto libre)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l2" vertex="1">
                     <mxGeometry x="560" y="72" width="160" height="95" as="geometry"/>
                 </mxCell>
-                <mxCell id="t5" value="Configurar Perfil de Habilidades&#xa;POST .../skill-profile&#xa;(SkillArea[])" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l2" vertex="1">
+                <mxCell id="t5" value="Configurar Perfil de Habilidades&#xa;(áreas de habilidad)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l2" vertex="1">
                     <mxGeometry x="800" y="72" width="160" height="95" as="geometry"/>
                 </mxCell>
-                <mxCell id="t6" value="Ver Persona&#xa;GET /api/persons/{id}&#xa;(roadmap, actividades, skills)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l2" vertex="1">
+                <mxCell id="t6" value="Ver Persona&#xa;(roadmap, actividades, skills)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l2" vertex="1">
                     <mxGeometry x="1100" y="72" width="160" height="95" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_prof" value="Fin" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=12;" parent="l2" vertex="1">
