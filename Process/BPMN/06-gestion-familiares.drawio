@@ -16,7 +16,7 @@
                 <mxCell id="gw_start" value="¿Alta directa&#xa;o invitación?" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" parent="l1" vertex="1">
                     <mxGeometry x="160" y="95" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="t1" value="Crear Familiar + Vincular a Persona&#xa;POST /api/family" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                <mxCell id="t1" value="Crear Familiar + Vincular a Persona" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
                     <mxGeometry x="460" y="15" width="160" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="f1" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l1" source="s1" target="gw_start" edge="1">
@@ -37,16 +37,16 @@
                 <mxCell id="t3" value="Registrarse vía invitación&#xa;o recibir acceso" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l3" vertex="1">
                     <mxGeometry x="580" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="t4" value="Login Portal Familiar&#xa;/family/login" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l3" vertex="1">
+                <mxCell id="t4" value="Login Portal Familiar" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l3" vertex="1">
                     <mxGeometry x="820" y="80" width="160" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="gw_par" value="" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=parallelGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#009900;fontSize=12;" parent="l3" vertex="1">
                     <mxGeometry x="1040" y="95" width="50" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="t5" value="Ver actividades de personas&#xa;a cargo&#xa;GET /api/family/activities" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l3" vertex="1">
+                <mxCell id="t5" value="Ver actividades de personas&#xa;a cargo" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l3" vertex="1">
                     <mxGeometry x="1160" y="20" width="160" height="95" as="geometry"/>
                 </mxCell>
-                <mxCell id="t6" value="Ver reportes aprobados&#xa;GET /api/reports/family + PDF" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l3" vertex="1">
+                <mxCell id="t6" value="Ver reportes aprobados&#xa;(PDF disponible)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l3" vertex="1">
                     <mxGeometry x="1160" y="140" width="160" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="gw_join" value="" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=parallelGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#ffffff;strokeColor=#009900;fontSize=12;" parent="l3" vertex="1">
