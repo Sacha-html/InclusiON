@@ -8,6 +8,7 @@ Diagramas de estado de las entidades principales del sistema. Cada archivo cubre
 
 | Archivo | Entidad | Estados |
 |---------|---------|---------|
+| [casos-borde.md](casos-borde.md) | Análisis transversal | 11 casos derivados de los diagramas |
 | [professional.md](professional.md) | `Professional` | Pending · Approved · Rejected · Suspended · Terminated |
 | [family-representative.md](family-representative.md) | `FamilyRepresentative` | Active · Terminated |
 | [invitation.md](invitation.md) | `Invitation` | Pending · Used · Expired · Cancelled |
