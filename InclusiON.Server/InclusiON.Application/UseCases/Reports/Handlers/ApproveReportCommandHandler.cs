@@ -1,0 +1,149 @@
+﻿using System.Text.Json;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.UseCases.Reports.Commands;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
+using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Reports;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+namespace InclusiON.Application.UseCases.Reports.Handlers
+{
+    public class ApproveReportCommandHandler : ICommandHandler<ApproveReportCommand, ApiResponse<ReportResponse>>
+    {
+        private readonly IReportsRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ApproveReportCommandHandler> _logger;
+        private readonly IDateTimeProvider _dateTime;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IEncryptionService _encryption;
+
+        public ApproveReportCommandHandler(
+            IReportsRepository repository,
+            IUnitOfWork unitOfWork,
+            ILogger<ApproveReportCommandHandler> logger,
+            IDateTimeProvider dateTime,
+            IServiceScopeFactory scopeFactory,
+            IEncryptionService encryption)
+        {
+            _repository   = repository;
+            _unitOfWork   = unitOfWork;
+            _logger       = logger;
+            _dateTime     = dateTime;
+            _scopeFactory = scopeFactory;
+            _encryption   = encryption;
+        }
+
+        public async Task<ApiResponse<ReportResponse>> HandleAsync(
+            ApproveReportCommand command,
+            CancellationToken cancellationToken)
+        {
+            var report = await _repository.GetByIdAsync(command.ReportId, cancellationToken);
+            if (report is null)
+                return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.ReportNotFound, "Reporte no encontrado.");
+
+            if (report.Status != ReportStatus.Submitted)
+                return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.InvalidOperation, "Solo se pueden aprobar reportes en estado Enviado.");
+
+            report.Status = ReportStatus.Approved;
+            report.ApprovedAt = _dateTime.UtcNow;
+            report.ApprovedBy = command.AdminUserId;
+            report.UpdatedAt = _dateTime.UtcNow;
+
+            await _repository.UpdateAsync(report, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Report {ReportId} approved by admin {AdminUserId}", report.Id, command.AdminUserId);
+
+            // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
+            // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
+            // Notificar a todos los familiares activos vinculados a la persona — fire and forget
+            var personId = report.PersonId;
+            var reportTitle = report.Title;
+            var reportType = report.ReportType?.Name ?? string.Empty;
+            var reportDate = report.ReportDate.ToString("dd/MM/yyyy");
+            var professionalName = report.Professional != null
+                ? $"{report.Professional.FirstName} {report.Professional.LastName}"
+                : string.Empty;
+            var personName = report.Person != null
+                ? $"{report.Person.FirstName} {report.Person.LastName}"
+                : string.Empty;
+            var year = _dateTime.UtcNow.Year.ToString();
+
+            _ = Task.Run(async () =>
+            {
+                // Crear scope propio: el scope del request ya está dispuesto cuando Task.Run ejecuta
+                using var scope = _scopeFactory.CreateScope();
+                var familyRepository = scope.ServiceProvider.GetRequiredService<IFamilyRepository>();
+                var bgJobRepo        = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
+
+                try
+                {
+                    var representatives = await familyRepository.GetPersonRepresentativesByPersonIdAsync(personId);
+                    var activeReps = representatives.Where(r => r.IsActive).ToList();
+
+                    foreach (var rep in activeReps)
+                    {
+                        var familyEmail     = rep.Representative?.User?.Email;
+                        var familyFirstName = rep.Representative?.FirstName ?? "Familiar";
+                        var familyUserId    = rep.Representative?.UserId;
+
+                        if (string.IsNullOrWhiteSpace(familyEmail)) continue;
+
+                        // Email via job queue (retry automático)
+                        await bgJobRepo.CreateAsync(
+                            JobTypes.Email,
+                            JsonSerializer.Serialize(new EmailPayload
+                            {
+                                To           = familyEmail,
+                                Subject      = $"Nuevo reporte disponible sobre {personName}",
+                                TemplateName = "ReportApproved",
+                                Replacements = new Dictionary<string, string?>
+                                {
+                                    { "FamilyName", familyFirstName },
+                                    { "PersonName", personName },
+                                    { "ReportTitle", reportTitle },
+                                    { "ReportType", reportType },
+                                    { "ReportDate", reportDate },
+                                    { "ProfessionalName", professionalName },
+                                    { "Year", year }
+                                }
+                            }),
+                            maxRetries: 2);
+
+                        // SignalR in-app toast para el familiar
+                        if (familyUserId.HasValue && familyUserId.Value != Guid.Empty)
+                        {
+                            await bgJobRepo.CreateAsync(
+                                JobTypes.Push,
+                                JsonSerializer.Serialize(new NotificationPayload
+                                {
+                                    UserId           = familyUserId.Value.ToString(),
+                                    Title            = $"Nuevo reporte de {personName}",
+                                    Message          = $"El reporte \"{reportTitle}\" ya está disponible.",
+                                    ActionUrl        = "/#/family/reports",
+                                    SendEmailFallback = false
+                                }),
+                                maxRetries: 3);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error encolando notificaciones de aprobación para reporte {ReportId}", command.ReportId);
+                }
+            });
+
+            var response = ReportResponse.MapToResponse(report);
+            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+            return ApiResponse<ReportResponse>.SuccessResult(response);
+        }
+
+        private static string ToUrlSafeBase64(string s)
+            => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+    }
+}
