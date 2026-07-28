@@ -116,7 +116,17 @@
       }
 
       <hr />
-      <button cButton color="secondary" (click)="onBack()">Volver a la lista</button>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <button cButton color="secondary" (click)="onBack()">Volver a la lista</button>
+        <div class="d-flex gap-2">
+          <button cButton color="warning" (click)="openReassignModal()">
+            Reasignar Profesional
+          </button>
+          <button cButton color="danger" (click)="showDeleteReportModal = true">
+            Dar de baja
+          </button>
+        </div>
+      </div>
     </c-card-body>
   </c-card>
 
@@ -148,4 +158,42 @@
     (confirm)="confirmReject($event)"
     (cancel)="cancelAction()">
   </app-confirm-modal>
+
+  <app-confirm-modal
+    [visible]="showDeleteReportModal"
+    title="Dar de baja reporte"
+    messagePrefix="¿Confirmás la baja definitiva del reporte &quot;"
+    [itemName]="report()!.title"
+    messageSuffix="&quot;? El reporte pasará a estar inactivo en el sistema de manera permanente."
+    confirmLabel="Dar de baja"
+    confirmColor="danger"
+    [loading]="isActioning"
+    (confirm)="confirmDeleteReport()"
+    (cancel)="cancelAction()">
+  </app-confirm-modal>
+
+  <c-modal [visible]="showReassignModal" (visibleChange)="showReassignModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 class="modal-title">Reasignar reporte</h5>
+    </c-modal-header>
+    <c-modal-body>
+      <p class="text-muted">Seleccioná el profesional que asumirá la autoría de este reporte.</p>
+      <div class="mb-3">
+        <label cLabel for="reassignSelect">Profesional</label>
+        <select cSelect id="reassignSelect" [(ngModel)]="selectedProfessionalId">
+          <option value="">Seleccione un profesional...</option>
+          @for (p of professionals(); track p.id) {
+            <option [value]="p.id">{{ p.fullName }} ({{ p.specialty || 'Sin especialidad' }})</option>
+          }
+        </select>
+      </div>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="showReassignModal = false">Cancelar</button>
+      <button cButton color="primary" [disabled]="!selectedProfessionalId || isActioning" (click)="confirmReassign()">
+        @if (isActioning) { <c-spinner size="sm" class="me-1"></c-spinner> }
+        Reasignar
+      </button>
+    </c-modal-footer>
+  </c-modal>
 }

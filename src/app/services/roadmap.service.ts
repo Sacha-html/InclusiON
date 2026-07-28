@@ -124,7 +124,7 @@ export class RoadmapService {
     personId: string,
     areaId: number,
     activityEntryId: number,
-    payload: { dueDate?: string; isEvaluationActivity: boolean }
+    payload: { dueDate?: string; isEvaluationActivity: boolean; bypassDuplicateWarning?: boolean }
   ): Observable<ActivityAssignmentResponse> {
     return this.http
       .post<ApiResponse<ActivityAssignmentResponse>>(

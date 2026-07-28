@@ -249,6 +249,7 @@
     [userId]="person.userId"
     [personId]="person.id"
     [currentLoginMethodId]="person.loginMethodId ?? null"
+    [currentSupervisorUserId]="person.supervisorUserId ?? null"
     [loginMethods]="loginMethods"
     (closed)="closeLoginMethodModal()"
     (updated)="onLoginMethodUpdated($event)">

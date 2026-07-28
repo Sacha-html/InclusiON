@@ -53,7 +53,7 @@ export class NewComponent {
       map(r => r.data)
     );
   readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
-  readonly subDisplayPerson = (p: PersonListItemResponse) => p.disabilityTypeName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => p.documentNumber ? `${p.disabilityTypeName ?? 'Sin tipo'} (DNI: ${p.documentNumber})` : p.disabilityTypeName ?? '';
   readonly valueFromPerson = (p: PersonListItemResponse) => p.id;
 
   get f() { return this.form.controls; }

@@ -47,7 +47,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (errorCode !== undefined) {
-        handleErrorCode(errorCode, errorCodeService, toastService, router, storageService, authService, isAacRoute);
+        handleErrorCode(errorCode, errorCodeService, toastService, router, storageService, authService, isAacRoute, backendMessage);
       } else {
         handleHttpStatus(error.status, router, toastService, storageService, authService, isAacRoute);
       }
@@ -77,7 +77,8 @@ function handleErrorCode(
   router: Router,
   storageService: LocalStorageService,
   authService: AuthService,
-  isAacRoute: boolean
+  isAacRoute: boolean,
+  backendMessage?: string
 ): void {
   // Si requiere re-autenticación, limpiar sesión y redirigir
   if (errorCodeService.requiresReauth(errorCode)) {
@@ -98,16 +99,17 @@ function handleErrorCode(
   // Mostrar toast según severidad (excepto para errores de validación que se manejan en forms)
   if (!errorCodeService.isValidationError(errorCode)) {
     const errorInfo = errorCodeService.getErrorInfo(errorCode);
+    const displayMessage = backendMessage || errorInfo.message;
 
     switch (errorInfo.severity) {
       case 'error':
-        toastService.error(errorInfo.message);
+        toastService.error(displayMessage);
         break;
       case 'warning':
-        toastService.warning(errorInfo.message);
+        toastService.warning(displayMessage);
         break;
       case 'info':
-        toastService.info(errorInfo.message);
+        toastService.info(displayMessage);
         break;
     }
   }

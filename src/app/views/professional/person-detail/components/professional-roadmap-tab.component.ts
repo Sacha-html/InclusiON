@@ -55,35 +55,36 @@ import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.
 export class ProfessionalRoadmapTabComponent implements OnInit {
   @Input({ required: true }) personId!: string;
 
-  private readonly roadmapService  = inject(RoadmapService);
+  private readonly roadmapService = inject(RoadmapService);
   private readonly activitiesService = inject(ActivitiesService);
   private readonly catalogsService = inject(CatalogsService);
-  private readonly authService     = inject(AuthService);
-  private readonly toastService    = inject(ToastService);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
-  roadmap       = signal<RoadmapResponse | null>(null);
-  loading       = signal(false);
-  skillAreas    = signal<SkillAreaItem[]>([]);
-  activities    = signal<ActivityListItemResponse[]>([]);
+  roadmap = signal<RoadmapResponse | null>(null);
+  loading = signal(false);
+  skillAreas = signal<SkillAreaItem[]>([]);
+  activities = signal<ActivityListItemResponse[]>([]);
 
   canCreate = this.authService.hasPermission(Permissions.Roadmap.Create);
   canUpdate = this.authService.hasPermission(Permissions.Roadmap.Update);
   canDelete = this.authService.hasPermission(Permissions.Roadmap.Delete);
+  readonly assignToday = new Date().toISOString().split('T')[0];
 
   // ── Create roadmap ──────────────────────────────────────────────────
-  showCreateModal  = false;
-  createNotes      = '';
-  creating         = false;
+  showCreateModal = false;
+  createNotes = '';
+  creating = false;
 
   // ── Edit notes ──────────────────────────────────────────────────────
   showEditNotesModal = false;
-  editNotes          = '';
-  savingNotes        = false;
+  editNotes = '';
+  savingNotes = false;
 
   // ── Add area ────────────────────────────────────────────────────────
-  showAddAreaModal   = false;
+  showAddAreaModal = false;
   selectedSkillAreaId: number | null = null;
-  addingArea         = false;
+  addingArea = false;
 
   usedAreaIds = computed(() => new Set((this.roadmap()?.areas ?? []).map(a => a.skillAreaId)));
 
@@ -94,10 +95,10 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   // ── Add activity ────────────────────────────────────────────────────
   showAddActivityModal = false;
   targetArea: RoadmapAreaResponse | null = null;
-  loadingActivities    = false;
+  loadingActivities = false;
   selectedActivityId: number | null = null;
   activityConfig: AddRoadmapActivityRequest = this.defaultActivityConfig();
-  addingActivity       = false;
+  addingActivity = false;
 
   usedActivityIdsInArea = computed(() =>
     new Set(this.targetArea?.activities.map(a => a.activityId) ?? [])
@@ -119,28 +120,28 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   unlockingActivityId: string | null = null;
 
   // ── Adjustment history ───────────────────────────────────────────────
-  adjustmentHistory           = signal<AdaptiveAdjustmentLogResponse[]>([]);
+  adjustmentHistory = signal<AdaptiveAdjustmentLogResponse[]>([]);
   showingHistoryForActivityId = signal<number | null>(null);
-  loadingHistory              = signal(false);
+  loadingHistory = signal(false);
 
   // ── Adaptive engine config (IN-116) ──────────────────────────────────
-  showAdaptiveConfigModal    = false;
+  showAdaptiveConfigModal = false;
   adaptiveConfigTarget: { area: RoadmapAreaResponse; activity: RoadmapActivityResponse } | null = null;
   adaptiveConfig: AdaptiveEngineConfigResponse | null = null;
-  loadingAdaptiveConfig      = false;
-  savingAdaptiveConfig       = false;
-  deletingAdaptiveConfig     = false;
+  loadingAdaptiveConfig = false;
+  savingAdaptiveConfig = false;
+  deletingAdaptiveConfig = false;
 
   adaptiveForm = {
-    isEnabled:                      true,
-    minDifficultyLevel:             1,
-    maxDifficultyLevel:             5,
-    minTimeLimitSeconds:            null as number | null,
-    maxTimeLimitSeconds:            null as number | null,
-    consecutiveSuccessToUpgrade:    3,
+    isEnabled: true,
+    minDifficultyLevel: 1,
+    maxDifficultyLevel: 5,
+    minTimeLimitSeconds: null as number | null,
+    maxTimeLimitSeconds: null as number | null,
+    consecutiveSuccessToUpgrade: 3,
     consecutiveFailuresToDowngrade: 2,
-    successThresholdPercent:        70,
-    frustrationThreshold:           3,
+    successThresholdPercent: 70,
+    frustrationThreshold: 3,
   };
 
   ngOnInit(): void {
@@ -150,8 +151,8 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   private loadRoadmap(): void {
     this.loading.set(true);
     this.roadmapService.getRoadmap(this.personId).subscribe({
-      next:  (data) => { this.roadmap.set(data); this.loading.set(false); },
-      error: (err)  => {
+      next: (data) => { this.roadmap.set(data); this.loading.set(false); },
+      error: (err) => {
         this.loading.set(false);
         if (err?.status !== 404) {
           this.toastService.error('Error al cargar hoja de ruta');
@@ -214,8 +215,8 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     this.selectedSkillAreaId = null;
     if (this.skillAreas().length === 0) {
       this.catalogsService.getSkillAreas().subscribe({
-        next:  (data) => this.skillAreas.set(data),
-        error: ()     => this.toastService.error('Error al cargar áreas de habilidad'),
+        next: (data) => this.skillAreas.set(data),
+        error: () => this.toastService.error('Error al cargar áreas de habilidad'),
       });
     }
     this.showAddAreaModal = true;
@@ -247,16 +248,16 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   // ── Add activity ─────────────────────────────────────────────────────
 
   openAddActivityModal(area: RoadmapAreaResponse): void {
-    this.targetArea            = area;
-    this.selectedActivityId    = null;
-    this.activityConfig        = this.defaultActivityConfig();
+    this.targetArea = area;
+    this.selectedActivityId = null;
+    this.activityConfig = this.defaultActivityConfig();
     this.activityConfig.sequenceOrder = area.activities.length + 1;
-    this.showAddActivityModal  = true;
+    this.showAddActivityModal = true;
     if (this.activities().length === 0) {
       this.loadingActivities = true;
       this.activitiesService.getActivities({ page: 1, pageSize: 100, isActive: true }).subscribe({
-        next:  (data) => { this.activities.set(data.data); this.loadingActivities = false; },
-        error: ()     => { this.loadingActivities = false; this.toastService.error('Error al cargar actividades'); },
+        next: (data) => { this.activities.set(data.data); this.loadingActivities = false; },
+        error: () => { this.loadingActivities = false; this.toastService.error('Error al cargar actividades'); },
       });
     }
   }
@@ -408,9 +409,9 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     ).join('\n');
 
     const blob = new Blob(['﻿' + header + rows], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
     a.download = `historial-mda-${activityTitle.replace(/\s+/g, '-').toLowerCase()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
@@ -472,59 +473,63 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
   private defaultActivityConfig(): AddRoadmapActivityRequest {
     return {
-      activityId:             0,
-      sequenceOrder:          1,
+      activityId: 0,
+      sequenceOrder: 1,
       unlockThresholdPercent: 60,
-      timeLimitSeconds:       null,
-      maxAttempts:            null,
-      showHints:              true,
-      difficultyLevel:        1,
+      timeLimitSeconds: null,
+      maxAttempts: null,
+      showHints: true,
+      difficultyLevel: 1,
     };
   }
 
   // ── Assign from roadmap (IN-150) ────────────────────────────────────
-  showAssignModal    = false;
+  showAssignModal = false;
   assignTarget: { area: RoadmapAreaResponse; activity: RoadmapActivityResponse } | null = null;
-  assigning          = false;
+  assigning = false;
   assignForm = {
-    dueDate:             '',
+    dueDate: '',
     isEvaluationActivity: false,
   };
 
-  get assignToday(): string {
-    return new Date().toISOString().split('T')[0];
-  }
-
   openAssignModal(area: RoadmapAreaResponse, activity: RoadmapActivityResponse): void {
     this.assignTarget = { area, activity };
-    this.assignForm   = { dueDate: '', isEvaluationActivity: false };
+    this.assignForm = { dueDate: '', isEvaluationActivity: false };
     this.showAssignModal = true;
   }
 
   closeAssignModal(): void {
     this.showAssignModal = false;
-    this.assignTarget    = null;
+    this.assignTarget = null;
   }
 
-  submitAssign(): void {
+  submitAssign(bypassDuplicateWarning: boolean = false): void {
     if (!this.assignTarget) return;
     const { area, activity } = this.assignTarget;
     this.assigning = true;
 
     this.roadmapService
       .assignFromRoadmap(this.personId, area.id, activity.id, {
-        dueDate:             this.assignForm.dueDate || undefined,
+        dueDate: this.assignForm.dueDate || undefined,
         isEvaluationActivity: this.assignForm.isEvaluationActivity,
+        bypassDuplicateWarning: bypassDuplicateWarning
       })
       .subscribe({
         next: () => {
           this.toastService.success(`"${activity.activityTitle}" asignada exitosamente.`);
-          this.assigning       = false;
+          this.assigning = false;
           this.showAssignModal = false;
         },
         error: (err) => {
           this.assigning = false;
-          this.toastService.error(err?.userMessage ?? 'Error al asignar actividad');
+          if (err?.status === 409) {
+            const confirmAssign = confirm('El alumno ya posee una asignación activa para esta actividad. ¿Desea asignarla nuevamente de todas formas?');
+            if (confirmAssign) {
+              this.submitAssign(true);
+            }
+          } else {
+            this.toastService.error(err?.userMessage ?? 'Error al asignar actividad');
+          }
         },
       });
   }
@@ -533,36 +538,36 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
   openAdaptiveConfigModal(area: RoadmapAreaResponse, activity: RoadmapActivityResponse): void {
     this.adaptiveConfigTarget = { area, activity };
-    this.adaptiveConfig       = null;
+    this.adaptiveConfig = null;
     this.showAdaptiveConfigModal = true;
-    this.loadingAdaptiveConfig   = true;
+    this.loadingAdaptiveConfig = true;
 
     this.roadmapService.getAdaptiveConfig(this.personId, area.id, activity.id).subscribe({
       next: (config) => {
         this.adaptiveConfig = config;
         if (config) {
           this.adaptiveForm = {
-            isEnabled:                      config.isEnabled,
-            minDifficultyLevel:             config.minDifficultyLevel,
-            maxDifficultyLevel:             config.maxDifficultyLevel,
-            minTimeLimitSeconds:            config.minTimeLimitSeconds ?? null,
-            maxTimeLimitSeconds:            config.maxTimeLimitSeconds ?? null,
-            consecutiveSuccessToUpgrade:    config.consecutiveSuccessToUpgrade,
+            isEnabled: config.isEnabled,
+            minDifficultyLevel: config.minDifficultyLevel,
+            maxDifficultyLevel: config.maxDifficultyLevel,
+            minTimeLimitSeconds: config.minTimeLimitSeconds ?? null,
+            maxTimeLimitSeconds: config.maxTimeLimitSeconds ?? null,
+            consecutiveSuccessToUpgrade: config.consecutiveSuccessToUpgrade,
             consecutiveFailuresToDowngrade: config.consecutiveFailuresToDowngrade,
-            successThresholdPercent:        config.successThresholdPercent,
-            frustrationThreshold:           config.frustrationThreshold,
+            successThresholdPercent: config.successThresholdPercent,
+            frustrationThreshold: config.frustrationThreshold,
           };
         } else {
           this.adaptiveForm = {
-            isEnabled:                      true,
-            minDifficultyLevel:             1,
-            maxDifficultyLevel:             5,
-            minTimeLimitSeconds:            null,
-            maxTimeLimitSeconds:            null,
-            consecutiveSuccessToUpgrade:    3,
+            isEnabled: true,
+            minDifficultyLevel: 1,
+            maxDifficultyLevel: 5,
+            minTimeLimitSeconds: null,
+            maxTimeLimitSeconds: null,
+            consecutiveSuccessToUpgrade: 3,
             consecutiveFailuresToDowngrade: 2,
-            successThresholdPercent:        70,
-            frustrationThreshold:           3,
+            successThresholdPercent: 70,
+            frustrationThreshold: 3,
           };
         }
         this.loadingAdaptiveConfig = false;
@@ -576,7 +581,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
   closeAdaptiveConfigModal(): void {
     this.showAdaptiveConfigModal = false;
-    this.adaptiveConfigTarget    = null;
+    this.adaptiveConfigTarget = null;
   }
 
   submitAdaptiveConfig(): void {
@@ -588,7 +593,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
       .upsertAdaptiveConfig(this.personId, area.id, activity.id, this.adaptiveForm)
       .subscribe({
         next: (saved) => {
-          this.adaptiveConfig       = saved;
+          this.adaptiveConfig = saved;
           this.savingAdaptiveConfig = false;
           this.toastService.success('Motor adaptativo configurado');
           this.showAdaptiveConfigModal = false;
@@ -607,7 +612,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
     this.roadmapService.deleteAdaptiveConfig(this.personId, area.id, activity.id).subscribe({
       next: () => {
-        this.adaptiveConfig         = null;
+        this.adaptiveConfig = null;
         this.deletingAdaptiveConfig = false;
         this.toastService.success('Motor adaptativo deshabilitado');
         this.showAdaptiveConfigModal = false;
