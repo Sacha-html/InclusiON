@@ -12,6 +12,7 @@ namespace InclusiON.DTOs.Responses.Assignments
         public string PersonFirstName { get; set; } = string.Empty;
         public string PersonLastName { get; set; } = string.Empty;
         public string PersonFullName => $"{PersonFirstName} {PersonLastName}".Trim();
+        public string? PersonDocumentNumber { get; set; }
         public string? AvatarColor { get; set; }
         public string? DisabilityTypeName { get; set; }
         public int? Age { get; set; }
@@ -37,6 +38,7 @@ namespace InclusiON.DTOs.Responses.Assignments
                 PersonId = assignment.PersonId,
                 PersonFirstName = person?.FirstName ?? string.Empty,
                 PersonLastName = person?.LastName ?? string.Empty,
+                PersonDocumentNumber = person?.DocumentNumber,
                 AvatarColor = person?.AvatarColor,
                 DisabilityTypeName = person?.DisabilityType?.Name,
                 Age = age,

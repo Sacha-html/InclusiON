@@ -279,5 +279,40 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(p => p.Status == ProfessionalStatusEnum.Approved && p.IsActive && p.User.IsActive)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<int> GetDependentAssistedLoginPersonsCountAsync(Guid professionalUserId, CancellationToken ct = default)
+        {
+            return await _context.PersonsWithDisability
+                .CountAsync(p => p.IsActive && p.LoginMethodId == 3 && p.SupervisorUserId == professionalUserId, ct);
+        }
+
+        public async Task DeactivateAssignmentsAndCancelActivitiesAsync(Guid professionalUserId, CancellationToken ct = default)
+        {
+            var pro = await _context.Professionals
+                .FirstOrDefaultAsync(p => p.UserId == professionalUserId, ct);
+
+            if (pro is not null)
+            {
+                var activeStudentLinks = await _context.ProfessionalPersons
+                    .Where(pp => pp.ProfessionalId == pro.Id && pp.IsActive)
+                    .ToListAsync(ct);
+
+                foreach (var link in activeStudentLinks)
+                {
+                    link.IsActive = false;
+
+                    var activeActivityAssignments = await _context.ActivityAssignments
+                        .Where(aa => aa.PersonId == link.PersonId && 
+                                     aa.AssignedByProfessionalId == pro.Id &&
+                                     (aa.StatusId == AssignmentStatuses.Pendiente || aa.StatusId == AssignmentStatuses.EnProgreso))
+                        .ToListAsync(ct);
+
+                    foreach (var aa in activeActivityAssignments)
+                    {
+                        aa.StatusId = AssignmentStatuses.Cancelada;
+                    }
+                }
+            }
+        }
     }
 }

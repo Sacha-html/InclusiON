@@ -6,6 +6,7 @@ namespace InclusiON.Application.UseCases.Activities.Commands
         Guid AssignedByProfessionalId,
         DateTime? DueDate,
         bool IsEvaluationActivity,
-        int? SequenceOrder
+        int? SequenceOrder,
+        bool BypassDuplicateWarning = false
     );
 }

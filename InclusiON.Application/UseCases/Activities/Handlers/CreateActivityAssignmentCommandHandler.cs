@@ -55,6 +55,25 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             if (!activity.IsStandardActivity && activity.ProfessionalId != command.AssignedByProfessionalId)
                 return ApiResponse<ActivityAssignmentResponse>.Forbidden();
 
+            if (command.DueDate.HasValue && command.DueDate.Value.Date < _dateTime.UtcNow.Date)
+            {
+                return ApiResponse<ActivityAssignmentResponse>.ErrorResult(
+                    ErrorCode.ValidationFailed,
+                    "La fecha límite no puede ser anterior a la fecha actual.");
+            }
+
+            if (!command.BypassDuplicateWarning)
+            {
+                var hasActiveAssignment = await _repository.HasActiveAssignmentAsync(command.PersonId, activityId, cancellationToken);
+
+                if (hasActiveAssignment)
+                {
+                    return ApiResponse<ActivityAssignmentResponse>.ErrorResult(
+                        ErrorCode.Conflict,
+                        "El alumno ya posee una asignación activa para esta actividad.");
+                }
+            }
+
             var assignment = new ActivityAssignment
             {
                 ActivityId               = activityId,

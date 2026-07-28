@@ -22,6 +22,7 @@ namespace InclusiON.Data.Seeders
             await SeedProfessionalsAsync(userManager, context);
             await SeedVisualLoginTestUsersAsync(userManager, context);
             await SeedFamilyAsync(userManager, context);
+            await SeedFiveAdditionalStudentsAndTutorsAsync(userManager, context);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
@@ -517,6 +518,16 @@ namespace InclusiON.Data.Seeders
                     LicenseNumber = "PROF-002",
                     Specialty = "Educacion Especial",
                     ProfessionalId = Guid.Parse("00000000-0000-0000-0000-000000000201")
+                },
+                new {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000022"),
+                    Email = "profesional2@test.com",
+                    Password = "Password123!",
+                    FirstName = "Sofía",
+                    LastName = "Gutiérrez",
+                    LicenseNumber = "PROF-003",
+                    Specialty = "Psicopedagogía",
+                    ProfessionalId = Guid.Parse("00000000-0000-0000-0000-000000000202")
                 }
             };
 
@@ -662,6 +673,177 @@ namespace InclusiON.Data.Seeders
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
                         });
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedFiveAdditionalStudentsAndTutorsAsync(UserManager<User> userManager, AppDbContext context)
+        {
+            var professional = await context.Professionals.FirstOrDefaultAsync(p => p.User.Email == "profesional@test.com");
+            if (professional == null) return;
+
+            var data = new[]
+            {
+                new { StudentEmail = "tomas@test.com", StudentName = "Tomás", StudentSurname = "Pérez", StudentDni = "11111111", TutorEmail = "carlostutor@test.com", TutorName = "Carlos", TutorSurname = "Pérez", Relationship = "Padre" },
+                new { StudentEmail = "sofia@test.com", StudentName = "Sofía", StudentSurname = "Rodríguez", StudentDni = "22222222", TutorEmail = "anatutor@test.com", TutorName = "Ana", TutorSurname = "Rodríguez", Relationship = "Madre" },
+                new { StudentEmail = "mateo@test.com", StudentName = "Mateo", StudentSurname = "Díaz", StudentDni = "33333333", TutorEmail = "luistutor@test.com", TutorName = "Luis", TutorSurname = "Díaz", Relationship = "Padre" },
+                new { StudentEmail = "valentina@test.com", StudentName = "Valentina", StudentSurname = "Silva", StudentDni = "44444444", TutorEmail = "elenatutor@test.com", TutorName = "Elena", TutorSurname = "Silva", Relationship = "Madre" },
+                new { StudentEmail = "benjamin@test.com", StudentName = "Benjamín", StudentSurname = "Castro", StudentDni = "55555555", TutorEmail = "jorgetutor@test.com", TutorName = "Jorge", TutorSurname = "Castro", Relationship = "Tutor Legal" }
+            };
+
+            foreach (var item in data)
+            {
+                var studentUser = await userManager.FindByEmailAsync(item.StudentEmail);
+                PersonWithDisability student = null!;
+                if (studentUser == null)
+                {
+                    studentUser = new User
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = item.StudentName,
+                        Surname = item.StudentSurname,
+                        Email = item.StudentEmail,
+                        UserName = item.StudentEmail,
+                        EmailConfirmed = true,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    var result = await userManager.CreateAsync(studentUser, "Student123!");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(studentUser, IdentityRoles.PersonWithDisability.ToString());
+                        student = new PersonWithDisability
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = studentUser.Id,
+                            FirstName = item.StudentName,
+                            LastName = item.StudentSurname,
+                            BirthDate = DateTime.UtcNow.AddYears(-15),
+                            DocumentNumber = item.StudentDni,
+                            LoginMethodId = 1, // Password
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        context.PersonsWithDisability.Add(student);
+                    }
+                }
+                else
+                {
+                    student = await context.PersonsWithDisability.FirstOrDefaultAsync(p => p.UserId == studentUser.Id);
+                }
+
+                var tutorUser = await userManager.FindByEmailAsync(item.TutorEmail);
+                FamilyRepresentative tutor = null!;
+                if (tutorUser == null)
+                {
+                    tutorUser = new User
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = item.TutorName,
+                        Surname = item.TutorSurname,
+                        Email = item.TutorEmail,
+                        UserName = item.TutorEmail,
+                        EmailConfirmed = true,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    var result = await userManager.CreateAsync(tutorUser, "Tutor123!");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(tutorUser, IdentityRoles.FamilyRepresentative.ToString());
+                        tutor = new FamilyRepresentative
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = tutorUser.Id,
+                            FirstName = item.TutorName,
+                            LastName = item.TutorSurname,
+                            Phone = "12345678",
+                            DocumentNumber = "T" + item.StudentDni,
+                            Relationship = item.Relationship,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        context.FamilyRepresentatives.Add(tutor);
+                    }
+                }
+                else
+                {
+                    tutor = await context.FamilyRepresentatives.FirstOrDefaultAsync(f => f.UserId == tutorUser.Id);
+                }
+
+                await context.SaveChangesAsync();
+
+                if (student != null && tutor != null)
+                {
+                    var studentTutorLinked = await context.PersonRepresentatives
+                        .AnyAsync(pr => pr.PersonId == student.Id && pr.RepresentativeId == tutor.Id);
+                    if (!studentTutorLinked)
+                    {
+                        context.PersonRepresentatives.Add(new PersonRepresentative
+                        {
+                            PersonId = student.Id,
+                            RepresentativeId = tutor.Id,
+                            Relationship = item.Relationship,
+                            IsPrimary = true,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+
+                    var studentProfLinked = await context.ProfessionalPersons
+                        .AnyAsync(pp => pp.ProfessionalId == professional.Id && pp.PersonId == student.Id);
+                    if (!studentProfLinked)
+                    {
+                        context.ProfessionalPersons.Add(new ProfessionalPerson
+                        {
+                            ProfessionalId = professional.Id,
+                            PersonId = student.Id,
+                            IsPrimaryProfessional = true,
+                            CanSuperviseLogin = true,
+                            IsActive = true,
+                            AssignedAt = DateTime.UtcNow
+                        });
+                    }
+
+                    var professional2 = await context.Professionals.FirstOrDefaultAsync(p => p.User.Email == "docente@test.com");
+                    if (professional2 != null)
+                    {
+                        var studentProf2Linked = await context.ProfessionalPersons
+                            .AnyAsync(pp => pp.ProfessionalId == professional2.Id && pp.PersonId == student.Id);
+                        if (!studentProf2Linked)
+                        {
+                            context.ProfessionalPersons.Add(new ProfessionalPerson
+                            {
+                                ProfessionalId = professional2.Id,
+                                PersonId = student.Id,
+                                IsPrimaryProfessional = false,
+                                CanSuperviseLogin = true,
+                                IsActive = true,
+                                AssignedAt = DateTime.UtcNow
+                            });
+                        }
+                    }
+
+                    var professional3 = await context.Professionals.FirstOrDefaultAsync(p => p.User.Email == "profesional2@test.com");
+                    if (professional3 != null)
+                    {
+                        var studentProf3Linked = await context.ProfessionalPersons
+                            .AnyAsync(pp => pp.ProfessionalId == professional3.Id && pp.PersonId == student.Id);
+                        if (!studentProf3Linked)
+                        {
+                            context.ProfessionalPersons.Add(new ProfessionalPerson
+                            {
+                                ProfessionalId = professional3.Id,
+                                PersonId = student.Id,
+                                IsPrimaryProfessional = false,
+                                CanSuperviseLogin = true,
+                                IsActive = true,
+                                AssignedAt = DateTime.UtcNow
+                            });
+                        }
                     }
                 }
             }
