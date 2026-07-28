@@ -1,0 +1,77 @@
+// Estilos globales de tabla y badges están en _custom.scss
+.cursor-pointer {
+  cursor: pointer;
+  user-select: none;
+}
+
+.th-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--a11y-focus-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+.sort-arrows {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.sort-arrow-up,
+.sort-arrow-down {
+  color: var(--a11y-text-muted);
+  transition: color 0.15s;
+  display: block;
+
+  &.active {
+    color: var(--a11y-primary);
+  }
+}
+
+.sort-arrow-up {
+  margin-bottom: -4px;
+}
+
+.sort-arrow-down {
+  margin-top: -4px;
+}
+
+.table-wrapper {
+  position: relative;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  &.loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.table-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

@@ -1,0 +1,158 @@
+<c-card>
+  <c-card-header class="d-flex align-items-center gap-2">
+    <h3 class="h6 mb-0">Datos Personales</h3>
+    <c-badge class="ms-1" [color]="person.isActive ? 'success' : 'danger'"
+          [attr.aria-label]="'Estado: ' + (person.isActive ? 'Activo' : 'Inactivo')">
+      {{ person.isActive ? 'Activo' : 'Inactivo' }}
+    </c-badge>
+  </c-card-header>
+  <c-card-body>
+
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Nombre</dt>
+        <dd class="mb-0 fw-medium">{{ person.firstName }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Apellido</dt>
+        <dd class="mb-0 fw-medium">{{ person.lastName }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Documento</dt>
+        <dd class="mb-0 fw-medium">{{ person.documentNumber ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Fecha de nacimiento</dt>
+        <dd class="mb-0 fw-medium">{{ formatDate(person.birthDate) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Edad</dt>
+        <dd class="mb-0 fw-medium">{{ person.age }} años</dd>
+      </div>
+    </dl>
+
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Discapacidad</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Tipo de discapacidad</dt>
+        <dd class="mb-0 fw-medium">{{ person.disabilityTypeName ?? 'Sin especificar' }}</dd>
+      </div>
+    </dl>
+
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Perfil funcional</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-4">
+        <dt class="form-label text-body-secondary mb-1">Atención</dt>
+        <dd class="mb-0 fw-medium">{{ formatLevel(person.attentionLevel) }}</dd>
+      </div>
+      <div class="col-sm-4">
+        <dt class="form-label text-body-secondary mb-1">Comunicación</dt>
+        <dd class="mb-0 fw-medium">{{ formatLevel(person.communicationLevel) }}</dd>
+      </div>
+      <div class="col-sm-4">
+        <dt class="form-label text-body-secondary mb-1">Motricidad</dt>
+        <dd class="mb-0 fw-medium">{{ formatLevel(person.motorSkillLevel) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Usa CAA</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.usesAAC) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Usa lengua de señas</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.usesSignLanguage) }}</dd>
+      </div>
+    </dl>
+
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Preferencias</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Intereses y motivadores</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.interestsAndMotivators ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Estilo de aprendizaje</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.learningStyle ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Recursos disponibles</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.availableResources ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Terapias adicionales</dt>
+        <dd class="mb-0" style="white-space: pre-wrap; min-height: 2.5rem;">{{ person.additionalTherapies ?? 'Sin especificar' }}</dd>
+      </div>
+    </dl>
+
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Accesibilidad</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Requiere fuente grande</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresLargeFont) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Requiere alto contraste</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresHighContrast) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Sensibilidad al ruido visual</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.visualNoiseSensitivity) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Sensibilidad al sonido</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.soundSensitivity) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Daltonismo</dt>
+        <dd class="mb-0 fw-medium">{{ formatColorBlindness(person.colorBlindnessType) }}</dd>
+      </div>
+    </dl>
+
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Configuración de acceso</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Nivel de autonomía</dt>
+        <dd class="mb-0 fw-medium">{{ person.autonomyLevelName ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Método de login</dt>
+        <dd class="mb-0 fw-medium">{{ person.loginMethodName ?? 'Sin especificar' }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">PIN configurado</dt>
+        <dd class="mb-0 fw-medium">{{ formatBoolean(person.hasPinConfigured) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Color de avatar</dt>
+        <dd class="mb-0 d-flex align-items-center gap-2">
+          <span class="avatar-color-preview" [style.background-color]="person.avatarColor ?? '#ccc'" aria-hidden="true"></span>
+          <span class="fw-medium">{{ person.avatarColor ?? 'Sin especificar' }}</span>
+        </dd>
+      </div>
+    </dl>
+
+    <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Auditoría</h4>
+    <dl class="row g-3 mb-0">
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Fecha de alta</dt>
+        <dd class="mb-0 fw-medium">{{ formatDateTime(person.createdAt) }}</dd>
+      </div>
+      <div class="col-sm-6">
+        <dt class="form-label text-body-secondary mb-1">Última actualización</dt>
+        <dd class="mb-0 fw-medium">{{ person.updatedAt ? formatDateTime(person.updatedAt) : 'Sin actualizar' }}</dd>
+      </div>
+    </dl>
+
+    <div class="mt-4 d-flex justify-content-between">
+      <div class="d-flex gap-2">
+        <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado de personas">Volver</button>
+        @if (person.isActive) {
+          <button cButton color="primary" (click)="goToEdit()" [attr.aria-label]="'Editar persona ' + person.fullName">Editar</button>
+        }
+      </div>
+      @if (person.isActive) {
+        <button cButton color="danger" (click)="deactivate.emit()" [attr.aria-label]="'Desactivar persona ' + person.fullName">Desactivar</button>
+      }
+    </div>
+
+  </c-card-body>
+</c-card>

@@ -1,0 +1,64 @@
+<div class="mb-3">
+  <label class="form-label" for="miw-instruction">Instrucción *</label>
+  <input cFormControl id="miw-instruction" [(ngModel)]="instruction" name="instruction"
+         placeholder="Ej: Uní cada imagen con su palabra" (ngModelChange)="onInstructionChange()" required />
+</div>
+
+<h6 class="mb-2">Pares imagen–palabra (mínimo 2) *</h6>
+<p class="text-body-secondary small">Cada par necesita una imagen y una palabra.</p>
+
+@if (pairs().length === 0) {
+  <p class="text-body-secondary small mb-3">Agregá pares con el botón de abajo.</p>
+}
+
+<div class="pairs-grid mb-3">
+  @for (pair of pairs(); track pair.id; let i = $index) {
+    <div class="pair-card" [class.pair-card--complete]="pair.pictogramId && pair.label">
+      <div class="pair-num">{{ i + 1 }}</div>
+      @if (pair.pictogramId) {
+        <div class="pair-picto-wrap">
+          <img [src]="pictogramUrl(pair.pictogramId)" [alt]="pair.label" class="pair-img" />
+          <button cButton size="sm" color="danger" variant="ghost" class="btn-remove-picto"
+                  (click)="removePictogram(i)">✕</button>
+        </div>
+      } @else {
+        <button cButton size="sm" color="secondary" class="btn-add-picto"
+                [class.active]="activePairIdx() === i" (click)="selectPairForPicto(i)">
+          📷 Asignar imagen
+        </button>
+      }
+      <input cFormControl class="pair-label" [(ngModel)]="pair.label" [name]="'miw-lbl-' + i"
+             placeholder="Palabra *" (ngModelChange)="onLabelChange()" required />
+      <button cButton size="sm" color="danger" variant="ghost" (click)="removePair(i)">✕</button>
+    </div>
+  }
+</div>
+
+<button cButton type="button" color="secondary" class="mb-4" (click)="addPair()">
+  + Agregar par
+</button>
+
+@if (activePairIdx() >= 0) {
+  <div class="arasaac-panel mb-3">
+    <h6>Buscar imagen para el par {{ activePairIdx() + 1 }}</h6>
+    <c-row class="mb-2">
+      <c-col xs="12" md="6">
+        <input cFormControl [(ngModel)]="arasaacSearch" name="miw-arasaac"
+               placeholder="Buscar pictograma..." (ngModelChange)="onArasaacSearchChange($event)" />
+      </c-col>
+      <c-col xs="auto" class="d-flex align-items-center">
+        @if (isSearching()) { <c-spinner size="sm" /> }
+      </c-col>
+    </c-row>
+    @if (arasaacResults().length > 0) {
+      <div class="arasaac-grid">
+        @for (pic of arasaacResults(); track pic.id) {
+          <button type="button" class="arasaac-card" (click)="assignPictogram(pic)" [title]="pic.keyword">
+            <img [src]="pic.imageUrl" [alt]="pic.keyword" />
+            <span>{{ pic.keyword }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,110 @@
+<c-card class="mb-4">
+  <c-card-header>
+    <h5 class="mb-0">{{ isGlobalAdmin ? 'Gestion de Instituciones por Admin' : 'Mis Instituciones' }}</h5>
+  </c-card-header>
+  <c-card-body>
+
+    @if (isLoading) {
+      <div class="text-center p-4">
+        <c-spinner color="primary"></c-spinner>
+      </div>
+    }
+
+    @if (!isLoading && myInstitutions.length === 0) {
+      <c-alert color="info" class="mb-3">
+        @if (isGlobalAdmin) {
+          Eres administrador global — tienes acceso a todas las instituciones del sistema.
+        } @else {
+          No tienes instituciones asignadas. Contacta al administrador global.
+        }
+      </c-alert>
+    }
+
+    @if (!isLoading && myInstitutions.length > 0) {
+      <table cTable hover responsive class="mb-3">
+        <thead>
+          <tr>
+            <th>Institucion</th>
+            <th>Fecha de asignacion</th>
+            <th>Estado</th>
+            <th *appIfGlobalAdmin>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inst of myInstitutions; track inst.institutionId) {
+            <tr>
+              <td>{{ inst.institutionName }}</td>
+              <td>{{ inst.assignedAt | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <c-badge [color]="inst.isActive ? 'success' : 'secondary'">
+                  {{ inst.isActive ? 'Activo' : 'Inactivo' }}
+                </c-badge>
+              </td>
+              <td *appIfGlobalAdmin>
+                <button cButton color="danger" size="sm" (click)="openRemoveModal(inst)">
+                  Quitar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <ng-container *appIfGlobalAdmin>
+      @if (!isLoading) {
+        <button cButton color="primary" (click)="openAssignModal()">
+          Agregar Institucion
+        </button>
+      }
+    </ng-container>
+
+  </c-card-body>
+</c-card>
+
+<!-- Modal para asignar institucion (solo admin global) -->
+<ng-container *appIfGlobalAdmin>
+  <c-modal [visible]="showAssignModal" (visibleChange)="showAssignModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Asignar Institucion</h5>
+    </c-modal-header>
+    <c-modal-body>
+      @if (availableInstitutions.length === 0) {
+        <p class="text-body-secondary">No hay instituciones disponibles para asignar.</p>
+      } @else {
+        <label for="institutionSelect" class="form-label">Seleccione una institucion</label>
+        <select cSelect id="institutionSelect" [(ngModel)]="selectedInstitutionId">
+          <option [ngValue]="null" disabled>-- Seleccionar --</option>
+          @for (inst of availableInstitutions; track inst.id) {
+            <option [ngValue]="inst.encryptedId">{{ inst.name }}</option>
+          }
+        </select>
+      }
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelAssign()">Cancelar</button>
+      <button cButton color="primary" (click)="confirmAssign()" [disabled]="!selectedInstitutionId || isSaving">
+        @if (isSaving) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+        Asignar
+      </button>
+    </c-modal-footer>
+  </c-modal>
+
+  <c-modal [visible]="showRemoveModal" (visibleChange)="showRemoveModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Confirmar desasignacion</h5>
+    </c-modal-header>
+    <c-modal-body>
+      @if (institutionToRemove) {
+        <p>¿Esta seguro de que desea quitar la institucion <strong>{{ institutionToRemove.institutionName }}</strong>?</p>
+      }
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelRemove()">Cancelar</button>
+      <button cButton color="danger" (click)="confirmRemove()" [disabled]="isSaving">
+        @if (isSaving) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+        Quitar
+      </button>
+    </c-modal-footer>
+  </c-modal>
+</ng-container>

@@ -1,0 +1,30 @@
+:host {
+  display: block;
+  padding: 1.5rem 1rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.player-game {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.game-instruction {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--a11y-text, #212121);
+  margin: 0;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

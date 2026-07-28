@@ -1,0 +1,83 @@
+<!-- Filtro estado -->
+<div class="d-flex gap-2 mb-3">
+  <select cSelect style="max-width: 180px" [(ngModel)]="statusFilter" (ngModelChange)="loadReports()">
+    <option value="">Todos los estados</option>
+    <option value="Draft">Borrador</option>
+    <option value="Submitted">Enviado</option>
+    <option value="Approved">Aprobado</option>
+    <option value="Rejected">Rechazado</option>
+  </select>
+</div>
+
+<app-data-table
+  [showCard]="false"
+  [showTitle]="false"
+  [showSearch]="false"
+  [columns]="columns"
+  [items]="reports()"
+  [totalItems]="totalRecords()"
+  [currentPage]="currentPage()"
+  [pageSize]="10"
+  [loading]="isLoading()"
+  (pageChange)="onPageChange($event)"
+  (rowAction)="onRowAction($event)"
+/>
+
+<!-- Modal: Aprobar reporte -->
+<c-modal [visible]="showApproveModal()" (visibleChange)="showApproveModal.set($event)" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Aprobar reporte</h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (selectedReport()) {
+      <p>
+        ¿Confirma que desea aprobar el reporte
+        <strong>{{ selectedReport()!.title }}</strong>
+        de <strong>{{ selectedReport()!.personName }}</strong>?
+      </p>
+      <p class="text-body-secondary mb-0">
+        Esta acción notificará al familiar del progreso.
+      </p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showApproveModal.set(false)">Cancelar</button>
+    <button cButton color="success" [disabled]="isProcessing()" (click)="confirmApprove()">
+      @if (isProcessing()) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+      Aprobar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal: Rechazar reporte -->
+<c-modal [visible]="showRejectModal()" (visibleChange)="showRejectModal.set($event)" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>Rechazar reporte</h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (selectedReport()) {
+      <p>
+        Rechazando: <strong>{{ selectedReport()!.title }}</strong>
+      </p>
+      <div class="mb-3">
+        <label for="rejectComment" class="form-label">Motivo del rechazo *</label>
+        <textarea
+          id="rejectComment"
+          class="form-control"
+          rows="3"
+          placeholder="Indicá el motivo del rechazo para que el profesional pueda corregirlo..."
+          [(ngModel)]="rejectComment"
+        ></textarea>
+      </div>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeRejectModal()">Cancelar</button>
+    <button cButton color="danger"
+            [disabled]="isProcessing() || !rejectComment.trim()"
+            (click)="confirmReject()">
+      @if (isProcessing()) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+      Rechazar
+    </button>
+  </c-modal-footer>
+</c-modal>

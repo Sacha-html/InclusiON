@@ -1,0 +1,165 @@
+<!-- Loading -->
+@if (isLoading()) {
+  <div class="text-center py-5">
+    <c-spinner aria-label="Cargando actividades"></c-spinner>
+  </div>
+}
+
+<!-- Error -->
+@else if (hasError()) {
+  <app-empty-state
+    icon="cil-warning"
+    message="Error al cargar actividades"
+    detail="No se pudieron cargar las actividades asignadas."
+  />
+}
+
+<!-- Vacío -->
+@else if (assignments().length === 0) {
+  <app-empty-state
+    icon="cil-task"
+    message="Sin actividades asignadas"
+    detail="Aún no se han asignado actividades a esta persona."
+  />
+}
+
+<!-- Tabla -->
+@else {
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Actividad</th>
+          <th>Estado</th>
+          <th>Asignada</th>
+          <th>Vence</th>
+          <th>Último intento</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of assignments(); track a.id) {
+          <tr>
+            <!-- Actividad -->
+            <td>
+              <div class="fw-semibold">{{ a.activityTitle }}</div>
+              @if (a.isEvaluationActivity) {
+                <c-badge color="secondary" class="mt-1">Evaluación</c-badge>
+              }
+            </td>
+
+            <!-- Estado -->
+            <td>
+              <c-badge [color]="statusColor(a.status)">
+                {{ statusLabel(a.status) }}
+              </c-badge>
+            </td>
+
+            <!-- Fecha asignada -->
+            <td class="text-nowrap text-body-secondary small">
+              {{ formatDate(a.assignedAt) }}
+            </td>
+
+            <!-- Fecha límite -->
+            <td class="text-nowrap small">
+              @if (a.dueDate) {
+                <span [class.text-danger]="isOverdue(a)" [class.fw-semibold]="isOverdue(a)">
+                  {{ formatDate(a.dueDate) }}
+                  @if (isOverdue(a)) { ⚠️ }
+                </span>
+              } @else {
+                <span class="text-body-secondary">Sin límite</span>
+              }
+            </td>
+
+            <!-- Último intento -->
+            <td class="small">
+              @if (lastAttempt(a); as attempt) {
+                @if (attempt.completedAt) {
+                  <div>
+                    <span class="fw-semibold"
+                          [class.text-success]="(attempt.successPercentage ?? 0) >= 70"
+                          [class.text-danger]="(attempt.successPercentage ?? 0) < 70">
+                      {{ attempt.successPercentage ?? 0 }}%
+                    </span>
+                    <span class="text-body-secondary ms-2">
+                      {{ formatTime(attempt.timeSpentSeconds) }}
+                    </span>
+                  </div>
+                  <div class="text-body-secondary" style="font-size:0.75rem">
+                    {{ formatDate(attempt.completedAt) }}
+                  </div>
+                } @else {
+                  <span class="text-body-secondary">En curso...</span>
+                }
+              } @else {
+                <span class="text-body-secondary">Sin intentos</span>
+              }
+            </td>
+
+            <!-- Expandir intentos -->
+            <td>
+              @if (a.responses.length > 1) {
+                <button cButton color="link" size="sm" class="p-0 text-body-secondary"
+                        (click)="toggleExpand(a.id)"
+                        [attr.aria-label]="expandedId() === a.id ? 'Ocultar intentos' : 'Ver todos los intentos'">
+                  {{ expandedId() === a.id ? '▲ Ocultar' : '▼ ' + a.responses.length + ' intentos' }}
+                </button>
+              }
+            </td>
+          </tr>
+
+          <!-- Fila expandida: todos los intentos -->
+          @if (expandedId() === a.id && a.responses.length > 1) {
+            <tr>
+              <td colspan="6" class="bg-body-tertiary">
+                <div class="px-3 py-2">
+                  <small class="text-body-secondary fw-semibold d-block mb-2">Historial de intentos</small>
+                  <div class="d-flex flex-wrap gap-2">
+                    @for (r of a.responses; track r.id; let i = $index) {
+                      <div class="border rounded p-2 small bg-white" style="min-width:160px">
+                        <div class="fw-semibold mb-1">Intento #{{ a.responses.length - i }}</div>
+                        <div>
+                          @if (r.completedAt) {
+                            <span [class.text-success]="(r.successPercentage ?? 0) >= 70"
+                                  [class.text-danger]="(r.successPercentage ?? 0) < 70"
+                                  class="fw-semibold">
+                              {{ r.successPercentage ?? 0 }}%
+                            </span>
+                            · {{ formatTime(r.timeSpentSeconds) }}
+                          } @else {
+                            <span class="text-body-secondary">En curso</span>
+                          }
+                        </div>
+                        <div class="text-body-secondary" style="font-size:0.75rem">
+                          {{ formatDate(r.startedAt) }}
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-body-secondary small mt-2 text-end">
+    {{ assignments().length }} asignación{{ assignments().length !== 1 ? 'es' : '' }} en total
+  </div>
+}
+
+@if (recommendedActivities().length > 0) {
+  <div class="mt-4 p-3 bg-light rounded">
+    <h6 class="mb-3">Actividades recomendadas para esta persona</h6>
+    <div class="d-flex flex-wrap gap-2">
+      @for (act of recommendedActivities(); track act.encryptedId) {
+        <span class="badge bg-secondary-subtle text-dark fs-6">
+          {{ act.title }}
+        </span>
+      }
+    </div>
+  </div>
+}

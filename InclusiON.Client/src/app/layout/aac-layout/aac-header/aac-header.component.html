@@ -1,0 +1,26 @@
+<header class="aac-header-container">
+  <div class="aac-user-info">
+    <div class="aac-avatar" [attr.aria-label]="'Usuario: ' + userName">
+      {{ userInitial }}
+    </div>
+    <span class="aac-user-name">Hola, {{ userName }}</span>
+  </div>
+
+  <div class="aac-header-actions">
+    <button
+      class="aac-btn-icon"
+      (click)="openSettings()"
+      aria-label="Configuraciones de accesibilidad"
+    >
+      <svg cIcon name="cilSettings" size="xl" aria-hidden="true"></svg>
+    </button>
+
+    <button
+      class="aac-btn-icon aac-btn-logout"
+      (click)="logout()"
+      aria-label="Cerrar sesión"
+    >
+      <svg cIcon name="cilAccountLogout" size="xl" aria-hidden="true"></svg>
+    </button>
+  </div>
+</header>

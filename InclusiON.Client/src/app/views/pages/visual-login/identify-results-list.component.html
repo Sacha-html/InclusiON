@@ -1,0 +1,19 @@
+<div class="results-grid" role="group" [attr.aria-label]="ariaLabel">
+  @for (m of matches; track m.userId) {
+    <button
+      type="button"
+      class="match-card"
+      [attr.aria-label]="'Soy ' + m.displayName + (m.lastNameInitial ? ' ' + m.lastNameInitial + '.' : '')"
+      (click)="select.emit(m)">
+      <div class="avatar" [style.background-color]="m.avatarColor" aria-hidden="true">
+        {{ m.initial }}
+      </div>
+      <div class="name">
+        <span class="first-name">{{ m.displayName }}</span>
+        @if (m.lastNameInitial) {
+          <span class="last-initial">{{ m.lastNameInitial }}.</span>
+        }
+      </div>
+    </button>
+  }
+</div>

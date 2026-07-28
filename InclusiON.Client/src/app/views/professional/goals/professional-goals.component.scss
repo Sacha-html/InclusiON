@@ -1,0 +1,68 @@
+:host {
+  display: block;
+  padding: 1rem;
+}
+
+.loading-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 3rem 1rem;
+}
+
+// ── Selector de persona ───────────────────────────────────────────────────────
+.person-selector {
+  margin-bottom: 1.5rem;
+}
+
+.selector-label {
+  font-weight: 600;
+  color: var(--a11y-text, #212121);
+  margin-bottom: .75rem;
+}
+
+.person-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.person-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  border: 2px solid var(--a11y-border, #E0E0E0);
+  border-radius: 999px;
+  background: var(--a11y-surface, #fff);
+  color: var(--a11y-text, #212121);
+  font-size: .95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+
+  &:focus-visible { outline: 3px solid var(--a11y-primary, #2196F3); outline-offset: 2px; }
+
+  &:hover:not(.person-pill--active) {
+    border-color: var(--a11y-primary, #2196F3);
+    background: rgba(33, 150, 243, .05);
+  }
+
+  &--active {
+    border-color: var(--a11y-primary, #2196F3);
+    background: rgba(33, 150, 243, .1);
+    color: var(--a11y-primary, #1565C0);
+    font-weight: 700;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--a11y-text-muted, #757575);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

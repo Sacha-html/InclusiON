@@ -1,0 +1,77 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || 'Ordená los pasos en el orden correcto.'"
+    [hint]="hint"
+    [loading]="isLoading()"
+    [error]="errorMsg()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="region" aria-labelledby="game-instruction">
+    <h2 class="game-instruction" id="game-instruction" tabindex="-1">
+      {{ content.instruction }}
+    </h2>
+
+    <ol class="sequence-list" aria-label="Secuencia a ordenar">
+      @for (item of orderedItems(); track item.id; let i = $index) {
+        <li
+          class="sequence-item"
+          [class.sequence-item--selected]="selectedIndex() === i"
+          [attr.aria-label]="'Paso ' + (i + 1) + ': ' + item.label + (selectedIndex() === i ? '. Seleccionado.' : '')"
+          tabindex="0"
+        >
+          <span class="step-number" aria-hidden="true">{{ i + 1 }}</span>
+
+          @if (item.pictogramId) {
+            <img
+              [src]="arasaac.getPictogramUrl(item.pictogramId)"
+              [alt]="item.label"
+              class="step-img"
+              loading="lazy"
+            />
+          }
+
+          <span class="step-label">{{ item.label }}</span>
+
+          <div class="step-controls" role="group" [attr.aria-label]="'Controles de ' + item.label">
+            <button
+              class="ctrl-btn"
+              [disabled]="i === 0"
+              (click)="moveUp(i)"
+              aria-label="Mover arriba"
+              title="Subir"
+            >▲</button>
+            <button
+              class="ctrl-btn"
+              [disabled]="i === orderedItems().length - 1"
+              (click)="moveDown(i)"
+              aria-label="Mover abajo"
+              title="Bajar"
+            >▼</button>
+          </div>
+        </li>
+      }
+    </ol>
+
+    <div class="confirm-row">
+      <button class="action-btn action-btn--primary" (click)="confirmOrder()" aria-label="Confirmar orden">
+        ✓ Confirmar orden
+      </button>
+    </div>
+  </div>
+}
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="score() === 100"
+    [score]="score()"
+    [message]="resultMessage()"
+    [loading]="isLoading()"
+    [canRetry]="score() < 100"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

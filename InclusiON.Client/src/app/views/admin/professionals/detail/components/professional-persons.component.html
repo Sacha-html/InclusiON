@@ -1,0 +1,86 @@
+<div class="d-flex justify-content-end mb-3">
+  <button cButton color="primary" size="sm" (click)="openAssignPersonModal()">
+    <svg cIcon name="cilUserFollow" class="me-1" aria-hidden="true"></svg>
+    Asignar persona
+  </button>
+</div>
+
+<app-data-table
+  [columns]="columns"
+  [items]="persons"
+  [showSearch]="false"
+  [currentPage]="1"
+  [pageSize]="persons.length || 1"
+  [totalItems]="persons.length"
+  emptyMessage="No hay personas asignadas."
+  emptyIcon="cil-people"
+  (rowAction)="onRowAction($event)"
+/>
+
+<!-- Modal asignar persona -->
+<c-modal [visible]="showAssignPersonModal()" (visibleChange)="showAssignPersonModal.set($event)" alignment="center" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>
+      <svg cIcon name="cilUserFollow" class="me-2" aria-hidden="true"></svg>
+      Asignar persona
+    </h5>
+  </c-modal-header>
+  <c-modal-body>
+    <form [formGroup]="assignPersonForm">
+      <div class="mb-4">
+        <label class="form-label fw-semibold mb-1" [for]="'ss-input'">Persona</label>
+        <app-searchable-select
+          formControlName="personId"
+          [searchFn]="searchPersonsFn"
+          [displayFn]="displayPerson"
+          [subDisplayFn]="subDisplayPerson"
+          [valueFn]="valueFromPerson"
+          placeholder="Buscar por nombre o documento..."
+          hintText="Escriba al menos 2 caracteres para buscar"
+          noResultsText="No se encontraron personas disponibles"
+        />
+      </div>
+
+      <div class="border rounded p-3 bg-body-tertiary permissions-box">
+        <p class="text-body-secondary small fw-semibold mb-2 text-uppercase" style="letter-spacing:.04em">Permisos de la asignación</p>
+        <c-form-check class="mb-2">
+          <input cFormCheckInput type="checkbox" id="isPrimaryProfessional" formControlName="isPrimaryProfessional" />
+          <label cFormCheckLabel for="isPrimaryProfessional" class="fw-medium">
+            Profesional principal
+            <small class="d-block text-body-secondary fw-normal">Este profesional aparece como referente principal de la persona</small>
+          </label>
+        </c-form-check>
+        <c-form-check>
+          <input cFormCheckInput type="checkbox" id="canSuperviseLogin" formControlName="canSuperviseLogin" />
+          <label cFormCheckLabel for="canSuperviseLogin" class="fw-medium">
+            Puede supervisar login
+            <small class="d-block text-body-secondary fw-normal">Este profesional puede asistir el inicio de sesión de la persona</small>
+          </label>
+        </c-form-check>
+      </div>
+    </form>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelAssignPerson()" [disabled]="isSubmitting()">Cancelar</button>
+    <button cButton color="primary" (click)="confirmAssignPerson()" [disabled]="!assignPersonForm.value.personId || isSubmitting()">
+      @if (isSubmitting()) {
+        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
+        Asignando...
+      } @else {
+        Asignar
+      }
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<app-confirm-modal
+  [visible]="showDeactivatePersonModal()"
+  title="Confirmar desasignación"
+  [itemName]="personToDeactivate()?.personFullName ?? ''"
+  messagePrefix="¿Desasignar a "
+  messageSuffix="?"
+  confirmLabel="Desasignar"
+  confirmColor="danger"
+  (confirm)="confirmDeactivatePerson()"
+  (cancel)="cancelDeactivatePerson()"
+/>

@@ -1,0 +1,137 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="visual-login-container min-vh-100 d-flex flex-column align-items-center justify-content-center">
+  <div class="content-wrapper">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <button
+        type="button"
+        cButton
+        color="light"
+        class="back-button"
+        (click)="goBack()"
+        aria-label="Volver a selección de tipo de usuario"
+      >
+        <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
+        <span>Volver</span>
+      </button>
+    </div>
+
+    <!-- Main Card -->
+    <section class="identify-card card shadow" aria-labelledby="identify-heading">
+      <div class="card-body p-4 p-md-5">
+        @if (matches) {
+          <!-- Multi-match: lista visual para que la persona elija -->
+          <header class="text-center mb-4">
+            <div class="user-type-badge mb-3" aria-label="Tipo de usuario seleccionado">
+              {{ userTypeLabel }}
+            </div>
+            <h1 id="identify-heading" class="h2 fw-bold mb-3" style="color: var(--a11y-text)">¿Cuál sos?</h1>
+            <p class="fs-5 mb-0" style="color: var(--a11y-text-muted)">Tocá tu cara para entrar</p>
+          </header>
+
+          <app-identify-results-list
+            [matches]="matches"
+            ariaLabel="Personas encontradas, tocá la tuya"
+            (select)="onMatchSelected($event)">
+          </app-identify-results-list>
+
+          <div class="d-grid mt-4">
+            <button type="button" cButton color="light" size="lg" (click)="searchAgain()" aria-label="Buscar de nuevo">
+              <svg cIcon name="cilSearch" class="me-2" aria-hidden="true"></svg>
+              <span>Buscar de nuevo</span>
+            </button>
+          </div>
+        } @else {
+          <!-- Header -->
+          <header class="text-center mb-5">
+            <div class="user-type-badge mb-3" aria-label="Tipo de usuario seleccionado">
+              {{ userTypeLabel }}
+            </div>
+            <h1 id="identify-heading" class="h2 fw-bold mb-3" style="color: var(--a11y-text)">Escribe tu nombre</h1>
+            <p class="fs-5 mb-0" id="identify-instructions" style="color: var(--a11y-text-muted)">Así te encontramos</p>
+          </header>
+
+          <!-- Error Alert -->
+          @if (errorMessage) {
+            <div
+              class="alert alert-danger mb-4"
+              role="alert"
+              aria-live="assertive"
+            >
+              <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
+              {{ errorMessage }}
+            </div>
+          }
+
+          <!-- Input -->
+          <div class="mb-4">
+            <label for="identifierInput" class="visually-hidden">Tu nombre</label>
+            <div class="input-group input-group-lg" role="group">
+              <span class="input-group-text" aria-hidden="true" style="background-color: var(--a11y-bg-secondary); border-color: var(--a11y-border)">
+                <svg cIcon name="cilUser" aria-hidden="true" style="color: var(--a11y-text-muted)"></svg>
+              </span>
+              <input
+                type="text"
+                id="identifierInput"
+                class="form-control form-control-lg"
+                [(ngModel)]="identifier"
+                [placeholder]="placeholderText"
+                autocomplete="name"
+                [disabled]="isLoading"
+                (keydown.enter)="onIdentify()"
+                aria-describedby="identify-instructions inputHelp"
+                autofocus
+              />
+              @if (identifier) {
+                <button
+                  cButton
+                  color="light"
+                  class="border"
+                  (click)="clearInput()"
+                  aria-label="Limpiar campo de búsqueda"
+                  type="button"
+                >
+                  <svg cIcon name="cilX" aria-hidden="true"></svg>
+                </button>
+              }
+            </div>
+            <small id="inputHelp" class="visually-hidden">
+              Escribe tu nombre y presiona Enter o el botón Buscar
+            </small>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid">
+            <button
+              type="button"
+              cButton
+              color="primary"
+              size="lg"
+              class="py-3 fs-4 a11y-btn-primary"
+              (click)="onIdentify()"
+              [disabled]="isLoading || !identifier.trim()"
+            >
+              @if (isLoading) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                <span>Buscando...</span>
+              } @else {
+                <svg cIcon name="cilSearch" class="me-2" aria-hidden="true"></svg>
+                <span>Buscar mi cuenta</span>
+              }
+            </button>
+          </div>
+
+          <!-- Help Text -->
+          <footer class="text-center mt-4">
+            <p class="mb-0" style="color: var(--a11y-text-muted)">
+              <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
+              ¿No lo recuerdas? Pide ayuda
+            </p>
+          </footer>
+        }
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,83 @@
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end g-2">
+    <c-col sm="3">
+      <label cLabel>Personas</label>
+      <select cSelect multiple style="height: 120px"
+              (change)="onPersonFilterChange($event)">
+        @for (p of persons(); track p.personId) {
+          <option [value]="p.personId"
+                  [selected]="selectedPersonIds.includes(p.personId)">
+            {{ p.personFullName }}
+          </option>
+        }
+      </select>
+      @if (selectedPersonIds.length > 0) {
+        <small class="text-body-secondary">{{ selectedPersonIds.length }} seleccionada(s)</small>
+      }
+    </c-col>
+    <c-col sm="2">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="Draft">Borrador</option>
+        <option value="Submitted">Enviado</option>
+        <option value="Approved">Aprobado</option>
+        <option value="Rejected">Rechazado</option>
+      </select>
+    </c-col>
+    <c-col sm="2">
+      <label cLabel>Tipo</label>
+      <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
+        <option value="">Todos</option>
+        @for (t of reportTypes(); track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="2">
+      <label cLabel>Desde</label>
+      <input cFormControl type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateChange()" />
+    </c-col>
+    <c-col sm="2">
+      <label cLabel>Hasta</label>
+      <input cFormControl type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Mis Reportes"
+  [columns]="columns"
+  [items]="reports()"
+  [totalItems]="totalRecords()"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  [sortable]="true"
+  [loading]="isLoading()"
+  [headerButtons]="headerButtons"
+  [emptyIcon]="'cilNotes'"
+  [emptyMessage]="'No hay reportes que coincidan con los filtros seleccionados.'"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (sortAction)="onSort($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
+</app-data-table>
+
+<!-- Modal: Confirmar envío al admin -->
+<app-confirm-modal
+  [visible]="showSubmitModal"
+  title="Enviar reporte al administrador"
+  messagePrefix="¿Confirmas el envío de &quot;"
+  [itemName]="reportToSubmit?.title ?? ''"
+  messageSuffix="&quot; al administrador para su revisión? Una vez enviado no podrás editarlo."
+  confirmLabel="Enviar"
+  confirmColor="primary"
+  [loading]="isSubmitting"
+  (confirm)="confirmSubmit()"
+  (cancel)="cancelSubmit()">
+</app-confirm-modal>

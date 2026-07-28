@@ -1,0 +1,47 @@
+<div class="mb-3">
+  <h4 style="color: var(--a11y-text)">Reportes de seguimiento</h4>
+  <p class="text-body-secondary mb-0">Informes aprobados generados por los profesionales a cargo.</p>
+</div>
+
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end g-2">
+    <c-col sm="4">
+      <label cLabel for="typeFilter">Tipo de reporte</label>
+      <select cSelect id="typeFilter" [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
+        <option value="">Todos los tipos</option>
+        @for (t of reportTypes(); track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel for="dateFrom">Desde</label>
+      <input cFormControl id="dateFrom" type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateChange()" />
+    </c-col>
+    <c-col sm="3">
+      <label cLabel for="dateTo">Hasta</label>
+      <input cFormControl id="dateTo" type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Reportes aprobados"
+  [columns]="columns"
+  [items]="reports()"
+  [totalItems]="totalRecords()"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  [sortable]="true"
+  [loading]="isLoading()"
+  [emptyIcon]="'cilNotes'"
+  [emptyMessage]="'No hay reportes disponibles aún.'"
+  [emptyDetail]="'Los reportes aparecerán aquí una vez que sean aprobados por el administrador.'"
+  (pageChange)="onPageChange($event)"
+  (sortAction)="onSort($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>

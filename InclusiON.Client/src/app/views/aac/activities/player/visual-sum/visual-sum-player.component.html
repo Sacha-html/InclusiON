@@ -1,0 +1,103 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || '¿Cuánto es la suma?'"
+    [hint]="hint"
+    [loading]="isLoading()"
+    [error]="errorMsg()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="region" aria-labelledby="game-instruction">
+    <h2 class="game-instruction" id="game-instruction" tabindex="-1">
+      {{ content.instruction || '¿Cuánto es la suma?' }}
+    </h2>
+
+    <!-- Ecuación visual -->
+    <div class="equation" aria-label="Operación a resolver">
+
+      <!-- Operando A -->
+      <div class="operand" [attr.aria-label]="content.operandA + ' elementos'">
+        @if (content.pictogramId) {
+          <div class="dots-grid">
+            @for (d of dotsA(); track d) {
+              <img
+                [src]="arasaac.getPictogramUrl(content.pictogramId)"
+                alt=""
+                class="dot-img"
+                aria-hidden="true"
+              />
+            }
+          </div>
+        } @else {
+          <div class="dots-grid">
+            @for (d of dotsA(); track d) {
+              <span class="dot" aria-hidden="true"></span>
+            }
+          </div>
+        }
+        <span class="operand-number">{{ content.operandA }}</span>
+      </div>
+
+      <span class="operator" aria-hidden="true">+</span>
+
+      <!-- Operando B -->
+      <div class="operand" [attr.aria-label]="content.operandB + ' elementos'">
+        @if (content.pictogramId) {
+          <div class="dots-grid">
+            @for (d of dotsB(); track d) {
+              <img
+                [src]="arasaac.getPictogramUrl(content.pictogramId)"
+                alt=""
+                class="dot-img"
+                aria-hidden="true"
+              />
+            }
+          </div>
+        } @else {
+          <div class="dots-grid">
+            @for (d of dotsB(); track d) {
+              <span class="dot" aria-hidden="true"></span>
+            }
+          </div>
+        }
+        <span class="operand-number">{{ content.operandB }}</span>
+      </div>
+
+      <span class="operator" aria-hidden="true">=</span>
+
+      <!-- Resultado -->
+      <div class="result-placeholder" aria-label="Resultado desconocido">
+        <span class="result-question" aria-hidden="true">?</span>
+      </div>
+    </div>
+
+    <!-- Opciones de respuesta -->
+    <div class="options-grid" role="group" aria-label="Opciones de respuesta">
+      @for (opt of content.options; track opt.id) {
+        <button
+          class="option-btn"
+          [class]="'option-btn--' + optionState(opt)"
+          [disabled]="selectedOptionId() !== null"
+          (click)="selectOption(opt)"
+          [attr.aria-label]="'Respuesta: ' + opt.value"
+        >
+          {{ opt.value }}
+        </button>
+      }
+    </div>
+  </div>
+}
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="!!isCorrect()"
+    [message]="resultMessage"
+    [loading]="isLoading()"
+    [canRetry]="!isCorrect()"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

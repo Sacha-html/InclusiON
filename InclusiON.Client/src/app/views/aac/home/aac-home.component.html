@@ -1,0 +1,37 @@
+<div class="aac-home" role="region" aria-labelledby="aac-home-title">
+
+  <header class="home-header">
+    <svg cIcon [name]="timeIcon" class="greeting-icon" aria-hidden="true" focusable="false"></svg>
+    <h1 id="aac-home-title" class="home-greeting">{{ greeting }}</h1>
+  </header>
+
+  <section class="quick-actions" aria-label="Acciones rápidas">
+    <div class="actions-grid">
+      <app-big-button
+        label="Mi Camino"
+        icon="cilMap"
+        color="#4CAF50"
+        (buttonClick)="goTo('/app/roadmap')"
+      />
+      <app-big-button
+        label="Mis Actividades"
+        icon="cilTask"
+        color="#2196F3"
+        (buttonClick)="goTo('/app/activities')"
+      />
+      <app-big-button
+        label="Ver Calendario"
+        icon="cilCalendar"
+        color="#FF9800"
+        (buttonClick)="goTo('/app/calendar')"
+      />
+      <app-big-button
+        label="Hablar"
+        icon="cilChatBubble"
+        color="#9C27B0"
+        (buttonClick)="goTo('/app/talk')"
+      />
+    </div>
+  </section>
+
+</div>

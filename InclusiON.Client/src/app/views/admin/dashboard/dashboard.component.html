@@ -1,0 +1,136 @@
+<!-- Cargando -->
+@if (loading) {
+  <c-row>
+    <c-col xs="12" class="text-center py-5">
+      <c-spinner color="primary" />
+      <p class="mt-2 text-body-secondary">Cargando dashboard…</p>
+    </c-col>
+  </c-row>
+}
+
+<!-- Error -->
+@if (!loading && error) {
+  <c-row>
+    <c-col xs="12">
+      <c-alert color="danger">
+        No se pudo cargar el dashboard. Intenta nuevamente.
+      </c-alert>
+    </c-col>
+  </c-row>
+}
+
+<!-- KPIs -->
+@if (!loading && !error && dashboard) {
+
+  <c-row class="mb-4">
+    <c-col xs="12">
+      <h1 class="h4 mb-1">Dashboard</h1>
+      <p class="text-body-secondary mb-0">Resumen del sistema.</p>
+    </c-col>
+  </c-row>
+
+  <!-- Fila 1: Personal -->
+  <c-row class="mb-3">
+
+    <c-col xs="12" sm="6" lg="3" class="mb-3">
+      <app-stat-card
+        label="Profesionales activos"
+        [value]="dashboard.totalProfessionals"
+        linkText="Ver todos"
+        linkUrl="/admin/professionals"
+      />
+    </c-col>
+
+    <c-col xs="12" sm="6" lg="3" class="mb-3">
+      <c-card class="h-100" [style.border-color]="dashboard.pendingValidations > 0 ? 'var(--cui-warning)' : ''">
+        <c-card-body class="text-center">
+          <p class="text-body-secondary small mb-1">Validaciones pendientes</p>
+          <div
+            class="display-6 fw-bold"
+            [class.text-warning]="dashboard.pendingValidations > 0"
+            [class.text-success]="dashboard.pendingValidations === 0">
+            {{ dashboard.pendingValidations }}
+          </div>
+          @if (dashboard.pendingValidations > 0) {
+            <a routerLink="/admin/professionals" class="btn btn-sm btn-warning mt-1">Revisar</a>
+          } @else {
+            <p class="small text-success mb-0 mt-1">Al día ✓</p>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+    <c-col xs="12" sm="6" lg="3" class="mb-3">
+      <app-stat-card
+        label="Familias activas"
+        [value]="dashboard.totalFamilies"
+        linkText="Ver todas"
+        linkUrl="/admin/family"
+      />
+    </c-col>
+
+    <c-col xs="12" sm="6" lg="3" class="mb-3">
+      <app-stat-card
+        label="Personas registradas"
+        [value]="dashboard.totalPersons"
+        linkText="Ver todas"
+        linkUrl="/admin/persons"
+      />
+    </c-col>
+
+  </c-row>
+
+  <!-- Fila 2: Actividades, Reportes + Instituciones (GlobalAdmin) -->
+  <c-row class="mb-3">
+
+    @if (isGlobalAdmin && dashboard.totalInstitutions !== undefined) {
+      <c-col xs="12" sm="6" lg="4" class="mb-3">
+        <app-stat-card
+          label="Instituciones activas"
+          [value]="dashboard.totalInstitutions!"
+          linkText="Ver todas"
+          linkUrl="/admin/institutions"
+        />
+      </c-col>
+    }
+
+    <c-col xs="12" sm="6" [lg]="isGlobalAdmin ? 4 : 6" class="mb-3">
+      <app-stat-card
+        label="Asignaciones activas"
+        [value]="dashboard.activeAssignments"
+      />
+    </c-col>
+
+    <c-col xs="12" sm="6" [lg]="isGlobalAdmin ? 4 : 6" class="mb-3">
+      <c-card class="h-100" [style.border-color]="dashboard.reportsPendingApproval > 0 ? 'var(--cui-warning)' : ''">
+        <c-card-body class="text-center">
+          <p class="text-body-secondary small mb-1">Reportes pendientes de aprobación</p>
+          <div
+            class="display-6 fw-bold"
+            [class.text-warning]="dashboard.reportsPendingApproval > 0"
+            [class.text-success]="dashboard.reportsPendingApproval === 0">
+            {{ dashboard.reportsPendingApproval }}
+          </div>
+          @if (dashboard.reportsPendingApproval > 0) {
+            <a routerLink="/admin/reports" class="btn btn-sm btn-warning mt-1">Revisar</a>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+
+  </c-row>
+
+  <!-- Fila 3: Reportes aprobados este mes -->
+  <c-row>
+    <c-col xs="12" sm="6" lg="4" class="mb-3">
+      <app-stat-card
+        label="Reportes aprobados este mes"
+        [value]="dashboard.reportsApprovedThisMonth"
+        color="success"
+        linkText="Ver reportes"
+        linkUrl="/admin/reports"
+      />
+    </c-col>
+  </c-row>
+
+}

@@ -1,0 +1,115 @@
+.login-method-selector {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.method-card {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid var(--a11y-border);
+  background-color: var(--a11y-surface);
+  color: var(--a11y-text);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--a11y-primary);
+  }
+
+  &:focus {
+    outline: 3px solid var(--a11y-focus-color);
+    outline-offset: 2px;
+  }
+
+  &.selected {
+    border-color: var(--a11y-primary);
+    background-color: var(--a11y-bg-secondary);
+  }
+
+  &.current {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 12px;
+      height: 12px;
+      background-color: var(--a11y-primary);
+      border-radius: 50%;
+    }
+  }
+}
+
+.method-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--a11y-bg-secondary);
+  border: 2px solid var(--a11y-border);
+  border-radius: 50%;
+
+  svg {
+    width: 32px;
+    height: 32px;
+    color: var(--a11y-primary);
+  }
+}
+
+.method-name {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--a11y-text);
+}
+
+.method-description {
+  margin-bottom: 0.5rem;
+  min-height: 40px;
+  color: var(--a11y-text-secondary);
+}
+
+.config-section {
+  background-color: var(--a11y-bg-secondary);
+  border: 1px solid var(--a11y-border);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  color: var(--a11y-text);
+}
+
+.pin-config input {
+  font-size: 1.25rem;
+  letter-spacing: 0.5rem;
+  text-align: center;
+}
+
+// Accessibility improvements
+@media (prefers-reduced-motion: reduce) {
+  .method-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// Large touch targets for accessibility
+@media (max-width: 767px) {
+  .method-card {
+    min-height: 180px;
+  }
+
+  .method-icon {
+    width: 80px;
+    height: 80px;
+
+    svg {
+      width: 40px;
+      height: 40px;
+    }
+  }
+}

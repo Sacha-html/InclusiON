@@ -1,0 +1,48 @@
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label cLabel>Tipo</label>
+      <select cSelect [(ngModel)]="filterRole" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        <option value="GlobalAdmin">Global</option>
+        <option value="InstitutionalAdmin">Institucional</option>
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Institución</label>
+      <select cSelect [(ngModel)]="filterInstitutionId" (ngModelChange)="onFilterChange()">
+        <option value="">Todas</option>
+        @for (inst of institutions; track inst.id) {
+          <option [value]="inst.id">{{ inst.name }}</option>
+        }
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="filterIsActive" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Administradores del Sistema"
+  [columns]="cols"
+  [items]="admins"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [loading]="isLoading"
+  [headerButtons]="[{action: 'new', label: 'Agregar'}]"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>

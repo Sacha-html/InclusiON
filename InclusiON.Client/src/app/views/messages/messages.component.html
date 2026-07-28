@@ -1,0 +1,263 @@
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0 fw-semibold">Mensajes</h5>
+  <button cButton color="primary" size="sm" (click)="openCompose()">
+    <svg cIcon name="cilPlus" size="sm" class="me-1"></svg>
+    Nuevo mensaje
+  </button>
+</div>
+
+<c-row class="g-3 align-items-start">
+  <!-- ── Lista ──────────────────────────────────────────────────────── -->
+  <c-col xs="12" md="4">
+    <c-card>
+      <c-card-header class="p-0">
+        <div class="d-flex msg-tabs border-bottom" role="tablist" aria-label="Bandeja de mensajes">
+          <button
+            class="msg-tab flex-fill py-2 px-3"
+            role="tab"
+            [attr.aria-selected]="activeTab === 'inbox'"
+            aria-controls="msg-panel-list"
+            id="msg-tab-inbox"
+            [class.msg-tab--active]="activeTab === 'inbox'"
+            (click)="switchTab('inbox')">
+            <svg cIcon name="cilEnvelopeClosed" size="sm" aria-hidden="true"></svg>
+            Recibidos
+            @if (unreadCount() > 0) {
+              <c-badge color="danger" class="ms-1" [attr.aria-label]="unreadCount() + ' mensajes sin leer'">{{ unreadCount() }}</c-badge>
+            }
+          </button>
+          <button
+            class="msg-tab flex-fill py-2 px-3"
+            role="tab"
+            [attr.aria-selected]="activeTab === 'sent'"
+            aria-controls="msg-panel-list"
+            id="msg-tab-sent"
+            [class.msg-tab--active]="activeTab === 'sent'"
+            (click)="switchTab('sent')">
+            <svg cIcon name="cilPaperPlane" size="sm" aria-hidden="true"></svg>
+            Enviados
+          </button>
+        </div>
+      </c-card-header>
+
+      <c-card-body class="p-0" id="msg-panel-list" role="tabpanel"
+                   [attr.aria-labelledby]="activeTab === 'inbox' ? 'msg-tab-inbox' : 'msg-tab-sent'">
+        @if (loadingList()) {
+          <div class="text-center py-5">
+            <c-spinner color="primary" size="sm" />
+          </div>
+        } @else if (currentList.length === 0) {
+          <div class="d-flex flex-column align-items-center justify-content-center py-5 text-body-secondary">
+            <svg cIcon name="cilEnvelopeClosed" size="xl" class="mb-2 opacity-50"></svg>
+            <p class="mb-0 small">Sin mensajes.</p>
+          </div>
+        } @else {
+          <ul class="list-unstyled mb-0">
+            @for (msg of currentList; track msg.id) {
+              <li
+                class="msg-item px-3 py-3 border-bottom"
+                [class.msg-item--active]="selectedDetail()?.id === msg.id"
+                [class.msg-item--unread]="!msg.isRead && activeTab === 'inbox'"
+                (click)="openMessage(msg)">
+
+                <div class="d-flex gap-2 align-items-start">
+                  <app-actor-avatar
+                    [name]="activeTab === 'inbox' ? msg.senderFullName : msg.receiverFullName"
+                    size="sm"
+                  />
+
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-baseline gap-1">
+                      <span class="msg-sender text-truncate">
+                        {{ activeTab === 'inbox' ? msg.senderFullName : msg.receiverFullName }}
+                      </span>
+                      <span class="msg-date">{{ msg.sentAt | date:'dd/MM HH:mm' }}</span>
+                    </div>
+                    <div class="msg-subject text-truncate">
+                      {{ msg.subject || '(sin asunto)' }}
+                    </div>
+                    <div class="msg-preview text-truncate">
+                      {{ msg.contentPreview }}
+                    </div>
+                  </div>
+
+                  @if (!msg.isRead && activeTab === 'inbox') {
+                    <div class="msg-unread-dot"></div>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+
+          @if (totalPages > 1) {
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+              <button cButton size="sm" color="secondary"
+                      [disabled]="currentPage() <= 1" (click)="prevPage()">‹</button>
+              <small class="text-body-secondary">{{ currentPage() }} / {{ totalPages }}</small>
+              <button cButton size="sm" color="secondary"
+                      [disabled]="currentPage() >= totalPages" (click)="nextPage()">›</button>
+            </div>
+          }
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <!-- ── Detalle ────────────────────────────────────────────────────── -->
+  <c-col xs="12" md="8"
+         [class.d-none]="!selectedDetail() && !loadingDetail()"
+         [class.d-md-block]="!selectedDetail() && !loadingDetail()">
+    @if (loadingDetail() || selectedDetail()) {
+      <c-card>
+        <c-card-header class="d-flex justify-content-between align-items-center py-2">
+          <span class="fw-semibold text-truncate me-2 small">
+            @if (loadingDetail()) { Cargando… }
+            @else { {{ selectedDetail()!.subject || '(sin asunto)' }} }
+          </span>
+          <button cButton size="sm" color="secondary" variant="ghost"
+                  (click)="closeDetail()">
+            <svg cIcon name="cilX" size="sm"></svg>
+          </button>
+        </c-card-header>
+
+        <c-card-body>
+          @if (loadingDetail()) {
+            <div class="text-center py-5">
+              <c-spinner color="primary" />
+            </div>
+          } @else if (selectedDetail()) {
+            <!-- Encabezado del mensaje -->
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+              <app-actor-avatar
+                [name]="selectedDetail()!.senderFullName"
+                size="lg"
+              />
+              <div class="flex-grow-1 overflow-hidden">
+                <div class="fw-semibold text-truncate">{{ selectedDetail()!.senderFullName }}</div>
+                <div class="small text-body-secondary">
+                  Para: <strong>{{ selectedDetail()!.receiverFullName }}</strong>
+                </div>
+              </div>
+              <div class="msg-date flex-shrink-0">
+                {{ selectedDetail()!.sentAt | date:'dd/MM/yyyy HH:mm' }}
+              </div>
+            </div>
+
+            <!-- Cuerpo principal -->
+            <div class="border rounded-3 p-3 bg-body-secondary mb-4">
+              <p class="mb-0 small" style="white-space: pre-wrap;">{{ selectedDetail()!.content }}</p>
+            </div>
+
+            <!-- Respuestas -->
+            @if (selectedDetail()!.replies.length) {
+              <p class="small text-body-secondary fw-semibold mb-3">
+                {{ selectedDetail()!.replies.length }}
+                {{ selectedDetail()!.replies.length === 1 ? 'respuesta' : 'respuestas' }}
+              </p>
+              @for (reply of selectedDetail()!.replies; track reply.id) {
+                <div class="mb-3 d-flex gap-2">
+                  <app-actor-avatar
+                    [name]="reply.senderFullName"
+                    size="sm"
+                    class="flex-shrink-0"
+                  />
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-baseline gap-1 mb-1">
+                      <strong class="small text-truncate">{{ reply.senderFullName }}</strong>
+                      <span class="msg-date flex-shrink-0">{{ reply.sentAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <div class="border rounded-3 p-3 bg-body-secondary">
+                      <p class="mb-0 small" style="white-space: pre-wrap;">{{ reply.content }}</p>
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+
+            <!-- Caja de respuesta (solo recibidos) -->
+            @if (activeTab === 'inbox') {
+              <div class="mt-4 border-top pt-3">
+                <textarea
+                  cFormControl
+                  rows="3"
+                  [(ngModel)]="replyBody"
+                  placeholder="Escribe tu respuesta…"
+                  class="mb-2">
+                </textarea>
+                <div class="d-flex justify-content-end">
+                  <button
+                    cButton color="primary" size="sm"
+                    [disabled]="!replyBody.trim() || sendingReply()"
+                    (click)="sendReply()">
+                    <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
+                    @if (sendingReply()) { Enviando… } @else { Enviar }
+                  </button>
+                </div>
+              </div>
+            }
+          }
+        </c-card-body>
+      </c-card>
+    } @else {
+      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-body-secondary border rounded-3" style="min-height: 300px;">
+        <svg cIcon name="cilChatBubble" size="3xl" class="mb-3 opacity-25"></svg>
+        <p class="mb-1 small fw-medium">Selecciona un mensaje</p>
+        <p class="mb-0 small opacity-75">para ver su contenido aquí</p>
+      </div>
+    }
+  </c-col>
+</c-row>
+
+<!-- ── Modal Nuevo Mensaje ─────────────────────────────────────────────── -->
+<c-modal [visible]="showCompose" (visibleChange)="showCompose = $event" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>Nuevo mensaje</h5>
+  </c-modal-header>
+
+  <c-modal-body>
+    @if (composeError) {
+      <c-alert color="danger" class="mb-3">{{ composeError }}</c-alert>
+    }
+
+    <div class="mb-3">
+      <label cLabel class="mb-1">Destinatario</label>
+      @if (loadingContacts) {
+        <div><c-spinner size="sm" /></div>
+      } @else if (contacts().length === 0) {
+        <p class="text-body-secondary small mb-0">
+          No tienes contactos disponibles aún.
+        </p>
+      } @else {
+        <select cSelect [(ngModel)]="compose.receiverId">
+          <option value="">— Selecciona un contacto —</option>
+          @for (c of contacts(); track c.userId) {
+            <option [value]="c.userId">{{ contactLabel(c) }}</option>
+          }
+        </select>
+      }
+    </div>
+
+    <div class="mb-3">
+      <label cLabel class="mb-1">Asunto</label>
+      <input cFormControl type="text" [(ngModel)]="compose.subject"
+             placeholder="Asunto del mensaje" maxlength="200" />
+    </div>
+
+    <div class="mb-3">
+      <label cLabel class="mb-1">Mensaje</label>
+      <textarea cFormControl rows="6" [(ngModel)]="compose.content"
+                placeholder="Escribe tu mensaje…"></textarea>
+    </div>
+  </c-modal-body>
+
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeCompose()">Cancelar</button>
+    <button cButton color="primary"
+            [disabled]="sendingNew() || contacts().length === 0"
+            (click)="sendNew()">
+      <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
+      @if (sendingNew()) { Enviando… } @else { Enviar }
+    </button>
+  </c-modal-footer>
+</c-modal>

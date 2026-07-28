@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 40" width="180" height="40">
+  <!-- Logo InclusiON para sidebar (fondo oscuro) -->
+
+  <!-- Símbolo de inclusión: círculo con persona -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="2">
+    <circle cx="18" cy="20" r="14"/>
+  </g>
+  <g fill="#FFFFFF">
+    <circle cx="18" cy="14" r="3.5"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 18.5 L18 26 M13 22 L23 22 M14.5 32 L18 26 L21.5 32"/>
+  </g>
+
+  <!-- Texto "Inclusi" en blanco -->
+  <text x="38" y="27"
+        font-family="'Atkinson Hyperlegible', Arial, sans-serif"
+        font-size="22"
+        font-weight="700"
+        fill="#FFFFFF">Inclusi</text>
+
+  <!-- Texto "ON" en amarillo/dorado para destacar -->
+  <text x="118" y="27"
+        font-family="'Atkinson Hyperlegible', Arial, sans-serif"
+        font-size="22"
+        font-weight="700"
+        fill="#FFD54F">ON</text>
+</svg>

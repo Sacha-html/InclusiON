@@ -1,0 +1,140 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="visual-login-container min-vh-100 d-flex flex-column align-items-center justify-content-center">
+  <div class="content-wrapper">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <button
+        type="button"
+        cButton
+        color="light"
+        class="back-button"
+        (click)="goBack()"
+        aria-label="Volver a identificación de usuario"
+      >
+        <svg cIcon name="cilArrowLeft" class="me-2" aria-hidden="true"></svg>
+        <span>Volver</span>
+      </button>
+    </div>
+
+    <!-- Main Card -->
+    <section class="login-card card shadow" aria-labelledby="standard-heading">
+      <div class="card-body p-4 p-md-5">
+        <!-- User Avatar -->
+        <header class="text-center mb-4">
+          <div
+            class="user-avatar mx-auto mb-3"
+            [style.background-color]="avatarColor"
+            role="img"
+            [attr.aria-label]="'Avatar de ' + displayName"
+          >
+            {{ initial }}
+          </div>
+          <h1 id="standard-heading" class="h4 fw-bold mb-1" style="color: var(--a11y-text)">Hola, {{ displayName }}</h1>
+          <p class="mb-0" style="color: var(--a11y-text-muted)">Ingresa tu contraseña para continuar</p>
+        </header>
+
+        <!-- Error Alert -->
+        @if (errorMessage) {
+          <div
+            class="alert mb-4 text-center"
+            [class.alert-warning]="isLocked"
+            [class.alert-danger]="!isLocked"
+            role="alert"
+            aria-live="assertive"
+          >
+            @if (isLocked) {
+              <svg cIcon name="cilLockLocked" class="me-2" aria-hidden="true"></svg>
+            } @else {
+              <svg cIcon name="cilWarning" class="me-2" aria-hidden="true"></svg>
+            }
+            {{ errorMessage }}
+          </div>
+        }
+
+        <!-- Password Form -->
+        <form (ngSubmit)="onSubmit()" class="password-form">
+          <div class="mb-4">
+            <label for="password" class="form-label visually-hidden">Contraseña</label>
+            <c-input-group size="lg">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
+              </span>
+              <input
+                cFormControl
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Tu contraseña"
+                [disabled]="isLoading || isLocked"
+                autocomplete="current-password"
+                class="password-input"
+                aria-describedby="passwordHelp"
+                autofocus
+              />
+              <button
+                type="button"
+                cButton
+                color="secondary"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                [attr.aria-pressed]="showPassword"
+              >
+                <svg cIcon [name]="showPassword ? 'cilLowVision' : 'cilMagnifyingGlass'" aria-hidden="true"></svg>
+              </button>
+            </c-input-group>
+            <small id="passwordHelp" class="visually-hidden">
+              Usa el botón a la derecha para mostrar u ocultar la contraseña
+            </small>
+          </div>
+
+          <!-- Remember Device -->
+          <div class="mb-4">
+            <c-form-check>
+              <input
+                cFormCheckInput
+                type="checkbox"
+                id="rememberDevice"
+                [(ngModel)]="rememberDevice"
+                name="rememberDevice"
+                [disabled]="isLoading"
+              />
+              <label cFormCheckLabel for="rememberDevice">
+                Recordar este dispositivo
+              </label>
+            </c-form-check>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            cButton
+            color="primary"
+            type="submit"
+            size="lg"
+            class="w-100 submit-button a11y-btn-primary"
+            [disabled]="!password || isLoading || isLocked"
+          >
+            @if (isLoading) {
+              <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
+              <span>Verificando...</span>
+            } @else {
+              <svg cIcon name="cilLockUnlocked" class="me-2" aria-hidden="true"></svg>
+              <span>Entrar</span>
+            }
+          </button>
+        </form>
+
+        <!-- Help -->
+        <footer class="text-center mt-4">
+          <p class="small mb-0" style="color: var(--a11y-text-muted)">
+            <svg cIcon name="cilInfo" class="me-1" aria-hidden="true"></svg>
+            <a [routerLink]="['/forgot-password']" style="color: var(--a11y-primary)">¿Olvidaste tu contraseña?</a>
+            Pedí ayuda a un familiar o profesional
+          </p>
+        </footer>
+      </div>
+    </section>
+  </div>
+</div>

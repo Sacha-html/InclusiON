@@ -1,0 +1,9 @@
+<div
+  class="actor-avatar"
+  [class.actor-avatar--sm]="size === 'sm'"
+  [class.actor-avatar--lg]="size === 'lg'"
+  [style.backgroundColor]="bgColor"
+  [style.color]="textColor"
+  [attr.aria-label]="name || undefined"
+  [attr.aria-hidden]="!name ? 'true' : undefined"
+>{{ initials }}</div>

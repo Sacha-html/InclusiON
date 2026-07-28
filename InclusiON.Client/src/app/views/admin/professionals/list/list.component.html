@@ -1,0 +1,221 @@
+<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="onFilterLoaded()"></app-institution-filter>
+
+<!-- Tabs: Activos y Pendientes -->
+<div class="mb-3">
+  <div class="nav nav-tabs" role="tablist">
+    <button class="nav-link" [class.active]="activeTab==='active'" (click)="switchTab('active')" type="button">Activos</button>
+    <button class="nav-link" [class.active]="activeTab==='validations'" (click)="switchTab('validations')" type="button">
+      Pendientes
+      @if (pendingCount > 0) {
+        <span class="badge bg-warning ms-2">{{ pendingCount }}</span>
+      }
+    </button>
+  </div>
+</div>
+
+@if (activeTab === 'active') {
+<div class="mb-3">
+  <fieldset class="p-3 border rounded mb-4">
+    <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+    <c-row class="align-items-end">
+      <c-col sm="3">
+        <label cLabel for="statusFilter">Estado</label>
+        <select cSelect id="statusFilter" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
+          <option value="">Todos</option>
+          <option value="active">Activos</option>
+          <option value="suspended">Suspendidos</option>
+          <option value="terminated">Dados de baja</option>
+        </select>
+      </c-col>
+      <c-col sm="auto">
+        <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
+      </c-col>
+    </c-row>
+  </fieldset>
+  <app-data-table
+    title="Gestionar Profesionales"
+    [columns]="cols"
+    [items]="professionals"
+    [totalItems]="totalItems"
+    [pageSize]="pageSize"
+    [currentPage]="currentPage"
+    [sortable]="true"
+    [loading]="loading"
+    [headerButtons]="getHeaderButtons()"
+    (pageChange)="onPageChange($event)"
+    (searchAction)="onSearch($event)"
+    (sortAction)="onSort($event)"
+    (rowAction)="onRowAction($event)"
+    (headerAction)="onHeaderAction($event)">
+  </app-data-table>
+  @if (!professionals.length && !statusFilter) {
+    <div class="text-center text-body-secondary py-4">
+      <svg cIcon name="cilUser" size="3xl" class="mb-2"></svg>
+      <p class="mb-0">No hay profesionales registrados.</p>
+    </div>
+  }
+  @if (!professionals.length && statusFilter) {
+    <div class="text-center text-body-secondary py-4">
+      <p class="mb-0">No se encontraron profesionales con el filtro seleccionado.</p>
+    </div>
+  }
+</div>
+}
+
+@if (activeTab === 'validations') {
+<div class="mb-3">
+  <app-data-table
+    title="Solicitudes Pendientes"
+    [columns]="pendingCols"
+    [items]="pendingProfessionals"
+    [totalItems]="pendingCount"
+    [pageSize]="pageSize"
+    [currentPage]="currentPage"
+    [sortable]="true"
+    [loading]="loading"
+    [showSearch]="true"
+    (pageChange)="onPageChange($event)"
+    (searchAction)="onSearch($event)"
+    (sortAction)="onSort($event)"
+    (rowAction)="onRowAction($event)">
+  </app-data-table>
+  @if (!pendingProfessionals.length) {
+    <div class="text-center text-body-secondary py-4">
+      <svg cIcon name="cilClock" size="3xl" class="mb-2"></svg>
+      <p class="mb-0">No hay solicitudes pendientes de validación.</p>
+    </div>
+  }
+</div>
+}
+
+<!-- Modal desactivar -->
+<app-confirm-modal
+  [visible]="showConfirmModal"
+  [loading]="isDeactivateLoading"
+  title="Confirmar desactivación"
+  messagePrefix="¿Está seguro de que desea desactivar al profesional "
+  [itemName]="itemToDeactivate?.fullName ?? ''"
+  messageSuffix="?"
+  [showObservation]="true"
+  observationLabel="Motivo de la desactivación"
+  observationPlaceholder="Indique el motivo de la desactivación..."
+  confirmLabel="Desactivar"
+  confirmColor="danger"
+  (confirm)="confirmDeactivate($event)"
+  (cancel)="cancelDeactivate()">
+</app-confirm-modal>
+
+<!-- Modal aprobar/rechazar -->
+<app-confirm-modal
+  [visible]="showValidateModal"
+  [loading]="isValidationLoading"
+  [title]="isApproveAction ? 'Aprobar Solicitud' : 'Rechazar Solicitud'"
+  [messagePrefix]="isApproveAction ? '¿Desea aprobar la solicitud de ' : '¿Desea rechazar la solicitud de '"
+  [itemName]="itemToValidate?.fullName ?? ''"
+  messageSuffix="?"
+  [detail]="!isApproveAction ? 'Se notificará al solicitante con el motivo del rechazo.' : 'Se activará el usuario y se enviarán las credenciales por email.'"
+  [confirmLabel]="isApproveAction ? 'Aprobar' : 'Rechazar'"
+  [confirmColor]="isApproveAction ? 'success' : 'danger'"
+  [showObservation]="!isApproveAction"
+  observationLabel="Motivo de rechazo"
+  observationPlaceholder="Indique el motivo del rechazo..."
+  (confirm)="onValidationConfirm($event)"
+  (cancel)="cancelValidation()">
+</app-confirm-modal>
+
+<!-- Modal resetear contraseña -->
+<app-confirm-modal
+  [visible]="showResetPasswordModal"
+  title="Resetear contraseña"
+  messagePrefix="¿Desea resetear la contraseña de "
+  [itemName]="itemToResetPassword?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se generará una contraseña temporal que el profesional deberá cambiar en su próximo inicio de sesión."
+  confirmLabel="Resetear"
+  confirmColor="warning"
+  (confirm)="confirmResetPassword()"
+  (cancel)="cancelResetPassword()">
+</app-confirm-modal>
+
+<!-- Modal reactivar -->
+<app-confirm-modal
+  [visible]="showReactivateModal"
+  [loading]="isReactivateLoading"
+  title="Reactivar Profesional"
+  [messagePrefix]="'¿Desea reactivar al profesional '"
+  [itemName]="itemToReactivate?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se restablecerá el acceso del profesional al sistema."
+  confirmLabel="Reactivar"
+  confirmColor="success"
+  (confirm)="confirmReactivate()"
+  (cancel)="cancelReactivate()">
+</app-confirm-modal>
+
+<!-- Modal historial de estados -->
+<c-modal [visible]="showHistoryModal" (visibleChange)="showHistoryModal = $event" alignment="center" size="lg">
+  <c-modal-header>
+    <h5 cModalTitle>
+      <svg cIcon name="cilHistory" class="me-2" aria-hidden="true"></svg>
+      Historial de Estados
+    </h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (statusHistoryLoading) {
+      <div class="text-center py-3">
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
+        <span class="ms-2">Cargando historial...</span>
+      </div>
+    } @else if (statusHistory.length) {
+      <table cTable hover small>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>De</th>
+            <th>A</th>
+            <th>Observación</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of statusHistory; track h.id) {
+            <tr>
+              <td class="text-nowrap">{{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                @if (h.oldStatus) {
+                  <c-badge [color]="statusMap[h.oldStatus].color">{{ statusMap[h.oldStatus].label }}</c-badge>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td><c-badge [color]="statusMap[h.newStatus].color">{{ statusMap[h.newStatus].label }}</c-badge></td>
+              <td>{{ h.observation || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <p class="text-center text-body-secondary">No hay registros de cambios de estado.</p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="showHistoryModal = false">Cerrar</button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal password -->
+<c-modal [visible]="showPasswordModal" (visibleChange)="closePasswordModal()">
+  <c-modal-header>
+    <h5 cModalTitle>Contraseña temporal generada</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p>Se generó una contraseña temporal para <strong>{{ tempPasswordEmail }}</strong>.</p>
+    <p>El usuario deberá cambiarla en su próximo inicio de sesión.</p>
+    <c-alert color="warning" class="d-flex align-items-center justify-content-between">
+      <code class="fs-5">{{ tempPassword }}</code>
+      <button cButton color="primary" size="sm" (click)="copyPassword()">Copiar</button>
+    </c-alert>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closePasswordModal()">Cerrar</button>
+  </c-modal-footer>
+</c-modal>

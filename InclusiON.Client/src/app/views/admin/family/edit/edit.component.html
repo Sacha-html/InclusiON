@@ -1,0 +1,170 @@
+@if (family) {
+  <c-card>
+    <c-card-header><strong>Editar Familiar</strong></c-card-header>
+    <c-card-body>
+      @if (serverError) {
+        <div class="alert alert-danger" role="alert">{{ serverError }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <c-row class="mb-3">
+          <c-col sm="6">
+            <label cLabel for="firstName">Nombre *</label>
+            <input cFormControl id="firstName" formControlName="firstName"
+                   [valid]="submitted ? f['firstName'].valid : undefined" />
+            @if (submitted && f['firstName'].errors) {
+              <c-form-feedback [valid]="false">
+                @if (f['firstName'].errors['required']) { El nombre es obligatorio. }
+                @if (f['firstName'].errors['minlength']) { Minimo 2 caracteres. }
+              </c-form-feedback>
+            }
+          </c-col>
+          <c-col sm="6">
+            <label cLabel for="lastName">Apellido *</label>
+            <input cFormControl id="lastName" formControlName="lastName"
+                   [valid]="submitted ? f['lastName'].valid : undefined" />
+            @if (submitted && f['lastName'].errors) {
+              <c-form-feedback [valid]="false">
+                @if (f['lastName'].errors['required']) { El apellido es obligatorio. }
+                @if (f['lastName'].errors['minlength']) { Minimo 2 caracteres. }
+              </c-form-feedback>
+            }
+          </c-col>
+        </c-row>
+
+        <c-row class="mb-3">
+          <c-col sm="6">
+            <label cLabel for="email">Email *</label>
+            <input cFormControl id="email" formControlName="email" type="email"
+                   [valid]="submitted ? f['email'].valid : undefined" />
+            @if (submitted && f['email'].errors) {
+              <c-form-feedback [valid]="false">
+                @if (f['email'].errors['required']) { El email es obligatorio. }
+                @if (f['email'].errors['email']) { Ingrese un email valido. }
+              </c-form-feedback>
+            }
+          </c-col>
+          <c-col sm="6">
+            <label cLabel for="documentNumber">Documento</label>
+            <input cFormControl id="documentNumber" formControlName="documentNumber" />
+          </c-col>
+        </c-row>
+
+        <c-row class="mb-3">
+          <c-col sm="6">
+            <label cLabel for="phone">Telefono</label>
+            <input cFormControl id="phone" formControlName="phone" />
+          </c-col>
+        </c-row>
+
+        <div class="mt-3 d-flex gap-2">
+          <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Guardar cambios">Guardar</button>
+          <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edicion">Cancelar</button>
+        </div>
+      </form>
+    </c-card-body>
+  </c-card>
+
+  <!-- Personas vinculadas -->
+  <c-card class="mt-3">
+    <c-card-header><strong>Personas vinculadas</strong></c-card-header>
+    <c-card-body>
+      @if (family.linkedPersons && family.linkedPersons.length > 0) {
+        @for (person of family.linkedPersons; track person.personId) {
+          <c-row class="mb-2 align-items-center linked-person-row">
+            <c-col sm="4">
+              <strong>{{ person.fullName }}</strong>
+              @if (person.isPrimary) {
+                <c-badge color="primary" class="ms-2">Principal</c-badge>
+              }
+            </c-col>
+            <c-col sm="3" class="text-body-secondary">
+              {{ person.relationship ?? 'Sin parentesco' }}
+            </c-col>
+            <c-col sm="3" class="text-body-secondary">
+              @if (person.disabilityType) { {{ person.disabilityType }} }
+            </c-col>
+            <c-col sm="2" class="text-end">
+              <button cButton color="danger" size="sm"
+                      (click)="openUnlinkModal(person)"
+                      [attr.aria-label]="'Desvincular ' + person.fullName">
+                Desvincular
+              </button>
+            </c-col>
+          </c-row>
+        }
+      } @else {
+        <p class="text-body-secondary mb-0">No hay personas vinculadas.</p>
+      }
+    </c-card-body>
+  </c-card>
+
+  <!-- Vincular nueva persona -->
+  <c-card class="mt-3">
+    <c-card-header><strong>Vincular persona</strong></c-card-header>
+    <c-card-body>
+      @if (linkError) {
+        <div class="alert alert-danger mb-3" role="alert">{{ linkError }}</div>
+      }
+      @if (validateParentLimit()) {
+        <div class="alert alert-warning mb-3" role="alert">{{ validateParentLimit() }}</div>
+      }
+
+      <c-row class="align-items-end">
+        <c-col sm="4">
+          <label cLabel for="search-person">Persona</label>
+          <app-searchable-select
+            [formControl]="linkPersonControl"
+            [searchFn]="searchPersonsFn"
+            [displayFn]="displayPerson"
+            [subDisplayFn]="subDisplayPerson"
+            placeholder="Buscar por nombre o documento..."
+            hintText="Escriba al menos 2 caracteres para buscar"
+            noResultsText="No se encontraron personas disponibles"
+          />
+        </c-col>
+
+        <c-col sm="3">
+          <label cLabel for="linkRelationship">Parentesco</label>
+          <select cSelect id="linkRelationship" [(ngModel)]="linkRelationship" aria-required="true">
+            <option value="">-- Seleccionar --</option>
+            @for (rel of relationships; track rel) {
+              <option [value]="rel">{{ rel }}</option>
+            }
+          </select>
+        </c-col>
+
+        <c-col sm="3" class="d-flex align-items-center pt-4">
+          <input type="checkbox" id="linkIsPrimary" [(ngModel)]="linkIsPrimary" class="form-check-input me-2" />
+          <label for="linkIsPrimary" class="form-check-label">Familiar principal</label>
+        </c-col>
+
+        <c-col sm="2">
+          <button cButton color="primary" (click)="linkPerson()"
+                  [disabled]="!linkPersonControl.value || !linkRelationship || !!validateParentLimit() || isLinking"
+                  aria-label="Vincular persona seleccionada">
+            @if (isLinking) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
+            Vincular
+          </button>
+        </c-col>
+      </c-row>
+    </c-card-body>
+  </c-card>
+}
+
+<!-- Modal de confirmacion para desvincular -->
+<app-confirm-modal
+  [visible]="showUnlinkModal"
+  title="Desvincular persona"
+  messagePrefix="¿Esta seguro de que desea desvincular a "
+  [itemName]="unlinkingPerson?.fullName ?? ''"
+  messageSuffix="?"
+  confirmLabel="Desvincular"
+  confirmColor="danger"
+  [showObservation]="true"
+  observationLabel="Motivo de desvinculacion"
+  observationPlaceholder="Ingrese el motivo..."
+  [loading]="isUnlinking"
+  (confirm)="confirmUnlink($event)"
+  (cancel)="showUnlinkModal = false">
+</app-confirm-modal>

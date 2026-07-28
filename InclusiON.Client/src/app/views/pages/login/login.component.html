@@ -1,0 +1,139 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="min-vh-100 d-flex flex-row align-items-center login-layout" style="background-color: var(--a11y-bg-secondary)">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="6" lg="5">
+        <c-card class="p-4 shadow">
+          <c-card-body>
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+              <header class="text-center mb-4">
+                <svg cIcon name="cilLockLocked" size="3xl" class="mb-3" style="color: var(--a11y-text-secondary)" aria-hidden="true"></svg>
+                <h1 class="h3" style="color: var(--a11y-text)">{{ pageTitle }}</h1>
+                <p class="mb-0" style="color: var(--a11y-text-muted)">{{ pageSubtitle }}</p>
+              </header>
+
+              <!-- Error Alert -->
+              @if (errorMessage) {
+                <c-alert color="danger" class="mb-3" dismissible role="alert" aria-live="assertive">
+                  {{ errorMessage }}
+                </c-alert>
+              }
+
+              <!-- Email -->
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser" aria-hidden="true"></svg>
+                </span>
+                <input
+                  cFormControl
+                  type="email"
+                  formControlName="email"
+                  placeholder="Email"
+                  autocomplete="email"
+                  aria-label="Email"
+                  aria-required="true"
+                  autofocus
+                />
+              </c-input-group>
+
+              <!-- Password -->
+              <c-input-group class="mb-4">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
+                </span>
+                <input
+                  cFormControl
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Contraseña"
+                  autocomplete="current-password"
+                  aria-label="Contraseña"
+                  aria-required="true"
+                />
+                <button
+                  type="button"
+                  cInputGroupText
+                  class="cursor-pointer"
+                  (click)="togglePasswordVisibility()"
+                  style="min-width: 55px; justify-content: center;"
+                  [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="showPassword"
+                >
+                  <small aria-hidden="true">{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </button>
+              </c-input-group>
+
+              <!-- Remember Me -->
+              <c-form-check class="mb-3">
+                <input
+                  cFormCheckInput
+                  type="checkbox"
+                  formControlName="rememberMe"
+                  id="rememberMe"
+                />
+                <label cFormCheckLabel for="rememberMe">
+                  Recordarme
+                </label>
+              </c-form-check>
+
+              <!-- Olvidé mi contraseña -->
+              <div class="text-end mb-3">
+                <a [routerLink]="['/forgot-password']" style="color: var(--a11y-primary); font-size: 0.875rem;">
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
+
+              <!-- Botón de Login -->
+              <div class="d-grid mb-3">
+                <button
+                  cButton
+                  color="primary"
+                  size="lg"
+                  type="submit"
+                  [disabled]="isLoading || loginForm.invalid"
+                >
+                  @if (!isLoading) {
+                    <svg cIcon name="cilLockUnlocked" class="me-2" aria-hidden="true"></svg>
+                    Ingresar
+                  } @else {
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    Ingresando...
+                  }
+                </button>
+              </div>
+
+              <!-- Volver al login visual -->
+              <div class="text-center">
+                <button
+                  cButton
+                  color="link"
+                  type="button"
+                  (click)="goToVisualLogin()"
+                >
+                  <svg cIcon name="cilArrowLeft" class="me-1" aria-hidden="true"></svg>
+                  Volver al inicio de sesión
+                </button>
+              </div>
+
+              <!-- Registro de profesionales -->
+              <hr class="my-4" />
+              <div class="text-center">
+                <p class="mb-2" style="color: var(--a11y-text-muted)">¿Eres profesional y aún no tienes cuenta?</p>
+                <a
+                  cButton
+                  color="outline-primary"
+                  [routerLink]="['/register-professional']"
+                >
+                  <svg cIcon name="cilUserPlus" class="me-2" aria-hidden="true"></svg>
+                  Registrarme
+                </a>
+              </div>
+            </form>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

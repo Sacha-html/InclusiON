@@ -1,0 +1,144 @@
+<div role="region" aria-labelledby="pro-activities-title">
+<c-row class="mb-3 align-items-center">
+  <c-col>
+    <h1 id="pro-activities-title" class="h4 mb-0" tabindex="-1">Mis Actividades</h1>
+  </c-col>
+  <c-col xs="auto" class="d-flex gap-2">
+    <button cButton [color]="semanticMode() ? 'warning' : 'secondary'" size="sm"
+            (click)="toggleSemanticMode()"
+            [title]="semanticMode() ? 'Volver a búsqueda por filtros' : 'Buscar por significado (IA)'">
+      ⚡ {{ semanticMode() ? 'Desactivar búsqueda IA' : 'Búsqueda semántica' }}
+    </button>
+  </c-col>
+</c-row>
+
+<!-- Modo semántico -->
+@if (semanticMode()) {
+  <div class="mb-3 p-3 border rounded bg-body-tertiary">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="fw-semibold">Búsqueda semántica</span>
+      <c-badge color="warning">IA</c-badge>
+    </div>
+    <p class="text-body-secondary small mb-2">
+      Describí qué tipo de actividad buscás con tus palabras. La IA encontrará las más similares por significado.
+    </p>
+    <div class="input-group">
+       <input type="text" class="form-control"
+              placeholder="Ej: actividades para trabajar la autonomía en el hogar..."
+              [value]="semanticText()"
+              (input)="onSemanticInput($any($event.target).value)"
+              (keydown)="onSemanticKeydown($event)"
+              [disabled]="semanticLoading()"
+              aria-label="Texto de búsqueda semántica" />
+      <button cButton color="primary" (click)="runSemanticSearch()" [disabled]="semanticLoading() || !semanticText().trim()">
+        @if (semanticLoading()) {
+          <c-spinner size="sm" aria-hidden="true"></c-spinner>
+          Buscando...
+        } @else {
+          Buscar
+        }
+      </button>
+    </div>
+
+    @if (!semanticLoading() && semanticText() && semanticResults().length === 0) {
+      <p class="text-body-secondary mt-2 mb-0 small" role="alert">No se encontraron actividades similares.</p>
+    }
+  </div>
+}
+
+<!-- Filtros (solo en modo normal) -->
+@if (!semanticMode()) {
+  <c-row class="mb-3 g-2">
+    <c-col xs="12" md="3">
+      <label class="form-label" for="cat-filter">Categoría</label>
+      <select cSelect id="cat-filter" [(ngModel)]="categoryFilter" (ngModelChange)="onFilterChange()">
+        <option value="">Todas</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </c-col>
+
+    <c-col xs="12" md="3">
+      <label class="form-label" for="type-filter">Tipo de plantilla</label>
+      <select cSelect id="type-filter" [(ngModel)]="templateTypeFilter" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        @for (t of templateTypes(); track t.id) {
+          <option [value]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </c-col>
+
+    <c-col xs="12" md="2">
+      <label class="form-label" for="status-filter">Estado</label>
+      <select cSelect id="status-filter" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
+    </c-col>
+
+    <c-col xs="12" md="2">
+      <label class="form-label" for="standard-filter">Origen</label>
+      <select cSelect id="standard-filter" [(ngModel)]="standardFilter" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        <option value="false">Propias</option>
+        <option value="true">Estándar</option>
+      </select>
+    </c-col>
+
+    <c-col xs="12" md="2" class="d-flex align-items-end">
+      <button cButton color="secondary" class="w-100" (click)="clearFilters()">
+        Limpiar filtros
+      </button>
+    </c-col>
+  </c-row>
+}
+
+<!-- Tabla: semántica o normal -->
+@if (semanticMode()) {
+  <app-data-table
+    [columns]="columns"
+    [items]="semanticResults()"
+    [loading]="semanticLoading()"
+    [showSearch]="false"
+    [currentPage]="1"
+    [pageSize]="semanticResults().length || 1"
+    [totalItems]="semanticResults().length"
+    [headerButtons]="headerButtons"
+    (rowAction)="onRowAction($event)"
+    (headerAction)="onHeaderAction($event)"
+  />
+} @else {
+  <app-data-table
+    [columns]="columns"
+    [items]="activities()"
+    [loading]="isLoading()"
+    [currentPage]="currentPage()"
+    [pageSize]="pageSize()"
+    [totalItems]="totalRecords()"
+    [headerButtons]="headerButtons"
+    [showSearch]="true"
+    (searchAction)="onSearch($event)"
+    (pageChange)="onPageChange($event)"
+    (sortAction)="onSort($event)"
+    (rowAction)="onRowAction($event)"
+    (headerAction)="onHeaderAction($event)"
+  />
+}
+
+<app-confirm-modal
+  [visible]="showDeactivateModal"
+  title="Desactivar Actividad"
+  [itemName]="itemToDeactivate?.title ?? ''"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()"
+/>
+
+<app-assign-activity-modal
+  [visible]="showAssignModal"
+  [activity]="itemToAssign"
+  (visibleChange)="showAssignModal = $event"
+  (assigned)="onAssigned()"
+/>
+</div>

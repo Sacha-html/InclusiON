@@ -1,0 +1,107 @@
+@if (family) {
+  <c-card>
+    <c-card-header>
+      <strong>Detalle del Familiar</strong>
+      <c-badge class="ms-2" [color]="family.isActive ? 'success' : 'danger'">
+        {{ family.isActive ? 'Activo' : 'Inactivo' }}
+      </c-badge>
+    </c-card-header>
+    <c-card-body>
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Nombre</label>
+          <input cFormControl [value]="family.firstName" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Apellido</label>
+          <input cFormControl [value]="family.lastName" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Email</label>
+          <input cFormControl [value]="family.email ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Documento</label>
+          <input cFormControl [value]="family.documentNumber ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Telefono</label>
+          <input cFormControl [value]="family.phone ?? 'Sin especificar'" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Parentesco</label>
+          <input cFormControl [value]="family.relationship ?? 'Sin especificar'" readonly />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel>Fecha de alta</label>
+          <input cFormControl [value]="formatDateTime(family.createdAt)" readonly />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel>Ultima actualizacion</label>
+          <input cFormControl [value]="family.updatedAt ? formatDateTime(family.updatedAt) : 'Sin actualizar'" readonly />
+        </c-col>
+      </c-row>
+
+      @if (family.linkedPersons && family.linkedPersons.length > 0) {
+        <c-card class="mb-3 mt-3">
+          <c-card-header><strong>Personas vinculadas</strong></c-card-header>
+          <c-card-body>
+            @for (person of family.linkedPersons; track person.personId) {
+              <c-row class="mb-2 align-items-center">
+                <c-col sm="6">
+                  <strong>{{ person.fullName }}</strong>
+                  @if (person.isPrimary) {
+                    <c-badge color="primary" class="ms-2">Principal</c-badge>
+                  }
+                </c-col>
+                <c-col sm="6" class="text-body-secondary">
+                  {{ person.disabilityType ?? '' }}
+                </c-col>
+              </c-row>
+            }
+          </c-card-body>
+        </c-card>
+      } @else {
+        <c-alert color="warning" class="mt-3">
+          Este familiar no tiene personas vinculadas.
+        </c-alert>
+      }
+
+      <div class="mt-3 d-flex justify-content-between">
+        <div class="d-flex gap-2">
+          <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado">Volver</button>
+          @if (family.isActive) {
+            <button cButton color="primary" (click)="goToEdit()" [attr.aria-label]="'Editar familiar ' + family.fullName">Editar</button>
+          }
+        </div>
+        @if (family.isActive) {
+          <button cButton color="danger" (click)="deactivate()" [attr.aria-label]="'Desactivar familiar ' + family.fullName">Desactivar</button>
+        }
+      </div>
+    </c-card-body>
+  </c-card>
+
+  <!-- Modal de confirmacion -->
+  <c-modal [visible]="showConfirmModal" (visibleChange)="showConfirmModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Confirmar desactivacion</h5>
+    </c-modal-header>
+    <c-modal-body>
+      <p>¿Esta seguro de que desea desactivar al familiar <strong>{{ family.fullName }}</strong>?</p>
+      <p class="text-body-secondary mb-0">Esta accion deshabilitara su acceso al sistema.</p>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelDeactivate()">Cancelar</button>
+      <button cButton color="danger" (click)="confirmDeactivate()">Desactivar</button>
+    </c-modal-footer>
+  </c-modal>
+}
