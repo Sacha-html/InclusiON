@@ -49,6 +49,7 @@ export class ChangeLoginMethodModalComponent implements OnChanges {
   @Input({ required: true }) userId!: string;
   @Input({ required: true }) personId!: string;
   @Input() currentLoginMethodId: number | null = null;
+  @Input() currentSupervisorUserId: string | null = null;
   @Input({ required: true }) loginMethods: LoginMethodItem[] = [];
 
   @Output() closed = new EventEmitter<void>();
@@ -85,6 +86,9 @@ export class ChangeLoginMethodModalComponent implements OnChanges {
   }
 
   get isCurrentMethod(): boolean {
+    if (this.selectedMethodId === METHOD_ASSISTED && this.currentLoginMethodId === METHOD_ASSISTED) {
+      return false;
+    }
     return this.selectedMethodId !== null && this.selectedMethodId === this.currentLoginMethodId;
   }
 
@@ -190,7 +194,7 @@ export class ChangeLoginMethodModalComponent implements OnChanges {
     this.selectedMethodId = null;
     this.pin = '';
     this.pinConfirm = '';
-    this.supervisorUserId = null;
+    this.supervisorUserId = this.currentSupervisorUserId;
     this.submitting = false;
     this.errorMessage = '';
     this.result = null;

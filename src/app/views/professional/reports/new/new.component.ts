@@ -70,7 +70,7 @@ export class NewComponent implements OnInit {
   };
 
   readonly displayPersonFn = (p: ProfessionalPersonResponse) =>
-    `${p.personFirstName} ${p.personLastName}`;
+    p.personDocumentNumber ? `${p.personLastName}, ${p.personFirstName} (DNI: ${p.personDocumentNumber})` : `${p.personLastName}, ${p.personFirstName}`;
 
   readonly personValueFn = (p: ProfessionalPersonResponse) => p;
 

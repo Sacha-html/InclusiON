@@ -58,7 +58,7 @@ export class EditComponent implements OnInit {
     );
   };
   readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
-  readonly subDisplayPerson = (p: PersonListItemResponse) => p.disabilityTypeName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => p.documentNumber ? `${p.disabilityTypeName ?? 'Sin tipo'} (DNI: ${p.documentNumber})` : p.disabilityTypeName ?? '';
 
   readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
   readonly PARENT_RELATIONSHIPS = ['Madre', 'Padre'];

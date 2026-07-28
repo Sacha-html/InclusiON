@@ -79,7 +79,7 @@ export class AssignActivityModalComponent implements OnChanges {
     });
   }
 
-  save(): void {
+  save(bypassDuplicateWarning: boolean = false): void {
     if (!this.isValid || !this.activity) return;
     this.isSaving.set(true);
 
@@ -88,6 +88,7 @@ export class AssignActivityModalComponent implements OnChanges {
       personId:             this.form.personId,
       dueDate:              this.form.dueDate || undefined,
       isEvaluationActivity: this.form.isEvaluationActivity,
+      bypassDuplicateWarning: bypassDuplicateWarning,
     }).subscribe({
       next: () => {
         this.toastService.success('Actividad asignada exitosamente.');
@@ -95,9 +96,16 @@ export class AssignActivityModalComponent implements OnChanges {
         this.close();
         this.assigned.emit();
       },
-      error: () => {
-        this.toastService.error('Error al asignar la actividad.');
+      error: (err) => {
         this.isSaving.set(false);
+        if (err?.status === 409) {
+          const confirmAssign = confirm('El alumno ya posee una asignación activa para esta actividad. ¿Desea asignarla nuevamente de todas formas?');
+          if (confirmAssign) {
+            this.save(true);
+          }
+        } else {
+          this.toastService.error('Error al asignar la actividad.');
+        }
       },
     });
   }

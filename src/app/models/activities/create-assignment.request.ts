@@ -4,4 +4,5 @@ export interface CreateAssignmentRequest {
   dueDate?: string;
   isEvaluationActivity: boolean;
   sequenceOrder?: number;
+  bypassDuplicateWarning?: boolean;
 }

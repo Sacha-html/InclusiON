@@ -194,7 +194,11 @@ export class EditComponent implements OnInit {
 
   onLoginMethodUpdated(response: UpdateLoginMethodResponse): void {
     if (this.person) {
-      this.person = { ...this.person, loginMethodId: response.loginMethodId, loginMethodName: response.loginMethodName };
+      this.personsService.getPersonById(this.person.id).subscribe({
+        next: (updatedPerson) => {
+          this.person = updatedPerson;
+        }
+      });
     }
     if (response.temporaryPassword) {
       this.toastService.warning(

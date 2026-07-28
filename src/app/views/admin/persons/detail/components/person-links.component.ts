@@ -88,7 +88,7 @@ export class PersonLinksComponent implements OnChanges {
 
   selectedFamilyControl = new FormControl<string | null>(null);
   readonly displayFamilyFn = (f: FamilyResponse) => f.fullName ?? '';
-  readonly subDisplayFamilyFn = (f: FamilyResponse) => f.email ?? '';
+  readonly subDisplayFamilyFn = (f: FamilyResponse) => f.documentNumber ? `${f.email} (DNI: ${f.documentNumber})` : f.email ?? '';
   readonly valueFamilyFn = (f: FamilyResponse) => f.id;
 
   selectedRelationship = '';

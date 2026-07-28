@@ -279,9 +279,9 @@ export class ListComponent implements OnInit {
         this.itemToDeactivate = null;
         this.loadProfessionals();
       },
-      error: () => {
+      error: (err) => {
         this.isDeactivateLoading = false;
-        this.toastService.error('Error al desactivar el profesional');
+        this.toastService.error(err?.userMessage || 'Error al desactivar el profesional');
         this.showConfirmModal = false;
       },
     });

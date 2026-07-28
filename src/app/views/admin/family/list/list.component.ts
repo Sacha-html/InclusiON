@@ -141,9 +141,12 @@ export class ListComponent {
         this.itemToDeactivate = null;
         this.loadFamily();
       },
-      error: () => {
-        this.toastService.error('Error al desactivar el familiar');
+      error: (err) => {
         this.showConfirmModal = false;
+        this.itemToDeactivate = null;
+        if (!err?.errorCode) {
+          this.toastService.error('Error al desactivar el familiar');
+        }
       },
     });
   }
