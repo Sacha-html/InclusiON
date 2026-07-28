@@ -1,0 +1,84 @@
+@if (isLoading()) {
+  <div class="text-center py-4"><c-spinner></c-spinner></div>
+} @else if (report()) {
+  <c-card>
+    <c-card-header>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h2 cCardTitle class="h5 mb-0">{{ report()!.title }}</h2>
+        <c-badge color="success" class="badge-with-icon badge-success">Aprobado</c-badge>
+      </div>
+    </c-card-header>
+    <c-card-body>
+
+      <dl class="row g-3 mb-3">
+        <div class="col-xs-12 col-md-6">
+          <dt class="form-label text-body-secondary mb-1">Fecha del reporte</dt>
+          <dd class="mb-0">{{ report()!.reportDate | date:'dd/MM/yyyy' }}</dd>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <dt class="form-label text-body-secondary mb-1">Tipo de reporte</dt>
+          <dd class="mb-0">{{ report()!.reportTypeName }}</dd>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <dt class="form-label text-body-secondary mb-1">Persona</dt>
+          <dd class="mb-0">{{ report()!.personName }}</dd>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <dt class="form-label text-body-secondary mb-1">Profesional</dt>
+          <dd class="mb-0">{{ report()!.professionalName }}</dd>
+        </div>
+        @if (report()!.periodStartDate || report()!.periodEndDate) {
+          <div class="col-xs-12 col-md-6">
+            <dt class="form-label text-body-secondary mb-1">Período desde</dt>
+            <dd class="mb-0">{{ report()!.periodStartDate | date:'dd/MM/yyyy' }}</dd>
+          </div>
+          <div class="col-xs-12 col-md-6">
+            <dt class="form-label text-body-secondary mb-1">Período hasta</dt>
+            <dd class="mb-0">{{ report()!.periodEndDate | date:'dd/MM/yyyy' }}</dd>
+          </div>
+        }
+      </dl>
+
+      <hr />
+
+      <dl class="row g-3 mb-3">
+        <div class="col-12">
+          <dt class="form-label text-body-secondary mb-1">Contenido</dt>
+          <dd class="mb-0" style="white-space: pre-wrap;">{{ report()!.content }}</dd>
+        </div>
+        @if (report()!.achievedGoals) {
+          <div class="col-12">
+            <dt class="form-label text-body-secondary mb-1">Objetivos alcanzados</dt>
+            <dd class="mb-0" style="white-space: pre-wrap;">{{ report()!.achievedGoals }}</dd>
+          </div>
+        }
+        @if (report()!.areasToReinforce) {
+          <div class="col-12">
+            <dt class="form-label text-body-secondary mb-1">Áreas a reforzar</dt>
+            <dd class="mb-0" style="white-space: pre-wrap;">{{ report()!.areasToReinforce }}</dd>
+          </div>
+        }
+        @if (report()!.futureRecommendations) {
+          <div class="col-12">
+            <dt class="form-label text-body-secondary mb-1">Recomendaciones</dt>
+            <dd class="mb-0" style="white-space: pre-wrap;">{{ report()!.futureRecommendations }}</dd>
+          </div>
+        }
+        @if (report()!.nextObjectives) {
+          <div class="col-12">
+            <dt class="form-label text-body-secondary mb-1">Próximos objetivos</dt>
+            <dd class="mb-0" style="white-space: pre-wrap;">{{ report()!.nextObjectives }}</dd>
+          </div>
+        }
+      </dl>
+
+      <hr />
+      <div class="d-flex gap-2">
+        <button cButton color="secondary" (click)="onBack()">Volver a reportes</button>
+        <button cButton color="primary" variant="outline" (click)="downloadPdf()">
+          Descargar PDF
+        </button>
+      </div>
+    </c-card-body>
+  </c-card>
+}

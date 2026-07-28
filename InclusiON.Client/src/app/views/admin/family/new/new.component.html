@@ -1,0 +1,113 @@
+<c-card>
+  <c-card-header><strong>Registrar Familiar</strong></c-card-header>
+  <c-card-body>
+    @if (serverError) {
+      <div class="alert alert-danger">{{ serverError }}</div>
+    }
+
+    <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="personId">Persona a cargo *</label>
+          <app-searchable-select
+            id="personId"
+            formControlName="personId"
+            [searchFn]="searchPersonsFn"
+            [displayFn]="displayPerson"
+            [subDisplayFn]="subDisplayPerson"
+            [valueFn]="valueFromPerson"
+            placeholder="Buscar por nombre o documento..."
+            hintText="Escriba al menos 2 caracteres para buscar"
+            noResultsText="No se encontraron personas disponibles"
+          />
+          @if (submitted && f['personId'].errors) {
+            <c-form-feedback [valid]="false" id="personId-error">
+              Debe seleccionar una persona.
+            </c-form-feedback>
+          }
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="firstName">Nombre *</label>
+          <input cFormControl id="firstName" formControlName="firstName"
+                 [valid]="submitted ? f['firstName'].valid : undefined" />
+          @if (submitted && f['firstName'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['firstName'].errors['required']) { El nombre es obligatorio. }
+              @if (f['firstName'].errors['minlength']) { Minimo 2 caracteres. }
+            </c-form-feedback>
+          }
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="lastName">Apellido *</label>
+          <input cFormControl id="lastName" formControlName="lastName"
+                 [valid]="submitted ? f['lastName'].valid : undefined" />
+          @if (submitted && f['lastName'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['lastName'].errors['required']) { El apellido es obligatorio. }
+              @if (f['lastName'].errors['minlength']) { Minimo 2 caracteres. }
+            </c-form-feedback>
+          }
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="email">Email *</label>
+          <input cFormControl id="email" formControlName="email" type="email"
+                 [valid]="submitted ? f['email'].valid : undefined" />
+          @if (submitted && f['email'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['email'].errors['required']) { El email es obligatorio. }
+              @if (f['email'].errors['email']) { Ingrese un email valido. }
+            </c-form-feedback>
+          }
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="documentNumber">Documento</label>
+          <input cFormControl id="documentNumber" formControlName="documentNumber" />
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="phone">Telefono</label>
+          <input cFormControl id="phone" formControlName="phone" />
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="relationship">Parentesco *</label>
+          <select cSelect id="relationship" formControlName="relationship"
+                  [valid]="submitted ? f['relationship'].valid : undefined">
+            <option value="">-- Seleccionar --</option>
+            @for (rel of relationships; track rel) {
+              <option [value]="rel">{{ rel }}</option>
+            }
+          </select>
+          @if (submitted && f['relationship'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['relationship'].errors['required']) { El parentesco es obligatorio. }
+            </c-form-feedback>
+          }
+        </c-col>
+      </c-row>
+
+      <div class="mt-3 d-flex gap-2">
+        <button cButton color="primary" type="submit" [disabled]="form.invalid">Guardar</button>
+        <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar y volver">Cancelar</button>
+      </div>
+    </form>
+  </c-card-body>
+</c-card>
+
+<app-password-modal
+  [visible]="showPasswordModal"
+  entityType="Familiar"
+  entityArticle="el"
+  [entityName]="createdFamily?.fullName ?? ''"
+  [password]="createdFamily?.temporaryPassword ?? ''"
+  (close)="closeModalAndNavigate()">
+</app-password-modal>

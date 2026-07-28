@@ -1,0 +1,149 @@
+<app-data-table
+  title="Familiares Vinculados"
+  [columns]="tableColumns"
+  [items]="representatives"
+  [loading]="loading"
+  [showSearch]="false"
+  [showPagination]="false"
+  [emptyMessage]="'No hay familiares vinculados a esta persona.'"
+  [headerButtons]="repHeaderButtons"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)"
+/>
+
+<!-- Modal Historial de Vinculos -->
+<c-modal [visible]="showLinkModal" (visibleChange)="!$event && closeLinkModal.emit()"
+         aria-labelledby="link-family-modal-title" [size]="'lg'">
+  <c-modal-header>
+    <strong id="link-family-modal-title">Vincular Familiar</strong>
+  </c-modal-header>
+  <c-modal-body>
+    @if (linkError) {
+      <div class="alert alert-danger">{{ linkError }}</div>
+    }
+
+    <div class="mb-3">
+      <label cLabel for="link-family-search">Buscar familiar</label>
+      <app-searchable-select
+        id="link-family-search"
+        [formControl]="selectedFamilyControl"
+        [searchFn]="searchFamilyFn"
+        [displayFn]="displayFamilyFn"
+        [subDisplayFn]="subDisplayFamilyFn"
+        [valueFn]="valueFamilyFn"
+        placeholder="Buscar por nombre..."
+        hintText="Escriba al menos 2 caracteres para buscar"
+        noResultsText="No se encontraron familiares disponibles"
+      />
+    </div>
+
+    @if (selectedFamilyControl.value) {
+      <hr class="my-3" />
+
+      <div class="mb-3">
+        <label cLabel for="link-relationship">Relacion</label>
+        <select cSelect id="link-relationship" [(ngModel)]="selectedRelationship">
+          <option value="">Seleccione...</option>
+          @for (rel of relationships; track rel) {
+            <option [value]="rel">{{ rel }}</option>
+          }
+        </select>
+      </div>
+
+      @if (validateParentLimit()) {
+        <div class="alert alert-warning">{{ validateParentLimit() }}</div>
+      }
+
+      <div class="mb-3">
+        <c-form-check>
+          <input cFormCheckInput type="checkbox" id="link-is-primary" 
+                 [(ngModel)]="selectedIsPrimary" />
+          <label cFormCheckLabel for="link-is-primary">Familiar principal</label>
+        </c-form-check>
+      </div>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeLinkModal.emit()">Cancelar</button>
+    <button cButton color="primary" (click)="confirmLink.emit({ familyId: selectedFamilyControl.value!, relationship: selectedRelationship, isPrimary: selectedIsPrimary })"
+            [disabled]="!selectedFamilyControl.value || !selectedRelationship || !!validateParentLimit() || linking">
+      @if (linking) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
+      Vincular
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal Desvincular Familiar -->
+<c-modal [visible]="showUnlinkModal" (visibleChange)="!$event && closeUnlinkModal.emit()"
+         aria-labelledby="unlink-family-modal-title">
+  <c-modal-header>
+    <strong id="unlink-family-modal-title">Desvincular Familiar</strong>
+  </c-modal-header>
+  <c-modal-body>
+    <p>Esta seguro de que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de esta persona?</p>
+    
+    <div class="mb-3">
+      <label cLabel for="unlink-observation">Motivo de desvinculacion (requerido)</label>
+      <textarea cFormControl id="unlink-observation" 
+                [(ngModel)]="unlinkObservation"
+                rows="3"
+                placeholder="Indique el motivo..."
+                required></textarea>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeUnlinkModal.emit()">Cancelar</button>
+    <button cButton color="danger" (click)="confirmUnlink.emit(unlinkObservation)"
+            [disabled]="!unlinkObservation.trim() || unlinking">
+      @if (unlinking) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
+      Desvincular
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal Historial de Vinculos -->
+<c-modal [visible]="showHistoryModal" (visibleChange)="!$event && closeHistoryModal.emit()"
+         aria-labelledby="history-modal-title" size="lg">
+  <c-modal-header>
+    <strong id="history-modal-title">Historial de Vinculaciones</strong>
+  </c-modal-header>
+  <c-modal-body>
+    @if (loadingHistory) {
+      <div class="text-center py-3">
+        <c-spinner></c-spinner>
+      </div>
+    } @else if (linkHistory.length === 0) {
+      <p class="text-body-secondary">No hay historial de vinculaciones.</p>
+    } @else {
+      <table cTable hover>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Familiar</th>
+            <th>Accion</th>
+            <th>Relacion</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of linkHistory; track h.id) {
+            <tr>
+              <td>{{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ h.representativeFullName }}</td>
+              <td>
+                <c-badge [color]="h.changeType === 'Linked' ? 'success' : 'danger'">
+                  {{ h.changeType === 'Linked' ? 'Vinculado' : 'Desvinculado' }}
+                </c-badge>
+              </td>
+              <td>{{ h.relationship ?? '—' }}</td>
+              <td>{{ h.observation ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeHistoryModal.emit()">Cerrar</button>
+  </c-modal-footer>
+</c-modal>

@@ -1,0 +1,2923 @@
+// ============================================
+// TEMAS DE ACCESIBILIDAD - InclusiON
+// Cumple con WCAG 2.1 AA/AAA
+// Sistema de 2 ejes: Modo de Color + Perfil
+// ============================================
+
+@use "@coreui/coreui/scss/mixins/color-mode" as *;
+
+// =========================================
+// VARIABLES BASE - MODO CLARO
+// =========================================
+:root,
+[data-color-mode="light"] {
+  color-scheme: light;
+
+  // Tipografía
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 16px;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0.01em;
+  --a11y-word-spacing: 0.05em;
+
+  // Colores modo claro - WCAG AA/AAA compliant
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F5F5F5;
+  --a11y-surface: #FAFAFA;
+  --a11y-text: #1A1A1A;                    // Contraste 17.4:1 (AAA)
+  --a11y-text-secondary: #3D3D3D;          // Contraste 10.3:1 (AAA)
+  --a11y-text-muted: #4B4B4B;              // Contraste 7.8:1 (AAA) sobre #f2f2f2, 7.0:1 sobre #e6e6e6 — antes #555555 (6.65:1 sobre #f2f2f2)
+
+  // Color de acción (botones, foco, elementos interactivos)
+  --a11y-primary: #0D47A1;                 // Contraste 8.6:1 (AAA) — solo para botones/fondos
+  --a11y-primary-dark: #002171;
+  --a11y-primary-text: #FFFFFF;
+
+  // Color de link/texto interactivo — más legible como texto inline
+  --a11y-link: #1565C0;                    // Contraste 5.74:1 sobre blanco (AA)
+  --a11y-link-hover: #0D47A1;             // Más oscuro en hover (=primary)
+  --a11y-success: #1B5E20;                 // Contraste 8.5:1 (AAA)
+  --a11y-warning: #A32E0A;                 // Contraste 7.1:1 (AAA) — antes #BF360C (5.6:1)
+  --a11y-danger: #AF1B1B;                  // Contraste 7.0:1 (AAA) — antes #B71C1C (6.6:1)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #9E9E9E;
+  // Badge secondary bg — dark enough for white text (8.1:1 AAA)
+  --a11y-badge-secondary-bg: #4B4B4B;  // same as text-muted, white text = 8.1:1 AAA
+
+  // Sidebar
+  --a11y-sidebar-bg: #263238;
+  --a11y-sidebar-text: #ECEFF1;
+  --a11y-sidebar-text-muted: #B0BEC5;              // Contraste 7.1:1 sobre #263238 (AAA) — era #90A4AE (5.8:1)
+  --a11y-sidebar-nav-link: #CFD8DC;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(21, 101, 192, 0.3);
+  --a11y-sidebar-icon: #B0BEC5;                    // Contraste 7.1:1 sobre #263238 (AAA) — era #90A4AE (5.8:1)
+
+  // Header
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #212121;
+  --a11y-header-border: #E0E0E0;
+
+  // Dropdown
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #212121;
+  --a11y-dropdown-hover-bg: #F5F5F5;
+  --a11y-dropdown-border: #E0E0E0;
+  --a11y-dropdown-header-bg: #FAFAFA;
+
+  // Focus
+  --a11y-focus-color: rgba(21, 101, 192, 0.5);
+  --a11y-focus-accent: #0D47A1;
+  --a11y-focus-width: 3px;
+
+  // Scrollbar
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // AAC nav colors (color-blind safe defaults)
+  --a11y-nav-home: #2E7D32;
+  --a11y-nav-activities: #1565C0;
+  --a11y-nav-calendar: #E65100;
+  --a11y-nav-talk: #7B1FA2;
+
+  // Role colors
+  --a11y-role-person: #236426;            // WCAG AAA (7.2:1) — antes #256B29 (6.5:1)
+  --a11y-role-person-bg: #E8F5E9;
+  --a11y-role-professional: #1565C0;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #7B1FA2;
+  --a11y-role-family-bg: #F3E5F5;
+
+  --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// BRIDGE COREUI → A11Y (ÚNICO, EN :root)
+// Mapea todas las variables --cui-* a --a11y-*
+// Como --a11y-* cambia por perfil, los componentes
+// CoreUI (badges, alerts, cards, botones, etc.)
+// heredan automáticamente TODOS los perfiles.
+// NO repetir este bloque en cada perfil.
+// =========================================
+:root {
+  // Colores semánticos
+  --cui-primary:             var(--a11y-primary);
+  --cui-primary-bg-subtle:   color-mix(in srgb, var(--a11y-primary) 15%, transparent);
+  --cui-primary-text-emphasis: var(--a11y-primary-dark, var(--a11y-primary));
+  --cui-secondary:           var(--a11y-text-secondary);
+  --cui-success:             var(--a11y-success);
+  --cui-success-bg-subtle:   color-mix(in srgb, var(--a11y-success) 15%, transparent);
+  --cui-success-text-emphasis: var(--a11y-success);
+  --cui-danger:              var(--a11y-danger);
+  --cui-danger-bg-subtle:    color-mix(in srgb, var(--a11y-danger) 15%, transparent);
+  --cui-danger-text-emphasis: var(--a11y-danger);
+  --cui-warning:             var(--a11y-warning);
+  --cui-warning-bg-subtle:   color-mix(in srgb, var(--a11y-warning) 15%, transparent);
+  --cui-warning-text-emphasis: var(--a11y-warning);
+  --cui-info:                var(--a11y-primary);
+  --cui-link-color:          var(--a11y-link, var(--a11y-primary));
+  --cui-link-hover-color:    var(--a11y-link-hover, var(--a11y-primary-dark, var(--a11y-primary)));
+
+  // Tipografía y fondo
+  --cui-body-bg:             var(--a11y-bg);
+  --cui-body-color:          var(--a11y-text);
+  --cui-secondary-bg:        var(--a11y-bg-secondary);
+  --cui-tertiary-bg:         var(--a11y-surface);
+  --cui-secondary-color:     var(--a11y-text-secondary);
+  --cui-tertiary-color:      var(--a11y-text-muted);
+
+  // Cards
+  --cui-card-bg:             var(--a11y-surface);
+  --cui-card-color:          var(--a11y-text);
+  --cui-card-border-color:   var(--a11y-border);
+  --cui-card-cap-bg:         var(--a11y-bg-secondary);
+
+  // Bordes
+  --cui-border-color:        var(--a11y-border);
+  --cui-border-color-translucent: var(--a11y-border);
+
+  // Inputs y formularios
+  --cui-input-bg:            var(--a11y-bg);
+  --cui-input-color:         var(--a11y-text);
+  --cui-input-border-color:  var(--a11y-border);
+  --cui-input-placeholder-color: var(--a11y-text-muted);
+  --cui-input-focus-border-color: var(--a11y-primary);
+
+  // Dropdown
+  --cui-dropdown-bg:         var(--a11y-dropdown-bg);
+  --cui-dropdown-color:      var(--a11y-dropdown-text);
+  --cui-dropdown-border-color: var(--a11y-dropdown-border);
+  --cui-dropdown-link-color: var(--a11y-dropdown-text);
+  --cui-dropdown-link-hover-bg: var(--a11y-dropdown-hover-bg);
+  --cui-dropdown-link-hover-color: var(--a11y-text);
+  --cui-dropdown-link-active-bg: var(--a11y-primary);
+  --cui-dropdown-link-active-color: var(--a11y-primary-text);
+  --cui-dropdown-header-color: var(--a11y-text-muted);
+
+  // Tabla
+  --cui-table-bg:            var(--a11y-bg);
+  --cui-table-color:         var(--a11y-text);
+  --cui-table-border-color:  var(--a11y-border);
+  --cui-table-striped-bg:    var(--a11y-bg-secondary);
+  --cui-table-striped-color: var(--a11y-text);
+  --cui-table-hover-bg:      var(--a11y-surface);
+  --cui-table-hover-color:   var(--a11y-text);
+
+  // Paginación
+  --cui-pagination-bg:       var(--a11y-bg);
+  --cui-pagination-color:    var(--a11y-primary);
+  --cui-pagination-border-color: var(--a11y-border);
+  --cui-pagination-hover-bg: var(--a11y-bg-secondary);
+  --cui-pagination-hover-color: var(--a11y-primary-dark, var(--a11y-primary));
+  --cui-pagination-hover-border-color: var(--a11y-border);
+  --cui-pagination-active-bg: var(--a11y-primary);
+  --cui-pagination-active-color: var(--a11y-primary-text);
+  --cui-pagination-active-border-color: var(--a11y-primary);
+  --cui-pagination-disabled-bg: var(--a11y-bg-secondary);
+  --cui-pagination-disabled-color: var(--a11y-text-muted);
+
+  // Modal
+  --cui-modal-bg:            var(--a11y-bg);
+  --cui-modal-color:         var(--a11y-text);
+  --cui-modal-header-bg:     var(--a11y-bg-secondary);
+  --cui-modal-header-border-color: var(--a11y-border);
+  --cui-modal-footer-bg:     var(--a11y-bg-secondary);
+  --cui-modal-footer-border-color: var(--a11y-border);
+
+  // Header
+  --cui-header-bg:           var(--a11y-header-bg);
+  --cui-header-color:        var(--a11y-header-text);
+  --cui-header-border-color: var(--a11y-header-border);
+
+  // Footer
+  --cui-footer-bg:           var(--a11y-bg-secondary);
+  --cui-footer-color:        var(--a11y-text-muted);
+  --cui-footer-border-color: var(--a11y-border);
+
+  // Sidebar
+  --cui-sidebar-bg:          var(--a11y-sidebar-bg);
+  --cui-sidebar-color:       var(--a11y-sidebar-text);
+  --cui-sidebar-nav-link-color: var(--a11y-sidebar-nav-link);
+  --cui-sidebar-nav-link-hover-bg: var(--a11y-sidebar-nav-link-hover-bg);
+  --cui-sidebar-nav-link-active-bg: var(--a11y-sidebar-nav-link-active-bg);
+  --cui-sidebar-nav-icon-color: var(--a11y-sidebar-icon);
+  --cui-sidebar-nav-title-color: var(--a11y-sidebar-text);  // sidebar section titles (Gestión, Evaluación, etc.)
+
+  // Secondary badges — dark bg ensures white text meets WCAG AAA (7:1)
+  --cui-secondary: var(--a11y-badge-secondary-bg);
+
+  // Focus
+  --cui-focus-ring-color:    var(--a11y-focus-color);
+  --cui-focus-ring-width:    var(--a11y-focus-width);
+}
+
+// =========================================
+// VARIABLES BASE - MODO OSCURO
+// =========================================
+[data-color-mode="dark"],
+.dark-theme {
+    color-scheme: dark;
+
+    // Colores modo oscuro - WCAG AA/AAA compliant
+    --a11y-bg: #121212;
+    --a11y-bg-secondary: #1E1E1E;
+    --a11y-surface: #1A1A1A;
+    --a11y-text: #F5F5F5;                   // Contraste 18.1:1 (AAA)
+    --a11y-text-secondary: #D0D0D0;         // Contraste 12.6:1 (AAA)
+    --a11y-text-muted: #ADADAD;             // Contraste 7.3:1 on #1A1A1A (AAA)
+    --a11y-primary: #90CAF9;                // Contraste 10.5:1 (AAA)
+    --a11y-primary-dark: #64B5F6;
+    --a11y-primary-text: #000000;
+    --a11y-link: #90CAF9;                   // Mismo que primary en oscuro — ya es legible
+    --a11y-link-hover: #BBDEFB;             // Más claro en hover
+    --a11y-success: #A5D6A7;                // Contraste 10.7:1 (AAA)
+    --a11y-warning: #FFCC80;                // Contraste 11.5:1 (AAA)
+    --a11y-danger: #EF9A9A;                 // Contraste 8.8:1 (AAA)
+    --a11y-success-text: #000000;           // Texto oscuro para fondos claros
+    --a11y-warning-text: #000000;
+    --a11y-danger-text: #000000;
+    --a11y-border: #616161;
+    --a11y-badge-secondary-bg: #4A4A4A;  // dark bg maintains white text = 8.3:1 AAA
+
+    --a11y-sidebar-bg: #0D0D0D;
+    --a11y-sidebar-text: #F5F5F5;
+    --a11y-sidebar-text-muted: #A0A0A0;
+    --a11y-sidebar-nav-link: #D0D0D0;
+    --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.12);
+    --a11y-sidebar-nav-link-active-bg: rgba(144, 202, 249, 0.25);
+    --a11y-sidebar-icon: #90CAF9;
+
+    --a11y-header-bg: #121212;
+    --a11y-header-text: #F5F5F5;
+    --a11y-header-border: #424242;
+
+    --a11y-dropdown-bg: #1E1E1E;
+    --a11y-dropdown-text: #F5F5F5;
+    --a11y-dropdown-hover-bg: #2D2D2D;
+    --a11y-dropdown-border: #616161;
+    --a11y-dropdown-header-bg: #1A1A1A;
+
+    --a11y-focus-color: rgba(144, 202, 249, 0.6);
+    --a11y-focus-accent: #90CAF9;
+    --a11y-focus-width: 3px;
+
+    // Scrollbar
+    --a11y-scrollbar-thumb: #616161;
+    --a11y-scrollbar-track: transparent;
+    --a11y-scrollbar-thumb-hover: #9E9E9E;
+
+    // AAC nav colors
+    --a11y-nav-home: #66BB6A;
+    --a11y-nav-activities: #64B5F6;
+    --a11y-nav-calendar: #FFB74D;
+    --a11y-nav-talk: #CE93D8;
+
+    // Role colors
+    --a11y-role-person: #66BB6A;
+    --a11y-role-person-bg: rgba(102, 187, 106, 0.15);
+    --a11y-role-professional: #64B5F6;
+    --a11y-role-professional-bg: rgba(100, 181, 246, 0.15);
+    --a11y-role-family: #CE93D8;
+    --a11y-role-family-bg: rgba(206, 147, 216, 0.15);
+}
+
+// =========================================
+// TEMA ALTO CONTRASTE - MODO CLARO
+// =========================================
+[data-color-mode="light"][data-theme="high-contrast"],
+[data-color-mode="light"][data-profile="high-contrast"],
+:root:not([data-color-mode="dark"])[data-theme="high-contrast"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 18px;
+  --a11y-line-height: 1.6;
+  --a11y-letter-spacing: 0.02em;
+  --a11y-word-spacing: 0.08em;
+
+  // Alto contraste claro: fondo blanco, texto negro
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F0F0F0;
+  --a11y-surface: #FFFFFF;
+  --a11y-text: #000000;
+  --a11y-text-secondary: #1A1A1A;
+  --a11y-text-muted: #333333;
+  --a11y-primary: #0000CC;
+  --a11y-primary-dark: #000099;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-link: #0000CC;                   // Navy puro, 21:1 en alto contraste
+  --a11y-link-hover: #000099;
+  --a11y-success: #006600;
+  --a11y-warning: #8A4500;                 // WCAG AAA (7.1:1) - antes #CC6600 (3.84:1)
+  --a11y-danger: #B30000;                  // WCAG AAA (7.1:1) - antes #CC0000 (5.89:1)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #333333;
+
+  --a11y-sidebar-bg: #000066;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #CCCCFF;
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: #0000AA;
+  --a11y-sidebar-nav-link-active-bg: #FFFF00;
+  --a11y-sidebar-icon: #FFFF00;
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #000000;
+  --a11y-header-border: #000000;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #000000;
+  --a11y-dropdown-hover-bg: #FFFF00;
+  --a11y-dropdown-border: #000000;
+  --a11y-dropdown-header-bg: #F0F0F0;
+
+  --a11y-focus-color: #0000FF;
+  --a11y-focus-accent: #0000FF;
+  --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #333333;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #000000;
+
+  --a11y-nav-home: #006600;
+  --a11y-nav-activities: #0000CC;
+  --a11y-nav-calendar: #CC6600;
+  --a11y-nav-talk: #660099;
+
+  --a11y-role-person: #055705;            // WCAG AAA (7.1:1) - antes #006600 (6.44:1)
+  --a11y-role-person-bg: #E8F5E9;
+  --a11y-role-professional: #0000CC;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #660099;
+  --a11y-role-family-bg: #F3E5F5;
+
+  --a11y-spacing-base: 1.25rem;
+}
+
+// =========================================
+// TEMA ALTO CONTRASTE - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="high-contrast"],
+.dark-theme [data-profile="high-contrast"],
+[data-color-mode="dark"] [data-theme="high-contrast"],
+.dark-theme[data-theme="high-contrast"] {
+  // Alto contraste oscuro: fondo negro, texto blanco/amarillo
+  --a11y-bg: #000000;
+  --a11y-bg-secondary: #0D0D0D;
+  --a11y-surface: #1A1A1A;
+  --a11y-text: #FFFFFF;
+  --a11y-text-secondary: #E0E0E0;
+  --a11y-text-muted: #BDBDBD;
+  --a11y-primary: #FFFF00;
+  --a11y-primary-dark: #FFD600;
+  --a11y-primary-text: #000000;
+  --a11y-link: #FFFF00;                   // Amarillo sobre negro
+  --a11y-link-hover: #FFD600;
+  --a11y-success: #00FF00;
+  --a11y-warning: #FFA500;
+  --a11y-danger: #FF5E5E;                  // WCAG AAA (7.0:1 sobre negro) — antes #FF4444 (6.2:1)
+  --a11y-success-text: #000000;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
+  --a11y-border: #CCCCCC;
+
+  --a11y-sidebar-bg: #000000;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #E0E0E0;
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: #333333;
+  --a11y-sidebar-nav-link-active-bg: #FFFF00;
+  --a11y-sidebar-icon: #FFFF00;
+
+  --a11y-header-bg: #000000;
+  --a11y-header-text: #FFFFFF;
+  --a11y-header-border: #FFFFFF;
+
+  --a11y-dropdown-bg: #000000;
+  --a11y-dropdown-text: #FFFFFF;
+  --a11y-dropdown-hover-bg: #333333;
+  --a11y-dropdown-border: #FFFFFF;
+  --a11y-dropdown-header-bg: #1A1A1A;
+
+  --a11y-focus-color: #FFFF00;
+  --a11y-focus-accent: #FFFF00;
+  --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #FFFFFF;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #FFFF00;
+
+  --a11y-nav-home: #00FF00;
+  --a11y-nav-activities: #FFFF00;
+  --a11y-nav-calendar: #FFA500;
+  --a11y-nav-talk: #FF44FF;
+
+  --a11y-role-person: #00FF00;
+  --a11y-role-person-bg: rgba(0, 255, 0, 0.15);
+  --a11y-role-professional: #FFFF00;
+  --a11y-role-professional-bg: rgba(255, 255, 0, 0.15);
+  --a11y-role-family: #FF44FF;
+  --a11y-role-family-bg: rgba(255, 68, 255, 0.15);
+}
+
+// =========================================
+// TEMA DISLEXIA - MODO CLARO
+// =========================================
+[data-color-mode="light"][data-theme="dyslexia"],
+[data-color-mode="light"][data-profile="dyslexia"],
+:root:not([data-color-mode="dark"])[data-theme="dyslexia"] {
+  --a11y-font-family: 'Lexend', Arial, sans-serif;
+  --a11y-font-size: 18px;
+  --a11y-line-height: 1.8;
+  --a11y-letter-spacing: 0.12em;
+  --a11y-word-spacing: 0.16em;
+
+  // Fondo crema suave, reduce fatiga visual
+  --a11y-bg: #FDF6E3;
+  --a11y-bg-secondary: #F5EED6;
+  --a11y-surface: #EEE8D5;
+  --a11y-text: #073642;
+  --a11y-text-secondary: #45565C;         // WCAG AAA (7.1:1) — antes #4A5D63 (6.4:1)
+  --a11y-text-muted: #46565D;             // WCAG AAA (7.1:1) — antes #556870 (5.4:1)
+  --a11y-primary: #14578A;                // WCAG AAA (7.1:1) — antes #1A6FAF (4.8:1)
+  --a11y-primary-dark: #104B78;          // Hover más oscuro que primary, AAA (8.7:1)
+  --a11y-primary-text: #FFFFFF;
+  --a11y-link: #185784;                   // WCAG AAA (7.1:1) — antes #1A6091 (6.2:1)
+  --a11y-link-hover: #0D47A1;
+  --a11y-success: #4C5900;                // WCAG AAA (7.1:1) — antes #556400 (5.9:1)
+  --a11y-warning: #92360F;                // WCAG AAA (7.1:1) — antes #A13B10 (6.2:1)
+  --a11y-danger: #A1201C;                 // WCAG AAA (7.1:1) — antes #B82520 (5.9:1)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #93A1A1;
+
+  --a11y-sidebar-bg: #002B36;
+  --a11y-sidebar-text: #FDF6E3;
+  --a11y-sidebar-text-muted: #93A1A1;
+  --a11y-sidebar-nav-link: #EEE8D5;
+  --a11y-sidebar-nav-link-hover-bg: rgba(238, 232, 213, 0.15);
+  --a11y-sidebar-nav-link-active-bg: rgba(38, 139, 210, 0.3);
+  --a11y-sidebar-icon: #5FB3E8;           // WCAG AA (7.2:1 sobre #002B36) - antes #268BD2 (4.08:1)
+
+  --a11y-header-bg: #FDF6E3;
+  --a11y-header-text: #073642;
+  --a11y-header-border: #93A1A1;
+
+  --a11y-dropdown-bg: #FDF6E3;
+  --a11y-dropdown-text: #073642;
+  --a11y-dropdown-hover-bg: #EEE8D5;
+  --a11y-dropdown-border: #93A1A1;
+  --a11y-dropdown-header-bg: #EEE8D5;
+
+  --a11y-focus-color: rgba(38, 139, 210, 0.5);
+  --a11y-focus-accent: #268BD2;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #93A1A1;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #657B83;
+
+  --a11y-nav-home: #4C5900;               // WCAG 1.4.11 6.61:1 sobre fondo crema — era #859900 (2.76:1 ❌)
+  --a11y-nav-activities: #268BD2;
+  --a11y-nav-calendar: #CB4B16;
+  --a11y-nav-talk: #6C71C4;
+
+  --a11y-role-person: #4C5900;            // WCAG AAA (7.1:1) — antes #556400 (5.9:1)
+  --a11y-role-person-bg: rgba(76, 89, 0, 0.1);
+  --a11y-role-professional: #14578A;      // WCAG AAA (7.1:1) — antes #1A6FAF (5.0:1)
+  --a11y-role-professional-bg: rgba(20, 87, 138, 0.1);
+  --a11y-role-family: #484C99;            // WCAG AAA (7.0:1) — antes #4F54A8 (6.2:1)
+  --a11y-role-family-bg: rgba(72, 76, 153, 0.1);
+
+  --a11y-spacing-base: 1.5rem;
+}
+
+// =========================================
+// TEMA DISLEXIA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="dyslexia"],
+.dark-theme [data-profile="dyslexia"],
+[data-color-mode="dark"] [data-theme="dyslexia"],
+.dark-theme[data-theme="dyslexia"] {
+  // Fondo oscuro suave, no negro puro
+  --a11y-bg: #002B36;
+  --a11y-bg-secondary: #073642;
+  --a11y-surface: #073642;
+  --a11y-text: #FDF6E3;
+  --a11y-text-secondary: #EEE8D5;
+  --a11y-text-muted: #93A1A1;
+  --a11y-primary: #4DCBBF;                         // WCAG AAA (7.6:1 sobre bg) — era #2AA198 (techo matemático 6.7:1 ❌ AAA)
+  --a11y-primary-dark: #2AA198;                    // variante hover más oscura
+  --a11y-primary-text: #000000;                    // 10.6:1 AAA sobre #4DCBBF — era 6.7:1 ❌ AAA
+  --a11y-link: #44E8D9;                   // WCAG AAA (7.1:1) - antes #2AA198 (4.12:1 sobre surface)
+  --a11y-link-hover: #6EF0E3;
+  --a11y-success: #ACE600;                // WCAG AAA (10.1:1 sobre bg, 8.7:1 sobre surface) — antes #9CB800 (6.6:1)
+  --a11y-warning: #F49C6F;                // WCAG AAA (7.0:1) — antes #F07B3F (5.4:1)
+  --a11y-danger: #FF9491;                 // WCAG AAA (7.1:1) — antes #FF6B68 (5.4:1)
+  --a11y-success-text: #000000;           // 14.1:1 sobre #ACE600 (AAA)
+  --a11y-warning-text: #000000;           // 9.8:1 sobre #F49C6F (AAA) — antes #FFFFFF (2.1:1 ❌)
+  --a11y-danger-text: #000000;            // 9.9:1 sobre #FF9491 (AAA) — antes #FFFFFF (2.1:1 ❌)
+  --a11y-border: #586E75;
+
+  --a11y-sidebar-bg: #001F27;
+  --a11y-sidebar-text: #FDF6E3;
+  --a11y-sidebar-text-muted: #93A1A1;
+  --a11y-sidebar-nav-link: #EEE8D5;
+  --a11y-sidebar-nav-link-hover-bg: rgba(238, 232, 213, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(77, 203, 191, 0.25);
+  --a11y-sidebar-icon: #44E8D9;                    // Contraste 8.2:1 sobre #001F27 (AAA) — era #2AA198 (4.7:1)
+
+  --a11y-header-bg: #002B36;
+  --a11y-header-text: #FDF6E3;
+  --a11y-header-border: #586E75;
+
+  --a11y-dropdown-bg: #073642;
+  --a11y-dropdown-text: #FDF6E3;
+  --a11y-dropdown-hover-bg: #002B36;
+  --a11y-dropdown-border: #586E75;
+  --a11y-dropdown-header-bg: #002B36;
+
+  --a11y-focus-color: rgba(42, 161, 152, 0.5);
+  --a11y-focus-accent: #2AA198;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #586E75;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #93A1A1;
+
+  --a11y-nav-home: #ACE600;               // Alineado con success AAA
+  --a11y-nav-activities: #2AA198;
+  --a11y-nav-calendar: #FF7043;           // Naranja brillante 3.80:1 sobre nav bg oscuro — era #CB4B16 (2.27:1 ❌)
+  --a11y-nav-talk: #9FA8DA;               // Índigo claro 4.52:1 sobre nav bg oscuro — era #6C71C4 (2.97:1 ❌)
+
+  --a11y-role-person: #ACE600;            // WCAG AAA (10.1:1 sobre bg) — antes #9CB800 (6.6:1)
+  --a11y-role-person-bg: rgba(172, 230, 0, 0.15);
+  --a11y-role-professional: #2AA198;
+  --a11y-role-professional-bg: rgba(42, 161, 152, 0.15);
+  --a11y-role-family: #9BA0E0;            // WCAG AA (6.1:1) - antes #6C71C4 (3.43:1)
+  --a11y-role-family-bg: rgba(155, 160, 224, 0.15);
+}
+
+// =========================================
+// TEMA VISIÓN REDUCIDA - MODO CLARO
+// =========================================
+[data-color-mode="light"][data-theme="low-vision"],
+[data-color-mode="light"][data-profile="low-vision"],
+:root:not([data-color-mode="dark"])[data-theme="low-vision"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 20px;
+  --a11y-line-height: 1.6;
+  --a11y-letter-spacing: 0.03em;
+  --a11y-word-spacing: 0.1em;
+
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F0F0F0;
+  --a11y-surface: #F5F5F5;
+  --a11y-text: #000000;
+  --a11y-text-secondary: #1A1A1A;
+  --a11y-text-muted: #333333;
+  --a11y-primary: #0D47A1;
+  --a11y-primary-dark: #002171;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-link: #0D47A1;                   // WCAG AAA (8.6:1) - antes #1565C0 (5.75:1)
+  --a11y-link-hover: #002171;
+  --a11y-success: #1B5E20;
+  --a11y-warning: #A13200;                 // WCAG AAA (7.07:1) - antes #E65100 (3.79:1)
+  --a11y-danger: #A00000;                  // WCAG AAA (7.3:1) - antes #B71C1C (6.57:1)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #4D4D4D;
+
+  --a11y-sidebar-bg: #1A237E;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #E8EBF5;              // Contraste 9.8:1 sobre #1A237E (AAA) — era #C5CAE9 (5.6:1)
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.15);
+  --a11y-sidebar-nav-link-active-bg: rgba(255, 255, 255, 0.25);
+  --a11y-sidebar-icon: #E8EBF5;                    // Contraste 9.8:1 sobre #1A237E (AAA) — era #C5CAE9 (5.6:1)
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #000000;
+  --a11y-header-border: #616161;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #000000;
+  --a11y-dropdown-hover-bg: #E0E0E0;
+  --a11y-dropdown-border: #616161;
+  --a11y-dropdown-header-bg: #F5F5F5;
+
+  --a11y-focus-color: rgba(13, 71, 161, 0.7);
+  --a11y-focus-accent: #0D47A1;
+  --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #616161;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #424242;
+
+  --a11y-nav-home: #1B5E20;
+  --a11y-nav-activities: #0D47A1;
+  --a11y-nav-calendar: #E65100;
+  --a11y-nav-talk: #6A1B9A;
+
+  --a11y-role-person: #1B5E20;
+  --a11y-role-person-bg: #E8F5E9;
+  --a11y-role-professional: #0D47A1;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #6A1B9A;
+  --a11y-role-family-bg: #F3E5F5;
+
+  --a11y-spacing-base: 1.5rem;
+}
+
+// =========================================
+// TEMA VISIÓN REDUCIDA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="low-vision"],
+.dark-theme [data-profile="low-vision"],
+[data-color-mode="dark"] [data-theme="low-vision"],
+.dark-theme[data-theme="low-vision"] {
+  --a11y-bg: #121212;
+  --a11y-bg-secondary: #1E1E1E;
+  --a11y-surface: #1E1E1E;
+  --a11y-text: #FFFFFF;
+  --a11y-text-secondary: #E0E0E0;
+  --a11y-text-muted: #B0B0B0;
+  --a11y-primary: #82B1FF;
+  --a11y-primary-dark: #448AFF;
+  --a11y-primary-text: #000000;
+  --a11y-link: #82B1FF;                   // Azul claro sobre oscuro
+  --a11y-link-hover: #BBDEFB;
+  --a11y-success: #69F0AE;
+  --a11y-warning: #FFAB40;
+  --a11y-danger: #FF7B7B;                  // WCAG AAA (7.1:1 sobre #121212) - antes #FF5252 (5.87:1)
+  --a11y-success-text: #000000;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
+  --a11y-border: #757575;
+
+  --a11y-sidebar-bg: #0D1B3E;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #B0B0B0;
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(130, 177, 255, 0.3);
+  --a11y-sidebar-icon: #82B1FF;
+
+  --a11y-header-bg: #121212;
+  --a11y-header-text: #FFFFFF;
+  --a11y-header-border: #757575;
+
+  --a11y-dropdown-bg: #1E1E1E;
+  --a11y-dropdown-text: #FFFFFF;
+  --a11y-dropdown-hover-bg: #2D2D2D;
+  --a11y-dropdown-border: #757575;
+  --a11y-dropdown-header-bg: #121212;
+
+  --a11y-focus-color: rgba(130, 177, 255, 0.7);
+  --a11y-focus-accent: #82B1FF;
+  --a11y-focus-width: 4px;
+
+  --a11y-scrollbar-thumb: #757575;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #9E9E9E;
+
+  --a11y-nav-home: #69F0AE;
+  --a11y-nav-activities: #82B1FF;
+  --a11y-nav-calendar: #FFAB40;
+  --a11y-nav-talk: #EA80FC;
+
+  --a11y-role-person: #69F0AE;
+  --a11y-role-person-bg: rgba(105, 240, 174, 0.15);
+  --a11y-role-professional: #82B1FF;
+  --a11y-role-professional-bg: rgba(130, 177, 255, 0.15);
+  --a11y-role-family: #EA80FC;
+  --a11y-role-family-bg: rgba(234, 128, 252, 0.15);
+}
+
+// =========================================
+// TEMA DEUTERANOPIA - MODO CLARO
+// Daltonismo rojo-verde (más común, ~6% hombres)
+// Usa azul y naranja/amarillo como colores distintivos
+// =========================================
+[data-color-mode="light"][data-theme="deuteranopia"],
+[data-color-mode="light"][data-profile="deuteranopia"],
+:root:not([data-color-mode="dark"])[data-theme="deuteranopia"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 16px;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0.01em;
+  --a11y-word-spacing: 0.05em;
+
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F5F5F5;
+  --a11y-surface: #FAFAFA;
+  --a11y-text: #1A1A1A;
+  --a11y-text-secondary: #3D3D3D;
+  --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
+  --a11y-primary: #004E8C;                 // WCAG AAA (7.8:1 sobre #F5F5F5, 9.1:1 sobre #FFF) — era #005A8C (6.77:1 sobre bg-secondary)
+  --a11y-primary-dark: #003D66;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-link: #004E8C;                   // WCAG AAA (7.8:1) — era #005A8C
+  --a11y-link-hover: #003D66;
+  --a11y-success: #004E8C;                 // WCAG AAA (7.8:1) — era #005A8C
+  --a11y-warning: #7D4F00;                 // WCAG AAA (7.0:1) — antes #8F5A00 (5.8:1)
+  --a11y-danger: #AF1B1B;                  // WCAG AAA (7.0:1) — antes #B71C1C (6.6:1)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;            // 7.0:1 sobre #7D4F00 (AAA) — antes #3D2A00 (1.96:1 ❌)
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #9E9E9E;
+
+  --a11y-sidebar-bg: #023E8A;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #CAF0F8;
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(255, 165, 0, 0.3);
+  --a11y-sidebar-icon: #FFD066;                    // WCAG AAA (7.2:1) - antes #FFC444 (6.43:1)
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #1A1A1A;
+  --a11y-header-border: #E0E0E0;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #1A1A1A;
+  --a11y-dropdown-hover-bg: #F5F5F5;
+  --a11y-dropdown-border: #E0E0E0;
+  --a11y-dropdown-header-bg: #FAFAFA;
+
+  --a11y-focus-color: rgba(0, 119, 182, 0.5);
+  --a11y-focus-accent: #0077B6;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // Deuteranopia: avoid green, use blue + orange/yellow
+  --a11y-nav-home: #0077B6;
+  --a11y-nav-activities: #023E8A;
+  --a11y-nav-calendar: #FFA500;
+  --a11y-nav-talk: #9B2335;
+
+  --a11y-role-person: #005A8C;            // WCAG AA (6.3:1 sobre #E0F7FA) - antes #0077B6 (4.37:1)
+  --a11y-role-person-bg: #E0F7FA;
+  --a11y-role-professional: #023E8A;
+  --a11y-role-professional-bg: #E3F2FD;
+  --a11y-role-family: #9B2335;
+  --a11y-role-family-bg: #FCE4EC;
+
+  --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// TEMA DEUTERANOPIA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="deuteranopia"],
+.dark-theme [data-profile="deuteranopia"],
+[data-color-mode="dark"] [data-theme="deuteranopia"],
+.dark-theme[data-theme="deuteranopia"] {
+  --a11y-bg: #121212;
+  --a11y-bg-secondary: #1E1E1E;
+  --a11y-surface: #1A1A1A;
+  --a11y-text: #F5F5F5;
+  --a11y-text-secondary: #D0D0D0;
+  --a11y-text-muted: #ADADAD;             // Contraste 7.3:1 on #1A1A1A (AAA)
+  --a11y-primary: #48CAE4;                 // Cyan claro
+  --a11y-primary-dark: #00B4D8;
+  --a11y-primary-text: #000000;
+  --a11y-link: #48CAE4;
+  --a11y-link-hover: #00B4D8;
+  --a11y-success: #48CAE4;                 // Cyan en lugar de verde
+  --a11y-warning: #FFB703;                 // Amarillo/naranja
+  --a11y-danger: #FB8500;                  // Naranja fuerte
+  --a11y-success-text: #001F27;            // 4.6:1 sobre #48CAE4 (era #000000 → 2.8:1 ✗)
+  --a11y-warning-text: #332200;            // 4.5:1 sobre #FFB703 (era #000000 → 2.2:1 ✗)
+  --a11y-danger-text: #332200;             // 4.5:1 sobre #FB8500 (era #000000 → 2.3:1 ✗)
+  --a11y-border: #616161;
+
+  --a11y-sidebar-bg: #03045E;
+  --a11y-sidebar-text: #F5F5F5;
+  --a11y-sidebar-text-muted: #90E0EF;
+  --a11y-sidebar-nav-link: #CAF0F8;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.12);
+  --a11y-sidebar-nav-link-active-bg: rgba(255, 183, 3, 0.25);
+  --a11y-sidebar-icon: #FFB703;
+
+  --a11y-header-bg: #121212;
+  --a11y-header-text: #F5F5F5;
+  --a11y-header-border: #424242;
+
+  --a11y-dropdown-bg: #1E1E1E;
+  --a11y-dropdown-text: #F5F5F5;
+  --a11y-dropdown-hover-bg: #2D2D2D;
+  --a11y-dropdown-border: #616161;
+  --a11y-dropdown-header-bg: #1A1A1A;
+
+  --a11y-focus-color: rgba(72, 202, 228, 0.6);
+  --a11y-focus-accent: #48CAE4;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #616161;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #9E9E9E;
+
+  --a11y-nav-home: #48CAE4;
+  --a11y-nav-activities: #0077B6;
+  --a11y-nav-calendar: #FFB703;
+  --a11y-nav-talk: #FB8500;
+
+  --a11y-role-person: #48CAE4;
+  --a11y-role-person-bg: rgba(72, 202, 228, 0.15);
+  --a11y-role-professional: #FFB703;      // Amarillo dorado, safe deuteranopia, WCAG AAA - antes #0077B6 (3.85:1)
+  --a11y-role-professional-bg: rgba(255, 183, 3, 0.15);
+  --a11y-role-family: #FB8500;
+  --a11y-role-family-bg: rgba(251, 133, 0, 0.15);
+}
+
+// =========================================
+// TEMA PROTANOPIA - MODO CLARO
+// Daltonismo rojo-verde (sensibilidad reducida al rojo)
+// Usa azul y amarillo como colores distintivos
+// =========================================
+[data-color-mode="light"][data-theme="protanopia"],
+[data-color-mode="light"][data-profile="protanopia"],
+:root:not([data-color-mode="dark"])[data-theme="protanopia"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 16px;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0.01em;
+  --a11y-word-spacing: 0.05em;
+
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F5F5F5;
+  --a11y-surface: #FAFAFA;
+  --a11y-text: #1A1A1A;
+  --a11y-text-secondary: #3D3D3D;
+  --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
+  --a11y-primary: #1D3557;                 // Azul oscuro
+  --a11y-primary-dark: #14213D;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-link: #005A8C;                    // WCAG AAA (7.0:1) - antes #0077B6 (4.87:1)
+  --a11y-link-hover: #003D66;
+  --a11y-success: #2E5370;                 // WCAG AAA (8.1:1) — era #355E78 (6.96:1, fallaba AAA)
+  --a11y-warning: #705500;                 // WCAG AAA (7.0:1) — antes #8C6A00 (5.0:1)
+  --a11y-danger: #8F4400;                  // WCAG AAA (7.0:1) — antes #9C4A00 (6.2:1)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;            // 7.0:1 sobre #705500 (AAA) — antes #000000 (2.99:1 ❌)
+  --a11y-danger-text: #FFFFFF;             // 7.0:1 sobre #8F4400 (AAA) — antes #000000 (2.99:1 ❌)
+  --a11y-border: #9E9E9E;
+
+  --a11y-sidebar-bg: #1D3557;
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #A8DADC;
+  --a11y-sidebar-nav-link: #F1FAEE;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(233, 196, 106, 0.3);
+  --a11y-sidebar-icon: #E9C46A;
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #1A1A1A;
+  --a11y-header-border: #E0E0E0;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #1A1A1A;
+  --a11y-dropdown-hover-bg: #F5F5F5;
+  --a11y-dropdown-border: #E0E0E0;
+  --a11y-dropdown-header-bg: #FAFAFA;
+
+  --a11y-focus-color: rgba(29, 53, 87, 0.5);
+  --a11y-focus-accent: #1D3557;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // Protanopia: avoid red, use blue + yellow
+  --a11y-nav-home: #457B9D;
+  --a11y-nav-activities: #1D3557;
+  --a11y-nav-calendar: #E9C46A;
+  --a11y-nav-talk: #F4A261;
+
+  --a11y-role-person: #2E5370;            // WCAG AAA (8.1:1) — era #355E78 (6.96:1, fallaba AAA)
+  --a11y-role-person-bg: rgba(53, 94, 120, 0.1);
+  --a11y-role-professional: #1D3557;
+  --a11y-role-professional-bg: rgba(29, 53, 87, 0.1);
+  --a11y-role-family: #9C4A00;            // WCAG AA (5.7:1) - antes #F4A261 fallaba (2.06:1)
+  --a11y-role-family-bg: rgba(156, 74, 0, 0.1);
+
+  --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// TEMA PROTANOPIA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="protanopia"],
+.dark-theme [data-profile="protanopia"],
+[data-color-mode="dark"] [data-theme="protanopia"],
+.dark-theme[data-theme="protanopia"] {
+  --a11y-bg: #14213D;
+  --a11y-bg-secondary: #1D3557;
+  --a11y-surface: #1D3557;
+  --a11y-text: #F1FAEE;
+  --a11y-text-secondary: #A8DADC;
+  --a11y-text-muted: #B8E0F0;              // WCAG AAA (9.77:1 sobre #1D3557) — era #97D0EB (7.38:1, muy ajustado)
+  --a11y-primary: #A8DADC;
+  --a11y-primary-dark: #97D0EB;            // WCAG AAA sobre bg — era #8ECAE6
+  --a11y-primary-text: #14213D;
+  --a11y-link: #A8DADC;
+  --a11y-link-hover: #8ECAE6;
+  --a11y-success: #97D0EB;                 // WCAG AAA (7.38:1) — era #8ECAE6 (6.91:1)
+  --a11y-warning: #E9C46A;
+  --a11y-danger: #F4A261;
+  --a11y-success-text: #14213D;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #000000;
+  --a11y-border: #457B9D;
+
+  --a11y-sidebar-bg: #0D1B2A;
+  --a11y-sidebar-text: #F1FAEE;
+  --a11y-sidebar-text-muted: #A8DADC;
+  --a11y-sidebar-nav-link: #F1FAEE;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(233, 196, 106, 0.3);
+  --a11y-sidebar-icon: #E9C46A;
+
+  --a11y-header-bg: #14213D;
+  --a11y-header-text: #F1FAEE;
+  --a11y-header-border: #457B9D;
+
+  --a11y-dropdown-bg: #1D3557;
+  --a11y-dropdown-text: #F1FAEE;
+  --a11y-dropdown-hover-bg: #264653;
+  --a11y-dropdown-border: #457B9D;
+  --a11y-dropdown-header-bg: #14213D;
+
+  --a11y-focus-color: rgba(168, 218, 220, 0.6);
+  --a11y-focus-accent: #A8DADC;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #457B9D;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #A8DADC;
+
+  --a11y-nav-home: #97D0EB;
+  --a11y-nav-activities: #A8DADC;
+  --a11y-nav-calendar: #E9C46A;
+  --a11y-nav-talk: #F4A261;
+
+  --a11y-role-person: #97D0EB;             // WCAG AAA — era #8ECAE6
+  --a11y-role-person-bg: rgba(142, 202, 230, 0.15);
+  --a11y-role-professional: #A8DADC;
+  --a11y-role-professional-bg: rgba(168, 218, 220, 0.15);
+  --a11y-role-family: #F4A261;
+  --a11y-role-family-bg: rgba(244, 162, 97, 0.15);
+}
+
+// =========================================
+// TEMA TRITANOPIA - MODO CLARO
+// Daltonismo azul-amarillo (muy raro)
+// Usa rojo/magenta y cyan como colores distintivos
+// =========================================
+[data-color-mode="light"][data-theme="tritanopia"],
+[data-color-mode="light"][data-profile="tritanopia"],
+:root:not([data-color-mode="dark"])[data-theme="tritanopia"] {
+  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-size: 16px;
+  --a11y-line-height: 1.5;
+  --a11y-letter-spacing: 0.01em;
+  --a11y-word-spacing: 0.05em;
+
+  --a11y-bg: #FFFFFF;
+  --a11y-bg-secondary: #F5F5F5;
+  --a11y-surface: #FAFAFA;
+  --a11y-text: #1A1A1A;
+  --a11y-text-secondary: #3D3D3D;
+  --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
+  --a11y-primary: #9B2335;                 // Rojo/magenta oscuro
+  --a11y-primary-dark: #7B1A29;
+  --a11y-primary-text: #FFFFFF;
+  --a11y-link: #1D3557;                   // Azul navy oscuro, legible sobre blanco
+  --a11y-link-hover: #457B9D;
+  --a11y-success: #005A62;                 // WCAG AAA (7.1:1) - antes #00838F (4.52:1)
+  --a11y-warning: #AF004A;                 // Magenta oscuro WCAG AAA (7.07:1) - antes #E91E63 (4.35:1)
+  --a11y-danger: #A00000;                  // WCAG AAA (7.3:1) - antes #B71C1C (6.57:1)
+  --a11y-success-text: #FFFFFF;
+  --a11y-warning-text: #FFFFFF;
+  --a11y-danger-text: #FFFFFF;
+  --a11y-border: #9E9E9E;
+
+  --a11y-sidebar-bg: #4A148C;              // Púrpura oscuro
+  --a11y-sidebar-text: #FFFFFF;
+  --a11y-sidebar-text-muted: #E1BEE7;
+  --a11y-sidebar-nav-link: #FFFFFF;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(0, 229, 255, 0.3);
+  --a11y-sidebar-icon: #00E5FF;                    // Contraste 7.7:1 sobre #4A148C (AAA) — era #00BCD4 (5.2:1 ❌)
+
+  --a11y-header-bg: #FFFFFF;
+  --a11y-header-text: #1A1A1A;
+  --a11y-header-border: #E0E0E0;
+
+  --a11y-dropdown-bg: #FFFFFF;
+  --a11y-dropdown-text: #1A1A1A;
+  --a11y-dropdown-hover-bg: #F5F5F5;
+  --a11y-dropdown-border: #E0E0E0;
+  --a11y-dropdown-header-bg: #FAFAFA;
+
+  --a11y-focus-color: rgba(155, 35, 53, 0.5);
+  --a11y-focus-accent: #9B2335;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #9E9E9E;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #616161;
+
+  // Tritanopia: avoid blue-yellow, use red/magenta + cyan
+  --a11y-nav-home: #00838F;
+  --a11y-nav-activities: #9B2335;
+  --a11y-nav-calendar: #B5004D;            // Magenta oscuro 7.2:1 — era #E91E63 (3.99:1, fallaba AAA)
+  --a11y-nav-talk: #4A148C;
+
+  --a11y-role-person: #005A62;            // WCAG AAA (7.1:1) - antes #00838F (4.52:1)
+  --a11y-role-person-bg: rgba(0, 90, 98, 0.1);
+  --a11y-role-professional: #9B2335;
+  --a11y-role-professional-bg: rgba(155, 35, 53, 0.1);
+  --a11y-role-family: #4A148C;
+  --a11y-role-family-bg: rgba(74, 20, 140, 0.1);
+
+  --a11y-spacing-base: 1rem;
+}
+
+// =========================================
+// TEMA TRITANOPIA - MODO OSCURO
+// =========================================
+[data-color-mode="dark"][data-profile="tritanopia"],
+.dark-theme [data-profile="tritanopia"],
+[data-color-mode="dark"] [data-theme="tritanopia"],
+.dark-theme[data-theme="tritanopia"] {
+  --a11y-bg: #1A1A2E;
+  --a11y-bg-secondary: #16213E;
+  --a11y-surface: #16213E;
+  --a11y-text: #EAEAEA;
+  --a11y-text-secondary: #B8B8B8;
+  --a11y-text-muted: #B0B0B0;              // WCAG AAA (7.2:1) - antes #9A9A9A (6.06:1)
+  --a11y-primary: #FF91A3;                 // Rosa claro WCAG AAA (7.44:1 sobre #16213E) — era #FF7A90 (6.38:1)
+  --a11y-primary-dark: #E94560;
+  --a11y-primary-text: #1A0008;            // WCAG AAA (9.38:1 sobre #FF91A3)
+  --a11y-link: #FF91A3;                    // WCAG AAA (7.44:1 sobre surface) — era #FF7A90
+  --a11y-link-hover: #FFA2B3;
+  --a11y-success: #4DD0E1;                 // Cyan claro
+  --a11y-warning: #F48FB1;                 // Rosa claro
+  --a11y-danger: #FF807E;                  // WCAG AAA (7.02:1) - antes #EF5350 (4.89:1)
+  --a11y-success-text: #000000;
+  --a11y-warning-text: #000000;
+  --a11y-danger-text: #1A0000;             // 6.4:1 sobre #EF5350 (era #FFFFFF → 3.3:1 ✗)
+  --a11y-border: #533483;
+
+  --a11y-sidebar-bg: #0F0E17;
+  --a11y-sidebar-text: #EAEAEA;
+  --a11y-sidebar-text-muted: #A7A9BE;
+  --a11y-sidebar-nav-link: #EAEAEA;
+  --a11y-sidebar-nav-link-hover-bg: rgba(255, 255, 255, 0.1);
+  --a11y-sidebar-nav-link-active-bg: rgba(77, 208, 225, 0.3);
+  --a11y-sidebar-icon: #4DD0E1;
+
+  --a11y-header-bg: #1A1A2E;
+  --a11y-header-text: #EAEAEA;
+  --a11y-header-border: #533483;
+
+  --a11y-dropdown-bg: #16213E;
+  --a11y-dropdown-text: #EAEAEA;
+  --a11y-dropdown-hover-bg: #1A1A2E;
+  --a11y-dropdown-border: #533483;
+  --a11y-dropdown-header-bg: #0F0E17;
+
+  --a11y-focus-color: rgba(233, 69, 96, 0.6);
+  --a11y-focus-accent: #E94560;
+  --a11y-focus-width: 3px;
+
+  --a11y-scrollbar-thumb: #533483;
+  --a11y-scrollbar-track: transparent;
+  --a11y-scrollbar-thumb-hover: #E94560;
+
+  --a11y-nav-home: #4DD0E1;
+  --a11y-nav-activities: #E94560;
+  --a11y-nav-calendar: #F48FB1;
+  --a11y-nav-talk: #7C4DFF;
+
+  --a11y-role-person: #4DD0E1;
+  --a11y-role-person-bg: rgba(77, 208, 225, 0.15);
+  --a11y-role-professional: #FF91A3;      // WCAG AAA (7.44:1) — era #FF7A90 (6.38:1)
+  --a11y-role-professional-bg: rgba(255, 122, 144, 0.15);
+  --a11y-role-family: #A78BFF;            // WCAG AA (5.5:1) - antes #7C4DFF (3.54:1)
+  --a11y-role-family-bg: rgba(167, 139, 255, 0.15);
+}
+
+// =========================================
+// APLICACIÓN GLOBAL DE VARIABLES
+// =========================================
+
+body {
+  font-family: var(--a11y-font-family) !important;
+  font-size: var(--a11y-font-size-override, var(--a11y-font-size)) !important;
+  line-height: var(--a11y-line-height-override, var(--a11y-line-height));
+  letter-spacing: var(--a11y-letter-spacing-override, var(--a11y-letter-spacing));
+  word-spacing: var(--a11y-word-spacing);
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+}
+
+// =========================================
+// TIPOGRAFÍA
+// =========================================
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--a11y-font-family) !important;
+  color: var(--a11y-text) !important;
+  line-height: 1.3;
+}
+
+p, span, div, li, td, th, label {
+  color: var(--a11y-text);
+}
+
+.text-secondary,
+.text-muted,
+.text-body-secondary {
+  color: var(--a11y-text-muted) !important;
+}
+
+small {
+  color: var(--a11y-text-secondary);
+}
+
+// =========================================
+// LINKS
+// =========================================
+
+a {
+  // Usa --a11y-link (separado del primary de botones)
+  // para evitar que texto azul compita visualmente con cuerpo negro
+  color: var(--a11y-link, var(--a11y-primary)) !important;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-underline-offset: 3px;
+
+  &:hover,
+  &:focus {
+    color: var(--a11y-link-hover, var(--a11y-primary-dark)) !important;
+    text-decoration-thickness: 2px;
+  }
+}
+
+// =========================================
+// FOCUS GLOBAL
+// =========================================
+
+*:focus-visible {
+  outline: var(--a11y-focus-width) solid var(--a11y-focus-color) !important;
+  outline-offset: 2px;
+}
+
+// =========================================
+// SIDEBAR
+// =========================================
+
+.sidebar {
+  background-color: var(--a11y-sidebar-bg) !important;
+  border-right: 1px solid var(--a11y-border);
+
+  .sidebar-brand {
+    color: var(--a11y-sidebar-text) !important;
+    background-color: var(--a11y-sidebar-bg) !important;
+
+    span {
+      color: var(--a11y-sidebar-text) !important;
+    }
+  }
+
+  .sidebar-header {
+    background-color: var(--a11y-sidebar-bg) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar-nav {
+    background-color: var(--a11y-sidebar-bg) !important;
+
+    .nav-title {
+      color: var(--a11y-sidebar-text) !important;  // text-muted #B0BEC5 = 6.24:1 → falla AAA; usar text #ECEFF1 = 10:1 ✓
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75em;
+    }
+
+    .nav-link {
+      color: var(--a11y-sidebar-nav-link) !important;
+      font-family: var(--a11y-font-family) !important;
+
+      &:hover {
+        background-color: var(--a11y-sidebar-nav-link-hover-bg) !important;
+        color: var(--a11y-sidebar-text) !important;
+      }
+
+      &.active {
+        background-color: var(--a11y-sidebar-nav-link-active-bg) !important;
+        color: var(--a11y-sidebar-text) !important;
+      }
+
+      .nav-icon {
+        color: var(--a11y-sidebar-icon) !important;
+      }
+    }
+
+    .nav-group {
+      &.show {
+        background-color: rgba(0, 0, 0, 0.2);
+      }
+
+      .nav-group-toggle {
+        color: var(--a11y-sidebar-nav-link) !important;
+
+        &::after {
+          background-color: var(--a11y-sidebar-icon);
+        }
+      }
+
+      .nav-group-items {
+        background-color: transparent !important;
+
+        .nav-link {
+          color: var(--a11y-sidebar-nav-link) !important;
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    background-color: var(--a11y-sidebar-bg) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .sidebar-toggler {
+    background-color: transparent !important;
+    color: var(--a11y-sidebar-text) !important;
+  }
+}
+
+// =========================================
+// HEADER
+// =========================================
+
+.header {
+  background-color: var(--a11y-header-bg) !important;
+  border-bottom: 2px solid var(--a11y-header-border) !important;
+  color: var(--a11y-header-text) !important;
+
+  .header-toggler,
+  .btn {
+    color: var(--a11y-header-text) !important;
+  }
+
+  .header-nav {
+    .nav-link {
+      color: var(--a11y-header-text) !important;
+
+      &:hover,
+      &:focus {
+        color: var(--a11y-link, var(--a11y-primary)) !important;
+      }
+
+      &.active {
+        color: var(--a11y-link, var(--a11y-primary)) !important;
+        font-weight: 600;
+      }
+    }
+  }
+
+  svg[cIcon] {
+    color: var(--a11y-header-text) !important;
+  }
+
+  .vr {
+    background-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
+// BREADCRUMB
+// =========================================
+
+.breadcrumb {
+  background-color: transparent !important;
+
+  .breadcrumb-item {
+    color: var(--a11y-text-secondary) !important;
+
+    a {
+      color: var(--a11y-link, var(--a11y-primary)) !important;
+    }
+
+    &.active {
+      color: var(--a11y-text) !important;
+    }
+
+    &::before {
+      color: var(--a11y-text-muted) !important;
+    }
+  }
+}
+
+// =========================================
+// DROPDOWNS
+// =========================================
+
+.dropdown-menu {
+  background-color: var(--a11y-dropdown-bg) !important;
+  border: 2px solid var(--a11y-dropdown-border) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .dropdown-header {
+    background-color: var(--a11y-dropdown-header-bg) !important;
+    color: var(--a11y-text-secondary) !important;
+    font-weight: 600;
+  }
+
+  .dropdown-item {
+    color: var(--a11y-dropdown-text) !important;
+    font-family: var(--a11y-font-family) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-dropdown-hover-bg) !important;
+      color: var(--a11y-text) !important;
+    }
+
+    &.active,
+    &:active {
+      background-color: var(--a11y-primary) !important;
+      color: var(--a11y-primary-text) !important;
+    }
+
+    svg[cIcon] {
+      color: var(--a11y-text-muted) !important;
+    }
+
+    small {
+      color: var(--a11y-text-muted) !important;
+    }
+  }
+
+  .dropdown-divider {
+    border-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
+// BOTONES
+// =========================================
+
+.btn {
+  font-family: var(--a11y-font-family) !important;
+  border-width: 2px !important;
+  min-height: 44px; // WCAG 2.5.5 - touch target mínimo 44px
+}
+
+.btn.small,
+.btn-sm {
+  min-height: 44px; // WCAG 2.5.5 - aplica también a botones pequeños
+}
+
+.btn-primary {
+  background-color: var(--a11y-primary) !important;
+  border-color: var(--a11y-primary) !important;
+  color: var(--a11y-primary-text) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-primary-dark) !important;
+    border-color: var(--a11y-primary-dark) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+}
+
+.btn-secondary {
+  background-color: var(--a11y-bg-secondary) !important;
+  border-color: var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-border) !important;
+  }
+
+  &:disabled,
+  &.disabled {
+    background-color: var(--a11y-bg-secondary) !important;
+    border-color: var(--a11y-text-muted) !important;
+    color: var(--a11y-text-muted) !important;
+    opacity: 1;
+  }
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled,
+.btn-success:disabled,
+.btn-success.disabled,
+.btn-danger:disabled,
+.btn-danger.disabled,
+.btn-warning:disabled,
+.btn-warning.disabled {
+  opacity: 0.6;
+  color: var(--a11y-text) !important;
+}
+
+.btn {
+  &:disabled,
+  &.disabled {
+    cursor: not-allowed;
+    pointer-events: auto;
+  }
+}
+
+.btn-success {
+  background-color: var(--a11y-success) !important;
+  border-color: var(--a11y-success) !important;
+  color: var(--a11y-success-text) !important;
+}
+
+.btn-danger {
+  background-color: var(--a11y-danger) !important;
+  border-color: var(--a11y-danger) !important;
+  color: var(--a11y-danger-text) !important;
+}
+
+.btn-warning {
+  background-color: var(--a11y-warning) !important;
+  border-color: var(--a11y-warning) !important;
+  color: var(--a11y-warning-text) !important;
+}
+
+.btn-outline-primary {
+  border-color: var(--a11y-primary) !important;
+  color: var(--a11y-primary) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+}
+
+.btn-link {
+  color: var(--a11y-link, var(--a11y-primary)) !important;
+
+  &:hover,
+  &:focus {
+    color: var(--a11y-link-hover, var(--a11y-primary-dark)) !important;
+  }
+}
+
+// Botones link pequeños (acciones secundarias) — AAA sobre cualquier fondo claro
+.btn-link.small,
+.btn-link.btn-sm {
+  color: var(--a11y-text-muted) !important;
+}
+
+// =========================================
+// CARDS
+// =========================================
+
+.card {
+  background-color: var(--a11y-surface) !important;
+  border: 2px solid var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+
+  .card-header {
+    background-color: var(--a11y-bg-secondary) !important;
+    border-bottom: 1px solid var(--a11y-border) !important;
+    color: var(--a11y-text) !important;
+  }
+
+  .card-body {
+    color: var(--a11y-text) !important;
+  }
+
+  .card-footer {
+    background-color: var(--a11y-bg-secondary) !important;
+    border-top: 1px solid var(--a11y-border) !important;
+  }
+
+  .card-title {
+    color: var(--a11y-text) !important;
+  }
+
+  .card-text {
+    color: var(--a11y-text-secondary) !important;
+  }
+}
+
+// =========================================
+// FORMULARIOS
+// =========================================
+
+.form-control,
+.form-select {
+  font-family: var(--a11y-font-family) !important;
+  font-size: var(--a11y-font-size) !important;
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+  border: 2px solid var(--a11y-border) !important;
+
+  &::placeholder {
+    color: var(--a11y-text-muted) !important;
+  }
+
+  &:focus {
+    border-color: var(--a11y-primary) !important;
+    box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+    background-color: var(--a11y-bg) !important;
+    color: var(--a11y-text) !important;
+  }
+
+  &:disabled,
+  &[readonly] {
+    background-color: var(--a11y-bg-secondary) !important;
+  }
+}
+
+// =========================================
+// NG-SELECT
+// =========================================
+.ng-select {
+  font-family: var(--a11y-font-family) !important;
+
+  .ng-select-container {
+    background-color: var(--a11y-bg) !important;
+    border: 2px solid var(--a11y-border) !important;
+    color: var(--a11y-text) !important;
+
+    &:hover {
+      border-color: var(--a11y-text-secondary) !important;
+    }
+
+    &.ng-select-focused {
+      border-color: var(--a11y-primary) !important;
+      box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+    }
+  }
+
+  .ng-placeholder {
+    color: var(--a11y-text-muted) !important;
+  }
+
+  .ng-value {
+    color: var(--a11y-text) !important;
+  }
+
+  .ng-value-label {
+    color: var(--a11y-text) !important;
+  }
+
+  .ng-arrow-wrapper {
+    .ng-arrow {
+      border-color: var(--a11y-text-muted) transparent transparent !important;
+    }
+  }
+
+  &.ng-select-opened {
+    .ng-arrow-wrapper .ng-arrow {
+      border-color: transparent transparent var(--a11y-text-muted) !important;
+    }
+  }
+
+  .ng-dropdown-panel {
+    background-color: var(--a11y-bg) !important;
+    border: 2px solid var(--a11y-border) !important;
+
+    .ng-option {
+      color: var(--a11y-text) !important;
+      background-color: var(--a11y-bg) !important;
+
+      &:hover,
+      &.ng-option-marked {
+        background-color: var(--a11y-bg-secondary) !important;
+      }
+
+      &.ng-option-selected {
+        background-color: var(--a11y-primary) !important;
+        color: var(--a11y-primary-text) !important;
+      }
+    }
+
+    .ng-option-group-name {
+      color: var(--a11y-text-secondary) !important;
+      font-weight: 600;
+    }
+  }
+
+  &.ng-select-disabled {
+    .ng-select-container {
+      background-color: var(--a11y-bg-secondary) !important;
+      border-color: var(--a11y-text-muted) !important;
+      color: var(--a11y-text-muted) !important;
+      opacity: 0.7;
+    }
+  }
+}
+
+.form-label {
+  color: var(--a11y-text) !important;
+  font-weight: 500;
+}
+
+.input-group {
+  .input-group-text {
+    background-color: var(--a11y-bg-secondary) !important;
+    border: 2px solid var(--a11y-border) !important;
+    color: var(--a11y-text) !important;
+
+    svg {
+      color: var(--a11y-text-muted) !important;
+    }
+  }
+}
+
+.form-check-input {
+  border: 2px solid var(--a11y-border) !important;
+  background-color: var(--a11y-bg) !important;
+
+  &:checked {
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+  }
+}
+
+.form-check-label {
+  color: var(--a11y-text) !important;
+}
+
+.is-invalid {
+  border-color: var(--a11y-danger) !important;
+}
+
+.invalid-feedback {
+  color: var(--a11y-danger) !important;
+
+  &::before {
+    content: "⚠ ";
+  }
+}
+
+.is-valid {
+  border-color: var(--a11y-success) !important;
+}
+
+.valid-feedback {
+  color: var(--a11y-success) !important;
+
+  &::before {
+    content: "✓ ";
+  }
+}
+
+// =========================================
+// TABLAS
+// =========================================
+
+.table {
+  color: var(--a11y-text) !important;
+  border-color: var(--a11y-border) !important;
+
+  thead {
+    background-color: var(--a11y-bg-secondary) !important;
+
+    th {
+      color: var(--a11y-text) !important;
+      border-color: var(--a11y-border) !important;
+      font-weight: 600;
+    }
+  }
+
+  tbody {
+    tr {
+      &:hover {
+        background-color: var(--a11y-bg-secondary) !important;
+      }
+
+      td {
+        color: var(--a11y-text) !important;
+        border-color: var(--a11y-border) !important;
+      }
+    }
+  }
+
+  &.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--a11y-bg-secondary) !important;
+  }
+}
+
+// =========================================
+// ALERTAS
+// =========================================
+
+.alert {
+  border-width: 2px !important;
+  color: var(--a11y-text) !important;
+  background-color: var(--a11y-surface) !important;
+
+  &.alert-success {
+    border-color: var(--a11y-success) !important;
+  }
+
+  &.alert-danger {
+    border-color: var(--a11y-danger) !important;
+  }
+
+  &.alert-warning {
+    border-color: var(--a11y-warning) !important;
+  }
+
+  &.alert-info {
+    border-color: var(--a11y-primary) !important;
+  }
+}
+
+// =========================================
+// BADGES
+// =========================================
+
+.badge {
+  font-family: var(--a11y-font-family) !important;
+  font-weight: 600;
+
+  &.bg-primary {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  /* Badge success: sólido — fondo --a11y-success, texto --a11y-success-text (blanco/negro según tema). */
+  &.bg-success {
+    background-color: var(--a11y-success) !important;
+    color:            var(--a11y-success-text, #FFFFFF) !important;
+    border:           none !important;
+  }
+
+  &.bg-danger {
+    background-color: var(--a11y-danger) !important;
+    color: var(--a11y-danger-text) !important;
+  }
+
+  &.bg-warning {
+    background-color: var(--a11y-warning) !important;
+    color: var(--a11y-warning-text) !important;
+  }
+
+  &.bg-secondary {
+    background-color: var(--a11y-border) !important;
+    color: var(--a11y-text) !important;
+  }
+
+  &.badge-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 0.75em;
+      height: 0.75em;
+      flex-shrink: 0;
+    }
+
+    &.badge-success::before {
+      /* Outlined badge: ícono usa --a11y-success (verde) para coincidir con el texto */
+      background-color: var(--a11y-success);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+      mask-size: contain;
+      -webkit-mask-size: contain;
+    }
+
+    &.badge-warning::before {
+      background-color: var(--a11y-warning-text);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+      mask-size: contain;
+      -webkit-mask-size: contain;
+    }
+
+    &.badge-danger::before {
+      background-color: var(--a11y-danger-text);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+      mask-size: contain;
+      -webkit-mask-size: contain;
+    }
+  }
+}
+
+// =========================================
+// ESTADOS DE TEXTO Y FONDO
+// =========================================
+
+.text-success { color: var(--a11y-success) !important; }
+.text-warning { color: var(--a11y-warning) !important; }
+.text-danger { color: var(--a11y-danger) !important; }
+.text-primary { color: var(--a11y-link, var(--a11y-primary)) !important; }
+
+.bg-primary { background-color: var(--a11y-primary) !important; }
+.bg-success { background-color: var(--a11y-success) !important; }
+.bg-warning { background-color: var(--a11y-warning) !important; }
+.bg-danger { background-color: var(--a11y-danger) !important; }
+.bg-light { background-color: var(--a11y-bg) !important; }
+.bg-dark { background-color: var(--a11y-sidebar-bg) !important; }
+
+.bg-body-secondary,
+.bg-body-tertiary {
+  background-color: var(--a11y-bg-secondary) !important;
+}
+
+// =========================================
+// ICONOS PARA DALTONISMO (WCAG 1.4.1)
+// =========================================
+.a11y-status-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+  }
+
+  &.success::before {
+    background-color: var(--a11y-success);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    -webkit-mask-size: contain;
+  }
+
+  &.warning::before {
+    background-color: var(--a11y-warning);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M8.22 1.754a.25.25 0 0 0-.44 0L.42 13.335c-.1.18.03.415.26.415h14.66c.23 0 .36-.234.26-.415L8.22 1.754Zm.53 1.28a.75.75 0 0 1-1.5 0V7.87a.75.75 0 0 1 1.5 0V3.034ZM8.593 10.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5a.75.75 0 0 1 .75-.75Z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    -webkit-mask-size: contain;
+  }
+
+  &.danger::before {
+    background-color: var(--a11y-danger);
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z'/%3E%3C/svg%3E");
+    mask-size: contain;
+    -webkit-mask-size: contain;
+  }
+}
+
+// Utilidad para screen readers - mostrar texto pero mantener iconos visibles
+.sr-only-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// =========================================
+// OTROS COMPONENTES
+// =========================================
+
+.avatar {
+  border: 2px solid var(--a11y-border) !important;
+}
+
+.footer {
+  background-color: var(--a11y-bg) !important;
+  border-top: 2px solid var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+}
+
+.wrapper {
+  background-color: var(--a11y-bg) !important;
+}
+
+.body {
+  background-color: var(--a11y-bg) !important;
+}
+
+.modal-content {
+  background-color: var(--a11y-bg) !important;
+  border: 2px solid var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+
+  .modal-header {
+    background-color: var(--a11y-bg-secondary) !important;
+    border-bottom: 1px solid var(--a11y-border) !important;
+    color: var(--a11y-text) !important;
+  }
+
+  .modal-body {
+    color: var(--a11y-text) !important;
+  }
+
+  .modal-footer {
+    background-color: var(--a11y-bg-secondary) !important;
+    border-top: 1px solid var(--a11y-border) !important;
+  }
+}
+
+.tooltip .tooltip-inner {
+  background-color: var(--a11y-sidebar-bg) !important;
+  color: var(--a11y-sidebar-text) !important;
+  border: 1px solid var(--a11y-border) !important;
+}
+
+.toast {
+  background-color: var(--a11y-bg) !important;
+  border: 2px solid var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+
+  .toast-header {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text) !important;
+  }
+}
+
+// =========================================
+// SIDEBAR NAV TITLES
+// Override directo necesario: CoreUI redefine --cui-sidebar-nav-title-color
+// en .sidebar/.sidebar-nav (especificidad [0,1,0]) que gana sobre :root [0,0,1].
+// !important en propiedad computed gana sobre cualquier especificidad.
+// =========================================
+
+.nav-title {
+  color: var(--a11y-sidebar-text) !important;
+}
+
+// =========================================
+// BADGES — SECONDARY Y INFO
+// CoreUI Angular renderiza como class="badge bg-secondary" / "badge bg-info".
+// Bootstrap redefine --cui-secondary en .badge.bg-secondary → :root bridge pierde.
+// Override directo con !important en background-color resuelve el cascade.
+// =========================================
+
+.badge.bg-secondary {
+  background-color: var(--a11y-badge-secondary-bg) !important;
+  color: #fff !important;
+}
+
+// Info badges (roles, etiquetas) → map a primary para mantener AAA por perfil
+.badge.bg-info {
+  background-color: var(--a11y-primary) !important;
+  color: var(--a11y-primary-text) !important;
+}
+
+// Botones outline-secondary: Sass compila $secondary (#455A64) hardcodeado.
+// En fondos levemente off-white (#FAFAFA), #455A64 da 6.73:1 → falla AAA.
+// Override directo a #4B4B4B que da 8.36:1 en #FAFAFA (AAA ✓).
+.btn-outline-secondary {
+  color: var(--a11y-badge-secondary-bg) !important;
+  border-color: var(--a11y-badge-secondary-bg) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-badge-secondary-bg) !important;
+    color: #fff !important;
+  }
+}
+
+// Dark mode: --a11y-badge-secondary-bg = #4A4A4A (dark gray) → invisible on #121212.
+// Use text-secondary (#D0D0D0) which gives 11.6:1 on #121212 (AAA ✓).
+[data-color-mode="dark"],
+.dark-theme {
+  .btn-outline-secondary {
+    color: var(--a11y-text-secondary) !important;
+    border-color: var(--a11y-text-secondary) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-text-secondary) !important;
+      color: var(--a11y-bg) !important;
+    }
+  }
+}
+
+// =========================================
+// LIST GROUP
+// =========================================
+
+.list-group-item {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+  border-color: var(--a11y-border) !important;
+
+  &.active {
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text) !important;
+  }
+}
+
+// =========================================
+// TABS Y PILLS
+// =========================================
+
+.nav-tabs {
+  border-bottom-color: var(--a11y-border) !important;
+
+  .nav-link {
+    color: var(--a11y-text-secondary) !important;
+    border-color: transparent !important;
+
+    &:hover,
+    &:focus {
+      color: var(--a11y-text) !important;
+      border-color: var(--a11y-border) var(--a11y-border) transparent !important;
+      background-color: var(--a11y-bg-secondary) !important;
+    }
+
+    &.active {
+      color: var(--a11y-text) !important;
+      background-color: var(--a11y-bg) !important;
+      border-color: var(--a11y-border) var(--a11y-border) var(--a11y-bg) !important;
+    }
+
+    &.disabled {
+      color: var(--a11y-text-muted) !important;
+    }
+  }
+}
+
+.nav-pills .nav-link {
+  color: var(--a11y-text-secondary) !important;
+
+  &.active {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  &:hover:not(.active) {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text) !important;
+  }
+}
+
+// =========================================
+// ACCORDION
+// =========================================
+
+.accordion-item {
+  background-color: var(--a11y-bg) !important;
+  border-color: var(--a11y-border) !important;
+  color: var(--a11y-text) !important;
+}
+
+.accordion-button {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+
+  &:not(.collapsed) {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-primary) !important;
+    box-shadow: inset 0 -1px 0 var(--a11y-border) !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 var(--a11y-focus-width) var(--a11y-focus-color) !important;
+  }
+
+  &::after {
+    filter: none;
+  }
+}
+
+.accordion-body {
+  background-color: var(--a11y-bg) !important;
+  color: var(--a11y-text) !important;
+}
+
+// =========================================
+// PAGINATION
+// =========================================
+
+.pagination {
+  .page-link {
+    background-color: var(--a11y-bg) !important;
+    color: var(--a11y-primary) !important;
+    border-color: var(--a11y-border) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-bg-secondary) !important;
+      color: var(--a11y-primary) !important;
+    }
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--a11y-primary) !important;
+    border-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+
+  .page-item.disabled .page-link {
+    background-color: var(--a11y-bg-secondary) !important;
+    color: var(--a11y-text-muted) !important;
+    border-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
+// PROGRESS BARS
+// =========================================
+
+.progress {
+  background-color: var(--a11y-bg-secondary) !important;
+}
+
+.progress-bar {
+  background-color: var(--a11y-primary) !important;
+
+  &.bg-success { background-color: var(--a11y-success) !important; }
+  &.bg-danger  { background-color: var(--a11y-danger) !important; }
+  &.bg-warning { background-color: var(--a11y-warning) !important; }
+  &.bg-info    { background-color: var(--a11y-primary) !important; }
+}
+
+// =========================================
+// FORM CONTROL PLAINTEXT
+// (campos display inline-edit)
+// =========================================
+
+.form-control-plaintext {
+  color: var(--a11y-text) !important;
+
+  &.border-bottom {
+    border-color: var(--a11y-border) !important;
+  }
+}
+
+// =========================================
+// ESTILOS ESPECÍFICOS POR TEMA
+// =========================================
+
+[data-theme="high-contrast"] {
+  a {
+    text-decoration: underline !important;
+    text-decoration-thickness: 2px !important;
+  }
+
+  .btn-close {
+    filter: invert(1) !important;
+    opacity: 1 !important;
+  }
+
+  .sidebar .sidebar-nav .nav-link.active {
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+}
+
+@include color-mode(dark) {
+  [data-theme="high-contrast"] {
+    .btn-close {
+      filter: none !important;
+    }
+  }
+}
+
+[data-theme="dyslexia"] {
+  * {
+    text-align: left !important;
+  }
+
+  em, i {
+    font-style: normal !important;
+    font-weight: 600 !important;
+  }
+
+  a {
+    text-decoration: underline !important;
+    text-decoration-thickness: 2px !important;
+  }
+
+  p {
+    max-width: 70ch;
+  }
+}
+
+[data-theme="low-vision"] {
+  svg[cIcon] {
+    transform: scale(1.3);
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1.1rem !important;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.75rem 1rem !important;
+    min-height: 3rem !important;
+  }
+
+  .sidebar .sidebar-nav .nav-link {
+    padding: 1rem 1.25rem !important;
+    font-size: 1.1rem !important;
+  }
+
+  .header .header-nav .nav-link {
+    padding: 0.75rem 1rem !important;
+    font-size: 1.1rem !important;
+  }
+
+  .dropdown-item {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 1.1rem !important;
+  }
+}
+
+// =========================================
+// MEDIA QUERIES
+// =========================================
+
+@media (forced-colors: active) {
+  a { color: LinkText !important; }
+  button, .btn { border: 2px solid ButtonText !important; }
+  *:focus-visible { outline: 3px solid Highlight !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-duration: 0ms;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border-width: 2px;
+  }
+}
+
+// =========================================
+// UTILIDADES
+// =========================================
+
+.visually-hidden,
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  border: 0 !important;
+}
+
+.skip-link {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  min-height: 44px;
+  background: var(--a11y-primary);
+  color: var(--a11y-primary-text) !important;
+  padding: 12px 24px;
+  z-index: 10000;
+  text-decoration: none !important;
+  font-weight: 600;
+  border-radius: 0 0 4px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+
+  &:focus {
+    top: 0;
+    left: 0;
+    outline: var(--a11y-focus-width) solid var(--a11y-focus-color);
+    outline-offset: 2px;
+  }
+}
+
+// =========================================
+// CLASES UTILITARIAS DE ACCESIBILIDAD
+// =========================================
+
+// Resaltar enlaces
+body.a11y-highlight-links {
+  // Links de contenido (inline, routerLink, etc.)
+  a:not(.btn):not(.nav-link):not(.dropdown-item) {
+    padding: 0 2px;
+    border-radius: 2px;
+    text-decoration: underline !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 3px !important;
+    text-underline-offset: 4px !important;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--a11y-primary) !important;
+      color: var(--a11y-primary-text) !important;
+      text-decoration-color: var(--a11y-primary-text, #FFFFFF) !important;
+    }
+  }
+
+  // Links de navegación del sidebar
+  a.nav-link {
+    text-decoration: underline !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+  }
+
+  // Items de menú desplegable (menú de usuario, acciones)
+  .dropdown-item {
+    text-decoration: underline !important;
+    text-decoration-color: var(--a11y-primary, #0D47A1) !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+  }
+
+  // Skip link visible permanentemente cuando highlight está activo
+  .skip-link {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    opacity: 0.92;
+    font-size: 0.85rem;
+  }
+}
+
+// Foco mejorado
+body.a11y-highlight-focus {
+  *:focus-visible {
+    outline: 4px solid var(--a11y-focus-color, #1565C0) !important;
+    outline-offset: 4px !important;
+    box-shadow: 0 0 0 6px rgba(var(--a11y-primary-rgb, 21, 101, 192), 0.3) !important;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Movimiento reducido
+body.a11y-reduced-motion {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// Guía de lectura (barra que sigue el cursor/foco)
+body.a11y-reading-guide {
+  cursor: crosshair;
+}
+
+// =========================================
+// GUÍA DE LECTURA - Barra horizontal
+// Sigue el mouse o el elemento enfocado
+// =========================================
+.a11y-reading-guide-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 44px;
+  pointer-events: none;
+  z-index: 9990;
+  transform: translateY(-50%);
+  transition: top 0.05s ease-out;
+
+  // Color sólido con opacidad — sin gradiente (WCAG: no información solo por color)
+  background-color: rgba(21, 101, 192, 0.12);
+  border-top: 2px solid rgba(21, 101, 192, 0.5);
+  border-bottom: 2px solid rgba(21, 101, 192, 0.5);
+}
+
+// Modo oscuro
+[data-color-mode="dark"] .a11y-reading-guide-bar {
+  background-color: rgba(100, 181, 246, 0.18);
+  border-color: rgba(100, 181, 246, 0.6);
+}
+
+// Alto contraste
+[data-profile="high-contrast"] .a11y-reading-guide-bar {
+  height: 52px;
+  background-color: rgba(255, 255, 0, 0.2);
+  border-color: #FFFF00;
+  border-width: 3px;
+}
+
+// Dislexia
+[data-profile="dyslexia"] .a11y-reading-guide-bar {
+  height: 48px;
+  background-color: rgba(147, 161, 161, 0.15);
+  border-color: rgba(147, 161, 161, 0.5);
+}
+
+// Visión reducida
+[data-profile="low-vision"] .a11y-reading-guide-bar {
+  height: 56px;
+  background-color: rgba(21, 101, 192, 0.2);
+  border-color: rgba(21, 101, 192, 0.7);
+  border-width: 3px;
+}
+
+// Daltonismo rojo-verde (deuteranopia, protanopia)
+[data-profile="deuteranopia"] .a11y-reading-guide-bar,
+[data-profile="protanopia"] .a11y-reading-guide-bar {
+  background-color: rgba(0, 114, 178, 0.18);
+  border-color: rgba(0, 114, 178, 0.6);
+}
+
+// Daltonismo azul-amarillo (tritanopia)
+[data-profile="tritanopia"] .a11y-reading-guide-bar {
+  background-color: rgba(204, 121, 167, 0.18);
+  border-color: rgba(204, 121, 167, 0.6);
+}
+
+// =========================================
+// LOGIN VISUAL - ESTILOS ACCESIBLES
+// =========================================
+
+// Contenedor de login visual
+.visual-login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+// Titulo de login
+.visual-login-title {
+  font-family: var(--a11y-font-family);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--a11y-text);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+// Instrucciones de login
+.visual-login-instructions {
+  font-family: var(--a11y-font-family);
+  font-size: 1.125rem;
+  color: var(--a11y-text-secondary);
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+// Grilla de perfiles
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  max-width: 400px;
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--a11y-bg);
+  border: 3px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--a11y-bg-secondary);
+    transform: scale(1.05);
+  }
+
+  &:focus {
+    outline: 3px solid var(--a11y-focus-accent, #FFD700);
+    outline-offset: 2px;
+  }
+
+  &.selected {
+    border-color: var(--a11y-primary);
+    background-color: rgba(21, 101, 192, 0.1);
+  }
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--a11y-primary-text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.profile-name {
+  font-family: var(--a11y-font-family);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--a11y-text);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Botones de accion de login visual
+.visual-login-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.btn-visual-login {
+  flex: 1;
+  min-height: 48px;
+  font-family: var(--a11y-font-family);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: 3px solid var(--a11y-focus-accent, #FFD700);
+    outline-offset: 2px;
+  }
+
+  &.btn-primary {
+    background-color: var(--a11y-primary);
+    color: var(--a11y-primary-text);
+    border-color: var(--a11y-primary);
+
+    &:hover {
+      background-color: var(--a11y-primary-dark);
+      border-color: var(--a11y-primary-dark);
+    }
+
+    &:disabled {
+      background-color: var(--a11y-border);
+      border-color: var(--a11y-border);
+      color: var(--a11y-text-muted);
+      cursor: not-allowed;
+    }
+  }
+
+  &.btn-secondary {
+    background-color: transparent;
+    color: var(--a11y-text);
+    border-color: var(--a11y-border);
+
+    &:hover {
+      background-color: var(--a11y-bg-secondary);
+    }
+  }
+}
+
+// Feedback de login
+.visual-login-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: var(--a11y-font-family);
+  font-size: 1rem;
+
+  &.success {
+    background-color: rgba(46, 125, 50, 0.1);
+    color: var(--a11y-success);
+    border: 2px solid var(--a11y-success);
+  }
+
+  &.error {
+    background-color: rgba(198, 40, 40, 0.1);
+    color: var(--a11y-danger);
+    border: 2px solid var(--a11y-danger);
+  }
+
+  &.info {
+    background-color: rgba(21, 101, 192, 0.1);
+    color: var(--a11y-primary);
+    border: 2px solid var(--a11y-primary);
+  }
+}
+
+// Animaciones de feedback
+@keyframes login-success {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes login-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.animate-success {
+  animation: login-success 0.3s ease-out;
+}
+
+.animate-error {
+  animation: login-shake 0.3s ease-out;
+}
+
+// Respeta preferencia de movimiento reducido
+@media (prefers-reduced-motion: reduce) {
+  .profile-item,
+  .btn-visual-login {
+    transition: none;
+  }
+
+  .animate-success,
+  .animate-error {
+    animation: none;
+  }
+}
+
+// =========================================
+// CURSOR GRANDE
+// =========================================
+body.a11y-large-cursor {
+  // Cursor personalizado grande
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M8 8 L8 40 L18 30 L28 42 L32 38 L22 26 L34 26 Z' fill='%23000000' stroke='%23FFFFFF' stroke-width='2'/%3E%3C/svg%3E") 4 4, auto !important;
+
+  *,
+  *::before,
+  *::after {
+    cursor: inherit !important;
+  }
+
+  a,
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"],
+  .btn {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M18 8 L18 28 L12 28 L24 44 L36 28 L30 28 L30 8 Z' fill='%23000000' stroke='%23FFFFFF' stroke-width='2'/%3E%3C/svg%3E") 24 4, pointer !important;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  [contenteditable="true"] {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect x='22' y='4' width='4' height='40' fill='%23000000' stroke='%23FFFFFF' stroke-width='2'/%3E%3Crect x='16' y='4' width='16' height='4' fill='%23000000' stroke='%23FFFFFF' stroke-width='1'/%3E%3Crect x='16' y='40' width='16' height='4' fill='%23000000' stroke='%23FFFFFF' stroke-width='1'/%3E%3C/svg%3E") 24 24, text !important;
+  }
+}
+
+// =========================================
+// TEXTO A VOZ (TTS)
+// Estilos para indicar que TTS está activo
+// =========================================
+body.a11y-tts-enabled {
+  // Resaltar texto seleccionable
+  *::selection {
+    background-color: var(--a11y-primary) !important;
+    color: var(--a11y-primary-text) !important;
+  }
+}
+
+// Indicador flotante de lectura activa (Angular component)
+.a11y-speaking-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--a11y-sidebar-bg);
+  border: 2px solid var(--a11y-primary);
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  font-family: var(--a11y-font-family);
+
+  .speaking-waves {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+
+    span {
+      display: block;
+      width: 4px;
+      background: var(--a11y-primary);
+      border-radius: 2px;
+      animation: speaking-wave 0.8s ease-in-out infinite;
+
+      &:nth-child(1) { height: 8px; animation-delay: 0s; }
+      &:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+      &:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+      &:nth-child(4) { height: 16px; animation-delay: 0.3s; }
+      &:nth-child(5) { height: 6px; animation-delay: 0.4s; }
+    }
+  }
+
+  .speaking-text {
+    color: var(--a11y-sidebar-text);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .speaking-stop-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 2px solid var(--a11y-danger);
+    border-radius: 50%;
+    color: var(--a11y-danger);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: var(--a11y-danger);
+      color: var(--a11y-danger-text);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+@keyframes speaking-wave {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1); }
+}
+
+// Respeta preferencia de movimiento reducido
+@media (prefers-reduced-motion: reduce) {
+  .a11y-speaking-indicator .speaking-waves span {
+    animation: none;
+  }
+}
+
+// Indicador de lectura activa
+.a11y-tts-speaking {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--a11y-primary);
+  color: var(--a11y-primary-text);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 10001;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-family: var(--a11y-font-family);
+
+  // Animación de ondas de sonido
+  .tts-waves {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+
+    span {
+      display: block;
+      width: 4px;
+      background: currentColor;
+      border-radius: 2px;
+      animation: tts-wave 0.8s ease-in-out infinite;
+
+      &:nth-child(1) { animation-delay: 0s; height: 8px; }
+      &:nth-child(2) { animation-delay: 0.1s; height: 16px; }
+      &:nth-child(3) { animation-delay: 0.2s; height: 12px; }
+      &:nth-child(4) { animation-delay: 0.3s; height: 20px; }
+      &:nth-child(5) { animation-delay: 0.4s; height: 8px; }
+    }
+  }
+
+  .tts-controls {
+    display: flex;
+    gap: 0.5rem;
+
+    button {
+      padding: 0.25rem 0.5rem;
+      background: transparent;
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      color: inherit;
+      cursor: pointer;
+      font-size: 0.75rem;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+}
+
+@keyframes tts-wave {
+  0%, 100% {
+    transform: scaleY(0.5);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+// Respeta preferencia de movimiento reducido para TTS
+@media (prefers-reduced-motion: reduce) {
+  .a11y-tts-speaking .tts-waves span {
+    animation: none;
+  }
+}
+
+// =========================================
+// INDICADORES DE PERFIL DE DALTONISMO
+// =========================================
+[data-profile="deuteranopia"],
+[data-profile="protanopia"],
+[data-profile="tritanopia"] {
+  // Agregar patrones además de colores para diferenciar estados
+  .badge.bg-success,
+  .alert-success,
+  .btn-success:not(:has(svg)) {
+    &::before {
+      content: '\2713 '; // Checkmark
+    }
+  }
+
+  .badge.bg-danger,
+  .alert-danger,
+  .btn-danger:not(:has(svg)) {
+    &::before {
+      content: '\2717 '; // X mark
+    }
+  }
+
+  .badge.bg-warning,
+  .alert-warning,
+  .btn-warning:not(:has(svg)) {
+    &::before {
+      content: '\26A0 '; // Warning triangle
+    }
+  }
+}

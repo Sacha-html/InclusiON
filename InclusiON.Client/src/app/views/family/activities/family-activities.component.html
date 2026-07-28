@@ -1,0 +1,179 @@
+<!-- Loading inicial -->
+@if (isLoading()) {
+  <div class="loading-center" role="status" aria-live="polite">
+    <c-spinner />
+    <p class="mt-2 text-body-secondary">Cargando...</p>
+  </div>
+} @else if (hasError()) {
+  <c-alert color="danger" role="alert">
+    No se pudo cargar la información. Intentá de nuevo más tarde.
+  </c-alert>
+} @else {
+
+  <!-- Selector de persona (si hay más de una) -->
+  @if (persons().length > 1) {
+    <div class="person-selector" role="group" aria-label="Seleccionar persona">
+      <p class="selector-label">¿De quién querés ver las actividades?</p>
+      <div class="person-pills">
+        @for (person of persons(); track person.personId) {
+          <button
+            class="person-pill"
+            [class.person-pill--active]="selectedPersonId() === person.personId"
+            (click)="selectPerson(person.personId)"
+            [attr.aria-pressed]="selectedPersonId() === person.personId"
+          >
+            <app-actor-avatar
+              [name]="person.fullName"
+              [color]="person.avatarColor"
+              size="sm"
+            />
+            {{ person.fullName }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Sin persona seleccionada -->
+  @if (!selectedPersonId()) {
+    <div class="empty-state">
+      <p>Seleccioná una persona para ver sus actividades.</p>
+    </div>
+  }
+
+  <!-- Actividades -->
+  @if (selectedPersonId()) {
+    <c-card>
+      <c-card-header>
+        <div class="header-row">
+          <div class="header-title">
+            <h2 class="h6 mb-0">
+              Actividades de {{ selectedPerson()?.fullName }}
+            </h2>
+          </div>
+          @if (!isLoadingAssignments()) {
+            <span class="total-badge">{{ counts().all }} total</span>
+          }
+        </div>
+      </c-card-header>
+
+      <c-card-body>
+        @if (isLoadingAssignments()) {
+          <div class="loading-center" role="status" aria-live="polite">
+            <c-spinner size="sm" />
+            <span class="ms-2 text-body-secondary">Cargando actividades...</span>
+          </div>
+        } @else if (assignments().length === 0) {
+          <p class="text-body-secondary text-center py-3">
+            Todavía no tiene actividades asignadas.
+          </p>
+        } @else {
+
+          <!-- Filtros de estado -->
+          <div class="filter-tabs" role="tablist" aria-label="Filtrar por estado">
+            <button
+              id="tab-all"
+              class="filter-tab"
+              [class.filter-tab--active]="statusFilter() === 'all'"
+              (click)="setFilter('all')"
+              role="tab"
+              [attr.aria-selected]="statusFilter() === 'all'"
+              aria-controls="activities-panel"
+            >
+              Todas <span class="tab-count">{{ counts().all }}</span>
+            </button>
+            <button
+              id="tab-pendiente"
+              class="filter-tab filter-tab--warning"
+              [class.filter-tab--active]="statusFilter() === ActivityAssignmentStatus.Pendiente"
+              (click)="setFilter(ActivityAssignmentStatus.Pendiente)"
+              role="tab"
+              [attr.aria-selected]="statusFilter() === ActivityAssignmentStatus.Pendiente"
+              aria-controls="activities-panel"
+            >
+              Pendientes <span class="tab-count">{{ counts().pendiente }}</span>
+            </button>
+            <button
+              id="tab-en-progreso"
+              class="filter-tab filter-tab--info"
+              [class.filter-tab--active]="statusFilter() === ActivityAssignmentStatus.EnProgreso"
+              (click)="setFilter(ActivityAssignmentStatus.EnProgreso)"
+              role="tab"
+              [attr.aria-selected]="statusFilter() === ActivityAssignmentStatus.EnProgreso"
+              aria-controls="activities-panel"
+            >
+              En progreso <span class="tab-count">{{ counts().enProgreso }}</span>
+            </button>
+            <button
+              id="tab-completada"
+              class="filter-tab filter-tab--success"
+              [class.filter-tab--active]="statusFilter() === ActivityAssignmentStatus.Completada"
+              (click)="setFilter(ActivityAssignmentStatus.Completada)"
+              role="tab"
+              [attr.aria-selected]="statusFilter() === ActivityAssignmentStatus.Completada"
+              aria-controls="activities-panel"
+            >
+              Completadas <span class="tab-count">{{ counts().completada }}</span>
+            </button>
+          </div>
+
+          <!-- Lista de actividades -->
+          <div id="activities-panel" role="tabpanel" tabindex="0" aria-live="polite" aria-label="Actividades filtradas">
+          @if (filteredAssignments().length === 0) {
+            <p class="text-body-secondary text-center py-3">
+              No hay actividades con ese estado.
+            </p>
+          } @else {
+            <div class="assignments-list" role="list">
+              @for (a of filteredAssignments(); track a.id) {
+                <div class="assignment-card" role="listitem">
+                  <div class="assignment-header">
+                    <span class="assignment-title">{{ a.activityTitle }}</span>
+                    <c-badge [color]="statusColor(a.status)" shape="rounded-pill">
+                      {{ statusLabel(a.status) }}
+                    </c-badge>
+                  </div>
+
+                  <div class="assignment-meta">
+                    @if (a.assignedAt) {
+                      <span class="meta-item">
+                        <span class="meta-icon" aria-hidden="true">📅</span>
+                        Asignada: {{ formatDate(a.assignedAt) }}
+                      </span>
+                    }
+                    @if (a.dueDate) {
+                      <span class="meta-item">
+                        <span class="meta-icon" aria-hidden="true">⏰</span>
+                        Vence: {{ formatDate(a.dueDate) }}
+                      </span>
+                    }
+                    @if (a.responses.length > 0) {
+                      <span class="meta-item">
+                        <span class="meta-icon" aria-hidden="true">🔄</span>
+                        {{ a.responses.length }} intento{{ a.responses.length !== 1 ? 's' : '' }}
+                      </span>
+                    }
+                    @if (a.isEvaluationActivity) {
+                      <c-badge color="primary" shape="rounded-pill" class="ms-1">Evaluación</c-badge>
+                    }
+                  </div>
+
+                  <!-- Último resultado -->
+                  @if (lastScore(a) !== null) {
+                    <div class="assignment-score">
+                      <span class="score-label">Último resultado:</span>
+                      <c-badge [color]="scoreColor(lastScore(a)!)" shape="rounded-pill">
+                        {{ lastScore(a) }}%
+                      </c-badge>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+          </div><!-- /activities-panel -->
+        }
+      </c-card-body>
+    </c-card>
+  }
+}

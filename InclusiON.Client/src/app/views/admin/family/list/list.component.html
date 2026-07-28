@@ -1,0 +1,49 @@
+<app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadFamily()"></app-institution-filter>
+
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label cLabel for="filter-linked-person">Persona a cargo</label>
+      <input cFormControl id="filter-linked-person" type="text" [(ngModel)]="linkedPersonSearch" (ngModelChange)="onLinkedPersonSearch()" placeholder="Nombre o documento de la persona">
+    </c-col>
+    <c-col sm="3">
+      <label cLabel for="filter-status">Estado</label>
+      <select cSelect id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Gestionar Familiares"
+  [columns]="cols"
+  [items]="families"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [headerButtons]="canCreate ? [{action: 'new', label: 'Agregar'}] : []"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (sortAction)="onSort($event)"
+  (rowAction)="onRowAction($event)"
+  (headerAction)="onHeaderAction($event)">
+</app-data-table>
+
+<app-confirm-modal
+  [visible]="showConfirmModal"
+  title="Confirmar desactivación"
+  messagePrefix="¿Está seguro de que desea desactivar al familiar "
+  [itemName]="itemToDeactivate?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Esta acción deshabilitará su acceso al sistema."
+  confirmLabel="Desactivar"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()">
+</app-confirm-modal>

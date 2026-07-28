@@ -1,0 +1,159 @@
+<app-data-table
+  title="Familiares vinculados"
+  [columns]="familyCols"
+  [items]="representatives"
+  [totalItems]="representatives.length"
+  [pageSize]="10"
+  [currentPage]="1"
+  [loading]="loading"
+  [showSearch]="false"
+  [showPagination]="false"
+  [headerButtons]="familyHeaderButtons"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>
+
+<!-- Modal Vincular Familiar -->
+<c-modal [visible]="showLinkModal" (visibleChange)="showLinkModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>Vincular Familiar</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <div class="mb-3">
+      <label cFormLabel for="search-family">Buscar familiar</label>
+      <div class="d-flex gap-2">
+        <input cFormControl id="search-family" [(ngModel)]="searchFamily" placeholder="Buscar por nombre..." />
+        <button type="button" cButton color="secondary" (click)="onSearchFamily()">Buscar</button>
+      </div>
+    </div>
+
+    @if (loadingFamilies) {
+      <div class="text-center py-3">
+        <c-spinner></c-spinner>
+      </div>
+    } @else if (availableFamilies.length > 0) {
+      <div class="mb-3">
+        <label cFormLabel id="family-list-label">Seleccionar familiar</label>
+        <div class="list-group family-list-scroll" style="max-height: 200px; overflow-y: auto;" role="listbox" aria-labelledby="family-list-label">
+          @for (family of availableFamilies; track family.id) {
+            <button
+              type="button"
+              class="list-group-item list-group-item-action family-list-item"
+              [class.active]="selectedFamilyId === family.id"
+              [class.family-previously-linked]="family.wasPreviouslyLinked"
+              [attr.aria-selected]="selectedFamilyId === family.id"
+              [attr.aria-label]="family.fullName + (family.wasPreviouslyLinked ? ', familiar previamente desvinculado' : '')"
+              role="option"
+              (click)="onSelectFamily(family)">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ family.fullName }}</strong>
+                  @if (family.email) {
+                    <br /><small class="text-body-secondary">{{ family.email }}</small>
+                  }
+                </div>
+                @if (family.wasPreviouslyLinked) {
+                  <c-badge color="warning">Desvinculado</c-badge>
+                }
+              </div>
+            </button>
+          }
+        </div>
+      </div>
+    } @else {
+      <p class="text-muted">No se encontraron familiares disponibles.</p>
+    }
+
+    @if (selectedFamilyId) {
+      <div class="mb-3">
+        <label cFormLabel for="relationship">Relación</label>
+        <select cSelect id="relationship" [(ngModel)]="linkRelationship">
+          <option value="">Seleccionar...</option>
+          <option value="Madre">Madre</option>
+          <option value="Padre">Padre</option>
+          <option value="Hermano/a">Hermano/a</option>
+          <option value="Abuelo/a">Abuelo/a</option>
+          <option value="Tío/a">Tío/a</option>
+          <option value="Tutor Legal">Tutor Legal</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <c-form-check>
+          <input cFormCheckInput type="checkbox" id="isPrimary" [(ngModel)]="linkIsPrimary" />
+          <label cFormCheckLabel for="isPrimary">Familiar principal</label>
+        </c-form-check>
+      </div>
+
+      @if (selectedFamilyIsPreviouslyLinked) {
+        <c-alert color="warning">
+          <strong>Nota:</strong> Este familiar fue previamente desvinculado. Al vincularlo nuevamente, se restaurará el vínculo anterior.
+        </c-alert>
+      }
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button type="button" cButton color="secondary" (click)="closeLinkModal()">Cancelar</button>
+    <button
+      type="button"
+      cButton
+      color="primary"
+      (click)="confirmLink()"
+      [disabled]="!selectedFamilyId || !linkRelationship || confirmingLink">
+      @if (confirmingLink) {
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
+      }
+      Vincular
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal Confirmar Revincular -->
+<c-modal [visible]="showConfirmLinkModal" (visibleChange)="showConfirmLinkModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>Confirmar vinculación</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p>¿Está seguro que desea vincular nuevamente a este familiar?</p>
+    <p class="text-muted">Esta acción restaurará el vínculo anterior con esta persona.</p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button type="button" cButton color="secondary" (click)="showConfirmLinkModal = false">Cancelar</button>
+    <button type="button" cButton color="primary" (click)="doLink()" [disabled]="confirmingLink">
+      @if (confirmingLink) {
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
+      }
+      Confirmar
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal Desvincular Familiar -->
+<c-modal [visible]="showUnlinkModal" (visibleChange)="showUnlinkModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>Desvincular Familiar</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p>¿Está seguro que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de esta persona?</p>
+    <div class="mb-3">
+      <label cLabel for="observation">Motivo de desvinculación *</label>
+      <textarea cFormControl id="observation" [(ngModel)]="unlinkObservation" rows="3" aria-required="true" aria-describedby="observation-help"></textarea>
+      <small id="observation-help" style="color: var(--a11y-text-muted)">El motivo es obligatorio para continuar.</small>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button type="button" cButton color="secondary" (click)="closeUnlinkModal()">Cancelar</button>
+    <button
+      type="button"
+      cButton
+      color="danger"
+      (click)="confirmUnlink()"
+      [disabled]="!unlinkObservation.trim() || unlinking">
+      @if (unlinking) {
+        <c-spinner size="sm" aria-hidden="true"></c-spinner>
+      }
+      Desvincular
+    </button>
+  </c-modal-footer>
+</c-modal>

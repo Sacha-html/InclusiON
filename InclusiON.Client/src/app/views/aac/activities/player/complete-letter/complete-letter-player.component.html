@@ -1,0 +1,96 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || 'Completá las letras que faltan.'"
+    [hint]="hint"
+    [loading]="isLoading()"
+    [error]="errorMsg()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="region" aria-labelledby="game-instruction">
+    <h2 class="game-instruction" id="game-instruction" tabindex="-1">
+      {{ content.instruction || 'Completá las letras que faltan.' }}
+    </h2>
+
+    <!-- Palabra con huecos -->
+    <div class="word-display" role="group" aria-label="Palabra a completar">
+      @for (token of wordTokens(); track $index) {
+        @if (token.slotIdx !== null) {
+          <!-- Hueco clicable -->
+          <button
+            class="letter-slot"
+            [class]="'letter-slot--' + slotState(token.slotIdx)"
+            (click)="selectSlot(token.slotIdx)"
+            (keydown.backspace)="$event.preventDefault(); clearSlot(token.slotIdx)"
+            (keydown.delete)="$event.preventDefault(); clearSlot(token.slotIdx)"
+            (keydown.arrowLeft)="$event.preventDefault(); prevSlot()"
+            (keydown.arrowRight)="$event.preventDefault(); nextSlot()"
+            [attr.aria-label]="'Hueco ' + (token.slotIdx + 1) + (token.letter ? ': ' + token.letter + '. Retroceso para borrar.' : ': vacío')"
+            [attr.aria-pressed]="activeSlot() === token.slotIdx"
+            [attr.aria-current]="activeSlot() === token.slotIdx ? 'step' : null"
+          >
+            {{ token.letter }}
+            @if (token.letter) {
+              <span class="slot-clear" aria-hidden="true">×</span>
+            }
+          </button>
+        } @else {
+          <!-- Letra visible -->
+          <span class="letter-fixed" aria-hidden="true">{{ token.letter }}</span>
+        }
+      }
+    </div>
+
+    <!-- Opciones para el slot activo -->
+    @if (activeSlot() !== null) {
+      <div class="options-panel" role="group"
+           [attr.aria-label]="'Opciones para hueco ' + ((activeSlot() ?? 0) + 1)">
+        <p class="options-label">Elegí la letra:</p>
+        <div class="options-row">
+          @for (letter of optionsForActiveSlot(); track letter) {
+            <button
+              class="option-btn"
+              [class.option-btn--selected]="answers()[activeSlot()!] === letter"
+              (click)="pickLetter(letter)"
+              [attr.aria-label]="'Letra ' + letter"
+              [attr.aria-pressed]="answers()[activeSlot()!] === letter"
+            >
+              {{ letter }}
+            </button>
+          }
+        </div>
+      </div>
+    } @else if (allAnswered()) {
+      <p class="options-label all-done" aria-live="polite">
+        ✅ Todos los huecos completados
+      </p>
+    }
+
+    <!-- Confirmar -->
+    <div class="confirm-row">
+      <button
+        class="action-btn action-btn--primary"
+        [disabled]="!allAnswered()"
+        (click)="confirmAnswer()"
+        aria-label="Confirmar respuesta"
+      >
+        ✓ Confirmar
+      </button>
+    </div>
+  </div>
+}
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="score() === 100"
+    [score]="score()"
+    [message]="resultMessage()"
+    [loading]="isLoading()"
+    [canRetry]="score() < 100"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

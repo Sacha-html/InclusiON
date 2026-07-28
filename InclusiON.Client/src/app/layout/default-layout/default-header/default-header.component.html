@@ -1,0 +1,178 @@
+<ng-container>
+  <c-container [fluid]="true" class="border-bottom px-4">
+    <button
+      type="button"
+      [cSidebarToggle]="sidebarId()"
+      cHeaderToggler
+      toggle="visible"
+      style="margin-inline-start: -14px"
+      aria-label="Toggle sidebar navigation"
+    >
+      <svg cIcon name="cilMenu" size="lg" aria-hidden="true"></svg>
+    </button>
+    <c-header-nav class="d-none d-md-flex">
+      <c-nav-item>
+        <a cNavLink routerLink="/dashboard" routerLinkActive="active"
+          >Dashboard</a
+        >
+      </c-nav-item>
+    </c-header-nav>
+
+    <c-header-nav class="d-none d-md-flex ms-auto">
+      <app-notification-bell />
+    </c-header-nav>
+
+    <c-header-nav class="ms-auto ms-md-0">
+      <div class="nav-item py-1">
+        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
+      </div>
+      <ng-container *ngTemplateOutlet="accessibilityDropdown" />
+      <div class="nav-item py-1">
+        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
+      </div>
+      <ng-container *ngTemplateOutlet="themeDropdown" />
+      <div class="nav-item py-1">
+        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
+      </div>
+    </c-header-nav>
+
+    <c-header-nav class="mx-0">
+      <ng-container *ngTemplateOutlet="userDropdown" />
+    </c-header-nav>
+  </c-container>
+  <c-container [fluid]="true" class="px-4">
+    <c-breadcrumb-router />
+  </c-container>
+</ng-container>
+
+<ng-template #userDropdown>
+  <c-dropdown
+    [popperOptions]="{ placement: 'bottom-start' }"
+    variant="nav-item"
+  >
+    <button
+      [caret]="false"
+      cDropdownToggle
+      class="py-0 pe-0"
+      aria-label="Open user menu"
+    >
+      <c-avatar
+        shape="rounded-1"
+        size="md"
+        src="./assets/images/logo/inclusion-icon.svg"
+        status="success"
+        textColor="primary"
+        alt="User avatar"
+      />
+    </button>
+    <ul cDropdownMenu class="pt-0 w-auto">
+      <li>
+        <h6
+          cDropdownHeader
+          class="bg-body-info text-body-secondary fw-semibold py-2 rounded-top text-center"
+        >
+          {{
+            currentUser != null
+              ? currentUser.displayName || currentUser.name || "-"
+              : "-"
+          }}
+        </h6>
+      </li>
+
+      <li>
+        <h6
+          cDropdownHeader
+          class="bg-body-secondary text-body-secondary fw-semibold py-2 rounded-top"
+        >
+          Cuenta
+        </h6>
+      </li>
+
+      <li>
+        <a cDropdownItem routerLink="">
+          <svg cIcon class="me-2" aria-hidden="true" name="cilUser"></svg>
+          Perfil
+        </a>
+      </li>
+      <li>
+        <a cDropdownItem routerLink="/change-password">
+          <svg cIcon class="me-2" aria-hidden="true" name="cilNotes"></svg>
+          Cambiar contraseña
+        </a>
+      </li>
+      <li>
+        <a cDropdownItem routerLink="">
+          <svg cIcon class="me-2" aria-hidden="true" name="cilSettings"></svg>
+          Ajustes
+        </a>
+      </li>
+      <li>
+        <a cDropdownItem (click)="logout()" style="cursor: pointer">
+          <svg cIcon class="me-2" aria-hidden="true" name="cilAccountLogout"></svg>
+          Cerrar Sesión
+        </a>
+      </li>
+    </ul>
+  </c-dropdown>
+</ng-template>
+
+<ng-template #accessibilityDropdown>
+  <c-dropdown alignment="end" variant="nav-item">
+    <button
+      [caret]="false"
+      cDropdownToggle
+      aria-label="Seleccionar tema de accesibilidad"
+      cTooltip="Accesibilidad"
+    >
+      <svg cIcon [name]="accessibilityIcon()" size="lg" aria-hidden="true"></svg>
+    </button>
+    <div cDropdownMenu>
+      <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
+        Tema de Accesibilidad
+      </h6>
+      @for (theme of accessibilityService.themes; track theme.id) {
+      <button
+        (click)="accessibilityService.setTheme(theme.id)"
+        [active]="accessibilityService.currentTheme() === theme.id"
+        cDropdownItem
+        class="d-flex align-items-center"
+      >
+        <svg cIcon class="me-2" aria-hidden="true" [name]="theme.icon" size="lg"></svg>
+        <div class="d-flex flex-column">
+          <span>{{ theme.name }}</span>
+          <small class="text-body-secondary">{{ theme.description }}</small>
+        </div>
+      </button>
+      }
+    </div>
+  </c-dropdown>
+</ng-template>
+
+<ng-template #themeDropdown>
+  <c-dropdown alignment="end" variant="nav-item">
+    <button
+      [caret]="false"
+      cDropdownToggle
+      aria-label="Cambiar modo de color"
+      cTooltip="Modo de color"
+    >
+      <svg cIcon [name]="colorModeIcon()" size="lg" aria-hidden="true"></svg>
+    </button>
+    <div cDropdownMenu>
+      <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
+        Modo de Color
+      </h6>
+      @for (mode of accessibilityService.colorModes; track mode.id) {
+      <button
+        (click)="accessibilityService.setColorMode(mode.id)"
+        [active]="accessibilityService.colorMode() === mode.id"
+        cDropdownItem
+        class="d-flex align-items-center"
+      >
+        <svg cIcon class="me-2" aria-hidden="true" [name]="mode.icon" size="lg"></svg>
+        {{ mode.name }}
+      </button>
+      }
+    </div>
+  </c-dropdown>
+</ng-template>

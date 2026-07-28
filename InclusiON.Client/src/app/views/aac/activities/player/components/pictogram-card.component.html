@@ -1,0 +1,23 @@
+<button
+  class="picto-card"
+  [class]="cardClass"
+  [disabled]="disabled"
+  (click)="cardClick.emit()"
+  [attr.aria-label]="label"
+  [attr.aria-pressed]="selected"
+>
+  @if (pictogramId) {
+    <img
+      [src]="arasaac.getPictogramUrl(pictogramId)"
+      [alt]="label"
+      class="picto-img"
+      loading="lazy"
+    />
+  }
+  <span class="picto-label">{{ label }}</span>
+
+  @if (badge) {
+    <span class="picto-badge" aria-hidden="true">{{ badge }}</span>
+    <span class="visually-hidden">{{ badge === '✅' ? 'correcto' : 'incorrecto' }}</span>
+  }
+</button>

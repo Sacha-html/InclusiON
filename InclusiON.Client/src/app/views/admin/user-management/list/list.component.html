@@ -1,0 +1,81 @@
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end">
+    <c-col sm="3">
+      <label cLabel>Rol</label>
+      <select cSelect [(ngModel)]="selectedRole" (ngModelChange)="onRoleFilterChange()">
+        <option value="">Todos los roles</option>
+        <option value="Admin">Administrador</option>
+        <option value="Professional">Profesional</option>
+        <option value="FamilyRepresentative">Familiar</option>
+        <option value="PersonWithDisability">Persona</option>
+      </select>
+    </c-col>
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="selectedStatus" (ngModelChange)="onStatusFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Activos</option>
+        <option value="false">Inactivos</option>
+      </select>
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Gestionar Usuarios"
+  [columns]="cols"
+  [items]="users"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [currentPage]="currentPage"
+  [headerButtons]="[]"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (rowAction)="onRowAction($event)">
+</app-data-table>
+
+<app-confirm-modal
+  [visible]="showResetPasswordModal"
+  title="Confirmar reseteo de contraseña"
+  messagePrefix="¿Está seguro de que desea resetear la contraseña de "
+  [itemName]="itemToReset?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se generará una contraseña temporal y se revocarán todas las sesiones activas del usuario."
+  confirmLabel="Resetear contraseña"
+  confirmColor="warning"
+  (confirm)="confirmResetPassword()"
+  (cancel)="cancelResetPassword()">
+</app-confirm-modal>
+
+<app-confirm-modal
+  [visible]="showConfirmModal"
+  title="Confirmar desactivación"
+  messagePrefix="¿Está seguro de que desea desactivar al usuario "
+  [itemName]="itemToDeactivate?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se revocará su acceso inmediatamente y se desactivará su cuenta."
+  confirmLabel="Desactivar"
+  (confirm)="confirmDeactivate()"
+  (cancel)="cancelDeactivate()">
+</app-confirm-modal>
+
+<c-modal [visible]="showPasswordModal" (visibleChange)="closePasswordModal()">
+  <c-modal-header>
+    <h5 cModalTitle>Contraseña temporal generada</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p>Se generó una contraseña temporal para <strong>{{ tempPasswordEmail }}</strong>.</p>
+    <p>El usuario deberá cambiarla en su próximo inicio de sesión.</p>
+    <c-alert color="warning" class="d-flex align-items-center justify-content-between">
+      <code class="fs-5">{{ tempPassword }}</code>
+      <button cButton color="primary" size="sm" (click)="copyPassword()">Copiar</button>
+    </c-alert>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closePasswordModal()">Cerrar</button>
+  </c-modal-footer>
+</c-modal>

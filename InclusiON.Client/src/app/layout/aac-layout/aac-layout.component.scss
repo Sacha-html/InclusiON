@@ -1,0 +1,80 @@
+.aac-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--a11y-bg, #f0f4f8);
+
+  --aac-primary: var(--a11y-primary, #2196F3);
+  --aac-success: var(--a11y-success, #4CAF50);
+  --aac-warning: var(--a11y-warning, #FF9800);
+  --aac-danger: var(--a11y-danger, #F44336);
+  --aac-bg: var(--a11y-surface, #FFFFFF);
+  --aac-text: var(--a11y-text, #1a1a1a);
+  --aac-radius: 24px;
+  --aac-spacing: 16px;
+}
+
+.aac-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  z-index: 100;
+  background: var(--aac-bg);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.aac-main {
+  flex: 1;
+  padding: 88px var(--aac-spacing) 100px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.aac-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 88px;
+  z-index: 100;
+  background: var(--aac-bg);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+// Alto contraste
+:host-context([data-profile="high-contrast"]) {
+  .aac-container {
+    background: var(--a11y-bg, #000000);
+  }
+
+  .aac-header,
+  .aac-nav {
+    border: 2px solid var(--a11y-border, #FFFFFF);
+  }
+}
+
+// Modo oscuro
+:host-context([data-color-mode="dark"]) {
+  .aac-container {
+    background: var(--a11y-bg, #1e1e2e);
+  }
+}
+
+// Reducir movimiento
+:host-context(.a11y-reduced-motion) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aac-header,
+  .aac-nav {
+    transition: none !important;
+  }
+}

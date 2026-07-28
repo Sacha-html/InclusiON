@@ -1,0 +1,61 @@
+<a href="#main-content" class="skip-link">Ir al contenido principal</a>
+
+<c-sidebar
+  #sidebar="cSidebar"
+  class="d-print-none sidebar sidebar-fixed border-end"
+  id="sidebar"
+  visible
+>
+  <c-sidebar-header class="border-bottom">
+    <c-sidebar-brand [routerLink]="['/pro']">
+      <span class="sidebar-brand-full">InclusiON Pro</span>
+      <span class="sidebar-brand-narrow">IO</span>
+    </c-sidebar-brand>
+    <button
+      type="button"
+      cButton
+      color="link"
+      cSidebarToggle="sidebar"
+      class="d-lg-none"
+      aria-label="Toggle Sidebar"
+    >
+      <svg cIcon name="cilMenu" size="lg"></svg>
+    </button>
+  </c-sidebar-header>
+
+  <ng-scrollbar pointerEventsMethod="scrollbar">
+    <c-sidebar-nav
+      [navItems]="navItems"
+      dropdownMode="close"
+    />
+  </ng-scrollbar>
+
+  @if (!sidebar.narrow) {
+  <c-sidebar-footer
+    cSidebarToggle="sidebar"
+    class="border-top d-none d-lg-flex"
+    toggle="unfoldable"
+    style="cursor: pointer"
+  >
+    <button cSidebarToggler aria-label="Toggle sidebar fold"></button>
+  </c-sidebar-footer>
+  }
+</c-sidebar>
+
+<div class="wrapper d-flex flex-column min-vh-100">
+  <app-default-header
+    class="mb-4 d-print-none header header-sticky p-0 shadow-sm"
+    sidebarId="sidebar"
+  />
+
+  <main id="main-content" tabindex="-1" class="body flex-grow-1">
+    <c-container breakpoint="lg" class="h-auto px-4">
+      <router-outlet />
+    </c-container>
+  </main>
+
+  <app-default-footer class="d-print-none" />
+</div>
+
+<app-toaster />
+<app-accessibility-panel />

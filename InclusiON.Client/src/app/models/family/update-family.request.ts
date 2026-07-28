@@ -1,0 +1,7 @@
+export interface UpdateFamilyRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  documentNumber?: string;
+  phone?: string;
+}

@@ -1,0 +1,30 @@
+<c-toaster
+  class="p-3"
+  placement="top-end"
+  position="fixed"
+  role="region"
+  aria-label="Notificaciones"
+  #toasterRegion
+>
+  @for (toast of toasts; track toast.id) {
+    <c-toast
+      [color]="toast.color"
+      [autohide]="toast.autohide ?? true"
+      [delay]="toast.delay ?? 3000"
+      [visible]="true"
+      (visibleChange)="onVisibleChange($event, toast)"
+      class="text-white border-0"
+      [attr.role]="toast.color === 'danger' ? 'alert' : 'status'"
+      [attr.aria-live]="toast.color === 'danger' ? 'assertive' : 'polite'"
+      aria-atomic="true"
+    >
+      <c-toast-header [closeButton]="true">
+        <svg cIcon [name]="getIcon(toast.color)" size="lg" class="me-2" aria-hidden="true" focusable="false"></svg>
+        <strong class="me-auto">{{ toast.title }}</strong>
+      </c-toast-header>
+      <c-toast-body>
+        {{ toast.message }}
+      </c-toast-body>
+    </c-toast>
+  }
+</c-toaster>

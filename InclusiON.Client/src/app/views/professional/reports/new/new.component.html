@@ -1,0 +1,198 @@
+<c-card>
+  <c-card-header>
+    <h5 cCardTitle>Nuevo Reporte</h5>
+  </c-card-header>
+  <c-card-body>
+    <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
+
+    <form (ngSubmit)="onSubmit()">
+      <c-row class="mb-4">
+        <!-- Persona -->
+        <c-col xs="12" md="6">
+          <label class="form-label" id="report-person-label">Persona con discapacidad *</label>
+
+          <app-searchable-select
+            [formControl]="personControl"
+            [searchFn]="searchPersonsFn"
+            [displayFn]="displayPersonFn"
+            [valueFn]="personValueFn"
+            placeholder="Buscar por nombre..."
+            noResultsText="Sin resultados"
+          />
+        </c-col>
+
+        <!-- Tipo de Reporte -->
+        <c-col xs="12" md="6">
+          <label class="form-label" for="reportTypeId">Tipo de Reporte *</label>
+          <select
+            cSelect
+            id="reportTypeId"
+            [(ngModel)]="form.reportTypeId"
+            name="reportTypeId"
+            required
+          >
+            <option [value]="0">Seleccionar tipo...</option>
+            @for (type of reportTypes(); track type.id) {
+              <option [value]="type.id">{{ type.name }}</option>
+            }
+          </select>
+        </c-col>
+      </c-row>
+
+      <!-- Título -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <label class="form-label" for="report-title">Título *</label>
+          <input
+            cFormControl
+            id="report-title"
+            [(ngModel)]="form.title"
+            name="title"
+            placeholder="Ej: Informe de progreso - Marzo 2026"
+            required
+          />
+        </c-col>
+      </c-row>
+
+      <!-- Contenido -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <label class="form-label" for="report-content">Contenido *</label>
+          <textarea
+            cFormControl
+            id="report-content"
+            [(ngModel)]="form.content"
+            name="content"
+            rows="5"
+            placeholder="Describe el contenido del reporte..."
+            required
+          ></textarea>
+        </c-col>
+      </c-row>
+
+      <!-- Período -->
+      <c-row class="mb-4">
+        <c-col xs="12" md="6">
+          <label class="form-label" for="period-start">Fecha inicio período</label>
+          <input
+            cFormControl
+            id="period-start"
+            type="date"
+            [(ngModel)]="form.periodStartDate"
+            name="periodStartDate"
+          />
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="form-label" for="period-end">Fecha fin período</label>
+          <input
+            cFormControl
+            id="period-end"
+            type="date"
+            [(ngModel)]="form.periodEndDate"
+            name="periodEndDate"
+          />
+        </c-col>
+      </c-row>
+
+      <!-- Objetivos alcanzados -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <label class="form-label" for="achieved-goals">Objetivos alcanzados</label>
+          <textarea
+            cFormControl
+            id="achieved-goals"
+            [(ngModel)]="form.achievedGoals"
+            name="achievedGoals"
+            rows="3"
+            placeholder="Describe los objetivos alcanzados durante el período..."
+          ></textarea>
+        </c-col>
+      </c-row>
+
+      <!-- Áreas a reforzar -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <label class="form-label" for="areas-to-reinforce">Áreas a reforzar</label>
+          <textarea
+            cFormControl
+            id="areas-to-reinforce"
+            [(ngModel)]="form.areasToReinforce"
+            name="areasToReinforce"
+            rows="3"
+            placeholder="Describe las áreas que requieren refuerzo..."
+          ></textarea>
+        </c-col>
+      </c-row>
+
+      <!-- Recomendaciones -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <label class="form-label" for="future-recommendations">Recomendaciones</label>
+          <textarea
+            cFormControl
+            id="future-recommendations"
+            [(ngModel)]="form.futureRecommendations"
+            name="futureRecommendations"
+            rows="3"
+            placeholder="Sugiere recomendaciones para el futuro..."
+          ></textarea>
+        </c-col>
+      </c-row>
+
+      <!-- Próximos objetivos -->
+      <c-row class="mb-4">
+        <c-col xs="12">
+          <label class="form-label" for="next-objectives">Próximos objetivos</label>
+          <textarea
+            cFormControl
+            id="next-objectives"
+            [(ngModel)]="form.nextObjectives"
+            name="nextObjectives"
+            rows="3"
+            placeholder="Describe los próximos objetivos a trabajar..."
+          ></textarea>
+        </c-col>
+      </c-row>
+
+      <!-- Botones -->
+      <c-row>
+        <c-col xs="12">
+          <button cButton type="submit" color="primary" [disabled]="isLoading() || !isValid">
+            @if (isLoading()) {
+              <c-spinner size="sm" aria-hidden="true"></c-spinner>
+            }
+            Guardar
+          </button>
+          <button cButton type="button" color="secondary" class="ms-2" (click)="onCancel()">
+            Cancelar
+          </button>
+        </c-col>
+      </c-row>
+    </form>
+  </c-card-body>
+</c-card>
+
+<!-- Modal post-creación: ¿enviar ahora o revisar después? -->
+<c-modal [visible]="showSubmitModal()" [backdrop]="'static'" [keyboard]="false" alignment="center"
+         aria-labelledby="submit-modal-title">
+  <c-modal-header>
+    <h5 cModalTitle id="submit-modal-title">Reporte guardado</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p class="mb-1">El reporte fue creado exitosamente como <strong>borrador</strong>.</p>
+    <p class="text-body-secondary mb-0">
+      ¿Deseás enviarlo al administrador para revisión ahora, o preferís revisarlo antes?
+    </p>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" [disabled]="isSubmitting()" (click)="reviewLater()">
+      Revisar después
+    </button>
+    <button cButton color="primary" [disabled]="isSubmitting()" (click)="submitNow()">
+      @if (isSubmitting()) {
+        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
+      }
+      Enviar al administrador
+    </button>
+  </c-modal-footer>
+</c-modal>

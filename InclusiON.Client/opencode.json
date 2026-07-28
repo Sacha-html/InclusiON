@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "a11y-component-validator": {
+      "description": "Valida accesibilidad WCAG 2.1 de componentes Angular del proyecto",
+      "mode": "subagent",
+      "prompt": "{file:.opencode/agents/a11y-component-validator.md}"
+    },
+    "wcag-validator": {
+      "description": "Valida contrastes WCAG 2.1 AA/AAA en el sistema de temas de accesibilidad",
+      "mode": "subagent",
+      "prompt": "{file:.opencode/agents/wcag-validator.md}"
+    }
+  }
+}

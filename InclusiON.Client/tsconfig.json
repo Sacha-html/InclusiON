@@ -1,0 +1,53 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "paths": {
+      "@app/*": ["./src/app/*"],
+      "@services/*": ["./src/app/services/*"],
+      "@services": ["./src/app/services/index.ts"],
+      "@models/*": ["./src/app/models/*"],
+      "@models": ["./src/app/models/index.ts"],
+      "@components/*": ["./src/app/components/*"],
+      "@guards/*": ["./src/app/guards/*"],
+      "@interceptors/*": ["./src/app/interceptors/*"],
+      "@shared/*": ["./src/app/shared/*"],
+      "@env": ["./src/environments/environment.ts"]
+    },
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2023",
+      "dom"
+    ]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "typeCheckHostBindings": true,
+    "strictTemplates": true
+  },
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" },
+  ]
+}

@@ -1,0 +1,35 @@
+<div class="aac-activities" role="region" aria-labelledby="aac-activities-title">
+  <h1 id="aac-activities-title" class="page-title">Mis Actividades</h1>
+
+  @if (isLoading()) {
+    <div class="loading-state" role="status" aria-live="polite">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p>Cargando actividades...</p>
+    </div>
+  } @else if (hasError()) {
+    <div class="empty-state" role="alert">
+      <p>No se pudieron cargar las actividades. Intentá de nuevo más tarde.</p>
+    </div>
+  } @else if (assignments().length === 0) {
+    <div class="empty-state" role="status">
+      <p>No tenés actividades asignadas por el momento.</p>
+    </div>
+  } @else {
+    <div class="activities-list" role="list" aria-live="polite">
+      @for (a of assignments(); track a.id) {
+        <div role="listitem">
+          <app-visual-card
+            [title]="a.activityTitle"
+            icon="cilTask"
+            [variant]="statusVariant(a.status)"
+            [badge]="statusLabel(a.status)"
+            [interactive]="isPlayable(a)"
+            [done]="!isPlayable(a)"
+            [ariaLabel]="a.activityTitle + ', estado: ' + statusLabel(a.status)"
+            (cardClick)="openActivity(a)"
+          />
+        </div>
+      }
+    </div>
+  }
+</div>
