@@ -115,4 +115,16 @@ export class ReportsService {
       .patch<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}/reject`, { comment })
       .pipe(unwrapResponse());
   }
+
+  reassignReport(id: string, newProfessionalId: string): Observable<ReportResponse> {
+    return this.http
+      .patch<ApiResponse<ReportResponse>>(`${this.baseUrl}/${id}/reassign`, { newProfessionalId })
+      .pipe(unwrapResponse());
+  }
+
+  deleteReport(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.baseUrl}/${id}`)
+      .pipe(handleApiError());
+  }
 }

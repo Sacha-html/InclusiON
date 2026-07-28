@@ -103,9 +103,9 @@ export class DetailComponent implements OnInit {
         this.showConfirmModal = false;
         this.toastService.success('Profesional desactivado exitosamente');
       },
-      error: () => {
+      error: (err) => {
         this.showConfirmModal = false;
-        this.toastService.error('Error al desactivar el profesional');
+        this.toastService.error(err?.userMessage || 'Error al desactivar el profesional');
       },
     });
   }

@@ -38,7 +38,7 @@
             <option value="">Seleccionar estudiante...</option>
             @for (p of activePersons; track p.personId) {
               <option [value]="p.personId">
-                {{ p.personFirstName }} {{ p.personLastName }}
+                {{ p.personLastName }}, {{ p.personFirstName }} @if (p.personDocumentNumber) { (DNI: {{ p.personDocumentNumber }}) }
                 @if (p.disabilityTypeName) { — {{ p.disabilityTypeName }} }
               </option>
             }

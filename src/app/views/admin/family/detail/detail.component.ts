@@ -58,9 +58,11 @@ export class DetailComponent implements OnInit {
         this.showConfirmModal = false;
         this.toastService.success('Familiar desactivado exitosamente');
       },
-      error: () => {
+      error: (err) => {
         this.showConfirmModal = false;
-        this.toastService.error('Error al desactivar el familiar');
+        if (!err?.errorCode) {
+          this.toastService.error('Error al desactivar el familiar');
+        }
       },
     });
   }

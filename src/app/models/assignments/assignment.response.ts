@@ -4,6 +4,7 @@ export interface ProfessionalPersonResponse {
   personFirstName: string;
   personLastName: string;
   personFullName: string;
+  personDocumentNumber?: string;
   avatarColor?: string;
   disabilityTypeName?: string;
   age?: number;
