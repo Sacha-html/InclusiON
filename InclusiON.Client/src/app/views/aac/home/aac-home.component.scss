@@ -1,0 +1,76 @@
+// 188px = 88px top padding + 100px bottom padding del aac-main
+.aac-home {
+  height: calc(100dvh - 188px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 16px;
+  overflow-y: auto;   // allow scroll when text is enlarged (WCAG 1.4.4)
+}
+
+// ── Greeting ────────────────────────────────────────────────────────────
+
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.greeting-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--a11y-text, #1a1a1a);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.home-greeting {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--a11y-text, #1a1a1a);
+  margin: 0;
+  text-align: center;
+  line-height: 1.2;
+}
+
+// ── Quick actions 2x2 ───────────────────────────────────────────────────
+
+.quick-actions {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 580px;
+
+  app-big-button {
+    aspect-ratio: 1;
+    --big-button-min-size: 0;  // override big-button's 140px floor so aspect-ratio controls size
+  }
+}
+
+// ── Dark / High-contrast ────────────────────────────────────────────────
+
+:host-context([data-profile="high-contrast"]) {
+  .home-greeting,
+  .greeting-icon {
+    color: var(--a11y-text, #fff);
+  }
+}
+
+:host-context([data-color-mode="dark"]) {
+  .home-greeting,
+  .greeting-icon {
+    color: var(--a11y-text, #f5f5f5);
+  }
+}

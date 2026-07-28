@@ -1,0 +1,45 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || 'Seleccioná la figura correcta.'"
+    [hint]="hint"
+    [loading]="isLoading()"
+    [error]="errorMsg()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="region" aria-labelledby="game-instruction">
+    <h2 class="game-instruction" id="game-instruction" tabindex="-1">
+      {{ content.instruction }}
+    </h2>
+
+    <div class="items-grid"
+         role="group"
+         aria-label="Opciones"
+         [attr.aria-disabled]="selectedItemId() !== null">
+      @for (item of items; track item.id) {
+        <app-pictogram-card
+          [label]="item.label"
+          [pictogramId]="item.pictogramId"
+          [disabled]="selectedItemId() !== null"
+          [state]="itemState(item)"
+          [badge]="itemBadge(item)"
+          (cardClick)="selectItem(item)"
+        />
+      }
+    </div>
+  </div>
+}
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="!!isCorrect()"
+    [message]="resultMessage"
+    [loading]="isLoading()"
+    [canRetry]="!isCorrect()"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

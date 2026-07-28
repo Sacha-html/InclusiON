@@ -1,0 +1,76 @@
+<app-data-table
+  [title]="config.title"
+  [columns]="tableColumns"
+  [items]="items"
+  [loading]="isLoading"
+  [showSearch]="false"
+  [showPagination]="false"
+  [headerButtons]="config.canCreate ? headerButtons : []"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)"
+/>
+
+<!-- Modal confirmar baja -->
+<c-modal [visible]="showDeactivateModal" (visibleChange)="showDeactivateModal = $event" alignment="center">
+  <c-modal-header><h5 cModalTitle>Confirmar baja</h5></c-modal-header>
+  <c-modal-body>
+    @if (deactivatingItem) {
+      <p>¿Está seguro de que desea dar de baja <strong>{{ deactivatingItem.name }}</strong>?</p>
+      <p class="text-body-secondary mb-0">Esta acción fallará si el elemento tiene registros activos asociados.</p>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelDeactivate()" [disabled]="isDeactivating">Cancelar</button>
+    <button cButton color="danger" (click)="confirmDeactivate()" [disabled]="isDeactivating">
+      {{ isDeactivating ? 'Procesando...' : 'Dar de baja' }}
+    </button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- Modal -->
+<c-modal [visible]="showModal" (visibleChange)="showModal = $event" alignment="center">
+  <c-modal-header><h5 cModalTitle>{{ modalTitle }}</h5></c-modal-header>
+  <c-modal-body>
+    @if (form) {
+      <form [formGroup]="form">
+        @for (field of visibleFields; track field.key) {
+          @if (field.type === 'checkbox') {
+            <div class="mb-3">
+              <c-form-check>
+                <input cFormCheckInput type="checkbox" [formControlName]="field.key" [id]="'field-' + field.key" />
+                <label cFormCheckLabel [for]="'field-' + field.key">{{ field.label }}</label>
+              </c-form-check>
+            </div>
+          } @else if (field.type === 'select') {
+            <div class="mb-3">
+              <label cLabel [for]="'field-' + field.key">{{ field.label }}</label>
+              <select cSelect [formControlName]="field.key" [id]="'field-' + field.key">
+                <option [ngValue]="null">-- Ninguna --</option>
+                @for (opt of field.options!(); track opt.id) {
+                  <option [ngValue]="opt.id">{{ opt.name }}</option>
+                }
+              </select>
+            </div>
+          } @else if (field.type === 'color') {
+            <div class="mb-3">
+              <label cLabel [for]="'field-' + field.key">{{ field.label }}</label>
+              <input type="color" class="form-control form-control-color" [formControlName]="field.key" [id]="'field-' + field.key" />
+            </div>
+          } @else {
+            <div class="mb-3">
+              <label cLabel [for]="'field-' + field.key">{{ field.label }}@if (field.required) { *}</label>
+              <input cFormControl [type]="field.type" [formControlName]="field.key" [id]="'field-' + field.key" />
+            </div>
+          }
+        }
+      </form>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
+    <button cButton color="primary" (click)="save()" [disabled]="isSaving || form?.invalid">
+      @if (isSaving) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
+      Guardar
+    </button>
+  </c-modal-footer>
+</c-modal>

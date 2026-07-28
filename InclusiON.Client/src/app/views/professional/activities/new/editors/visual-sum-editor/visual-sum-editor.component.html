@@ -1,0 +1,84 @@
+<div class="mb-3">
+  <label class="form-label" for="vs-instruction">Instrucción *</label>
+  <input cFormControl id="vs-instruction" [(ngModel)]="instruction" name="instruction"
+         placeholder="Ej: ¿Cuántas frutas hay en total?" (ngModelChange)="onInstructionChange()" required />
+</div>
+
+<c-row class="mb-3">
+  <c-col xs="6" md="3">
+    <label class="form-label" for="vs-a">Sumando A *</label>
+    <input cFormControl id="vs-a" type="number" [(ngModel)]="operandA" name="operandA"
+           min="0" max="99" (ngModelChange)="onOperandChange()" />
+  </c-col>
+  <c-col xs="6" md="3">
+    <label class="form-label" for="vs-b">Sumando B *</label>
+    <input cFormControl id="vs-b" type="number" [(ngModel)]="operandB" name="operandB"
+           min="0" max="99" (ngModelChange)="onOperandChange()" />
+  </c-col>
+  <c-col xs="12" md="6" class="d-flex align-items-end">
+    <div class="sum-preview">{{ operandA }} + {{ operandB }} = <strong>{{ correctAnswer }}</strong></div>
+  </c-col>
+</c-row>
+
+<!-- Pictogram optional -->
+<div class="mb-3">
+  <label class="form-label">Pictograma ilustrativo (opcional)</label>
+  @if (pictogramId) {
+    <div class="picto-preview">
+      <img [src]="pictogramUrl(pictogramId)" alt="pictograma" class="picto-img" />
+      <button cButton size="sm" color="danger" variant="ghost" (click)="removePictogram()">✕ Quitar</button>
+    </div>
+  } @else {
+    <div>
+      <button cButton type="button" size="sm" color="secondary" (click)="toggleArasaac()">
+        {{ showArasaac ? '▲ Cerrar buscador' : '📷 Buscar pictograma' }}
+      </button>
+    </div>
+  }
+  @if (showArasaac) {
+    <div class="arasaac-panel mt-2">
+      <c-row class="mb-2">
+        <c-col xs="12" md="6">
+          <input cFormControl [(ngModel)]="arasaacSearch" name="vs-arasaac"
+                 placeholder="Buscar..." (ngModelChange)="onArasaacSearchChange($event)" />
+        </c-col>
+        <c-col xs="auto" class="d-flex align-items-center">
+          @if (isSearching()) { <c-spinner size="sm" /> }
+        </c-col>
+      </c-row>
+      @if (arasaacResults().length > 0) {
+        <div class="arasaac-grid">
+          @for (pic of arasaacResults(); track pic.id) {
+            <button type="button" class="arasaac-card" (click)="assignPictogram(pic)" [title]="pic.keyword">
+              <img [src]="pic.imageUrl" [alt]="pic.keyword" />
+              <span>{{ pic.keyword }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Options -->
+<h6 class="mb-2">Opciones de respuesta *</h6>
+<p class="text-body-secondary small">
+  La respuesta correcta es <strong>{{ correctAnswer }}</strong>. Podés ajustar los distractores.
+</p>
+<div class="options-list mb-2">
+  @for (opt of options(); track opt.id; let i = $index) {
+    <div class="option-row" [class.option-row--correct]="opt.value === correctAnswer">
+      <span class="opt-badge">{{ opt.value === correctAnswer ? '✓' : '?' }}</span>
+      <input cFormControl type="number" [(ngModel)]="opt.value" [name]="'vs-opt-' + i"
+             min="0" max="999" class="opt-input" (ngModelChange)="onOptionChange()" />
+      @if (opt.value !== correctAnswer) {
+        <span class="text-body-secondary small">distractor</span>
+      } @else {
+        <span class="text-success small fw-bold">correcta</span>
+      }
+    </div>
+  }
+</div>
+<button cButton type="button" size="sm" color="secondary" class="mb-3" (click)="autoGenerateOptions()">
+  ↺ Regenerar opciones
+</button>

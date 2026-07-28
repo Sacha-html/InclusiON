@@ -1,0 +1,218 @@
+<div class="min-vh-100 d-flex flex-row align-items-center register-layout" style="background-color: var(--a11y-bg-secondary)">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="6">
+        <c-card class="mx-4">
+          <c-card-body class="p-4">
+            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+              <h1 style="color: var(--a11y-text)">Registrar Usuario</h1>
+              <p class="mb-0" style="color: var(--a11y-text-muted)">Crea tu cuenta</p>
+
+              <!-- Mensaje de error general -->
+              @if (errorMessage) {
+              <div class="alert alert-danger py-2 mb-3" role="alert" aria-live="assertive">
+                {{ errorMessage }}
+              </div>
+              }
+
+              <!-- Nombre -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('name', 'required') || hasError('name', 'minlength')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser" aria-hidden="true"></svg>
+                </span>
+                <input
+                  cFormControl
+                  type="text"
+                  formControlName="name"
+                  placeholder="Nombre"
+                  autocomplete="name"
+                  aria-required="true"
+                  [attr.aria-invalid]="hasError('name', 'required') || hasError('name', 'minlength')"
+                  [attr.aria-describedby]="hasError('name', 'required') || hasError('name', 'minlength') ? 'name-error' : null"
+                  [class.is-invalid]="hasError('name', 'required') || hasError('name', 'minlength')"
+                />
+              </c-input-group>
+              @if (getErrorMessage('name')) {
+              <small class="text-danger d-block mt-n2 mb-2" id="name-error" role="alert">{{ getErrorMessage('name') }}</small>
+              }
+
+              <!-- Apellido -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('surname', 'required') || hasError('surname', 'minlength')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilUser" aria-hidden="true"></svg>
+                </span>
+                <input
+                  cFormControl
+                  type="text"
+                  formControlName="surname"
+                  placeholder="Apellido"
+                  autocomplete="family-name"
+                  aria-required="true"
+                  [attr.aria-invalid]="hasError('surname', 'required') || hasError('surname', 'minlength')"
+                  [attr.aria-describedby]="hasError('surname', 'required') || hasError('surname', 'minlength') ? 'surname-error' : null"
+                  [class.is-invalid]="hasError('surname', 'required') || hasError('surname', 'minlength')"
+                />
+              </c-input-group>
+              @if (getErrorMessage('surname')) {
+              <small class="text-danger d-block mt-n2 mb-2" id="surname-error" role="alert">{{ getErrorMessage('surname') }}</small>
+              }
+
+              <!-- Email -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilEnvelopeClosed" aria-hidden="true"></svg>
+                </span>
+                <input
+                  cFormControl
+                  type="email"
+                  formControlName="email"
+                  placeholder="Email"
+                  autocomplete="email"
+                  aria-required="true"
+                  [attr.aria-invalid]="hasError('email', 'required') || hasError('email', 'email')"
+                  [attr.aria-describedby]="hasError('email', 'required') || hasError('email', 'email') ? 'email-error' : null"
+                  [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email')"
+                />
+              </c-input-group>
+              @if (getErrorMessage('email')) {
+              <small class="text-danger d-block mt-n2 mb-2" id="email-error" role="alert">{{ getErrorMessage('email') }}</small>
+              }
+
+              <!-- Password -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength')">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
+                </span>
+                <input
+                  cFormControl
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Contraseña (mín. 8 caracteres)"
+                  autocomplete="new-password"
+                  aria-required="true"
+                  [attr.aria-invalid]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength')"
+                  [attr.aria-describedby]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength') ? 'password-error' : null"
+                  [class.is-invalid]="hasError('password', 'required') || hasError('password', 'minlength') || hasError('password', 'passwordStrength')"
+                />
+                <button
+                  type="button"
+                  cInputGroupText
+                  class="cursor-pointer"
+                  (click)="togglePasswordVisibility()"
+                  [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="showPassword"
+                  style="min-width: 55px; justify-content: center;"
+                >
+                  <small aria-hidden="true">{{ showPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </button>
+              </c-input-group>
+              @if (getErrorMessage('password')) {
+              <small class="text-danger d-block mt-n2 mb-2" id="password-error" role="alert">{{ getErrorMessage('password') }}</small>
+              }
+              
+              <!-- Indicador de fortaleza de contraseña -->
+              @if (f['password'].value) {
+              <div class="password-strength-indicator mb-3">
+                <div class="progress" style="height: 5px;">
+                  <div
+                    class="progress-bar"
+                    role="progressbar"
+                    [class.bg-danger]="passwordStrength <= 2"
+                    [class.bg-warning]="passwordStrength === 3"
+                    [class.bg-success]="passwordStrength >= 4"
+                    [style.width.%]="(passwordStrength / 4) * 100"
+                    [attr.aria-valuenow]="(passwordStrength / 4) * 100"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-label]="'Fortaleza de contraseña: ' + passwordStrengthText"
+                  ></div>
+                </div>
+                <small [class.text-danger]="passwordStrength <= 2"
+                       [class.text-warning]="passwordStrength === 3"
+                       [class.text-success]="passwordStrength >= 4">
+                  Fortaleza: {{ passwordStrengthText }}
+                </small>
+              </div>
+              }
+
+              <!-- Confirm Password -->
+              <c-input-group class="mb-3" [class.is-invalid]="hasError('confirmPassword', 'required') || !passwordsMatch">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked" aria-hidden="true"></svg>
+                </span>
+                <input
+                  cFormControl
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="Repetir contraseña"
+                  autocomplete="new-password"
+                  aria-required="true"
+                  [attr.aria-invalid]="hasError('confirmPassword', 'required') || (!passwordsMatch && f['confirmPassword'].touched)"
+                  [class.is-invalid]="hasError('confirmPassword', 'required') || (!passwordsMatch && f['confirmPassword'].touched)"
+                />
+                <button
+                  type="button"
+                  cInputGroupText
+                  class="cursor-pointer"
+                  (click)="toggleConfirmPasswordVisibility()"
+                  [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="showConfirmPassword"
+                  style="min-width: 55px; justify-content: center;"
+                >
+                  <small aria-hidden="true">{{ showConfirmPassword ? 'Ocultar' : 'Mostrar' }}</small>
+                </button>
+              </c-input-group>
+              @if (registerForm.errors?.['passwordMismatch'] && f['confirmPassword'].touched) {
+              <small class="text-danger d-block mt-n2 mb-3">Las contraseñas no coinciden</small>
+              }
+
+              <!-- Checkbox de Términos y Condiciones -->
+              <c-form-check class="mb-4">
+                <input
+                  cFormCheckInput
+                  type="checkbox"
+                  formControlName="acceptTerms"
+                  id="acceptTerms"
+                  [class.is-invalid]="hasError('acceptTerms', 'requiredTrue')"
+                />
+                <label cFormCheckLabel for="acceptTerms">
+                  Acepto los <a href="#" style="color: var(--a11y-primary)">términos y condiciones</a>
+                </label>
+              </c-form-check>
+              @if (hasError('acceptTerms', 'requiredTrue')) {
+              <small class="text-danger d-block mt-n3 mb-3">Debes aceptar los términos y condiciones</small>
+              }
+
+              <!-- Botones -->
+              <div class="d-grid gap-2">
+                <button 
+                  cButton 
+                  color="primary" 
+                  type="submit"
+                  [disabled]="isLoading || registerForm.invalid"
+                >
+                  @if (!isLoading) {
+                  <span>Crear Cuenta</span>
+                  } @else {
+                  <span>
+                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                    Creando cuenta...
+                  </span>
+                  }
+                </button>
+                <button 
+                  cButton 
+                  color="secondary" 
+                  type="button"
+                  routerLink="/login"
+                >
+                  Ya tengo cuenta
+                </button>
+              </div>
+            </form>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

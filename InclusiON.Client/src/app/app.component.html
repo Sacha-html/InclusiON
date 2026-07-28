@@ -1,0 +1,12 @@
+<app-spinner-overlay />
+<!-- Landmarks de página para WCAG 1.3.6 — visually-hidden para no interferir
+     con los headers/footers visuales de cada layout autenticado -->
+<header role="banner" class="visually-hidden" aria-label="InclusiON">
+  InclusiON — Plataforma de Educación Inclusiva
+</header>
+<main>
+  <router-outlet />
+</main>
+<footer role="contentinfo" class="visually-hidden">
+  InclusiON &copy; {{ currentYear }}
+</footer>

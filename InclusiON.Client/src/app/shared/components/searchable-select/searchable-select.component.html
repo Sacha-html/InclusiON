@@ -1,0 +1,73 @@
+<!-- Ítem seleccionado -->
+@if (selectedItem()) {
+  <div class="ss-selected" [class.ss-selected--disabled]="isDisabled">
+    <span class="ss-selected__label">{{ displayFn(selectedItem()) }}</span>
+    @if (!isDisabled) {
+      <button type="button" class="ss-selected__clear"
+              (click)="clearSelection()"
+              [attr.aria-label]="'Quitar ' + displayFn(selectedItem())">
+        ×
+      </button>
+    }
+  </div>
+} @else {
+  <!-- Combobox input -->
+  <div class="ss-combobox"
+       role="combobox"
+       [attr.aria-expanded]="isOpen()"
+       aria-haspopup="listbox"
+       [attr.aria-owns]="uid + '-listbox'">
+    <input
+      class="ss-input form-control"
+      type="text"
+      [value]="query()"
+      [placeholder]="placeholder"
+      [disabled]="isDisabled"
+      autocomplete="off"
+      aria-autocomplete="list"
+      [attr.aria-controls]="uid + '-listbox'"
+      [attr.aria-activedescendant]="activeIndex() >= 0 ? uid + '-opt-' + activeIndex() : null"
+      (input)="onInput($any($event.target).value)"
+      (focus)="openDropdown()"
+    />
+
+    @if (isLoading()) {
+      <c-spinner class="ss-spinner" size="sm" aria-hidden="true" />
+    }
+  </div>
+
+  <!-- Dropdown -->
+  @if (isOpen()) {
+    <ul
+      class="ss-listbox"
+      role="listbox"
+      [id]="uid + '-listbox'"
+      [attr.aria-label]="placeholder"
+    >
+      @if (isLoading()) {
+        <li class="ss-listbox__hint" aria-live="polite">Buscando...</li>
+      } @else if (query().length < minLength && !hasSearched()) {
+        <li class="ss-listbox__hint">{{ hintText }}</li>
+      } @else if (results().length === 0 && hasSearched()) {
+        <li class="ss-listbox__hint">{{ noResultsText }}</li>
+      } @else {
+        @for (item of results(); track $index) {
+          <li
+            role="option"
+            class="ss-listbox__option"
+            [id]="uid + '-opt-' + $index"
+            [class.ss-listbox__option--active]="activeIndex() === $index"
+            [attr.aria-selected]="activeIndex() === $index"
+            (click)="selectItem(item)"
+            (mouseenter)="activeIndex.set($index)"
+          >
+            <span class="ss-option__main">{{ displayFn(item) }}</span>
+            @if (subDisplayFn) {
+              <span class="ss-option__sub">{{ subDisplayFn(item) }}</span>
+            }
+          </li>
+        }
+      }
+    </ul>
+  }
+}

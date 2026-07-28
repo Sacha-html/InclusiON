@@ -1,0 +1,23 @@
+.sidebar-brand-full {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--a11y-sidebar-text);
+}
+
+.sidebar-brand-narrow {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--a11y-sidebar-text);
+}
+
+.sidebar-toggler {
+  width: 100%;
+  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--a11y-sidebar-nav-link-hover-bg);
+  }
+}

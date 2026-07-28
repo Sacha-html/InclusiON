@@ -1,0 +1,59 @@
+<!-- Panel de Accesibilidad -->
+<app-accessibility-panel></app-accessibility-panel>
+
+<div class="visual-login-container min-vh-100 d-flex flex-column align-items-center justify-content-center">
+  <div class="role-cards-wrapper">
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold mb-3" style="color: var(--a11y-primary)">Bienvenido a InclusiON</h1>
+      <p class="lead mb-0 fs-4" style="color: var(--a11y-text-muted)">Selecciona cómo quieres ingresar</p>
+    </div>
+
+    <!-- Role Cards -->
+    <div class="row g-4 g-xl-5">
+      @for (role of roles; track role.type) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <div
+            class="role-card card h-100 shadow-sm"
+            [style.--role-color]="role.color"
+            [style.--role-bg]="role.bgColor"
+            (click)="selectRole(role.type)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="role.title + ': ' + role.description"
+            (keydown.enter)="selectRole(role.type)"
+            (keydown.space)="selectRole(role.type); $event.preventDefault()"
+          >
+            <div class="card-body d-flex flex-column align-items-center text-center p-4 p-lg-5">
+              <div class="role-icon-container mb-4">
+                <svg
+                  cIcon
+                  [name]="role.icon"
+                  class="role-icon"
+                  [style.color]="role.color"
+                  aria-hidden="true"
+                ></svg>
+              </div>
+              <h2 class="h3 mb-3 fw-bold role-title" style="color: var(--a11y-text)">{{ role.title }}</h2>
+              <p class="mb-0 fs-5 role-description" style="color: var(--a11y-text-muted)">{{ role.description }}</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Admin Login Link (small, unobtrusive) -->
+    <div class="text-center mt-5 pt-4">
+      <button
+        cButton
+        color="link"
+        class="small"
+        (click)="goToAdminLogin()"
+        aria-label="Acceso para administradores"
+        style="color: var(--a11y-text-muted)"
+      >
+        Acceso administrativo
+      </button>
+    </div>
+  </div>
+</div>

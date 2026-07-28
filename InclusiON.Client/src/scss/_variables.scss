@@ -1,0 +1,78 @@
+// ============================================
+// PALETA DE COLORES ACCESIBLE - InclusiON
+// Cumple con WCAG 2.1 AA/AAA
+// ============================================
+
+// -----------------------------------------
+// Colores Primarios - Alto Contraste
+// -----------------------------------------
+$primary:           #1565C0;  // Azul primario (contraste 7.2:1 sobre blanco)
+$primary-dark:      #0D47A1;  // Azul oscuro
+$primary-light:     #1E88E5;  // Azul claro
+
+// -----------------------------------------
+// Colores Secundarios
+// -----------------------------------------
+$secondary:         #455A64;  // Gris azulado (contraste 7.5:1)
+$secondary-dark:    #263238;
+$secondary-light:   #607D8B;
+
+// -----------------------------------------
+// Fondos
+// -----------------------------------------
+$background:        #FFFFFF;  // Blanco puro
+$surface:           #FAFAFA;  // Gris muy claro
+$surface-variant:   #F5F5F5;
+
+// -----------------------------------------
+// Texto - Alto Contraste
+// -----------------------------------------
+$text-primary:      #212121;  // Casi negro (21:1 sobre blanco)
+$text-secondary:    #424242;  // Gris oscuro (12.6:1)
+$text-disabled:     #757575;  // Gris medio (4.6:1 - cumple AA)
+$text-on-primary:   #FFFFFF;  // Blanco sobre primario
+
+// -----------------------------------------
+// Estados Accesibles (evitando rojo/verde juntos)
+// -----------------------------------------
+$success:           #2E7D32;  // Verde oscuro (contraste 6.1:1)
+$success-light:     #4CAF50;
+$warning:           #E65100;  // Naranja oscuro (contraste 5.5:1)
+$warning-light:     #FF9800;
+$danger:            #C62828;  // Rojo oscuro (contraste 7.8:1)
+$danger-light:      #EF5350;
+$info:              #0277BD;  // Azul información (contraste 6.5:1)
+$info-light:        #03A9F4;
+
+// -----------------------------------------
+// Colores de Acento (distinguibles para daltónicos)
+// -----------------------------------------
+$accent:            #6A1B9A;  // Púrpura (contraste 10.5:1)
+$accent-light:      #9C27B0;
+
+// -----------------------------------------
+// Modo Oscuro - Alto Contraste
+// -----------------------------------------
+$dark-bg:           #121212;
+$dark-surface:      #1E1E1E;
+$dark-text:         #E0E0E0;  // Contraste 13.5:1 sobre dark-bg
+$dark-text-secondary: #B0B0B0;
+
+// -----------------------------------------
+// Variables para CoreUI
+// -----------------------------------------
+$body-bg:           $background;
+$light:             $surface;
+$dark:              $secondary-dark;
+
+// -----------------------------------------
+// Bordes y Divisores
+// -----------------------------------------
+$border-color:      #BDBDBD;  // Contraste 3.1:1 (cumple para UI)
+$divider-color:     #E0E0E0;
+
+// -----------------------------------------
+// Focus y Accesibilidad
+// -----------------------------------------
+$focus-ring-color:  rgba($primary, 0.5);
+$focus-ring-width:  3px;

@@ -1,0 +1,87 @@
+.area-header-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.activities-drop-list {
+  min-height: 1px; // required for empty list to accept drops
+}
+
+.activity-row {
+  border: 1px solid var(--cui-border-color, #dee2e6);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--cui-body-bg, #fff);
+  cursor: default;
+
+  &.locked {
+    background-color: var(--cui-tertiary-bg, #f8f9fa);
+    color: var(--cui-secondary-color, #6c757d);
+    border-left: 3px solid var(--cui-border-color, #dee2e6);
+  }
+
+  // CDK drag state
+  &.cdk-drag-preview {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    opacity: 0.95;
+    border-radius: 6px;
+  }
+
+  &.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+// Placeholder while dragging
+.drag-placeholder {
+  border: 2px dashed var(--cui-border-color, #dee2e6);
+  border-radius: 6px;
+  height: 44px;
+  margin-bottom: 0.5rem;
+  background: var(--cui-tertiary-bg, #f8f9fa);
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// Drop list animates items while sorting
+.activities-drop-list.cdk-drop-list-dragging .activity-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.drag-handle {
+  cursor: grab;
+  font-size: 1.1rem;
+  color: var(--cui-secondary-color, #6c757d);
+  padding: 0 4px;
+  flex-shrink: 0;
+  user-select: none;
+  line-height: 1;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.sequence-badge {
+  font-size: 0.75rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.empty-area {
+  color: var(--cui-secondary-color, #6c757d);
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

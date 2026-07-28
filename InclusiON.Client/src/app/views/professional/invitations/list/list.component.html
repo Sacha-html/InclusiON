@@ -1,0 +1,138 @@
+<fieldset class="p-3 border rounded mb-4">
+  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+  <c-row class="align-items-end g-2">
+    <c-col sm="3">
+      <label cLabel>Estado</label>
+      <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+        <option value="">Todos</option>
+        <option value="Enviada">Enviadas</option>
+        <option value="Aceptada">Aceptadas</option>
+        <option value="Expirada">Expiradas</option>
+      </select>
+    </c-col>
+    <c-col sm="auto">
+      <button cButton color="secondary" (click)="clearFilters()">Limpiar</button>
+    </c-col>
+  </c-row>
+</fieldset>
+
+<app-data-table
+  title="Invitaciones Familiares"
+  [columns]="columns"
+  [items]="invitations"
+  [totalItems]="totalRecords"
+  [currentPage]="currentPage"
+  [pageSize]="pageSize"
+  [loading]="isLoading"
+  [headerButtons]="headerButtons"
+  [sortable]="true"
+  (pageChange)="onPageChange($event)"
+  (searchAction)="onSearch($event)"
+  (sortAction)="onSortAction($event)"
+  (headerAction)="onHeaderAction($event)"
+  (rowAction)="onRowAction($event)"
+/>
+
+<!-- Modal: Nueva Invitacion -->
+<c-modal [visible]="showModal" (visibleChange)="showModal = $event" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>
+      @if (createdInvitationCode) {
+        Invitación Creada
+      } @else {
+        Agregar Invitación
+      }
+    </h5>
+  </c-modal-header>
+  <c-modal-body>
+
+    @if (createdInvitationCode) {
+      <c-alert color="success">
+        Invitación creada exitosamente. Compartí el siguiente link con el familiar:
+      </c-alert>
+      <div class="input-group mb-3">
+        <input
+          class="form-control"
+          readonly
+          [value]="getInviteUrl(createdInvitationCode)"
+        />
+        <button cButton color="primary" (click)="copyToClipboard(createdInvitationCode)">
+          Copiar
+        </button>
+      </div>
+    } @else {
+      @if (errorMessage) {
+        <c-alert color="danger" [dismissible]="true" (visibleChange)="errorMessage = ''">
+          {{ errorMessage }}
+        </c-alert>
+      }
+
+      <form [formGroup]="invitationForm" (ngSubmit)="onSubmit()">
+
+        <div class="mb-3">
+          <label cFormLabel>Persona vinculada</label>
+          <select cSelect formControlName="personId">
+            <option value="">-- Seleccionar (opcional) --</option>
+            @for (person of persons; track person.personId) {
+              <option [value]="person.personId">{{ person.personFullName }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label cFormLabel>Email del familiar *</label>
+          <input cFormControl formControlName="email" type="email" placeholder="email@ejemplo.com" />
+          @if (hasError('email', 'required')) {
+            <div class="text-danger small mt-1">El email es requerido</div>
+          }
+          @if (hasError('email', 'email')) {
+            <div class="text-danger small mt-1">Ingresa un email valido</div>
+          }
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label cFormLabel>Nombre *</label>
+            <input cFormControl formControlName="firstName" placeholder="Nombre"
+                   [class.is-invalid]="hasError('firstName', 'required')" />
+            @if (hasError('firstName', 'required')) {
+              <div class="text-danger small mt-1">El nombre es requerido</div>
+            }
+          </div>
+          <div class="col-md-6">
+            <label cFormLabel>Apellido *</label>
+            <input cFormControl formControlName="lastName" placeholder="Apellido"
+                   [class.is-invalid]="hasError('lastName', 'required')" />
+            @if (hasError('lastName', 'required')) {
+              <div class="text-danger small mt-1">El apellido es requerido</div>
+            }
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label cFormLabel>Parentesco</label>
+          <select cSelect formControlName="relationship">
+            <option value="">-- Seleccionar --</option>
+            @for (rel of relationships; track rel) {
+              <option [value]="rel">{{ rel }}</option>
+            }
+          </select>
+        </div>
+
+      </form>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    @if (createdInvitationCode) {
+      <button cButton color="primary" (click)="closeModal()">Cerrar</button>
+    } @else {
+      <button cButton color="secondary" (click)="closeModal()">Cancelar</button>
+      <button cButton color="primary" (click)="onSubmit()" [disabled]="isSubmitting">
+        @if (isSubmitting) {
+          <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
+        }
+        Guardar
+      </button>
+    }
+  </c-modal-footer>
+</c-modal>

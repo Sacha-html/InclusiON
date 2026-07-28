@@ -1,0 +1,18 @@
+<button
+  type="button"
+  class="big-button"
+  [style.--btn-color]="color"
+  [style.--btn-bg]="bgColor"
+  [attr.aria-label]="ariaLabel || label"
+  [disabled]="disabled"
+  (click)="handleClick()">
+  @if (icon) {
+    <div class="btn-icon">
+      <svg cIcon [name]="icon" size="xxl" aria-hidden="true" focusable="false"></svg>
+    </div>
+  }
+  @if (image) {
+    <img [src]="image" [alt]="imageAlt" class="btn-image" />
+  }
+  <span class="btn-label">{{ label }}</span>
+</button>

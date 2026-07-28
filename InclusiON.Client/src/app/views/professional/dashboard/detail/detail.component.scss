@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.counter-card-primary {
+  background-color: var(--a11y-primary) !important;
+  --cui-card-bg: var(--a11y-primary);
+  --cui-card-color: var(--a11y-primary-text);
+  color: var(--a11y-primary-text) !important;
+
+  * {
+    color: var(--a11y-primary-text) !important;
+  }
+}
+
+.counter-card-success {
+  background-color: var(--a11y-success) !important;
+  --cui-card-bg: var(--a11y-success);
+  --cui-card-color: var(--a11y-success-text);
+  color: var(--a11y-success-text) !important;
+
+  * {
+    color: var(--a11y-success-text) !important;
+  }
+}
+
+.counter-card-muted {
+}
+
+// ── Weekly Progress Card ─────────────────────────────────────────────────────
+
+.weekly-progress-card {
+  border-left: 4px solid var(--cui-primary);
+}
+
+.weekly-stat {
+  padding: 0.5rem;
+
+  &__value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: var(--cui-secondary-color);
+    margin-top: 0.25rem;
+  }
+}

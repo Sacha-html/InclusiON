@@ -1,0 +1,467 @@
+// Here you can add other styles
+
+// custom tweaks for scrollbar styling (wip)
+@use "scrollbar";
+
+// custom calendar today cell color
+.calendar-cell.today {
+  --cui-calendar-cell-today-color: var(--cui-info) !important;
+}
+
+// custom select week cursor pointer
+.select-week .calendar-row.current {
+  cursor: pointer;
+}
+
+// ========================================
+// LOGIN/REGISTER LAYOUTS - ACCESIBLES
+// ========================================
+.login-layout,
+.register-layout {
+  background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
+  min-height: 100vh;
+}
+
+// Estilos para las cards de login/register
+.login-layout,
+.register-layout {
+  .card {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: var(--a11y-bg, #FFFFFF) !important;
+    border: 2px solid var(--a11y-border, #BDBDBD) !important;
+    color: var(--a11y-text, #212121) !important;
+
+    h1, h2, h3, p {
+      color: var(--a11y-text, #212121) !important;
+    }
+
+    // Card secundaria (Registrarse)
+    &.bg-secondary {
+      background-color: var(--a11y-primary, #1565C0) !important;
+      border: 2px solid var(--a11y-primary-dark, #0D47A1) !important;
+
+      h2, p {
+        color: var(--a11y-primary-text, #FFFFFF) !important;
+      }
+
+      .btn-outline-light,
+      .btn[variant="outline"] {
+        border-color: var(--a11y-primary-text, #FFFFFF) !important;
+        color: var(--a11y-primary-text, #FFFFFF) !important;
+
+        &:hover,
+        &:focus {
+          background-color: var(--a11y-primary-text, #FFFFFF) !important;
+          color: var(--a11y-primary, #1565C0) !important;
+        }
+      }
+    }
+
+    // Text muted dentro de cards
+    .text-body-secondary {
+      color: var(--a11y-text-muted, #757575) !important;
+    }
+  }
+}
+
+// ========================================
+// INPUT GROUPS - ACCESIBLES
+// ========================================
+.input-group {
+  display: flex;
+  align-items: stretch;
+
+  // Primer elemento (icono izquierdo)
+  > .input-group-text:first-child {
+    background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
+    border: 2px solid var(--a11y-border, #BDBDBD) !important;
+    border-right: 0 !important;
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--a11y-text-muted, #757575) !important;
+    }
+  }
+
+  // Input en el medio
+  > .form-control {
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0;
+    background-color: var(--a11y-bg, #FFFFFF) !important;
+    color: var(--a11y-text, #212121) !important;
+    border-color: var(--a11y-border, #BDBDBD) !important;
+
+    &::placeholder {
+      color: var(--a11y-text-muted, #757575) !important;
+    }
+
+    &:focus {
+      border-color: var(--a11y-primary, #1565C0) !important;
+      box-shadow: none;
+      z-index: 3;
+    }
+  }
+
+  // Último elemento (botón "Mostrar")
+  > .input-group-text:last-child {
+    background-color: var(--a11y-bg-secondary, #F5F5F5) !important;
+    border: 2px solid var(--a11y-border, #BDBDBD) !important;
+    border-left: 0 !important;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+      background-color: var(--a11y-dropdown-hover-bg, #F5F5F5) !important;
+    }
+
+    &:active {
+      background-color: var(--a11y-border, #BDBDBD) !important;
+    }
+
+    small {
+      font-weight: 600;
+      color: var(--a11y-primary, #1565C0) !important;
+    }
+  }
+
+  // Solo input + icono izquierdo (sin botón derecho)
+  > .form-control:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    border-right: 2px solid var(--a11y-border, #BDBDBD) !important;
+  }
+
+  // Cuando el input tiene focus
+  &:focus-within {
+    .input-group-text {
+      border-color: var(--a11y-primary, #1565C0) !important;
+    }
+
+    .form-control {
+      border-color: var(--a11y-primary, #1565C0) !important;
+    }
+  }
+}
+
+// ========================================
+// ESTILOS POR TEMA DE ACCESIBILIDAD
+// ========================================
+
+// Tema alto contraste - login/register
+[data-theme="high-contrast"] {
+  .login-layout,
+  .register-layout {
+    background-color: #000000 !important;
+
+    .card {
+      background-color: #000000 !important;
+      border: 3px solid #FFFFFF !important;
+
+      h1, h2 {
+        color: #FFFFFF !important;
+      }
+
+      p {
+        color: #E0E0E0 !important;
+      }
+
+      &.bg-secondary {
+        background-color: #1A1A1A !important;
+        border: 3px solid #FFFF00 !important;
+
+        h2, p {
+          color: #FFFFFF !important;
+        }
+
+        .btn {
+          border: 2px solid #FFFF00 !important;
+          color: #FFFF00 !important;
+          background-color: transparent !important;
+
+          &:hover,
+          &:focus {
+            background-color: #FFFF00 !important;
+            color: #000000 !important;
+          }
+        }
+      }
+    }
+
+    .input-group {
+      .input-group-text {
+        background-color: #1A1A1A !important;
+        border-color: #FFFFFF !important;
+
+        svg {
+          color: #FFFF00 !important;
+        }
+
+        small {
+          color: #FFFF00 !important;
+        }
+      }
+
+      .form-control {
+        background-color: #000000 !important;
+        color: #FFFFFF !important;
+        border-color: #FFFFFF !important;
+
+        &::placeholder {
+          color: #BDBDBD !important;
+        }
+      }
+    }
+
+    .form-check-label {
+      color: #FFFFFF !important;
+    }
+
+    .btn-link {
+      color: #FFFF00 !important;
+    }
+  }
+}
+
+// Tema dislexia - login/register
+[data-theme="dyslexia"] {
+  .login-layout,
+  .register-layout {
+    background-color: #EEE8D5 !important;
+
+    .card {
+      background-color: #FDF6E3 !important;
+      border: 2px solid #93A1A1 !important;
+
+      h1, h2 {
+        color: #073642 !important;
+      }
+
+      p {
+        color: #586E75 !important;
+      }
+
+      &.bg-secondary {
+        background-color: #268BD2 !important;
+        border: 2px solid #1A6091 !important;
+
+        h2, p {
+          color: #FFFFFF !important;
+        }
+      }
+    }
+
+    .input-group {
+      .input-group-text {
+        background-color: #EEE8D5 !important;
+        border-color: #93A1A1 !important;
+
+        svg {
+          color: #657B83 !important;
+        }
+
+        small {
+          color: #268BD2 !important;
+        }
+      }
+
+      .form-control {
+        background-color: #FDF6E3 !important;
+        color: #073642 !important;
+        border-color: #93A1A1 !important;
+
+        &::placeholder {
+          color: #657B83 !important;
+        }
+      }
+    }
+
+    .form-check-label {
+      color: #073642 !important;
+    }
+
+    .btn-link {
+      color: #268BD2 !important;
+    }
+  }
+}
+
+// Tema visión reducida - login/register
+[data-theme="low-vision"] {
+  .login-layout,
+  .register-layout {
+    background-color: #F0F0F0 !important;
+
+    .card {
+      background-color: #FFFFFF !important;
+      border: 3px solid #616161 !important;
+
+      h1 {
+        font-size: 2rem !important;
+        color: #000000 !important;
+      }
+
+      h2 {
+        font-size: 1.75rem !important;
+        color: #000000 !important;
+      }
+
+      p {
+        font-size: 1.1rem !important;
+        color: #333333 !important;
+      }
+
+      &.bg-secondary {
+        background-color: #0D47A1 !important;
+        border: 3px solid #002171 !important;
+
+        h2, p {
+          color: #FFFFFF !important;
+        }
+
+        .btn {
+          font-size: 1.1rem !important;
+          padding: 0.75rem 1.5rem !important;
+        }
+      }
+    }
+
+    .input-group {
+      .input-group-text {
+        padding: 0.75rem !important;
+
+        svg {
+          width: 1.25rem !important;
+          height: 1.25rem !important;
+        }
+
+        small {
+          font-size: 1rem !important;
+        }
+      }
+
+      .form-control {
+        font-size: 1.1rem !important;
+        padding: 0.75rem !important;
+      }
+    }
+
+    .form-check-label {
+      font-size: 1.1rem !important;
+    }
+
+    .btn {
+      font-size: 1.1rem !important;
+      padding: 0.75rem 1.5rem !important;
+    }
+  }
+}
+
+// ========================================
+// TABLAS - ACCESIBLES
+// ========================================
+.table {
+  --cui-table-bg: var(--a11y-bg, #FFFFFF);
+  --cui-table-color: var(--a11y-text, #212121);
+  --cui-table-border-color: var(--a11y-border, #BDBDBD);
+  --cui-table-striped-bg: var(--a11y-bg-secondary, #F5F5F5);
+  --cui-table-striped-color: var(--a11y-text, #212121);
+  --cui-table-hover-bg: var(--a11y-surface, #FAFAFA);
+  --cui-table-hover-color: var(--a11y-text, #212121);
+
+  thead {
+    background-color: var(--a11y-bg-secondary, #F5F5F5);
+    color: var(--a11y-text, #212121);
+  }
+
+  th, td {
+    color: var(--a11y-text, #212121);
+    border-color: var(--a11y-border, #BDBDBD);
+    vertical-align: middle;
+  }
+
+  // Badge y botón con tamaño consistente dentro de tablas
+  td .badge,
+  td .btn-sm {
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+    line-height: 1.5;
+  }
+
+  // Badges accesibles
+  td .badge-success {
+    background-color: var(--a11y-success);
+    color: var(--a11y-success-text);
+  }
+
+  td .badge-danger {
+    background-color: var(--a11y-danger);
+    color: var(--a11y-danger-text);
+  }
+
+  // Botón accesible en tablas (excluye btn-link para no pisar su estilo)
+  td .btn:not(.btn-link) {
+    background-color: var(--a11y-primary);
+    color: var(--a11y-primary-text, #FFFFFF);
+    border-color: var(--a11y-primary);
+
+    &:hover,
+    &:focus {
+      background-color: var(--a11y-primary-dark);
+      border-color: var(--a11y-primary-dark);
+      color: var(--a11y-primary-text, #FFFFFF);
+    }
+  }
+}
+
+// Visión reducida - tablas
+[data-theme="low-vision"] {
+  .table {
+    td .badge,
+    td .btn-sm,
+    td .btn {
+      font-size: 1rem;
+      padding: 0.5em 0.75em;
+    }
+  }
+}
+
+// ========================================
+// FOCUS VISIBLE — WCAG 2.4.7 Focus Visible
+// ========================================
+// Bootstrap usa box-shadow para foco en botones/inputs, pero algunos elementos
+// no lo tienen. Esta regla garantiza outline en :focus-visible para todos,
+// sin interferir con el comportamiento normal (mouse).
+:focus-visible {
+  outline: 3px solid var(--a11y-focus-color, #1565C0) !important;
+  outline-offset: 2px !important;
+}
+
+// ========================================
+// AJUSTES GENERALES
+// ========================================
+
+// Sidebar ajustes por tema ya manejados en _accessibility-themes.scss
+
+// Ajustes del logo colapsado
+.sidebar-narrow {
+  .sidebar-brand {
+    padding: 0.75rem 0;
+  }
+}
+
+// Cursor pointer para elementos clickeables
+.cursor-pointer {
+  cursor: pointer;
+}

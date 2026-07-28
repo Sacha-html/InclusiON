@@ -1,0 +1,57 @@
+<!-- Instrucción -->
+<div class="mb-3">
+  <label class="form-label" for="sf-instruction">Instrucción que verá el estudiante *</label>
+  <input cFormControl id="sf-instruction" [(ngModel)]="content.instruction" name="instruction"
+         placeholder="Ej: Seleccioná el animal que vive en la casa"
+         (ngModelChange)="onInstructionChange()" required />
+</div>
+
+<!-- Items agregados -->
+<h6 class="mb-2">Opciones (mínimo 2) *</h6>
+@if (content.items.length === 0) {
+  <p class="text-body-secondary small mb-3">Buscá pictogramas abajo para agregarlos.</p>
+} @else {
+  <div class="items-grid mb-4">
+    @for (item of content.items; track item.id) {
+      <div class="item-card" [class.item-card--correct]="item.id === content.correctItemId"
+           [title]="item.id === content.correctItemId ? 'Respuesta correcta' : 'Clic para marcar como correcta'"
+           (click)="setCorrect(item.id)">
+        @if (item.id === content.correctItemId) {
+          <span class="item-badge-correct">✓</span>
+        }
+        <button type="button" class="item-btn-remove" (click)="$event.stopPropagation(); removeItem(item.id)" title="Quitar">✕</button>
+        <img [src]="pictogramUrl(item.pictogramId)" [alt]="item.label" class="item-img" />
+        <input
+          cFormControl
+          class="item-label-input"
+          [name]="'lbl-' + item.id"
+          [(ngModel)]="item.label"
+          placeholder="Etiqueta"
+          (click)="$event.stopPropagation()"
+          (ngModelChange)="emit()" />
+      </div>
+    }
+  </div>
+}
+
+<!-- ARASAAC -->
+<h6 class="mb-2">Buscador de pictogramas ARASAAC</h6>
+<c-row class="mb-2">
+  <c-col xs="12" md="6">
+    <input cFormControl [(ngModel)]="arasaacSearch" name="arasaacSearch"
+           placeholder="Buscar pictograma..." (ngModelChange)="onArasaacSearchChange($event)" />
+  </c-col>
+  <c-col xs="auto" class="d-flex align-items-center">
+    @if (isSearching()) { <c-spinner size="sm" /> }
+  </c-col>
+</c-row>
+@if (arasaacResults().length > 0) {
+  <div class="arasaac-grid mb-3">
+    @for (pic of arasaacResults(); track pic.id) {
+      <button type="button" class="arasaac-card" (click)="addPictogram(pic)" [title]="pic.keyword">
+        <img [src]="pic.imageUrl" [alt]="pic.keyword" />
+        <span>{{ pic.keyword }}</span>
+      </button>
+    }
+  </div>
+}
