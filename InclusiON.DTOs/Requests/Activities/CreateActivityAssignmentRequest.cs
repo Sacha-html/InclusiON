@@ -13,5 +13,6 @@ namespace InclusiON.DTOs.Requests.Activities
         public DateTime? DueDate { get; set; }
         public bool IsEvaluationActivity { get; set; } = false;
         public int? SequenceOrder { get; set; }
+        public bool BypassDuplicateWarning { get; set; } = false;
     }
 }

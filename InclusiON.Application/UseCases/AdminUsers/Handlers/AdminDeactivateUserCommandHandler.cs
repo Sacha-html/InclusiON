@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Domain.Enums;
 using InclusiON.Application.Auditing;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
@@ -21,6 +22,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AdminDeactivateUserCommandHandler> _logger;
         private readonly IAccessAuditLogger _audit;
+        private readonly IDateTimeProvider _dateTime;
 
         public AdminDeactivateUserCommandHandler(
             IIdentityService identityService,
@@ -30,7 +32,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             IFamilyRepository familyRepository,
             IUnitOfWork unitOfWork,
             ILogger<AdminDeactivateUserCommandHandler> logger,
-            IAccessAuditLogger audit)
+            IAccessAuditLogger audit,
+            IDateTimeProvider dateTime)
         {
             _identityService = identityService;
             _refreshTokensRepository = refreshTokensRepository;
@@ -40,6 +43,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _audit = audit;
+            _dateTime = dateTime;
         }
 
         public async Task<ApiResponse<object>> HandleAsync(
@@ -63,13 +67,30 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     "El usuario ya se encuentra inactivo.");
             }
 
+            var roles = await _identityService.GetRolesAsync(user);
+            var primaryRole = roles.FirstOrDefault();
+
+            if (primaryRole == RoleNames.Professional)
+            {
+                var dependentPersonsCount = await _professionalsRepository.GetDependentAssistedLoginPersonsCountAsync(user.Id, cancellationToken);
+
+                if (dependentPersonsCount > 0)
+                {
+                    return ApiResponse<object>.ErrorResult(
+                        ErrorCode.InvalidOperation,
+                        $"No se puede desactivar al profesional porque es el supervisor exclusivo de inicio de sesión asistido para {dependentPersonsCount} alumno(s). Reasigne la supervisión de estos alumnos antes de proceder.");
+                }
+            }
+
+            var suspendedStudents = new List<string>();
+
             user.IsActive = false;
             await _identityService.UpdateUserAsync(user);
 
             await _refreshTokensRepository.RevokeAllUserTokensAsync(
                 user.Id, Constants.RevokeReasons.UserDeactivated, cancellationToken);
 
-            await SetLinkedEntityActiveAsync(user, false, cancellationToken);
+            await SetLinkedEntityActiveAsync(user, false, suspendedStudents, cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -87,10 +108,16 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                 Details        = "Admin deactivated user account",
             }, cancellationToken);
 
-            return ApiResponse<object>.SuccessResult("Usuario desactivado exitosamente.");
+            var successMessage = "Usuario desactivado exitosamente.";
+            if (suspendedStudents.Count > 0)
+            {
+                successMessage += $" Se ha suspendido el acceso de los siguientes alumnos por no contar con otros representantes familiares activos: {string.Join(", ", suspendedStudents)}.";
+            }
+
+            return ApiResponse<object>.SuccessResult(successMessage);
         }
 
-        private async Task SetLinkedEntityActiveAsync(User user, bool isActive, CancellationToken cancellationToken)
+        private async Task SetLinkedEntityActiveAsync(User user, bool isActive, List<string> suspendedStudents, CancellationToken cancellationToken)
         {
             var roles = await _identityService.GetRolesAsync(user);
             var primaryRole = roles.FirstOrDefault();
@@ -103,6 +130,11 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     {
                         pro.User.IsActive = isActive;
                         await _professionalsRepository.UpdateAsync(pro, cancellationToken);
+
+                        if (!isActive)
+                        {
+                            await _professionalsRepository.DeactivateAssignmentsAndCancelActivitiesAsync(user.Id, cancellationToken);
+                        }
                     }
                     break;
 
@@ -121,6 +153,15 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     {
                         family.User.IsActive = isActive;
                         await _familyRepository.UpdateAsync(family, cancellationToken);
+
+                        if (!isActive)
+                        {
+                            var suspended = await _familyRepository.DeactivateRepresentativeAndSuspendDependentStudentsAsync(user.Id, _dateTime.UtcNow, cancellationToken);
+                            if (suspended is not null)
+                            {
+                                suspendedStudents.AddRange(suspended);
+                            }
+                        }
                     }
                     break;
             }

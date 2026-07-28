@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -41,6 +41,15 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 return ApiResponse<FamilyResponse>.NotFound("Familiar");
             }
 
+            // Verificar si es el único representante activo para algún alumno
+            var dependentStudentsCount = await _repository.GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(family.Id, cancellationToken);
+            if (dependentStudentsCount > 0)
+            {
+                return ApiResponse<FamilyResponse>.ErrorResult(
+                    ErrorCode.InvalidOperation,
+                    $"No se puede desactivar al familiar porque es el único representante activo para {dependentStudentsCount} alumno(s). Reasigne la tutoría de estos alumnos antes de proceder.");
+            }
+
             if (family.User != null)
             {
                 family.User.IsActive = false;
@@ -49,6 +58,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             family.IsActive = false;
             family.UpdatedAt = _dateTime.UtcNow;
 
+            await _repository.UpdateAsync(family, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Familiar desactivado: {FamilyId}", family.Id);

@@ -42,5 +42,6 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<List<User>> GetContactsForFamilyAsync(
             Guid familyUserId,
             CancellationToken ct = default);
+        Task CancelActiveAssignmentsForProfessionalAndPersonAsync(Guid professionalId, Guid personId, CancellationToken ct = default);
     }
 }

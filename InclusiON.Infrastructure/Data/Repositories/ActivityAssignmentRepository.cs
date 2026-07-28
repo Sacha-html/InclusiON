@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
+using InclusiON.Domain.Enums;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
@@ -104,6 +105,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return responses
                 .GroupBy(r => r.Assignment.PersonId)
                 .ToDictionary(g => g.Key, g => g.Take(limit).ToList());
+        }
+
+        public async Task<bool> HasActiveAssignmentAsync(Guid personId, int activityId, CancellationToken ct = default)
+        {
+            return await _context.ActivityAssignments
+                .AnyAsync(aa => aa.PersonId == personId &&
+                                aa.ActivityId == activityId &&
+                                aa.StatusId != AssignmentStatuses.Completada &&
+                                aa.StatusId != AssignmentStatuses.Cancelada,
+                          ct);
         }
     }
 }

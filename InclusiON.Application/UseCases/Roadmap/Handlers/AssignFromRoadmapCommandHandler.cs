@@ -47,7 +47,6 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
             AssignFromRoadmapCommand command, CancellationToken cancellationToken)
         {
-            // Resolve roadmap entry → plain activity id
             var entry = await _roadmapRepo.GetActivityByIdAsync(
                 command.PersonRoadmapActivityId, cancellationToken);
 
@@ -61,6 +60,25 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
 
             if (!activity.IsStandardActivity && activity.ProfessionalId != command.AssignedByProfessionalId)
                 return ApiResponse<ActivityAssignmentResponse>.Forbidden();
+
+            if (command.DueDate.HasValue && command.DueDate.Value.Date < _dateTime.UtcNow.Date)
+            {
+                return ApiResponse<ActivityAssignmentResponse>.ErrorResult(
+                    ErrorCode.ValidationFailed,
+                    "La fecha límite no puede ser anterior a la fecha actual.");
+            }
+
+            if (!command.BypassDuplicateWarning)
+            {
+                var hasActiveAssignment = await _assignmentRepo.HasActiveAssignmentAsync(command.PersonId, entry.ActivityId, cancellationToken);
+
+                if (hasActiveAssignment)
+                {
+                    return ApiResponse<ActivityAssignmentResponse>.ErrorResult(
+                        ErrorCode.Conflict,
+                        "El alumno ya posee una asignación activa para esta actividad.");
+                }
+            }
 
             var assignment = new ActivityAssignment
             {

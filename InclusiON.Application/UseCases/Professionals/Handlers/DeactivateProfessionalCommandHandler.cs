@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -54,6 +54,14 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 return ApiResponse<ProfessionalResponse>.ErrorResult(
                     ErrorCode.BusinessRuleViolation,
                     "El profesional ya se encuentra dado de baja");
+            }
+
+            var dependentPersonsCount = await _repository.GetDependentAssistedLoginPersonsCountAsync(professional.UserId, cancellationToken);
+            if (dependentPersonsCount > 0)
+            {
+                return ApiResponse<ProfessionalResponse>.ErrorResult(
+                    ErrorCode.InvalidOperation,
+                    $"No se puede desactivar al profesional porque es el supervisor exclusivo de inicio de sesión asistido para {dependentPersonsCount} alumno(s). Reasigne la supervisión de estos alumnos antes de proceder.");
             }
 
             var adminUserId = _httpContextService.GetCurrentUserId();

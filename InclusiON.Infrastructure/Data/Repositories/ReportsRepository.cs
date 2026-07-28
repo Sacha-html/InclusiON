@@ -201,5 +201,56 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .GroupBy(r => r.PersonId)
                 .ToDictionary(g => g.Key, g => (g.Count(), (Report?)g.First()));
         }
+
+        public async Task<Report?> GetReportWithDetailsAsync(int reportId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Reports
+                .Include(r => r.Person)
+                .Include(r => r.Professional)
+                .Include(r => r.ReportType)
+                .FirstOrDefaultAsync(r => r.Id == reportId, cancellationToken);
+        }
+
+        public async Task ReassignReportAsync(Report report, Guid newProfessionalId, DateTime assignedAt, CancellationToken cancellationToken = default)
+        {
+            var newProfessional = await _context.Professionals
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == newProfessionalId, cancellationToken);
+
+            if (newProfessional is null || !newProfessional.IsActive || !(newProfessional.User?.IsActive ?? false))
+                throw new InvalidOperationException("El profesional asignado no está activo o no existe.");
+
+            var link = await _context.ProfessionalPersons
+                .FirstOrDefaultAsync(pp => pp.ProfessionalId == newProfessional.Id && pp.PersonId == report.PersonId, cancellationToken);
+
+            if (link is null)
+            {
+                link = new ProfessionalPerson
+                {
+                    ProfessionalId = newProfessional.Id,
+                    PersonId = report.PersonId,
+                    IsPrimaryProfessional = false,
+                    CanSuperviseLogin = true,
+                    IsActive = true,
+                    AssignedAt = assignedAt
+                };
+                _context.ProfessionalPersons.Add(link);
+            }
+            else if (!link.IsActive)
+            {
+                link.IsActive = true;
+                link.AssignedAt = assignedAt;
+            }
+
+            report.ProfessionalId = newProfessional.Id;
+            report.Professional = newProfessional;
+            report.UpdatedAt = assignedAt;
+        }
+
+        public async Task SoftDeleteReportAsync(Report report, DateTime updatedAt, CancellationToken cancellationToken = default)
+        {
+            report.IsActive = false;
+            report.UpdatedAt = updatedAt;
+        }
     }
 }

@@ -37,5 +37,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Devuelve las personas con discapacidad vinculadas activamente al familiar (por UserId).
         /// </summary>
         Task<List<PersonWithDisability>> GetLinkedPersonsAsync(Guid familyUserId, CancellationToken cancellationToken = default);
+        Task<List<string>> DeactivateRepresentativeAndSuspendDependentStudentsAsync(Guid familyUserId, DateTime endedAt, CancellationToken ct = default);
+        Task<int> GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(Guid familyId, CancellationToken cancellationToken = default);
     }
 }

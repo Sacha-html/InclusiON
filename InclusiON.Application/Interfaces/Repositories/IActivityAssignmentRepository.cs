@@ -26,5 +26,6 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// </summary>
         Task<Dictionary<Guid, List<ActivityResponse>>> GetRecentCompletedResponsesByPersonIdsAsync(
             IEnumerable<Guid> personIds, int limit, CancellationToken ct = default);
+        Task<bool> HasActiveAssignmentAsync(Guid personId, int activityId, CancellationToken ct = default);
     }
 }

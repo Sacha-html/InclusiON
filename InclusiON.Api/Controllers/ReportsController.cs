@@ -316,6 +316,38 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        /// <summary>Admin reasigna un reporte a otro profesional.</summary>
+        [HttpPatch("{reportId}/reassign")]
+        [Authorize(Policy = "reports:approve")] // Solo admins
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse<ReportResponse>>> ReassignReport(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
+            [FromBody] ReassignReportRequest request,
+            [FromServices] ICommandHandler<ReassignReportCommand, ApiResponse<ReportResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var adminUserId = _httpContextService.GetCurrentUserId()!.Value;
+            var result = await handler.HandleAsync(new ReassignReportCommand(reportId, request.NewProfessionalId, adminUserId), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>Admin elimina/da de baja un reporte.</summary>
+        [HttpDelete("{reportId}")]
+        [Authorize(Policy = "reports:approve")] // Solo admins
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<object>>> DeleteReport(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int reportId,
+            [FromServices] ICommandHandler<AdminDeleteReportCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var adminUserId = _httpContextService.GetCurrentUserId()!.Value;
+            var result = await handler.HandleAsync(new AdminDeleteReportCommand(reportId, adminUserId), cancellationToken);
+            return result.ToActionResult();
+        }
+
         /// <summary>Exporta un reporte aprobado como archivo PDF.</summary>
         [HttpGet("{reportId}/export-pdf")]
         [Authorize(Policy = "reports:export")]

@@ -8,6 +8,7 @@ namespace InclusiON.Application.UseCases.Roadmap.Commands
         Guid    PersonId,
         Guid    AssignedByProfessionalId,
         DateTime? DueDate,
-        bool    IsEvaluationActivity
+        bool    IsEvaluationActivity,
+        bool    BypassDuplicateWarning = false
     );
 }
