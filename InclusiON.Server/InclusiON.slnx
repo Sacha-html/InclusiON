@@ -1,0 +1,18 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="InclusiON.Api/InclusiON.Api.csproj" />
+  <Project Path="InclusiON.Application/InclusiON.Application.csproj" />
+  <Project Path="InclusiON.Data/InclusiON.Data.csproj" />
+  <Project Path="InclusiON.Domain/InclusiON.Domain.csproj" />
+  <Project Path="InclusiON.DTOs/InclusiON.DTOs.csproj" />
+  <Project Path="InclusiON.Infrastructure.Telemetry/InclusiON.Infrastructure.Telemetry.csproj" />
+  <Project Path="InclusiON.Infrastructure/InclusiON.Infrastructure.csproj" />
+  <Project Path="InclusiON.Workers/InclusiON.Workers.csproj" />
+  <Project Path="InclusiON.Shared/InclusiON.Shared.csproj" />
+  <Project Path="InclusiON.Tests/Unit/InclusiON.Tests.Unit.csproj" />
+  <Project Path="InclusiON.Tests/Integration/InclusiON.Tests.Integration.csproj" />
+</Solution>

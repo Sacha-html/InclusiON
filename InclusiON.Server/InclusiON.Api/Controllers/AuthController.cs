@@ -1,0 +1,296 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Configuration;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Api.Extensions;
+using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.UseCases.Auth.Commands;
+using InclusiON.Application.UseCases.Auth.Queries;
+using InclusiON.DTOs.Requests.Auth;
+using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Auth;
+namespace InclusiON.Api.Controllers
+{
+    /// <summary>
+    /// Controlador de autenticacion y registro de usuarios.
+    /// </summary>
+    [Route("api/[controller]")]
+    [ApiController]
+    [Produces("application/json")]
+    public class AuthController : ControllerBase
+    {
+        private readonly string[] _allowedOrigins;
+
+        public AuthController(IConfiguration configuration)
+        {
+            _allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+        }
+
+        /// <summary>
+        /// Registra un nuevo usuario en el sistema.
+        /// </summary>
+        [HttpPost("register")]
+        [EnableRateLimiting("auth-sensitive")]
+        [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<UserResponse>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse<UserResponse>>> Register(
+            [FromBody] RegisterRequest request,
+            [FromServices] ICommandHandler<RegisterUserCommand, ApiResponse<UserResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new RegisterUserCommand(
+                request.Name,
+                request.Surname,
+                request.Email,
+                request.Password,
+                request.ConfirmPassword,
+                request.PhoneNumber);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Inicia sesion con email y contraseña.
+        /// </summary>
+        [HttpPost("login")]
+        [EnableRateLimiting("auth-login")]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> Login(
+            [FromBody] LoginRequest request,
+            [FromServices] ICommandHandler<LoginCommand, ApiResponse<LoginResponse>> handler,
+            CancellationToken cancellationToken
+            )
+        {
+            var command = new LoginCommand(request.Email, request.Password, request.RememberMe, request.AllowedRoles);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Obtiene los metodos de login disponibles (activos) para personas con discapacidad.
+        /// </summary>
+        [HttpGet("login-methods")]
+        [OutputCache(PolicyName = "catalogs")]
+        [ProducesResponseType(typeof(ApiResponse<List<LoginMethodResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<LoginMethodResponse>>>> GetLoginMethods(
+            [FromServices] IQueryHandler<GetLoginMethodsQuery, ApiResponse<List<LoginMethodResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new GetLoginMethodsQuery();
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return Ok(result);
+        }
+
+        #region Visual Login Methods
+
+        /// <summary>
+        /// Identifica un usuario antes del login para obtener su metodo de autenticacion.
+        /// </summary>
+        [HttpPost("identify")]
+        [EnableRateLimiting("auth-login")]
+        [ProducesResponseType(typeof(ApiResponse<IdentifyUserResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<IdentifyUserResponse>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse<IdentifyUserResponse>>> IdentifyUser(
+            [FromBody] IdentifyUserRequest request,
+            [FromServices] IQueryHandler<IdentifyUserQuery, ApiResponse<IdentifyUserResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var query = new IdentifyUserQuery(request.Identifier, request.DeviceId, request.UserType);
+            var result = await handler.HandleAsync(query, cancellationToken);
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Login visual estandar con contraseña para personas con discapacidad.
+        /// </summary>
+        [HttpPost("login/visual-standard")]
+        [EnableRateLimiting("auth-login")]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginVisualStandard(
+            [FromBody] VisualStandardLoginRequest request,
+            [FromServices] ICommandHandler<VisualStandardLoginCommand, ApiResponse<VisualLoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new VisualStandardLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success || result.Data?.Success == false)
+            {
+                return Unauthorized(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Login con PIN numerico para personas con discapacidad.
+        /// </summary>
+        [HttpPost("login/pin")]
+        [EnableRateLimiting("auth-pin")]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginWithPin(
+            [FromBody] PinLoginRequest request,
+            [FromServices] ICommandHandler<PinLoginCommand, ApiResponse<VisualLoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new PinLoginCommand(request.UserId, request.Pin, request.DeviceId, request.RememberDevice);
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success || result.Data?.Success == false)
+            {
+                return Unauthorized(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Login para familiares/tutores con contraseña.
+        /// </summary>
+        [HttpPost("login/family")]
+        [EnableRateLimiting("auth-login")]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginFamily(
+            [FromBody] FamilyLoginRequest request,
+            [FromServices] ICommandHandler<FamilyLoginCommand, ApiResponse<VisualLoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new FamilyLoginCommand(request.UserId, request.Password, request.DeviceId, request.RememberDevice);
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success || result.Data?.Success == false)
+            {
+                return Unauthorized(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Login asistido donde un familiar o profesional autoriza el acceso.
+        /// </summary>
+        [HttpPost("login/assisted")]
+        [EnableRateLimiting("auth-login")]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VisualLoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<VisualLoginResponse>>> LoginAssisted(
+            [FromBody] AssistedLoginRequest request,
+            [FromServices] ICommandHandler<AssistedLoginCommand, ApiResponse<VisualLoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new AssistedLoginCommand(request.UserId, request.SupervisorEmail, request.SupervisorPassword, request.DeviceId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success || result.Data?.Success == false)
+            {
+                return Unauthorized(result);
+            }
+
+            return Ok(result);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Cambia la contraseña del usuario autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpPut("change-password")]
+        [EnableRateLimiting("auth-sensitive")]
+        [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<ChangePasswordResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<ChangePasswordResponse>>> ChangePassword(
+            [FromBody] ChangePasswordRequest request,
+            [FromServices] ICommandHandler<ChangePasswordCommand, ApiResponse<ChangePasswordResponse>> handler,
+            [FromServices] IHttpContextService httpContextService,
+            CancellationToken cancellationToken = default)
+        {
+            var userId = httpContextService.GetCurrentUserId();
+            if (!userId.HasValue)
+            {
+                return Unauthorized(ApiResponse<ChangePasswordResponse>.Unauthorized());
+            }
+
+            var command = new ChangePasswordCommand(
+                userId.Value,
+                request.CurrentPassword,
+                request.NewPassword,
+                request.ConfirmNewPassword);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Solicita el envio de un email para recuperar la contrasena.
+        /// Siempre responde 200 para evitar enumeracion de usuarios.
+        /// </summary>
+        [HttpPost("forgot-password")]
+        [EnableRateLimiting("auth-sensitive")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<object>>> ForgotPassword(
+            [FromBody] ForgotPasswordRequest request,
+            [FromServices] ICommandHandler<ForgotPasswordCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var requestOrigin = Request.Headers["Origin"].FirstOrDefault();
+            var baseUrl = _allowedOrigins.Contains(requestOrigin, StringComparer.OrdinalIgnoreCase)
+                ? requestOrigin
+                : _allowedOrigins.FirstOrDefault();
+
+            var command = new ForgotPasswordCommand(request.Email, baseUrl);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Aplica la nueva contrasena usando el token recibido por email.
+        /// </summary>
+        [HttpPost("reset-password")]
+        [EnableRateLimiting("auth-sensitive")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ApiResponse<object>>> ResetPassword(
+            [FromBody] ResetPasswordRequest request,
+            [FromServices] ICommandHandler<ResetPasswordCommand, ApiResponse<object>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new ResetPasswordCommand(request.Token, request.NewPassword, request.ConfirmNewPassword);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
+        /// Refresca el token de acceso usando un refresh token valido.
+        /// </summary>
+        [HttpPost("refresh")]
+        [EnableRateLimiting("auth-refresh")]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponse>), StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<LoginResponse>>> RefreshToken(
+            [FromBody] RefreshTokenRequest request,
+            [FromServices] ICommandHandler<RefreshTokenCommand, ApiResponse<LoginResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new RefreshTokenCommand(request.RefreshToken);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+    }
+}
