@@ -1,0 +1,69 @@
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
+using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.UseCases.Auth.Queries;
+using InclusiON.DTOs.Common;
+using InclusiON.DTOs.Responses;
+using InclusiON.DTOs.Responses.Auth;
+using InclusiON.Shared.Resources;
+
+namespace InclusiON.Application.UseCases.Auth.Handlers
+{
+    /// <summary>
+    /// Handler para obtener los metodos de login disponibles.
+    /// Implementa cache en memoria para evitar consultas repetidas a la BD.
+    /// </summary>
+    public class GetLoginMethodsQueryHandler : IQueryHandler<GetLoginMethodsQuery, ApiResponse<List<LoginMethodResponse>>>
+    {
+        private readonly IVisualLoginRepository _repository;
+        private readonly IMemoryCache _cache;
+        private readonly ILogger<GetLoginMethodsQueryHandler> _logger;
+
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
+
+        public GetLoginMethodsQueryHandler(
+            IVisualLoginRepository repository,
+            IMemoryCache cache,
+            ILogger<GetLoginMethodsQueryHandler> logger)
+        {
+            _repository = repository;
+            _cache = cache;
+            _logger = logger;
+        }
+
+        public async Task<ApiResponse<List<LoginMethodResponse>>> HandleAsync(
+            GetLoginMethodsQuery query,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Intentar obtener del cache primero
+            if (_cache.TryGetValue(CatalogCacheKeys.LoginMethods, out List<LoginMethodResponse>? cachedResponse) && cachedResponse != null)
+            {
+                _logger.LogDebug("LoginMethods obtenidos desde cache");
+                return ApiResponse<List<LoginMethodResponse>>.SuccessResult(
+                    cachedResponse,
+                    SuccessMessages.LoginMethodsRetrieved);
+            }
+
+            // Si no está en cache, consultar BD
+            var loginMethods = await _repository.GetActiveLoginMethodsAsync(cancellationToken);
+
+            var response = loginMethods.Select(LoginMethodResponse.MapToResponse).ToList();
+
+            // Guardar en cache
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(CacheDuration)
+                .SetPriority(CacheItemPriority.High);
+
+            _cache.Set(CatalogCacheKeys.LoginMethods, response, cacheOptions);
+            _logger.LogDebug("LoginMethods guardados en cache por {Duration}", CacheDuration);
+
+            return ApiResponse<List<LoginMethodResponse>>.SuccessResult(
+                response,
+                SuccessMessages.LoginMethodsRetrieved);
+        }
+    }
+}

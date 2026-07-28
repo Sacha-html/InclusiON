@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>1.3</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="LoginSuccessful" xml:space="preserve">
+		<value>Login succesfull</value>
+	</data>
+	<data name="AssistedLoginSuccessful" xml:space="preserve">
+		<value>Login asistido exitoso</value>
+	</data>
+	<data name="VisualLoginSuccessful" xml:space="preserve">
+		<value>Login exitoso</value>
+	</data>
+	<data name="UserRegistered" xml:space="preserve">
+		<value>User registered successfully</value>
+	</data>
+	<data name="TokenRefreshed" xml:space="preserve">
+		<value>Token refreshed successfully</value>
+	</data>
+	<data name="PersonCreated" xml:space="preserve">
+		<value>Persona creada exitosamente</value>
+	</data>
+	<data name="PersonUpdated" xml:space="preserve">
+		<value>Persona actualizada exitosamente</value>
+	</data>
+	<data name="PersonDeactivated" xml:space="preserve">
+		<value>Persona desactivada exitosamente</value>
+	</data>
+	<data name="ProfessionalCreated" xml:space="preserve">
+		<value>Profesional creado exitosamente</value>
+	</data>
+	<data name="ProfessionalUpdated" xml:space="preserve">
+		<value>Profesional actualizado exitosamente</value>
+	</data>
+	<data name="ProfessionalDeactivated" xml:space="preserve">
+		<value>Profesional desactivado exitosamente</value>
+	</data>
+	<data name="ProfessionalPendingApproval" xml:space="preserve">
+		<value>Registro pendiente de validacion</value>
+	</data>
+	<data name="ProfessionalValidated" xml:space="preserve">
+		<value>Profesional validado exitosamente</value>
+	</data>
+	<data name="ProfessionalRejected" xml:space="preserve">
+		<value>Profesional rechazado</value>
+	</data>
+	<data name="LoginMethodUpdated" xml:space="preserve">
+		<value>Metodo de login actualizado correctamente</value>
+	</data>
+	<data name="UserIdentified" xml:space="preserve">
+		<value>Usuario identificado correctamente</value>
+	</data>
+	<data name="LoginMethodsRetrieved" xml:space="preserve">
+		<value>Metodos de login obtenidos correctamente</value>
+	</data>
+	<data name="FamilyLoginSuccessful" xml:space="preserve">
+		<value>Login familiar exitoso</value>
+	</data>
+	<data name="PasswordChanged" xml:space="preserve">
+		<value>Contrasena cambiada exitosamente</value>
+	</data>
+	<data name="InvitationCreated" xml:space="preserve">
+		<value>Invitacion creada exitosamente</value>
+	</data>
+	<data name="InvitationAccepted" xml:space="preserve">
+		<value>Registro completado exitosamente</value>
+	</data>
+</root>
