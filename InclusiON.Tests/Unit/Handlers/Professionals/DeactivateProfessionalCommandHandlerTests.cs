@@ -103,5 +103,23 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
                 professional.UserId, Arg.Any<string>(), Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         }
+
+        // ── Con alumnos dependientes ─────────────────────────────────────────
+
+        [Fact]
+        public async Task HandleAsync_WithDependentStudents_ReturnsInvalidOperation()
+        {
+            var professional = AProfessional();
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(professional);
+            _httpCtx.GetCurrentUserId().Returns(AdminId);
+            _prosRepo.GetDependentAssistedLoginPersonsCountAsync(professional.UserId, Arg.Any<CancellationToken>())
+                     .Returns(3);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.InvalidOperation);
+            result.Message.Should().Contain("supervisor exclusivo");
+        }
     }
 }

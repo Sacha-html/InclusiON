@@ -288,5 +288,65 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 select p
             ).AsNoTracking().ToListAsync(cancellationToken);
         }
+
+        public async Task<List<string>> DeactivateRepresentativeAndSuspendDependentStudentsAsync(Guid familyUserId, DateTime endedAt, CancellationToken ct = default)
+        {
+            var suspendedStudents = new List<string>();
+            var family = await _context.FamilyRepresentatives
+                .FirstOrDefaultAsync(f => f.UserId == familyUserId, ct);
+
+            if (family is not null)
+            {
+                var studentLinks = await _context.PersonRepresentatives
+                    .Include(pr => pr.Person)
+                    .ThenInclude(p => p.User)
+                    .Where(pr => pr.RepresentativeId == family.Id && pr.IsActive)
+                    .ToListAsync(ct);
+
+                foreach (var link in studentLinks)
+                {
+                    var otherRepsCount = await _context.PersonRepresentatives
+                        .CountAsync(pr => pr.PersonId == link.PersonId && pr.RepresentativeId != family.Id && pr.IsActive, ct);
+
+                    if (otherRepsCount == 0)
+                    {
+                        link.Person.IsActive = false;
+                        if (link.Person.User != null)
+                        {
+                            link.Person.User.IsActive = false;
+                        }
+                        suspendedStudents.Add($"{link.Person.FirstName} {link.Person.LastName}");
+                    }
+
+                    link.IsActive = false;
+                    link.EndedAt = endedAt;
+                    link.UnlinkObservation = "Representante familiar desactivado";
+                }
+            }
+
+            return suspendedStudents;
+        }
+
+        public async Task<int> GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(Guid familyId, CancellationToken cancellationToken = default)
+        {
+            var activeStudentIds = await _context.PersonRepresentatives
+                .Where(pr => pr.RepresentativeId == familyId && pr.IsActive)
+                .Select(pr => pr.PersonId)
+                .ToListAsync(cancellationToken);
+
+            int count = 0;
+            foreach (var studentId in activeStudentIds)
+            {
+                var otherRepsCount = await _context.PersonRepresentatives
+                    .CountAsync(pr => pr.PersonId == studentId && pr.RepresentativeId != familyId && pr.IsActive, cancellationToken);
+
+                if (otherRepsCount == 0)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
     }
 }

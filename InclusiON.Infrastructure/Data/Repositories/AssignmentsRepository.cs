@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
+using InclusiON.Domain.Enums;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
@@ -126,6 +127,20 @@ namespace InclusiON.Infrastructure.Data.Repositories
                    && fam.UserId == familyUserId
                 select u
             ).Distinct().AsNoTracking().ToListAsync(ct);
+        }
+
+        public async Task CancelActiveAssignmentsForProfessionalAndPersonAsync(Guid professionalId, Guid personId, CancellationToken ct = default)
+        {
+            var activeActivityAssignments = await _context.ActivityAssignments
+                .Where(aa => aa.PersonId == personId && 
+                             aa.AssignedByProfessionalId == professionalId &&
+                             (aa.StatusId == AssignmentStatuses.Pendiente || aa.StatusId == AssignmentStatuses.EnProgreso))
+                .ToListAsync(ct);
+
+            foreach (var aa in activeActivityAssignments)
+            {
+                aa.StatusId = AssignmentStatuses.Cancelada;
+            }
         }
     }
 }

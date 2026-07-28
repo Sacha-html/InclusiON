@@ -30,7 +30,7 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
             if (await _roadmaps.HasResponsesAsync(command.ActivityEntryId, cancellationToken))
                 return ApiResponse<object>.ErrorResult(
                     ErrorCode.InvalidOperation,
-                    "No se puede eliminar una actividad que ya tiene respuestas registradas.");
+                    "No se puede eliminar la actividad del roadmap porque ya posee respuestas o progreso registrado por parte del alumno. Considere archivar o desactivar la actividad si desea evitar nuevas asignaciones.");
 
             _roadmaps.RemoveActivity(activity);
             await _uow.SaveChangesAsync(cancellationToken);

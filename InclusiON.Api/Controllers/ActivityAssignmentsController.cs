@@ -81,7 +81,8 @@ namespace InclusiON.Api.Controllers
                 professionalId.Value,
                 request.DueDate,
                 request.IsEvaluationActivity,
-                request.SequenceOrder);
+                request.SequenceOrder,
+                request.BypassDuplicateWarning);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 

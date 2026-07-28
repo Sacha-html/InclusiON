@@ -53,5 +53,8 @@ namespace InclusiON.Application.Interfaces.Repositories
             SortField? sortBy,
             string sortDirection,
             CancellationToken cancellationToken = default);
+        Task<Report?> GetReportWithDetailsAsync(int reportId, CancellationToken cancellationToken = default);
+        Task ReassignReportAsync(Report report, Guid newProfessionalId, DateTime assignedAt, CancellationToken cancellationToken = default);
+        Task SoftDeleteReportAsync(Report report, DateTime updatedAt, CancellationToken cancellationToken = default);
     }
 }

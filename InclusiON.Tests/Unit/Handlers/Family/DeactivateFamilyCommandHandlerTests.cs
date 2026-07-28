@@ -56,6 +56,7 @@ namespace InclusiON.Tests.Unit.Handlers.Family
             var family = AFamily();
             var now    = DateTime.UtcNow;
             _familyRepo.GetByIdAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
+            _familyRepo.GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(family.Id, Arg.Any<CancellationToken>()).Returns(0);
             _dateTime.UtcNow.Returns(now);
 
             var result = await BuildSut().HandleAsync(new DeactivateFamilyCommand(FamilyId), default);
@@ -64,7 +65,26 @@ namespace InclusiON.Tests.Unit.Handlers.Family
             family.IsActive.Should().BeFalse();
             family.User.IsActive.Should().BeFalse();
             family.UpdatedAt.Should().Be(now);
+            await _familyRepo.Received(1).UpdateAsync(family, Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_ActiveFamilyWithDependentStudents_ReturnsError()
+        {
+            var family = AFamily();
+            _familyRepo.GetByIdAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
+            _familyRepo.GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(family.Id, Arg.Any<CancellationToken>()).Returns(2);
+
+            var result = await BuildSut().HandleAsync(new DeactivateFamilyCommand(FamilyId), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.InvalidOperation);
+            result.Message.Should().Contain("No se puede desactivar al familiar porque es el único representante activo para 2 alumno(s)");
+            family.IsActive.Should().BeTrue();
+            family.User.IsActive.Should().BeTrue();
+            await _familyRepo.DidNotReceive().UpdateAsync(Arg.Any<FamilyRepresentative>(), Arg.Any<CancellationToken>());
+            await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         }
     }
 }

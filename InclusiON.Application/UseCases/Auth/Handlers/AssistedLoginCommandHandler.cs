@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
 using InclusiON.Domain.Models;
+using InclusiON.Domain.Enums;
 using InclusiON.Shared.Resources;
 
 namespace InclusiON.Application.UseCases.Auth.Handlers
@@ -58,7 +59,49 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     });
             }
 
-            var isAuthorized = await IsAuthorizedSupervisorAsync(person, supervisor.Id, cancellationToken);
+            if (!supervisor.IsActive)
+            {
+                return ApiResponse<VisualLoginResponse>.SuccessResult(
+                    new VisualLoginResponse
+                    {
+                        Success = false,
+                        ErrorMessage = ErrorMessages.AccountDeactivated
+                    });
+            }
+
+            // Check if profile itself is active/approved
+            var roles = await _identityService.GetRolesAsync(supervisor);
+            if (roles != null)
+            {
+                if (roles.Contains(RoleNames.Professional))
+                {
+                    var professional = await _repository.GetProfessionalByUserIdAsync(supervisor.Id, cancellationToken);
+                    if (professional != null && !professional.IsActive)
+                    {
+                        return ApiResponse<VisualLoginResponse>.SuccessResult(
+                            new VisualLoginResponse
+                            {
+                                Success = false,
+                                ErrorMessage = ErrorMessages.AccountDeactivated
+                            });
+                    }
+                }
+                else if (roles.Contains(RoleNames.Family))
+                {
+                    var family = await _repository.GetFamilyByUserIdAsync(supervisor.Id, cancellationToken);
+                    if (family != null && family.Status != FamilyStatusEnum.Active)
+                    {
+                        return ApiResponse<VisualLoginResponse>.SuccessResult(
+                            new VisualLoginResponse
+                            {
+                                Success = false,
+                                ErrorMessage = ErrorMessages.AccountDeactivated
+                            });
+                    }
+                }
+            }
+
+            var isAuthorized = await IsAuthorizedSupervisorAsync(person, supervisor, cancellationToken);
 
             if (!isAuthorized)
             {
@@ -117,19 +160,31 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
 
         private async Task<bool> IsAuthorizedSupervisorAsync(
             PersonWithDisability person,
-            Guid supervisorUserId,
+            User supervisorUser,
             CancellationToken cancellationToken)
         {
+            var supervisorUserId = supervisorUser.Id;
             if (person.SupervisorUserId.HasValue && person.SupervisorUserId.Value == supervisorUserId)
             {
+                // Verify the primary supervisor entity is active/approved based on their role
+                var directRoles = await _identityService.GetRolesAsync(supervisorUser);
+                if (directRoles.Contains(RoleNames.Professional))
+                {
+                    var professional = await _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
+                    if (professional == null || !professional.IsActive || professional.Status != ProfessionalStatusEnum.Approved)
+                    {
+                        return false;
+                    }
+                }
+                else if (directRoles.Contains(RoleNames.Family))
+                {
+                    var family = await _repository.GetFamilyByUserIdAsync(supervisorUserId, cancellationToken);
+                    if (family == null || family.Status != FamilyStatusEnum.Active)
+                    {
+                        return false;
+                    }
+                }
                 return true;
-            }
-
-            var supervisorUser = await _identityService.FindByIdAsync(supervisorUserId);
-            if (supervisorUser == null)
-            {
-                _logger.LogWarning("Supervisor user not found: {SupervisorUserId}", supervisorUserId);
-                return false;
             }
 
             var roles = await _identityService.GetRolesAsync(supervisorUser);
@@ -141,6 +196,8 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             {
                 var professional = await _repository.GetProfessionalByUserIdAsync(supervisorUserId, cancellationToken);
                 if (professional != null
+                    && professional.IsActive
+                    && professional.Status == ProfessionalStatusEnum.Approved
                     && await _repository.CanProfessionalSupervisedLoginAsync(professional.Id, person.Id, cancellationToken))
                 {
                     return true;
@@ -151,6 +208,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             {
                 var family = await _repository.GetFamilyByUserIdAsync(supervisorUserId, cancellationToken);
                 if (family != null
+                    && family.Status == FamilyStatusEnum.Active
                     && await _repository.CanFamilySupervisedLoginAsync(family.Id, person.Id, cancellationToken))
                 {
                     return true;

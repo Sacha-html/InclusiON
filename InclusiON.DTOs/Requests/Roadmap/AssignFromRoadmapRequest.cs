@@ -12,5 +12,7 @@ namespace InclusiON.DTOs.Requests.Roadmap
 
         /// <summary>Indica si la actividad cuenta como evaluación.</summary>
         public bool IsEvaluationActivity { get; set; }
+
+        public bool BypassDuplicateWarning { get; set; } = false;
     }
 }

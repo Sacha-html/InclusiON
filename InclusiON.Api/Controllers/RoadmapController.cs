@@ -311,7 +311,8 @@ namespace InclusiON.Api.Controllers
                 personId,
                 professionalId.Value,
                 request.DueDate,
-                request.IsEvaluationActivity);
+                request.IsEvaluationActivity,
+                request.BypassDuplicateWarning);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 

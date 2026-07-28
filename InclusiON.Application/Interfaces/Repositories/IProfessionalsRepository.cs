@@ -101,5 +101,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Incluye User para acceder al email.
         /// </summary>
         Task<List<Professional>> GetAllActiveAsync(CancellationToken cancellationToken = default);
+        Task<int> GetDependentAssistedLoginPersonsCountAsync(Guid professionalUserId, CancellationToken ct = default);
+        Task DeactivateAssignmentsAndCancelActivitiesAsync(Guid professionalUserId, CancellationToken ct = default);
     }
 }

@@ -41,6 +41,9 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             }
 
             assignment.IsActive = false;
+
+            await _repository.CancelActiveAssignmentsForProfessionalAndPersonAsync(command.ProfessionalId, command.PersonId, cancellationToken);
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var response = ProfessionalPersonResponse.MapToResponse(assignment);
