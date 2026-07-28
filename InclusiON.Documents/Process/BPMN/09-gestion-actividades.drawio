@@ -1,0 +1,140 @@
+<mxfile host="65bd71144e">
+    <diagram id="13nn70zNAL2_y6zykGO-" name="Page-1">
+        <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="pool" value="Proceso 09 — Gestión de Actividades (Catálogo)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#555555;fontColor=#333333;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="20" width="1700" height="515" as="geometry"/>
+                </mxCell>
+                <mxCell id="l1" value="Profesional" style="swimlane;startSize=30;horizontal=0;fillColor=#f8f8f8;strokeColor=#888888;fontStyle=1;fontSize=12;" parent="pool" vertex="1">
+                    <mxGeometry y="25" width="1700" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="l2" value="Sistema / Motor IA" style="swimlane;startSize=30;horizontal=0;fillColor=#f8f8f8;strokeColor=#888888;fontStyle=1;fontSize=12;" parent="pool" vertex="1">
+                    <mxGeometry y="265" width="1700" height="250" as="geometry"/>
+                </mxCell>
+
+                <!-- LANE 1: 4 user tasks in separate columns, same row -->
+                <mxCell id="s1" value="Inicio" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#23a027;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=12;" parent="l1" vertex="1">
+                    <mxGeometry x="60" y="100" width="40" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="gw0" value="¿Qué acción?" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" parent="l1" vertex="1">
+                    <mxGeometry x="160" y="95" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <!-- Column 1 x=350: Crear/Editar -->
+                <mxCell id="t1" value="Diseñar actividad&#xa;(template + contentJson&#xa;+ accesibilidad)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                    <mxGeometry x="350" y="70" width="160" height="95" as="geometry"/>
+                </mxCell>
+                <!-- Column 2 x=650: Buscar -->
+                <mxCell id="t2" value="Buscar actividad&#xa;(semántica o filtros)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                    <mxGeometry x="650" y="70" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <!-- Column 3 x=950: Activar/Desact -->
+                <mxCell id="t3" value="Activar / Desactivar&#xa;actividad" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                    <mxGeometry x="950" y="70" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <!-- Column 4 x=1250: Ver compatibles -->
+                <mxCell id="t4" value="Ver personas compatibles&#xa;(IA ranking)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;" parent="l1" vertex="1">
+                    <mxGeometry x="1250" y="70" width="160" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="Fin" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;verticalLabelPosition=bottom;verticalAlign=top;align=center;fontSize=12;" parent="l1" vertex="1">
+                    <mxGeometry x="1580" y="100" width="40" height="40" as="geometry"/>
+                </mxCell>
+
+                <!-- LANE 2: service tasks aligned with l1 columns -->
+                <mxCell id="t5" value="Guardar actividad&#xa;+ generar vector semántico (IA)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                    <mxGeometry x="350" y="75" width="160" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="t6" value="Búsqueda semántica&#xa;de actividades (IA)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                    <mxGeometry x="650" y="75" width="160" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="t7" value="Actualizar estado&#xa;activo / inactivo" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                    <mxGeometry x="950" y="75" width="160" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="t8" value="Buscar personas compatibles&#xa;(ranking IA)" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=middle;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" parent="l2" vertex="1">
+                    <mxGeometry x="1250" y="75" width="160" height="90" as="geometry"/>
+                </mxCell>
+                <!-- gw_merge in l2: all service completions converge here -->
+                <mxCell id="gw_merge" value="" style="shape=mxgraph.bpmn.shape;perimeter=mxPerimeter.rhombusPerimeter;symbol=exclusiveGw;verticalLabelPosition=bottom;verticalAlign=top;align=center;fillColor=#fffdc3;strokeColor=#aa7200;fontSize=12;" parent="l2" vertex="1">
+                    <mxGeometry x="1480" y="95" width="50" height="50" as="geometry"/>
+                </mxCell>
+
+                <!-- FLOWS: start -->
+                <mxCell id="f1" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l1" source="s1" target="gw0" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- gw0 exits: 4 routes fan at 4 y-levels
+                     y=120 (mid)  → Crear/Editar  col1 — direct
+                     y=50  (top)  → Buscar        col2 — above tasks
+                     y=185 (low)  → Activar       col3 — below tasks
+                     y=20  (very top) → Ver compat col4 — long top cable
+                     Routes diverge within 70px of gw0 right edge -->
+                <mxCell id="f2" value="Crear/Editar" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l1" source="gw0" target="t1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="255" y="120"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="f3" value="Buscar" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l1" source="gw0" target="t2" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="230" y="50"/>
+                            <mxPoint x="650" y="50"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="f_act" value="Activar/Desact." style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l1" source="gw0" target="t3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="245" y="185"/>
+                            <mxPoint x="950" y="185"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="f_compat" value="Ver compatibles" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l1" source="gw0" target="t4" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="215" y="20"/>
+                            <mxPoint x="1250" y="20"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Cross-lane: user tasks → service tasks (straight down, same column) -->
+                <mxCell id="f4" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="pool" source="t1" target="t5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="f5" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="pool" source="t2" target="t6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="f_act2" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="pool" source="t3" target="t7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="f_compat2" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="pool" source="t4" target="t8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- Service tasks → gw_merge (within l2, auto-route) -->
+                <mxCell id="f6" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l2" source="t5" target="gw_merge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="f7" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l2" source="t6" target="gw_merge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="f_act3" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l2" source="t7" target="gw_merge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="f_compat3" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="l2" source="t8" target="gw_merge" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- gw_merge (l2) → e1 (l1): single final cross-lane flow up -->
+                <mxCell id="f_end" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=block;endFill=1;strokeColor=#333333;" parent="pool" source="gw_merge" target="e1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
