@@ -32,6 +32,9 @@ export class ReportsService {
       params = params.set('isActive', request.isActive.toString());
     }
     if (request.status) params = params.set('status', request.status);
+    if (request.onlyDeactivatedProfessionals !== undefined && request.onlyDeactivatedProfessionals !== null) {
+      params = params.set('onlyDeactivatedProfessionals', request.onlyDeactivatedProfessionals.toString());
+    }
     if (request.dateFrom) params = params.set('dateFrom', request.dateFrom);
     if (request.dateTo) params = params.set('dateTo', request.dateTo);
     if (request.sortBy) params = params.set('sortBy', request.sortBy);

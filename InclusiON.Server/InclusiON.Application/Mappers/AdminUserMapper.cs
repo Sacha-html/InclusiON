@@ -48,7 +48,9 @@ namespace InclusiON.Application.Mappers
                 {
                     EntityType     = entityType,
                     EntityId       = e.Id,
-                    DocumentNumber = e.DocumentNumber
+                    DocumentNumber = e.DocumentNumber,
+                    SupervisorName = e.SupervisorName,
+                    RepresentativeName = e.RepresentativeName
                 },
                 (RoleNames.FamilyRepresentative, { } e) => new LinkedEntityInfo
                 {
@@ -74,6 +76,8 @@ namespace InclusiON.Application.Mappers
             string? LicenseNumber,
             string? DocumentNumber,
             string? Phone,
-            string? Relationship);
+            string? Relationship,
+            string? SupervisorName = null,
+            string? RepresentativeName = null);
     }
 }

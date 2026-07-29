@@ -1,0 +1,260 @@
+<c-row>
+  <!-- Alumnos Sidebar -->
+  <c-col lg="3" md="4" class="mb-4">
+    <c-card class="shadow-sm border-0">
+      <c-card-header class="bg-dark text-white py-3">
+        <h5 class="mb-0 text-uppercase tracking-wider font-semibold">Alumnos Asignados</h5>
+      </c-card-header>
+      <c-card-body class="p-0">
+        @if (isLoadingPersons()) {
+        <div class="text-center p-4">
+          <c-spinner color="primary"></c-spinner>
+          <p class="text-muted mt-2 mb-0">Cargando aula...</p>
+        </div>
+        } @else if (persons().length === 0) {
+        <div class="text-center p-4">
+          <p class="text-muted mb-0">No tienes alumnos asignados.</p>
+        </div>
+        } @else {
+        <div class="list-group list-group-flush">
+          @for (person of persons(); track person.personId) {
+          <button type="button"
+            class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 border-0 transition-all"
+            [class.active]="selectedPerson()?.personId === person.personId"
+            [class.bg-light]="selectedPerson()?.personId !== person.personId" (click)="selectPerson(person)">
+            <app-actor-avatar [name]="person.personFullName" [color]="person.avatarColor" size="md"
+              class="shadow-sm"></app-actor-avatar>
+            <div class="text-start flex-grow-1 min-w-0">
+              <h6 class="mb-0 text-truncate font-medium"
+                [class.text-white]="selectedPerson()?.personId === person.personId">
+                {{ person.personFullName }}
+              </h6>
+              <small [class.text-light]="selectedPerson()?.personId === person.personId"
+                [class.text-muted]="selectedPerson()?.personId !== person.personId">
+                DNI: {{ person.personDocumentNumber || '—' }}
+              </small>
+            </div>
+          </button>
+          }
+        </div>
+        }
+      </c-card-body>
+    </c-card>
+  </c-col>
+
+  <!-- Metrics & Evaluations Main Dashboard -->
+  <c-col lg="9" md="8">
+    @if (!selectedPerson()) {
+    <c-card class="shadow-sm border-0 py-5 text-center bg-light">
+      <c-card-body class="py-5">
+        <div class="py-5">
+          <i class="cil-chart-pie d-block text-muted mb-3" style="font-size: 3rem;"></i>
+          <h4 class="text-dark font-semibold">Dashboard de Evaluaciones</h4>
+          <p class="text-muted mx-auto" style="max-width: 450px;">
+            Selecciona un alumno de la lista lateral para cargar sus métricas de resolución, historial de intentos y
+            tasa de aciertos de las actividades asignadas.
+          </p>
+        </div>
+      </c-card-body>
+    </c-card>
+    } @else {
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="text-dark font-bold mb-0">Métricas de {{ selectedPerson()?.personFullName }}</h3>
+        <p class="text-muted mb-0">Visualiza el rendimiento y avances en tiempo real.</p>
+      </div>
+    </div>
+
+    <!-- Quick Metrics Grid -->
+    <c-row class="mb-4">
+      <!-- Tasa de Exito Promedio -->
+      <c-col sm="6" lg="3" class="mb-3">
+        <c-card class="shadow-sm border-0 h-100 bg-white border-start border-4 border-success">
+          <c-card-body class="p-3">
+            <span class="text-muted text-uppercase tracking-wider font-semibold small d-block mb-1">Tasa de
+              Acierto</span>
+            <h3 class="font-bold text-success mb-1">
+              {{ averageSuccessRate() | number:'1.0-1' }}%
+            </h3>
+            <c-progress class="mt-2" style="height: 6px;">
+              <c-progress-bar [value]="averageSuccessRate()" color="success"></c-progress-bar>
+            </c-progress>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <!-- Tiempo invertido Promedio -->
+      <c-col sm="6" lg="3" class="mb-3">
+        <c-card class="shadow-sm border-0 h-100 bg-white border-start border-4 border-primary">
+          <c-card-body class="p-3">
+            <span class="text-muted text-uppercase tracking-wider font-semibold small d-block mb-1">Tiempo
+              Promedio</span>
+            <h3 class="font-bold text-primary mb-1">
+              {{ formatTime(averageTimeSpent()) }}
+            </h3>
+            <p class="text-muted small mb-0 mt-2">Duración por intento</p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <!-- Actividades Completadas -->
+      <c-col sm="6" lg="3" class="mb-3">
+        <c-card class="shadow-sm border-0 h-100 bg-white border-start border-4 border-info">
+          <c-card-body class="p-3">
+            <span class="text-muted text-uppercase tracking-wider font-semibold small d-block mb-1">Completadas</span>
+            <h3 class="font-bold text-info mb-1">
+              {{ completedCount() }}
+            </h3>
+            <p class="text-muted small mb-0 mt-2">
+              {{ inProgressCount() }} en curso / {{ pendingCount() }} pendientes
+            </p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <!-- Total Intentos -->
+      <c-col sm="6" lg="3" class="mb-3">
+        <c-card class="shadow-sm border-0 h-100 bg-white border-start border-4 border-warning">
+          <c-card-body class="p-3">
+            <span class="text-muted text-uppercase tracking-wider font-semibold small d-block mb-1">Total
+              Intentos</span>
+            <h3 class="font-bold text-warning mb-1">
+              {{ totalAttempts() }}
+            </h3>
+            <p class="text-muted small mb-0 mt-2">Ejercicios realizados</p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+
+    <!-- Assignments list & responses detail -->
+    <c-card class="shadow-sm border-0">
+      <c-card-header class="bg-light py-3 border-0">
+        <strong class="text-dark">Historial de Actividades Asignadas</strong>
+      </c-card-header>
+      <c-card-body class="p-0">
+        @if (isLoadingAssignments()) {
+        <div class="text-center py-5">
+          <c-spinner color="primary"></c-spinner>
+          <p class="text-muted mt-2 mb-0">Cargando avances...</p>
+        </div>
+        } @else if (assignments().length === 0) {
+        <div class="text-center py-5">
+          <p class="text-muted mb-0">El alumno no tiene actividades asignadas.</p>
+        </div>
+        } @else {
+        <div class="table-responsive">
+          <table cTable hover align="middle" class="mb-0">
+            <thead class="table-light text-uppercase tracking-wider small">
+              <tr>
+                <th class="ps-4">Actividad</th>
+                <th>Estado</th>
+                <th>Fecha Asignación</th>
+                <th>Intentos</th>
+                <th>Mejor Acierto</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (assignment of assignments(); track assignment.id) {
+              <!-- Main Assignment Row -->
+              <tr class="align-middle">
+                <td class="ps-4 py-3">
+                  <div class="d-flex flex-column">
+                    <span class="font-semibold text-dark">{{ assignment.activityTitle }}</span>
+                    <span class="text-muted small">Código: {{ assignment.templateTypeCode }}</span>
+                  </div>
+                </td>
+                <td>
+                  <c-badge [color]="getAssignmentStatusColor(assignment.status)"
+                    class="px-2 py-1.5 font-medium rounded-pill">
+                    {{ getAssignmentStatusLabel(assignment.status) }}
+                  </c-badge>
+                </td>
+                <td class="text-muted small">
+                  {{ assignment.assignedAt | date:'dd/MM/yyyy' }}
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border font-medium px-2 py-1 rounded">
+                    {{ assignment.responses?.length || 0 }}
+                  </span>
+                </td>
+                <td>
+                  @if (assignment.responses && assignment.responses.length > 0) {
+                  <span class="font-bold text-success">
+                    {{ getMaxSuccess(assignment.responses) }}%
+                  </span>
+                  } @else {
+                  <span class="text-muted">—</span>
+                  }
+                </td>
+                <td>
+                  <button cButton color="link" class="p-0 text-decoration-none small text-primary font-medium"
+                    (click)="toggleExpanded(assignment.id)"
+                    *ngIf="assignment.responses && assignment.responses.length > 0">
+                    {{ isExpanded(assignment.id) ? 'Ocultar' : 'Ver intentos' }}
+                  </button>
+                  <span class="text-muted small" *ngIf="!assignment.responses || assignment.responses.length === 0">Sin
+                    intentos</span>
+                </td>
+              </tr>
+
+              <!-- Collapsible Attempt Details Row -->
+              @if (assignment.responses && assignment.responses.length > 0 && isExpanded(assignment.id)) {
+              <tr>
+                <td colspan="6" class="bg-light p-3 border-top-0">
+                  <div class="rounded bg-white shadow-sm p-3">
+                    <h6 class="font-semibold text-muted text-uppercase tracking-wider small mb-3">Intentos del Alumno
+                    </h6>
+                    <table cTable striped hover size="sm" class="mb-0 align-middle">
+                      <thead class="small text-muted">
+                        <tr>
+                          <th>Intento</th>
+                          <th>Fecha / Hora</th>
+                          <th>Resultado</th>
+                          <th>Tasa de Acierto</th>
+                          <th>Duración</th>
+                          <th>Frustración</th>
+                          <th>Asistencia</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (resp of assignment.responses; track resp.id) {
+                        <tr class="small">
+                          <td class="font-semibold text-muted">#{{ resp.attemptCount }}</td>
+                          <td>{{ resp.startedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                          <td>
+                            <c-badge [color]="getResultBadgeColor(resp.result)" class="px-2 py-1">
+                              {{ getResultLabel(resp.result) }}
+                            </c-badge>
+                          </td>
+                          <td class="font-semibold">
+                            {{ resp.successPercentage !== null && resp.successPercentage !== undefined ?
+                            resp.successPercentage + '%' : '—' }}
+                          </td>
+                          <td>{{ formatTime(resp.timeSpentSeconds) }}</td>
+                          <td>{{ getFrustrationEmoji(resp.frustrationLevel) }}</td>
+                          <td>
+                            <c-badge [color]="resp.requiredSupport ? 'warning' : 'success'" class="px-2 py-1">
+                              {{ resp.requiredSupport ? 'Con Apoyo' : 'Autónomo' }}
+                            </c-badge>
+                          </td>
+                        </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              }
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </c-card-body>
+    </c-card>
+    }
+  </c-col>
+</c-row>

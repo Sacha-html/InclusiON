@@ -47,6 +47,8 @@ namespace InclusiON.DTOs.Responses.Activities
         public string? Result { get; set; }
         public decimal? SuccessPercentage { get; set; }
         public int AttemptCount { get; set; }
+        public bool RequiredSupport { get; set; }
+        public int? FrustrationLevel { get; set; }
 
         public static ActivityAttemptResponse From(DomainActivityResponse r) => new()
         {
@@ -57,6 +59,8 @@ namespace InclusiON.DTOs.Responses.Activities
             Result            = r.Result?.ToString(),
             SuccessPercentage = r.SuccessPercentage,
             AttemptCount      = r.AttemptCount,
+            RequiredSupport   = r.RequiredSupport,
+            FrustrationLevel  = r.FrustrationLevel,
         };
     }
 }

@@ -73,8 +73,8 @@ export const professionalRoutes: Routes = [
   {
     path: 'evaluations',
     loadComponent: () =>
-      import('../coming-soon/coming-soon.component').then(
-        (m) => m.ComingSoonComponent
+      import('./evaluations/evaluations.component').then(
+        (m) => m.EvaluationsComponent
       ),
     data: { title: 'Evaluaciones' }
   },

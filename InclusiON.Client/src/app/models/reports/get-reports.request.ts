@@ -8,6 +8,7 @@ export interface GetReportsRequest {
   institutionId?: number;
   reportTypeId?: number;
   isActive?: boolean;
+  onlyDeactivatedProfessionals?: boolean;
   status?: string;
   dateFrom?: string;
   dateTo?: string;

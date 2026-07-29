@@ -14,6 +14,7 @@ using InclusiON.DTOs.Common;
 using Activity = InclusiON.Domain.Models.Activity;
 using ActivityAssignment = InclusiON.Domain.Models.ActivityAssignment;
 using DomainActivityResponse = InclusiON.Domain.Models.ActivityResponse;
+using Professional = InclusiON.Domain.Models.Professional;
 
 namespace InclusiON.Tests.Unit.Handlers.Activities
 {
@@ -351,6 +352,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IActivityAssignmentRepository _repo = Substitute.For<IActivityAssignmentRepository>();
         private readonly IActivitiesRepository _activitiesRepo = Substitute.For<IActivitiesRepository>();
         private readonly IPersonsRepository _personsRepo = Substitute.For<IPersonsRepository>();
+        private readonly IProfessionalsRepository _profRepo = Substitute.For<IProfessionalsRepository>();
         private readonly IBackgroundJobRepository _bgJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
@@ -370,10 +372,12 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
             // Decrypt: "ENCRYPTED_10" (url-safe) → standard base64 → "10"
             _encryption.Decrypt(Arg.Any<string>()).Returns(ActivityId.ToString());
+            _profRepo.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+                .Returns(new Professional { Id = ProfId, IsActive = true });
         }
 
         private CreateActivityAssignmentCommandHandler BuildSut() =>
-            new(_repo, _activitiesRepo, _personsRepo, _bgJobs, _uow, _dateTime, _encryption);
+            new(_repo, _activitiesRepo, _personsRepo, _profRepo, _bgJobs, _uow, _dateTime, _encryption);
 
         private static CreateActivityAssignmentCommand Cmd(Guid? profId = null) => new(
             EncryptedActivityId, PersonId, profId ?? ProfId,
@@ -394,6 +398,18 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             Status = new InclusiON.Domain.Models.ActivityAssignmentStatus { Id = AssignmentStatuses.Pendiente, Name = AssignmentStatuses.Names.Pendiente },
             AssignedAt = Now
         };
+
+        [Fact]
+        public async Task NotAProfessional_ReturnsForbidden()
+        {
+            _profRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>())
+                .Returns((Professional?)null);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.Forbidden);
+        }
 
         [Fact]
         public async Task ActivityNotFound_ReturnsNotFound()

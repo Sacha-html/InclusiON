@@ -44,6 +44,7 @@ export class DetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
+  private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
 
   activeTab: 'datos' | 'personas' | 'instituciones' | 'usuario' | 'reportes' = 'datos';
@@ -72,6 +73,12 @@ export class DetailComponent implements OnInit {
       this.professionalsService.getProfessionalById(id).subscribe({
         next: (data) => {
           this.professional = data;
+          this.assignmentsService.getPersonsByProfessional(id).subscribe({
+            next: (persons: ProfessionalPersonResponse[]) => this.assignedPersons = persons,
+          });
+          this.assignmentsService.getInstitutionsByProfessional(id).subscribe({
+            next: (institutions: ProfessionalInstitutionResponse[]) => this.assignedInstitutions = institutions,
+          });
         },
         error: () => this.router.navigate([AppRoutes.Admin.Professionals]),
       });

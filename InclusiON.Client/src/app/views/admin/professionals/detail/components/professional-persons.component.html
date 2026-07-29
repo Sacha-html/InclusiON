@@ -84,3 +84,37 @@
   (confirm)="confirmDeactivatePerson()"
   (cancel)="cancelDeactivatePerson()"
 />
+
+<!-- Modal: Transferir alumno -->
+<c-modal [visible]="showTransferModal()" (visibleChange)="showTransferModal.set($event)" alignment="center">
+  <c-modal-header>
+    <h5 cModalTitle>
+      Transferir Alumno
+    </h5>
+  </c-modal-header>
+  <c-modal-body>
+    <p>Vas a transferir al alumno <strong>"{{ personToTransfer()?.personFullName }}"</strong>. Esto desactivará su vínculo con el profesional actual y lo vinculará al nuevo profesional.</p>
+    <p class="text-warning fw-semibold">Todas sus actividades en curso y reportes pendientes se reasignarán automáticamente.</p>
+    
+    <div class="mb-3">
+      <label cLabel for="transferTargetProfSelect" class="form-label fw-semibold">Seleccionar Nuevo Profesional</label>
+      <select cSelect id="transferTargetProfSelect" [ngModel]="selectedTargetProfessionalId()" (ngModelChange)="selectedTargetProfessionalId.set($event)">
+        <option value="" disabled>Seleccione un profesional...</option>
+        @for (p of activeProfessionalsList(); track p.id) {
+          <option [value]="p.id">{{ p.fullName }} ({{ p.specialty }})</option>
+        }
+      </select>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" (click)="cancelTransfer()" [disabled]="isSubmitting()">Cancelar</button>
+    <button cButton color="primary" (click)="confirmTransfer()" [disabled]="!selectedTargetProfessionalId() || isSubmitting()">
+      @if (isSubmitting()) {
+        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
+        Transfiriendo...
+      } @else {
+        Transferir
+      }
+    </button>
+  </c-modal-footer>
+</c-modal>

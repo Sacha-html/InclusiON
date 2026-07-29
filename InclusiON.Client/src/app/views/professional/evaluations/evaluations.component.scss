@@ -1,0 +1,39 @@
+.list-group-item {
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: all 0.2s ease-in-out;
+  border-left: 4px solid transparent !important;
+
+  &:hover:not(.active) {
+    background-color: var(--cui-gray-100) !important;
+    transform: translateX(4px);
+    border-left-color: var(--cui-gray-300) !important;
+  }
+
+  &.active {
+    background-color: var(--cui-dark) !important;
+    border-left-color: var(--cui-primary) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.transition-all {
+  transition: all 0.25s ease-in-out;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-medium {
+  font-weight: 500;
+}
