@@ -67,6 +67,8 @@ namespace InclusiON.Application.Mappers
             PersonId               = pr.PersonId,
             RepresentativeId       = pr.RepresentativeId,
             RepresentativeFullName = $"{pr.Representative.FirstName} {pr.Representative.LastName}",
+            RepresentativeDocumentNumber = pr.Representative.DocumentNumber,
+            RepresentativeEmail = pr.Representative.User?.Email,
             Relationship           = pr.Relationship,
             IsPrimary              = pr.IsPrimary,
             IsActive               = pr.IsActive,

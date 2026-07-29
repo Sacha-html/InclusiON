@@ -61,6 +61,21 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     ErrorCode.BusinessRuleViolation,
                     "Esta respuesta ya fue completada.");
 
+            if (command.SuccessPercentage < 0 || command.SuccessPercentage > 100)
+                return ApiResponse<ActivityAssignmentResponse>.ErrorResult(
+                    ErrorCode.InvalidFormat,
+                    "El porcentaje de éxito debe estar entre 0 y 100.");
+
+            if (command.TimeSpentSeconds < 0)
+                return ApiResponse<ActivityAssignmentResponse>.ErrorResult(
+                    ErrorCode.InvalidFormat,
+                    "El tiempo transcurrido no puede ser negativo.");
+
+            if (command.FrustrationLevel.HasValue && (command.FrustrationLevel.Value < 1 || command.FrustrationLevel.Value > 5))
+                return ApiResponse<ActivityAssignmentResponse>.ErrorResult(
+                    ErrorCode.InvalidFormat,
+                    "El nivel de frustración debe estar entre 1 y 5.");
+
             var now = _dateTime.UtcNow;
 
             // Read roadmap data before any mutations — both reads only need PersonId/ActivityId

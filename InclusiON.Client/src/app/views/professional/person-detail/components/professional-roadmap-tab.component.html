@@ -511,3 +511,17 @@
     </button>
   </c-modal-footer>
 </c-modal>
+
+<!-- Modal: Confirmar asignación duplicada -->
+<app-confirm-modal
+  [visible]="showDuplicateConfirm"
+  title="Confirmar duplicada"
+  messagePrefix="El alumno ya posee una asignación activa para esta actividad. ¿Confirmás que deseás asignarla nuevamente?"
+  [itemName]="assignTarget?.activity?.activityTitle || ''"
+  messageSuffix=""
+  confirmLabel="Confirmar"
+  confirmColor="warning"
+  [loading]="assigning"
+  (confirm)="confirmDuplicateAssign()"
+  (cancel)="cancelDuplicateAssign()">
+</app-confirm-modal>

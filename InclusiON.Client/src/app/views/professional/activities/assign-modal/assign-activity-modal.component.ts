@@ -6,6 +6,7 @@ import { AssignmentsService } from '@services/assignments.service';
 import { ProfessionalsService } from '@services/professionals.service';
 import { ToastService } from '@services';
 import { ActivityListItemResponse, ProfessionalPersonResponse } from '@models';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
   ButtonDirective, SpinnerComponent,
@@ -19,6 +20,7 @@ import {
   standalone: true,
   imports: [
     FormsModule,
+    ConfirmModalComponent,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
     ButtonDirective, SpinnerComponent,
     FormSelectDirective, FormControlDirective,
@@ -41,6 +43,7 @@ export class AssignActivityModalComponent implements OnChanges {
   persons      = signal<ProfessionalPersonResponse[]>([]);
   isLoadingPersons = signal(false);
   isSaving     = signal(false);
+  showDuplicateConfirm = false;
 
   form = {
     personId:            '',
@@ -66,6 +69,7 @@ export class AssignActivityModalComponent implements OnChanges {
     }
     if (this.visible) {
       this.form = { personId: '', dueDate: '', isEvaluationActivity: false };
+      this.showDuplicateConfirm = false;
     }
   }
 
@@ -99,15 +103,21 @@ export class AssignActivityModalComponent implements OnChanges {
       error: (err) => {
         this.isSaving.set(false);
         if (err?.status === 409) {
-          const confirmAssign = confirm('El alumno ya posee una asignación activa para esta actividad. ¿Desea asignarla nuevamente de todas formas?');
-          if (confirmAssign) {
-            this.save(true);
-          }
+          this.showDuplicateConfirm = true;
         } else {
           this.toastService.error('Error al asignar la actividad.');
         }
       },
     });
+  }
+
+  confirmDuplicateAssign(): void {
+    this.showDuplicateConfirm = false;
+    this.save(true);
+  }
+
+  cancelDuplicateAssign(): void {
+    this.showDuplicateConfirm = false;
   }
 
   close(): void {

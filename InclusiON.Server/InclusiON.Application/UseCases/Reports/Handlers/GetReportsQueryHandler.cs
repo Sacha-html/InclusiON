@@ -31,6 +31,7 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                 query.ProfessionalId,
                 query.ReportTypeId,
                 query.IsActive,
+                query.OnlyDeactivatedProfessionals,
                 query.Status,
                 query.DateFrom,
                 query.DateTo,

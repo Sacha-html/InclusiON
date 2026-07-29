@@ -21,6 +21,8 @@ export interface LinkedEntityInfo {
   documentNumber: string | null;
   phone: string | null;
   relationship: string | null;
+  supervisorName: string | null;
+  representativeName: string | null;
 }
 
 export interface ResetPasswordResultResponse {

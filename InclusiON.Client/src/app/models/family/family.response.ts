@@ -42,6 +42,8 @@ export interface PersonRepresentativeResponse {
   personId: string;
   representativeId: string;
   representativeFullName: string;
+  representativeDocumentNumber?: string;
+  representativeEmail?: string;
   relationship?: string;
   isPrimary: boolean;
   isActive: boolean;

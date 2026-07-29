@@ -81,6 +81,7 @@ namespace InclusiON.Api.Controllers
                 request.ProfessionalId,
                 request.ReportTypeId,
                 request.IsActive,
+                request.OnlyDeactivatedProfessionals,
                 request.Status,
                 request.DateFrom,
                 request.DateTo,

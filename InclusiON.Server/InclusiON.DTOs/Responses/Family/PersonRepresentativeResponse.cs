@@ -15,6 +15,9 @@ namespace InclusiON.DTOs.Responses.Family
         public DateTime? EndedAt { get; set; }
         public string? UnlinkObservation { get; set; }
 
+        public string? RepresentativeDocumentNumber { get; set; }
+        public string? RepresentativeEmail { get; set; }
+
         public static PersonRepresentativeResponse MapToResponse(
             Guid personId,
             FamilyRepresentative family,
@@ -29,6 +32,8 @@ namespace InclusiON.DTOs.Responses.Family
                 PersonId = personId,
                 RepresentativeId = family.Id,
                 RepresentativeFullName = $"{family.FirstName} {family.LastName}",
+                RepresentativeDocumentNumber = family.DocumentNumber,
+                RepresentativeEmail = family.User?.Email,
                 Relationship = relationship,
                 IsPrimary = isPrimary,
                 IsActive = isActive,

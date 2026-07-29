@@ -64,6 +64,8 @@ export interface ActivityAttemptResponse {
   result?: ActivityResponseResult;
   successPercentage?: number;
   attemptCount: number;
+  requiredSupport: boolean;
+  frustrationLevel?: number;
 }
 
 export interface ActivityAssignmentResponse {

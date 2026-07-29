@@ -18,6 +18,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IActivityAssignmentRepository _repository;
         private readonly IActivitiesRepository _activitiesRepository;
         private readonly IPersonsRepository _personsRepository;
+        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
@@ -27,23 +28,29 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             IActivityAssignmentRepository repository,
             IActivitiesRepository activitiesRepository,
             IPersonsRepository personsRepository,
+            IProfessionalsRepository professionalsRepository,
             IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
             IEncryptionService encryption)
         {
-            _repository           = repository;
-            _activitiesRepository = activitiesRepository;
-            _personsRepository    = personsRepository;
-            _backgroundJobs       = backgroundJobs;
-            _unitOfWork           = unitOfWork;
-            _dateTime             = dateTime;
-            _encryption           = encryption;
+            _repository              = repository;
+            _activitiesRepository    = activitiesRepository;
+            _personsRepository       = personsRepository;
+            _professionalsRepository = professionalsRepository;
+            _backgroundJobs          = backgroundJobs;
+            _unitOfWork              = unitOfWork;
+            _dateTime                = dateTime;
+            _encryption              = encryption;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
             CreateActivityAssignmentCommand command, CancellationToken cancellationToken)
         {
+            var professional = await _professionalsRepository.GetByIdAsync(command.AssignedByProfessionalId, cancellationToken);
+            if (professional is null || !professional.IsActive)
+                return ApiResponse<ActivityAssignmentResponse>.Forbidden();
+
             if (!int.TryParse(_encryption.Decrypt(ToStandardBase64(command.EncryptedActivityId)), out var activityId))
                 return ApiResponse<ActivityAssignmentResponse>.ErrorResult(ErrorCode.ValidationFailed, "Identificador de actividad inválido.");
 

@@ -10,6 +10,7 @@ namespace InclusiON.Application.UseCases.Reports.Queries
         string? ProfessionalId,
         string? ReportTypeId,
         bool? IsActive,
+        bool? OnlyDeactivatedProfessionals,
         string? Status,
         DateTime? DateFrom,
         DateTime? DateTo,

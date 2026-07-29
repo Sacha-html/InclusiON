@@ -17,19 +17,22 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IPersonsRepository            _personsRepository;
         private readonly IFamilyRepository             _familyRepository;
         private readonly IAdminInstitutionRepository   _adminInstitutionRepository;
+        private readonly IAssignmentsRepository        _assignmentsRepository;
 
         public GetAdminUserDetailQueryHandler(
             IIdentityService              identityService,
             IProfessionalsRepository      professionalsRepository,
             IPersonsRepository            personsRepository,
             IFamilyRepository             familyRepository,
-            IAdminInstitutionRepository   adminInstitutionRepository)
+            IAdminInstitutionRepository   adminInstitutionRepository,
+            IAssignmentsRepository        assignmentsRepository)
         {
             _identityService              = identityService;
             _professionalsRepository      = professionalsRepository;
             _personsRepository            = personsRepository;
             _familyRepository             = familyRepository;
             _adminInstitutionRepository   = adminInstitutionRepository;
+            _assignmentsRepository        = assignmentsRepository;
         }
 
         public async Task<ApiResponse<AdminUserDetailResponse>> HandleAsync(
@@ -74,9 +77,19 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                         pro.Specialty, pro.LicenseNumber, pro.DocumentNumber, pro.Phone, null));
 
             if (await _personsRepository.GetByUserIdAsync(userId, cancellationToken) is { } person)
+            {
+                var professionals = await _assignmentsRepository.GetProfessionalsByPersonIdAsync(person.Id, cancellationToken);
+                var activePros = (professionals ?? []).Where(p => p.IsActive).Select(p => $"{p.Professional?.FirstName} {p.Professional?.LastName}".Trim());
+                var supervisorName = activePros.Any() ? string.Join(", ", activePros) : "Ninguno";
+
+                var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(person.Id, cancellationToken);
+                var activeReps = (representatives ?? []).Where(r => r.IsActive).Select(r => $"{r.Representative?.FirstName} {r.Representative?.LastName}".Trim());
+                var representativeName = activeReps.Any() ? string.Join(", ", activeReps) : "Ninguno";
+
                 return (RoleNames.PersonWithDisability,
                     new AdminUserMapper.LinkedEntityData(person.Id, person.FirstName, person.LastName,
-                        null, null, person.DocumentNumber, null, null));
+                        null, null, person.DocumentNumber, null, null, supervisorName, representativeName));
+            }
 
             if (await _familyRepository.GetByUserIdAsync(userId, cancellationToken) is { } family)
                 return (RoleNames.FamilyRepresentative,

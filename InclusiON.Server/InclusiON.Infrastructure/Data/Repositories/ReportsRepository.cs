@@ -48,6 +48,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string? professionalId,
             string? reportTypeId,
             bool? isActive,
+            bool? onlyDeactivatedProfessionals,
             string? status,
             DateTime? dateFrom,
             DateTime? dateTo,
@@ -60,9 +61,17 @@ namespace InclusiON.Infrastructure.Data.Repositories
             var query = _context.Reports
                 .Include(r => r.Person)
                 .Include(r => r.Professional)
+                .ThenInclude(p => p.User)
                 .Include(r => r.ReportType)
                 .AsNoTracking()
                 .AsQueryable();
+
+            if (onlyDeactivatedProfessionals.HasValue && onlyDeactivatedProfessionals.Value)
+            {
+                query = query.Where(r => 
+                    (r.Professional.Status == ProfessionalStatusEnum.Terminated || !r.Professional.User.IsActive) 
+                    && r.Status != ReportStatus.Approved);
+            }
 
             if (!string.IsNullOrWhiteSpace(search))
             {

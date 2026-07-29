@@ -17,6 +17,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             string? professionalId,
             string? reportTypeId,
             bool? isActive,
+            bool? onlyDeactivatedProfessionals,
             string? status,
             DateTime? dateFrom,
             DateTime? dateTo,
