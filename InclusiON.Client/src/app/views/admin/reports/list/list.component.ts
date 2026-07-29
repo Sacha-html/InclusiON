@@ -17,6 +17,11 @@ import {
   FormLabelDirective,
   FormSelectDirective,
   GridModule,
+  ModalModule,
+  SpinnerComponent,
+  FormCheckComponent,
+  FormCheckInputDirective,
+  FormCheckLabelDirective,
 } from '@coreui/angular';
 
 @Component({
@@ -31,6 +36,11 @@ import {
     FormLabelDirective,
     FormSelectDirective,
     GridModule,
+    ModalModule,
+    SpinnerComponent,
+    FormCheckComponent,
+    FormCheckInputDirective,
+    FormCheckLabelDirective,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -66,9 +76,14 @@ export class ListComponent implements OnInit {
   filterProfessionalId = '';
   filterInstitutionId  = '';
 
+  onlyDeactivatedProfessionals = false;
+
   // Modales
   showApproveModal = false;
   showRejectModal = false;
+  showReassignModal = false;
+  showDeleteModal = false;
+  selectedProfessionalId = '';
   selectedReport: ReportListItemResponse | null = null;
   isActioning = false;
 
@@ -84,6 +99,7 @@ export class ListComponent implements OnInit {
       key: 'status',
       label: 'Estado',
       type: 'badge',
+      sortable: true,
       badgeMap: {
         [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador },
         [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado },
@@ -101,13 +117,25 @@ export class ListComponent implements OnInit {
           action: 'approve',
           label: 'Aprobar',
           icon: 'cilCheckCircle',
-          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
+          visible: (item: ReportListItemResponse) => !this.onlyDeactivatedProfessionals && item.status === ReportStatus.Submitted,
         },
         {
           action: 'reject',
           label: 'Rechazar',
           icon: 'cilXCircle',
-          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
+          visible: (item: ReportListItemResponse) => !this.onlyDeactivatedProfessionals && item.status === ReportStatus.Submitted,
+        },
+        {
+          action: 'reassign',
+          label: 'Reasignar',
+          icon: 'cilShareAlt',
+          visible: (item: ReportListItemResponse) => this.onlyDeactivatedProfessionals,
+        },
+        {
+          action: 'delete',
+          label: 'Eliminar',
+          icon: 'cilTrash',
+          visible: (item: ReportListItemResponse) => this.onlyDeactivatedProfessionals,
         },
       ],
     },
@@ -117,7 +145,7 @@ export class ListComponent implements OnInit {
     this.loadReports();
     this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
     this.personsService.getPersons({ pageSize: 500 }).subscribe(r => this.persons.set(r.data));
-    this.professionalsService.getProfessionals({ pageSize: 500, isActive: true }).subscribe(r => this.professionals.set(r.data));
+    this.professionalsService.getProfessionals({ pageSize: 500, status: 'active' }).subscribe(r => this.professionals.set(r.data));
     this.institutionsService.getAll().subscribe(list => this.institutions.set(list));
   }
 
@@ -128,7 +156,8 @@ export class ListComponent implements OnInit {
       pageSize: this.pageSize(),
       sortBy: this.sortBy,
       sortDirection: this.sortDirection,
-      status: this.statusFilter || undefined,
+      status: this.onlyDeactivatedProfessionals ? undefined : (this.statusFilter || undefined),
+      onlyDeactivatedProfessionals: this.onlyDeactivatedProfessionals || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
       dateTo: this.dateTo || undefined,
@@ -160,6 +189,16 @@ export class ListComponent implements OnInit {
 
   onFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
 
+  onOrphanedReportsChange(): void {
+    if (this.onlyDeactivatedProfessionals) {
+      this.statusFilter = ''; // Desactivar filtro de estado para ver todos los reportes huérfanos
+    } else {
+      this.statusFilter = 'Submitted'; // Volver al filtro por defecto
+    }
+    this.currentPage.set(1);
+    this.loadReports();
+  }
+
   clearFilters(): void {
     this.statusFilter        = 'Submitted';
     this.typeFilter          = '';
@@ -168,6 +207,7 @@ export class ListComponent implements OnInit {
     this.selectedPersonIds   = [];
     this.filterProfessionalId = '';
     this.filterInstitutionId  = '';
+    this.onlyDeactivatedProfessionals = false;
     this.currentPage.set(1);
     this.loadReports();
   }
@@ -197,6 +237,11 @@ export class ListComponent implements OnInit {
       this.showApproveModal = true;
     } else if (event.action === 'reject') {
       this.showRejectModal = true;
+    } else if (event.action === 'reassign') {
+      this.selectedProfessionalId = '';
+      this.showReassignModal = true;
+    } else if (event.action === 'delete') {
+      this.showDeleteModal = true;
     }
   }
 
@@ -236,9 +281,48 @@ export class ListComponent implements OnInit {
     });
   }
 
+  confirmReassign(): void {
+    if (!this.selectedReport || !this.selectedProfessionalId) return;
+    this.isActioning = true;
+    this.reportsService.reassignReport(this.selectedReport.encryptedId, this.selectedProfessionalId).subscribe({
+      next: () => {
+        this.toastService.success('Reporte reasignado exitosamente.');
+        this.showReassignModal = false;
+        this.selectedReport = null;
+        this.selectedProfessionalId = '';
+        this.isActioning = false;
+        this.loadReports();
+      },
+      error: (err) => {
+        this.toastService.error(err?.userMessage ?? 'Error al reasignar el reporte.');
+        this.isActioning = false;
+      }
+    });
+  }
+
+  confirmDelete(): void {
+    if (!this.selectedReport) return;
+    this.isActioning = true;
+    this.reportsService.deleteReport(this.selectedReport.encryptedId).subscribe({
+      next: () => {
+        this.toastService.success('Reporte eliminado exitosamente.');
+        this.showDeleteModal = false;
+        this.selectedReport = null;
+        this.isActioning = false;
+        this.loadReports();
+      },
+      error: (err) => {
+        this.toastService.error(err?.userMessage ?? 'Error al eliminar el reporte.');
+        this.isActioning = false;
+      }
+    });
+  }
+
   cancelAction(): void {
     this.showApproveModal = false;
     this.showRejectModal = false;
+    this.showReassignModal = false;
+    this.showDeleteModal = false;
     this.selectedReport = null;
   }
 }

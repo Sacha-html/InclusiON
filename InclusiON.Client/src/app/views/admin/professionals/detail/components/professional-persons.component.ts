@@ -2,9 +2,11 @@ import { Component, Input, Output, EventEmitter, inject, OnInit, signal } from '
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { map } from 'rxjs';
 import { AssignmentsService, PersonsService, ToastService } from '@services';
+import { ProfessionalsService } from '@services/professionals.service';
 import {
   PersonListItemResponse,
   ProfessionalPersonResponse,
+  ProfessionalListItemResponse,
 } from '@models';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
 import {
@@ -54,11 +56,16 @@ export class ProfessionalPersonsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly personsService = inject(PersonsService);
+  private readonly professionalsService = inject(ProfessionalsService);
   private readonly toastService = inject(ToastService);
 
   showAssignPersonModal = signal(false);
   showDeactivatePersonModal = signal(false);
+  showTransferModal = signal(false);
   personToDeactivate = signal<ProfessionalPersonResponse | null>(null);
+  personToTransfer = signal<ProfessionalPersonResponse | null>(null);
+  selectedTargetProfessionalId = signal<string>('');
+  activeProfessionalsList = signal<ProfessionalListItemResponse[]>([]);
   isSubmitting = signal(false);
 
   assignPersonForm: FormGroup = this.fb.group({
@@ -81,6 +88,7 @@ export class ProfessionalPersonsComponent implements OnInit {
 
   columns: TableColumn[] = [
     { key: 'personFullName', label: 'Nombre' },
+    { key: 'personDocumentNumber', label: 'Documento' },
     {
       key: 'isPrimaryProfessional',
       label: 'Principal',
@@ -113,16 +121,64 @@ export class ProfessionalPersonsComponent implements OnInit {
       label: 'Acciones',
       type: 'actions',
       actions: [
+        { action: 'transfer', label: 'Transferir', icon: 'cilSwapHorizontal', visible: (item) => item.isActive },
         { action: 'deactivate', label: 'Desasignar', icon: 'cilUserUnfollow', visible: (item) => item.isActive },
       ],
     },
   ];
 
   onRowAction(event: { action: string; item: ProfessionalPersonResponse }): void {
-    if (event.action === 'deactivate') this.openDeactivatePersonModal(event.item);
+    if (event.action === 'deactivate') {
+      this.openDeactivatePersonModal(event.item);
+    } else if (event.action === 'transfer') {
+      this.openTransferModal(event.item);
+    }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.professionalsService.getProfessionals({ pageSize: 500, status: 'active' }).subscribe({
+      next: (r) => {
+        // Filtrar al profesional actual para evitar auto-transferencias
+        this.activeProfessionalsList.set(r.data.filter(p => p.id !== this.professionalId));
+      }
+    });
+  }
+
+  openTransferModal(person: ProfessionalPersonResponse): void {
+    this.personToTransfer.set(person);
+    this.selectedTargetProfessionalId.set('');
+    this.showTransferModal.set(true);
+  }
+
+  confirmTransfer(): void {
+    const student = this.personToTransfer();
+    const targetProfId = this.selectedTargetProfessionalId();
+    if (!student || !targetProfId) return;
+
+    this.isSubmitting.set(true);
+    this.assignmentsService.transferStudent({
+      personId: student.personId,
+      fromProfessionalId: this.professionalId,
+      toProfessionalId: targetProfId
+    }).subscribe({
+      next: (res) => {
+        this.isSubmitting.set(false);
+        this.showTransferModal.set(false);
+        this.personToTransfer.set(null);
+        this.toastService.success(res?.message ?? 'Alumno transferido exitosamente');
+        this.loadAssignedPersons();
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.toastService.error(err?.userMessage ?? 'Error al transferir alumno');
+      }
+    });
+  }
+
+  cancelTransfer(): void {
+    this.showTransferModal.set(false);
+    this.personToTransfer.set(null);
+  }
 
   openAssignPersonModal(): void {
     this.assignPersonForm.reset({ personId: null, isPrimaryProfessional: false, canSuperviseLogin: false });

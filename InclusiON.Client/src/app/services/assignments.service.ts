@@ -39,6 +39,12 @@ export class AssignmentsService {
       .pipe(handleApiError());
   }
 
+  transferStudent(request: { personId: string; fromProfessionalId: string; toProfessionalId: string }): Observable<any> {
+    return this.http
+      .post<ApiResponse<any>>(`${environment.apiUrl}/Professionals/transfer-student`, request)
+      .pipe(unwrapResponse());
+  }
+
   getInstitutionsByProfessional(profId: string): Observable<ProfessionalInstitutionResponse[]> {
     return this.http
       .get<ApiResponse<ProfessionalInstitutionResponse[]>>(`${this.professionalsUrl(profId)}/institutions`)

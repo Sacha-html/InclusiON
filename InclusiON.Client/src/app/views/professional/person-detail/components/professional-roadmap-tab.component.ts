@@ -485,6 +485,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
   // ── Assign from roadmap (IN-150) ────────────────────────────────────
   showAssignModal = false;
+  showDuplicateConfirm = false;
   assignTarget: { area: RoadmapAreaResponse; activity: RoadmapActivityResponse } | null = null;
   assigning = false;
   assignForm = {
@@ -496,6 +497,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     this.assignTarget = { area, activity };
     this.assignForm = { dueDate: '', isEvaluationActivity: false };
     this.showAssignModal = true;
+    this.showDuplicateConfirm = false;
   }
 
   closeAssignModal(): void {
@@ -523,15 +525,21 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
         error: (err) => {
           this.assigning = false;
           if (err?.status === 409) {
-            const confirmAssign = confirm('El alumno ya posee una asignación activa para esta actividad. ¿Desea asignarla nuevamente de todas formas?');
-            if (confirmAssign) {
-              this.submitAssign(true);
-            }
+            this.showDuplicateConfirm = true;
           } else {
             this.toastService.error(err?.userMessage ?? 'Error al asignar actividad');
           }
         },
       });
+  }
+
+  confirmDuplicateAssign(): void {
+    this.showDuplicateConfirm = false;
+    this.submitAssign(true);
+  }
+
+  cancelDuplicateAssign(): void {
+    this.showDuplicateConfirm = false;
   }
 
   // ── Adaptive engine config modal (IN-116) ────────────────────────────

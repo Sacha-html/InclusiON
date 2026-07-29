@@ -25,5 +25,7 @@ namespace InclusiON.DTOs.Responses.Admin
         public string? DocumentNumber { get; set; }
         public string? Phone { get; set; }
         public string? Relationship { get; set; }
+        public string? SupervisorName { get; set; }
+        public string? RepresentativeName { get; set; }
     }
 }

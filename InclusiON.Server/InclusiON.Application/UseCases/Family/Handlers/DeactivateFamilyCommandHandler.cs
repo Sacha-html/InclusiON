@@ -41,14 +41,9 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 return ApiResponse<FamilyResponse>.NotFound("Familiar");
             }
 
-            // Verificar si es el único representante activo para algún alumno
-            var dependentStudentsCount = await _repository.GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(family.Id, cancellationToken);
-            if (dependentStudentsCount > 0)
-            {
-                return ApiResponse<FamilyResponse>.ErrorResult(
-                    ErrorCode.InvalidOperation,
-                    $"No se puede desactivar al familiar porque es el único representante activo para {dependentStudentsCount} alumno(s). Reasigne la tutoría de estos alumnos antes de proceder.");
-            }
+            // Desactivar relaciones y suspender alumnos que se queden sin representantes
+            var suspendedStudents = await _repository.DeactivateRepresentativeAndSuspendDependentStudentsAsync(family.UserId, _dateTime.UtcNow, cancellationToken);
+            suspendedStudents ??= new List<string>();
 
             if (family.User != null)
             {
@@ -64,7 +59,11 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             _logger.LogInformation("Familiar desactivado: {FamilyId}", family.Id);
 
             var response = FamilyResponse.MapToResponse(family);
-            return ApiResponse<FamilyResponse>.SuccessResult(response, "Familiar desactivado exitosamente");
+            var successMessage = suspendedStudents.Count > 0
+                ? $"Familiar desactivado exitosamente. Se ha suspendido el acceso de los alumnos: {string.Join(", ", suspendedStudents)} por no contar con otro representante activo."
+                : "Familiar desactivado exitosamente";
+
+            return ApiResponse<FamilyResponse>.SuccessResult(response, successMessage);
         }
     }
 }

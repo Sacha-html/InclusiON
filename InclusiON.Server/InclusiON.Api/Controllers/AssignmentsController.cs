@@ -93,6 +93,34 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        [HttpPost("transfer-student")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<TransferStudentResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<TransferStudentResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<TransferStudentResponse>>> TransferStudent(
+            [FromBody] TransferStudentRequest request,
+            [FromServices] ICommandHandler<TransferStudentCommand, ApiResponse<TransferStudentResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!await _resourceAuthz.CanAccessPersonAsync(request.PersonId, AccessMode.Write, cancellationToken))
+                return ApiResponse<TransferStudentResponse>.Forbidden().ToActionResult();
+
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            var currentUserRole = _httpContextService.GetCurrentUserRole();
+
+            var command = new TransferStudentCommand(
+                request.PersonId,
+                request.FromProfessionalId,
+                request.ToProfessionalId,
+                currentUserId ?? Guid.Empty,
+                currentUserRole ?? string.Empty
+            );
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
         #endregion
 
         #region Professional-Institution Assignments

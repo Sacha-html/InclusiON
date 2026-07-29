@@ -98,6 +98,8 @@ export class PersonLinksComponent implements OnChanges {
   get tableColumns(): TableColumn[] {
     const cols: TableColumn[] = [
       { key: 'representativeFullName', label: 'Nombre' },
+      { key: 'representativeDocumentNumber', label: 'Documento' },
+      { key: 'representativeEmail', label: 'Email' },
       { key: 'relationship',           label: 'Relación' },
       {
         key: 'isPrimary', label: 'Principal', type: 'badge',
