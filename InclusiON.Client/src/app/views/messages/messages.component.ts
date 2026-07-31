@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ViewChild, ElementRef, effect } from '@angular/core';
 import { UserRoles } from '@shared/constants/roles';
 import { DatePipe } from '@angular/common';
 import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
@@ -36,6 +36,26 @@ export class MessagesComponent implements OnInit {
   private readonly messagesService = inject(MessagesService);
   private readonly toastService    = inject(ToastService);
   private readonly authService     = inject(AuthService);
+
+  @ViewChild('chatHistory') chatHistory!: ElementRef<HTMLDivElement>;
+
+  constructor() {
+    effect(() => {
+      const msgs = this.chatMessages();
+      if (msgs.length > 0) {
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  scrollToBottom(): void {
+    setTimeout(() => {
+      if (this.chatHistory) {
+        const element = this.chatHistory.nativeElement;
+        element.scrollTop = element.scrollHeight;
+      }
+    }, 100);
+  }
 
   // ── Signals ────────────────────────────────────────────────────────────
   contacts = signal<MessageContactResponse[]>([]);
