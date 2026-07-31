@@ -19,7 +19,9 @@
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto">
-      <app-notification-bell />
+      @if (showNotificationBell) {
+        <app-notification-bell />
+      }
     </c-header-nav>
 
     <c-header-nav class="ms-auto ms-md-0">

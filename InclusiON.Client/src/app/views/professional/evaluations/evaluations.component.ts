@@ -1,7 +1,16 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
-import { ProfessionalsService, AssignmentsService, ActivitiesService, ToastService } from '@services';
-import { ProfessionalPersonResponse, ActivityAssignmentResponse, ActivityAttemptResponse, ActivityAssignmentStatus, ActivityResponseResult } from '@models';
+import { FormsModule } from '@angular/forms';
+import { ProfessionalsService, AssignmentsService, ActivitiesService, FamilyService, ToastService } from '@services';
+import { MessagesService } from '@services/messages.service';
+import {
+  ProfessionalPersonResponse,
+  ActivityAssignmentResponse,
+  ActivityAttemptResponse,
+  ActivityAssignmentStatus,
+  ActivityResponseResult,
+  PersonRepresentativeResponse
+} from '@models';
 import { switchMap } from 'rxjs';
 import {
   CardComponent,
@@ -14,8 +23,16 @@ import {
   TableDirective,
   ButtonDirective,
   ProgressComponent,
-  ProgressBarComponent
+  ProgressBarComponent,
+  ModalComponent,
+  ModalHeaderComponent,
+  ModalBodyComponent,
+  ModalFooterComponent,
+  ModalTitleDirective,
+  FormSelectDirective,
+  FormControlDirective
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 
 @Component({
@@ -25,6 +42,7 @@ import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avat
     CommonModule,
     DatePipe,
     DecimalPipe,
+    FormsModule,
     CardComponent,
     CardBodyComponent,
     CardHeaderComponent,
@@ -36,6 +54,14 @@ import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avat
     ButtonDirective,
     ProgressComponent,
     ProgressBarComponent,
+    ModalComponent,
+    ModalHeaderComponent,
+    ModalBodyComponent,
+    ModalFooterComponent,
+    ModalTitleDirective,
+    FormSelectDirective,
+    FormControlDirective,
+    IconDirective,
     ActorAvatarComponent
   ],
   templateUrl: './evaluations.component.html',
@@ -45,6 +71,8 @@ export class EvaluationsComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly activitiesService = inject(ActivitiesService);
+  private readonly familyService = inject(FamilyService);
+  private readonly messagesService = inject(MessagesService);
   private readonly toastService = inject(ToastService);
 
   persons = signal<ProfessionalPersonResponse[]>([]);
@@ -64,6 +92,13 @@ export class EvaluationsComponent implements OnInit {
   averageSuccessRate = signal<number>(0);
   averageTimeSpent = signal<number>(0);
   totalAttempts = signal<number>(0);
+
+  // Modal State
+  showShareModal = signal<boolean>(false);
+  representativesList = signal<PersonRepresentativeResponse[]>([]);
+  selectedTutorId = '';
+  shareMessageBody = '';
+  sendingShare = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadPersons();
@@ -226,5 +261,169 @@ export class EvaluationsComponent implements OnInit {
     if (level === 3) return '😐 (Moderado)';
     if (level === 4) return '🙁 (Alto)';
     return '😫 (Muy alto)';
+  }
+
+  // ── Download Student Metrics PDF ───────────────────────────────────────
+  downloadStudentMetricsPdf(): void {
+    const student = this.selectedPerson();
+    if (!student) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      this.toastService.error('Por favor, permite ventanas emergentes para descargar el PDF.');
+      return;
+    }
+
+    const assignmentsHtml = this.assignments().map(a => `
+      <tr>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px;">
+          <strong>${a.activityTitle}</strong><br>
+          <span style="font-size: 11px; color: #777;">Código: ${a.templateTypeCode}</span>
+        </td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${this.getAssignmentStatusLabel(a.status)}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${new Date(a.assignedAt).toLocaleDateString('es-ES')}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px; text-align: center;">${a.responses?.length || 0}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px; text-align: center; font-weight: bold; color: #2e7d32;">
+          ${a.responses && a.responses.length > 0 ? this.getMaxSuccess(a.responses) + '%' : '—'}
+        </td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Reporte de Métricas - ${student.personFullName}</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #333; line-height: 1.5; }
+            .header { border-bottom: 2px solid #0096c7; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo { font-size: 24px; font-weight: bold; color: #0077b6; }
+            .student-info { font-size: 20px; margin-top: 10px; font-weight: 600; color: #111; }
+            .dni { font-size: 13px; color: #666; margin-top: 5px; }
+            .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 35px; }
+            .card { border: 1px solid #e0e0e0; padding: 18px; border-radius: 10px; background: #fcfcfc; box-shadow: 0 2px 4px rgba(0,0,0,0.01); }
+            .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #777; font-weight: 600; }
+            .value { font-size: 24px; font-weight: bold; color: #0077b6; margin-top: 5px; }
+            .table-container { margin-top: 30px; }
+            h3 { font-size: 16px; font-weight: 600; border-left: 4px solid #0077b6; padding-left: 10px; margin-bottom: 15px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { background-color: #f8f9fa; padding: 12px 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #666; font-weight: 600; border-bottom: 2px solid #dee2e6; }
+            .footer { border-top: 1px solid #eee; padding-top: 20px; font-size: 11px; color: #999; margin-top: 60px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">InclusiON</div>
+            <div class="student-info">Métricas de Desempeño Escolar: ${student.personFullName}</div>
+            <div class="dni">DNI / Nro. Documento: ${student.personDocumentNumber || '—'}</div>
+          </div>
+          <div class="grid">
+            <div class="card">
+              <div class="label">Tasa de Acierto</div>
+              <div class="value">${Math.round(this.averageSuccessRate())}%</div>
+            </div>
+            <div class="card">
+              <div class="label">Tiempo Promedio</div>
+              <div class="value">${this.formatTime(this.averageTimeSpent())}</div>
+            </div>
+            <div class="card">
+              <div class="label">Completadas</div>
+              <div class="value">${this.completedCount()}</div>
+            </div>
+            <div class="card">
+              <div class="label">Total Intentos</div>
+              <div class="value">${this.totalAttempts()}</div>
+            </div>
+          </div>
+          <div class="table-container">
+            <h3>Historial de Avance de Actividades</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Actividad</th>
+                  <th>Estado</th>
+                  <th>Asignado el</th>
+                  <th style="text-align: center;">Intentos</th>
+                  <th style="text-align: center;">Mejor Acierto</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${assignmentsHtml || '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">Sin actividades asignadas</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+          <div class="footer">
+            Generado automáticamente por el portal profesional de InclusiON el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}.
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    this.toastService.success('Preparando PDF de métricas...');
+  }
+
+  // ── Share Student Metrics with Tutor ───────────────────────────────────
+  openShareModal(): void {
+    const student = this.selectedPerson();
+    if (!student) return;
+
+    this.selectedTutorId = '';
+    const successRate = Math.round(this.averageSuccessRate());
+    const avgTime = this.formatTime(this.averageTimeSpent());
+
+    this.shareMessageBody = `Estimado Tutor, le comparto las métricas de rendimiento y avance de ${student.personFullName}:\n\n` +
+      `- Tasa de acierto promedio: ${successRate}%\n` +
+      `- Tiempo promedio por intento: ${avgTime}\n` +
+      `- Actividades completadas: ${this.completedCount()} (en curso: ${this.inProgressCount()}, pendientes: ${this.pendingCount()})\n` +
+      `- Cantidad total de intentos: ${this.totalAttempts()}\n\n` +
+      `Quedo a su entera disposición para analizar en conjunto la evolución del alumno.`;
+
+    this.familyService.getPersonRepresentatives(student.personId).subscribe({
+      next: (list) => {
+        this.representativesList.set(list);
+        this.showShareModal.set(true);
+      },
+      error: () => {
+        this.toastService.error('Error al obtener la lista de tutores del alumno.');
+      }
+    });
+  }
+
+  closeShareModal(): void {
+    this.showShareModal.set(false);
+  }
+
+  sendSharedMetrics(): void {
+    const tutorId = this.selectedTutorId;
+    if (!tutorId) {
+      this.toastService.error('Por favor, selecciona un tutor destinatario.');
+      return;
+    }
+    if (!this.shareMessageBody.trim()) {
+      this.toastService.error('El contenido del mensaje no puede estar vacío.');
+      return;
+    }
+
+    this.sendingShare.set(true);
+    this.messagesService.send({
+      receiverId: tutorId,
+      subject: `Métricas de Avance - ${this.selectedPerson()?.personFullName}`,
+      content: this.shareMessageBody.trim()
+    }).subscribe({
+      next: () => {
+        this.sendingShare.set(false);
+        this.showShareModal.set(false);
+        this.toastService.success('Métricas compartidas por mensajería exitosamente.');
+      },
+      error: () => {
+        this.sendingShare.set(false);
+        this.toastService.error('Error al enviar las métricas.');
+      }
+    });
   }
 }

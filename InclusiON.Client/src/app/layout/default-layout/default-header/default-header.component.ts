@@ -75,6 +75,11 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   sidebarId = input<string>('sidebar1');
 
+  get showNotificationBell(): boolean {
+    const role = this.authService.getUserRole();
+    return role === 'Professional' || role === 'FamilyRepresentative';
+  }
+
   logout(): void {
     this.authService.logout();
   }

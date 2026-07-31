@@ -5,6 +5,8 @@ import { IconDirective } from '@coreui/icons-angular';
 import { NavItemComponent, NavLinkDirective, TooltipDirective } from '@coreui/angular';
 import { MessagesService } from '@services/messages.service';
 import { SignalrService } from '@services/signalr.service';
+import { AuthService } from '@services/auth.service';
+import { UserRoles } from '@shared/constants/roles';
 
 @Component({
   selector: 'app-notification-bell',
@@ -58,6 +60,7 @@ import { SignalrService } from '@services/signalr.service';
 export class NotificationBellComponent implements OnInit, OnDestroy {
   private readonly messagesService = inject(MessagesService);
   private readonly signalrService  = inject(SignalrService);
+  private readonly authService     = inject(AuthService);
   private readonly router          = inject(Router);
 
   readonly unreadCount = signal(0);
@@ -82,7 +85,14 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   onBellClick(): void {
     this.unreadCount.set(0);
-    this.router.navigate(['/messages']);
+    const role = this.authService.getUserRole();
+    if (role === UserRoles.Professional) {
+      this.router.navigate(['/pro/messages']);
+    } else if (role === UserRoles.FamilyRepresentative) {
+      this.router.navigate(['/family/messages']);
+    } else {
+      this.router.navigate(['/messages']);
+    }
   }
 
   private fetchCount(): void {

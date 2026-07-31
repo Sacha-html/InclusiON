@@ -121,8 +121,8 @@ export const professionalRoutes: Routes = [
   {
     path: 'calendar',
     loadComponent: () =>
-      import('../coming-soon/coming-soon.component').then(
-        (m) => m.ComingSoonComponent
+      import('../calendar/calendar.component').then(
+        (m) => m.CalendarComponent
       ),
     data: { title: 'Calendario' }
   },

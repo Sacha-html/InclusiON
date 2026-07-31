@@ -114,6 +114,17 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             {
                 nextToUnlock.IsUnlocked = true;
                 nextToUnlock.UnlockedAt = now;
+
+                var nextAssignment = new ActivityAssignment
+                {
+                    ActivityId               = nextToUnlock.ActivityId,
+                    PersonId                 = assignment.PersonId,
+                    AssignedByProfessionalId = assignment.AssignedByProfessionalId,
+                    AssignedAt               = now,
+                    StatusId                 = AssignmentStatuses.Pendiente,
+                    CreatedAt                = now,
+                };
+                await _repository.CreateAsync(nextAssignment, cancellationToken);
             }
 
             // Single save — all mutations committed atomically

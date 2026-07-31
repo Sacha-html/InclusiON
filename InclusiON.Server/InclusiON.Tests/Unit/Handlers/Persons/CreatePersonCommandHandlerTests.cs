@@ -21,10 +21,11 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         private readonly IUnitOfWork             _uow           = Substitute.For<IUnitOfWork>();
         private readonly IBackgroundJobRepository _bgJobs       = Substitute.For<IBackgroundJobRepository>();
         private readonly IDateTimeProvider       _dateTime      = Substitute.For<IDateTimeProvider>();
+        private readonly IRoadmapInitializer    _roadmapInit   = Substitute.For<IRoadmapInitializer>();
 
         private CreatePersonCommandHandler BuildSut() =>
             new(_personsRepo, _identity, _pwdHasher, _pinHasher, _uow, _bgJobs,
-                NullLogger<CreatePersonCommandHandler>.Instance, _dateTime);
+                NullLogger<CreatePersonCommandHandler>.Instance, _dateTime, _roadmapInit);
 
         private static CreatePersonCommand Cmd(string? doc = null) =>
             new("Lucas", "Pérez", doc,
