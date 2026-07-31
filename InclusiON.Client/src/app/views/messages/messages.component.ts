@@ -1,15 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { UserRoles } from '@shared/constants/roles';
 import { DatePipe } from '@angular/common';
 import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 import { FormsModule } from '@angular/forms';
 import {
-  CardBodyComponent, CardComponent, CardHeaderComponent,
-  ColComponent, RowComponent, BadgeComponent, SpinnerComponent,
-  ButtonDirective, FormLabelDirective, FormControlDirective,
-  FormSelectDirective, ModalComponent, ModalHeaderComponent,
-  ModalBodyComponent, ModalFooterComponent, ModalTitleDirective,
-  AlertComponent,
+  ColComponent, RowComponent, SpinnerComponent,
+  ButtonDirective, FormControlDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import {
@@ -18,9 +14,7 @@ import {
   MessageDetailResponse,
   MessageContactResponse,
 } from '@services/messages.service';
-import { ToastService } from '@services';
-
-type ActiveTab = 'inbox' | 'sent';
+import { ToastService, AuthService } from '@services';
 
 @Component({
   selector: 'app-messages',
@@ -29,14 +23,10 @@ type ActiveTab = 'inbox' | 'sent';
     FormsModule,
     ActorAvatarComponent,
     DatePipe,
-    CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent,
-    BadgeComponent, SpinnerComponent,
+    SpinnerComponent,
     ButtonDirective,
-    FormLabelDirective, FormControlDirective, FormSelectDirective,
-    ModalComponent, ModalHeaderComponent, ModalBodyComponent,
-    ModalFooterComponent, ModalTitleDirective,
-    AlertComponent,
+    FormControlDirective,
     IconDirective,
   ],
   templateUrl: './messages.component.html',
@@ -45,207 +35,177 @@ type ActiveTab = 'inbox' | 'sent';
 export class MessagesComponent implements OnInit {
   private readonly messagesService = inject(MessagesService);
   private readonly toastService    = inject(ToastService);
+  private readonly authService     = inject(AuthService);
 
-  // ── State ──────────────────────────────────────────────────────────────
-  activeTab: ActiveTab = 'inbox';
-
-  inboxMessages  = signal<MessageListItemResponse[]>([]);
-  sentMessages   = signal<MessageListItemResponse[]>([]);
+  // ── Signals ────────────────────────────────────────────────────────────
+  contacts = signal<MessageContactResponse[]>([]);
+  searchQuery = signal<string>('');
+  selectedContact = signal<MessageContactResponse | null>(null);
   selectedDetail = signal<MessageDetailResponse | null>(null);
+  chatMessages = signal<any[]>([]);
 
-  loadingList   = signal(true);
-  loadingDetail = signal(false);
-  sendingReply  = signal(false);
-  sendingNew    = signal(false);
+  loadingContacts = signal(true);
+  loadingChat = signal(false);
+  sendingMessage = signal(false);
 
-  inboxTotal  = signal(0);
-  sentTotal   = signal(0);
-  currentPage = signal(1);
-  readonly pageSize = 20;
+  newMessageText = '';
 
-  // Compose modal
-  showCompose     = false;
-  contacts        = signal<MessageContactResponse[]>([]);
-  loadingContacts = false;
-  compose         = { receiverId: '', subject: '', content: '' };
-  composeError    = '';
+  // Get current user ID to identify our sent messages
+  currentUserId = '';
 
-  // Reply
-  replyBody = '';
+  // Computed signal to filter contacts by search query
+  filteredContacts = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const allContacts = this.contacts();
+    if (!query) return allContacts;
+    return allContacts.filter(c => c.fullName.toLowerCase().includes(query));
+  });
 
   // ── Init ───────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.loadInbox();
+    this.currentUserId = this.authService.getCurrentUser()?.id || '';
     this.loadContacts();
   }
 
-  // ── Tab switch ─────────────────────────────────────────────────────────
-  switchTab(tab: ActiveTab): void {
-    if (this.activeTab === tab) return;
-    this.activeTab = tab;
-    this.selectedDetail.set(null);
-    this.currentPage.set(1);
-    tab === 'inbox' ? this.loadInbox() : this.loadSent();
-  }
-
   // ── Loaders ────────────────────────────────────────────────────────────
-  loadInbox(): void {
-    this.loadingList.set(true);
-    this.messagesService.getInbox({ page: this.currentPage(), pageSize: this.pageSize })
-      .subscribe({
-        next: (res) => {
-          this.inboxMessages.set(res.data);
-          this.inboxTotal.set(res.totalRecords);
-          this.loadingList.set(false);
-        },
-        error: () => {
-          this.toastService.error('Error al cargar bandeja de entrada');
-          this.loadingList.set(false);
-        },
-      });
-  }
+  loadContacts(): void {
+    this.loadingContacts.set(true);
+    this.messagesService.getContacts(1, 100).subscribe({
+      next: (list) => {
+        this.contacts.set(list);
+        this.loadingContacts.set(false);
 
-  loadSent(): void {
-    this.loadingList.set(true);
-    this.messagesService.getSent({ page: this.currentPage(), pageSize: this.pageSize })
-      .subscribe({
-        next: (res) => {
-          this.sentMessages.set(res.data);
-          this.sentTotal.set(res.totalRecords);
-          this.loadingList.set(false);
-        },
-        error: () => {
-          this.toastService.error('Error al cargar mensajes enviados');
-          this.loadingList.set(false);
-        },
-      });
-  }
-
-  // ── Message detail ─────────────────────────────────────────────────────
-  openMessage(msg: MessageListItemResponse): void {
-    this.loadingDetail.set(true);
-    this.replyBody = '';
-    this.messagesService.getById(msg.encryptedId).subscribe({
-      next: (detail) => {
-        this.selectedDetail.set(detail);
-        this.loadingDetail.set(false);
-        // Backend auto-marks as read on getById; update local list to reflect
-        if (!msg.isRead && this.activeTab === 'inbox') {
-          this.inboxMessages.update(list =>
-            list.map(m => m.encryptedId === msg.encryptedId ? { ...m, isRead: true } : m)
-          );
+        // Pre-select first contact if available
+        if (list.length > 0) {
+          this.loadChatForContact(list[0]);
         }
       },
       error: () => {
-        this.toastService.error('Error al cargar el mensaje');
-        this.loadingDetail.set(false);
+        this.toastService.error('Error al cargar contactos');
+        this.loadingContacts.set(false);
       },
     });
   }
 
-  closeDetail(): void {
+  loadChatForContact(contact: MessageContactResponse): void {
+    this.selectedContact.set(contact);
+    this.loadingChat.set(true);
+    this.chatMessages.set([]);
     this.selectedDetail.set(null);
-    this.replyBody = '';
+    this.newMessageText = '';
+
+    // Fetch inbox messages to check for an existing thread
+    this.messagesService.getInbox({ page: 1, pageSize: 50, senderId: contact.userId }).subscribe({
+      next: (inboxRes) => {
+        const inboxParent = inboxRes.data.find(m => !m.parentMessageId);
+        if (inboxParent) {
+          this.loadFullThread(inboxParent.encryptedId);
+          return;
+        }
+
+        // Check sent messages if no inbox parent exists
+        this.messagesService.getSent({ page: 1, pageSize: 50, receiverId: contact.userId }).subscribe({
+          next: (sentRes) => {
+            const sentParent = sentRes.data.find(m => !m.parentMessageId);
+            if (sentParent) {
+              this.loadFullThread(sentParent.encryptedId);
+            } else {
+              this.loadingChat.set(false);
+            }
+          },
+          error: () => {
+            this.loadingChat.set(false);
+          }
+        });
+      },
+      error: () => {
+        this.loadingChat.set(false);
+      }
+    });
   }
 
-  // ── Reply ──────────────────────────────────────────────────────────────
-  sendReply(): void {
+  private loadFullThread(encryptedId: string): void {
+    this.messagesService.getById(encryptedId).subscribe({
+      next: (detail) => {
+        this.selectedDetail.set(detail);
+        const messages: any[] = [{
+          id: detail.id,
+          encryptedId: detail.encryptedId,
+          content: detail.content,
+          sentAt: detail.sentAt,
+          senderId: detail.senderId,
+          senderFullName: detail.senderFullName,
+          receiverId: detail.receiverId,
+          receiverFullName: detail.receiverFullName
+        }];
+
+        if (detail.replies) {
+          detail.replies.forEach(r => {
+            messages.push({
+              id: r.id,
+              encryptedId: r.encryptedId,
+              content: r.content,
+              sentAt: r.sentAt,
+              senderId: r.senderId,
+              senderFullName: r.senderFullName,
+              receiverId: r.receiverId,
+              receiverFullName: r.receiverFullName
+            });
+          });
+        }
+
+        messages.sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
+        this.chatMessages.set(messages);
+        this.loadingChat.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar conversación');
+        this.loadingChat.set(false);
+      }
+    });
+  }
+
+  // ── Send Message ───────────────────────────────────────────────────────
+  sendChatMessage(): void {
+    const contact = this.selectedContact();
+    if (!contact || !this.newMessageText.trim()) return;
+
+    const text = this.newMessageText.trim();
+    this.newMessageText = '';
+    this.sendingMessage.set(true);
+
     const detail = this.selectedDetail();
-    if (!detail || !this.replyBody.trim()) return;
-
-    this.sendingReply.set(true);
-    this.messagesService.reply(detail.encryptedId, this.replyBody.trim()).subscribe({
-      next: (updated) => {
-        this.selectedDetail.set(updated);
-        this.replyBody = '';
-        this.sendingReply.set(false);
-        this.toastService.success('Respuesta enviada');
-      },
-      error: () => {
-        this.toastService.error('Error al enviar respuesta');
-        this.sendingReply.set(false);
-      },
-    });
-  }
-
-  // ── Compose ────────────────────────────────────────────────────────────
-  openCompose(): void {
-    this.compose     = { receiverId: '', subject: '', content: '' };
-    this.composeError = '';
-    this.showCompose  = true;
-  }
-
-  closeCompose(): void {
-    this.showCompose = false;
-  }
-
-  sendNew(): void {
-    if (!this.compose.receiverId || !this.compose.subject.trim() || !this.compose.content.trim()) {
-      this.composeError = 'Todos los campos son obligatorios.';
-      return;
+    if (detail) {
+      this.messagesService.reply(detail.encryptedId, text).subscribe({
+        next: () => {
+          this.sendingMessage.set(false);
+          this.loadFullThread(detail.encryptedId);
+        },
+        error: () => {
+          this.toastService.error('Error al enviar respuesta');
+          this.sendingMessage.set(false);
+        }
+      });
+    } else {
+      this.messagesService.send({
+        receiverId: contact.userId,
+        subject: 'Chat de InclusiON',
+        content: text
+      }).subscribe({
+        next: () => {
+          this.sendingMessage.set(false);
+          this.loadChatForContact(contact);
+        },
+        error: () => {
+          this.toastService.error('Error al enviar mensaje');
+          this.sendingMessage.set(false);
+        }
+      });
     }
-    this.composeError = '';
-    this.sendingNew.set(true);
-    this.messagesService.send({
-      receiverId: this.compose.receiverId,
-      subject:    this.compose.subject.trim(),
-      content:    this.compose.content.trim(),
-    }).subscribe({
-      next: () => {
-        this.showCompose = false;
-        this.sendingNew.set(false);
-        this.toastService.success('Mensaje enviado');
-        if (this.activeTab === 'sent') this.loadSent();
-      },
-      error: () => {
-        this.toastService.error('Error al enviar mensaje');
-        this.sendingNew.set(false);
-      },
-    });
   }
 
-  // ── Contacts ───────────────────────────────────────────────────────────
-  private loadContacts(): void {
-    this.loadingContacts = true;
-    this.messagesService.getContacts().subscribe({
-      next: (list) => {
-        this.contacts.set(list);
-        this.loadingContacts = false;
-      },
-      error: () => { this.loadingContacts = false; },
-    });
-  }
-
-  // ── Pagination ─────────────────────────────────────────────────────────
-  get totalPages(): number {
-    const total = this.activeTab === 'inbox' ? this.inboxTotal() : this.sentTotal();
-    return Math.ceil(total / this.pageSize);
-  }
-
-  prevPage(): void {
-    if (this.currentPage() <= 1) return;
-    this.currentPage.update(p => p - 1);
-    this.activeTab === 'inbox' ? this.loadInbox() : this.loadSent();
-  }
-
-  nextPage(): void {
-    if (this.currentPage() >= this.totalPages) return;
-    this.currentPage.update(p => p + 1);
-    this.activeTab === 'inbox' ? this.loadInbox() : this.loadSent();
-  }
-
-  // ── Helpers ────────────────────────────────────────────────────────────
-  get currentList(): MessageListItemResponse[] {
-    return this.activeTab === 'inbox' ? this.inboxMessages() : this.sentMessages();
-  }
-
-  unreadCount(): number {
-    return this.inboxMessages().filter(m => !m.isRead).length;
-  }
-
+  // Helper labels
   contactLabel(c: MessageContactResponse): string {
-    const type = c.userType === UserRoles.Professional ? 'Profesional' : 'Familiar';
-    return `${c.fullName} (${type})`;
+    return c.userType === UserRoles.Professional ? 'Profesional' : 'Familiar/Tutor';
   }
-
 }

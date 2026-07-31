@@ -15,6 +15,7 @@ using Activity = InclusiON.Domain.Models.Activity;
 using ActivityAssignment = InclusiON.Domain.Models.ActivityAssignment;
 using DomainActivityResponse = InclusiON.Domain.Models.ActivityResponse;
 using Professional = InclusiON.Domain.Models.Professional;
+using PersonRoadmapActivity = InclusiON.Domain.Models.PersonRoadmapActivity;
 
 namespace InclusiON.Tests.Unit.Handlers.Activities
 {
@@ -730,6 +731,56 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             await _repo.Received(1).UpdateResponseAsync(response, Arg.Any<CancellationToken>());
             await _repo.Received(1).UpdateAsync(assignment, Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task UnlocksNextRoadmapActivity_CreatesNewAssignment()
+        {
+            var assignment = AnAssignment();
+            var response = AResponse();
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+
+            var currentRoadmapAct = new PersonRoadmapActivity
+            {
+                Id = 10,
+                PersonRoadmapAreaId = 5,
+                ActivityId = assignment.ActivityId,
+                SequenceOrder = 1,
+                UnlockThresholdPercent = 80,
+                IsUnlocked = true
+            };
+
+            var nextRoadmapAct = new PersonRoadmapActivity
+            {
+                Id = 11,
+                PersonRoadmapAreaId = 5,
+                ActivityId = 99,
+                SequenceOrder = 2,
+                UnlockThresholdPercent = 80,
+                IsUnlocked = false
+            };
+
+            _roadmaps.GetByPersonAndActivityAsync(assignment.PersonId, assignment.ActivityId, Arg.Any<CancellationToken>())
+                .Returns(currentRoadmapAct);
+
+            _roadmaps.GetNextInAreaAsync(currentRoadmapAct.PersonRoadmapAreaId, currentRoadmapAct.SequenceOrder, Arg.Any<CancellationToken>())
+                .Returns(nextRoadmapAct);
+
+            var result = await BuildSut().HandleAsync(Cmd(success: 85m), default);
+
+            result.Success.Should().BeTrue();
+            nextRoadmapAct.IsUnlocked.Should().BeTrue();
+            nextRoadmapAct.UnlockedAt.Should().Be(Now);
+
+            await _repo.Received(1).CreateAsync(Arg.Is<ActivityAssignment>(a => 
+                a.ActivityId == 99 &&
+                a.PersonId == assignment.PersonId &&
+                a.StatusId == AssignmentStatuses.Pendiente
+            ), Arg.Any<CancellationToken>());
         }
     }
 }

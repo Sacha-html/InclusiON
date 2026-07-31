@@ -59,10 +59,20 @@
     </c-card>
     } @else {
     <!-- Dashboard Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
       <div>
         <h3 class="text-dark font-bold mb-0">Métricas de {{ selectedPerson()?.personFullName }}</h3>
         <p class="text-muted mb-0">Visualiza el rendimiento y avances en tiempo real.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button cButton color="primary" size="sm" (click)="downloadStudentMetricsPdf()">
+          <svg cIcon name="cilCloudDownload" size="sm" class="me-1"></svg>
+          Descargar PDF
+        </button>
+        <button cButton color="outline-primary" size="sm" (click)="openShareModal()">
+          <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
+          Compartir con Tutor
+        </button>
       </div>
     </div>
 
@@ -255,6 +265,35 @@
         }
       </c-card-body>
     </c-card>
+
+    <!-- ── Modal Compartir Métricas por Mensajería ────────────────────────── -->
+    <c-modal [visible]="showShareModal()" (visibleChange)="showShareModal.set($event)">
+      <c-modal-header>
+        <h5 cModalTitle>Compartir Métricas de {{ selectedPerson()?.personFullName }}</h5>
+      </c-modal-header>
+      <c-modal-body>
+        <div class="mb-3">
+          <label cLabel class="mb-1">Tutor / Familiar Destinatario *</label>
+          <select cSelect [(ngModel)]="selectedTutorId">
+            <option value="">— Selecciona un tutor —</option>
+            @for (t of representativesList(); track t.representativeId) {
+              <option [value]="t.representativeId">{{ t.representativeFullName }} ({{t.relationship}})</option>
+            }
+          </select>
+        </div>
+        <div class="mb-3">
+          <label cLabel class="mb-1">Mensaje a enviar</label>
+          <textarea cFormControl rows="8" [(ngModel)]="shareMessageBody" placeholder="Mensaje..."></textarea>
+        </div>
+      </c-modal-body>
+      <c-modal-footer>
+        <button cButton color="secondary" size="sm" (click)="closeShareModal()">Cancelar</button>
+        <button cButton color="primary" size="sm" [disabled]="!selectedTutorId || sendingShare()" (click)="sendSharedMetrics()">
+          @if (sendingShare()) { Enviando… } @else { Enviar Mensaje }
+        </button>
+      </c-modal-footer>
+    </c-modal>
+
     }
   </c-col>
 </c-row>

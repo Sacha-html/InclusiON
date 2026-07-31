@@ -1,263 +1,139 @@
-<!-- ── Header ──────────────────────────────────────────────────────────── -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h5 class="mb-0 fw-semibold">Mensajes</h5>
-  <button cButton color="primary" size="sm" (click)="openCompose()">
-    <svg cIcon name="cilPlus" size="sm" class="me-1"></svg>
-    Nuevo mensaje
-  </button>
-</div>
+<c-row class="g-0 chat-container border rounded-3 overflow-hidden bg-body shadow-sm">
+  
+  <!-- ── COLUMNA IZQUIERDA: Contactos (WhatsApp Style) ────────────────── -->
+  <c-col xs="12" md="4" class="border-end d-flex flex-column bg-body-tertiary list-panel">
+    
+    <!-- Header de búsqueda -->
+    <div class="p-3 border-bottom bg-body flex-shrink-0">
+      <h6 class="fw-semibold mb-3 d-flex align-items-center gap-2">
+        <svg cIcon name="cilChatBubble" size="sm" class="text-primary"></svg>
+        Chats
+      </h6>
+      <div class="input-group input-group-sm">
+        <span class="input-group-text bg-body-secondary border-end-0">
+          <svg cIcon name="cilSearch" size="sm" class="opacity-50"></svg>
+        </span>
+        <input 
+          #searchInput
+          cFormControl
+          type="text" 
+          placeholder="Buscar tutor o contacto..." 
+          class="border-start-0 bg-body-secondary ps-0"
+          [value]="searchQuery()"
+          (input)="searchQuery.set(searchInput.value)"
+        />
+      </div>
+    </div>
 
-<c-row class="g-3 align-items-start">
-  <!-- ── Lista ──────────────────────────────────────────────────────── -->
-  <c-col xs="12" md="4">
-    <c-card>
-      <c-card-header class="p-0">
-        <div class="d-flex msg-tabs border-bottom" role="tablist" aria-label="Bandeja de mensajes">
-          <button
-            class="msg-tab flex-fill py-2 px-3"
-            role="tab"
-            [attr.aria-selected]="activeTab === 'inbox'"
-            aria-controls="msg-panel-list"
-            id="msg-tab-inbox"
-            [class.msg-tab--active]="activeTab === 'inbox'"
-            (click)="switchTab('inbox')">
-            <svg cIcon name="cilEnvelopeClosed" size="sm" aria-hidden="true"></svg>
-            Recibidos
-            @if (unreadCount() > 0) {
-              <c-badge color="danger" class="ms-1" [attr.aria-label]="unreadCount() + ' mensajes sin leer'">{{ unreadCount() }}</c-badge>
-            }
-          </button>
-          <button
-            class="msg-tab flex-fill py-2 px-3"
-            role="tab"
-            [attr.aria-selected]="activeTab === 'sent'"
-            aria-controls="msg-panel-list"
-            id="msg-tab-sent"
-            [class.msg-tab--active]="activeTab === 'sent'"
-            (click)="switchTab('sent')">
-            <svg cIcon name="cilPaperPlane" size="sm" aria-hidden="true"></svg>
-            Enviados
-          </button>
+    <!-- Lista de Contactos (Scrollable) -->
+    <div class="flex-grow-1 overflow-auto contacts-list">
+      @if (loadingContacts()) {
+        <div class="text-center py-5">
+          <c-spinner color="primary" size="sm" />
         </div>
-      </c-card-header>
+      } @else if (filteredContacts().length === 0) {
+        <div class="text-center py-5 text-body-secondary">
+          <svg cIcon name="cilUser" size="xl" class="mb-2 opacity-25"></svg>
+          <p class="small mb-0">No se encontraron contactos</p>
+        </div>
+      } @else {
+        <ul class="list-unstyled mb-0">
+          @for (c of filteredContacts(); track c.userId) {
+            <li 
+              class="contact-item p-3 border-bottom d-flex align-items-center gap-3 cursor-pointer"
+              [class.contact-item--active]="selectedContact()?.userId === c.userId"
+              (click)="loadChatForContact(c)"
+            >
+              <app-actor-avatar [name]="c.fullName" size="md" class="flex-shrink-0" />
+              <div class="flex-grow-1 overflow-hidden">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-semibold text-truncate text-body">{{ c.fullName }}</span>
+                </div>
+                <div class="small text-body-secondary text-truncate">
+                  {{ contactLabel(c) }}
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </c-col>
 
-      <c-card-body class="p-0" id="msg-panel-list" role="tabpanel"
-                   [attr.aria-labelledby]="activeTab === 'inbox' ? 'msg-tab-inbox' : 'msg-tab-sent'">
-        @if (loadingList()) {
-          <div class="text-center py-5">
-            <c-spinner color="primary" size="sm" />
+  <!-- ── COLUMNA DERECHA: Chat / Mensajes ─────────────────────────────── -->
+  <c-col xs="12" md="8" class="d-flex flex-column bg-body chat-panel">
+    @if (selectedContact()) {
+      
+      <!-- Cabecera del Chat -->
+      <div class="p-3 border-bottom d-flex align-items-center gap-3 bg-body-tertiary flex-shrink-0">
+        <app-actor-avatar [name]="selectedContact()!.fullName" size="md" />
+        <div>
+          <h6 class="fw-semibold mb-0 text-body">{{ selectedContact()!.fullName }}</h6>
+          <small class="text-body-secondary">{{ contactLabel(selectedContact()!) }}</small>
+        </div>
+      </div>
+
+      <!-- Historial de Conversación (Scrollable) -->
+      <div class="flex-grow-1 p-3 overflow-auto chat-history d-flex flex-column gap-3 bg-body-secondary">
+        @if (loadingChat()) {
+          <div class="d-flex align-items-center justify-content-center h-100">
+            <c-spinner color="primary" />
           </div>
-        } @else if (currentList.length === 0) {
-          <div class="d-flex flex-column align-items-center justify-content-center py-5 text-body-secondary">
-            <svg cIcon name="cilEnvelopeClosed" size="xl" class="mb-2 opacity-50"></svg>
-            <p class="mb-0 small">Sin mensajes.</p>
+        } @else if (chatMessages().length === 0) {
+          <div class="d-flex flex-column align-items-center justify-content-center h-100 text-body-secondary opacity-75">
+            <svg cIcon name="cilChatBubble" size="3xl" class="mb-3 opacity-25"></svg>
+            <p class="small mb-1 fw-semibold">Sin mensajes con {{ selectedContact()!.fullName }}</p>
+            <p class="small mb-0 text-center px-4">Escribe un mensaje abajo para comenzar la conversación.</p>
           </div>
         } @else {
-          <ul class="list-unstyled mb-0">
-            @for (msg of currentList; track msg.id) {
-              <li
-                class="msg-item px-3 py-3 border-bottom"
-                [class.msg-item--active]="selectedDetail()?.id === msg.id"
-                [class.msg-item--unread]="!msg.isRead && activeTab === 'inbox'"
-                (click)="openMessage(msg)">
-
-                <div class="d-flex gap-2 align-items-start">
-                  <app-actor-avatar
-                    [name]="activeTab === 'inbox' ? msg.senderFullName : msg.receiverFullName"
-                    size="sm"
-                  />
-
-                  <div class="flex-grow-1 overflow-hidden">
-                    <div class="d-flex justify-content-between align-items-baseline gap-1">
-                      <span class="msg-sender text-truncate">
-                        {{ activeTab === 'inbox' ? msg.senderFullName : msg.receiverFullName }}
-                      </span>
-                      <span class="msg-date">{{ msg.sentAt | date:'dd/MM HH:mm' }}</span>
-                    </div>
-                    <div class="msg-subject text-truncate">
-                      {{ msg.subject || '(sin asunto)' }}
-                    </div>
-                    <div class="msg-preview text-truncate">
-                      {{ msg.contentPreview }}
-                    </div>
-                  </div>
-
-                  @if (!msg.isRead && activeTab === 'inbox') {
-                    <div class="msg-unread-dot"></div>
-                  }
+          @for (msg of chatMessages(); track msg.id) {
+            <div 
+              class="d-flex flex-column bubble-wrapper"
+              [class.bubble-wrapper--sent]="msg.senderId === currentUserId"
+              [class.bubble-wrapper--received]="msg.senderId !== currentUserId"
+            >
+              <div class="chat-bubble shadow-sm p-3 rounded-3 max-w-75">
+                <p class="mb-1 text-break small">{{ msg.content }}</p>
+                <div class="text-end">
+                  <span class="bubble-time text-body-secondary">{{ msg.sentAt | date:'HH:mm' }}</span>
                 </div>
-              </li>
-            }
-          </ul>
-
-          @if (totalPages > 1) {
-            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
-              <button cButton size="sm" color="secondary"
-                      [disabled]="currentPage() <= 1" (click)="prevPage()">‹</button>
-              <small class="text-body-secondary">{{ currentPage() }} / {{ totalPages }}</small>
-              <button cButton size="sm" color="secondary"
-                      [disabled]="currentPage() >= totalPages" (click)="nextPage()">›</button>
+              </div>
             </div>
           }
         }
-      </c-card-body>
-    </c-card>
-  </c-col>
+      </div>
 
-  <!-- ── Detalle ────────────────────────────────────────────────────── -->
-  <c-col xs="12" md="8"
-         [class.d-none]="!selectedDetail() && !loadingDetail()"
-         [class.d-md-block]="!selectedDetail() && !loadingDetail()">
-    @if (loadingDetail() || selectedDetail()) {
-      <c-card>
-        <c-card-header class="d-flex justify-content-between align-items-center py-2">
-          <span class="fw-semibold text-truncate me-2 small">
-            @if (loadingDetail()) { Cargando… }
-            @else { {{ selectedDetail()!.subject || '(sin asunto)' }} }
-          </span>
-          <button cButton size="sm" color="secondary" variant="ghost"
-                  (click)="closeDetail()">
-            <svg cIcon name="cilX" size="sm"></svg>
-          </button>
-        </c-card-header>
+      <!-- Barra de Envío de Mensaje -->
+      <div class="p-3 border-top bg-body flex-shrink-0 d-flex gap-2 align-items-center">
+        <textarea 
+          cFormControl 
+          rows="1" 
+          placeholder="Escribe un mensaje..."
+          [(ngModel)]="newMessageText" 
+          (keydown.enter)="$event.preventDefault(); sendChatMessage()"
+          [disabled]="sendingMessage()"
+          class="flex-grow-1 resize-none rounded-pill px-3 py-2 border bg-body-tertiary"
+        ></textarea>
+        <button 
+          cButton 
+          color="primary" 
+          [disabled]="!newMessageText.trim() || sendingMessage()"
+          (click)="sendChatMessage()"
+          class="rounded-circle d-flex align-items-center justify-content-center shadow-sm send-btn"
+        >
+          <svg cIcon name="cilPaperPlane" size="md" class="text-white"></svg>
+        </button>
+      </div>
 
-        <c-card-body>
-          @if (loadingDetail()) {
-            <div class="text-center py-5">
-              <c-spinner color="primary" />
-            </div>
-          } @else if (selectedDetail()) {
-            <!-- Encabezado del mensaje -->
-            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-              <app-actor-avatar
-                [name]="selectedDetail()!.senderFullName"
-                size="lg"
-              />
-              <div class="flex-grow-1 overflow-hidden">
-                <div class="fw-semibold text-truncate">{{ selectedDetail()!.senderFullName }}</div>
-                <div class="small text-body-secondary">
-                  Para: <strong>{{ selectedDetail()!.receiverFullName }}</strong>
-                </div>
-              </div>
-              <div class="msg-date flex-shrink-0">
-                {{ selectedDetail()!.sentAt | date:'dd/MM/yyyy HH:mm' }}
-              </div>
-            </div>
-
-            <!-- Cuerpo principal -->
-            <div class="border rounded-3 p-3 bg-body-secondary mb-4">
-              <p class="mb-0 small" style="white-space: pre-wrap;">{{ selectedDetail()!.content }}</p>
-            </div>
-
-            <!-- Respuestas -->
-            @if (selectedDetail()!.replies.length) {
-              <p class="small text-body-secondary fw-semibold mb-3">
-                {{ selectedDetail()!.replies.length }}
-                {{ selectedDetail()!.replies.length === 1 ? 'respuesta' : 'respuestas' }}
-              </p>
-              @for (reply of selectedDetail()!.replies; track reply.id) {
-                <div class="mb-3 d-flex gap-2">
-                  <app-actor-avatar
-                    [name]="reply.senderFullName"
-                    size="sm"
-                    class="flex-shrink-0"
-                  />
-                  <div class="flex-grow-1 overflow-hidden">
-                    <div class="d-flex justify-content-between align-items-baseline gap-1 mb-1">
-                      <strong class="small text-truncate">{{ reply.senderFullName }}</strong>
-                      <span class="msg-date flex-shrink-0">{{ reply.sentAt | date:'dd/MM/yyyy HH:mm' }}</span>
-                    </div>
-                    <div class="border rounded-3 p-3 bg-body-secondary">
-                      <p class="mb-0 small" style="white-space: pre-wrap;">{{ reply.content }}</p>
-                    </div>
-                  </div>
-                </div>
-              }
-            }
-
-            <!-- Caja de respuesta (solo recibidos) -->
-            @if (activeTab === 'inbox') {
-              <div class="mt-4 border-top pt-3">
-                <textarea
-                  cFormControl
-                  rows="3"
-                  [(ngModel)]="replyBody"
-                  placeholder="Escribe tu respuesta…"
-                  class="mb-2">
-                </textarea>
-                <div class="d-flex justify-content-end">
-                  <button
-                    cButton color="primary" size="sm"
-                    [disabled]="!replyBody.trim() || sendingReply()"
-                    (click)="sendReply()">
-                    <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
-                    @if (sendingReply()) { Enviando… } @else { Enviar }
-                  </button>
-                </div>
-              </div>
-            }
-          }
-        </c-card-body>
-      </c-card>
     } @else {
-      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-body-secondary border rounded-3" style="min-height: 300px;">
-        <svg cIcon name="cilChatBubble" size="3xl" class="mb-3 opacity-25"></svg>
-        <p class="mb-1 small fw-medium">Selecciona un mensaje</p>
-        <p class="mb-0 small opacity-75">para ver su contenido aquí</p>
+      <!-- Estado vacío (Placeholder de bienvenida) -->
+      <div class="h-100 d-flex flex-column align-items-center justify-content-center text-body-secondary bg-body-tertiary border rounded-3 py-5" style="min-height: 400px;">
+        <svg cIcon name="cilChatBubble" size="4xl" class="mb-3 text-primary opacity-25"></svg>
+        <h5 class="fw-semibold text-body mb-2">Mensajería InclusiON</h5>
+        <p class="text-center text-body-secondary px-4 small max-w-sm mb-0">
+          Envía y recibe mensajes directamente con los tutores y familiares de tus alumnos a cargo de manera segura.
+        </p>
       </div>
     }
   </c-col>
 </c-row>
-
-<!-- ── Modal Nuevo Mensaje ─────────────────────────────────────────────── -->
-<c-modal [visible]="showCompose" (visibleChange)="showCompose = $event" size="lg">
-  <c-modal-header>
-    <h5 cModalTitle>Nuevo mensaje</h5>
-  </c-modal-header>
-
-  <c-modal-body>
-    @if (composeError) {
-      <c-alert color="danger" class="mb-3">{{ composeError }}</c-alert>
-    }
-
-    <div class="mb-3">
-      <label cLabel class="mb-1">Destinatario</label>
-      @if (loadingContacts) {
-        <div><c-spinner size="sm" /></div>
-      } @else if (contacts().length === 0) {
-        <p class="text-body-secondary small mb-0">
-          No tienes contactos disponibles aún.
-        </p>
-      } @else {
-        <select cSelect [(ngModel)]="compose.receiverId">
-          <option value="">— Selecciona un contacto —</option>
-          @for (c of contacts(); track c.userId) {
-            <option [value]="c.userId">{{ contactLabel(c) }}</option>
-          }
-        </select>
-      }
-    </div>
-
-    <div class="mb-3">
-      <label cLabel class="mb-1">Asunto</label>
-      <input cFormControl type="text" [(ngModel)]="compose.subject"
-             placeholder="Asunto del mensaje" maxlength="200" />
-    </div>
-
-    <div class="mb-3">
-      <label cLabel class="mb-1">Mensaje</label>
-      <textarea cFormControl rows="6" [(ngModel)]="compose.content"
-                placeholder="Escribe tu mensaje…"></textarea>
-    </div>
-  </c-modal-body>
-
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="closeCompose()">Cancelar</button>
-    <button cButton color="primary"
-            [disabled]="sendingNew() || contacts().length === 0"
-            (click)="sendNew()">
-      <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
-      @if (sendingNew()) { Enviando… } @else { Enviar }
-    </button>
-  </c-modal-footer>
-</c-modal>

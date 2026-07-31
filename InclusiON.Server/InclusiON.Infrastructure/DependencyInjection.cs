@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -65,6 +65,12 @@ namespace InclusiON.Infrastructure
                 Microsoft.Extensions.Logging.Abstractions.NullLogger<Argon2idPinHasher>.Instance);
             PinHashAccessor.Initialize(pinHasher.Hash);
 
+            RoadmapInitializerAccessor.Initialize(async (context, studentId, supervisorUserId, ct) =>
+            {
+                var initializer = new RoadmapInitializer(context);
+                await initializer.InitializeStudentRoadmapAsync(studentId, supervisorUserId, ct);
+            });
+
             var connectionString = configuration.GetConnectionString("PostgreSqlConn");
 
             if (string.IsNullOrEmpty(connectionString))
@@ -79,6 +85,8 @@ namespace InclusiON.Infrastructure
             services.AddScoped<InclusiON.Application.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
             services.AddScoped<IPinHasher, Argon2idPinHasher>();
             services.AddScoped<TokenServices>();
+
+            services.AddScoped<IRoadmapInitializer, RoadmapInitializer>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IRawDbExecutor, RawDbExecutor>();
@@ -246,7 +254,6 @@ namespace InclusiON.Infrastructure
             // Cualquier [Authorize(Policy = "modulo:accion")] se evalua contra los claims
             // de tipo "permission" del JWT, sin necesidad de registrar politicas manuales.
             services.AddAuthorization();
-
 
             return services;
         }
