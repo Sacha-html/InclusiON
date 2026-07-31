@@ -68,6 +68,7 @@ namespace InclusiON.Data
         public DbSet<Report> Reports { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<AccessAudit> AccessAudits { get; set; }
+        public DbSet<CalendarEvent> CalendarEvents { get; set; }
         public DbSet<ProfessionalStatusHistory> ProfessionalStatusHistories { get; set; }
         public DbSet<FamilyStatusHistory> FamilyStatusHistories { get; set; }
         public DbSet<PersonRepresentativeHistory> PersonRepresentativeHistories { get; set; }

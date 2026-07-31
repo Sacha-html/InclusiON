@@ -21,12 +21,13 @@ public class RequestHelpCommandHandlerTests
 
     private static readonly Guid PersonId = Guid.NewGuid();
 
-    private static PersonWithDisability APerson() => new()
+    private static PersonWithDisability APerson(int? loginMethodId = 3) => new()
     {
-        Id        = PersonId,
-        UserId    = Guid.NewGuid(),
-        FirstName = "Ana",
-        LastName  = "García",
+        Id            = PersonId,
+        UserId        = Guid.NewGuid(),
+        FirstName     = "Ana",
+        LastName      = "García",
+        LoginMethodId = loginMethodId
     };
 
     private static Professional AProfessional(Guid? userId = null) => new()
@@ -51,14 +52,14 @@ public class RequestHelpCommandHandlerTests
             .NotifyUserAsync(default!, default!, default!, default, default);
     }
 
-    // ── Sin supervisores ─────────────────────────────────────────────────────
+    // ── Sin destinatarios ────────────────────────────────────────────────────
 
     [Fact]
-    public async Task HandleAsync_NoSupervisors_ReturnsSuccessWithoutNotifying()
+    public async Task HandleAsync_NoRecipients_ReturnsSuccessWithoutNotifying()
     {
-        _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(APerson());
-        _personsRepo.GetSupervisingProfessionalsAsync(PersonId, Arg.Any<CancellationToken>())
-                    .Returns(new List<Professional>());
+        _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(APerson(loginMethodId: null));
+        _personsRepo.GetActiveRepresentativesAsync(PersonId, Arg.Any<CancellationToken>())
+                    .Returns(new List<PersonRepresentative>());
 
         var result = await BuildSut().HandleAsync(new RequestHelpCommand(PersonId), default);
 
@@ -67,65 +68,72 @@ public class RequestHelpCommandHandlerTests
             .NotifyUserAsync(default!, default!, default!, default, default);
     }
 
-    // ── Un supervisor ────────────────────────────────────────────────────────
+    // ── Notifica a Tutor (Siempre) ───────────────────────────────────────────
 
     [Fact]
-    public async Task HandleAsync_OneSupervisor_NotifiesOnce()
+    public async Task HandleAsync_HasRepresentatives_NotifiesTutors()
     {
-        var profUserId = Guid.NewGuid();
-        var prof       = AProfessional(profUserId);
+        var person = APerson(loginMethodId: null); // standard login, not assisted
+        var tutorUserId = Guid.NewGuid();
+        var representative = new PersonRepresentative
+        {
+            PersonId = PersonId,
+            Representative = new FamilyRepresentative { UserId = tutorUserId }
+        };
 
-        _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(APerson());
+        _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(person);
+        _personsRepo.GetActiveRepresentativesAsync(PersonId, Arg.Any<CancellationToken>())
+                    .Returns(new List<PersonRepresentative> { representative });
+
+        var result = await BuildSut().HandleAsync(new RequestHelpCommand(PersonId), default);
+
+        result.Success.Should().BeTrue();
+        await _notifier.Received(1).NotifyUserAsync(
+            tutorUserId.ToString(),
+            Arg.Is<string>(t => t.Contains("ayuda")),
+            Arg.Is<string>(m => m.Contains("Ana García")),
+            Arg.Is<string>("/#/family/dashboard"),
+            Arg.Any<CancellationToken>());
+    }
+
+    // ── Ingreso Asistido: Notifica a Tutor y Profesional ──────────────────────
+
+    [Fact]
+    public async Task HandleAsync_AssistedLogin_NotifiesTutorAndProfessional()
+    {
+        var person = APerson(loginMethodId: 3); // assisted login
+        var tutorUserId = Guid.NewGuid();
+        var representative = new PersonRepresentative
+        {
+            PersonId = PersonId,
+            Representative = new FamilyRepresentative { UserId = tutorUserId }
+        };
+        var profUserId = Guid.NewGuid();
+        var prof = AProfessional(profUserId);
+
+        _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(person);
+        _personsRepo.GetActiveRepresentativesAsync(PersonId, Arg.Any<CancellationToken>())
+                    .Returns(new List<PersonRepresentative> { representative });
         _personsRepo.GetSupervisingProfessionalsAsync(PersonId, Arg.Any<CancellationToken>())
                     .Returns(new List<Professional> { prof });
 
         var result = await BuildSut().HandleAsync(new RequestHelpCommand(PersonId), default);
 
         result.Success.Should().BeTrue();
+        // Verificamos que se notifica al tutor
+        await _notifier.Received(1).NotifyUserAsync(
+            tutorUserId.ToString(),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Is<string>("/#/family/dashboard"),
+            Arg.Any<CancellationToken>());
+
+        // Verificamos que se notifica al profesional supervisor
         await _notifier.Received(1).NotifyUserAsync(
             profUserId.ToString(),
-            Arg.Is<string>(t => t.Contains("ayuda")),
-            Arg.Is<string>(m => m.Contains("Ana García")),
-            Arg.Any<string?>(),
-            Arg.Any<CancellationToken>());
-    }
-
-    // ── Múltiples supervisores ───────────────────────────────────────────────
-
-    [Fact]
-    public async Task HandleAsync_MultipleSupervisors_NotifiesAll()
-    {
-        var prof1 = AProfessional();
-        var prof2 = AProfessional();
-        var prof3 = AProfessional();
-
-        _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(APerson());
-        _personsRepo.GetSupervisingProfessionalsAsync(PersonId, Arg.Any<CancellationToken>())
-                    .Returns(new List<Professional> { prof1, prof2, prof3 });
-
-        var result = await BuildSut().HandleAsync(new RequestHelpCommand(PersonId), default);
-
-        result.Success.Should().BeTrue();
-        await _notifier.Received(3).NotifyUserAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string?>(), Arg.Any<CancellationToken>());
-    }
-
-    // ── ActionUrl contiene PersonId ──────────────────────────────────────────
-
-    [Fact]
-    public async Task HandleAsync_ActionUrl_ContainsPersonId()
-    {
-        var profUserId = Guid.NewGuid();
-        _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(APerson());
-        _personsRepo.GetSupervisingProfessionalsAsync(PersonId, Arg.Any<CancellationToken>())
-                    .Returns(new List<Professional> { AProfessional(profUserId) });
-
-        await BuildSut().HandleAsync(new RequestHelpCommand(PersonId), default);
-
-        await _notifier.Received(1).NotifyUserAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Is<string?>(url => url != null && url.Contains(PersonId.ToString())),
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Is<string>(url => url != null && url.Contains(PersonId.ToString())),
             Arg.Any<CancellationToken>());
     }
 }

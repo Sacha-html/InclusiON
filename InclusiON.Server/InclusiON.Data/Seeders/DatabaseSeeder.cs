@@ -23,17 +23,55 @@ namespace InclusiON.Data.Seeders
             await SeedVisualLoginTestUsersAsync(userManager, context);
             await SeedFamilyAsync(userManager, context);
             await SeedFiveAdditionalStudentsAndTutorsAsync(userManager, context);
+
+            // Inicializar Roadmap Estándar para todos los alumnos existentes
+            var students = await context.PersonsWithDisability.ToListAsync();
+            foreach (var student in students)
+            {
+                // Limpiar cualquier roadmap anterior para asegurar que se regenere correctamente sin duplicados
+                var existingRoadmap = await context.PersonRoadmaps.FirstOrDefaultAsync(r => r.PersonId == student.Id);
+                if (existingRoadmap != null)
+                {
+                    context.PersonRoadmaps.Remove(existingRoadmap);
+                    await context.SaveChangesAsync();
+                }
+
+                // Limpiar cualquier asignación estándar anterior de la trayectoria
+                var skillArea = await context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria");
+                if (skillArea != null)
+                {
+                    var standardAssignments = await context.Set<ActivityAssignment>()
+                        .Where(a => a.PersonId == student.Id && a.Activity.SkillAreaId == skillArea.Id)
+                        .ToListAsync();
+                    if (standardAssignments.Count > 0)
+                    {
+                        context.Set<ActivityAssignment>().RemoveRange(standardAssignments);
+                        await context.SaveChangesAsync();
+                    }
+                }
+
+                await RoadmapInitializerAccessor.InitializeStudentRoadmap(context, student.Id, student.SupervisorUserId, CancellationToken.None);
+            }
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
         {
-            const string adminEmail = "admin@inclusion.com";
+            const string adminEmail = "admin@test.com";
             const string adminPassword = "Admin123!";
 
-            var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
-
-            if (existingAdmin != null)
+            var existingById = await userManager.FindByIdAsync("00000000-0000-0000-0000-000000000001");
+            if (existingById != null)
+            {
+                if (existingById.Email != adminEmail)
+                {
+                    existingById.Email = adminEmail;
+                    existingById.NormalizedEmail = adminEmail.ToUpperInvariant();
+                    existingById.UserName = adminEmail;
+                    existingById.NormalizedUserName = adminEmail.ToUpperInvariant();
+                    await userManager.UpdateAsync(existingById);
+                }
                 return;
+            }
 
             var adminUser = new User
             {
@@ -533,48 +571,62 @@ namespace InclusiON.Data.Seeders
 
             foreach (var prof in professionals)
             {
-                // Verificar si ya existe por email o por ID
                 var existingUser = await userManager.FindByEmailAsync(prof.Email);
-                if (existingUser != null)
-                    continue;
-
-                var existingById = await userManager.FindByIdAsync(prof.Id.ToString());
-                if (existingById != null)
-                    continue;
-
-                var user = new User
+                if (existingUser == null)
                 {
-                    Id = prof.Id,
-                    Name = prof.FirstName,
-                    Surname = prof.LastName,
-                    Email = prof.Email,
-                    UserName = prof.Email,
-                    EmailConfirmed = true,
-                    IsActive = true,
-                    LockoutEnabled = true,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                var result = await userManager.CreateAsync(user, prof.Password);
-
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(user, IdentityRoles.Professional.ToString());
-
-                    var professional = new Professional
+                    var existingById = await userManager.FindByIdAsync(prof.Id.ToString());
+                    if (existingById == null)
                     {
-                        Id = prof.ProfessionalId,
-                        UserId = prof.Id,
-                        FirstName = prof.FirstName,
-                        LastName = prof.LastName,
-                        LicenseNumber = prof.LicenseNumber,
-                        Specialty = prof.Specialty,
-                        Status = ProfessionalStatusEnum.Approved,
-                        IsActive = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
+                        var user = new User
+                        {
+                            Id = prof.Id,
+                            Name = prof.FirstName,
+                            Surname = prof.LastName,
+                            Email = prof.Email,
+                            UserName = prof.Email,
+                            EmailConfirmed = true,
+                            IsActive = true,
+                            LockoutEnabled = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
 
-                    context.Professionals.Add(professional);
+                        var result = await userManager.CreateAsync(user, prof.Password);
+                        if (result.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(user, IdentityRoles.Professional.ToString());
+                            existingUser = user;
+                        }
+                        else
+                        {
+                            existingUser = await userManager.FindByEmailAsync(prof.Email);
+                        }
+                    }
+                    else
+                    {
+                        existingUser = existingById;
+                    }
+                }
+
+                if (existingUser != null)
+                {
+                    var existingProf = await context.Professionals.FirstOrDefaultAsync(p => p.UserId == existingUser.Id);
+                    if (existingProf == null)
+                    {
+                        var professional = new Professional
+                        {
+                            Id = prof.ProfessionalId,
+                            UserId = existingUser.Id,
+                            FirstName = prof.FirstName,
+                            LastName = prof.LastName,
+                            LicenseNumber = prof.LicenseNumber,
+                            Specialty = prof.Specialty,
+                            Status = ProfessionalStatusEnum.Approved,
+                            IsActive = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        context.Professionals.Add(professional);
+                    }
                 }
             }
 
@@ -723,7 +775,8 @@ namespace InclusiON.Data.Seeders
                             LastName = item.StudentSurname,
                             BirthDate = DateTime.UtcNow.AddYears(-15),
                             DocumentNumber = item.StudentDni,
-                            LoginMethodId = 1, // Password
+                            LoginMethodId = item.StudentEmail == "benjamin@test.com" ? 3 : 1, // 3: Ingreso Asistido (requiere supervisor) para Benjamín Castro
+                            SupervisorUserId = item.StudentEmail == "benjamin@test.com" ? professional.UserId : null,
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
                         };
@@ -733,6 +786,11 @@ namespace InclusiON.Data.Seeders
                 else
                 {
                     student = await context.PersonsWithDisability.FirstOrDefaultAsync(p => p.UserId == studentUser.Id);
+                    if (student != null && item.StudentEmail == "benjamin@test.com")
+                    {
+                        student.LoginMethodId = 3;
+                        student.SupervisorUserId = professional.UserId;
+                    }
                 }
 
                 var tutorUser = await userManager.FindByEmailAsync(item.TutorEmail);

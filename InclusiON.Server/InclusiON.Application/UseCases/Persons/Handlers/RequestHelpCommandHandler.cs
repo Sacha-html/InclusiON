@@ -39,29 +39,72 @@ public class RequestHelpCommandHandler
 
         var personName = $"{person.FirstName} {person.LastName}";
 
-        var supervisors = await _personsRepository
-            .GetSupervisingProfessionalsAsync(command.PersonId, cancellationToken);
+        // 1. Obtener representantes familiares activos
+        var representatives = await _personsRepository
+            .GetActiveRepresentativesAsync(command.PersonId, cancellationToken);
 
-        if (supervisors.Count == 0)
+        var tasks = new List<Task>();
+
+        // Notificar siempre a los tutores/familiares vinculados
+        foreach (var rep in representatives)
         {
-            _logger.LogWarning(
-                "Persona {PersonId} solicitó ayuda pero no tiene profesionales supervisores.", command.PersonId);
-            return ApiResponse<object>.SuccessResult("Solicitud enviada.");
+            if (rep.Representative != null && rep.Representative.UserId != Guid.Empty)
+            {
+                tasks.Add(_notifier.NotifyUserAsync(
+                    rep.Representative.UserId.ToString(),
+                    "🆘 Solicitud de ayuda",
+                    $"{personName} necesita ayuda urgente.",
+                    actionUrl: "/#/family/dashboard",
+                    cancellationToken: cancellationToken));
+            }
         }
 
-        var tasks = supervisors.Select(prof =>
-            _notifier.NotifyUserAsync(
-                prof.UserId.ToString(),
-                "🆘 Solicitud de ayuda",
-                $"{personName} necesita ayuda urgente.",
-                actionUrl: $"/#/pro/persons/{command.PersonId}",
-                cancellationToken: cancellationToken));
+        // 2. Si el alumno tiene ingreso asistido (LoginMethodId == 3), también se notifica al profesional supervisor
+        if (person.LoginMethodId == 3)
+        {
+            var supervisors = await _personsRepository
+                .GetSupervisingProfessionalsAsync(command.PersonId, cancellationToken);
 
-        await Task.WhenAll(tasks);
+            var notifiedProfUserIds = new HashSet<string>();
+
+            foreach (var prof in supervisors)
+            {
+                var profUserId = prof.UserId.ToString();
+                if (notifiedProfUserIds.Add(profUserId))
+                {
+                    tasks.Add(_notifier.NotifyUserAsync(
+                        profUserId,
+                        "🆘 Solicitud de ayuda",
+                        $"{personName} necesita ayuda urgente.",
+                        actionUrl: $"/#/pro/persons/{command.PersonId}",
+                        cancellationToken: cancellationToken));
+                }
+            }
+
+            // Si hay un supervisor específico guardado en SupervisorUserId
+            if (person.SupervisorUserId.HasValue)
+            {
+                var specificSupervisorUserIdStr = person.SupervisorUserId.Value.ToString();
+                if (notifiedProfUserIds.Add(specificSupervisorUserIdStr))
+                {
+                    tasks.Add(_notifier.NotifyUserAsync(
+                        specificSupervisorUserIdStr,
+                        "🆘 Solicitud de ayuda",
+                        $"{personName} necesita ayuda urgente.",
+                        actionUrl: $"/#/pro/persons/{command.PersonId}",
+                        cancellationToken: cancellationToken));
+                }
+            }
+        }
+
+        if (tasks.Count > 0)
+        {
+            await Task.WhenAll(tasks);
+        }
 
         _logger.LogInformation(
-            "Solicitud de ayuda de {PersonId} enviada a {Count} profesionales vía SignalR.",
-            command.PersonId, supervisors.Count);
+            "Solicitud de ayuda de {PersonId} procesada. Notificados: {Count} destinos.",
+            command.PersonId, tasks.Count);
 
         return ApiResponse<object>.SuccessResult("Solicitud enviada.");
     }

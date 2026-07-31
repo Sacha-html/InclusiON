@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -35,7 +35,6 @@
     <ProjectReference Include="..\InclusiON.Infrastructure\InclusiON.Infrastructure.csproj" />
     <ProjectReference Include="..\InclusiON.Infrastructure.Telemetry\InclusiON.Infrastructure.Telemetry.csproj" />
     <ProjectReference Include="..\InclusiON.Shared\InclusiON.Shared.csproj" />
-    <ProjectReference Include="..\InclusiON.Workers\InclusiON.Workers.csproj" />
   </ItemGroup>
 
 </Project>

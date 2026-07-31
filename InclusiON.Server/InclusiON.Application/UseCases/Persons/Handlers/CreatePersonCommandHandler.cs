@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
@@ -28,6 +28,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly ILogger<CreatePersonCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
 
+        private readonly IRoadmapInitializer _roadmapInitializer;
+
         public CreatePersonCommandHandler(
             IPersonsRepository repository,
             IIdentityService identityService,
@@ -36,7 +38,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             IUnitOfWork unitOfWork,
             IBackgroundJobRepository backgroundJobs,
             ILogger<CreatePersonCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IRoadmapInitializer roadmapInitializer)
         {
             _repository = repository;
             _identityService = identityService;
@@ -46,6 +49,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             _backgroundJobs = backgroundJobs;
             _logger = logger;
             _dateTime = dateTime;
+            _roadmapInitializer = roadmapInitializer;
         }
 
         public async Task<ApiResponse<PersonResponse>> HandleAsync(CreatePersonCommand command, CancellationToken cancellationToken)
@@ -138,6 +142,9 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     await _repository.CreateAsync(person, ct);
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
+
+                // Inicializar Roadmap Estándar de 10 Niveles
+                await _roadmapInitializer.InitializeStudentRoadmapAsync(person.Id, person.SupervisorUserId, cancellationToken);
 
                 await _backgroundJobs.CreateAsync(
                     JobTypes.Embedding,

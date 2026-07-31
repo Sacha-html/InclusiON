@@ -1,0 +1,262 @@
+<div class="fade-in">
+  
+  <!-- ── Encabezado y Navegación ────────────────────────────────────────── -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-semibold text-body mb-1">Calendario de Actividades</h4>
+      <p class="text-body-secondary small mb-0">
+        {{ isProfessional ? 'Agenda y gestiona las clases, consultas y tareas de tus alumnos.' : 'Visualiza el cronograma de clases y consultas de tu hijo.' }}
+      </p>
+    </div>
+    
+    <div class="d-flex gap-2 position-relative">
+      <div class="btn-group btn-group-sm">
+        <button cButton color="secondary" (click)="prevMonth()">
+          <svg cIcon name="cilChevronLeft" size="sm"></svg>
+        </button>
+        <button cButton color="outline-secondary" (click)="toggleMonthYearPicker()" class="fw-semibold text-body px-3">
+          {{ monthLabel }}
+          <svg cIcon name="cilCaretBottom" size="sm" class="ms-1"></svg>
+        </button>
+        <button cButton color="secondary" (click)="nextMonth()">
+          <svg cIcon name="cilChevronRight" size="sm"></svg>
+        </button>
+      </div>
+
+      <!-- Month & Year Quick Picker Popover -->
+      @if (showMonthYearPicker) {
+        <div class="position-absolute top-100 end-0 mt-2 p-3 border rounded bg-body shadow-lg z-3 month-year-popover" style="width: 280px;">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0 fw-semibold small text-body">Seleccionar Fecha</h6>
+            <select cSelect size="sm" [(ngModel)]="pickerYear" (change)="applyMonthYearPicker()" style="width: 90px;" class="py-1 px-2">
+              @for (y of [2024, 2025, 2026, 2027, 2028, 2029, 2030]; track y) {
+                <option [value]="y">{{ y }}</option>
+              }
+            </select>
+          </div>
+          
+          <div class="d-grid month-grid gap-2">
+            @for (m of monthsList; track m.value) {
+              <button 
+                cButton 
+                size="sm"
+                [color]="currentDate.getMonth() === m.value ? 'primary' : 'outline-secondary'"
+                (click)="selectPickerMonth(m.value)"
+                class="py-2 small"
+              >
+                {{ m.abbr }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (isProfessional) {
+        <button cButton color="primary" size="sm" (click)="openCreateModal()">
+          <svg cIcon name="cilPlus" size="sm" class="me-1"></svg>
+          Agendar Actividad
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ── Leyenda de Tipos de Eventos ────────────────────────────────────── -->
+  <div class="d-flex flex-wrap gap-3 mb-3 p-3 border rounded bg-body-tertiary">
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-info text-info-emphasis rounded-pill px-2 py-1">Consulta</span>
+      <span class="small text-body-secondary">Revisión clínica o médica</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-primary text-primary-emphasis rounded-pill px-2 py-1">Tutoría</span>
+      <span class="small text-body-secondary">Reunión con padres/tutor</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-success text-success-emphasis rounded-pill px-2 py-1">Clase</span>
+      <span class="small text-body-secondary">Sesión educativa o terapéutica</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-warning text-warning-emphasis rounded-pill px-2 py-1">Tarea</span>
+      <span class="small text-body-secondary">Actividades para resolver en casa</span>
+    </div>
+  </div>
+
+  <!-- ── Cuadrícula del Calendario (Mes) ────────────────────────────────── -->
+  <c-card class="shadow-sm border-0 mb-4 overflow-hidden">
+    <c-card-body class="p-0">
+      
+      <!-- Días de la semana -->
+      <div class="d-grid calendar-week-header border-bottom bg-body-tertiary text-center fw-semibold text-body-secondary py-2">
+        @for (day of weekDays; track day) {
+          <div class="small">{{ day }}</div>
+        }
+      </div>
+
+      <!-- Celdas del mes -->
+      <div class="d-grid calendar-month-grid bg-border">
+        @for (cell of daysGrid; track $index) {
+          <div 
+            class="calendar-day-cell p-2 d-flex flex-column gap-1 bg-body min-h-6"
+            [class.calendar-day-cell--today]="cell.isToday"
+            [class.calendar-day-cell--empty]="!cell.date"
+            [class.cursor-pointer]="cell.date && isProfessional"
+            (click)="cell.date && openCreateModal(cell.date)"
+          >
+            @if (cell.date) {
+              <!-- Número del día -->
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span 
+                  class="day-number d-flex align-items-center justify-content-center rounded-circle"
+                  [class.day-number--today]="cell.isToday"
+                >
+                  {{ cell.date.getDate() }}
+                </span>
+              </div>
+
+              <!-- Listado de eventos en el día -->
+              <div class="d-flex flex-column gap-1 overflow-hidden">
+                @for (ev of cell.events; track ev.id) {
+                  <div 
+                    class="event-badge px-2 py-1 rounded small text-truncate text-start"
+                    [class]="'event-badge--' + ev.type.toLowerCase()"
+                    (click)="openDetail(ev, $event)"
+                  >
+                    <strong>{{ ev.time }}</strong> {{ ev.title }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </c-card-body>
+  </c-card>
+
+</div>
+
+<!-- ── Modal Crear/Editar Evento (Sólo Profesional) ────────────────────── -->
+<c-modal [visible]="showEventModal" (visibleChange)="showEventModal = $event">
+  <c-modal-header>
+    <h5 cModalTitle>{{ eventForm.id ? 'Editar Evento' : 'Agendar Nueva Actividad' }}</h5>
+  </c-modal-header>
+  <c-modal-body>
+    <div class="mb-3">
+      <label cLabel class="mb-1">Título de la actividad *</label>
+      <input cFormControl type="text" [(ngModel)]="eventForm.title" placeholder="Ej: Tutoría de Lectura" />
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-6">
+        <label cLabel class="mb-1">Tipo de Evento</label>
+        <select cSelect [(ngModel)]="eventForm.type">
+          <option value="Consulta">Consulta</option>
+          <option value="Tutoría">Tutoría</option>
+          <option value="Clase">Clase</option>
+          <option value="Tarea">Tarea</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label cLabel class="mb-1">Dirigido a</label>
+        <select cSelect [(ngModel)]="eventForm.targetScope">
+          <option value="all">Todos los alumnos a cargo</option>
+          <option value="single">Un alumno específico (Clase Refuerzo)</option>
+        </select>
+      </div>
+    </div>
+
+    @if (eventForm.targetScope === 'single') {
+      <div class="mb-3">
+        <label cLabel class="mb-1">Seleccionar Alumno *</label>
+        <select cSelect [(ngModel)]="eventForm.studentId">
+          <option value="">— Selecciona un alumno —</option>
+          @for (s of assignedStudents(); track s.personId) {
+            <option [value]="s.personId">{{ s.personFirstName }} {{ s.personLastName }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div class="row g-3 mb-3">
+      <div class="col-6">
+        <label cLabel class="mb-1">Fecha *</label>
+        <input cFormControl type="date" [(ngModel)]="eventForm.date" />
+      </div>
+      <div class="col-6">
+        <label cLabel class="mb-1">Hora *</label>
+        <input cFormControl type="time" [(ngModel)]="eventForm.time" />
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label cLabel class="mb-1">Descripción / Observaciones</label>
+      <textarea cFormControl rows="3" [(ngModel)]="eventForm.description" placeholder="Añade detalles sobre el encuentro..."></textarea>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" size="sm" (click)="closeEventModal()">Cancelar</button>
+    <button cButton color="primary" size="sm" (click)="saveEventSubmit()">Guardar</button>
+  </c-modal-footer>
+</c-modal>
+
+<!-- ── Modal Detalle de Evento ─────────────────────────────────────────── -->
+<c-modal [visible]="showDetailModal" (visibleChange)="showDetailModal = $event" size="sm">
+  <c-modal-header>
+    <h5 cModalTitle>Detalle del Evento</h5>
+  </c-modal-header>
+  <c-modal-body>
+    @if (selectedEvent()) {
+      <div class="d-flex flex-column gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="badge" [class]="'bg-' + getEventTypeBadgeColor(selectedEvent()!.type)">
+              {{ selectedEvent()!.type }}
+            </span>
+            <span class="small text-body-secondary">
+              Agendado por: {{ selectedEvent()!.createdBy }}
+            </span>
+          </div>
+          <h5 class="fw-semibold text-body mb-1">{{ selectedEvent()!.title }}</h5>
+        </div>
+
+        <div class="border-top pt-2 d-flex flex-column gap-2 small">
+          <div class="d-flex align-items-center gap-2">
+            <svg cIcon name="cilCalendar" size="sm" class="text-body-secondary"></svg>
+            <strong>Fecha:</strong> {{ selectedEvent()!.date | date:'dd/MM/yyyy' }}
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <svg cIcon name="cilClock" size="sm" class="text-body-secondary"></svg>
+            <strong>Hora:</strong> {{ selectedEvent()!.time }} hs
+          </div>
+          @if (selectedEvent()!.studentName) {
+            <div class="d-flex align-items-center gap-2">
+              <svg cIcon name="cilUser" size="sm" class="text-body-secondary"></svg>
+              <strong>Dirigido a:</strong> 
+              <span>
+                {{ selectedEvent()!.studentName }}
+                @if (selectedEvent()!.targetScope === 'single') {
+                  <span class="badge bg-warning text-warning-emphasis ms-1">Refuerzo</span>
+                }
+              </span>
+            </div>
+          }
+        </div>
+
+        @if (selectedEvent()!.description) {
+          <div class="border-top pt-2">
+            <strong>Descripción:</strong>
+            <p class="small text-body-secondary mb-0 mt-1" style="white-space: pre-wrap;">
+              {{ selectedEvent()!.description }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+  </c-modal-body>
+  <c-modal-footer>
+    <button cButton color="secondary" size="sm" (click)="closeDetailModal()">Cerrar</button>
+    @if (isProfessional) {
+      <button cButton color="warning" size="sm" (click)="editSelectedEvent()">Editar</button>
+      <button cButton color="danger" size="sm" (click)="deleteSelectedEvent()">Eliminar</button>
+    }
+  </c-modal-footer>
+</c-modal>

@@ -1,0 +1,99 @@
+.calendar-week-header {
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--cui-body-secondary-bg);
+  border-color: var(--cui-border-color) !important;
+}
+
+.calendar-month-grid {
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--cui-border-color);
+  gap: 1px; // Grid lines
+}
+
+.calendar-day-cell {
+  min-height: 110px;
+  transition: background-color 0.15s ease;
+  background-color: var(--cui-body-bg);
+
+  &--empty {
+    background-color: var(--cui-tertiary-bg);
+    pointer-events: none;
+  }
+
+  &--today {
+    background-color: rgba(var(--cui-primary-rgb, 13, 110, 253), 0.04);
+  }
+
+  &:hover:not(.calendar-day-cell--empty) {
+    background-color: var(--cui-secondary-bg);
+  }
+}
+
+.day-number {
+  width: 26px;
+  height: 26px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--cui-body-color);
+
+  &--today {
+    background-color: var(--cui-primary);
+    color: #fff !important;
+    font-weight: 600;
+  }
+}
+
+/* Event Badges */
+.event-badge {
+  font-size: 0.7rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.12s ease;
+  border-left: 3px solid transparent;
+
+  &:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.92);
+  }
+
+  &--consulta {
+    background-color: rgba(0, 180, 216, 0.15);
+    color: #0077b6;
+    border-left-color: #0096c7;
+  }
+
+  &--tutoría {
+    background-color: rgba(114, 9, 183, 0.12);
+    color: #7209b7;
+    border-left-color: #7209b7;
+  }
+
+  &--clase {
+    background-color: rgba(40, 167, 69, 0.12);
+    color: #1e7e34;
+    border-left-color: #28a745;
+  }
+
+  &--tarea {
+    background-color: rgba(253, 126, 20, 0.12);
+    color: #d35400;
+    border-left-color: #fd7e14;
+  }
+}
+
+/* Modal form style adjustments */
+textarea {
+  resize: none;
+}
+
+/* Month & Year Picker Popover styling */
+.month-year-popover {
+  border-color: var(--cui-border-color);
+  background-color: var(--cui-body-bg);
+}
+
+.month-grid {
+  grid-template-columns: repeat(4, 1fr);
+}

@@ -21,6 +21,25 @@ namespace InclusiON.Infrastructure.Data.Repositories
             _logger = logger;
         }
 
+        private static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return text;
+            var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+            var stringBuilder = new System.Text.StringBuilder(capacity: normalizedString.Length);
+
+            for (int i = 0; i < normalizedString.Length; i++)
+            {
+                char c = normalizedString[i];
+                var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
+        }
+
         public async Task<PersonWithDisability?> FindPersonByIdentifierAsync(
             string identifier,
             CancellationToken cancellationToken = default)
@@ -29,19 +48,27 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             try
             {
-                // ILike para búsqueda case-insensitive en PostgreSQL.
-                var searchPattern = $"%{identifier}%";
+                var rawPattern = $"%{identifier}%";
+                var cleanPattern = $"%{RemoveDiacritics(identifier)}%";
+
                 return await _context.PersonsWithDisability
                     .Include(p => p.User)
                     .Include(p => p.LoginMethod)
                     .Include(p => p.SupervisorUser)
                     .AsNoTracking()
                     .Where(p => p.IsActive && p.User.IsActive &&
-                        (EF.Functions.ILike(p.FirstName, searchPattern) ||
-                         EF.Functions.ILike(p.LastName, searchPattern) ||
-                         EF.Functions.ILike(p.FirstName + " " + p.LastName, searchPattern) ||
-                         EF.Functions.ILike(p.User.UserName!, searchPattern) ||
-                         EF.Functions.ILike(p.User.Email!, searchPattern)))
+                        (EF.Functions.ILike(p.FirstName, rawPattern) ||
+                         EF.Functions.ILike(p.FirstName, cleanPattern) ||
+                         EF.Functions.ILike(p.LastName, rawPattern) ||
+                         EF.Functions.ILike(p.LastName, cleanPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, rawPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, cleanPattern) ||
+                         EF.Functions.ILike(p.LastName + " " + p.FirstName, rawPattern) ||
+                         EF.Functions.ILike(p.LastName + " " + p.FirstName, cleanPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, rawPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, cleanPattern) ||
+                         EF.Functions.ILike(p.User.Email!, rawPattern) ||
+                         EF.Functions.ILike(p.User.Email!, cleanPattern)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -61,18 +88,27 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             try
             {
-                var searchPattern = $"%{identifier}%";
+                var rawPattern = $"%{identifier}%";
+                var cleanPattern = $"%{RemoveDiacritics(identifier)}%";
+
                 return await _context.PersonsWithDisability
                     .Include(p => p.User)
                     .Include(p => p.LoginMethod)
                     .Include(p => p.SupervisorUser)
                     .AsNoTracking()
                     .Where(p => p.IsActive && p.User.IsActive &&
-                        (EF.Functions.ILike(p.FirstName, searchPattern) ||
-                         EF.Functions.ILike(p.LastName, searchPattern) ||
-                         EF.Functions.ILike(p.FirstName + " " + p.LastName, searchPattern) ||
-                         EF.Functions.ILike(p.User.UserName!, searchPattern) ||
-                         EF.Functions.ILike(p.User.Email!, searchPattern)))
+                        (EF.Functions.ILike(p.FirstName, rawPattern) ||
+                         EF.Functions.ILike(p.FirstName, cleanPattern) ||
+                         EF.Functions.ILike(p.LastName, rawPattern) ||
+                         EF.Functions.ILike(p.LastName, cleanPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, rawPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, cleanPattern) ||
+                         EF.Functions.ILike(p.LastName + " " + p.FirstName, rawPattern) ||
+                         EF.Functions.ILike(p.LastName + " " + p.FirstName, cleanPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, rawPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, cleanPattern) ||
+                         EF.Functions.ILike(p.User.Email!, rawPattern) ||
+                         EF.Functions.ILike(p.User.Email!, cleanPattern)))
                     .OrderBy(p => p.FirstName)
                     .ThenBy(p => p.LastName)
                     .Take(limit)
@@ -94,18 +130,24 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             try
             {
-                // ILike para búsqueda case-insensitive en PostgreSQL.
-                var searchPattern = $"%{identifier}%";
+                var rawPattern = $"%{identifier}%";
+                var cleanPattern = $"%{RemoveDiacritics(identifier)}%";
+
                 return await _context.Professionals
                     .Include(p => p.User)
                     .AsNoTracking()
                     .Where(p => p.IsActive &&
-                        (EF.Functions.ILike(p.FirstName, searchPattern) ||
-                         EF.Functions.ILike(p.LastName, searchPattern) ||
-                         EF.Functions.ILike(p.FirstName + " " + p.LastName, searchPattern) ||
-                         EF.Functions.ILike(p.User.UserName!, searchPattern) ||
-                         EF.Functions.ILike(p.User.Email!, searchPattern) ||
-                         EF.Functions.ILike(p.LicenseNumber!, searchPattern)))
+                        (EF.Functions.ILike(p.FirstName, rawPattern) ||
+                         EF.Functions.ILike(p.FirstName, cleanPattern) ||
+                         EF.Functions.ILike(p.LastName, rawPattern) ||
+                         EF.Functions.ILike(p.LastName, cleanPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, rawPattern) ||
+                         EF.Functions.ILike(p.FirstName + " " + p.LastName, cleanPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, rawPattern) ||
+                         EF.Functions.ILike(p.User.UserName!, cleanPattern) ||
+                         EF.Functions.ILike(p.User.Email!, rawPattern) ||
+                         EF.Functions.ILike(p.User.Email!, cleanPattern) ||
+                         EF.Functions.ILike(p.LicenseNumber!, rawPattern)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -124,17 +166,23 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             try
             {
-                // ILike para búsqueda case-insensitive en PostgreSQL.
-                var searchPattern = $"%{identifier}%";
+                var rawPattern = $"%{identifier}%";
+                var cleanPattern = $"%{RemoveDiacritics(identifier)}%";
+
                 return await _context.FamilyRepresentatives
                     .Include(f => f.User)
                     .AsNoTracking()
                     .Where(f => f.IsActive &&
-                        (EF.Functions.ILike(f.FirstName, searchPattern) ||
-                         EF.Functions.ILike(f.LastName, searchPattern) ||
-                         EF.Functions.ILike(f.FirstName + " " + f.LastName, searchPattern) ||
-                         EF.Functions.ILike(f.User.UserName!, searchPattern) ||
-                         EF.Functions.ILike(f.User.Email!, searchPattern)))
+                        (EF.Functions.ILike(f.FirstName, rawPattern) ||
+                         EF.Functions.ILike(f.FirstName, cleanPattern) ||
+                         EF.Functions.ILike(f.LastName, rawPattern) ||
+                         EF.Functions.ILike(f.LastName, cleanPattern) ||
+                         EF.Functions.ILike(f.FirstName + " " + f.LastName, rawPattern) ||
+                         EF.Functions.ILike(f.FirstName + " " + f.LastName, cleanPattern) ||
+                         EF.Functions.ILike(f.User.UserName!, rawPattern) ||
+                         EF.Functions.ILike(f.User.UserName!, cleanPattern) ||
+                         EF.Functions.ILike(f.User.Email!, rawPattern) ||
+                         EF.Functions.ILike(f.User.Email!, cleanPattern)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
