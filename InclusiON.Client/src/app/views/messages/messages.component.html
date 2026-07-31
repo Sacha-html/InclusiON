@@ -74,7 +74,7 @@
       </div>
 
       <!-- Historial de Conversación (Scrollable) -->
-      <div class="flex-grow-1 p-3 overflow-auto chat-history d-flex flex-column gap-3 bg-body-secondary">
+      <div #chatHistory class="flex-grow-1 p-3 overflow-auto chat-history d-flex flex-column gap-3 bg-body-secondary">
         @if (loadingChat()) {
           <div class="d-flex align-items-center justify-content-center h-100">
             <c-spinner color="primary" />

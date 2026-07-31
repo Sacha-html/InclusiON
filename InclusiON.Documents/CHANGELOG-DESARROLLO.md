@@ -51,12 +51,13 @@ Este documento detalla las nuevas funcionalidades, mejoras técnicas, refactoriz
 
 ---
 
-## 3. Rediseño del Canal de Comunicación (WhatsApp Web Layout)
+## 3. Rediseño del Canal de Comunicación (WhatsApp Web Layout) y Auto-Scroll
 
 * **Interfaz de Mensajería:** Se reemplazó el listado plano de correos por una interfaz moderna inspirada en WhatsApp Web en `messages.component`:
   - Panel izquierdo con barra de búsqueda rápida de contactos y conversaciones recientes ordenadas cronológicamente.
   - Burbujas de mensajes con alineación interactiva izquierda (recibidos) y derecha (enviados) con su respectiva estampa de hora.
   - Caja inferior para envío instantáneo de mensajes.
+* **Auto-Scroll UX:** Se implementó una referencia de plantilla (`#chatHistory`) combinada con un efecto reactivo de Angular (`effect`). Cada vez que la lista de mensajes (`chatMessages`) se actualiza por la carga de un chat, el envío de una respuesta o la recepción de un nuevo mensaje, el contenedor realiza automáticamente un desplazamiento suave hacia el final de la ventana de conversación.
 
 ---
 
