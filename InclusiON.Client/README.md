@@ -81,6 +81,7 @@ src/
 | `CatalogsService` | Catálogos del sistema (métodos de login, colores de avatar, etc.) |
 | `CatalogAdminService` | Gestión de catálogos desde admin |
 | `AccessibilityService` | Preferencias de accesibilidad del usuario |
+| `CalendarService` | CRUD eventos de calendario (consultas, tutorías, clases, tareas) |
 | `ToastService` | Notificaciones toast |
 
 ---
@@ -123,6 +124,13 @@ export const environment = {
 | `/activities/{id}/similar` | GET | Actividades similares (búsqueda semántica) |
 | `/activities/{id}/compatible-persons` | GET | Personas compatibles para una actividad |
 | `/persons/{id}/recommended-activities` | GET | Actividades recomendadas para una persona |
+| `/my/activity-assignments` | GET | Asignaciones activas del alumno autenticado |
+| `/activity-assignments/{id}` | GET | Obtener asignación con ContentJson + TemplateTypeCode (para el player) |
+| `/activity-assignments/{id}/responses/start` | POST | Iniciar intento de actividad |
+| `/activity-assignments/{id}/responses/{responseId}/complete` | POST | Completar intento (desbloquea siguiente nivel del roadmap) |
+| `/calendar` | GET | Listar eventos de calendario (filtrado por rol) |
+| `/calendar` | POST | Crear o actualizar evento de calendario |
+| `/calendar/{id}` | DELETE | Eliminar evento de calendario |
 
 ---
 
@@ -168,6 +176,8 @@ $warning:            #FFC107;
 $high-contrast-bg:   #000000;
 $high-contrast-text: #FFFFFF;
 ```
+
+> **Nota de desarrollo**: `withViewTransitions()` está deshabilitado en entornos `!environment.production` para evitar el `InvalidStateError` que surge al combinarlo con Hot Module Replacement (HMR) de Angular 20.
 
 ---
 

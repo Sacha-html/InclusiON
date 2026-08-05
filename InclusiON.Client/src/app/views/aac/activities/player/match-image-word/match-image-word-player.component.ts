@@ -16,7 +16,7 @@ interface MatchState {
   standalone: true,
   imports: [PlayerIntroComponent, PlayerResultComponent],
   templateUrl: './match-image-word-player.component.html',
-  styleUrl:    './match-image-word-player.component.scss',
+  styleUrl: './match-image-word-player.component.scss',
 })
 export class MatchImageWordPlayerComponent extends PlayerBaseComponent {
 
@@ -24,27 +24,33 @@ export class MatchImageWordPlayerComponent extends PlayerBaseComponent {
 
   // Columnas barajadas independientemente
   shuffledImages = signal<MatchPair[]>([]);
-  shuffledWords  = signal<MatchPair[]>([]);
+  shuffledWords = signal<MatchPair[]>([]);
 
   // Selección en curso
   selectedImageId = signal<string | null>(null);
-  selectedWordId  = signal<string | null>(null);
+  selectedWordId = signal<string | null>(null);
 
   // Pares confirmados: imageId → wordId
   matches = signal<MatchState[]>([]);
 
   get content(): MatchImageWordContent {
-    try { return JSON.parse(this.assignment.contentJson) as MatchImageWordContent; }
+    try {
+      const parsed = JSON.parse(this.assignment.contentJson);
+      return { instruction: parsed.instruction ?? '', pairs: parsed.pairs ?? [] };
+    }
     catch { return { instruction: '', pairs: [] }; }
   }
 
   get hint(): string {
-    return `Uní cada imagen con su palabra. Hay ${this.content.pairs.length} pares.`;
+    const count = this.content.pairs?.length ?? 0;
+    return count > 0
+      ? `Uní cada imagen con su palabra. Hay ${count} pares.`
+      : 'Esta actividad aún no tiene contenido configurado.';
   }
 
   // IDs ya emparejados
   readonly matchedImageIds = computed(() => new Set(this.matches().map(m => m.imageId)));
-  readonly matchedWordIds  = computed(() => new Set(this.matches().map(m => m.wordId)));
+  readonly matchedWordIds = computed(() => new Set(this.matches().map(m => m.wordId)));
 
   // Score: % de pares correctos (imageId === wordId en nuestro modelo: el id es igual en imagen y palabra)
   readonly score = computed(() => {
@@ -82,7 +88,7 @@ export class MatchImageWordPlayerComponent extends PlayerBaseComponent {
   }
 
   private tryMatch(): void {
-    const imgId  = this.selectedImageId();
+    const imgId = this.selectedImageId();
     const wordId = this.selectedWordId();
     if (!imgId || !wordId) return;
 
@@ -104,7 +110,7 @@ export class MatchImageWordPlayerComponent extends PlayerBaseComponent {
   onFinish(): void {
     this.finishActivity({
       successPercentage: this.score(),
-      timeSpentSeconds:  this.elapsedSeconds,
+      timeSpentSeconds: this.elapsedSeconds,
     });
   }
 
@@ -121,7 +127,7 @@ export class MatchImageWordPlayerComponent extends PlayerBaseComponent {
   resultMessage(): string {
     const s = this.score();
     if (s === 100) return '¡Uniste todos los pares correctamente!';
-    if (s >= 50)   return `Acertaste ${s}% de los pares. ¡Seguí practicando!`;
+    if (s >= 50) return `Acertaste ${s}% de los pares. ¡Seguí practicando!`;
     return `Acertaste ${s}% de los pares. Intentá de nuevo.`;
   }
 

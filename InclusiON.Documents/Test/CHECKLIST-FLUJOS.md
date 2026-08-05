@@ -37,13 +37,11 @@
 
 ## 2. Portal Administrador
 
-### 2.1 Instituciones
-- [ ] Crear institución con nombre único → aparece en listado
-- [ ] Intentar nombre duplicado → error de validación
-- [ ] Editar institución → cambios persisten
-- [ ] Ver detalle de institución → muestra admins y profesionales asignados
-- [ ] Dar de baja institución → estado cambia a inactivo
-- [ ] Intentar dar de baja con profesionales activos → error 409 con mensaje claro
+### ~~2.1 Instituciones~~ — ⚠️ ELIMINADO DEL DASHBOARD ADMIN
+> **Decisión de modelo de negocio:** El administrador *es* la institución. La UI de gestión de instituciones fue removida del dashboard en la sesión del 2026-08-02.
+> Los endpoints de backend `/api/institutions` siguen existiendo. Si en el futuro se necesita gestión multi-institución, se deberá reimplementar la UI.
+> Los ítems de navegación `Instituciones` y `Mis Instituciones` fueron eliminados del sidebar.
+
 
 ### 2.2 Profesionales
 - [ ] Crear profesional → email con contraseña temporal enviado; estado Pendiente
@@ -168,6 +166,8 @@
 - [ ] Actividades bloqueadas no son seleccionables
 - [ ] Actividades desbloqueadas son seleccionables
 - [ ] Actividades completadas muestran checkmark / porcentaje
+- [ ] Actividades completadas son seleccionables para volver a jugar (re-intento)
+- [ ] Al completar o salir de la actividad en el player, se redirige de nuevo a Mi Camino (/app/roadmap)
 
 ### 4.2 Resolver actividad — SELECT_FIGURE
 - [ ] Pantalla de intro con instrucciones → botón Empezar
@@ -290,9 +290,54 @@
 | Autenticación | 10 | | |
 | Admin | 27 | | |
 | Profesional | 33 | | |
-| AAC | 16 | | |
+| AAC | 18 | | |
 | Familiar | 14 | | |
 | Accesibilidad | 9 | | |
 | Seguridad | 7 | | |
 | Smoke test E2E | 12 | | |
-| **Total** | **128** | | |
+| Sprint 10 | 20 | | |
+| **Total** | **150** | | |
+
+---
+
+## Sprint 10 — Roadmap Estándar, Players y Modelo de Negocio
+
+### 10.1 Roadmap Estándar — Carga de Players y Reintentos
+
+- [ ] Alumno nuevo recibe roadmap de 10 niveles automáticamente al ser creado
+- [ ] Nivel 1 aparece desbloqueado; niveles 2–10 aparecen bloqueados
+- [ ] Al abrir el Nivel 1, el player carga correctamente el juego (no muestra "actividad no disponible")
+- [ ] Cada uno de los 10 niveles carga su tipo de player correcto (OPTION_SELECT, ORDER_SEQUENCE, CLASSIFY, PICTOGRAM_SELECT, MATCH_IMAGE_WORD, GLOBAL_READING)
+- [ ] Alumno completa nivel con ≥60% → el siguiente nivel se desbloquea automáticamente
+- [ ] Alumno completa nivel con <60% → el siguiente nivel permanece bloqueado; puede reintentar
+- [ ] Actividad completada en el roadmap (Nivel 1) se puede volver a jugar y genera un nuevo intento limpio
+- [ ] Al finalizar o salir del reproductor, redirige a Mi Camino (/app/roadmap)
+
+**Casos de borde:**
+- [ ] Servidor reiniciado → actividades con `ContentJson = '{}'` se parchean; las que ya tienen contenido no cambian
+- [ ] Alumno completa el Nivel 10 → no aparece ningún nivel adicional
+- [ ] Tipo de actividad sin player (SOUND_RECOGNITION) → nunca aparece en el roadmap estándar
+
+### 10.2 Animación de Celebración
+
+- [ ] Alumno completa actividad con resultado "Éxito" → aparece overlay con medalla, brillo y confetti
+- [ ] Alumno completa con resultado "Parcial" (<60%) → NO aparece la animación de celebración
+- [ ] Alumno completa con resultado "Fallido" → NO aparece la animación de celebración
+- [ ] Después de la animación, los botones de la pantalla de resultado siguen siendo accesibles
+
+### 10.3 Perfil Persona — Sin Calendario
+
+- [ ] El home del alumno (AAC) NO muestra el botón "Ver Calendario"
+- [ ] La barra de navegación inferior del alumno NO muestra el ítem "Calendario"
+- [ ] Acceder manualmente a `/app/calendar` redirige o muestra 404
+- [ ] El profesional SÍ ve su calendario en `/pro/calendar` sin cambios
+- [ ] El familiar SÍ ve su calendario en `/family/calendar` sin cambios
+
+### 10.4 Dashboard Admin — Sin Módulo de Instituciones
+
+- [ ] El sidebar del admin NO muestra el ítem "Instituciones"
+- [ ] El sidebar del admin NO muestra el ítem "Mis Instituciones"
+- [ ] Acceder manualmente a `/admin/institutions` redirige o muestra 404
+- [ ] Acceder manualmente a `/admin/my-institutions` redirige o muestra 404
+- [ ] El admin SÍ ve: Dashboard, Familiares, Invitaciones, Personas, Profesionales, Usuarios, Reportes, Catálogos
+- [ ] `GET /api/institutions` (backend) sigue respondiendo correctamente

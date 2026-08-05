@@ -11,7 +11,7 @@ import { inject } from '@angular/core';
   standalone: true,
   imports: [PlayerIntroComponent, PlayerResultComponent],
   templateUrl: './order-sequence-player.component.html',
-  styleUrl:    './order-sequence-player.component.scss',
+  styleUrl: './order-sequence-player.component.scss',
 })
 export class OrderSequencePlayerComponent extends PlayerBaseComponent {
 
@@ -24,12 +24,18 @@ export class OrderSequencePlayerComponent extends PlayerBaseComponent {
   selectedIndex = signal<number | null>(null);
 
   get content(): OrderSequenceContent {
-    try { return JSON.parse(this.assignment.contentJson) as OrderSequenceContent; }
+    try {
+      const parsed = JSON.parse(this.assignment.contentJson);
+      return { instruction: parsed.instruction ?? '', items: parsed.items ?? [] };
+    }
     catch { return { instruction: '', items: [] }; }
   }
 
   get hint(): string {
-    return `Ordená los ${this.content.items.length} pasos en la secuencia correcta.`;
+    const count = this.content.items?.length ?? 0;
+    return count > 0
+      ? `Ordená los ${count} pasos en la secuencia correcta.`
+      : 'Esta actividad aún no tiene contenido configurado.';
   }
 
   // Score: porcentaje de ítems que quedaron en la posición correcta
@@ -94,7 +100,7 @@ export class OrderSequencePlayerComponent extends PlayerBaseComponent {
   onFinish(): void {
     this.finishActivity({
       successPercentage: this.score(),
-      timeSpentSeconds:  this.elapsedSeconds,
+      timeSpentSeconds: this.elapsedSeconds,
     });
   }
 
@@ -108,7 +114,7 @@ export class OrderSequencePlayerComponent extends PlayerBaseComponent {
   resultMessage(): string {
     const s = this.score();
     if (s === 100) return '¡Ordenaste todos los pasos correctamente!';
-    if (s >= 50)   return `Tuviste ${s}% de aciertos. ¡Seguí practicando!`;
+    if (s >= 50) return `Tuviste ${s}% de aciertos. ¡Seguí practicando!`;
     return `Tuviste ${s}% de aciertos. Intentá de nuevo.`;
   }
 }

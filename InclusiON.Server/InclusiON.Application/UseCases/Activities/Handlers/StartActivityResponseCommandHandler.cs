@@ -41,7 +41,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             if (assignment.PersonId != command.PersonId)
                 return ApiResponse<ActivityAssignmentResponse>.Forbidden();
 
-            if (assignment.StatusId == AssignmentStatuses.Completada || assignment.StatusId == AssignmentStatuses.Cancelada)
+            if (assignment.StatusId == AssignmentStatuses.Cancelada)
                 return ApiResponse<ActivityAssignmentResponse>.Conflict(
                     ErrorCode.BusinessRuleViolation,
                     $"No se puede iniciar una actividad en estado {assignment.Status?.Name ?? assignment.StatusId.ToString()}.");
@@ -58,7 +58,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             await _repository.CreateResponseAsync(response, cancellationToken);
 
-            if (assignment.StatusId == AssignmentStatuses.Pendiente)
+            if (assignment.StatusId == AssignmentStatuses.Pendiente || assignment.StatusId == AssignmentStatuses.Completada)
             {
                 assignment.StatusId  = AssignmentStatuses.EnProgreso;
                 assignment.UpdatedAt = _dateTime.UtcNow;

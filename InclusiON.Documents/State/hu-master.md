@@ -1,6 +1,6 @@
 # InclusiON — HU Master (Única Fuente de Verdad)
 
-**Última actualización:** 2026-05-16
+**Última actualización:** 2026-08-02
 **Fuente Jira:** `Sprints/Jira-CSV.csv` (export 2026-05)
 **Reemplaza:** `HU_ESTADO.md` y `progreso-hu.md`
 
@@ -32,7 +32,7 @@
 
 ## Resumen
 
-> Actualizado 2026-05-16. IN-135 completo: backend + servicio Angular + barra de búsqueda con toggle IA + debounce 400ms.
+> Actualizado 2026-08-04. Habilitación de reintentos en "Mi Camino" y redirección a roadmap al finalizar actividades.
 
 | Sprint | HUs | ✅ | 🔵 | 🔧 | ⏳ |
 |--------|-----|----|----|----|----|
@@ -44,9 +44,10 @@
 | Sprint 5 | 2 | — | 2 | — | — |
 | Sprint 6 | 7 | — | 7 | — | — |
 | Sprint 7 | 7 | — | 4 | — | 3 |
+| Sprint 10 | 16 | 16 | — | — | — |
 | Sin sprint — implementado | 30 | — | 30 | — | — |
 | Sin sprint — pendiente | 18 | — | — | 1 | 17 |
-| **Total** | **145** | **7** | **117** | **1** | **20** |
+| **Total** | **161** | **23** | **117** | **1** | **20** |
 
 ---
 
@@ -305,3 +306,26 @@ Features implementadas sin Story formal en Jira:
 | IN-11 | Resolución de Actividades | Sin sprint (Backlog) |
 | IN-12 | Motor Adaptativo (MDA) y Reportes | Sin sprint (Backlog) |
 | IN-13 | Mensajería y Portal Familiar | Sin sprint (Backlog) |
+
+---
+
+## Sprint 10 — Roadmap Estándar, Players y Modelo de Negocio (Agosto 2026)
+
+| IN | Historia | Estado | HU |
+|----|----------|--------|----|
+| IN-200 | Implementar RoadmapInitializer con 10 actividades estándar | ✅ | HU-15 |
+| IN-201 | Definir ContentJson real por tipo de player en cada actividad | ✅ | HU-15 |
+| IN-202 | Patch de actividades existentes con ContentJson vacío al arranque | ✅ | HU-15 |
+| IN-203 | Corrección de TemplateTypeId para actividades 3, 6 y 10 | ✅ | HU-15 |
+| IN-204 | Fix: players muestran "actividad no disponible" (ContentJson vacío) | ✅ | HU-15 |
+| IN-205 | Fix: withViewTransitions() causa InvalidStateError con HMR en dev | ✅ | HU-15 |
+| IN-206 | Animación de medalla dorada al completar actividad exitosamente | ✅ | HU-16 |
+| IN-207 | Auto-scroll al final del chat al enviar o recibir mensajes | ✅ | HU-16 |
+| IN-208 | Fix sembrado: supervisor de Benjamín Castro | ✅ | — |
+| IN-209 | Fix sembrado: Laura González omitida en tabla Professionals | ✅ | — |
+| IN-210 | Actualización System.Security.Cryptography.Xml → 10.0.10 (CVE) | ✅ | — |
+| IN-211 | Actualización QuestPDF → 2025.4.0 | ✅ | — |
+| IN-212 | Eliminar Calendario del perfil Persona (modelo de negocio) | ✅ | HU-16 |
+| IN-213 | Eliminar módulo de Instituciones del dashboard Admin (modelo de negocio) | ✅ | HU-16 |
+| IN-214 | Permitir repetir actividades completadas desde "Mi Camino" y backend | ✅ | HU-16 |
+| IN-215 | Redireccionar a la pantalla de "Mi Camino" (/app/roadmap) al finalizar | ✅ | HU-16 |

@@ -97,9 +97,6 @@
                 [ngClass]="{ 'info-right': node.side === 'left', 'info-left': node.side === 'right' }"
               >
                 <span class="node-title">{{ node.activity.activityTitle }}</span>
-                <span class="node-difficulty" [attr.aria-label]="'Dificultad ' + node.activity.difficultyLevel + ' de 5'">
-                  {{ difficultyStars(node.activity.difficultyLevel) }}
-                </span>
                 @if (node.status === 'locked' && node.activity.unlockThresholdPercent > 0) {
                   <span class="node-hint">Necesitas {{ node.activity.unlockThresholdPercent }}% en la anterior</span>
                 }

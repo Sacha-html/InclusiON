@@ -1,0 +1,1278 @@
+﻿{
+    "value":  [
+                  {
+                      "_id":  39207,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "skin":  false,
+                      "hair":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "cultural building",
+                                         "cinema",
+                                         "signaling system"
+                                     ],
+                      "synsets":  [
+
+                                  ],
+                      "tags":  [
+                                   "place",
+                                   "building",
+                                   "culture",
+                                   "scenic art",
+                                   "cinema",
+                                   "show",
+                                   "communication",
+                                   "signaling system"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=cine al aire libre; type=2; hasLocution=False; plural=cines al aire libre}"
+                                   ],
+                      "created":  "2024-06-05T08:45:26.524Z",
+                      "lastUpdated":  "2024-06-05T09:28:23.668Z",
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  11653,
+                      "created":  "2010-01-13T18:04:47.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "categorization"
+                               ],
+                      "synsets":  [
+                                      "15162377-n",
+                                      "01067611-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-11-23T11:48:53.056Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=tiempo libre; type=2; meaning=Tiempo que tiene uno mismo para dedicarse al ocio.; plural=tiempos libres; hasLocution=True}",
+                                       "@{keyword=ocio; type=2; meaning=m. Tiempo libre de una persona.; plural=; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "leisure",
+                                         "categorization"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  7.5
+                  },
+                  {
+                      "_id":  36431,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "00456623-n"
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de piedra papel o tijera; type=2; hasLocution=False}"
+                                   ],
+                      "created":  "2019-12-15T16:19:24.905Z",
+                      "lastUpdated":  "2020-06-24T11:07:31.881Z",
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  5.833333333333334
+                  },
+                  {
+                      "_id":  37449,
+                      "schematic":  true,
+                      "sex":  false,
+                      "violence":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "skin":  true,
+                      "hair":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "00456623-n"
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=Las cuatro esquinas; hasLocution=False; type=1}",
+                                       "@{keyword=juego de las 4 esquinas; type=2; hasLocution=False}"
+                                   ],
+                      "created":  "2021-03-16T16:03:24.109Z",
+                      "lastUpdated":  "2021-03-18T12:09:57.568Z",
+                      "score":  6
+                  },
+                  {
+                      "_id":  3421,
+                      "created":  "2008-02-05T11:08:17.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "game",
+                                   "board game"
+                               ],
+                      "synsets":  [
+                                      "00507071-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2021-02-06T06:35:23.607Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=juego de la Oca; type=2; meaning=Juego de mesa con 63 casillas en las que aparece una oca cada nueve, y a lo largo de las cuales se mueve una ficha de acuerdo con la tirada de los dados.; plural=juegos de la Oca; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "board game",
+                                         "core vocabulary-leisure"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  true,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  11474,
+                      "created":  "2009-12-28T18:19:51.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "adjective",
+                                   "qualifying adjective"
+                               ],
+                      "synsets":  [
+                                      "02426474-v",
+                                      "01065188-a",
+                                      "01069383-a"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-12-27T08:44:06.394Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=libre; type=4; meaning=adj. Que no está preso, ni encerrado.; plural=libres; hasLocution=True}",
+                                       "@{keyword=liberar; type=3; meaning=tr. Hacer que alguien o algo quede libre.; plural=; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "qualifying adjective"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  11
+                  },
+                  {
+                      "_id":  29945,
+                      "created":  "2014-03-14T13:34:03.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "00145844-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-05T14:34:37.339Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Juego de persecución en el que uno de los participantes \"se la queda\" o \"la paga\" y su objetivo consiste en pillar a otro para quedarse libre y así sucesivamente.; plural=juegos del pilla pilla; keyword=juego del pilla pilla; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  29947,
+                      "created":  "2014-03-14T13:48:02.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "04620912-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-05T14:34:47.074Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Juego de habilidad con el yo-yo que consiste en hacerlo subir y bajar, realizando distintos malabarismos sin que se detenga o deje de girar.; plural=juegos del yo-yo; keyword=juego del yo-yo; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  29949,
+                      "created":  "2014-03-14T13:51:38.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "04461511-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-05T14:34:27.155Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Juego de habilidad que consiste en lanzar al suelo la peonza, enrollada en una cuerda, haciéndola rodar sobre sí misma sobre la punta metálica del extremo.; plural=juegos de la peonza; keyword=juego de la peonza; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  34157,
+                      "created":  "2018-09-25T12:21:52.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-04T15:50:13.801Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Juego formado por grupos de dos integrantes, uno de pie y el otro haciendo de carretilla (se pone de rodillas y apoya las palmas de las manos sobre el suelo). Cuando se da la señal los grupos parten hacia la primera llegada. Allí invierten su posición y parten hacia la segunda llegada donde vuelven a cambiar su posición y se dirigen hacia la última llegada.; plural=juegos de la carretilla; keyword=juego de la carretilla; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  39595,
+                      "schematic":  true,
+                      "sex":  false,
+                      "violence":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "skin":  true,
+                      "hair":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "recreational facility",
+                                         "entertainment facility"
+                                     ],
+                      "synsets":  [
+
+                                  ],
+                      "tags":  [
+                                   "place",
+                                   "facility",
+                                   "recreational facility",
+                                   "leisure"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=atracción; type=2; hasLocution=False; plural=atracciones}",
+                                       "@{keyword=caída libre; type=2; hasLocution=False}"
+                                   ],
+                      "created":  "2025-05-21T07:32:38.664Z",
+                      "lastUpdated":  "2026-04-16T08:32:22.552Z",
+                      "score":  7.5
+                  },
+                  {
+                      "_id":  35231,
+                      "created":  "2019-03-27T16:45:16.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "toy"
+                               ],
+                      "synsets":  [
+
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-07T15:41:03.559Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=Juego de puntería consistente en lanzar unas anillas (desde una distancia correcta establecida para los niños y adultos) a unos palos que están colocados al suelo con una estructura de madera. Cada uno de estos palos tiene una puntuación. El objetivo es conseguir cuantos más puntos mejor.; plural=juegos de las anillas; keyword=juego de las anillas; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "toy"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  36404,
+                      "schematic":  true,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "00487681-n"
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de las sillas; type=2; hasLocution=False}"
+                                   ],
+                      "created":  "2019-12-15T15:59:40.156Z",
+                      "lastUpdated":  "2020-06-07T15:11:50.124Z",
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  29240,
+                      "created":  "2013-06-30T11:27:15.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "00910891-n",
+                                      "00431591-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-01T15:38:19.355Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. juego cooperativo en el que uno de los participantes se sitúa de pie en el centro del corro y los demás participantes le ayudan a girar sobre sí mismo hasta conseguir \"marearlo\".; plural=juegos de dar vueltas; keyword=juego de dar vueltas; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  36454,
+                      "schematic":  true,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "07487308-n"
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=sogatira; type=2; hasLocution=True}",
+                                       "@{keyword=juego de la soga; type=2; hasLocution=True}",
+                                       "@{keyword=tira y afloja; type=2; hasLocution=True}"
+                                   ],
+                      "created":  "2019-12-15T16:23:31.111Z",
+                      "lastUpdated":  "2020-06-07T15:11:23.844Z",
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  37067,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "verb",
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "01733312-v",
+                                      "02423786-v",
+                                      "02423521-v"
+                                  ],
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "verb",
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de falda; plural=juegos de falda; type=2; hasLocution=False}",
+                                       "@{keyword=cantar una nana; hasLocution=False; type=3}",
+                                       "@{keyword=jugar con el bebé; hasLocution=False; type=3}",
+                                       "@{keyword=entretener al bebé; hasLocution=False; type=3}"
+                                   ],
+                      "created":  "2020-10-20T14:20:32.250Z",
+                      "lastUpdated":  "2020-11-22T05:56:05.319Z",
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  37124,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego del Stop; hasLocution=False; type=2}"
+                                   ],
+                      "created":  "2020-11-09T18:00:44.661Z",
+                      "lastUpdated":  "2020-11-09T18:47:48.713Z",
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  39621,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "skin":  false,
+                      "hair":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game",
+                                         "educational material"
+                                     ],
+                      "synsets":  [
+
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game",
+                                   "education",
+                                   "educational material"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de los aros; type=2; hasLocution=False; plural=juegos de los aros}"
+                                   ],
+                      "created":  "2025-05-23T17:46:37.745Z",
+                      "lastUpdated":  "2025-06-04T07:20:01.710Z",
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  29937,
+                      "created":  "2014-03-14T13:18:58.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "00487369-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-07-14T06:14:26.400Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Juego colaborativo que consiste en lanzar una o varias canicas para intentar aproximarse a otras, golpearlas o introducirlas en un agujero.; plural=juegos de las canicas; keyword=juego de las canicas; hasLocution=False}",
+                                       "@{keyword=juego de las bolillas; hasLocution=False; plural=juegos de las bolillas; type=2}",
+                                       "@{keyword=juego de las bolitas; hasLocution=False; plural=juego de las bolitas; type=2}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  18.75
+                  },
+                  {
+                      "_id":  37604,
+                      "schematic":  true,
+                      "sex":  false,
+                      "violence":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "skin":  true,
+                      "hair":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "03893954-n",
+                                      "00431591-n"
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego del paracaídas; hasLocution=False; plural=juegos del paracaídas; type=2}"
+                                   ],
+                      "created":  "2021-05-30T10:08:07.922Z",
+                      "lastUpdated":  "2021-05-30T10:13:06.304Z",
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  25179,
+                      "created":  "2011-08-05T18:14:04.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "00456623-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2021-02-06T06:34:43.184Z",
+                      "schematic":  true,
+                      "keywords":  [
+                                       "@{keyword=juego del pañuelo; type=2; meaning=m. Juego infantil en el que se distribuyen los jugadores en dos grupos. En el centro se sitúa un niño con el pañuelo extendido. A una consigna, un niño de cada grupo echa a correr para coger el pañuelo y volver a su sitio de origen con el pañuelo y sin ser pillado por el contrario.; plural=; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game",
+                                         "core vocabulary-leisure"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  true,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  37066,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "verb",
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "02423521-v",
+                                      "02423786-v",
+                                      "04088393-n"
+                                  ],
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "verb",
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de falda; plural=juegos de falda; hasLocution=False; type=2}",
+                                       "@{keyword=cantar una nana; hasLocution=False; type=3}",
+                                       "@{keyword=jugar con el bebé; type=3; hasLocution=False}",
+                                       "@{keyword=entretener al bebé; type=3; hasLocution=False}"
+                                   ],
+                      "created":  "2020-10-20T14:20:32.250Z",
+                      "lastUpdated":  "2020-11-22T05:55:59.040Z",
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  36405,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "educational material",
+                                         "game",
+                                         "core vocabulary-miscellaneous"
+                                     ],
+                      "synsets":  [
+                                      "00431591-n"
+                                  ],
+                      "tags":  [
+                                   "education",
+                                   "educational material",
+                                   "leisure",
+                                   "game",
+                                   "core vocabulary"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juegos didácticos; type=2; hasLocution=False}",
+                                       "@{keyword=juego; hasLocution=True; type=2; plural=juegos}"
+                                   ],
+                      "created":  "2019-12-15T15:59:40.156Z",
+                      "lastUpdated":  "2021-06-15T16:38:54.529Z",
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  true,
+                      "aacColor":  false,
+                      "score":  11
+                  },
+                  {
+                      "_id":  22212,
+                      "created":  "2010-10-05T11:20:32.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "toy",
+                                   "education",
+                                   "educational material"
+                               ],
+                      "synsets":  [
+                                      "03912343-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-01T08:00:28.419Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=juego de los pinchitos; type=2; meaning=m. Tablero blanco agujereado en el que se encajan piezas de plástico de múltiples colores que disponen de un pincho que encaja en los agujeros y cuya combinación permite crear figuras y formas.\n\n; plural=juegos de los pinchitos; hasLocution=True}",
+                                       "@{keyword=pinchitos; type=2; meaning=m. Tablero blanco agujereado en el que se encajan piezas de plástico de múltiples colores que disponen de un pincho que encaja en los agujeros y cuya combinación permite crear figuras y formas.; plural=; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "toy",
+                                         "educational material"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  33990,
+                      "created":  "2018-07-22T13:28:48.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "toy"
+                               ],
+                      "synsets":  [
+                                      "00553134-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-01T14:51:56.956Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Capacidad del niño o niña para imitar situaciones de la vida real y ponerse en la piel de otras personas.; plural=; keyword=juego simbólico; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "toy"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  7.5
+                  },
+                  {
+                      "_id":  37154,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "00456623-n"
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de salto; hasLocution=False; type=2; plural=juegos de salto}"
+                                   ],
+                      "created":  "2020-11-18T16:04:19.029Z",
+                      "lastUpdated":  "2020-12-07T14:48:39.819Z",
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  37640,
+                      "schematic":  true,
+                      "sex":  false,
+                      "violence":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "skin":  true,
+                      "hair":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "disruptive behavior"
+                                     ],
+                      "synsets":  [
+                                      "05773412-n",
+                                      "00432833-n"
+                                  ],
+                      "tags":  [
+                                   "psychology",
+                                   "disruptive behavior"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=ausencia de juego simbólico; hasLocution=False; type=2}",
+                                       "@{keyword=falta de juego simbólico; hasLocution=False; type=2}"
+                                   ],
+                      "created":  "2021-06-10T07:09:15.881Z",
+                      "lastUpdated":  "2021-06-25T08:52:11.437Z",
+                      "score":  12.5
+                  },
+                  {
+                      "_id":  36647,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de la muralla; hasLocution=False; type=2}",
+                                       "@{keyword=juego de la araña; hasLocution=False; type=2}",
+                                       "@{keyword=Bulldog; hasLocution=False; type=1}"
+                                   ],
+                      "created":  "2020-02-26T11:23:41.585Z",
+                      "lastUpdated":  "2020-06-07T15:04:02.093Z",
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  12.5
+                  },
+                  {
+                      "_id":  29048,
+                      "created":  "2013-06-28T12:35:38.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "00456623-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-11T07:06:35.297Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Juegos no competitivos que pertenecen a la tradición lúdica y oral. Se desarrollan entre dos o más jugadores, generalmente siguiendo un patrón libre o establecido de palmadas con ambas manos al tiempo que se canta o recita una rima o retahíla.; plural=juegos de palmas; keyword=juego de palmas; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  37055,
+                      "schematic":  true,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "verb",
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "01733312-v",
+                                      "02423786-v",
+                                      "02423521-v"
+                                  ],
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "verb",
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de falda; hasLocution=False; plural=juegos de falda; type=2}",
+                                       "@{keyword=cantar una nana; hasLocution=False; type=3}",
+                                       "@{keyword=jugar con el bebé; hasLocution=False; type=3}",
+                                       "@{keyword=entretener al bebé; hasLocution=False; type=3}"
+                                   ],
+                      "created":  "2020-09-25T21:25:38.828Z",
+                      "lastUpdated":  "2020-11-22T05:56:16.653Z",
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  32574,
+                      "created":  "2018-01-30T11:33:32.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "game",
+                                   "sport",
+                                   "categorization"
+                               ],
+                      "synsets":  [
+                                      "08014145-n",
+                                      "03418738-n",
+                                      "00524569-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2021-06-15T16:39:41.584Z",
+                      "schematic":  true,
+                      "keywords":  [
+                                       "@{type=2; meaning=Actividad física, ejercida como juego o competición, cuya práctica supone entrenamiento y sujeción a normas y reglas y en el que unos ganan y otros pierden.; plural=; keyword=juego y deporte; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "game",
+                                         "sport",
+                                         "categorization"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  29941,
+                      "created":  "2014-03-14T13:25:28.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "03553582-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-05T14:32:40.941Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Juego que consiste en hacer girar un aro alrededor de la cintura o de otro miembro del cuerpo como brazos o piernas. ; plural=juegos del hula hoop; keyword=juego del hula hoop; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  10368,
+                      "created":  "2009-11-13T12:40:59.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "expression",
+                                   "leisure",
+                                   "sport",
+                                   "toy"
+                               ],
+                      "synsets":  [
+                                      "07208256-n",
+                                      "00431591-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-12-06T06:24:08.174Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=¿qué juego quieres?; type=5; meaning=Expresión que sirve para averiguar el juego que prefiere la persona a quien se le pregunta.; plural=; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "expression",
+                                         "toy"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  29234,
+                      "created":  "2013-06-30T11:24:00.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "03893954-n",
+                                      "00431591-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-01T15:38:09.095Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=juego cooperativo para aprender a colaborar con los demás, en el que se utiliza como nexo de unión entre los participantes un paracaídas a los que los participantes se agarran en su extremo para ondearlo o voltear algunos objetos.; plural=juegos del paracaídas; keyword=juego del paracaídas; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  28885,
+                      "created":  "2013-06-19T20:28:48.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "place",
+                                   "building",
+                                   "catering establishment",
+                                   "hospitality industry",
+                                   "work",
+                                   "tertiary sector",
+                                   "feeding",
+                                   "food",
+                                   "gastronomy"
+                               ],
+                      "synsets":  [
+                                      "00099759-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-11-21T15:43:22.394Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{type=2; meaning=m. Tipo de restaurante universal. El servicio funciona pagando un precio fijo por el cual se puede comer todo lo que uno desee. Es común que en esta clase de establecimientos la bebida sea cobrada por separado, a un precio elevado. En algunos tenedores libre, sólo una porción de postre viene incluida en el precio fijo, aunque generalmente el postre también es ilimitado.; plural=buffets libres; keyword=buffet libre; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "catering establishment",
+                                         "hospitality industry",
+                                         "gastronomy"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  7.5
+                  },
+                  {
+                      "_id":  36676,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "toy",
+                                         "educational material"
+                                     ],
+                      "synsets":  [
+
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "toy",
+                                   "education",
+                                   "educational material"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de enroscar; hasLocution=False; type=2; plural=juegos de enroscar}"
+                                   ],
+                      "created":  "2020-02-26T11:34:54.631Z",
+                      "lastUpdated":  "2020-06-01T11:24:28.735Z",
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  11290,
+                      "created":  "2009-12-24T17:05:57.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-01T07:23:21.564Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=juego del pañuelo; type=2; meaning=m. Juego infantil en el que se distribuyen los jugadores en dos grupos. En el centro se sitúa un niño con el pañuelo extendido. A una consigna, un niño de cada grupo echa a correr para coger el pañuelo y volver a su sitio de origen con el pañuelo y sin ser pillado por el contrario.; plural=; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  9810,
+                      "created":  "2009-09-30T08:51:41.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "game",
+                                   "board game"
+                               ],
+                      "synsets":  [
+                                      "00503426-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2021-02-06T06:34:31.292Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=juegos; type=2; meaning= Actividad recreativa sometida a reglas en el que unos ganan y otros pierden.; plural=; hasLocution=True}",
+                                       "@{keyword=juego de mesa; type=2; meaning=Un juego de mesa es un juego que requiere una mesa para jugarse o un soporte similar y que es jugado generalmente por un grupo de personas alrededor de él. Aunque el azar puede ser una parte muy importante en este tipo de juegos, también los hay en los que son necesarios estrategia y razonamiento para poder jugar y en los que el azar no aparece. Por su naturaleza, en general los juegos de mesa no conllevan actividad física, aunque existen algunos que implican levantarse de la mesa y realizar actividades fuera de ésta ya sea por castigo o recompensa, en este caso estos serían juegos de mesa pero no limitados a la misma.; hasLocution=True; plural=juegos de mesa}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "board game",
+                                         "core vocabulary-leisure"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  true,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  4935,
+                      "created":  "2008-07-02T13:04:32.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "toy",
+                                   "education",
+                                   "educational material",
+                                   "core vocabulary"
+                               ],
+                      "synsets":  [
+                                      "03660621-n",
+                                      "02855782-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2024-12-09T11:39:26.994Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=bloques de construcción; type=2; meaning=Bloques de plástico interconectables. ; plural=; hasLocution=False}",
+                                       "@{keyword=construcciones; type=2; meaning=f. Juguete que consiste en bloques para construir.; plural=; hasLocution=True}",
+                                       "@{keyword=bloques; type=2; meaning=Piezas de plástico interconectables de juguete que simulan una construcción.; plural=; hasLocution=True}",
+                                       "@{keyword=juego de construcciones; type=2; meaning=Juego,generalmente de madera o plástico, para hacer construcciones.; plural=juegos construcciones; hasLocution=False}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "toy",
+                                         "educational material",
+                                         "core vocabulary-leisure"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  false,
+                      "aac":  true,
+                      "aacColor":  false,
+                      "score":  6.666666666666666
+                  },
+                  {
+                      "_id":  26150,
+                      "created":  "2011-12-26T16:12:47.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "synsets":  [
+                                      "00456623-n"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2021-02-06T06:37:38.742Z",
+                      "schematic":  true,
+                      "keywords":  [
+                                       "@{keyword=Veo veo; type=1; meaning=m. Juego de adivinanzas usualmente jugado por familias con niños pequeños, en parte para ayudarlos tanto en la observación como en la familiaridad con el alfabeto.; plural=; hasLocution=True}",
+                                       "@{keyword=juego del Veo Veo; type=2; meaning=m. Juego de adivinanzas usualmente jugado por familias con niños pequeños, en parte para ayudarlos tanto en la observación como en la familiaridad con el alfabeto.; plural=juegos del Veo Veo; hasLocution=True}"
+                                   ],
+                      "desc":  "",
+                      "categories":  [
+                                         "traditional game",
+                                         "core vocabulary-leisure"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  true,
+                      "aacColor":  false,
+                      "score":  6.25
+                  },
+                  {
+                      "_id":  38304,
+                      "schematic":  false,
+                      "sex":  false,
+                      "violence":  false,
+                      "aac":  false,
+                      "aacColor":  false,
+                      "skin":  false,
+                      "hair":  false,
+                      "downloads":  0,
+                      "categories":  [
+                                         "traditional game"
+                                     ],
+                      "synsets":  [
+                                      "07643087-n"
+                                  ],
+                      "tags":  [
+                                   "leisure",
+                                   "sport",
+                                   "traditional game"
+                               ],
+                      "keywords":  [
+                                       "@{keyword=juego de la rana; type=2; hasLocution=False}"
+                                   ],
+                      "created":  "2022-04-05T16:10:48.472Z",
+                      "lastUpdated":  "2022-04-05T16:50:05.598Z",
+                      "score":  6.25
+                  }
+              ],
+    "Count":  41
+}
