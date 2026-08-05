@@ -426,6 +426,16 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 | `/activities/{id}/similar` | GET | Actividades similares (búsqueda semántica) |
 | `/activities/{id}/compatible-persons` | GET | Personas compatibles para una actividad |
 | `/persons/{id}/recommended-activities` | GET | Actividades recomendadas para una persona |
+| `/my/activity-assignments` | GET | Asignaciones activas del alumno autenticado |
+| `/persons/{id}/activity-assignments` | GET | Asignaciones activas de una persona |
+| `/activity-assignments` | POST | Crear asignación de actividad |
+| `/activity-assignments/{id}` | GET | Obtener asignación con ContentJson y TemplateTypeCode |
+| `/activity-assignments/{id}/cancel` | PATCH | Cancelar asignación pendiente |
+| `/activity-assignments/{id}/responses/start` | POST | Iniciar intento de actividad (el alumno empieza a jugar) |
+| `/activity-assignments/{id}/responses/{responseId}/complete` | POST | Completar intento con resultados (desbloquea siguiente nivel) |
+| `/calendar` | GET | Listar eventos del calendario (filtrado por rol) |
+| `/calendar` | POST | Crear o actualizar evento de calendario |
+| `/calendar/{id}` | DELETE | Eliminar evento de calendario |
 
 ---
 
@@ -440,3 +450,5 @@ dotnet ef database update --project InclusiON.Data --startup-project InclusiON.A
 | profesional@test.com | Profesional | Estándar | Prof123! |
 | docente@test.com | Profesional | Estándar | Doc123! |
 | admin@inclusion.com | Admin | Estándar | Admin123! |
+
+> **Nota**: Al iniciar el backend, `DatabaseSeeder` corre `PatchStandardActivitiesContentAsync` que verifica y corrige el `ContentJson` de las 10 actividades estándar del roadmap si está vacío (`'{}'`). Esto garantiza que los players del cliente siempre tengan datos del juego.

@@ -167,15 +167,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'institutions',
-        data: { title: 'Instituciones' },
-        canActivate: [globalAdminGuard],
-        loadChildren: () =>
-          import('./views/admin/institutions/routes').then(
-            (m) => m.institutionRoutes,
-          ),
-      },
-      {
         path: 'catalogs/:type',
         data: { title: 'Catalogos' },
         loadComponent: () =>
@@ -198,14 +189,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./views/admin/invitations/invitations.component').then(
             (m) => m.InvitationsComponent,
-          ),
-      },
-      {
-        path: 'my-institutions',
-        data: { title: 'Mis Instituciones' },
-        loadComponent: () =>
-          import('./views/admin/admin-institutions/admin-institutions.component').then(
-            (m) => m.AdminInstitutionsComponent,
           ),
       },
       {

@@ -52,13 +52,12 @@ export class DefaultLayoutComponent implements OnInit {
     const isGlobal = this.authService.isGlobalAdmin();
 
     if (isGlobal) {
-      // Admin global: ve todo excepto "Mis Instituciones"
-      this.navItems = navItems.filter(item => item.url !== '/admin/my-institutions');
+      // Admin global: ve todo
+      this.navItems = navItems;
     } else {
-      // Admin institucional: no ve Instituciones, Administradores, Roles, ni seccion "Sistema"
-      const globalOnlyUrls = ['/admin/institutions', '/admin/roles', '/admin/admins'];
+      // Admin institucional: no ve Administradores, Roles ni seccion "Sistema"
+      const globalOnlyUrls = ['/admin/roles', '/admin/admins'];
       this.navItems = navItems.filter(item => {
-        // Filtrar la seccion "Sistema" (solo tiene items de admin global)
         if (item.title && item.name === 'Sistema') return false;
         const url = typeof item.url === 'string' ? item.url : '';
         return !globalOnlyUrls.includes(url);

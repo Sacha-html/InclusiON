@@ -32,14 +32,6 @@ export const aacRoutes: Routes = [
     data: { title: 'Mi Roadmap' }
   },
   {
-    path: 'calendar',
-    loadComponent: () =>
-      import('./calendar/aac-calendar.component').then(
-        (m) => m.AacCalendarComponent
-      ),
-    data: { title: 'Calendario' }
-  },
-  {
     path: 'talk',
     loadComponent: () =>
       import('./communication/aac-communication.component').then(

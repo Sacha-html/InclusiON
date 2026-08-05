@@ -1,4 +1,4 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, isDevMode } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
   provideRouter,
@@ -26,7 +26,7 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'top',
         anchorScrolling: 'enabled',
       }),
-      withViewTransitions(),
+      withViewTransitions({ skipInitialTransition: isDevMode() }),
       withHashLocation()
     ),
     provideHttpClient(withInterceptors([spinnerInterceptor, authInterceptor])),

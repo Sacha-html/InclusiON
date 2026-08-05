@@ -14,6 +14,7 @@ export type NodeStatus = 'locked' | 'available' | 'pending' | 'in-progress' | 'c
 
 export interface RoadmapNode {
   activity: RoadmapActivityResponse;
+  areaId: number;
   assignment?: ActivityAssignmentResponse;
   status: NodeStatus;
   side: 'left' | 'right';
@@ -50,9 +51,16 @@ export class AacRoadmapComponent implements OnInit {
       ...area,
       headerColor: area.color ?? '#5C6BC0',
       nodes: area.activities.map((act, idx) => {
-        const assignment = asns.find(a => a.activityId === act.activityId);
+        const matchingAssignments = asns.filter(a => a.activityId === act.activityId);
+        const assignment = matchingAssignments.sort((a, b) => {
+          if (a.status !== ActivityAssignmentStatus.Completada && b.status === ActivityAssignmentStatus.Completada) return -1;
+          if (a.status === ActivityAssignmentStatus.Completada && b.status !== ActivityAssignmentStatus.Completada) return 1;
+          return new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime();
+        })[0];
+
         return {
           activity:   act,
+          areaId:     area.id,
           assignment,
           status:     this.resolveStatus(act, assignment),
           side:       (idx % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
@@ -79,8 +87,27 @@ export class AacRoadmapComponent implements OnInit {
   }
 
   onNodeClick(node: RoadmapNode): void {
-    if (node.status === 'locked' || !node.assignment || node.status === 'completed') return;
-    this.router.navigate([AppRoutes.Aac.Activities, node.assignment.encryptedId]);
+    if (node.status === 'locked') return;
+
+    if (node.assignment) {
+      this.router.navigate([AppRoutes.Aac.Activities, node.assignment.encryptedId]);
+    } else if (node.activity.isUnlocked) {
+      const personId = this.roadmap()?.personId;
+      if (!personId) return;
+
+      this.loading.set(true);
+      this.roadmapService.assignFromRoadmap(personId, node.areaId, node.activity.id, {
+        isEvaluationActivity: false
+      }).subscribe({
+        next: (asn) => {
+          this.loading.set(false);
+          this.router.navigate([AppRoutes.Aac.Activities, asn.encryptedId]);
+        },
+        error: () => {
+          this.loading.set(false);
+        }
+      });
+    }
   }
 
   nodeLabel(node: RoadmapNode): string {
@@ -98,7 +125,7 @@ export class AacRoadmapComponent implements OnInit {
       case 'locked':      return `${title} - bloqueada`;
       case 'completed':   return `${title} - completada`;
       case 'in-progress': return `${title} - en progreso, tap para continuar`;
-      case 'available':   return `${title} - disponible pero no asignada aún`;
+      case 'available':   return `${title} - disponible, tap para iniciar`;
       default:            return `${title} - pendiente, tap para iniciar`;
     }
   }
@@ -114,7 +141,7 @@ export class AacRoadmapComponent implements OnInit {
 
   private resolveStatus(act: RoadmapActivityResponse, assignment?: ActivityAssignmentResponse): NodeStatus {
     if (!act.isUnlocked) return 'locked';
-    if (!assignment)     return 'available';
+    if (!assignment)     return 'pending';
     switch (assignment.status) {
       case ActivityAssignmentStatus.Completada:  return 'completed';
       case ActivityAssignmentStatus.EnProgreso:  return 'in-progress';

@@ -1,9 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { SelectFigureContent, SelectFigureItem } from '../player.models';
 import { PlayerBaseComponent } from '../player-base.component';
 import { PlayerIntroComponent } from '../components/player-intro.component';
 import { PlayerResultComponent } from '../components/player-result.component';
 import { PictogramCardComponent } from '../components/pictogram-card.component';
+import { AccessibilityService } from '@services/accessibility.service';
 
 type ItemState = 'none' | 'correct' | 'wrong' | 'reveal' | 'dimmed';
 
@@ -15,16 +16,23 @@ type ItemState = 'none' | 'correct' | 'wrong' | 'reveal' | 'dimmed';
   styleUrl: './select-figure-player.component.scss',
 })
 export class SelectFigurePlayerComponent extends PlayerBaseComponent {
+  private readonly a11y = inject(AccessibilityService);
 
   selectedItemId = signal<string | null>(null);
 
   get content(): SelectFigureContent {
-    try { return JSON.parse(this.assignment.contentJson) as SelectFigureContent; }
+    try {
+      const parsed = JSON.parse(this.assignment.contentJson);
+      return { instruction: parsed.instruction ?? '', correctItemId: parsed.correctItemId ?? '', items: parsed.items ?? [] };
+    }
     catch { return { instruction: '', correctItemId: '', items: [] }; }
   }
 
   get items(): SelectFigureItem[]  { return this.content.items; }
-  get hint(): string               { return `Hay ${this.items.length} opciones para elegir.`; }
+  get hint(): string {
+    const count = this.items?.length ?? 0;
+    return count > 0 ? `Hay ${count} opciones para elegir.` : 'Esta actividad aún no tiene contenido configurado.';
+  }
 
   get correctLabel(): string {
     const c = this.content;
@@ -40,6 +48,9 @@ export class SelectFigurePlayerComponent extends PlayerBaseComponent {
   // ── Fase playing ─────────────────────────────────────────────────────────
   selectItem(item: SelectFigureItem): void {
     if (this.selectedItemId() !== null) return;
+    if (item.label) {
+      this.a11y.speak(item.label);
+    }
     const correct = item.id === this.content.correctItemId;
     this.selectedItemId.set(item.id);
     this.isCorrect.set(correct);

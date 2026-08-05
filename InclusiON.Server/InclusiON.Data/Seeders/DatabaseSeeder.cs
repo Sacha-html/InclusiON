@@ -24,32 +24,41 @@ namespace InclusiON.Data.Seeders
             await SeedFamilyAsync(userManager, context);
             await SeedFiveAdditionalStudentsAndTutorsAsync(userManager, context);
 
-            // Inicializar Roadmap Estándar para todos los alumnos existentes
-            var students = await context.PersonsWithDisability.ToListAsync();
+            // Inicializar Roadmap Estándar para todos los alumnos existentes y resetear todo su progreso a Nivel 0
+            var students = await context.PersonsWithDisability.Include(p => p.User).ToListAsync();
             foreach (var student in students)
             {
-                // Limpiar cualquier roadmap anterior para asegurar que se regenere correctamente sin duplicados
-                var existingRoadmap = await context.PersonRoadmaps.FirstOrDefaultAsync(r => r.PersonId == student.Id);
-                if (existingRoadmap != null)
+                // 1. Borrar todas las respuestas de actividades (ActivityResponse) y asignaciones de la persona
+                var studentAssignments = await context.Set<ActivityAssignment>()
+                    .Where(a => a.PersonId == student.Id)
+                    .ToListAsync();
+                if (studentAssignments.Count > 0)
                 {
-                    context.PersonRoadmaps.Remove(existingRoadmap);
+                    var assignmentIds = studentAssignments.Select(a => a.Id).ToList();
+                    var responses = await context.Set<ActivityResponse>()
+                        .Where(r => assignmentIds.Contains(r.AssignmentId))
+                        .ToListAsync();
+                    if (responses.Count > 0)
+                    {
+                        context.Set<ActivityResponse>().RemoveRange(responses);
+                        await context.SaveChangesAsync();
+                    }
+
+                    context.Set<ActivityAssignment>().RemoveRange(studentAssignments);
                     await context.SaveChangesAsync();
                 }
 
-                // Limpiar cualquier asignación estándar anterior de la trayectoria
-                var skillArea = await context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria");
-                if (skillArea != null)
+                // 2. Borrar cualquier roadmap previo (PersonRoadmap, PersonRoadmapArea, PersonRoadmapActivity)
+                var existingRoadmaps = await context.PersonRoadmaps
+                    .Where(r => r.PersonId == student.Id)
+                    .ToListAsync();
+                if (existingRoadmaps.Count > 0)
                 {
-                    var standardAssignments = await context.Set<ActivityAssignment>()
-                        .Where(a => a.PersonId == student.Id && a.Activity.SkillAreaId == skillArea.Id)
-                        .ToListAsync();
-                    if (standardAssignments.Count > 0)
-                    {
-                        context.Set<ActivityAssignment>().RemoveRange(standardAssignments);
-                        await context.SaveChangesAsync();
-                    }
+                    context.PersonRoadmaps.RemoveRange(existingRoadmaps);
+                    await context.SaveChangesAsync();
                 }
 
+                // 3. Inicializar roadmap estándar a Nivel 0 (Nivel 1 desbloqueado y pendiente, niveles 2-10 bloqueados)
                 await RoadmapInitializerAccessor.InitializeStudentRoadmap(context, student.Id, student.SupervisorUserId, CancellationToken.None);
             }
         }
