@@ -17,11 +17,6 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-home' },
   },
   {
-    name: 'Instituciones',
-    url: AppRoutes.Admin.Institutions,
-    iconComponent: { name: 'cil-book' },
-  },
-  {
     name: 'Invitaciones',
     url: AppRoutes.Admin.Invitations,
     iconComponent: { name: 'cil-link' },
@@ -62,11 +57,6 @@ export const navItems: INavData[] = [
       { name: 'Tipos de Discapacidad',     url: AppRoutes.Admin.Catalogs.DisabilityTypes },
       { name: 'Tipos de Plantilla',        url: AppRoutes.Admin.Catalogs.TemplateTypes },
     ],
-  },
-  {
-    name: 'Mis Instituciones',
-    url: AppRoutes.Admin.MyInstitutions,
-    iconComponent: { name: 'cil-library' },
   },
   {
     title: true,

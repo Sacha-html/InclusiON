@@ -77,14 +77,14 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
     ref.changeDetectorRef.detectChanges();
 
     setTimeout(() => {
-      const container = this.playerHost.element.nativeElement;
+      const container = ref.location.nativeElement as HTMLElement;
       const heading = container.querySelector('[role="heading"], h1, h2, h3') as HTMLElement;
       heading?.focus();
     }, 100);
   }
 
   onCompleted(): void {
-    this.router.navigate([AppRoutes.Aac.Activities]);
+    this.router.navigate(['/app/roadmap']);
   }
 
   ngOnDestroy(): void {

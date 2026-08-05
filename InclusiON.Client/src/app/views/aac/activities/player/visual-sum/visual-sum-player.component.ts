@@ -20,7 +20,10 @@ export class VisualSumPlayerComponent extends PlayerBaseComponent {
   selectedOptionId = signal<string | null>(null);
 
   get content(): VisualSumContent {
-    try { return JSON.parse(this.assignment.contentJson) as VisualSumContent; }
+    try {
+      const parsed = JSON.parse(this.assignment.contentJson);
+      return { instruction: parsed.instruction ?? '', operandA: parsed.operandA ?? 0, operandB: parsed.operandB ?? 0, options: parsed.options ?? [] };
+    }
     catch { return { instruction: '', operandA: 0, operandB: 0, options: [] }; }
   }
 

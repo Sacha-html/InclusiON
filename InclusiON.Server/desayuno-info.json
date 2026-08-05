@@ -1,0 +1,98 @@
+﻿{
+    "value":  [
+                  {
+                      "_id":  4625,
+                      "created":  "2008-04-29T12:17:06.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "verb",
+                                   "event",
+                                   "feeding"
+                               ],
+                      "synsets":  [
+                                      "01188273-v"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-26T08:53:50.803Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=desayunar; type=3; meaning=intr. Tomar el desayuno.; plural=; hasLocution=True}"
+                                   ],
+                      "categories":  [
+                                         "verb",
+                                         "event",
+                                         "feeding"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false
+                  },
+                  {
+                      "_id":  7012,
+                      "created":  "2009-01-12T13:28:15.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "verb",
+                                   "event",
+                                   "feeding"
+                               ],
+                      "synsets":  [
+                                      "01188273-v"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-26T08:54:30.667Z",
+                      "schematic":  true,
+                      "keywords":  [
+                                       "@{keyword=desayunar; type=3; meaning=intr. Tomar el desayuno.; plural=; hasLocution=True}"
+                                   ],
+                      "categories":  [
+                                         "verb",
+                                         "event",
+                                         "feeding"
+                                     ],
+                      "violence":  false,
+                      "hair":  false,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false
+                  },
+                  {
+                      "_id":  28667,
+                      "created":  "2013-06-01T23:23:52.000Z",
+                      "downloads":  0,
+                      "tags":  [
+                                   "communication",
+                                   "language",
+                                   "verb",
+                                   "event",
+                                   "feeding"
+                               ],
+                      "synsets":  [
+                                      "01188273-v"
+                                  ],
+                      "sex":  false,
+                      "lastUpdated":  "2020-06-26T08:54:59.710Z",
+                      "schematic":  false,
+                      "keywords":  [
+                                       "@{keyword=desayunar; type=3; meaning=intr. Tomar el desayuno.; plural=; hasLocution=True}"
+                                   ],
+                      "categories":  [
+                                         "verb",
+                                         "event",
+                                         "feeding"
+                                     ],
+                      "violence":  false,
+                      "hair":  true,
+                      "skin":  true,
+                      "aac":  false,
+                      "aacColor":  false
+                  }
+              ],
+    "Count":  3
+}

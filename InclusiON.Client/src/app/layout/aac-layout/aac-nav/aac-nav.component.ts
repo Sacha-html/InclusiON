@@ -32,12 +32,6 @@ export class AacNavComponent {
       color: 'var(--a11y-nav-activities, #2196F3)'
     },
     {
-      path: AppRoutes.Aac.Calendar,
-      label: 'Calendario',
-      icon: 'cilCalendar',
-      color: 'var(--a11y-nav-calendar, #FF9800)'
-    },
-    {
       path: AppRoutes.Aac.Talk,
       label: 'Hablar',
       icon: 'cilChatBubble',

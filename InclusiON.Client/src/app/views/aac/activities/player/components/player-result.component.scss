@@ -1,0 +1,261 @@
+/* ═══════════════════════════════════════════════════════
+   MEDAL OVERLAY ANIMATIONS
+═══════════════════════════════════════════════════════ */
+@keyframes medal-drop {
+  0% {
+    transform: scale(0) rotate(-30deg) translateY(-60px);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.2) rotate(8deg) translateY(0);
+    opacity: 1;
+  }
+
+  80% {
+    transform: scale(0.9) rotate(-4deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes burst {
+  0% {
+    transform: scale(0);
+    opacity: 0.9;
+  }
+
+  60% {
+    transform: scale(1.4);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(180px) rotate(540deg) scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-10px);
+    opacity: 0.85;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   MEDAL STRUCTURE
+═══════════════════════════════════════════════════════ */
+.medal-overlay {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.medal-burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  margin-top: -60px;
+  margin-left: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFD700 0%, #FF8C00 50%, transparent 71%);
+  animation: burst 0.6s ease-out forwards;
+  z-index: 0;
+}
+
+.medal-circle {
+  position: relative;
+  z-index: 1;
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+  border-radius: 50%;
+  border: 4px solid #fff;
+  box-shadow:
+    0 0 0 3px #FFD700,
+    0 8px 24px rgba(255, 165, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: medal-drop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    float-up 2s ease-in-out 0.8s infinite alternate;
+}
+
+.medal-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONFETTI
+═══════════════════════════════════════════════════════ */
+.confetti-row {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confetti-fall 1.2s ease-in forwards;
+  animation-delay: 0s;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESULT LAYOUT
+═══════════════════════════════════════════════════════ */
+.player-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.result-icon {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.result-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+
+  &--success {
+    color: #2e7d32;
+  }
+
+  &--fail {
+    color: #c62828;
+  }
+}
+
+.result-score {
+  font-size: 2.4rem;
+  font-weight: 900;
+  margin: 0;
+  border-radius: 12px;
+  padding: 0.25rem 1rem;
+
+  &--success {
+    color: #2e7d32;
+    background: #e8f5e9;
+  }
+
+  &--fail {
+    color: #c62828;
+    background: #ffebee;
+  }
+}
+
+.result-msg {
+  font-size: 1.05rem;
+  color: #555;
+  margin: 0;
+  max-width: 320px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ACTION BUTTONS
+═══════════════════════════════════════════════════════ */
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: linear-gradient(135deg, #43a047, #2e7d32);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(46, 125, 50, 0.35);
+
+    &:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(46, 125, 50, 0.5);
+      transform: translateY(-1px);
+    }
+  }
+
+  &--secondary {
+    background: #f5f5f5;
+    color: #333;
+    border: 2px solid #ddd;
+
+    &:hover:not(:disabled) {
+      background: #eeeeee;
+    }
+  }
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

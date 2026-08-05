@@ -18,4 +18,5 @@ export const PLAYER_REGISTRY: Record<string, Type<any>> = {
   NUMERATION:       VisualSumPlayerComponent,       // numeración / suma visual
   OPTION_SELECT:    OptionSelectPlayerComponent,    // opción múltiple con texto + pictograma opcional
   GLOBAL_READING:   GlobalReadingPlayerComponent,   // lectura global: leer palabra, elegir imagen
+  SOUND_RECOGNITION: OptionSelectPlayerComponent,   // conciencia fonológica (usar opción múltiple)
 };

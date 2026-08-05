@@ -80,3 +80,56 @@ Este documento detalla las nuevas funcionalidades, mejoras técnicas, refactoriz
 
 * **Vulnerabilidad de Criptografía:** Se actualizó la dependencia de `System.Security.Cryptography.Xml` en todos los proyectos del backend a la versión estable no vulnerable `10.0.10`.
 * **Consistencia NuGet:** Se resolvió la discrepancia de paquetes mediante la actualización de `QuestPDF` a la versión `2025.4.0` en `InclusiON.Infrastructure`.
+
+---
+
+## 7. Corrección de Players de Actividades y Animación de Celebración
+
+### Diagnóstico y Corrección de Bug Crítico
+
+Las 10 actividades estándar del roadmap mostraban la pantalla del player pero sin ningún juego cargado. La causa raíz eran dos problemas simultáneos:
+* **`ContentJson` vacío (`'{}'`):** El `RoadmapInitializer` inicializaba los registros de `ActivityContent` con un JSON vacío, por lo que ningún player (CLASSIFY, ORDER_SEQUENCE, OPTION_SELECT, PICTOGRAM_SELECT) tenía datos del juego.
+* **`SOUND_RECOGNITION` sin player implementado:** La actividad 6 (Conciencia fonológica) usaba un `TemplateTypeCode` para el que no existe componente Angular en el `PLAYER_REGISTRY`, mostrando "Este tipo de actividad no está disponible" en lugar del juego.
+
+### Backend (.NET 10)
+* **`PatchStandardActivitiesContentAsync` en `DatabaseSeeder`:** Nuevo método de parche que corre automáticamente en cada arranque del backend. Detecta actividades estándar con `ContentJson = '{}'` y las actualiza con el JSON correcto compatible con cada player del frontend.
+* **Corrección de `TemplateTypeId`:** Actividades 3 (`Muchos/Pocos`), 6 (`Conciencia fonológica`) y 10 (`Encuentra el intruso`) migradas de `CLASSIFY`/`SOUND_RECOGNITION` a `OPTION_SELECT`, que sí tiene player disponible.
+* **`RoadmapInitializer`:** Se actualizó para que nuevos alumnos reciban `ContentJson` correcto desde el primer registro. Se añadió lógica de actualización de actividades existentes con JSON vacío.
+
+### Frontend (Angular)
+* **Fix de `InvalidStateError` con HMR:** `withViewTransitions()` en Angular 20 entra en conflicto con Hot Module Replacement en desarrollo. Se deshabilita condicionalmente en entornos `!environment.production` dentro de `app.config.ts`.
+* **Animación de medalla de celebración:** Al completar exitosamente una actividad del roadmap, el `player-result.component` muestra un overlay con animaciones CSS puras: caída de medalla dorada (`medal-drop`), explosión de brillo (`burst`) y 12 partículas de confetti multicolor. Sin dependencias externas.
+
+---
+
+## 8. Decisiones de Modelo de Negocio — Ajuste de Perfiles de Usuario
+
+### Contexto
+Revisión del modelo de negocio que derivó en la eliminación de funcionalidades de UI que no sumaban valor para los perfiles correspondientes. Los cambios son exclusivamente de frontend; el backend y la base de datos no se modificaron.
+
+### Frontend (Angular)
+
+**Eliminación del Calendario del perfil Persona (`/app/calendar`)**
+* Las personas con discapacidad tienen autonomía limitada y no necesitan gestionar su propio calendario — ese es un rol del profesional o familiar.
+* Se eliminó la ruta `/app/calendar` de `aac/routes.ts`.
+* Se eliminó el botón "Ver Calendario" del home del perfil Persona (`aac-home.component.html`).
+* Se eliminó el ítem "Calendario" de la barra de navegación inferior del layout AAC (`aac-nav.component.ts`).
+* El calendario sigue disponible sin cambios en los perfiles **Profesional** y **Familiar**.
+
+**Eliminación del módulo de Instituciones del dashboard Admin (`/admin/institutions`, `/admin/my-institutions`)**
+* El administrador del sistema *es* la institución. Gestionar instituciones desde adentro del dashboard no tiene sentido en el modelo de negocio actual (sistema mono-institución por tenant).
+* Se eliminaron los items `Instituciones` y `Mis Instituciones` del sidebar de navegación (`_nav.ts`).
+* Se eliminaron las rutas `/admin/institutions` y `/admin/my-institutions` de `app.routes.ts`.
+* Se simplificó la lógica de filtrado de navegación en `default-layout.component.ts`.
+* **Los endpoints de backend `/api/institutions` y el modelo de datos siguen existiendo** — solo se removió la UI de gestión.
+
+---
+
+## 9. Mejoras en "Mi Camino" (Roadmap) — Reintentos y Redirección de Flujo (Agosto 2026)
+
+### Backend (.NET 10)
+* **Re-ejecución de Actividades Completadas:** Se modificó `StartActivityResponseCommandHandler.cs` para permitir iniciar un nuevo intento (`StartResponse`) en asignaciones que ya tienen el estado `Completada`. Al hacerlo, la asignación se actualiza a `EnProgreso` y se genera un nuevo intento para guardar el progreso nuevo de manera limpia.
+
+### Frontend (Angular)
+* **Habilitación de Clic en Nodos Completados:** En `aac-roadmap.component.ts`, se eliminó la restricción en la acción `onNodeClick` que bloqueaba el clic en actividades completadas (`node.status === 'completed'`). Ahora el alumno puede hacer clic en cualquier actividad desbloqueada del mapa (sea pendiente, en progreso o completada) para jugarla de nuevo.
+* **Redirección al Roadmap al finalizar:** En `activity-player-shell.component.ts`, se cambió el destino de redirección en `onCompleted()` para que, al finalizar el juego o presionar volver en caso de error, el alumno regrese a la pantalla de "Mi Camino" (`/app/roadmap`) en lugar del catálogo general de actividades (`/app/activities`).

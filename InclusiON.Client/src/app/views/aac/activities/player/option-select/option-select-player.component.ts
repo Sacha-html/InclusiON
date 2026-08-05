@@ -20,12 +20,18 @@ export class OptionSelectPlayerComponent extends PlayerBaseComponent {
   selectedOptionId = signal<string | null>(null);
 
   get content(): OptionSelectContent {
-    try { return JSON.parse(this.assignment.contentJson) as OptionSelectContent; }
+    try {
+      const parsed = JSON.parse(this.assignment.contentJson);
+      return { instruction: parsed.instruction ?? '', question: parsed.question ?? '', options: parsed.options ?? [], correctOptionId: parsed.correctOptionId ?? '' };
+    }
     catch { return { instruction: '', question: '', options: [], correctOptionId: '' }; }
   }
 
   get options(): OptionSelectOption[] { return this.content.options; }
-  get hint(): string { return `Hay ${this.options.length} opciones para elegir.`; }
+  get hint(): string {
+    const count = this.options?.length ?? 0;
+    return count > 0 ? `Hay ${count} opciones para elegir.` : 'Esta actividad aún no tiene contenido configurado.';
+  }
 
   get correctText(): string {
     const c = this.content;
@@ -59,7 +65,7 @@ export class OptionSelectPlayerComponent extends PlayerBaseComponent {
   onFinish(): void {
     this.finishActivity({
       successPercentage: this.isCorrect() ? 100 : 0,
-      timeSpentSeconds:  this.elapsedSeconds,
+      timeSpentSeconds: this.elapsedSeconds,
     });
   }
 

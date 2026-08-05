@@ -1,44 +1,50 @@
 <div class="player-result" role="region" aria-label="Resultado de la actividad" aria-live="assertive">
+
   @if (success) {
-    <div class="result-icon result-icon--success" aria-hidden="true">🎉</div>
-    <h2 class="result-title result-title--success">¡Muy bien!</h2>
+  <!-- Medal & confetti overlay -->
+  <div class="medal-overlay" aria-hidden="true">
+    <div class="medal-burst"></div>
+    <div class="medal-circle">
+      <span class="medal-emoji">🏅</span>
+    </div>
+    <div class="confetti-row">
+      @for (item of confettiItems; track item) {
+      <span class="confetti-piece" [style.animation-delay]="(item * 0.09) + 's'" [style.left]="(item * 9 + 2) + '%'"
+        [style.background]="confettiColors[item % confettiColors.length]"></span>
+      }
+    </div>
+  </div>
+
+  <h2 class="result-title result-title--success">¡Muy bien!</h2>
   } @else {
-    <div class="result-icon result-icon--fail" aria-hidden="true">💪</div>
-    <h2 class="result-title result-title--fail">¡Casi!</h2>
+  <div class="result-icon result-icon--fail" aria-hidden="true">💪</div>
+  <h2 class="result-title result-title--fail">¡Casi!</h2>
   }
 
   @if (score !== null) {
-    <p class="result-score" [class.result-score--success]="success" [class.result-score--fail]="!success">
-      {{ score }}%
-    </p>
+  <p class="result-score" [class.result-score--success]="success" [class.result-score--fail]="!success">
+    {{ score }}%
+  </p>
   }
 
   @if (message) {
-    <p class="result-msg">{{ message }}</p>
+  <p class="result-msg">{{ message }}</p>
   }
 
   <div class="result-actions">
-    <button
-      class="action-btn action-btn--primary"
-      [disabled]="loading"
-      (click)="finish.emit()"
-    >
+    <button class="action-btn action-btn--primary" [disabled]="loading" (click)="finish.emit()">
       @if (loading) {
-        <span class="btn-spinner" aria-hidden="true"></span>
-        Guardando...
+      <span class="btn-spinner" aria-hidden="true"></span>
+      Guardando...
       } @else {
-        ✓ Finalizar
+      ✓ Finalizar
       }
     </button>
 
     @if (canRetry) {
-      <button
-        class="action-btn action-btn--secondary"
-        [disabled]="loading"
-        (click)="retry.emit()"
-      >
-        <span aria-hidden="true">🔄</span> Intentar de nuevo
-      </button>
+    <button class="action-btn action-btn--secondary" [disabled]="loading" (click)="retry.emit()">
+      <span aria-hidden="true">🔄</span> Intentar de nuevo
+    </button>
     }
   </div>
 </div>
