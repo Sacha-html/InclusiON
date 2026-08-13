@@ -206,3 +206,25 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
 * **Depuración y UI:**
   - Removida la opción redundante *"Todas las Aulas"* en la vista del profesional.
   - Agregados logs descriptivos de consola (`console.log`) para diagnosticar la estructura de datos en runtime.
+
+---
+
+## 14. Refactorización de Accesibilidad y Autonomía de Alumnos (PIN y Asistido) (Agosto 2026)
+
+### Backend (.NET 10)
+* **Restricción de Login por Email en Alumnos:**
+  - `LoginCommandHandler.cs`: Agregada validación que rechaza el acceso por email/contraseña para el rol `PersonWithDisability`, devolviendo `ErrorCode.RoleNotAllowedForLogin` con el mensaje *"Los alumnos no pueden iniciar sesión con email y contraseña."*.
+  - `VisualStandardLoginCommandHandler.cs`: Inhabilitado el acceso visual estándar por contraseña para personas con discapacidad.
+  - `UpdateLoginMethodCommandHandler.cs`: Prohibida la reasignación del método `STANDARD` (`LoginMethodId = 1`) para alumnos.
+  - `DatabaseSeeder.cs`: Configurado el alumno de prueba Juan con `LoginMethodId = 2` (PIN) y PIN `"1234"`.
+* **Migración de Base de Datos:**
+  - Creada la migración EF Core `20260813190000_MigrateStudentLoginMethodsToPin.cs` y el script SQL `migrate_students_login_method.sql` para actualizar automáticamente a todos los alumnos existentes que tenían login por email (`LoginMethodId = 1` o `NULL`) hacia `LoginMethodId = 2` (PIN) y PIN por defecto `1234`.
+
+### Frontend (Angular)
+* **Login de Familiares:**
+  - `identify-user.component.ts` e `.html`: Actualizado el flujo para `userType === 'FAMILY'` para solicitar explícitamente el correo electrónico ("Escribe tu email...", "Escribe tu email", "Tu email").
+* **Formulario ABM de Alumnos y Validaciones Dinámicas:**
+  - `new.component.ts`: Filtrado el selector de métodos de inicio de sesión eliminando la opción "Email" (`STANDARD`), dejando disponibles únicamente "PIN" y "Asistido".
+  - **Regla Reactiva de Validación:** Al seleccionar "PIN" (`id === 2`), el campo PIN pasa a ser estrictamente obligatorio (`Validators.required` y `Validators.pattern(/^\d{4}$/)`) y se habilita. Al elegir "Asistido", se remueven las reglas de validación, se limpia el valor y se deshabilita/oculta.
+  - `change-login-method-modal.component.ts` y `login-method-selector.component.ts`: Excluida la opción "Email" del listado de métodos seleccionables en el modal de cambio de método de acceso.
+

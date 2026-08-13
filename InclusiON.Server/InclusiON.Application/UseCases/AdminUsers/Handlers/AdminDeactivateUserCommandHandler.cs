@@ -19,6 +19,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IFamilyRepository _familyRepository;
+        private readonly IReportsRepository _reportsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AdminDeactivateUserCommandHandler> _logger;
         private readonly IAccessAuditLogger _audit;
@@ -30,6 +31,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             IProfessionalsRepository professionalsRepository,
             IPersonsRepository personsRepository,
             IFamilyRepository familyRepository,
+            IReportsRepository reportsRepository,
             IUnitOfWork unitOfWork,
             ILogger<AdminDeactivateUserCommandHandler> logger,
             IAccessAuditLogger audit,
@@ -40,6 +42,7 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             _professionalsRepository = professionalsRepository;
             _personsRepository = personsRepository;
             _familyRepository = familyRepository;
+            _reportsRepository = reportsRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _audit = audit;
@@ -72,6 +75,18 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             if (primaryRole == RoleNames.Professional)
             {
+                var pro = await _professionalsRepository.GetByUserIdAsync(user.Id, cancellationToken);
+                if (pro is not null)
+                {
+                    var pendingReportsCount = await _reportsRepository.GetPendingReportsCountByProfessionalAsync(pro.Id, cancellationToken);
+                    if (pendingReportsCount > 0)
+                    {
+                        return ApiResponse<object>.Conflict(
+                            ErrorCode.HasPendingReports,
+                            "Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.");
+                    }
+                }
+
                 var dependentPersonsCount = await _professionalsRepository.GetDependentAssistedLoginPersonsCountAsync(user.Id, cancellationToken);
 
                 if (dependentPersonsCount > 0)

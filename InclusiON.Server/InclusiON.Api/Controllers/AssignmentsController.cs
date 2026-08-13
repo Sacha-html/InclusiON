@@ -20,13 +20,16 @@ namespace InclusiON.Api.Controllers
     {
         private readonly IHttpContextService _httpContextService;
         private readonly IResourceAuthorizationService _resourceAuthz;
+        private readonly ILogger<AssignmentsController> _logger;
 
         public AssignmentsController(
             IHttpContextService httpContextService,
-            IResourceAuthorizationService resourceAuthz)
+            IResourceAuthorizationService resourceAuthz,
+            ILogger<AssignmentsController> logger)
         {
             _httpContextService = httpContextService;
             _resourceAuthz      = resourceAuthz;
+            _logger             = logger;
         }
 
         #region Professional-Person Assignments
@@ -46,6 +49,16 @@ namespace InclusiON.Api.Controllers
 
             var query = new GetPersonsByProfessionalQuery(professionalId);
             var result = await handler.HandleAsync(query, cancellationToken);
+
+            if (result.Data is not null)
+            {
+                _logger.LogInformation(
+                    "GetPersonsByProfessional for {ProfId}: returned {Count} persons. Classrooms: {ClassroomNames}",
+                    professionalId,
+                    result.Data.Count,
+                    string.Join("; ", result.Data.Select(p => $"{p.PersonFullName} -> ClassroomId={p.ClassroomId}, ClassroomName={p.ClassroomName ?? "NULL"}")));
+            }
+
             return result.ToActionResult();
         }
 

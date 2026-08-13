@@ -19,15 +19,22 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
         private readonly IProfessionalsRepository _proRepo = Substitute.For<IProfessionalsRepository>();
         private readonly IPersonsRepository _personRepo = Substitute.For<IPersonsRepository>();
         private readonly IFamilyRepository _familyRepo = Substitute.For<IFamilyRepository>();
+        private readonly IReportsRepository _reportsRepo = Substitute.For<IReportsRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IAccessAuditLogger _audit = Substitute.For<IAccessAuditLogger>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+
+        public AdminDeactivateUserCommandHandlerTests()
+        {
+            _reportsRepo.GetPendingReportsCountByProfessionalAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+                        .Returns(0);
+        }
 
         private static readonly Guid TargetId = Guid.NewGuid();
         private static readonly Guid AdminId = Guid.NewGuid();
 
         private AdminDeactivateUserCommandHandler BuildSut() =>
-            new(_identity, _tokens, _proRepo, _personRepo, _familyRepo, _uow,
+            new(_identity, _tokens, _proRepo, _personRepo, _familyRepo, _reportsRepo, _uow,
                 NullLogger<AdminDeactivateUserCommandHandler>.Instance, _audit, _dateTime);
 
         private static AdminDeactivateUserCommand Cmd(Guid? target = null, Guid? admin = null) =>
@@ -142,6 +149,27 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
 
             family.User.IsActive.Should().BeFalse();
             await _familyRepo.Received(1).UpdateAsync(family, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ActiveProfessional_WithPendingReports_ReturnsHasPendingReports()
+        {
+            var user = ActiveUser();
+            var innerUser = new User { Id = TargetId, IsActive = true };
+            var pro = new Professional
+                { Id = Guid.NewGuid(), UserId = TargetId, User = innerUser };
+
+            _identity.FindByIdAsync(TargetId).Returns(user);
+            _identity.GetRolesAsync(user).Returns(new List<string> { "Professional" });
+            _proRepo.GetByUserIdAsync(TargetId, Arg.Any<CancellationToken>()).Returns(pro);
+            _reportsRepo.GetPendingReportsCountByProfessionalAsync(pro.Id, Arg.Any<CancellationToken>())
+                        .Returns(5);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.HasPendingReports);
+            result.Message.Should().Contain("informes pendientes");
         }
     }
 }

@@ -218,8 +218,8 @@ namespace InclusiON.Data.Seeders
                     Surname = "Lopez",
                     Email = "juan@test.com",
                     Password = "Juan123!",
-                    Pin = (string?)null,
-                    LoginMethodId = 1, // STANDARD (password)
+                    Pin = "1234",
+                    LoginMethodId = 2, // PIN
                     AvatarColor = AvatarColors.DefaultPerson,
                     SupervisorUserId = (Guid?)null,
                     PersonId = Guid.Parse("00000000-0000-0000-0000-000000000101")

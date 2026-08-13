@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Telemetry;
@@ -88,9 +89,18 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.InvalidCredentials);
             }
 
+            var userRoles = await _identityService.GetRolesAsync(user);
+            if (userRoles.Any(r => string.Equals(r, RoleNames.PersonWithDisability, StringComparison.OrdinalIgnoreCase)))
+            {
+                _logger.LogWarning("Login rejected for student {Email}: email login not allowed for PERSON role", command.Email);
+                _telemetryService.RecordLogin("role_not_allowed", null);
+                return ApiResponse<LoginResponse>.ErrorResult(
+                    ErrorCode.RoleNotAllowedForLogin,
+                    "Los alumnos no pueden iniciar sesión con email y contraseña.");
+            }
+
             if (command.AllowedRoles is not null && command.AllowedRoles.Count > 0)
             {
-                var userRoles = await _identityService.GetRolesAsync(user);
                 if (!userRoles.Any(r => command.AllowedRoles.Contains(r, StringComparer.OrdinalIgnoreCase)))
                 {
                     _logger.LogWarning(

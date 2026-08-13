@@ -17,12 +17,19 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
     {
         private readonly IProfessionalsRepository  _prosRepo   = Substitute.For<IProfessionalsRepository>();
         private readonly IRefreshTokensRepository  _tokenRepo  = Substitute.For<IRefreshTokensRepository>();
+        private readonly IReportsRepository        _reportsRepo = Substitute.For<IReportsRepository>();
         private readonly IHttpContextService       _httpCtx    = Substitute.For<IHttpContextService>();
         private readonly IUnitOfWork               _uow        = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider         _dateTime   = Substitute.For<IDateTimeProvider>();
 
+        public DeactivateProfessionalCommandHandlerTests()
+        {
+            _reportsRepo.GetPendingReportsCountByProfessionalAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+                        .Returns(0);
+        }
+
         private DeactivateProfessionalCommandHandler BuildSut() =>
-            new(_prosRepo, _tokenRepo, _httpCtx, _uow,
+            new(_prosRepo, _tokenRepo, _reportsRepo, _httpCtx, _uow,
                 NullLogger<DeactivateProfessionalCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid ProfId  = Guid.NewGuid();
@@ -120,6 +127,24 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.InvalidOperation);
             result.Message.Should().Contain("supervisor exclusivo");
+        }
+
+        // ── Con reportes pendientes ──────────────────────────────────────────
+
+        [Fact]
+        public async Task HandleAsync_WithPendingReports_ReturnsHasPendingReports()
+        {
+            var professional = AProfessional();
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(professional);
+            _httpCtx.GetCurrentUserId().Returns(AdminId);
+            _reportsRepo.GetPendingReportsCountByProfessionalAsync(professional.Id, Arg.Any<CancellationToken>())
+                        .Returns(5);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.HasPendingReports);
+            result.Message.Should().Contain("informes pendientes");
         }
     }
 }
