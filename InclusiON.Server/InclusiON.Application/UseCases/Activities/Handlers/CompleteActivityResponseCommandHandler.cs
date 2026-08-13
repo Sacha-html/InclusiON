@@ -130,53 +130,52 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             // Single save — all mutations committed atomically
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Ajuste adaptativo — fire and forget, solo si la actividad esta en roadmap
-            if (roadmapEntry?.Id > 0)
+            // Ejecutar la creación de los trabajos de fondo de forma secuencial y segura
+            try
             {
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        var prof = await _professionalsRepository.GetByIdAsync(
-                            assignment.AssignedByProfessionalId, CancellationToken.None);
-                        await _backgroundJobs.CreateAsync(
-                            JobTypes.AdaptiveAdjustment,
-                            JsonSerializer.Serialize(new
-                            {
-                                PersonRoadmapActivityId = roadmapEntry.Id,
-                                ActivityResponseId      = response.Id,
-                                AssignmentId            = assignment.Id,
-                                ProfessionalUserId      = prof?.UserId.ToString() ?? string.Empty
-                            }),
-                            maxRetries: 3);
-                    }
-                    catch { /* fire and forget */ }
-                });
-            }
+                var prof = await _professionalsRepository.GetByIdAsync(
+                    assignment.AssignedByProfessionalId, cancellationToken);
+                var professionalUserId = prof?.UserId.ToString() ?? string.Empty;
 
-            // Notificar al profesional — fire and forget
-            _ = Task.Run(async () =>
-            {
-                try
+                // Ajuste adaptativo - solo si la actividad está en el roadmap
+                if (roadmapEntry?.Id > 0)
                 {
-                    var prof = await _professionalsRepository.GetByIdAsync(
-                        assignment.AssignedByProfessionalId, CancellationToken.None);
-                    if (prof is not null)
-                    {
-                        await _backgroundJobs.CreateAsync(
-                            JobTypes.Push,
-                            JsonSerializer.Serialize(new NotificationPayload
-                            {
-                                UserId    = prof.UserId.ToString(),
-                                Title     = "Actividad completada",
-                                Message   = $"Una persona completó una actividad asignada por vos ({command.SuccessPercentage:F0}% de éxito).",
-                                ActionUrl = "/#/pro/persons"
-                            }),
-                            maxRetries: 3);
-                    }
+                    await _backgroundJobs.CreateAsync(
+                        JobTypes.AdaptiveAdjustment,
+                        JsonSerializer.Serialize(new
+                        {
+                            PersonRoadmapActivityId = roadmapEntry.Id,
+                            ActivityResponseId      = response.Id,
+                            AssignmentId            = assignment.Id,
+                            ProfessionalUserId      = professionalUserId
+                        }),
+                        maxRetries: 3,
+                        cancellationToken: cancellationToken);
                 }
-                catch { /* fire and forget */ }
-            });
+
+                // Notificar al profesional
+                if (prof is not null)
+                {
+                    var studentName = assignment.Person != null ? $"{assignment.Person.FirstName} {assignment.Person.LastName}" : "Un alumno";
+                    var activityTitle = assignment.Activity != null ? assignment.Activity.Title : "una actividad";
+
+                    await _backgroundJobs.CreateAsync(
+                        JobTypes.Push,
+                        JsonSerializer.Serialize(new NotificationPayload
+                        {
+                            UserId    = professionalUserId,
+                            Title     = "Actividad completada",
+                            Message   = $"{studentName} completó la actividad '{activityTitle}' ({command.SuccessPercentage:F0}% de éxito).",
+                            ActionUrl = "/#/pro/persons"
+                        }),
+                        maxRetries: 3,
+                        cancellationToken: cancellationToken);
+                }
+            }
+            catch (Exception)
+            {
+                // Silent catch para asegurar la robustez de la respuesta principal
+            }
 
             var updated = await _repository.GetByIdAsync(command.AssignmentId, cancellationToken);
 

@@ -19,6 +19,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.ActivityAssignments
                 .Include(a => a.Status)
+                .Include(a => a.Person)
                 .Include(a => a.Activity)
                     .ThenInclude(a => a.Content)
                         .ThenInclude(c => c!.TemplateType)

@@ -1,6 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AppRoutes } from '@shared/constants/app-routes';
 import { ProfessionalsService, AssignmentsService, ActivitiesService, FamilyService, ToastService } from '@services';
 import { MessagesService } from '@services/messages.service';
 import {
@@ -68,6 +70,7 @@ import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avat
   styleUrl: './evaluations.component.scss'
 })
 export class EvaluationsComponent implements OnInit {
+  private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly activitiesService = inject(ActivitiesService);
@@ -425,5 +428,9 @@ export class EvaluationsComponent implements OnInit {
         this.toastService.error('Error al enviar las métricas.');
       }
     });
+  }
+
+  navigateToNewActivity(): void {
+    this.router.navigate([AppRoutes.Pro.ActivityNew]);
   }
 }
