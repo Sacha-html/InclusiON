@@ -106,10 +106,6 @@ export class ListComponent implements OnInit {
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
         { action: 'reset-password', label: 'Resetear', icon: 'cilReload', visible: (item) => item.status === 'Approved' },
-        { action: 'history', label: 'Historial', icon: 'cilHistory' },
-        { action: 'persons', label: 'Personas', icon: 'cilPeople' },
-        { action: 'institutions', label: 'Instituciones', icon: 'cilBook' },
-        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.status === 'Approved' },
         { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.status === 'Approved' },
         { action: 'reactivate', label: 'Reactivar', icon: 'cilReload', visible: (item) => item.status !== 'Approved' },
       ],
