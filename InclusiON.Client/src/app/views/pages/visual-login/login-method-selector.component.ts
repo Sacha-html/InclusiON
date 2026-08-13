@@ -71,7 +71,7 @@ export class LoginMethodSelectorComponent implements OnInit {
     this.authService.getLoginMethods().subscribe({
       next: (response) => {
         if (response.success) {
-          this.loginMethods = response.data;
+          this.loginMethods = (response.data || []).filter(m => m.code !== 'STANDARD' && m.id !== 1);
           if (this.currentLoginMethodId) {
             this.selectedMethod = this.loginMethods.find(m => m.id === this.currentLoginMethodId) || null;
           }

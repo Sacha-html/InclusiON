@@ -61,7 +61,7 @@ export class IdentifyUserComponent implements OnInit {
       case 'PROFESSIONAL':
         return 'Escribe tu nombre o email...';
       case 'FAMILY':
-        return 'Escribe tu nombre...';
+        return 'Escribe tu email...';
       default:
         return 'Escribe tu nombre...';
     }
@@ -70,7 +70,7 @@ export class IdentifyUserComponent implements OnInit {
   onIdentify(): void {
     const trimmed = this.identifier.trim();
     if (!trimmed) {
-      this.errorMessage = 'Por favor, escribe tu nombre';
+      this.errorMessage = this.userType === 'FAMILY' ? 'Por favor, escribe tu email' : 'Por favor, escribe tu nombre';
       return;
     }
     if (trimmed.length < MIN_IDENTIFIER_LENGTH) {

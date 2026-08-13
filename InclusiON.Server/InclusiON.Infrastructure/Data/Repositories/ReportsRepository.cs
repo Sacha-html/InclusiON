@@ -48,7 +48,6 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string? professionalId,
             string? reportTypeId,
             bool? isActive,
-            bool? onlyDeactivatedProfessionals,
             string? status,
             DateTime? dateFrom,
             DateTime? dateTo,
@@ -65,13 +64,6 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(r => r.ReportType)
                 .AsNoTracking()
                 .AsQueryable();
-
-            if (onlyDeactivatedProfessionals.HasValue && onlyDeactivatedProfessionals.Value)
-            {
-                query = query.Where(r => 
-                    (r.Professional.Status == ProfessionalStatusEnum.Terminated || !r.Professional.User.IsActive) 
-                    && r.Status != ReportStatus.Approved);
-            }
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -260,6 +252,14 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             report.IsActive = false;
             report.UpdatedAt = updatedAt;
+        }
+
+        public async Task<int> GetPendingReportsCountByProfessionalAsync(Guid professionalId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Reports
+                .CountAsync(r => r.ProfessionalId == professionalId
+                              && r.IsActive
+                              && r.Status != ReportStatus.Approved, cancellationToken);
         }
     }
 }

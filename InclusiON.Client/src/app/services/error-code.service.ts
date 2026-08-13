@@ -215,6 +215,10 @@ export class ErrorCodeService {
       userAction: 'Tu cuenta profesional aún no fue aprobada. Contactá al administrador',
       severity: 'warning'
     }],
+    [ErrorCode.HasPendingReports, {
+      message: 'Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.',
+      severity: 'error'
+    }],
   ]);
 
   /** Mensaje por defecto para códigos no mapeados */

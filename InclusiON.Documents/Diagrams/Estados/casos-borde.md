@@ -4,18 +4,15 @@ Cada caso borde está justificado por una transición o condición documentada e
 
 ---
 
-## CB-01 — Professional `Terminated` con Reports en `Draft` o `Submitted`
+## CB-01 — Bloqueo preventivo de baja para profesionales con reportes pendientes
 
 **Origen:** [`professional.md`](professional.md) × [`report.md`](report.md)
 
-Cuando un `Professional` llega a `Terminated` (`IsActive = false`), el flujo de baja desactiva `ProfessionalPerson` pero **no menciona los `Report` pendientes**.
+**Resolución:** Se implementó un bloqueo preventivo (*hard stop*). Cuando un profesional es dado de baja (`IsActive = false`) o su usuario es desactivado, el sistema valida si posee informes de progreso en estado pendiente o borrador. De ser así, se aborta la transacción y se retorna un error preventivo (`ErrorCode.HasPendingReports` / `710`), obligando al administrador a reasignarlos o finalizarlos manualmente en la plataforma.
 
-| Estado del Report | Consecuencia |
-|-------------------|-------------|
-| `Draft` | Queda huérfano. Nadie puede editarlo ni enviarlo. No tiene transición de salida. |
-| `Submitted` | Está en cola del admin. Si el admin **rechaza** → el email de rechazo se envía al profesional dado de baja (cuenta inactiva). Si el admin **aprueba** → flujo normal, pero el autor ya no puede ver ni actuar sobre él. |
-
-**Brecha:** El flujo de baja de `Professional` no define qué sucede con sus `Report` activos.
+| Estado del Report | Comportamiento del Sistema |
+|-------------------|---------------------------|
+| `Draft` u `Submitted` | Bloquean de forma automática la desactivación del profesional responsable. |
 
 ---
 
@@ -149,7 +146,7 @@ Un profesional `Suspended` podría seguir autenticándose con tokens activos si 
 
 | ID | Entidades involucradas | Tipo de borde |
 |----|----------------------|---------------|
-| CB-01 | Professional + Report | Estado huérfano al llegar a terminal |
+| CB-01 | Professional + Report | Bloqueo preventivo (Hard Stop) por reportes pendientes |
 | CB-02 | Professional + PersonWithDisability | Estado terminal bloquea entidad dependiente |
 | CB-03 | FamilyRepresentative + PersonWithDisability | Estado terminal bloquea entidad dependiente |
 | CB-04 | ActivityAssignment | Condición temporal sin transición documentada |

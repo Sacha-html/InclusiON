@@ -139,6 +139,23 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             result.ErrorCode.Should().Be(ErrorCode.RoleNotAllowedForLogin);
         }
 
+        [Fact]
+        public async Task HandleAsync_PersonWithDisabilityRole_ReturnsRoleNotAllowedForLogin()
+        {
+            var user = ActiveUser();
+            _identity.FindByEmailAsync(Arg.Any<string>()).Returns(user);
+            _identity.IsLockedOutAsync(user).Returns(false);
+            _identity.CheckPasswordAsync(user, Arg.Any<string>(), Arg.Any<bool>())
+                     .Returns(SignInStatus.Success);
+            _identity.GetRolesAsync(user).Returns(new List<string> { "PersonWithDisability" });
+
+            var result = await BuildSut().HandleAsync(Cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.RoleNotAllowedForLogin);
+            result.Message.Should().Contain("no pueden iniciar sesión con email");
+        }
+
         // ── Happy path ───────────────────────────────────────────────────────
 
         [Fact]
