@@ -24,43 +24,16 @@ namespace InclusiON.Data.Seeders
             await SeedFamilyAsync(userManager, context);
             await SeedFiveAdditionalStudentsAndTutorsAsync(userManager, context);
 
-            // Inicializar Roadmap Estándar para todos los alumnos existentes y resetear todo su progreso a Nivel 0
-            var students = await context.PersonsWithDisability.Include(p => p.User).ToListAsync();
+            // Inicializar Roadmap Estándar para todos los alumnos existentes
+            // El RoadmapInitializer ya verifica si el alumno tiene roadmap y lo omite si existe
+            var students = await context.PersonsWithDisability.ToListAsync();
             foreach (var student in students)
             {
-                // 1. Borrar todas las respuestas de actividades (ActivityResponse) y asignaciones de la persona
-                var studentAssignments = await context.Set<ActivityAssignment>()
-                    .Where(a => a.PersonId == student.Id)
-                    .ToListAsync();
-                if (studentAssignments.Count > 0)
-                {
-                    var assignmentIds = studentAssignments.Select(a => a.Id).ToList();
-                    var responses = await context.Set<ActivityResponse>()
-                        .Where(r => assignmentIds.Contains(r.AssignmentId))
-                        .ToListAsync();
-                    if (responses.Count > 0)
-                    {
-                        context.Set<ActivityResponse>().RemoveRange(responses);
-                        await context.SaveChangesAsync();
-                    }
-
-                    context.Set<ActivityAssignment>().RemoveRange(studentAssignments);
-                    await context.SaveChangesAsync();
-                }
-
-                // 2. Borrar cualquier roadmap previo (PersonRoadmap, PersonRoadmapArea, PersonRoadmapActivity)
-                var existingRoadmaps = await context.PersonRoadmaps
-                    .Where(r => r.PersonId == student.Id)
-                    .ToListAsync();
-                if (existingRoadmaps.Count > 0)
-                {
-                    context.PersonRoadmaps.RemoveRange(existingRoadmaps);
-                    await context.SaveChangesAsync();
-                }
-
-                // 3. Inicializar roadmap estándar a Nivel 0 (Nivel 1 desbloqueado y pendiente, niveles 2-10 bloqueados)
                 await RoadmapInitializerAccessor.InitializeStudentRoadmap(context, student.Id, student.SupervisorUserId, CancellationToken.None);
             }
+
+            // Parche: actualizar ContentJson vacío de actividades estándar existentes
+            await PatchStandardActivitiesContentAsync(context);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
@@ -649,7 +622,7 @@ namespace InclusiON.Data.Seeders
                 new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000030"),
                     Email = "familia@test.com",
-                    Password = "Fam123!",
+                    Password = "Familia123!",
                     FirstName = "Rosa",
                     LastName = "Sanchez",
                     Phone = "1155667788",
@@ -667,59 +640,87 @@ namespace InclusiON.Data.Seeders
                     Relationship = "Tutor Legal",
                     LinkedPersonEmail = "juan@test.com",
                     FamilyId = Guid.Parse("00000000-0000-0000-0000-000000000301")
+                },
+                new {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000032"),
+                    Email = "anatu@test.com",
+                    Password = "Tutor123!",
+                    FirstName = "Patricia",
+                    LastName = "Martínez",
+                    Phone = "1133445566",
+                    Relationship = "Madre",
+                    LinkedPersonEmail = "ana@test.com",
+                    FamilyId = Guid.Parse("00000000-0000-0000-0000-000000000302")
+                },
+                new {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000033"),
+                    Email = "carlostu@test.com",
+                    Password = "Tutor123!",
+                    FirstName = "Roberto",
+                    LastName = "Rodríguez",
+                    Phone = "1122334455",
+                    Relationship = "Padre",
+                    LinkedPersonEmail = "carlos@test.com",
+                    FamilyId = Guid.Parse("00000000-0000-0000-0000-000000000303")
                 }
             };
 
             foreach (var fam in families)
             {
-                // Crear usuario si no existe
                 var existingUser = await userManager.FindByEmailAsync(fam.Email);
                 if (existingUser == null)
                 {
-                    var existingById = await userManager.FindByIdAsync(fam.Id.ToString());
-                    if (existingById == null)
+                    existingUser = new User
                     {
-                        var user = new User
-                        {
-                            Id = fam.Id,
-                            Name = fam.FirstName,
-                            Surname = fam.LastName,
-                            Email = fam.Email,
-                            UserName = fam.Email,
-                            EmailConfirmed = true,
-                            IsActive = true,
-                            LockoutEnabled = true,
-                            CreatedAt = DateTime.UtcNow
-                        };
+                        Id = fam.Id,
+                        Name = fam.FirstName,
+                        Surname = fam.LastName,
+                        Email = fam.Email,
+                        UserName = fam.Email,
+                        EmailConfirmed = true,
+                        IsActive = true,
+                        LockoutEnabled = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                        var result = await userManager.CreateAsync(user, fam.Password);
-                        if (result.Succeeded)
-                        {
-                            await userManager.AddToRoleAsync(user, IdentityRoles.FamilyRepresentative.ToString());
-
-                            context.FamilyRepresentatives.Add(new FamilyRepresentative
-                            {
-                                Id = fam.FamilyId,
-                                UserId = fam.Id,
-                                FirstName = fam.FirstName,
-                                LastName = fam.LastName,
-                                Phone = fam.Phone,
-                                Relationship = fam.Relationship,
-                                IsActive = true,
-                                CreatedAt = DateTime.UtcNow
-                            });
-                            await context.SaveChangesAsync();
-                        }
+                    var result = await userManager.CreateAsync(existingUser, fam.Password);
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(existingUser, IdentityRoles.FamilyRepresentative.ToString());
+                    }
+                    else
+                    {
+                        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                        throw new Exception($"Failed to create user {fam.Email}: {errors}");
                     }
                 }
 
-                // Vincular con persona — siempre, aunque el familiar ya exista
+                // Asegurar que exista el FamilyRepresentative
                 var familyEntity = await context.FamilyRepresentatives
-                    .FirstOrDefaultAsync(f => f.User.Email == fam.Email);
+                    .FirstOrDefaultAsync(f => f.UserId == existingUser.Id);
+
+                if (familyEntity == null)
+                {
+                    familyEntity = new FamilyRepresentative
+                    {
+                        Id = fam.FamilyId,
+                        UserId = existingUser.Id,
+                        FirstName = fam.FirstName,
+                        LastName = fam.LastName,
+                        Phone = fam.Phone,
+                        Relationship = fam.Relationship,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    context.FamilyRepresentatives.Add(familyEntity);
+                    await context.SaveChangesAsync();
+                }
+
+                // Vincular con persona
                 var personToLink = await context.PersonsWithDisability
                     .FirstOrDefaultAsync(p => p.User.Email == fam.LinkedPersonEmail);
 
-                if (familyEntity != null && personToLink != null)
+                if (personToLink != null)
                 {
                     var alreadyLinked = await context.PersonRepresentatives
                         .AnyAsync(pr => pr.RepresentativeId == familyEntity.Id && pr.PersonId == personToLink.Id);
@@ -730,6 +731,7 @@ namespace InclusiON.Data.Seeders
                         {
                             PersonId = personToLink.Id,
                             RepresentativeId = familyEntity.Id,
+                            Relationship = fam.Relationship,
                             IsPrimary = true,
                             IsActive = true,
                             CreatedAt = DateTime.UtcNow
@@ -913,6 +915,69 @@ namespace InclusiON.Data.Seeders
                         }
                     }
                 }
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Parche de startup: actualiza el ContentJson de las actividades estándar
+        /// que aún tienen '{}' con contenido real compatible con los players del frontend.
+        /// Se ejecuta en cada arranque pero solo modifica registros con contenido vacío.
+        /// </summary>
+        private static async Task PatchStandardActivitiesContentAsync(AppDbContext context)
+        {
+            // Mapa: Título de actividad → (TemplateCode, ContentJson correcto)
+            var patches = new Dictionary<string, (string TemplateCode, string ContentJson)>
+            {
+                ["Rompecabezas de 2 piezas"] = ("CLASSIFY",
+                    """{"instruction":"Arrastra y une cada imagen con su palabra.","pairs":[{"id":"manzana","label":"Manzana","pictogramId":7950},{"id":"pelota","label":"Pelota","pictogramId":6012}]}"""),
+
+                ["Mi rutina visual"] = ("ORDER_SEQUENCE",
+                    """{"instruction":"Ordena lo que haces primero en el día.","items":[{"id":"despertar","label":"Despertar","pictogramId":2695,"correctPosition":0},{"id":"desayunar","label":"Desayunar","pictogramId":2547,"correctPosition":1},{"id":"jugar","label":"Jugar","pictogramId":37495,"correctPosition":2}]}"""),
+
+                ["Concepto 'Muchos / Pocos'"] = ("OPTION_SELECT",
+                    """{"instruction":"Selecciona la imagen que tiene MUCHOS objetos.","question":"¿Cuál canasta tiene MUCHAS manzanas?","options":[{"id":"muchos","text":"Muchas manzanas","pictogramId":7950},{"id":"pocos","text":"Pocas manzanas","pictogramId":7951}],"correctOptionId":"muchos"}"""),
+
+                ["Explotar burbujas"] = ("PICTOGRAM_SELECT",
+                    """{"instruction":"Toca la imagen correcta.","correctItemId":"globo","items":[{"id":"globo","pictogramId":5441,"label":"Globo"},{"id":"pelota","pictogramId":6012,"label":"Pelota"},{"id":"casa","pictogramId":7034,"label":"Casa"}]}"""),
+
+                ["¿Qué quieres hacer?"] = ("PICTOGRAM_SELECT",
+                    """{"instruction":"¿Qué quieres hacer hoy?","correctItemId":"musica","items":[{"id":"musica","pictogramId":2706,"label":"Escuchar música"},{"id":"dibujar","pictogramId":6124,"label":"Dibujar"},{"id":"jugar","pictogramId":37495,"label":"Jugar"}]}"""),
+
+                ["Conciencia fonológica"] = ("OPTION_SELECT",
+                    """{"instruction":"Escucha la letra y toca el animal correcto.","question":"¿Qué animal empieza con la letra A?","options":[{"id":"arana","text":"Araña","pictogramId":2036},{"id":"bota","text":"Bota","pictogramId":5220},{"id":"casa","text":"Casa","pictogramId":7034}],"correctOptionId":"arana"}"""),
+
+                ["Colorear libre"] = ("OPTION_SELECT",
+                    """{"instruction":"Elige tu color favorito.","question":"¿Qué color te gusta más para pintar?","options":[{"id":"rojo","text":"Rojo"},{"id":"azul","text":"Azul"},{"id":"amarillo","text":"Amarillo"},{"id":"verde","text":"Verde"}],"correctOptionId":"rojo"}"""),
+
+                ["Vestirse para el frío"] = ("CLASSIFY",
+                    """{"instruction":"Une cada ropa con su nombre.","pairs":[{"id":"bufanda","label":"Bufanda","pictogramId":29557},{"id":"abrigo","label":"Abrigo","pictogramId":4933}]}"""),
+
+                ["Clasificación por tamaño"] = ("ORDER_SEQUENCE",
+                    """{"instruction":"Ordena de más grande a más pequeño.","items":[{"id":"grande","label":"Grande","pictogramId":6012,"correctPosition":0},{"id":"mediana","label":"Mediana","pictogramId":6012,"correctPosition":1},{"id":"pequena","label":"Pequeña","pictogramId":6012,"correctPosition":2}]}"""),
+
+                ["Encuentra el intruso"] = ("OPTION_SELECT",
+                    """{"instruction":"Encuentra el que no pertenece al grupo.","question":"¿Cuál NO es una fruta?","options":[{"id":"manzana","text":"Manzana","pictogramId":7950},{"id":"pera","text":"Pera","pictogramId":6540},{"id":"banana","text":"Banana","pictogramId":5170},{"id":"zapato","text":"Zapato","pictogramId":7285}],"correctOptionId":"zapato"}""")
+            };
+
+            foreach (var (title, patch) in patches)
+            {
+                var activity = await context.Activities
+                    .Include(a => a.Content)
+                    .FirstOrDefaultAsync(a => a.Title == title && a.IsStandardActivity);
+
+                if (activity?.Content == null) continue;
+
+                var needsContentPatch  = activity.Content.ContentJson == "{}" || string.IsNullOrEmpty(activity.Content.ContentJson);
+                var templateType       = await context.Set<ActivityTemplateType>().FirstOrDefaultAsync(t => t.Code == patch.TemplateCode);
+                var needsTemplatePatch = templateType != null && activity.Content.TemplateTypeId != templateType.Id;
+
+                if (needsContentPatch)
+                    activity.Content.ContentJson = patch.ContentJson;
+
+                if (needsTemplatePatch)
+                    activity.Content.TemplateTypeId = templateType!.Id;
             }
 
             await context.SaveChangesAsync();

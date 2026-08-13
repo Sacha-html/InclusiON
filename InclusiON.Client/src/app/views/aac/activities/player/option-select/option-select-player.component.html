@@ -17,10 +17,39 @@
       <p class="game-instruction-small">{{ content.instruction }}</p>
     }
 
-    <!-- Pregunta prominente -->
-    <h2 class="game-question" id="game-question" tabindex="-1">
-      {{ content.question }}
-    </h2>
+    <!-- Si hay imagen de pregunta (Asociación Funcional) -->
+    @if (content.questionPictogramId) {
+      <div class="functional-association-container">
+        <div class="association-main-area">
+          <div class="main-object">
+            <img [src]="pictogramUrl(content.questionPictogramId)" alt="Objeto principal" class="main-obj-img" />
+          </div>
+          
+          <div class="association-connector">
+            <span class="connector-arrow">➔</span>
+          </div>
+
+          <div class="association-slot" [class.association-slot--docked]="dockedOptionId() !== null">
+            @if (dockedOption) {
+              @if (dockedOption.pictogramId) {
+                <img [src]="pictogramUrl(dockedOption.pictogramId)" [alt]="dockedOption.text" class="docked-img animate-dock" />
+              }
+            } @else {
+              <div class="slot-placeholder">?</div>
+            }
+          </div>
+        </div>
+
+        <button class="audio-btn" (click)="speakQuestion()" aria-label="Escuchar pregunta">
+          🔊 Escuchar
+        </button>
+      </div>
+    } @else {
+      <!-- Pregunta prominente standard -->
+      <h2 class="game-question" id="game-question" tabindex="-1">
+        {{ content.question }}
+      </h2>
+    }
 
     <!-- Opciones -->
     <div class="options-grid"
@@ -31,6 +60,7 @@
         <button
           class="option-btn"
           [class]="'option-btn--' + optionState(option)"
+          [class.option-btn--wrong-shake]="wrongOptionId() === option.id"
           [disabled]="selectedOptionId() !== null"
           (click)="selectOption(option)"
           [attr.aria-label]="option.text"

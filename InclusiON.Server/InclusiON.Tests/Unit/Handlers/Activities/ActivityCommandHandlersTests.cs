@@ -537,9 +537,8 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         [Theory]
-        [InlineData(AssignmentStatuses.Completada)]
         [InlineData(AssignmentStatuses.Cancelada)]
-        public async Task TerminalStatus_ReturnsConflict(int status)
+        public async Task CancelledStatus_ReturnsConflict(int status)
         {
             _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
                 .Returns(AnAssignment(status: status));

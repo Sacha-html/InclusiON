@@ -10,6 +10,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Domain.Models;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Calendar;
 using InclusiON.DTOs.Responses;
@@ -28,6 +29,7 @@ namespace InclusiON.Api.Controllers
         private readonly IFamilyRepository _familyRepository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IHttpContextService _httpContextService;
+        private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
 
         public CalendarController(
@@ -36,6 +38,7 @@ namespace InclusiON.Api.Controllers
             IFamilyRepository familyRepository,
             IPersonsRepository personsRepository,
             IHttpContextService httpContextService,
+            IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork)
         {
             _calendarEventsRepository = calendarEventsRepository;
@@ -43,6 +46,7 @@ namespace InclusiON.Api.Controllers
             _familyRepository = familyRepository;
             _personsRepository = personsRepository;
             _httpContextService = httpContextService;
+            _backgroundJobs = backgroundJobs;
             _unitOfWork = unitOfWork;
         }
 
@@ -149,6 +153,37 @@ namespace InclusiON.Api.Controllers
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            // Send push notification to target student's tutors if single target scope
+            if (request.TargetScope == "single" && studentId.HasValue)
+            {
+                try
+                {
+                    var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(studentId.Value, cancellationToken);
+                    foreach (var rep in representatives.Where(r => r.IsActive && r.Representative.IsActive))
+                    {
+                        var tutorUserId = rep.Representative.UserId.ToString();
+                        var tutorName = $"{professional.FirstName} {professional.LastName}";
+                        await _backgroundJobs.CreateAsync(
+                            JobTypes.Push,
+                            System.Text.Json.JsonSerializer.Serialize(new NotificationPayload
+                            {
+                                UserId = tutorUserId,
+                                Title = "Nuevo evento de calendario",
+                                Message = $"{tutorName} agendó un nuevo evento '{request.Title}' para {studentName}.",
+                                ActionUrl = "calendar",
+                                SendEmailFallback = false
+                            }),
+                            maxRetries: 3,
+                            cancellationToken: cancellationToken);
+                    }
+                }
+                catch (Exception)
+                {
+                    // Silent catch to avoid breaking the response if notification queuing fails
+                }
+            }
+
             return Ok(ApiResponse<CalendarEventResponse>.SuccessResult(CalendarEventResponse.From(ev)));
         }
 

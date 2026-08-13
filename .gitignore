@@ -6,5 +6,7 @@ Thumbs.db
 .agents/
 .vscode/
 
-# Ignorar la carpeta local de modificaciones
+# Ignorar la carpeta local de modificaciones y carpetas personales excluidas
 modificaciones/
+InclusiON-2.0/
+demo-repository/

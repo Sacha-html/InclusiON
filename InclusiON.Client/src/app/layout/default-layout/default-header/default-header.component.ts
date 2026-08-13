@@ -77,7 +77,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   get showNotificationBell(): boolean {
     const role = this.authService.getUserRole();
-    return role === 'Professional' || role === 'FamilyRepresentative';
+    return role === 'Professional' || role === 'FamilyRepresentative' || role === 'Admin';
   }
 
   logout(): void {

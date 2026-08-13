@@ -63,6 +63,7 @@ export interface OptionSelectOption {
 export interface OptionSelectContent {
   instruction: string;
   question:    string;    // pregunta mostrada al alumno (prominente)
+  questionPictogramId?: number;
   options:     OptionSelectOption[];
   correctOptionId: string;
 }
