@@ -68,6 +68,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
 
             result.Success.Should().BeTrue();
             result.Data!.UserEmail.Should().Be("target@test.com");
+            result.Data!.TemporaryPassword.Should().NotBeNullOrEmpty();
             await _identity.Received(1).UpdateUserAsync(user);
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
             user.MustChangePassword.Should().BeTrue();

@@ -48,6 +48,8 @@ export interface PersonResponse {
   isActive: boolean;
   createdAt: string;
   updatedAt?: string;
+
+  tutorTemporaryPassword?: string;
 }
 
 export interface PersonListItemResponse {

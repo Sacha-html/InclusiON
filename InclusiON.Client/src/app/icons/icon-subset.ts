@@ -73,7 +73,8 @@ import {
   cilXCircle,
   cilZoomIn,
   cilCaretTop,
-  cilCaretBottom
+  cilCaretBottom,
+  cilSwapHorizontal
 } from '@coreui/icons';
 
 import { signet } from './signet';
@@ -155,6 +156,7 @@ export const iconSubset = {
   cilZoomIn,
   cilCaretTop,
   cilCaretBottom,
+  cilSwapHorizontal,
   logo,
   signet
 };

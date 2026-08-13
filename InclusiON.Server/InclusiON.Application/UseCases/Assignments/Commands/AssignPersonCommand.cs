@@ -4,6 +4,7 @@ namespace InclusiON.Application.UseCases.Assignments.Commands
         Guid ProfessionalId,
         Guid PersonId,
         bool IsPrimaryProfessional,
-        bool CanSuperviseLogin
+        bool CanSuperviseLogin,
+        Guid? ClassroomId = null
     );
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Auditing;
 using InclusiON.Application.Constants;
@@ -75,6 +75,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
 
             user.IsActive = true;
             user.MustChangePassword = true;
+            user.LockoutEnd = null;
+            user.AccessFailedCount = 0;
             await _identityService.UpdateUserAsync(user);
 
             await SetLinkedEntityActiveAsync(user, true, cancellationToken);
@@ -118,7 +120,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             return ApiResponse<ResetPasswordResultResponse>.SuccessResult(
                 new ResetPasswordResultResponse
                 {
-                    UserEmail = user.Email ?? string.Empty
+                    UserEmail = user.Email ?? string.Empty,
+                    TemporaryPassword = tempPassword
                 },
                 "Usuario reactivado exitosamente. Se enviaron las credenciales por email.");
         }

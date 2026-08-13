@@ -159,3 +159,50 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
   - **Familiar:** Nuevos mensajes de terapeutas, avisos de actividades nuevas asignadas a sus representados y recordatorios de eventos del calendario.
   - **Administrador:** Alertas del sistema como registro de nuevos profesionales pendientes de aprobación, reportes semanales enviados y avisos de mantenimiento de servidor.
 * **Integración en Tiempo Real y Persistencia:** Conectada la campana al flujo `notification$` del `SignalrService` para recibir eventos en tiempo real. La lista se persiste localmente en `localStorage` y permite navegar directamente al recurso asociado al hacer clic en cada notificación (mensajes, calendario, evaluaciones, etc.), además de marcar la notificación como leída o limpiar la bandeja completamente.
+
+---
+
+## 12. Creación de Aulas Vacías y Asistente de Registro Unificado (Alumno + Tutor + Aula) (Agosto 2026)
+
+### Backend (.NET 10)
+* **Semillado de Datos Robustos (`DatabaseSeeder.cs`):** 
+  - Se agregó el método `SeedCustomClassroomsAndStudentsAsync` que asegura que los profesionales Sacha Del Barrio (nuevo), Sofía Gutiérrez y Pedro Martinez estén aprobados en el sistema.
+  - Genera 6 aulas de prueba de manera automática al iniciar la API.
+  - Genera y vincula transaccionalmente a 39 alumnos (`student1@inclusion.com` a `student39@inclusion.com` con clave `Student123!`) y sus respectivos 39 tutores (`tutor1@inclusion.com` a `tutor39@inclusion.com` con clave `Tutor123!`) enlazados por parentesco en la base de datos y distribuidos en las aulas (entre 5 y 8 alumnos por aula).
+* **Endpoint de Registro Bulk (`POST api/persons/with-tutor`):**
+  - Creado `CreatePersonWithTutorRequest.cs` y `CreatePersonWithTutorCommand.cs`.
+  - Implementado `CreatePersonWithTutorCommandHandler.cs` que ejecuta toda la creación (Usuario Alumno, Persona con Discapacidad, Usuario Tutor, Familiar Representante, Enlace de Parentesco, Asignación de Aula obligatoria e Inicialización de Roadmap) de forma transaccional usando `IUnitOfWork.ExecuteInTransactionAsync`, garantizando revertir todo en caso de cualquier error (Rollback).
+* **Flexibilización de Creación de Aulas:**
+  - Modificado `CreateClassroomRequest.cs`, `CreateClassroomCommand.cs` y `CreateClassroomCommandHandler.cs` para admitir que la lista de IDs de alumnos sea opcional (`null` o vacía), permitiendo registrar aulas vacías.
+  - Añadidos controles defensivos contra valores nulos en `AssignmentsController.cs` al validar permisos sobre listas vacías de alumnos.
+
+### Frontend (Angular)
+* **Asistente de Registro (Wizard) de 3 Pasos:**
+  - Rediseñado por completo el componente de registro `NewComponent` (`new.component.ts` y `.html`) en la administración de Personas.
+  - Implementado asistente visual (Wizard) que transiciona automáticamente del Paso 1 (Datos del Alumno con placeholders descriptivos y guías de ingreso) al Paso 2 (Datos del Tutor a cargo) y finalmente al Paso 3 (Asignación obligatoria de Profesional y Aula).
+* **Servicios de API:**
+  - Creado e integrado el modelo `CreatePersonWithTutorRequest` y el método `createPersonWithTutor()` en `persons.service.ts` para conectar con el nuevo endpoint transaccional del backend.
+* **Creación de Aulas Vacías:**
+  - Se eliminó la validación en `professional-persons.component.ts` y `.html` que forzaba a seleccionar alumnos antes de guardar un aula, permitiendo al administrador crear aulas vacías directamente desde la pestaña "Personas a cargo" del perfil del docente.
+
+---
+
+## 13. Sincronización de Aulas y Filtrado Robusto por Nombre de Aula (Agosto 2026)
+
+### Diagnóstico de Encriptación No Determinista
+* **Causa Raíz:** El backend en .NET utiliza encriptación AES con Vector de Inicialización (IV) dinámico (`AesGcmEncryptionService`), generando hashes `ENC:...` distintos para el mismo GUID en peticiones o serializaciones independientes.
+* **Impacto:** La comparación estricta por ID (`p.classroomId === targetId`) resultaba falsa en el cliente de Angular, devolviendo un arreglo vacío al filtrar alumnos por aula.
+
+### Backend (.NET 10)
+* **Recarga de Navegación de Aula:** 
+  - En `AssignmentsRepository.cs` (`MovePersonToClassroomAsync`), al cambiar el foreign key `ClassroomId`, se recarga explícitamente la entidad `Classroom` para asegurar que `ProfessionalPersonResponse` contenga siempre la propiedad `ClassroomName` poblada.
+  - En `AssignPersonCommandHandler.cs`, se incluye la propiedad de navegación `Classroom` antes del mapeo del DTO al asignar o reactivar alumnos.
+
+### Frontend (Angular)
+* **Filtrado por Texto Plano Normalizado (`classroomName`):** 
+  - Se actualizó la propiedad calculada `filteredPersons` tanto en `list.component.ts` (Vista del Profesional) como en `professional-persons.component.ts` (Panel de Administración) para filtrar utilizando `classroomName?.toLowerCase()?.trim()`.
+* **Sincronización Dinámica de Contadores:**
+  - En `professional-persons.component.ts`, se incorporó la llamada a `loadClassrooms()` en todas las acciones de asignación, cambio de aula, transferencia y desasignación, manteniendo las tarjetas de aulas superiores sincronizadas en tiempo real con sus contadores de alumnos.
+* **Depuración y UI:**
+  - Removida la opción redundante *"Todas las Aulas"* en la vista del profesional.
+  - Agregados logs descriptivos de consola (`console.log`) para diagnosticar la estructura de datos en runtime.

@@ -68,8 +68,126 @@ namespace InclusiON.Api.Controllers
                 professionalId,
                 request.PersonId,
                 request.IsPrimaryProfessional,
+                request.CanSuperviseLogin,
+                request.ClassroomId);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPut("{professionalId}/persons/{personId}/classroom")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalPersonResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<ProfessionalPersonResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<ProfessionalPersonResponse>>> MovePersonToClassroom(
+            Guid professionalId,
+            Guid personId,
+            [FromBody] MovePersonToClassroomRequest request,
+            [FromServices] ICommandHandler<MovePersonToClassroomCommand, ApiResponse<ProfessionalPersonResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new MovePersonToClassroomCommand(professionalId, personId, request.ClassroomId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPost("{professionalId}/classroom")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<List<ProfessionalPersonResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<List<ProfessionalPersonResponse>>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<List<ProfessionalPersonResponse>>>> CreateClassroom(
+            Guid professionalId,
+            [FromBody] CreateClassroomRequest request,
+            [FromServices] ICommandHandler<CreateClassroomCommand, ApiResponse<List<ProfessionalPersonResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            // Validar accesos de escritura a cada alumno (si hay alguno)
+            if (request.PersonIds != null)
+            {
+                foreach (var personId in request.PersonIds)
+                {
+                    if (!await _resourceAuthz.CanAccessPersonAsync(personId, AccessMode.Write, cancellationToken))
+                        return ApiResponse<List<ProfessionalPersonResponse>>.Forbidden().ToActionResult();
+                }
+            }
+
+            var command = new CreateClassroomCommand(
+                professionalId,
+                request.Name,
+                request.PersonIds,
+                request.IsPrimaryProfessional,
                 request.CanSuperviseLogin);
 
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpGet("{professionalId}/classrooms")]
+        [Authorize(Policy = "persons:read")]
+        [ProducesResponseType(typeof(ApiResponse<List<ClassroomResponse>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<List<ClassroomResponse>>>> GetClassroomsByProfessional(
+            Guid professionalId,
+            [FromServices] IQueryHandler<GetClassroomsByProfessionalQuery, ApiResponse<List<ClassroomResponse>>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<List<ClassroomResponse>>.Forbidden().ToActionResult();
+
+            var query = new GetClassroomsByProfessionalQuery(professionalId);
+            var result = await handler.HandleAsync(query, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPut("{professionalId}/classrooms/{classroomId}")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<ClassroomResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<ClassroomResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> UpdateClassroom(
+            Guid professionalId,
+            Guid classroomId,
+            [FromBody] UpdateClassroomRequest request,
+            [FromServices] ICommandHandler<UpdateClassroomCommand, ApiResponse<ClassroomResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new UpdateClassroomCommand(professionalId, classroomId, request.Name);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpPut("{professionalId}/classrooms/{classroomId}/deactivate")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<ClassroomResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<ClassroomResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> DeactivateClassroom(
+            Guid professionalId,
+            Guid classroomId,
+            [FromServices] ICommandHandler<DeactivateClassroomCommand, ApiResponse<ClassroomResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new DeactivateClassroomCommand(professionalId, classroomId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
+        [HttpDelete("{professionalId}/classrooms/{classroomId}")]
+        [Authorize(Policy = "professionals:update")]
+        [ProducesResponseType(typeof(ApiResponse<ClassroomResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<ClassroomResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ClassroomResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> DeleteClassroom(
+            Guid professionalId,
+            Guid classroomId,
+            [FromServices] ICommandHandler<DeleteClassroomCommand, ApiResponse<ClassroomResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new DeleteClassroomCommand(professionalId, classroomId);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
         }

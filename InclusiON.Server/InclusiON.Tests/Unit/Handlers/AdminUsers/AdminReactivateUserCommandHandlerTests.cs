@@ -94,6 +94,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
 
             result.Success.Should().BeTrue();
             result.Data!.UserEmail.Should().Be("user@test.com");
+            result.Data!.TemporaryPassword.Should().NotBeNullOrEmpty();
             user.IsActive.Should().BeTrue();
             user.MustChangePassword.Should().BeTrue();
             await _identity.Received(1).UpdateUserAsync(user);

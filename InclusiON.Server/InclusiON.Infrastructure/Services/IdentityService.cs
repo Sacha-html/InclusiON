@@ -61,6 +61,11 @@ namespace InclusiON.Infrastructure.Services
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            if (result.Succeeded)
+            {
+                await _userManager.SetLockoutEndDateAsync(user, null);
+                await _userManager.ResetAccessFailedCountAsync(user);
+            }
             return MapIdentityResult(result);
         }
 
