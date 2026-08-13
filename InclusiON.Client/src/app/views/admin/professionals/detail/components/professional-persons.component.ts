@@ -317,6 +317,9 @@ export class ProfessionalPersonsComponent implements OnInit {
           this.isSubmitting.set(false);
           this.showMovePersonModal.set(false);
           this.toastService.success('Alumno movido al aula correctamente');
+          if (classroomId) {
+            this.selectedClassroomIdFilter.set(classroomId);
+          }
           this.loadAssignedPersons();
           this.loadClassrooms();
         },
@@ -532,7 +535,10 @@ export class ProfessionalPersonsComponent implements OnInit {
 
   private loadAssignedPersons(): void {
     this.assignmentsService.getPersonsByProfessional(this.professionalId).subscribe({
-      next: (data) => this.personsChange.emit(data),
+      next: (data) => {
+        this.persons = data;
+        this.personsChange.emit(data);
+      },
       error: () => this.toastService.error('Error al cargar personas asignadas'),
     });
   }
