@@ -20,6 +20,8 @@ namespace InclusiON.DTOs.Responses.Assignments
         public bool IsPrimaryProfessional { get; set; }
         public bool CanSuperviseLogin { get; set; }
         public bool IsActive { get; set; }
+        public Guid? ClassroomId { get; set; }
+        public string? ClassroomName { get; set; }
 
         public static ProfessionalPersonResponse MapToResponse(ProfessionalPerson assignment)
         {
@@ -45,7 +47,9 @@ namespace InclusiON.DTOs.Responses.Assignments
                 AssignedAt = assignment.AssignedAt,
                 IsPrimaryProfessional = assignment.IsPrimaryProfessional,
                 CanSuperviseLogin = assignment.CanSuperviseLogin,
-                IsActive = assignment.IsActive
+                IsActive = assignment.IsActive,
+                ClassroomId = assignment.ClassroomId,
+                ClassroomName = assignment.Classroom?.Name
             };
         }
     }

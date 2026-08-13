@@ -12,6 +12,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<List<ProfessionalPerson>> GetProfessionalsByPersonIdAsync(Guid personId, CancellationToken ct = default);
         Task<ProfessionalPerson?> GetAssignmentAsync(Guid professionalId, Guid personId, CancellationToken ct = default);
         Task<ProfessionalPerson> CreateAssignmentAsync(ProfessionalPerson assignment, CancellationToken ct = default);
+        Task<ProfessionalPerson?> MovePersonToClassroomAsync(Guid professionalId, Guid personId, Guid? classroomId, CancellationToken ct = default);
 
         // Professional-Institution
         Task<List<ProfessionalInstitution>> GetInstitutionsByProfessionalIdAsync(Guid professionalId, CancellationToken ct = default);
@@ -43,5 +44,13 @@ namespace InclusiON.Application.Interfaces.Repositories
             Guid familyUserId,
             CancellationToken ct = default);
         Task CancelActiveAssignmentsForProfessionalAndPersonAsync(Guid professionalId, Guid personId, CancellationToken ct = default);
+
+        // Classrooms
+        Task<Classroom> CreateClassroomAsync(Classroom classroom, CancellationToken ct = default);
+        Task<List<Classroom>> GetClassroomsByProfessionalIdAsync(Guid professionalId, CancellationToken ct = default);
+        Task<Classroom?> GetClassroomByIdAsync(Guid classroomId, CancellationToken ct = default);
+        Task<Classroom?> UpdateClassroomAsync(Guid classroomId, string name, CancellationToken ct = default);
+        Task<Classroom?> DeactivateClassroomAsync(Guid classroomId, CancellationToken ct = default);
+        Task<(bool success, string error)> DeleteClassroomAsync(Guid classroomId, CancellationToken ct = default);
     }
 }

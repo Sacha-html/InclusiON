@@ -53,6 +53,7 @@ namespace InclusiON.Data
         public DbSet<TrustedDevice> TrustedDevices { get; set; }
         public DbSet<ProfessionalInstitution> ProfessionalInstitutions { get; set; }
         public DbSet<ProfessionalPerson> ProfessionalPersons { get; set; }
+        public DbSet<Classroom> Classrooms { get; set; }
         public DbSet<PersonRepresentative> PersonRepresentatives { get; set; }
         public DbSet<PersonSkillProfile> PersonSkillProfiles { get; set; }
         public DbSet<Diagnosis> Diagnoses { get; set; }

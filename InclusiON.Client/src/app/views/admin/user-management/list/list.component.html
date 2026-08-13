@@ -63,7 +63,7 @@
   (cancel)="cancelDeactivate()">
 </app-confirm-modal>
 
-<c-modal [visible]="showPasswordModal" (visibleChange)="closePasswordModal()">
+<c-modal [visible]="showPasswordModal" (visibleChange)="showPasswordModal = $event">
   <c-modal-header>
     <h5 cModalTitle>Contraseña temporal generada</h5>
   </c-modal-header>

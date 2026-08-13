@@ -1046,6 +1046,44 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("CalendarEvents", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.Classroom", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<Guid>("ProfessionalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionalId");
+
+                    b.ToTable("Classrooms", (string)null);
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.Property<int>("Id")
@@ -2290,6 +2328,9 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
+                    b.Property<Guid?>("ClassroomId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -2301,6 +2342,8 @@ namespace InclusiON.Data.Migrations
                         .HasDefaultValue(false);
 
                     b.HasKey("ProfessionalId", "PersonId");
+
+                    b.HasIndex("ClassroomId");
 
                     b.HasIndex("PersonId");
 
@@ -3189,6 +3232,17 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.Classroom", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
+                        .WithMany()
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Professional");
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Diagnosis", b =>
                 {
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
@@ -3495,6 +3549,11 @@ namespace InclusiON.Data.Migrations
 
             modelBuilder.Entity("InclusiON.Domain.Models.ProfessionalPerson", b =>
                 {
+                    b.HasOne("InclusiON.Domain.Models.Classroom", "Classroom")
+                        .WithMany("ProfessionalPersons")
+                        .HasForeignKey("ClassroomId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Person")
                         .WithMany("ProfessionalPersons")
                         .HasForeignKey("PersonId")
@@ -3506,6 +3565,8 @@ namespace InclusiON.Data.Migrations
                         .HasForeignKey("ProfessionalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Classroom");
 
                     b.Navigation("Person");
 
@@ -3674,6 +3735,11 @@ namespace InclusiON.Data.Migrations
             modelBuilder.Entity("InclusiON.Domain.Models.BackgroundJobStatus", b =>
                 {
                     b.Navigation("BackgroundJobs");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.Classroom", b =>
+                {
+                    b.Navigation("ProfessionalPersons");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.DisabilityType", b =>

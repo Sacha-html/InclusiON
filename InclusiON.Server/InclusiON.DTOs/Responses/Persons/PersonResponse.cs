@@ -61,6 +61,8 @@ namespace InclusiON.DTOs.Responses.Persons
         public DateTime? UpdatedAt { get; set; }
         #endregion
 
+        public string? TutorTemporaryPassword { get; set; }
+
         private static int CalculateAge(DateTime birthDate)
         {
             var today = DateTime.Today;

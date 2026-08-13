@@ -13,5 +13,7 @@ namespace InclusiON.DTOs.Requests.Assignments
         public bool IsPrimaryProfessional { get; set; } = false;
 
         public bool CanSuperviseLogin { get; set; } = false;
+
+        public Guid? ClassroomId { get; set; }
     }
 }

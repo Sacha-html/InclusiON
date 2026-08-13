@@ -168,9 +168,34 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
         private string GenerateUsername(string firstName, string lastName)
         {
-            var baseUsername = $"{firstName.ToLower().Replace(" ", "")}.{lastName.ToLower().Replace(" ", "")}";
+            var cleanFirstName = RemoveDiacritics(firstName.ToLower()).Replace(" ", "");
+            var cleanLastName = RemoveDiacritics(lastName.ToLower()).Replace(" ", "");
+
+            cleanFirstName = new string(cleanFirstName.Where(c => (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '.').ToArray());
+            cleanLastName = new string(cleanLastName.Where(c => (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '.').ToArray());
+
+            var baseUsername = $"{cleanFirstName}.{cleanLastName}";
             var timestamp = _dateTime.UtcNow.Ticks % 10000;
             return $"{baseUsername}{timestamp}";
+        }
+
+        private static string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return text;
+            var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);
+            var stringBuilder = new System.Text.StringBuilder(capacity: normalizedString.Length);
+
+            for (int i = 0; i < normalizedString.Length; i++)
+            {
+                char c = normalizedString[i];
+                var unicodeCategory = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
         }
 
         private static string BuildEmbeddingPayload(PersonWithDisability person, CreatePersonCommand command) =>

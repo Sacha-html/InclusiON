@@ -33,6 +33,14 @@ namespace InclusiON.Data.Configurations
                 .WithMany(p => p.ProfessionalPersons)
                 .HasForeignKey(pp => pp.PersonId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(pp => pp.ClassroomId)
+                .IsRequired(false);
+
+            builder.HasOne(pp => pp.Classroom)
+                .WithMany(c => c.ProfessionalPersons)
+                .HasForeignKey(pp => pp.ClassroomId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

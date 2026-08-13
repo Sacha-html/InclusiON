@@ -11,6 +11,7 @@ import {
   ActivityListItemResponse,
   CreatePersonRequest,
   UpdatePersonRequest,
+  CreatePersonWithTutorRequest,
   GetPersonsRequest,
   ProfessionalPersonResponse,
   UpdateLoginMethodRequest,
@@ -114,6 +115,17 @@ export class PersonsService {
   ): Observable<PersonResponse> {
     return this.http
       .post<ApiResponse<PersonResponse>>(this.apiUrl, request)
+      .pipe(unwrapResponse());
+  }
+
+  /**
+   * Crea una nueva persona junto con su tutor y asignación de aula.
+   */
+  createPersonWithTutor(
+    request: CreatePersonWithTutorRequest
+  ): Observable<PersonResponse> {
+    return this.http
+      .post<ApiResponse<PersonResponse>>(`${this.apiUrl}/with-tutor`, request)
       .pipe(unwrapResponse());
   }
 

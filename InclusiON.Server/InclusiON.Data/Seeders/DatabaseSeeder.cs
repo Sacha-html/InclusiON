@@ -34,6 +34,7 @@ namespace InclusiON.Data.Seeders
 
             // Parche: actualizar ContentJson vacío de actividades estándar existentes
             await PatchStandardActivitiesContentAsync(context);
+            await SeedCustomClassroomsAndStudentsAsync(userManager, context);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
@@ -979,6 +980,251 @@ namespace InclusiON.Data.Seeders
                 if (needsTemplatePatch)
                     activity.Content.TemplateTypeId = templateType!.Id;
             }
+
+            await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedCustomClassroomsAndStudentsAsync(UserManager<User> userManager, AppDbContext context)
+        {
+            // 0. Limpiar alumnos y tutores previamente semillados (emails studentX@inclusion.com y tutorX@inclusion.com)
+            var studentEmailsToDelete = Enumerable.Range(1, 55).Select(i => $"student{i}@inclusion.com").ToList();
+            var tutorEmailsToDelete = Enumerable.Range(1, 55).Select(i => $"tutor{i}@inclusion.com").ToList();
+
+            var usersToDelete = await context.Users
+                .Where(u => u.Email != null && (studentEmailsToDelete.Contains(u.Email) || tutorEmailsToDelete.Contains(u.Email)))
+                .ToListAsync();
+
+            if (usersToDelete.Any())
+            {
+                var userIds = usersToDelete.Select(u => u.Id).ToList();
+
+                // Obtener los IDs reales de PersonsWithDisability y FamilyRepresentatives
+                var studentPersonIds = await context.PersonsWithDisability
+                    .Where(p => userIds.Contains(p.UserId))
+                    .Select(p => p.Id)
+                    .ToListAsync();
+
+                var tutorRepIds = await context.FamilyRepresentatives
+                    .Where(f => userIds.Contains(f.UserId))
+                    .Select(f => f.Id)
+                    .ToListAsync();
+
+                // 1. Eliminar de tablas dependientes del Roadmap (usando studentPersonIds)
+                await context.AdaptiveAdjustmentLogs
+                    .Where(x => studentPersonIds.Contains(x.PersonRoadmapActivity.PersonRoadmapArea.PersonRoadmap.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.AdaptiveEngineConfigs
+                    .Where(x => studentPersonIds.Contains(x.PersonRoadmapActivity.PersonRoadmapArea.PersonRoadmap.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.ActivityResults
+                    .Where(x => studentPersonIds.Contains(x.PersonRoadmapActivity.PersonRoadmapArea.PersonRoadmap.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.PersonRoadmapActivities
+                    .Where(x => studentPersonIds.Contains(x.PersonRoadmapArea.PersonRoadmap.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.PersonRoadmapAreas
+                    .Where(x => studentPersonIds.Contains(x.PersonRoadmap.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.PersonRoadmaps
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                // 2. Eliminar de tablas dependientes de la Actividad (usando studentPersonIds)
+                await context.ActivityResponses
+                    .Where(x => studentPersonIds.Contains(x.Assignment.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.ActivityAssignments
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                // 3. Eliminar de otras tablas relacionadas a alumnos (usando studentPersonIds)
+                await context.PersonEmbeddings
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.ProfessionalPersons
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.Reports
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.PersonSkillProfiles
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.Diagnoses
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                await context.AccessAudits
+                    .Where(x => x.AccessedPersonId.HasValue && studentPersonIds.Contains(x.AccessedPersonId.Value))
+                    .ExecuteDeleteAsync();
+
+                await context.CalendarEvents
+                    .Where(x => x.StudentId.HasValue && studentPersonIds.Contains(x.StudentId.Value))
+                    .ExecuteDeleteAsync();
+
+                await context.Invitations
+                    .Where(x => x.ForPersonId.HasValue && studentPersonIds.Contains(x.ForPersonId.Value))
+                    .ExecuteDeleteAsync();
+
+                // 4. Relaciones Alumno-Tutor (usando studentPersonIds y tutorRepIds)
+                await context.PersonRepresentatives
+                    .Where(x => studentPersonIds.Contains(x.PersonId) || tutorRepIds.Contains(x.RepresentativeId))
+                    .ExecuteDeleteAsync();
+
+                await context.PersonRepresentativeHistories
+                    .Where(x => studentPersonIds.Contains(x.PersonId))
+                    .ExecuteDeleteAsync();
+
+                // 5. Mensajes (usando userIds y studentPersonIds)
+                await context.Messages
+                    .Where(x => userIds.Contains(x.SenderId) || userIds.Contains(x.ReceiverId) || (x.RelatedPersonId.HasValue && studentPersonIds.Contains(x.RelatedPersonId.Value)))
+                    .ExecuteDeleteAsync();
+
+                // 6. Perfiles base (FamilyRepresentatives y PersonsWithDisability)
+                await context.FamilyRepresentatives
+                    .Where(x => userIds.Contains(x.UserId))
+                    .ExecuteDeleteAsync();
+
+                await context.PersonsWithDisability
+                    .Where(x => userIds.Contains(x.UserId))
+                    .ExecuteDeleteAsync();
+
+                await context.SaveChangesAsync();
+
+                // 7. Identity Users (a través de userManager)
+                foreach (var user in usersToDelete)
+                {
+                    await userManager.DeleteAsync(user);
+                }
+            }
+
+            // 0. Eliminar profesionales o usuarios duplicados de "Sacha" (manteniendo únicamente el oficial)
+            var sachaFixedProfId = Guid.Parse("00000000-0000-0000-0000-000000000203");
+            var sachaFixedUserId = Guid.Parse("00000000-0000-0000-0000-000000000023");
+            var duplicateSachaProfs = await context.Professionals
+                .Include(p => p.User)
+                .Where(p => p.Id != sachaFixedProfId &&
+                            (p.FirstName.ToLower().Contains("sacha") ||
+                             p.LastName.ToLower().Contains("del barrio") ||
+                             (p.User != null && p.User.Email.ToLower().Contains("sacha"))))
+                .ToListAsync();
+
+            foreach (var dup in duplicateSachaProfs)
+            {
+                var dupUser = dup.User;
+
+                var dupClassrooms = await context.Classrooms.Where(c => c.ProfessionalId == dup.Id).ToListAsync();
+                context.Classrooms.RemoveRange(dupClassrooms);
+
+                var dupPersons = await context.ProfessionalPersons.Where(pp => pp.ProfessionalId == dup.Id).ToListAsync();
+                context.ProfessionalPersons.RemoveRange(dupPersons);
+
+                var dupInsts = await context.ProfessionalInstitutions.Where(pi => pi.ProfessionalId == dup.Id).ToListAsync();
+                context.ProfessionalInstitutions.RemoveRange(dupInsts);
+
+                await context.SaveChangesAsync();
+
+                context.Professionals.Remove(dup);
+                await context.SaveChangesAsync();
+
+                if (dupUser != null && dupUser.Id != sachaFixedUserId)
+                {
+                    await userManager.DeleteAsync(dupUser);
+                }
+            }
+
+            var duplicateSachaUsers = await userManager.Users
+                .Where(u => u.Id != sachaFixedUserId &&
+                            u.Email != "sacha.delbarrio@test.com" &&
+                            (u.Name.ToLower().Contains("sacha") ||
+                             (u.Surname != null && u.Surname.ToLower().Contains("del barrio")) ||
+                             (u.Email != null && u.Email.ToLower().Contains("sacha"))))
+                .ToListAsync();
+
+            foreach (var dupUser in duplicateSachaUsers)
+            {
+                await userManager.DeleteAsync(dupUser);
+            }
+
+            // 1. Asegurar profesionales y estado Approved
+            // Sacha Del Barrio
+            var sachaEmail = "sacha.delbarrio@test.com";
+            var sachaUser = await userManager.FindByEmailAsync(sachaEmail);
+            Professional sachaProf;
+            if (sachaUser == null)
+            {
+                sachaUser = new User
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000023"),
+                    Name = "Sacha",
+                    Surname = "Del Barrio",
+                    Email = sachaEmail,
+                    UserName = sachaEmail,
+                    EmailConfirmed = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await userManager.CreateAsync(sachaUser, "Sacha123!");
+                await userManager.AddToRoleAsync(sachaUser, IdentityRoles.Professional.ToString());
+
+                sachaProf = new Professional
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000203"),
+                    UserId = sachaUser.Id,
+                    FirstName = "Sacha",
+                    LastName = "Del Barrio",
+                    LicenseNumber = "31293",
+                    Specialty = "Educacion",
+                    Status = ProfessionalStatusEnum.Approved,
+                    ValidatedAt = DateTime.UtcNow,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+                context.Professionals.Add(sachaProf);
+            }
+            else
+            {
+                sachaProf = await context.Professionals.FirstAsync(p => p.UserId == sachaUser.Id);
+                sachaProf.Status = ProfessionalStatusEnum.Approved;
+            }
+
+            // Sofía Gutiérrez
+            var sofiaEmail = "profesional2@test.com"; // De la semilla existente
+            var sofiaUser = await userManager.FindByEmailAsync(sofiaEmail);
+            var sofiaProf = await context.Professionals.FirstAsync(p => p.UserId == sofiaUser.Id);
+            sofiaProf.Status = ProfessionalStatusEnum.Approved;
+
+            // Pedro Martinez
+            var pedroEmail = "profesional@test.com"; // De la semilla existente
+            var pedroUser = await userManager.FindByEmailAsync(pedroEmail);
+            var pedroProf = await context.Professionals.FirstAsync(p => p.UserId == pedroUser.Id);
+            pedroProf.Status = ProfessionalStatusEnum.Approved;
+
+            await context.SaveChangesAsync();
+
+            // 2. Crear las Aulas si no existen
+            if (!await context.Classrooms.AnyAsync(c => c.Name == "Aula Sacha Mañana"))
+                context.Classrooms.Add(new Classroom { Id = Guid.NewGuid(), Name = "Aula Sacha Mañana", ProfessionalId = sachaProf.Id, IsActive = true, CreatedAt = DateTime.UtcNow });
+            if (!await context.Classrooms.AnyAsync(c => c.Name == "Aula Sacha Tarde"))
+                context.Classrooms.Add(new Classroom { Id = Guid.NewGuid(), Name = "Aula Sacha Tarde", ProfessionalId = sachaProf.Id, IsActive = true, CreatedAt = DateTime.UtcNow });
+            if (!await context.Classrooms.AnyAsync(c => c.Name == "Aula Sofía A"))
+                context.Classrooms.Add(new Classroom { Id = Guid.NewGuid(), Name = "Aula Sofía A", ProfessionalId = sofiaProf.Id, IsActive = true, CreatedAt = DateTime.UtcNow });
+            if (!await context.Classrooms.AnyAsync(c => c.Name == "Aula Sofía B"))
+                context.Classrooms.Add(new Classroom { Id = Guid.NewGuid(), Name = "Aula Sofía B", ProfessionalId = sofiaProf.Id, IsActive = true, CreatedAt = DateTime.UtcNow });
+            if (!await context.Classrooms.AnyAsync(c => c.Name == "Aula Pedro Integradora"))
+                context.Classrooms.Add(new Classroom { Id = Guid.NewGuid(), Name = "Aula Pedro Integradora", ProfessionalId = pedroProf.Id, IsActive = true, CreatedAt = DateTime.UtcNow });
+            if (!await context.Classrooms.AnyAsync(c => c.Name == "Aula Pedro Avanzada"))
+                context.Classrooms.Add(new Classroom { Id = Guid.NewGuid(), Name = "Aula Pedro Avanzada", ProfessionalId = pedroProf.Id, IsActive = true, CreatedAt = DateTime.UtcNow });
 
             await context.SaveChangesAsync();
         }
