@@ -5,21 +5,42 @@
 } @else {
 
   <c-card class="mb-4">
+    <!-- listado de aula del profesional -->
     <c-card-header>
       <h5 class="mb-0">Mi Aula</h5>
     </c-card-header>
     <c-card-body>
 
-      @if (activePersons.length === 0) {
+      @if (hasClassrooms) {
+        <div class="mb-4 row align-items-center">
+          <div class="col-12 col-md-4">
+            <label for="classroomSelect" class="form-label fw-semibold text-body-secondary small text-uppercase" style="letter-spacing: .04em;">Aula seleccionada</label>
+            <select id="classroomSelect" class="form-select" [(ngModel)]="selectedClassroomId">
+              @for (c of classrooms; track c.id) {
+                <option [value]="c.id">{{ c.name }} ({{ c.studentCount }} alumno{{ c.studentCount !== 1 ? 's' : '' }})</option>
+              }
+              <option value="unassigned">Sin Aula (Asignación General)</option>
+            </select>
+          </div>
+        </div>
+      }
+
+      @if (!hasClassrooms) {
+        <app-empty-state
+          icon="cil-school"
+          message="No tenés aulas creadas"
+          detail="Solicitá al administrador que te cree un aula."
+        />
+      } @else if (filteredPersons.length === 0) {
         <app-empty-state
           icon="cil-people"
-          message="No tenés personas asignadas"
-          detail="Solicitá al administrador que te asigne personas a cargo."
+          message="Esta aula no tiene alumnos asignados"
+          detail="Solicitá al administrador que asigne alumnos a esta aula."
         />
       }
 
       <c-row>
-        @for (person of activePersons; track person.personId) {
+        @for (person of filteredPersons; track person.personId) {
           <c-col sm="6" md="4" lg="3" class="mb-4 d-flex">
             <button type="button" class="person-card" (click)="goToDetail(person)" [attr.aria-label]="'Ver detalle de ' + person.personFullName" [style.--card-accent]="person.avatarColor || '#9E9E9E'">
               <!-- Avatar -->

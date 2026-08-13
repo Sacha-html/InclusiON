@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Auditing;
 using InclusiON.Application.Helpers;
@@ -92,6 +92,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             }
 
             user.MustChangePassword = true;
+            user.LockoutEnd = null;
+            user.AccessFailedCount = 0;
             await _identityService.UpdateUserAsync(user);
 
             await _refreshTokensRepository.RevokeAllUserTokensAsync(
@@ -136,7 +138,8 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             return ApiResponse<ResetPasswordResultResponse>.SuccessResult(
                 new ResetPasswordResultResponse
                 {
-                    UserEmail = user.Email ?? string.Empty
+                    UserEmail = user.Email ?? string.Empty,
+                    TemporaryPassword = tempPassword
                 },
                 "Contraseña reseteada exitosamente. Se envió un email al usuario con las instrucciones.");
         }

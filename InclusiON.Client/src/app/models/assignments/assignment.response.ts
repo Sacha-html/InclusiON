@@ -12,6 +12,16 @@ export interface ProfessionalPersonResponse {
   canSuperviseLogin: boolean;
   isActive: boolean;
   assignedAt: string;
+  classroomId?: string;
+  classroomName?: string;
+}
+
+export interface ClassroomResponse {
+  id: string;
+  name: string;
+  professionalId: string;
+  isActive: boolean;
+  studentCount: number;
 }
 
 export interface ProfessionalInstitutionResponse {

@@ -7,6 +7,8 @@ import {
   AssignPersonRequest,
   ProfessionalInstitutionResponse,
   ProfessionalPersonResponse,
+  CreateClassroomRequest,
+  ClassroomResponse,
 } from '@models';
 import { Observable } from 'rxjs';
 import { unwrapResponse, handleApiError } from '@shared/utils';
@@ -30,6 +32,42 @@ export class AssignmentsService {
   assignPerson(profId: string, request: AssignPersonRequest): Observable<ProfessionalPersonResponse> {
     return this.http
       .post<ApiResponse<ProfessionalPersonResponse>>(`${this.professionalsUrl(profId)}/persons`, request)
+      .pipe(unwrapResponse());
+  }
+
+  movePersonToClassroom(profId: string, personId: string, classroomId: string | null): Observable<ProfessionalPersonResponse> {
+    return this.http
+      .put<ApiResponse<ProfessionalPersonResponse>>(`${this.professionalsUrl(profId)}/persons/${personId}/classroom`, { classroomId })
+      .pipe(unwrapResponse());
+  }
+
+  createClassroom(profId: string, request: CreateClassroomRequest): Observable<ProfessionalPersonResponse[]> {
+    return this.http
+      .post<ApiResponse<ProfessionalPersonResponse[]>>(`${this.professionalsUrl(profId)}/classroom`, request)
+      .pipe(unwrapResponse());
+  }
+
+  getClassroomsByProfessional(profId: string): Observable<ClassroomResponse[]> {
+    return this.http
+      .get<ApiResponse<ClassroomResponse[]>>(`${this.professionalsUrl(profId)}/classrooms`)
+      .pipe(unwrapResponse());
+  }
+
+  updateClassroom(profId: string, classroomId: string, name: string): Observable<ClassroomResponse> {
+    return this.http
+      .put<ApiResponse<ClassroomResponse>>(`${this.professionalsUrl(profId)}/classrooms/${classroomId}`, { name })
+      .pipe(unwrapResponse());
+  }
+
+  deactivateClassroom(profId: string, classroomId: string): Observable<ClassroomResponse> {
+    return this.http
+      .put<ApiResponse<ClassroomResponse>>(`${this.professionalsUrl(profId)}/classrooms/${classroomId}/deactivate`, {})
+      .pipe(unwrapResponse());
+  }
+
+  deleteClassroom(profId: string, classroomId: string): Observable<ClassroomResponse> {
+    return this.http
+      .delete<ApiResponse<ClassroomResponse>>(`${this.professionalsUrl(profId)}/classrooms/${classroomId}`)
       .pipe(unwrapResponse());
   }
 

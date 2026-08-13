@@ -37,6 +37,11 @@ namespace InclusiON.Domain.Models
         public bool IsActive { get; set; } = true;
 
         /// <summary>
+        /// ID del aula asociada (opcional).
+        /// </summary>
+        public Guid? ClassroomId { get; set; }
+
+        /// <summary>
         /// Profesional asignado.
         /// </summary>
         public virtual Professional Professional { get; set; } = null!;
@@ -45,5 +50,10 @@ namespace InclusiON.Domain.Models
         /// Persona con discapacidad.
         /// </summary>
         public virtual PersonWithDisability Person { get; set; } = null!;
+
+        /// <summary>
+        /// Aula asociada a esta asignación.
+        /// </summary>
+        public virtual Classroom? Classroom { get; set; }
     }
 }

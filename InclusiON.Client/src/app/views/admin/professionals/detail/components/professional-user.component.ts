@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService, ToastService, UserManagementService } from '@services';
 import { ProfessionalResponse } from '@models';
-import { AlertComponent, ButtonDirective, ModalComponent, ModalBodyComponent, ModalFooterComponent, ModalHeaderComponent, BadgeModule } from '@coreui/angular';
+import { AlertComponent, ButtonDirective, ModalComponent, ModalBodyComponent, ModalFooterComponent, ModalHeaderComponent, ModalTitleDirective, BadgeModule } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { DatePipe } from '@angular/common';
 
@@ -18,6 +18,7 @@ import { DatePipe } from '@angular/common';
     ModalBodyComponent,
     ModalFooterComponent,
     ModalHeaderComponent,
+    ModalTitleDirective,
     IconModule,
     BadgeModule,
     DatePipe,
@@ -54,5 +55,10 @@ export class ProfessionalUserComponent {
     navigator.clipboard.writeText(this.tempPassword).then(() => {
       this.toastService.success('Contraseña copiada al portapapeles');
     });
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal = false;
+    this.tempPassword = '';
   }
 }

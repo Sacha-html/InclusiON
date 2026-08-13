@@ -182,6 +182,43 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Crea una nueva persona con discapacidad vinculada a su tutor en una sola transacción.
+        /// </summary>
+        [HttpPost("with-tutor")]
+        [Authorize(Policy = "persons:create")]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PersonResponse>>> CreatePersonWithTutor(
+            [FromBody] CreatePersonWithTutorRequest request,
+            [FromServices] ICommandHandler<CreatePersonWithTutorCommand, ApiResponse<PersonResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var command = new CreatePersonWithTutorCommand(
+                request.Student.FirstName, request.Student.LastName, request.Student.DocumentNumber,
+                request.Student.BirthDate, request.Student.DisabilityTypeId, request.Student.PhotoUrl,
+                request.Student.AttentionLevel, request.Student.CommunicationLevel,
+                request.Student.UsesAAC, request.Student.UsesSignLanguage, request.Student.MotorSkillLevel,
+                request.Student.InterestsAndMotivators, request.Student.LearningStyle,
+                request.Student.AvailableResources, request.Student.AdditionalTherapies,
+                request.Student.RequiresLargeFont, request.Student.RequiresHighContrast,
+                request.Student.VisualNoiseSensitivity, request.Student.SoundSensitivity,
+                request.Student.ColorBlindnessType, request.Student.AutonomyLevelId,
+                request.Student.LoginMethodId, request.Student.Pin, request.Student.AvatarColor,
+                request.TutorFirstName, request.TutorLastName, request.TutorEmail,
+                request.TutorDocumentNumber, request.TutorPhone, request.TutorRelationship,
+                request.ClassroomId);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+                return result.ToActionResult();
+
+            return CreatedAtAction(nameof(GetPersonById), new { personId = result.Data!.Id }, result);
+        }
+
+        /// <summary>
         /// Actualiza una persona existente.
         /// </summary>
         [HttpPut("{personId}")]

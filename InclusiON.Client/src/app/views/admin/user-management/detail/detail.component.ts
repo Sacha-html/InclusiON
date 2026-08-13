@@ -20,6 +20,7 @@ import {
   ModalHeaderComponent,
   ModalBodyComponent,
   ModalFooterComponent,
+  ModalTitleDirective,
   SpinnerComponent,
   TableDirective,
 } from '@coreui/angular';
@@ -41,6 +42,7 @@ import {
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
+    ModalTitleDirective,
     ConfirmModalComponent,
     SpinnerComponent,
     TableDirective,

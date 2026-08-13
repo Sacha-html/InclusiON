@@ -1,4 +1,4 @@
-﻿using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
@@ -79,10 +79,15 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 existing.IsActive = true;
                 existing.IsPrimaryProfessional = command.IsPrimaryProfessional;
                 existing.CanSuperviseLogin = command.CanSuperviseLogin;
+                if (command.ClassroomId.HasValue) existing.ClassroomId = command.ClassroomId.Value;
                 existing.AssignedAt = _dateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 existing.Person = person;
+                if (existing.ClassroomId.HasValue)
+                {
+                    existing.Classroom = await _repository.GetClassroomByIdAsync(existing.ClassroomId.Value, cancellationToken);
+                }
                 var reactivatedResponse = ProfessionalPersonResponse.MapToResponse(existing);
                 return ApiResponse<ProfessionalPersonResponse>.SuccessResult(reactivatedResponse, "Asignacion reactivada exitosamente.");
             }
@@ -91,6 +96,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             {
                 ProfessionalId = command.ProfessionalId,
                 PersonId = command.PersonId,
+                ClassroomId = command.ClassroomId,
                 IsPrimaryProfessional = command.IsPrimaryProfessional,
                 CanSuperviseLogin = command.CanSuperviseLogin,
                 AssignedAt = _dateTime.UtcNow,
@@ -101,6 +107,10 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             assignment.Person = person;
+            if (assignment.ClassroomId.HasValue)
+            {
+                assignment.Classroom = await _repository.GetClassroomByIdAsync(assignment.ClassroomId.Value, cancellationToken);
+            }
             var response = ProfessionalPersonResponse.MapToResponse(assignment);
             return ApiResponse<ProfessionalPersonResponse>.SuccessResult(response, "Persona asignada al profesional exitosamente.");
         }
