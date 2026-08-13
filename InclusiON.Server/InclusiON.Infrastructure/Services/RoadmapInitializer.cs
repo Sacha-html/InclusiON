@@ -78,29 +78,29 @@ namespace InclusiON.Infrastructure.Services
                 new {
                     Seq = 3,
                     Title = "Concepto 'Muchos / Pocos'",
-                    Desc = "Tocar la canasta que tiene 'muchas' manzanas.",
+                    Desc = "Tocar el grupo que tiene más frutas.",
                     CatId = 2,
                     TemplateCode = "OPTION_SELECT",
-                    Instructions = "Toca la canasta que tiene muchas manzanas.",
-                    ContentJson = "{\"instruction\":\"Toca la canasta que tiene muchas manzanas.\",\"question\":\"¿Dónde hay muchas manzanas?\",\"options\":[{\"id\":\"muchas\",\"text\":\"Muchas manzanas\",\"pictogramId\":32314},{\"id\":\"pocas\",\"text\":\"2 manzanas\",\"pictogramId\":2479}],\"correctOptionId\":\"muchas\"}"
+                    Instructions = "Toca el grupo que tiene más frutas.",
+                    ContentJson = "{\"instruction\":\"Toca el grupo que tiene más frutas.\",\"question\":\"¿Dónde hay más fruta?\",\"options\":[{\"id\":\"muchas\",\"text\":\"Muchas frutas\",\"pictogramId\":28339},{\"id\":\"pocas\",\"text\":\"Menos fruta\",\"pictogramId\":3247}],\"correctOptionId\":\"muchas\"}"
                 },
                 new {
                     Seq = 4,
                     Title = "Explotar burbujas",
-                    Desc = "Seguir un camino visual simple moviendo el cursor o el dedo.",
+                    Desc = "Reventar la burbuja que tiene la estrella de mar adentro.",
                     CatId = 5,
                     TemplateCode = "PICTOGRAM_SELECT",
-                    Instructions = "Mueve el dedo o cursor para reventar las burbujas en pantalla.",
-                    ContentJson = "{\"instruction\":\"Mueve el dedo o cursor para reventar las burbujas en pantalla.\",\"correctItemId\":\"bubble1\",\"items\":[{\"id\":\"bubble1\",\"label\":\"Burbuja 1\",\"pictogramId\":32251},{\"id\":\"bubble2\",\"label\":\"Burbuja 2\",\"pictogramId\":32251},{\"id\":\"bubble3\",\"label\":\"Burbuja 3\",\"pictogramId\":32251}]}"
+                    Instructions = "Reventá la burbuja que tenga la estrella de mar adentro.",
+                    ContentJson = "{\"instruction\":\"Reventá la burbuja que tenga la estrella de mar adentro.\",\"correctItemId\":\"estrella\",\"items\":[{\"id\":\"auto\",\"label\":\"Auto\",\"pictogramId\":2339},{\"id\":\"estrella\",\"label\":\"Estrella de mar\",\"pictogramId\":3310},{\"id\":\"silla\",\"label\":\"Silla\",\"pictogramId\":3155}]}"
                 },
                 new {
                     Seq = 5,
-                    Title = "¿Qué quieres hacer?",
-                    Desc = "Seleccionar entre dos pictogramas de SAAC (ej: 'Escuchar música' o 'Dibujar').",
-                    CatId = 4,
-                    TemplateCode = "PICTOGRAM_SELECT",
-                    Instructions = "Selecciona el pictograma que represente lo que quieres hacer hoy.",
-                    ContentJson = "{\"instruction\":\"Selecciona el pictograma que represente lo que quieres hacer hoy.\",\"correctItemId\":\"musica\",\"items\":[{\"id\":\"musica\",\"label\":\"Escuchar música\",\"pictogramId\":2606},{\"id\":\"dibujar\",\"label\":\"Dibujar\",\"pictogramId\":2600}]}"
+                    Title = "¿Dónde va cada cosa?",
+                    Desc = "Asociación Funcional Directa",
+                    CatId = 2,
+                    TemplateCode = "OPTION_SELECT",
+                    Instructions = "¿Qué va aquí?",
+                    ContentJson = "{\"instruction\":\"¿Qué va aquí?\",\"question\":\"¿Qué va aquí?\",\"questionPictogramId\":25900,\"options\":[{\"id\":\"almohada\",\"text\":\"Almohada\",\"pictogramId\":2250},{\"id\":\"pelota\",\"text\":\"Pelota\",\"pictogramId\":3241}],\"correctOptionId\":\"almohada\"}"
                 },
                 new {
                     Seq = 6,

@@ -133,3 +133,29 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
 ### Frontend (Angular)
 * **Habilitación de Clic en Nodos Completados:** En `aac-roadmap.component.ts`, se eliminó la restricción en la acción `onNodeClick` que bloqueaba el clic en actividades completadas (`node.status === 'completed'`). Ahora el alumno puede hacer clic en cualquier actividad desbloqueada del mapa (sea pendiente, en progreso o completada) para jugarla de nuevo.
 * **Redirección al Roadmap al finalizar:** En `activity-player-shell.component.ts`, se cambió el destino de redirección en `onCompleted()` para que, al finalizar el juego o presionar volver en caso de error, el alumno regrese a la pantalla de "Mi Camino" (`/app/roadmap`) en lugar del catálogo general de actividades (`/app/activities`).
+
+---
+
+## 10. Robustez en Semillado de Base de Datos y Tutores del Aula (Agosto 2026)
+
+### Backend (.NET 10)
+* **Robustez en `DatabaseSeeder`:** Se refactorizó el método `SeedFamilyAsync` para buscar usuarios, perfiles y relaciones existentes antes de crearlos. Esto previene violaciones de clave primaria y duplicación de datos al ejecutar el semillador de base de datos múltiples veces.
+* **Fortaleza de Contraseñas:** Se actualizó la contraseña por defecto del familiar de prueba a `Familia123!` para satisfacer la restricción de longitud mínima de 8 caracteres exigida por Identity.
+* **Asociación de Tutores Faltantes:** Se registraron y vincularon los familiares de prueba `anatu@test.com` (Patricia Martínez) para la estudiante Ana Martínez, y `carlostu@test.com` (Roberto Rodríguez) para Carlos Rodríguez. Esto resolvió un problema donde el profesional Pedro Martínez solo podía visualizar a 6 tutores de los 9 alumnos a cargo en el listado de mensajería (ahora visualiza correctamente a los 9 tutores).
+
+---
+
+## 11. Sistema y Panel de Notificaciones (Mensajes, Actividades y Calendario) (Agosto 2026)
+
+### Backend (.NET 10)
+* **Carga Eager en Actividades Completadas:** Se actualizó `ActivityAssignmentRepository.cs` para incluir la relación `.Include(a => a.Person)` en `GetByIdAsync`. Esto permite que el handler de finalización (`CompleteActivityResponseCommandHandler.cs`) cargue el nombre real del estudiante y el título de la actividad en las notificaciones enviadas, en lugar de un mensaje genérico.
+* **Notificaciones de Calendario en Tiempo Real:** Modificado `CalendarController.cs` para inyectar `IBackgroundJobRepository` y disparar un trabajo en segundo plano del tipo `Push` cuando el profesional guarda o edita un evento específico para un alumno. Esto notifica en tiempo real a todos los tutores/familiares activos vinculados a dicho estudiante.
+
+### Frontend (Angular)
+* **Dropdown de Notificaciones Multirrol:** Se rediseñó el componente de la campana de notificaciones (`NotificationBellComponent`) en la cabecera del sistema. Al hacer clic, ahora despliega una lista interactiva de notificaciones recientes en lugar de redirigir inmediatamente a mensajería.
+* **Habilitación de Notificaciones para el Administrador:** Se actualizó `default-header.component.ts` para que la campana de notificaciones también se muestre en el perfil de Administrador (`Admin`), sumándose a Profesional y Familiar.
+* **Semillado de Notificaciones Personalizadas por Rol:** Al cargar el panel por primera vez (o si el almacenamiento local está vacío), se precargan notificaciones simuladas acordes al rol logueado para enriquecer la experiencia de usuario:
+  - **Profesional:** Nuevos mensajes de tutores, confirmación de actividades completadas por alumnos y recordatorios de sesiones.
+  - **Familiar:** Nuevos mensajes de terapeutas, avisos de actividades nuevas asignadas a sus representados y recordatorios de eventos del calendario.
+  - **Administrador:** Alertas del sistema como registro de nuevos profesionales pendientes de aprobación, reportes semanales enviados y avisos de mantenimiento de servidor.
+* **Integración en Tiempo Real y Persistencia:** Conectada la campana al flujo `notification$` del `SignalrService` para recibir eventos en tiempo real. La lista se persiste localmente en `localStorage` y permite navegar directamente al recurso asociado al hacer clic en cada notificación (mensajes, calendario, evaluaciones, etc.), además de marcar la notificación como leída o limpiar la bandeja completamente.
