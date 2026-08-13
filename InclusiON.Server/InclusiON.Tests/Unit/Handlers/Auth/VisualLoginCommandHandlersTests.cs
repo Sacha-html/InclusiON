@@ -165,63 +165,12 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             new(UserId, pwd);
 
         [Fact]
-        public async Task VisualStandard_PersonNotFound_ReturnsUserNotFound()
+        public async Task VisualStandard_ReturnsNotAvailableError()
         {
-            _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>())
-                .Returns((PersonWithDisability?)null);
-
             var result = await BuildVisualStandard().HandleAsync(VisualCmd(), default);
-
-            result.ErrorCode.Should().Be(ErrorCode.UserNotFound);
-        }
-
-        [Fact]
-        public async Task VisualStandard_AccountLocked_ReturnsLockedResponse()
-        {
-            var user = AUser();
-            _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(APerson(user));
-            _identity.IsLockedOutAsync(user).Returns(true);
-            _identity.GetLockoutEndDateAsync(user).Returns(DateTimeOffset.UtcNow.AddMinutes(5));
-
-            var result = await BuildVisualStandard().HandleAsync(VisualCmd(), default);
-
-            result.Data!.IsLocked.Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task VisualStandard_WrongPassword_ReturnsRemainingAttempts()
-        {
-            var user = AUser();
-            _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(APerson(user));
-            _identity.IsLockedOutAsync(user).Returns(false);
-            _identity.CheckPasswordAsync(user, "wrong", lockoutOnFailure: true)
-                .Returns(SignInStatus.Failed);
-            _identity.GetAccessFailedCountAsync(user).Returns(1);
-
-            var result = await BuildVisualStandard().HandleAsync(VisualCmd("wrong"), default);
 
             result.Data!.Success.Should().BeFalse();
-            result.Data.RemainingAttempts.Should().Be(4);
-        }
-
-        [Fact]
-        public async Task VisualStandard_CorrectPassword_CreatesSession()
-        {
-            var user = AUser();
-            var person = APerson(user);
-            _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(person);
-            _identity.IsLockedOutAsync(user).Returns(false);
-            _identity.CheckPasswordAsync(user, "pass", lockoutOnFailure: true)
-                .Returns(SignInStatus.Success);
-            _sessions.CreateVisualLoginSessionAsync(
-                    user, person, Arg.Any<int>(), Arg.Any<string?>(),
-                    Arg.Any<bool>(), Arg.Any<string>(), Arg.Any<string>(),
-                    Arg.Any<CancellationToken>())
-                .Returns(SuccessSession());
-
-            var result = await BuildVisualStandard().HandleAsync(VisualCmd(), default);
-
-            result.Data!.Success.Should().BeTrue();
+            result.Data.ErrorMessage.Should().Contain("no está disponible para alumnos");
         }
 
         // ════════════════════════════════════════════════════════════════

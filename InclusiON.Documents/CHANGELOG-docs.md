@@ -127,3 +127,16 @@ Al migrar a Confluence, verificar:
 4. **CU-02**: Lista de obligatorios actualizada
 5. **HU-IN-149**: Documento en las 4 listas de obligatorios
 6. **Diccionario de datos**: DNI (Sí\*) y DisabilityType (Sí)
+
+124. **HU-18**: Documentación de la refactorización de accesibilidad y autonomía de alumnos (acceso por PIN o Asistido, restricción por email, validaciones dinámicas en ABM).
+125. **Sprint 11**: Creación del documento de Sprint 11 integrando Aulas, Registro Unificado y Autonomía de Alumnos.
+
+---
+
+## Actualizaciones de Agosto 2026
+
+### Documentos Creados y Actualizados:
+- **`HU/HU-18-autonomia-acceso-pin-asistido.md`**: Creada Historia de Usuario HU-18 para la restricción de login por email en alumnos, migración a PIN por defecto (1234), login de familiares por email y validación dinámica de PIN en ABM.
+- **`Sprints/Sprint-11-autonomia-accesibilidad-aulas.md`**: Creado resumen del Sprint 11 integrando HU-17 y HU-18.
+- **`CHANGELOG-DESARROLLO.md`**: Incorporada la Sección 14 con los cambios de backend, base de datos y frontend.
+- **`modificaciones/ResumenModificaciones.md`**: Actualizado con el resumen de la refactorización de autonomía y accesibilidad.

@@ -59,6 +59,7 @@ namespace InclusiON.DTOs.Common
         UserAlreadyInactive = 707,
         UserAlreadyActive = 708,
         ProfessionalNotApproved = 709,
+        HasPendingReports = 710,
 
         // Invitaciones (8xx)
         InvitationNotFound = 800,

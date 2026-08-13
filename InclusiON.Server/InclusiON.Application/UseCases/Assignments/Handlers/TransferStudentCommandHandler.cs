@@ -141,7 +141,6 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 professionalId: command.FromProfessionalId.ToString(),
                 reportTypeId: null,
                 isActive: true,
-                onlyDeactivatedProfessionals: null,
                 status: null,
                 dateFrom: null,
                 dateTo: null,

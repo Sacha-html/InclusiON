@@ -14,9 +14,6 @@ namespace InclusiON.DTOs.Requests.Reports
         public string? ReportTypeId { get; set; }
         public bool? IsActive { get; set; }
 
-        /// <summary>Indica si solo se deben traer reportes de profesionales desactivados.</summary>
-        public bool? OnlyDeactivatedProfessionals { get; set; }
-
         /// <summary>Filtro por estado del flujo (Draft, Submitted, Approved, Rejected).</summary>
         public string? Status { get; set; }
 

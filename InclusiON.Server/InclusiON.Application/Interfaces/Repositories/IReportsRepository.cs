@@ -17,7 +17,6 @@ namespace InclusiON.Application.Interfaces.Repositories
             string? professionalId,
             string? reportTypeId,
             bool? isActive,
-            bool? onlyDeactivatedProfessionals,
             string? status,
             DateTime? dateFrom,
             DateTime? dateTo,
@@ -57,5 +56,6 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<Report?> GetReportWithDetailsAsync(int reportId, CancellationToken cancellationToken = default);
         Task ReassignReportAsync(Report report, Guid newProfessionalId, DateTime assignedAt, CancellationToken cancellationToken = default);
         Task SoftDeleteReportAsync(Report report, DateTime updatedAt, CancellationToken cancellationToken = default);
+        Task<int> GetPendingReportsCountByProfessionalAsync(Guid professionalId, CancellationToken cancellationToken = default);
     }
 }

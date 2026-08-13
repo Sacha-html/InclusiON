@@ -70,7 +70,8 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.BusinessRuleViolation or
                 ErrorCode.DocumentAlreadyExists or
                 ErrorCode.EmailAlreadyExists or
-                ErrorCode.UsernameAlreadyExists
+                ErrorCode.UsernameAlreadyExists or
+                ErrorCode.HasPendingReports
                     => new ConflictObjectResult(response),
 
                 // 500 Internal Server Error - Errores internos

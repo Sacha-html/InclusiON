@@ -160,10 +160,24 @@ export class NewComponent implements OnInit {
       next: (data) => this.autonomyLevels = data,
     });
     this.catalogsService.getLoginMethods().subscribe({
-      next: (data) => this.loginMethods = data,
+      next: (data) => this.loginMethods = data.filter(m => m.code !== 'STANDARD' && m.id !== 1),
     });
     this.professionalsService.getProfessionals({ page: 1, pageSize: 200, status: 'active' }).subscribe({
       next: (res) => this.professionals = res.data,
+    });
+
+    this.form.get('loginMethodId')?.valueChanges.subscribe((val) => {
+      const pinCtrl = this.form.get('pin');
+      const methodId = val ? +val : null;
+      if (methodId === 2) {
+        pinCtrl?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
+        pinCtrl?.enable();
+      } else {
+        pinCtrl?.clearValidators();
+        pinCtrl?.setValue('');
+        pinCtrl?.disable();
+      }
+      pinCtrl?.updateValueAndValidity();
     });
   }
 

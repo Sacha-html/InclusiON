@@ -25,15 +25,7 @@
         }
       </select>
     </c-col>
-    <c-col sm="3">
-      <label cLabel>Institución</label>
-      <select cSelect [(ngModel)]="filterInstitutionId" (ngModelChange)="onFilterChange()">
-        <option value="">Todas</option>
-        @for (i of institutions(); track i.id) {
-          <option [value]="i.id">{{ i.name }}</option>
-        }
-      </select>
-    </c-col>
+
     <c-col sm="3">
       <label cLabel>Estado</label>
       <select cSelect [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()" [disabled]="onlyDeactivatedProfessionals">
@@ -44,13 +36,7 @@
         <option value="Rejected">Rechazados</option>
       </select>
     </c-col>
-    <c-col sm="3" class="d-flex align-items-center mb-3">
-      <c-form-check [switch]="true">
-        <input cFormCheckInput type="checkbox" id="orphanedReportsSwitch"
-               [(ngModel)]="onlyDeactivatedProfessionals" (ngModelChange)="onOrphanedReportsChange()" />
-        <label cFormCheckLabel for="orphanedReportsSwitch" class="fw-semibold text-warning">Reportes Huérfanos</label>
-      </c-form-check>
-    </c-col>
+
     <c-col sm="3">
       <label cLabel>Tipo</label>
       <select cSelect [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange()">
@@ -122,42 +108,4 @@
   (cancel)="cancelAction()">
 </app-confirm-modal>
 
-<!-- Modal: Reasignar Reporte -->
-<c-modal [visible]="showReassignModal" (visibleChange)="showReassignModal = $event">
-  <c-modal-header>
-    <h5 cModalTitle>Reasignar reporte</h5>
-  </c-modal-header>
-  <c-modal-body>
-    <p>Reasignar el reporte <strong>"{{ selectedReport?.title }}"</strong> de un profesional desactivado a otro profesional activo:</p>
-    <div class="mb-3">
-      <label cLabel for="reassignProfSelect">Nuevo Profesional Responsable</label>
-      <select cSelect id="reassignProfSelect" [(ngModel)]="selectedProfessionalId">
-        <option value="" disabled>Seleccione un profesional...</option>
-        @for (p of professionals(); track p.id) {
-          <option [value]="p.id">{{ p.fullName }} ({{ p.specialty }})</option>
-        }
-      </select>
-    </div>
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="cancelAction()">Cancelar</button>
-    <button cButton color="primary" (click)="confirmReassign()" [disabled]="isActioning || !selectedProfessionalId">
-      @if (isActioning) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
-      Reasignar
-    </button>
-  </c-modal-footer>
-</c-modal>
 
-<!-- Modal: Eliminar Reporte -->
-<app-confirm-modal
-  [visible]="showDeleteModal"
-  title="Eliminar reporte huérfano"
-  messagePrefix="¿Confirmás la eliminación permanente del reporte &quot;"
-  [itemName]="selectedReport?.title ?? ''"
-  messageSuffix="&quot;? Esta acción no se puede deshacer."
-  confirmLabel="Eliminar"
-  confirmColor="danger"
-  [loading]="isActioning"
-  (confirm)="confirmDelete()"
-  (cancel)="cancelAction()">
-</app-confirm-modal>

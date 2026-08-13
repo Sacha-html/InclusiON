@@ -259,7 +259,7 @@
           </c-col>
         </c-row>
 
-        @if (selectedLoginMethod?.requiresPin) {
+        @if (+form.get('loginMethodId')?.value === 2 || selectedLoginMethod?.requiresPin) {
           <c-row class="mb-3">
             <c-col sm="6">
               <label cLabel for="pin">PIN (4 dígitos) *</label>
@@ -269,7 +269,11 @@
                      [valid]="submittedStep1 ? f['pin'].valid : undefined" />
               @if (submittedStep1 && f['pin'].errors) {
                 <c-form-feedback [valid]="false">
-                  El PIN debe tener 4 dígitos numéricos.
+                  @if (f['pin'].hasError('required')) {
+                    El PIN es obligatorio al seleccionar el método de acceso PIN.
+                  } @else {
+                    El PIN debe tener 4 dígitos numéricos.
+                  }
                 </c-form-feedback>
               }
             </c-col>

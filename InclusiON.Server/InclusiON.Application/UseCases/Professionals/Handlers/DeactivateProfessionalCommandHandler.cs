@@ -17,6 +17,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
     {
         private readonly IProfessionalsRepository _repository;
         private readonly IRefreshTokensRepository _refreshTokensRepository;
+        private readonly IReportsRepository _reportsRepository;
         private readonly IHttpContextService _httpContextService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<DeactivateProfessionalCommandHandler> _logger;
@@ -25,6 +26,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         public DeactivateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IRefreshTokensRepository refreshTokensRepository,
+            IReportsRepository reportsRepository,
             IHttpContextService httpContextService,
             IUnitOfWork unitOfWork,
             ILogger<DeactivateProfessionalCommandHandler> logger,
@@ -32,6 +34,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         {
             _repository = repository;
             _refreshTokensRepository = refreshTokensRepository;
+            _reportsRepository = reportsRepository;
             _httpContextService = httpContextService;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -54,6 +57,14 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 return ApiResponse<ProfessionalResponse>.ErrorResult(
                     ErrorCode.BusinessRuleViolation,
                     "El profesional ya se encuentra dado de baja");
+            }
+
+            var pendingReportsCount = await _reportsRepository.GetPendingReportsCountByProfessionalAsync(professional.Id, cancellationToken);
+            if (pendingReportsCount > 0)
+            {
+                return ApiResponse<ProfessionalResponse>.Conflict(
+                    ErrorCode.HasPendingReports,
+                    "Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.");
             }
 
             var dependentPersonsCount = await _repository.GetDependentAssistedLoginPersonsCountAsync(professional.UserId, cancellationToken);

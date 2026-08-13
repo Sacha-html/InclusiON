@@ -53,27 +53,29 @@ export class ListComponent implements OnInit {
       return active.filter(p => !p.classroomId && !p.classroomName);
     }
 
-    // 1. Buscamos el aula
+    // 1. Buscamos el aula seleccionada
     const selectedRoom = this.classrooms.find(
       c => c.id === this.selectedClassroomId || (c.id && c.id.toLowerCase() === this.selectedClassroomId.toLowerCase())
     );
 
-    // --- INICIO DE CONSOLE LOGS ---
-    console.log('--- DEBUGGING EXTREMO ---');
-    console.log('1. ID seleccionado en el combo:', this.selectedClassroomId);
-    console.log('2. ¿Encontró el objeto aula?:', selectedRoom !== undefined);
-    console.log('3. Propiedades del aula encontrada:', selectedRoom);
-    console.log('4. Lista de todas las aulas:', this.classrooms);
-    console.log('5. Alumnos en total (this.persons):', this.persons);
-    console.log('6. Alumnos activos (active):', active);
-    console.log('7. Nombres de aula en alumnos activos:', active.map(p => p.classroomName));
-    // --- FIN DE CONSOLE LOGS ---
-
-    // 2. Extraemos el nombre asumiendo que la propiedad es 'name'
     const targetName = selectedRoom?.name?.toLowerCase()?.trim();
+    const targetIdRaw = this.selectedClassroomId.replace(/^ENC:/i, '').toLowerCase().trim();
 
-    // 3. Filtramos
-    return active.filter(p => p.classroomName?.toLowerCase()?.trim() === targetName);
+    // 2. Coincidencia dual: por nombre de aula (primaria) o por ID sanitizado (fallback)
+    return active.filter(p => {
+      if (targetName && p.classroomName?.toLowerCase()?.trim() === targetName) {
+        return true;
+      }
+
+      if (p.classroomId) {
+        const personRoomIdRaw = p.classroomId.replace(/^ENC:/i, '').toLowerCase().trim();
+        if (personRoomIdRaw === targetIdRaw) {
+          return true;
+        }
+      }
+
+      return false;
+    });
   }
 
   ngOnInit(): void {

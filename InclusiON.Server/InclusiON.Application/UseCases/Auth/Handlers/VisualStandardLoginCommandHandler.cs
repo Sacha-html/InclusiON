@@ -33,81 +33,12 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var person = await _repository.GetPersonByUserIdAsync(command.UserId, cancellationToken);
-
-            if (person == null)
-            {
-                return ApiResponse<VisualLoginResponse>.ErrorResult(
-                    ErrorCode.UserNotFound,
-                    ErrorMessages.UserNotFound);
-            }
-
-            var user = person.User;
-
-            if (await _identityService.IsLockedOutAsync(user))
-            {
-                var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
-                var secondsRemaining = lockoutEnd.HasValue
-                    ? (int)(lockoutEnd.Value - DateTimeOffset.UtcNow).TotalSeconds
-                    : 0;
-
-                return ApiResponse<VisualLoginResponse>.SuccessResult(
-                    new VisualLoginResponse
-                    {
-                        Success = false,
-                        IsLocked = true,
-                        LockoutSecondsRemaining = secondsRemaining,
-                        ErrorMessage = ErrorMessages.AccountLocked
-                    });
-            }
-
-            var signInStatus = await _identityService.CheckPasswordAsync(
-                user,
-                command.Password,
-                lockoutOnFailure: true);
-
-            if (signInStatus != SignInStatus.Success)
-            {
-                var failedCount = await _identityService.GetAccessFailedCountAsync(user);
-                var remaining = MaxFailedAttempts - failedCount;
-
-                if (signInStatus == SignInStatus.LockedOut)
+            return await Task.FromResult(ApiResponse<VisualLoginResponse>.SuccessResult(
+                new VisualLoginResponse
                 {
-                    var lockoutEnd = await _identityService.GetLockoutEndDateAsync(user);
-                    var secondsRemaining = lockoutEnd.HasValue
-                        ? (int)(lockoutEnd.Value - DateTimeOffset.UtcNow).TotalSeconds
-                        : 0;
-
-                    return ApiResponse<VisualLoginResponse>.SuccessResult(
-                        new VisualLoginResponse
-                        {
-                            Success = false,
-                            IsLocked = true,
-                            LockoutSecondsRemaining = secondsRemaining,
-                            ErrorMessage = ErrorMessages.AccountLocked
-                        });
-                }
-
-                return ApiResponse<VisualLoginResponse>.SuccessResult(
-                    new VisualLoginResponse
-                    {
-                        Success = false,
-                        RemainingAttempts = remaining > 0 ? remaining : 0,
-                        ErrorMessage = ErrorMessages.PasswordIncorrect
-                    });
-            }
-
-            var refreshTokenExpiryDays = command.RememberDevice ? 30 : 1;
-
-            return await _loginSessionService.CreateVisualLoginSessionAsync(
-                user,
-                person,
-                refreshTokenExpiryDays,
-                command.DeviceId,
-                command.RememberDevice,
-                Constants.RevokeReasons.NewLogin,
-                SuccessMessages.VisualLoginSuccessful,
-                cancellationToken);
+                    Success = false,
+                    ErrorMessage = "El inicio de sesión por contraseña ya no está disponible para alumnos. Utilizá PIN o inicio de sesión Asistido."
+                }));
         }
     }
 }

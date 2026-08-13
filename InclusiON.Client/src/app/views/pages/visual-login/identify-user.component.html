@@ -49,7 +49,7 @@
             <div class="user-type-badge mb-3" aria-label="Tipo de usuario seleccionado">
               {{ userTypeLabel }}
             </div>
-            <h1 id="identify-heading" class="h2 fw-bold mb-3" style="color: var(--a11y-text)">Escribe tu nombre</h1>
+            <h1 id="identify-heading" class="h2 fw-bold mb-3" style="color: var(--a11y-text)">{{ userType === 'FAMILY' ? 'Escribe tu email' : 'Escribe tu nombre' }}</h1>
             <p class="fs-5 mb-0" id="identify-instructions" style="color: var(--a11y-text-muted)">Así te encontramos</p>
           </header>
 
@@ -67,7 +67,7 @@
 
           <!-- Input -->
           <div class="mb-4">
-            <label for="identifierInput" class="visually-hidden">Tu nombre</label>
+            <label for="identifierInput" class="visually-hidden">{{ userType === 'FAMILY' ? 'Tu email' : 'Tu nombre' }}</label>
             <div class="input-group input-group-lg" role="group">
               <span class="input-group-text" aria-hidden="true" style="background-color: var(--a11y-bg-secondary); border-color: var(--a11y-border)">
                 <svg cIcon name="cilUser" aria-hidden="true" style="color: var(--a11y-text-muted)"></svg>

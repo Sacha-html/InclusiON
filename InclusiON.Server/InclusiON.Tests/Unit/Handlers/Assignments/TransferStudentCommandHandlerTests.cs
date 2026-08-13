@@ -141,8 +141,8 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
             var report3 = new Report { ProfessionalId = FromProfId, Status = ReportStatus.Approved }; // Should not reassign approved
 
             _reportsRepo.GetPagedAsync(
-                page: 1, pageSize: 999, search: null, personId: PersonId.ToString(), professionalId: FromProfId.ToString(),
-                reportTypeId: null, isActive: true, onlyDeactivatedProfessionals: null, status: null, dateFrom: null, dateTo: null,
+                page: 1, pageSize: Arg.Any<int>(), search: null, personId: PersonId.ToString(), professionalId: FromProfId.ToString(),
+                reportTypeId: null, isActive: true, status: null, dateFrom: null, dateTo: null,
                 sortBy: null, sortDirection: "ASC", cancellationToken: Arg.Any<CancellationToken>())
             .Returns(new PagedResponse<Report> { Data = new List<Report> { report1, report2, report3 } });
 

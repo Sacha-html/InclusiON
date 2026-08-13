@@ -28,7 +28,7 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
             _repo.GetPagedAsync(
                 Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(),
                 Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(),
-                Arg.Any<bool?>(), Arg.Any<bool?>(), Arg.Any<string?>(),
+                Arg.Any<bool?>(), Arg.Any<string?>(),
                 Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
                 Arg.Any<SortField?>(), Arg.Any<string>(), Arg.Any<List<int>?>(),
                 Arg.Any<List<string>?>(), Arg.Any<CancellationToken>())
@@ -41,7 +41,22 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
             _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:test");
             var handler = new GetReportsQueryHandler(_repo, _encryption);
             var result = await handler.HandleAsync(
-                new GetReportsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, "asc", null), default);
+                new GetReportsQuery(
+                    Page: 1,
+                    PageSize: 10,
+                    Search: null,
+                    PersonId: null,
+                    ProfessionalId: null,
+                    ReportTypeId: null,
+                    IsActive: null,
+                    Status: null,
+                    DateFrom: null,
+                    DateTo: null,
+                    SortBy: null,
+                    SortDirection: "asc",
+                    InstitutionIds: null,
+                    PersonIds: null
+                ), default);
 
             result.Success.Should().BeTrue();
             result.Data!.TotalRecords.Should().Be(1);

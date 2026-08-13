@@ -78,7 +78,7 @@ export class ChangeLoginMethodModalComponent implements OnChanges {
   }
 
   get availableMethods(): LoginMethodItem[] {
-    return this.loginMethods.filter(m => [METHOD_STANDARD, METHOD_PIN, METHOD_ASSISTED].includes(m.id));
+    return this.loginMethods.filter(m => [METHOD_PIN, METHOD_ASSISTED].includes(m.id) && m.code !== 'STANDARD');
   }
 
   get selectedMethod(): LoginMethodItem | null {

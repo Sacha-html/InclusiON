@@ -164,51 +164,16 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         }
 
         [Fact]
-        public async Task StandardMethod_UserNotFoundInIdentity_ReturnsPersonNotFound()
+        public async Task StandardMethod_ReturnsLoginMethodNotAllowed()
         {
             _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(APerson());
             _repo.GetLoginMethodByIdAsync(1, Arg.Any<CancellationToken>()).Returns(ActiveMethod(1, "Standard"));
-            _identity.FindByIdAsync(UserId).Returns((User?)null);
 
             var result = await BuildSut().HandleAsync(Cmd(loginMethodId: 1), default);
 
             result.Success.Should().BeFalse();
-            result.ErrorCode.Should().Be(ErrorCode.PersonNotFound);
-        }
-
-        [Fact]
-        public async Task StandardMethod_ResetFails_ReturnsValidationFailed()
-        {
-            var user = new User { Id = UserId };
-            _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(APerson());
-            _repo.GetLoginMethodByIdAsync(1, Arg.Any<CancellationToken>()).Returns(ActiveMethod(1, "Standard"));
-            _identity.FindByIdAsync(UserId).Returns(user);
-            _identity.ResetPasswordAsync(user, Arg.Any<string>())
-                .Returns((false, (IEnumerable<string>)new[] { "Token inválido" }));
-
-            var result = await BuildSut().HandleAsync(Cmd(loginMethodId: 1), default);
-
-            result.Success.Should().BeFalse();
-            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
-        }
-
-        [Fact]
-        public async Task StandardMethod_Valid_ReturnsSuccessWithTemporaryPassword()
-        {
-            var user = new User { Id = UserId };
-            _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(APerson());
-            _repo.GetLoginMethodByIdAsync(1, Arg.Any<CancellationToken>()).Returns(ActiveMethod(1, "Standard"));
-            _identity.FindByIdAsync(UserId).Returns(user);
-            _identity.ResetPasswordAsync(user, Arg.Any<string>())
-                .Returns((true, Array.Empty<string>()));
-
-            var result = await BuildSut().HandleAsync(Cmd(loginMethodId: 1), default);
-
-            result.Success.Should().BeTrue();
-            result.Data!.TemporaryPassword.Should().NotBeNullOrEmpty();
-            user.MustChangePassword.Should().BeTrue();
-            await _identity.Received(1).UpdateUserAsync(user);
-            await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+            result.ErrorCode.Should().Be(ErrorCode.LoginMethodNotAllowed);
+            result.Message.Should().Contain("no está disponible para alumnos");
         }
 
         [Fact]
