@@ -17,3 +17,4 @@ export * from './roadmap';
 export * from './catalogs';
 export * from './roles';
 export * from './dashboard';
+export * from './analytics/analytics.response';

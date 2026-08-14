@@ -3,7 +3,7 @@
   <c-row>
     <c-col xs="12" class="text-center py-5">
       <c-spinner color="primary" />
-      <p class="mt-2 text-body-secondary">Cargando dashboard…</p>
+      <p class="mt-2 text-body-secondary">Cargando dashboard institucional…</p>
     </c-col>
   </c-row>
 }
@@ -19,19 +19,142 @@
   </c-row>
 }
 
-<!-- KPIs -->
+<!-- Dashboard Principal -->
 @if (!loading && !error && dashboard) {
 
-  <c-row class="mb-4">
-    <c-col xs="12">
-      <h1 class="h4 mb-1">Dashboard</h1>
-      <p class="text-body-secondary mb-0">Resumen del sistema.</p>
+  <c-row class="mb-4 align-items-center">
+    <c-col xs="12" md="8">
+      <h1 class="h4 mb-1 fw-bold">Panel de Control del Administrador</h1>
+      <p class="text-body-secondary mb-0">Auditoría institucional, analítica pedagógica y seguimiento documental.</p>
+    </c-col>
+    <c-col xs="12" md="4" class="text-md-end mt-2 mt-md-0">
+      <a routerLink="/admin/reports" class="btn btn-outline-primary btn-sm">
+        Ver Todos los Reportes &rarr;
+      </a>
     </c-col>
   </c-row>
 
-  <!-- Fila 1: Personal -->
-  <c-row class="mb-3">
+  <!-- ── Fila 1: KPIs Documentales y Workflow de Reportes ─────────────────────── -->
+  @if (reportsAnalytics) {
+    <c-row class="mb-4">
+      <!-- Pendientes de Revisión (Clickable Card hacia reportes pendientes) -->
+      <c-col xs="12" sm="6" lg="3" class="mb-3">
+        <c-card
+          class="h-100 shadow-sm clickable-kpi-card"
+          [style.border-left]="'5px solid ' + (reportsAnalytics.pendientes_Revision > 0 ? '#FF6D00' : '#00C853')"
+          role="button"
+          tabindex="0"
+          (click)="navigateToPendingReports()"
+          (keydown.enter)="navigateToPendingReports()"
+          title="Haz clic para ver y gestionar los reportes pendientes de revisión">
+          <c-card-body class="d-flex flex-column justify-content-between text-center">
+            <div>
+              <p class="text-body-secondary small mb-1 fw-semibold">Pendientes de Revisión</p>
+              <div class="display-6 fw-bold my-1"
+                   [class.text-warning]="reportsAnalytics.pendientes_Revision > 0"
+                   [class.text-success]="reportsAnalytics.pendientes_Revision === 0">
+                {{ reportsAnalytics.pendientes_Revision }}
+              </div>
+            </div>
+            <div class="mt-2">
+              @if (reportsAnalytics.pendientes_Revision > 0) {
+                <span class="small text-warning fw-semibold">
+                  ⚠️ Revisar informes
+                </span>
+              } @else {
+                <span class="badge bg-success-subtle text-success border">Bandeja al día ✓</span>
+              }
+            </div>
+          </c-card-body>
+        </c-card>
+      </c-col>
 
+      <!-- Índice de Lectura Familiar -->
+      <c-col xs="12" sm="6" lg="3" class="mb-3">
+        <c-card class="h-100 shadow-sm" style="border-left: 5px solid #00C853;">
+          <c-card-body class="d-flex flex-column justify-content-between text-center">
+            <div>
+              <p class="text-body-secondary small mb-1 fw-semibold">Índice de Lectura Familiar</p>
+              <div class="display-6 fw-bold text-success my-1">
+                {{ reportsAnalytics.indice_Lectura_Familiar }}%
+              </div>
+            </div>
+            <p class="small text-body-secondary mb-0 mt-2">
+              De informes aprobados leídos
+            </p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <!-- Tasa de Rechazo -->
+      <c-col xs="12" sm="6" lg="3" class="mb-3">
+        <c-card class="h-100 shadow-sm" style="border-left: 5px solid #D50000;">
+          <c-card-body class="d-flex flex-column justify-content-between text-center">
+            <div>
+              <p class="text-body-secondary small mb-1 fw-semibold">Tasa de Rechazo</p>
+              <div class="display-6 fw-bold text-danger my-1">
+                {{ reportsAnalytics.tasa_Rechazo }}%
+              </div>
+            </div>
+            <p class="small text-body-secondary mb-0 mt-2">
+              {{ reportsAnalytics.rechazados_Total }} informes devueltos
+            </p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <!-- Total de Reportes -->
+      <c-col xs="12" sm="6" lg="3" class="mb-3">
+        <c-card class="h-100 shadow-sm" style="border-left: 5px solid #1A237E;">
+          <c-card-body class="d-flex flex-column justify-content-between text-center">
+            <div>
+              <p class="text-body-secondary small mb-1 fw-semibold">Total de Informes</p>
+              <div class="display-6 fw-bold text-primary my-1">
+                {{ reportsAnalytics.total_Reportes }}
+              </div>
+            </div>
+            <p class="small text-body-secondary mb-0 mt-2">
+              {{ reportsAnalytics.aprobados_Total }} aprobados históricamente
+            </p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  }
+
+  <!-- ── Fila de Gráficos de Analítica Documental ─────────────────────────────── -->
+  @if (reportsAnalytics) {
+    <c-row class="mb-4">
+      <!-- Ranking de Productividad de Profesionales -->
+      <c-col xs="12" md="6" class="mb-3 mb-md-0">
+        <c-card class="h-100 shadow-sm">
+          <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
+            <div class="fw-semibold">Productividad de Profesionales</div>
+            <span class="badge bg-success-subtle text-success border">Informes Aprobados</span>
+          </c-card-header>
+          <c-card-body>
+            <app-professional-productivity-chart [items]="reportsAnalytics.ranking_Profesionales" />
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <!-- Distribución de Estados de Reportes -->
+      <c-col xs="12" md="6">
+        <c-card class="h-100 shadow-sm">
+          <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
+            <div class="fw-semibold">Distribución de Estados de Informes</div>
+            <span class="badge bg-primary-subtle text-primary border font-monospace">Auditoría de Estados</span>
+          </c-card-header>
+          <c-card-body>
+            <app-report-status-pie-chart [items]="reportsAnalytics.distribucion_Estados" />
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  }
+
+  <!-- ── Fila de Resumen Institucional y Usuarios ─────────────────────────────── -->
+  <c-row class="mb-4">
     <c-col xs="12" sm="6" lg="3" class="mb-3">
       <app-stat-card
         label="Profesionales activos"
@@ -39,25 +162,6 @@
         linkText="Ver todos"
         linkUrl="/admin/professionals"
       />
-    </c-col>
-
-    <c-col xs="12" sm="6" lg="3" class="mb-3">
-      <c-card class="h-100" [style.border-color]="dashboard.pendingValidations > 0 ? 'var(--cui-warning)' : ''">
-        <c-card-body class="text-center">
-          <p class="text-body-secondary small mb-1">Validaciones pendientes</p>
-          <div
-            class="display-6 fw-bold"
-            [class.text-warning]="dashboard.pendingValidations > 0"
-            [class.text-success]="dashboard.pendingValidations === 0">
-            {{ dashboard.pendingValidations }}
-          </div>
-          @if (dashboard.pendingValidations > 0) {
-            <a routerLink="/admin/professionals" class="btn btn-sm btn-warning mt-1">Revisar</a>
-          } @else {
-            <p class="small text-success mb-0 mt-1">Al día ✓</p>
-          }
-        </c-card-body>
-      </c-card>
     </c-col>
 
     <c-col xs="12" sm="6" lg="3" class="mb-3">
@@ -78,59 +182,77 @@
       />
     </c-col>
 
-  </c-row>
-
-  <!-- Fila 2: Actividades, Reportes + Instituciones (GlobalAdmin) -->
-  <c-row class="mb-3">
-
-    @if (isGlobalAdmin && dashboard.totalInstitutions !== undefined) {
-      <c-col xs="12" sm="6" lg="4" class="mb-3">
-        <app-stat-card
-          label="Instituciones activas"
-          [value]="dashboard.totalInstitutions!"
-          linkText="Ver todas"
-          linkUrl="/admin/institutions"
-        />
-      </c-col>
-    }
-
-    <c-col xs="12" sm="6" [lg]="isGlobalAdmin ? 4 : 6" class="mb-3">
+    <c-col xs="12" sm="6" lg="3" class="mb-3">
       <app-stat-card
         label="Asignaciones activas"
         [value]="dashboard.activeAssignments"
       />
     </c-col>
-
-    <c-col xs="12" sm="6" [lg]="isGlobalAdmin ? 4 : 6" class="mb-3">
-      <c-card class="h-100" [style.border-color]="dashboard.reportsPendingApproval > 0 ? 'var(--cui-warning)' : ''">
-        <c-card-body class="text-center">
-          <p class="text-body-secondary small mb-1">Reportes pendientes de aprobación</p>
-          <div
-            class="display-6 fw-bold"
-            [class.text-warning]="dashboard.reportsPendingApproval > 0"
-            [class.text-success]="dashboard.reportsPendingApproval === 0">
-            {{ dashboard.reportsPendingApproval }}
-          </div>
-          @if (dashboard.reportsPendingApproval > 0) {
-            <a routerLink="/admin/reports" class="btn btn-sm btn-warning mt-1">Revisar</a>
-          }
-        </c-card-body>
-      </c-card>
-    </c-col>
-
   </c-row>
 
-  <!-- Fila 3: Reportes aprobados este mes -->
-  <c-row>
-    <c-col xs="12" sm="6" lg="4" class="mb-3">
-      <app-stat-card
-        label="Reportes aprobados este mes"
-        [value]="dashboard.reportsApprovedThisMonth"
-        color="success"
-        linkText="Ver reportes"
-        linkUrl="/admin/reports"
-      />
-    </c-col>
-  </c-row>
+  <!-- ── KPIs Analíticos de Aprendizaje y Roadmap ─────────────────────────────── -->
+  @if (analytics) {
+    <c-row class="mb-4">
+      <c-col xs="12" sm="6" lg="4" class="mb-3">
+        <c-card class="h-100 shadow-sm border-primary">
+          <c-card-body class="text-center">
+            <p class="text-body-secondary small mb-1 fw-semibold">KPI GAS Promedio</p>
+            <div class="display-6 fw-bold text-primary my-1">
+              {{ analytics.promedio_GAS >= 0 ? '+' : '' }}{{ analytics.promedio_GAS }}
+            </div>
+            <p class="small text-body-secondary mb-0 mt-1">Escala clínica [-2, +2]</p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <c-col xs="12" sm="6" lg="4" class="mb-3">
+        <c-card class="h-100 shadow-sm border-success">
+          <c-card-body class="text-center">
+            <p class="text-body-secondary small mb-1 fw-semibold">Tasa de Éxito Global</p>
+            <div class="display-6 fw-bold text-success my-1">
+              {{ analytics.promedioExito }}%
+            </div>
+            <p class="small text-body-secondary mb-0 mt-1">{{ analytics.totalActividadesCompletadas }} sesiones analizadas</p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <c-col xs="12" sm="6" lg="4" class="mb-3">
+        <c-card class="h-100 shadow-sm" [class.border-warning]="analytics.alertasFrustracion > 0">
+          <c-card-body class="text-center">
+            <p class="text-body-secondary small mb-1 fw-semibold">Alertas de Estancamiento</p>
+            <div class="display-6 fw-bold my-1" [class.text-warning]="analytics.alertasFrustracion > 0">
+              {{ analytics.alertasFrustracion }}
+            </div>
+            <p class="small text-body-secondary mb-0 mt-1">Requieren atención</p>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+
+    <!-- Gráficos de Roadmap y Categorías -->
+    <c-row class="mb-4">
+      <c-col xs="12" md="6" class="mb-3 mb-md-0">
+        <c-card class="h-100 shadow-sm">
+          <c-card-body>
+            <h5 class="card-title fw-semibold mb-3">Rendimiento por Categoría Pedagógica</h5>
+            <app-high-contrast-pie-chart [items]="analytics.rendimiento_Por_Categoria" />
+          </c-card-body>
+        </c-card>
+      </c-col>
+
+      <c-col xs="12" md="6">
+        <c-card class="h-100 shadow-sm">
+          <c-card-body>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="card-title fw-semibold mb-0">Distribución Institucional por Niveles</h5>
+              <span class="badge bg-primary font-monospace">Niveles 1 - 10</span>
+            </div>
+            <app-level-histogram-chart [items]="analytics.distribucion_Por_Nivel" />
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  }
 
 }

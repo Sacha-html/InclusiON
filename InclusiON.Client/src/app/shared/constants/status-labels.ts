@@ -11,7 +11,7 @@ export const AssignmentStatus = {
 
 export const ReportStatus = {
   Borrador:  'Borrador',
-  Enviado:   'Enviado',
+  Enviado:   'Pendiente',
   Aprobado:  'Aprobado',
   Rechazado: 'Rechazado',
 } as const;

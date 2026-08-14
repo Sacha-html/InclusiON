@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CatalogsService, ReportsService, ToastService } from '@services';
 import { PersonsService } from '@services/persons.service';
@@ -51,6 +51,7 @@ export class ListComponent implements OnInit {
   private readonly personsService       = inject(PersonsService);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly router               = inject(Router);
+  private readonly route                = inject(ActivatedRoute);
 
   reports       = signal<ReportListItemResponse[]>([]);
   persons       = signal<PersonListItemResponse[]>([]);
@@ -105,23 +106,15 @@ export class ListComponent implements OnInit {
       type: 'actions',
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
-        {
-          action: 'approve',
-          label: 'Aprobar',
-          icon: 'cilCheckCircle',
-          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
-        },
-        {
-          action: 'reject',
-          label: 'Rechazar',
-          icon: 'cilXCircle',
-          visible: (item: ReportListItemResponse) => item.status === ReportStatus.Submitted,
-        },
       ],
     },
   ];
 
   ngOnInit(): void {
+    const statusParam = this.route.snapshot.queryParamMap.get('status');
+    if (statusParam) {
+      this.statusFilter = statusParam;
+    }
     this.loadReports();
     this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
     this.personsService.getPersons({ pageSize: 500 }).subscribe(r => this.persons.set(r.data));
