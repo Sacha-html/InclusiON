@@ -6,14 +6,12 @@ using InclusiON.Domain.Models;
 namespace InclusiON.Data.Seeders
 {
     /// <summary>
-    /// Seeder de datos analíticos y métricas simuladas sobre las actividades existentes.
-    /// Puebla la tabla ActivitySessions con 100 a 200 registros distribuidos en los últimos 30 días
-    /// para alimentar dashboards de KPIs de Profesionales y Administradores.
+    /// Seeder de métricas secuenciales del Roadmap ("Mi Camino").
+    /// Simula que todos los alumnos registrados avanzan en los 10 niveles del Roadmap en estricto orden cronológico,
+    /// respetando la regla pedagógica de que un alumno solo accede al nivel N si obtuvo > 60% de éxito en el nivel N-1.
     /// </summary>
     public static class MetricsDataSeeder
     {
-        private static readonly int[] GasScores = [-2, -1, 0, 1, 2];
-
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
@@ -27,96 +25,140 @@ namespace InclusiON.Data.Seeders
                 return;
             }
 
-            // Paso A (Fetch): Obtener Actividades, Alumnos y Profesionales
-            // 1. Actividades reales de profesionales (excluyendo plantillas de roadmap) o todas las actividades activas
-            var activities = await context.Activities
-                .Where(a => a.IsActive && !a.IsTemplate)
+            // 1. Recuperación de Entidades (Fetch)
+            // A. Todos los alumnos registrados activos
+            var students = await context.PersonsWithDisability
+                .Where(p => p.IsActive)
                 .ToListAsync();
 
-            if (activities.Count == 0)
+            if (students.Count == 0)
             {
-                // Fallback si no hay actividades de profesionales: usar cualquier actividad activa
-                activities = await context.Activities.Where(a => a.IsActive).ToListAsync();
-            }
-
-            if (activities.Count == 0)
-            {
-                logger?.LogWarning("MetricsDataSeeder: No se encontraron actividades activas en la base de datos.");
+                logger?.LogWarning("MetricsDataSeeder: No se encontraron alumnos registrados en la base de datos.");
                 return;
             }
 
-            // 2. Alumnos con sus relaciones de profesionales o aulas
-            var studentProfessionalPairs = await context.ProfessionalPersons
-                .Where(pp => pp.IsActive && pp.Person.IsActive && pp.Professional.IsActive)
-                .Select(pp => new { StudentId = pp.PersonId, ProfessionalId = pp.ProfessionalId })
-                .Distinct()
+            // B. Las 10 actividades globales del Roadmap ordenadas ascendentemente (1 al 10)
+            var roadmapActivities = await context.Activities
+                .Where(a => a.IsActive && a.IsTemplate && a.RoadmapOrder != null)
+                .OrderBy(a => a.RoadmapOrder)
                 .ToListAsync();
 
-            // Fallback: Si no hay pares en ProfessionalPersons, emparejar alumnos con su supervisor o el primer profesional
-            if (studentProfessionalPairs.Count == 0)
+            if (roadmapActivities.Count == 0)
             {
-                var students = await context.PersonsWithDisability.Where(p => p.IsActive).ToListAsync();
-                var defaultProf = await context.Professionals.FirstOrDefaultAsync(p => p.IsActive);
-
-                if (students.Count == 0 || defaultProf == null)
-                {
-                    logger?.LogWarning("MetricsDataSeeder: No se encontraron alumnos o profesionales activos para sembrar métricas.");
-                    return;
-                }
-
-                studentProfessionalPairs = students
-                    .Select(s => new { StudentId = s.Id, ProfessionalId = s.SupervisorUserId ?? defaultProf.Id })
-                    .ToList();
+                // Fallback: Si no están marcadas como IsTemplate, buscar por RoadmapOrder
+                roadmapActivities = await context.Activities
+                    .Where(a => a.IsActive && a.RoadmapOrder != null)
+                    .OrderBy(a => a.RoadmapOrder)
+                    .ToListAsync();
             }
 
-            // Paso B (Loop): Generar entre 100 y 200 registros de sesiones ficticias
-            var random = new Random(42); // Seed fija para reproducibilidad uniforme
-            var totalSessions = random.Next(120, 180); // Entre 120 y 180 registros
-            var sessions = new List<ActivitySession>(totalSessions);
+            if (roadmapActivities.Count == 0)
+            {
+                logger?.LogWarning("MetricsDataSeeder: No se encontraron actividades del Roadmap para sembrar.");
+                return;
+            }
+
+            // C. Mapa de alumno -> profesional a cargo (a través de ProfessionalPersons o fallback)
+            var professionalPersons = await context.ProfessionalPersons
+                .Where(pp => pp.IsActive && pp.Person.IsActive && pp.Professional.IsActive)
+                .ToListAsync();
+
+            var defaultProf = await context.Professionals.FirstOrDefaultAsync(p => p.IsActive);
+            if (defaultProf == null)
+            {
+                logger?.LogWarning("MetricsDataSeeder: No se encontró ningún profesional activo.");
+                return;
+            }
+
+            var studentProfMap = new Dictionary<Guid, Guid>();
+            foreach (var student in students)
+            {
+                var pp = professionalPersons.FirstOrDefault(x => x.PersonId == student.Id);
+                var profId = pp?.ProfessionalId ?? student.SupervisorUserId ?? defaultProf.Id;
+                studentProfMap[student.Id] = profId;
+            }
+
+            // 2. Lógica de Simulación Secuencial (Simulation Loop)
+            var random = new Random(42); // Seed para reproducibilidad
+            var sessions = new List<ActivitySession>();
             var now = DateTime.UtcNow;
 
-            for (int i = 0; i < totalSessions; i++)
+            foreach (var student in students)
             {
-                // Paso C (Randomization)
-                var pair = studentProfessionalPairs[random.Next(studentProfessionalPairs.Count)];
-                var activity = activities[random.Next(activities.Count)];
+                var profId = studentProfMap[student.Id];
 
-                // Fechas distribuidas uniformemente en los últimos 30 días
-                var daysAgo = random.Next(0, 30);
-                var minutesAgo = random.Next(0, 1440);
-                var dateCompleted = now.AddDays(-daysAgo).AddMinutes(-minutesAgo);
+                // Fecha base inicial para el Nivel 1 (entre 25 y 29 días atrás)
+                var currentDate = now.AddDays(-random.Next(25, 30))
+                                     .AddHours(random.Next(8, 17))
+                                     .AddMinutes(random.Next(0, 60));
 
-                // SuccessRate: entre 40% y 100%
-                var successRate = (decimal)random.Next(40, 101);
-
-                // ErrorCount: entre 0 y 6
-                var errorCount = random.Next(0, 7);
-
-                // TimeSpentSeconds: entre 30 y 300 segundos
-                var timeSpent = random.Next(30, 301);
-
-                // GasScore: valor cualitativo (-2, -1, 0, 1, 2)
-                var gasScore = GasScores[random.Next(GasScores.Length)];
-
-                sessions.Add(new ActivitySession
+                foreach (var activity in roadmapActivities)
                 {
-                    StudentId = pair.StudentId,
-                    ProfessionalId = pair.ProfessionalId,
-                    ActivityId = activity.Id,
-                    DateCompleted = dateCompleted,
-                    SuccessRate = successRate,
-                    ErrorCount = errorCount,
-                    TimeSpentSeconds = timeSpent,
-                    GasScore = gasScore,
-                    CreatedAt = dateCompleted,
-                    IsActive = true,
-                });
+                    // Regla de Progresión Estricta:
+                    // Ponderación: 80% de las veces supera el 60% (avance), 20% estancamiento (<= 60%)
+                    var isSuccess = random.NextDouble() < 0.80;
+
+                    decimal successRate;
+                    int errorCount;
+                    int gasScore;
+
+                    if (isSuccess)
+                    {
+                        // Éxito: 61% a 100%
+                        successRate = random.Next(61, 101);
+                        errorCount = random.Next(0, 4); // 0 a 3 errores
+                        gasScore = successRate >= 85 ? random.Next(1, 3) : random.Next(0, 2); // [0, +2]
+                    }
+                    else
+                    {
+                        // Estancamiento / Fallo: 30% a 60%
+                        successRate = random.Next(30, 61);
+                        errorCount = random.Next(4, 11); // 4 a 10 errores
+                        gasScore = random.Next(-2, 0); // [-2, -1]
+                    }
+
+                    var timeSpent = random.Next(40, 301); // 40 a 300 segundos
+
+                    // Garantizar que la fecha no supere el presente
+                    if (currentDate > now)
+                    {
+                        currentDate = now.AddMinutes(-random.Next(5, 60));
+                    }
+
+                    sessions.Add(new ActivitySession
+                    {
+                        StudentId = student.Id,
+                        ProfessionalId = profId,
+                        ActivityId = activity.Id,
+                        DateCompleted = currentDate,
+                        SuccessRate = successRate,
+                        ErrorCount = errorCount,
+                        TimeSpentSeconds = timeSpent,
+                        GasScore = gasScore,
+                        CreatedAt = currentDate,
+                        IsActive = true,
+                    });
+
+                    // Punto de quiebre (Break condition):
+                    // Si el éxito es <= 60%, el alumno no desbloquea el siguiente nivel. Detener simulación.
+                    if (successRate <= 60)
+                    {
+                        break;
+                    }
+
+                    // Fechas Coherentes (Time Flow):
+                    // Avanzar la fecha para el siguiente nivel (+1 a +3 días con horas hábiles)
+                    currentDate = currentDate.AddDays(random.Next(1, 4))
+                                             .AddHours(random.Next(1, 5))
+                                             .AddMinutes(random.Next(0, 60));
+                }
             }
 
+            // 4. Persistencia
             await context.ActivitySessions.AddRangeAsync(sessions);
             await context.SaveChangesAsync();
 
-            logger?.LogInformation("MetricsDataSeeder: Se generaron e insertaron exitosamente {Count} sesiones de métricas en ActivitySessions.", sessions.Count);
+            logger?.LogInformation("MetricsDataSeeder: Se generaron {Count} sesiones secuenciales del Roadmap para {StudentCount} alumnos.", sessions.Count, students.Count);
         }
     }
 }

@@ -4,6 +4,45 @@ Este documento detalla las nuevas funcionalidades, mejoras técnicas, refactoriz
 
 ---
 
+## 0. Dashboards Analíticos y Workflow Documental Institucional
+
+### Backend (.NET 10 / C# & EF Core)
+* **Controlador Analítico (`AnalyticsController.cs`):**
+  - `GET /api/Analytics/professional?aulaId={id}`: Retorna métricas en tiempo real para el profesional autenticado (KPI GAS promedio, tasa de éxito, distribución por nivel, rendimiento por categoría pedagógica, avance de tiempo y alertas de frustración).
+  - `GET /api/Analytics/professional/frustration-details`: Endpoint de *Drill-Down* que detalla sesiones con bloqueo, cantidad de errores, tasa de éxito, actividad y diagnóstico de frustración por alumno y aula.
+  - `GET /api/Analytics/admin`: Retorna la visión institucional consolidada del aprendizaje para todos los alumnos y profesionales.
+  - `GET /api/Analytics/admin/reports`: Endpoint de analítica documental que calcula:
+    * `Pendientes_Revision`: Total de informes en estado `Submitted`.
+    * `Tasa_Rechazo`: Porcentaje de informes devueltos con observaciones.
+    * `Indice_Lectura_Familiar`: Porcentaje de informes aprobados leídos por los tutores (`IsReadByFamily`).
+    * `Ranking_Profesionales`: Ranking de productividad docente consultando a todos los profesionales activos en la base de datos (con inclusión automática inmediata de nuevos registros).
+    * `Distribucion_Estados`: Distribución cuantitativa y porcentual para gráficos de auditoría.
+* **Transiciones de Workflow (`ReportsController.cs`):**
+  - Soporte de métodos `PATCH` y `PUT` para `/api/Reports/{id}/approve` y `/api/Reports/{id}/reject`.
+  - Aprobación transaccional con disparo en segundo plano de notificación al familiar/tutor a cargo del alumno.
+  - Rechazo con validación de comentario obligatorio (`AdminComment`) devuelto al profesional.
+* **Data Seeder Relacional (`ReportsDataSeeder.cs`):**
+  - Generación de 255 reportes relacionales simulados distribuidos a lo largo del último año con ponderaciones exactas: 60% `Approved` (80% con confirmación de lectura familiar), 20% `Submitted`, 10% `Draft` y 10% `Rejected` con observaciones clínicas.
+
+### Frontend (Angular)
+* **Componentes de Visualización y Gráficos de Alto Contraste:**
+  - `HighContrastPieChartComponent`: Gráfico de torta/donut interactivo con paleta de alto contraste, elevación dimensional en hover (`hoverOffset: 14px`) y tooltips flotantes en tiempo real.
+  - `LevelHistogramChartComponent`: Histograma interactivo de barras de 10 niveles pedagógicos con altura ampliada a 420px y métricas de superación y estancamiento.
+  - `ClassroomRankingChartComponent`: Gráfico de barras horizontales para el Dashboard Profesional que compara el porcentaje de éxito entre aulas cuando está en vista general ("Todas mis aulas").
+  - `ProfessionalProductivityChartComponent`: Gráfico comparativo para el Dashboard Administrador con podio (#1, #2, #3), conteo total de informes y tasa de aprobación.
+  - `ReportStatusPieChartComponent`: Gráfico de torta interactivo para la auditoría de estados de informes institucionales.
+* **Dashboard del Profesional:**
+  - Selector dinámico de aulas reactivo que recalcula todos los KPIs y gráficos al instante.
+  - Tarjeta de *Alertas de Frustración* clickeable (`.clickable-card`) con modal interactivo de *Drill-Down*.
+* **Dashboard del Administrador:**
+  - Scorecards de alto impacto: *Pendientes de Revisión* (destacado en naranja con alerta), *Índice de Lectura Familiar* (en verde), *Tasa de Rechazo* y *Total de Informes*.
+  - Tarjeta interactiva de *Pendientes de Revisión* (`.clickable-kpi-card`) con navegación por clic hacia `/admin/reports?status=Submitted`.
+* **Módulo de Reportes (`/admin/reports`):**
+  - Columna de acciones configurada exclusivamente con la opción **`Ver`** (🔍) para obligar a la lectura integral del informe previo a su aprobación o rechazo en la vista de detalle.
+  - Unificación global de terminología: el estado `Submitted` ahora se visualiza en toda la aplicación como **"Pendiente"** o **"Pendiente de revisión"** en lugar de "Enviado".
+
+---
+
 ## 1. Migración del Calendario a Base de Datos
 
 ### Backend (.NET 10)
