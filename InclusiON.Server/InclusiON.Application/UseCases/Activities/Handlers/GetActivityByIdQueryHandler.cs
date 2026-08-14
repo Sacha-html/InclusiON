@@ -28,10 +28,6 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             if (activity is null)
                 return ApiResponse<ActivityResponse>.NotFound("Actividad");
 
-            // Si no es estándar ni plantilla, verificar que pertenezca al profesional autenticado
-            if (!activity.IsStandardActivity && !activity.IsTemplate && activity.ProfessionalId != query.ProfessionalId)
-                return ApiResponse<ActivityResponse>.Forbidden();
-
             var dto = ActivityResponse.From(activity);
             dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(activity.Id.ToString()));
             return ApiResponse<ActivityResponse>.SuccessResult(dto);
