@@ -16,3 +16,8 @@ export * from './stat-card/stat-card.component';
 export { ActorAvatarComponent } from './actor-avatar/actor-avatar.component';
 export { SkillChipComponent } from './skill-chip/skill-chip.component';
 export { SkillRadarChartComponent } from './skill-radar-chart/skill-radar-chart.component';
+export { HighContrastPieChartComponent } from './high-contrast-pie-chart/high-contrast-pie-chart.component';
+export { LevelHistogramChartComponent } from './level-histogram-chart/level-histogram-chart.component';
+export { ClassroomRankingChartComponent } from './classroom-ranking-chart/classroom-ranking-chart.component';
+export { ProfessionalProductivityChartComponent } from './professional-productivity-chart/professional-productivity-chart.component';
+export { ReportStatusPieChartComponent } from './report-status-pie-chart/report-status-pie-chart.component';

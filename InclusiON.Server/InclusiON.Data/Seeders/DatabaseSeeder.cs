@@ -40,6 +40,9 @@ namespace InclusiON.Data.Seeders
 
             // Semillado de métricas analíticas y sesiones de actividades para KPIs
             await MetricsDataSeeder.SeedAsync(serviceProvider);
+
+            // Semillado relacional de reportes para flujos de aprobación y dashboards
+            await ReportsDataSeeder.SeedAsync(serviceProvider);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
@@ -536,16 +539,6 @@ namespace InclusiON.Data.Seeders
                     ProfessionalId = Guid.Parse("00000000-0000-0000-0000-000000000200")
                 },
                 new {
-                    Id = Guid.Parse("00000000-0000-0000-0000-000000000021"),
-                    Email = "docente@test.com",
-                    Password = "Doc123!",
-                    FirstName = "Laura",
-                    LastName = "Gonzalez",
-                    LicenseNumber = "PROF-002",
-                    Specialty = "Educacion Especial",
-                    ProfessionalId = Guid.Parse("00000000-0000-0000-0000-000000000201")
-                },
-                new {
                     Id = Guid.Parse("00000000-0000-0000-0000-000000000022"),
                     Email = "profesional2@test.com",
                     Password = "Password123!",
@@ -881,25 +874,6 @@ namespace InclusiON.Data.Seeders
                             IsActive = true,
                             AssignedAt = DateTime.UtcNow
                         });
-                    }
-
-                    var professional2 = await context.Professionals.FirstOrDefaultAsync(p => p.User.Email == "docente@test.com");
-                    if (professional2 != null)
-                    {
-                        var studentProf2Linked = await context.ProfessionalPersons
-                            .AnyAsync(pp => pp.ProfessionalId == professional2.Id && pp.PersonId == student.Id);
-                        if (!studentProf2Linked)
-                        {
-                            context.ProfessionalPersons.Add(new ProfessionalPerson
-                            {
-                                ProfessionalId = professional2.Id,
-                                PersonId = student.Id,
-                                IsPrimaryProfessional = false,
-                                CanSuperviseLogin = true,
-                                IsActive = true,
-                                AssignedAt = DateTime.UtcNow
-                            });
-                        }
                     }
 
                     var professional3 = await context.Professionals.FirstOrDefaultAsync(p => p.User.Email == "profesional2@test.com");

@@ -57,3 +57,20 @@
     margin-top: 0.25rem;
   }
 }
+
+.clickable-card {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    transform: translateY(-3px);
+    background-color: var(--cui-tertiary-bg, rgba(220, 53, 69, 0.06));
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.12);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+}

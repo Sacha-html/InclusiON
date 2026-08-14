@@ -1,11 +1,11 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import {
-  CardBodyComponent, CardComponent, ColComponent, RowComponent,
+  CardBodyComponent, CardComponent, CardHeaderComponent, ColComponent, RowComponent,
   SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
   ModalComponent, ModalHeaderComponent, ModalBodyComponent,
   ModalFooterComponent, ModalTitleDirective, FormSelectDirective,
@@ -27,17 +27,24 @@ import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-lab
 import { forkJoin } from 'rxjs';
 import { environment } from '@env';
 
+import { HighContrastPieChartComponent, LevelHistogramChartComponent, ClassroomRankingChartComponent } from '@shared/components';
+import { AnalyticsService } from '@services/analytics.service';
+import { ClassroomResponse, AnalyticsDashboardResponse, FrustrationDetailResponse } from '@models';
+
 @Component({
   selector: 'app-professional-dashboard',
   standalone: true,
   imports: [
     FormsModule,
-    CardComponent, CardBodyComponent, RowComponent, ColComponent,
+    CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent, ColComponent,
     SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent,
     ModalFooterComponent, ModalTitleDirective, FormSelectDirective,
     FormControlDirective,
-    IconDirective, DatePipe,
+    IconDirective, DatePipe, DecimalPipe,
+    HighContrastPieChartComponent,
+    LevelHistogramChartComponent,
+    ClassroomRankingChartComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
@@ -50,12 +57,14 @@ export class DetailComponent implements OnInit, OnDestroy {
   private readonly messagesService      = inject(MessagesService);
   private readonly signalrService       = inject(SignalrService);
   private readonly toastService         = inject(ToastService);
+  private readonly analyticsService     = inject(AnalyticsService);
   private readonly router               = inject(Router);
   private readonly http                 = inject(HttpClient);
 
   #notifSub = Subscription.EMPTY;
 
   isLoading = true;
+  isLoadingAnalytics = false;
   professional: ProfessionalResponse | null = null;
   persons: ProfessionalPersonResponse[] = [];
   invitations: InvitationResponse[] = [];
@@ -63,9 +72,18 @@ export class DetailComponent implements OnInit, OnDestroy {
   unreadMessages = 0;
   weeklyProgress: WeeklyProgressResponse | null = null;
 
+  classrooms: ClassroomResponse[] = [];
+  selectedClassroomId = '';
+  analytics: AnalyticsDashboardResponse | null = null;
+
   draftReportsCount     = 0;
   submittedReportsCount = 0;
   rejectedReportsCount  = 0;
+
+  // Frustration Details Modal State
+  showFrustrationModal = false;
+  frustrationDetails: FrustrationDetailResponse[] = [];
+  isLoadingFrustrationDetails = false;
 
   // Sharing Modal State
   showShareModal = false;
@@ -135,6 +153,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     forkJoin({
       persons:         this.assignmentsService.getPersonsByProfessional(professionalId),
       invitations:     this.invitationsService.getAll(),
+      classrooms:      this.assignmentsService.getClassroomsByProfessional(professionalId),
       reports:         this.reportsService.getReports({
                          page: 1,
                          professionalId,
@@ -148,9 +167,10 @@ export class DetailComponent implements OnInit, OnDestroy {
       countSubmitted:  getCount(this.http, reportsUrl, countParams(ReportStatus.Submitted)),
       countRejected:   getCount(this.http, reportsUrl, countParams(ReportStatus.Rejected)),
     }).subscribe({
-      next: ({ persons, invitations, reports, unread, weeklyProgress, countDraft, countSubmitted, countRejected }) => {
+      next: ({ persons, invitations, classrooms, reports, unread, weeklyProgress, countDraft, countSubmitted, countRejected }) => {
         this.persons               = persons;
         this.invitations           = invitations.data;
+        this.classrooms            = classrooms;
         this.recentReports         = reports.data;
         this.unreadMessages        = unread;
         this.weeklyProgress        = weeklyProgress;
@@ -158,12 +178,46 @@ export class DetailComponent implements OnInit, OnDestroy {
         this.submittedReportsCount = countSubmitted.totalCount;
         this.rejectedReportsCount  = countRejected.totalCount;
         this.isLoading             = false;
+
+        // Cargar métricas analíticas iniciales (todas las aulas)
+        this.loadAnalytics();
       },
       error: () => {
         this.isLoading = false;
         this.toastService.error('Error al cargar el panel');
       },
     });
+  }
+
+  loadAnalytics(classroomId?: string): void {
+    this.isLoadingAnalytics = true;
+    this.analyticsService.getProfessionalAnalytics(classroomId).subscribe({
+      next: (data) => {
+        this.analytics = data;
+        this.isLoadingAnalytics = false;
+
+        // Actualizar dinámicamente los 4 números del resumen semanal según el aula seleccionada
+        if (this.weeklyProgress && data) {
+          this.weeklyProgress = {
+            ...this.weeklyProgress,
+            personCount: data.personasActivas,
+            totalCompleted: data.totalActividadesCompletadas,
+            avgSuccess: Math.round(data.promedioExito),
+            frustrationAlerts: data.alertasFrustracion,
+          };
+        }
+      },
+      error: () => {
+        this.isLoadingAnalytics = false;
+        this.toastService.error('Error al actualizar las métricas analíticas.');
+      }
+    });
+  }
+
+  onChangeClassroom(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedClassroomId = select?.value || '';
+    this.loadAnalytics(this.selectedClassroomId);
   }
 
   navigateTo(path: string, queryParams?: Record<string, string>): void {
@@ -309,5 +363,26 @@ export class DetailComponent implements OnInit, OnDestroy {
         this.toastService.error('Error al enviar las métricas.');
       }
     });
+  }
+
+  openFrustrationDetails(): void {
+    this.showFrustrationModal = true;
+    this.isLoadingFrustrationDetails = true;
+    this.frustrationDetails = [];
+
+    this.analyticsService.getFrustrationDetails(this.selectedClassroomId).subscribe({
+      next: (details) => {
+        this.frustrationDetails = details || [];
+        this.isLoadingFrustrationDetails = false;
+      },
+      error: () => {
+        this.isLoadingFrustrationDetails = false;
+        this.toastService.error('Error al cargar el detalle de alertas de frustración.');
+      }
+    });
+  }
+
+  closeFrustrationModal(): void {
+    this.showFrustrationModal = false;
   }
 }

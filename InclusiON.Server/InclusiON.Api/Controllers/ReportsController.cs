@@ -241,6 +241,7 @@ namespace InclusiON.Api.Controllers
 
         /// <summary>Admin aprueba el reporte. El familiar podrá consultarlo.</summary>
         [HttpPatch("{reportId}/approve")]
+        [HttpPut("{reportId}/approve")]
         [Authorize(Policy = "reports:approve")]
         [ReportAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
@@ -279,6 +280,7 @@ namespace InclusiON.Api.Controllers
 
         /// <summary>Admin rechaza el reporte con un motivo para el profesional.</summary>
         [HttpPatch("{reportId}/reject")]
+        [HttpPut("{reportId}/reject")]
         [Authorize(Policy = "reports:reject")]
         [ReportAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<ReportResponse>), StatusCodes.Status200OK)]
