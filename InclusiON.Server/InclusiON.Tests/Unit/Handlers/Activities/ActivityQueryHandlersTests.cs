@@ -93,7 +93,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         [Fact]
-        public async Task GetActivityById_BelongsToOtherProfessional_ReturnsForbidden()
+        public async Task GetActivityById_BelongsToOtherProfessional_ReturnsSuccess()
         {
             var otherProfId = Guid.NewGuid();
             var activity = AnActivity(1, isStandard: false);
@@ -105,8 +105,9 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             var result = await new GetActivityByIdQueryHandler(_activitiesRepo, _encryption)
                 .HandleAsync(new GetActivityByIdQuery(1, ProfId), default);
 
-            result.Success.Should().BeFalse();
-            result.ErrorCode.Should().Be(ErrorCode.Forbidden);
+            result.Success.Should().BeTrue();
+            result.Data.Should().NotBeNull();
+            result.Data!.Title.Should().Be("Actividad Test");
         }
 
         [Fact]

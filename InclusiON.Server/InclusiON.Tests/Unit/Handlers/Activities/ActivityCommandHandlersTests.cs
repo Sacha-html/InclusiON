@@ -437,15 +437,18 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         [Fact]
-        public async Task NonStandardActivity_DifferentProfessional_ReturnsForbidden()
+        public async Task NonStandardActivity_DifferentProfessional_Allowed()
         {
             _activitiesRepo.GetByIdAsync(ActivityId, Arg.Any<CancellationToken>())
                 .Returns(AnActivity(isStandard: false, profId: OtherProfId));
+            _dateTime.UtcNow.Returns(Now);
+            var created = ACreatedAssignment();
+            _repo.GetByIdAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(created);
 
             var result = await BuildSut().HandleAsync(Cmd(profId: ProfId), default);
 
-            result.Success.Should().BeFalse();
-            result.ErrorCode.Should().Be(ErrorCode.Forbidden);
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateAsync(Arg.Any<ActivityAssignment>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]

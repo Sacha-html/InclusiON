@@ -59,9 +59,6 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             if (activity is null || !activity.IsActive)
                 return ApiResponse<ActivityAssignmentResponse>.NotFound("Actividad");
 
-            if (!activity.IsStandardActivity && activity.ProfessionalId != command.AssignedByProfessionalId)
-                return ApiResponse<ActivityAssignmentResponse>.Forbidden();
-
             if (command.DueDate.HasValue && command.DueDate.Value.Date < _dateTime.UtcNow.Date)
             {
                 return ApiResponse<ActivityAssignmentResponse>.ErrorResult(

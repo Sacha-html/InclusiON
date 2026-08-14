@@ -54,8 +54,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             }
             else
             {
-                // Aislamiento estricto: solo actividades del profesional que no sean plantillas
-                query = query.Where(a => a.ProfessionalId == professionalId && !a.IsTemplate);
+                // Todas las actividades creadas por profesionales y estándar son visibles para todos los profesionales (excluyendo plantillas del roadmap)
+                query = query.Where(a => !a.IsTemplate);
             }
 
             if (!string.IsNullOrWhiteSpace(search))
