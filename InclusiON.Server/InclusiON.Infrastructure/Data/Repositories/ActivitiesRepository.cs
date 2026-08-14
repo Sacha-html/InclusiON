@@ -35,6 +35,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             int? templateTypeId,
             bool? isActive,
             bool? isStandard,
+            bool? isTemplate,
             int page,
             int pageSize,
             CancellationToken cancellationToken = default)
@@ -42,10 +43,20 @@ namespace InclusiON.Infrastructure.Data.Repositories
             var query = _context.Activities
                 .Include(a => a.Category)
                 .Include(a => a.SkillArea)
+                .Include(a => a.Professional)
                 .Include(a => a.Content)
                     .ThenInclude(c => c!.TemplateType)
-                .Where(a => a.ProfessionalId == professionalId || a.IsStandardActivity)
                 .AsNoTracking();
+
+            if (isTemplate.HasValue && isTemplate.Value)
+            {
+                query = query.Where(a => a.IsTemplate);
+            }
+            else
+            {
+                // Aislamiento estricto: solo actividades del profesional que no sean plantillas
+                query = query.Where(a => a.ProfessionalId == professionalId && !a.IsTemplate);
+            }
 
             if (!string.IsNullOrWhiteSpace(search))
                 query = query.Where(a =>
@@ -144,6 +155,21 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     a.Description,
                     a.Instructions,
                     a.Content != null ? a.Content.ContentJson : null))
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Activity>> GetRoadmapTemplatesAsync(
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Activities
+                .Include(a => a.Category)
+                .Include(a => a.SkillArea)
+                .Include(a => a.Professional)
+                .Include(a => a.Content)
+                    .ThenInclude(c => c!.TemplateType)
+                .Where(a => a.IsTemplate && a.RoadmapOrder != null)
+                .OrderBy(a => a.RoadmapOrder)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }

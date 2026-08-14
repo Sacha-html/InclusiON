@@ -3,7 +3,12 @@
   <c-col>
     <h1 id="pro-activities-title" class="h4 mb-0" tabindex="-1">Mis Actividades</h1>
   </c-col>
-  <c-col xs="auto" class="d-flex gap-2">
+  <c-col xs="auto" class="d-flex gap-2 align-items-center">
+    @if (canCreate) {
+      <a cButton color="primary" size="sm" routerLink="/pro/activities/new" id="btn-new-activity">
+        + Nueva actividad
+      </a>
+    }
     <button cButton [color]="semanticMode() ? 'warning' : 'secondary'" size="sm"
             (click)="toggleSemanticMode()"
             [title]="semanticMode() ? 'Volver a búsqueda por filtros' : 'Buscar por significado (IA)'">
@@ -105,9 +110,7 @@
     [currentPage]="1"
     [pageSize]="semanticResults().length || 1"
     [totalItems]="semanticResults().length"
-    [headerButtons]="headerButtons"
     (rowAction)="onRowAction($event)"
-    (headerAction)="onHeaderAction($event)"
   />
 } @else {
   <app-data-table
@@ -117,13 +120,11 @@
     [currentPage]="currentPage()"
     [pageSize]="pageSize()"
     [totalItems]="totalRecords()"
-    [headerButtons]="headerButtons"
     [showSearch]="true"
     (searchAction)="onSearch($event)"
     (pageChange)="onPageChange($event)"
     (sortAction)="onSort($event)"
     (rowAction)="onRowAction($event)"
-    (headerAction)="onHeaderAction($event)"
   />
 }
 

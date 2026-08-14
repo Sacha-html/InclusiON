@@ -19,21 +19,55 @@ export class ActivitiesService {
 
   getActivities(request: GetActivitiesRequest): Observable<PagedResponse<ActivityListItemResponse>> {
     let params = new HttpParams();
-    if (request.page)           params = params.set('page', request.page.toString());
-    if (request.pageSize)       params = params.set('pageSize', request.pageSize.toString());
-    if (request.search)         params = params.set('search', request.search);
-    if (request.categoryId)     params = params.set('categoryId', request.categoryId.toString());
-    if (request.skillAreaId)    params = params.set('skillAreaId', request.skillAreaId.toString());
+    if (request.page) params = params.set('page', request.page.toString());
+    if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
+    if (request.search) params = params.set('search', request.search);
+    if (request.categoryId) params = params.set('categoryId', request.categoryId.toString());
+    if (request.skillAreaId) params = params.set('skillAreaId', request.skillAreaId.toString());
     if (request.templateTypeId) params = params.set('templateTypeId', request.templateTypeId.toString());
     if (request.isActive !== undefined && request.isActive !== null)
       params = params.set('isActive', request.isActive.toString());
     if (request.isStandard !== undefined && request.isStandard !== null)
       params = params.set('isStandard', request.isStandard.toString());
-    if (request.sortBy)         params = params.set('sortBy', request.sortBy);
-    if (request.sortDirection)  params = params.set('sortDirection', request.sortDirection);
+    if (request.isTemplate !== undefined && request.isTemplate !== null)
+      params = params.set('isTemplate', request.isTemplate.toString());
+    if (request.sortBy) params = params.set('sortBy', request.sortBy);
+    if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
 
     return this.http
       .get<ApiResponse<PagedResponse<ActivityListItemResponse>>>(this.baseUrl, { params })
+      .pipe(unwrapResponse());
+  }
+
+  getTemplates(request: GetActivitiesRequest = {}): Observable<PagedResponse<ActivityListItemResponse>> {
+    let params = new HttpParams();
+    if (request.page) params = params.set('page', request.page.toString());
+    if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
+    if (request.search) params = params.set('search', request.search);
+    if (request.categoryId) params = params.set('categoryId', request.categoryId.toString());
+    if (request.skillAreaId) params = params.set('skillAreaId', request.skillAreaId.toString());
+    if (request.templateTypeId) params = params.set('templateTypeId', request.templateTypeId.toString());
+    if (request.isActive !== undefined && request.isActive !== null)
+      params = params.set('isActive', request.isActive.toString());
+    if (request.isStandard !== undefined && request.isStandard !== null)
+      params = params.set('isStandard', request.isStandard.toString());
+    if (request.sortBy) params = params.set('sortBy', request.sortBy);
+    if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
+
+    return this.http
+      .get<ApiResponse<PagedResponse<ActivityListItemResponse>>>(`${this.baseUrl}/templates`, { params })
+      .pipe(unwrapResponse());
+  }
+
+  getRoadmap(): Observable<ActivityListItemResponse[]> {
+    return this.http
+      .get<ApiResponse<ActivityListItemResponse[]>>(`${this.baseUrl}/roadmap`)
+      .pipe(unwrapResponse());
+  }
+
+  clone(id: string): Observable<ActivityResponse> {
+    return this.http
+      .post<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${encodeURIComponent(id)}/clone`, {})
       .pipe(unwrapResponse());
   }
 
@@ -51,7 +85,7 @@ export class ActivitiesService {
 
   update(id: string, request: UpdateActivityRequest): Observable<ActivityResponse> {
     return this.http
-      .put<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${id}`, request)
+      .put<ApiResponse<ActivityResponse>>(`${this.baseUrl}/${encodeURIComponent(id)}`, request)
       .pipe(unwrapResponse());
   }
 
@@ -96,6 +130,15 @@ export class ActivitiesService {
     return this.http
       .get<ApiResponse<ActivityAssignmentResponse>>(
         `${environment.apiUrl}/activity-assignments/${encryptedId}`
+      )
+      .pipe(unwrapResponse());
+  }
+
+  autoAssign(activityId: string): Observable<ActivityAssignmentResponse> {
+    return this.http
+      .post<ApiResponse<ActivityAssignmentResponse>>(
+        `${this.assignmentsUrl}/auto-assign/${activityId}`,
+        {}
       )
       .pipe(unwrapResponse());
   }

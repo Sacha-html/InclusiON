@@ -2,7 +2,7 @@ namespace InclusiON.Application.UseCases.Activities.Commands
 {
     public record UpdateActivityCommand(
         int ActivityId,
-        Guid ProfessionalId,
+        Guid? ProfessionalId,
         string Title,
         string? Description,
         string? Instructions,
@@ -16,6 +16,7 @@ namespace InclusiON.Application.UseCases.Activities.Commands
         bool UsesEasyReading,
         bool UsesPictograms,
         string? ResourcesUrl,
-        string ContentJson
+        string ContentJson,
+        bool IsTemplate = false
     );
 }

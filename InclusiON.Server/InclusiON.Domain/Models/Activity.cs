@@ -15,9 +15,9 @@ namespace InclusiON.Domain.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// ID del profesional que creo la actividad.
+        /// ID del profesional que creo la actividad. Opcional para plantillas globales.
         /// </summary>
-        public Guid ProfessionalId { get; set; }
+        public Guid? ProfessionalId { get; set; }
 
         /// <summary>
         /// ID de la categoria de la actividad.
@@ -89,12 +89,22 @@ namespace InclusiON.Domain.Models
         /// Indica si es una actividad estandar del sistema (no editable).
         /// </summary>
         public bool IsStandardActivity { get; set; } = false;
+
+        /// <summary>
+        /// Indica si es una plantilla global de actividad (disponible para todos).
+        /// </summary>
+        public bool IsTemplate { get; set; } = false;
+
+        /// <summary>
+        /// Orden secuencial en el Roadmap oficial (1-10).
+        /// </summary>
+        public int? RoadmapOrder { get; set; }
         #endregion
 
         /// <summary>
         /// Profesional creador de la actividad.
         /// </summary>
-        public virtual Professional Professional { get; set; } = null!;
+        public virtual Professional? Professional { get; set; }
 
         /// <summary>
         /// Categoria de la actividad.

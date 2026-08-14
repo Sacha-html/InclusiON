@@ -60,99 +60,110 @@ namespace InclusiON.Infrastructure.Services
                 new {
                     Seq = 1,
                     Title = "Rompecabezas de 2 piezas",
-                    Desc = "Unir la mitad de una imagen de un objeto cotidiano con su otra mitad.",
+                    OldTitles = new[] { "Rompecabezas de 2 piezas" },
+                    Desc = "Une la mitad de la imagen para completar el objeto cotidiano.",
                     CatId = 8,
                     TemplateCode = "CLASSIFY",
-                    Instructions = "Arrastra y une las dos piezas para formar la imagen completa.",
-                    ContentJson = "{\"instruction\":\"Arrastra y une las dos piezas para formar la imagen completa.\",\"pairs\":[{\"id\":\"manzana\",\"label\":\"Manzana\",\"pictogramId\":2462},{\"id\":\"pelota\",\"label\":\"Pelota\",\"pictogramId\":3241}]}"
+                    Instructions = "Arrastra y une la mitad de la imagen para completar el objeto cotidiano.",
+                    ContentJson = """{"pairs":[{"id":1,"label":"Taza (Derecha)","pictogramId":"pic_taza_der"},{"id":2,"label":"Taza (Izquierda)","pictogramId":"pic_taza_izq"}]}"""
                 },
                 new {
                     Seq = 2,
                     Title = "Mi rutina visual",
-                    Desc = "Ordenar 3 pictogramas cronológicos (ej: Despertar, Comer, Ir al colegio).",
+                    OldTitles = new[] { "Mi rutina visual" },
+                    Desc = "Ordena los pasos de tu rutina diaria.",
                     CatId = 3,
                     TemplateCode = "ORDER_SEQUENCE",
-                    Instructions = "Ordena los pictogramas según lo que haces primero en el día.",
-                    ContentJson = "{\"instruction\":\"Ordena los pictogramas según lo que haces primero en el día.\",\"items\":[{\"id\":\"1\",\"label\":\"Cepillarse los dientes\",\"pictogramId\":30086,\"correctPosition\":0},{\"id\":\"2\",\"label\":\"Desayunar\",\"pictogramId\":28667,\"correctPosition\":1},{\"id\":\"3\",\"label\":\"Ir al colegio\",\"pictogramId\":32446,\"correctPosition\":2}]}"
+                    Instructions = "Ordena los pasos de tu rutina diaria.",
+                    ContentJson = """{"items":[{"id":1,"label":"Despertar","pictogramId":"pic_despertar","correctPosition":1},{"id":2,"label":"Comer","pictogramId":"pic_comer","correctPosition":2},{"id":3,"label":"Jugar","pictogramId":"pic_jugar","correctPosition":3}]}"""
                 },
                 new {
                     Seq = 3,
-                    Title = "Concepto 'Muchos / Pocos'",
-                    Desc = "Tocar el grupo que tiene más frutas.",
+                    Title = "Concepto Muchos / Pocos",
+                    OldTitles = new[] { "Concepto 'Muchos / Pocos'", "Concepto Muchos / Pocos" },
+                    Desc = "¿Dónde hay muchas manzanas?",
                     CatId = 2,
-                    TemplateCode = "OPTION_SELECT",
-                    Instructions = "Toca el grupo que tiene más frutas.",
-                    ContentJson = "{\"instruction\":\"Toca el grupo que tiene más frutas.\",\"question\":\"¿Dónde hay más fruta?\",\"options\":[{\"id\":\"muchas\",\"text\":\"Muchas frutas\",\"pictogramId\":28339},{\"id\":\"pocas\",\"text\":\"Menos fruta\",\"pictogramId\":3247}],\"correctOptionId\":\"muchas\"}"
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    Instructions = "¿Dónde hay muchas manzanas?",
+                    ContentJson = """{"correctItemId":2,"items":[{"id":1,"pictogramId":"pic_una_manzana","label":"Pocas (1)"},{"id":2,"pictogramId":"pic_muchas_manzanas","label":"Muchas (8)"}]}"""
                 },
                 new {
                     Seq = 4,
-                    Title = "Explotar burbujas",
-                    Desc = "Reventar la burbuja que tiene la estrella de mar adentro.",
+                    Title = "Secuencia de acción (Camino Visual)",
+                    OldTitles = new[] { "Explotar burbujas", "Secuencia de acción (Camino Visual)" },
+                    Desc = "Toca las burbujas en orden para terminar el camino.",
                     CatId = 5,
-                    TemplateCode = "PICTOGRAM_SELECT",
-                    Instructions = "Reventá la burbuja que tenga la estrella de mar adentro.",
-                    ContentJson = "{\"instruction\":\"Reventá la burbuja que tenga la estrella de mar adentro.\",\"correctItemId\":\"estrella\",\"items\":[{\"id\":\"auto\",\"label\":\"Auto\",\"pictogramId\":2339},{\"id\":\"estrella\",\"label\":\"Estrella de mar\",\"pictogramId\":3310},{\"id\":\"silla\",\"label\":\"Silla\",\"pictogramId\":3155}]}"
+                    TemplateCode = "ORDER_SEQUENCE",
+                    Instructions = "Toca las burbujas en orden para terminar el camino.",
+                    ContentJson = """{"items":[{"id":1,"label":"Burbuja 1","pictogramId":"pic_burbuja_1","correctPosition":1},{"id":2,"label":"Burbuja 2","pictogramId":"pic_burbuja_2","correctPosition":2},{"id":3,"label":"Burbuja 3","pictogramId":"pic_burbuja_3","correctPosition":3}]}"""
                 },
                 new {
                     Seq = 5,
-                    Title = "¿Dónde va cada cosa?",
-                    Desc = "Asociación Funcional Directa",
-                    CatId = 2,
-                    TemplateCode = "OPTION_SELECT",
-                    Instructions = "¿Qué va aquí?",
-                    ContentJson = "{\"instruction\":\"¿Qué va aquí?\",\"question\":\"¿Qué va aquí?\",\"questionPictogramId\":25900,\"options\":[{\"id\":\"almohada\",\"text\":\"Almohada\",\"pictogramId\":2250},{\"id\":\"pelota\",\"text\":\"Pelota\",\"pictogramId\":3241}],\"correctOptionId\":\"almohada\"}"
+                    Title = "Asociación Funcional Cotidiana",
+                    OldTitles = new[] { "¿Dónde va cada cosa?", "¿Qué quieres hacer?", "Asociación Funcional Cotidiana" },
+                    Desc = "Contexto: Cama. ¿Qué objeto va en la cama?",
+                    CatId = 8,
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    Instructions = "Contexto: Cama. ¿Qué objeto va en la cama?",
+                    ContentJson = """{"correctItemId":1,"items":[{"id":1,"pictogramId":"pic_almohada","label":"Almohada"},{"id":2,"pictogramId":"pic_pelota","label":"Pelota de fútbol"}]}"""
                 },
                 new {
                     Seq = 6,
-                    Title = "Conciencia fonológica",
-                    Desc = "Escuchar el sonido de una vocal y seleccionar el animal que empieza igual (ej: 'A' -> Araña).",
+                    Title = "Reconocimiento Fonológico",
+                    OldTitles = new[] { "Conciencia fonológica", "Reconocimiento Fonológico" },
+                    Desc = "¿Qué animal empieza con la letra A?",
                     CatId = 1,
-                    TemplateCode = "SOUND_RECOGNITION",
-                    Instructions = "Escucha el sonido y selecciona el dibujo que comience con esa letra.",
-                    ContentJson = "{\"instruction\":\"Escucha el sonido y selecciona el dibujo que comience con esa letra.\",\"question\":\"Sonido de la vocal A\",\"options\":[{\"id\":\"1\",\"text\":\"Araña\",\"pictogramId\":3028},{\"id\":\"2\",\"text\":\"Perro\",\"pictogramId\":9217},{\"id\":\"3\",\"text\":\"Gato\",\"pictogramId\":9214}],\"correctOptionId\":\"1\"}"
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    Instructions = "¿Qué animal empieza con la letra A?",
+                    ContentJson = """{"correctItemId":3,"items":[{"id":1,"pictogramId":"pic_perro","label":"Perro"},{"id":2,"pictogramId":"pic_gato","label":"Gato"},{"id":3,"pictogramId":"pic_arana","label":"Araña"}]}"""
                 },
                 new {
                     Seq = 7,
-                    Title = "Colorear libre",
-                    Desc = "Un lienzo digital con colores predefinidos donde solo deben rellenar formas grandes.",
-                    CatId = 6,
-                    TemplateCode = "OPTION_SELECT",
-                    Instructions = "Elige tus colores favoritos y rellena el dibujo libremente.",
-                    ContentJson = "{\"instruction\":\"Elige tus colores favoritos y rellena el dibujo libremente.\",\"question\":\"Colorea la Estrella\",\"options\":[{\"id\":\"amarillo\",\"text\":\"Amarillo\",\"pictogramId\":2854},{\"id\":\"azul\",\"text\":\"Azul\",\"pictogramId\":2854},{\"id\":\"rojo\",\"text\":\"Rojo\",\"pictogramId\":2854}],\"correctOptionId\":\"amarillo\"}"
+                    Title = "Identificación de Formas Básicas",
+                    OldTitles = new[] { "Colorear libre", "Identificación de Formas Básicas" },
+                    Desc = "¿Cuál es el círculo?",
+                    CatId = 2,
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    Instructions = "¿Cuál es el círculo?",
+                    ContentJson = """{"correctItemId":3,"items":[{"id":1,"pictogramId":"pic_cuadrado","label":"Cuadrado"},{"id":2,"pictogramId":"pic_triangulo","label":"Triángulo"},{"id":3,"pictogramId":"pic_circulo","label":"Círculo"}]}"""
                 },
                 new {
                     Seq = 8,
                     Title = "Vestirse para el frío",
-                    Desc = "Arrastrar una bufanda y un abrigo hacia un personaje.",
+                    OldTitles = new[] { "Vestirse para el frío" },
+                    Desc = "Guarda la ropa de invierno en el armario.",
                     CatId = 7,
                     TemplateCode = "CLASSIFY",
-                    Instructions = "Arrastra la bufanda y el abrigo para abrigar al personaje.",
-                    ContentJson = "{\"instruction\":\"Arrastra la bufanda y el abrigo para abrigar al personaje.\",\"pairs\":[{\"id\":\"1\",\"label\":\"Bufanda\",\"pictogramId\":5996},{\"id\":\"2\",\"label\":\"Abrigo\",\"pictogramId\":5992}]}"
+                    Instructions = "Guarda la ropa de invierno en el armario.",
+                    ContentJson = """{"pairs":[{"id":1,"label":"Invierno","pictogramId":"pic_bufanda"},{"id":2,"label":"Invierno","pictogramId":"pic_gorro"}]}"""
                 },
                 new {
                     Seq = 9,
-                    Title = "Clasificación por tamaño",
-                    Desc = "Ordenar 3 pelotas de 'Grande' a 'Pequeño'.",
+                    Title = "Seriación de Tamaños",
+                    OldTitles = new[] { "Clasificación por tamaño", "Seriación de Tamaños" },
+                    Desc = "Ordena las pelotas de la más pequeña a la más grande.",
                     CatId = 2,
                     TemplateCode = "ORDER_SEQUENCE",
-                    Instructions = "Ordena las pelotas de fútbol de la más grande a la más pequeña.",
-                    ContentJson = "{\"instruction\":\"Ordena las pelotas de fútbol de la más grande a la más pequeña.\",\"items\":[{\"id\":\"1\",\"label\":\"Grande\",\"pictogramId\":3270,\"correctPosition\":0},{\"id\":\"2\",\"label\":\"Mediano\",\"pictogramId\":3272,\"correctPosition\":1},{\"id\":\"3\",\"label\":\"Pequeño\",\"pictogramId\":3271,\"correctPosition\":2}]}"
+                    Instructions = "Ordena las pelotas de la más pequeña a la más grande.",
+                    ContentJson = """{"items":[{"id":1,"label":"Pequeña","pictogramId":"pic_pelota_chica","correctPosition":1},{"id":2,"label":"Mediana","pictogramId":"pic_pelota_mediana","correctPosition":2},{"id":3,"label":"Grande","pictogramId":"pic_pelota_grande","correctPosition":3}]}"""
                 },
                 new {
                     Seq = 10,
                     Title = "Encuentra el intruso",
-                    Desc = "Identificar qué objeto no pertenece a la categoría (ej: 3 frutas y 1 zapato).",
+                    OldTitles = new[] { "Encuentra el intruso" },
+                    Desc = "¿Qué objeto no pertenece a este grupo de frutas?",
                     CatId = 8,
-                    TemplateCode = "OPTION_SELECT",
-                    Instructions = "Toca el objeto que no pertenece al grupo.",
-                    ContentJson = "{\"instruction\":\"Toca el objeto que no pertenece al grupo.\",\"question\":\"¿Cuál es el intruso?\",\"options\":[{\"id\":\"manzana\",\"text\":\"Manzana\",\"pictogramId\":2479},{\"id\":\"pera\",\"text\":\"Pera\",\"pictogramId\":2483},{\"id\":\"banana\",\"text\":\"Banana\",\"pictogramId\":2480},{\"id\":\"zapato\",\"text\":\"Zapato\",\"pictogramId\":3113}],\"correctOptionId\":\"zapato\"}"
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    Instructions = "¿Qué objeto no pertenece a este grupo de frutas?",
+                    ContentJson = """{"correctItemId":4,"items":[{"id":1,"pictogramId":"pic_manzana","label":"Manzana"},{"id":2,"pictogramId":"pic_pera","label":"Pera"},{"id":3,"pictogramId":"pic_banana","label":"Banana"},{"id":4,"pictogramId":"pic_zapato","label":"Zapato"}]}"""
                 }
             };
 
             foreach (var def in activitiesDefinitions)
             {
-                var act = await _context.Activities.FirstOrDefaultAsync(a => a.Title == def.Title && a.IsStandardActivity, cancellationToken);
+                var act = await _context.Activities.FirstOrDefaultAsync(a => a.Title == def.Title || def.OldTitles.Contains(a.Title), cancellationToken);
                 var templateType = await _context.Set<ActivityTemplateType>().FirstOrDefaultAsync(t => t.Code == def.TemplateCode, cancellationToken);
+                var templateTypeId = templateType?.Id ?? 1;
 
                 if (act == null)
                 {
@@ -170,6 +181,7 @@ namespace InclusiON.Infrastructure.Services
                         UsesPictograms = true,
                         RequiresSupervision = false,
                         IsStandardActivity = true,
+                        IsTemplate = true,
                         ComplexityLevel = 1,
                         EstimatedDurationMinutes = 2,
                         CreatedAt = DateTime.UtcNow,
@@ -182,7 +194,7 @@ namespace InclusiON.Infrastructure.Services
                     var content = new ActivityContent
                     {
                         ActivityId = act.Id,
-                        TemplateTypeId = templateType?.Id ?? 1,
+                        TemplateTypeId = templateTypeId,
                         ContentJson = def.ContentJson,
                         CreatedAt = DateTime.UtcNow,
                         CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
@@ -192,16 +204,33 @@ namespace InclusiON.Infrastructure.Services
                 }
                 else
                 {
+                    act.Title = def.Title;
+                    act.Description = def.Desc;
+                    act.Instructions = def.Instructions;
+                    act.CategoryId = def.CatId;
+                    act.SkillAreaId = skillArea.Id;
+                    act.IsStandardActivity = true;
+                    act.IsTemplate = true;
+
                     var existingContent = await _context.Set<ActivityContent>().FirstOrDefaultAsync(c => c.ActivityId == act.Id, cancellationToken);
                     if (existingContent != null)
                     {
                         existingContent.ContentJson = def.ContentJson;
-                        if (templateType != null)
-                        {
-                            existingContent.TemplateTypeId = templateType.Id;
-                        }
-                        await _context.SaveChangesAsync(cancellationToken);
+                        existingContent.TemplateTypeId = templateTypeId;
                     }
+                    else
+                    {
+                        var content = new ActivityContent
+                        {
+                            ActivityId = act.Id,
+                            TemplateTypeId = templateTypeId,
+                            ContentJson = def.ContentJson,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                        };
+                        _context.Set<ActivityContent>().Add(content);
+                    }
+                    await _context.SaveChangesAsync(cancellationToken);
                 }
                 standardActivities.Add(act);
             }

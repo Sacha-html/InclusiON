@@ -19,9 +19,15 @@
   <c-card-header>
     <h5 cCardTitle>
       @if (savedActivity()) { Actividad creada }
-      @else if (currentStep() === 1) { Nueva Actividad — Identificación }
-      @else if (currentStep() === 2) { Nueva Actividad — Detalles }
-      @else { Nueva Actividad — {{ selectedTemplateName }} }
+      @else if (isTemplateMode()) {
+        @if (currentStep() === 1) { Nueva Plantilla del Roadmap — Identificación }
+        @else if (currentStep() === 2) { Nueva Plantilla del Roadmap — Detalles }
+        @else { Nueva Plantilla del Roadmap — {{ selectedTemplateName }} }
+      } @else {
+        @if (currentStep() === 1) { Nueva Actividad — Identificación }
+        @else if (currentStep() === 2) { Nueva Actividad — Detalles }
+        @else { Nueva Actividad — {{ selectedTemplateName }} }
+      }
     </h5>
   </c-card-header>
   <c-card-body>
@@ -104,9 +110,11 @@
 
       <c-row class="mb-3">
         <c-col xs="12" md="6">
-          <label class="form-label" for="act-complexity">Complejidad (1–5)</label>
+          <label class="form-label" for="act-complexity">
+            @if (isTemplateMode()) { Nivel del Roadmap (1–10) } @else { Complejidad (1–5) }
+          </label>
           <input cFormControl id="act-complexity" type="number" [(ngModel)]="meta.complexityLevel"
-                 name="complexityLevel" min="1" max="5" />
+                 name="complexityLevel" min="1" [attr.max]="isTemplateMode() ? 10 : 5" />
         </c-col>
         <c-col xs="12" md="6">
           <label class="form-label" for="act-duration">Duración estimada (min)</label>
@@ -141,12 +149,20 @@
             <label cFormCheckLabel for="chk-picto">Usa pictogramas</label>
           </c-form-check>
         </c-col>
-        <c-col xs="6" md="3">
+        <c-col xs="12" md="6">
           <c-form-check>
             <input cFormCheckInput type="checkbox" id="chk-super" [(ngModel)]="meta.requiresSupervision" name="requiresSupervision" />
             <label cFormCheckLabel for="chk-super">Requiere supervisión</label>
           </c-form-check>
         </c-col>
+        @if (!isTemplateMode()) {
+          <c-col xs="12" md="6">
+            <c-form-check>
+              <input cFormCheckInput type="checkbox" id="chk-template" [(ngModel)]="meta.isTemplate" name="isTemplate" />
+              <label cFormCheckLabel for="chk-template"><strong>Guardar como Plantilla Global (Roadmap)</strong></label>
+            </c-form-check>
+          </c-col>
+        }
       </c-row>
 
       <c-row>
@@ -181,7 +197,7 @@
           <button cButton type="button" color="primary" class="ms-2"
                   [disabled]="!step3Valid || isLoading()" (click)="submit()">
             @if (isLoading()) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
-            Guardar actividad
+            @if (isTemplateMode()) { Guardar plantilla } @else { Guardar actividad }
           </button>
           <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">
             Cancelar

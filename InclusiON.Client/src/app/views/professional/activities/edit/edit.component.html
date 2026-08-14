@@ -99,62 +99,22 @@
             <label cFormCheckLabel for="chk-super">Requiere supervisión</label>
           </c-form-check>
         </c-col>
+        <c-col xs="12" md="6">
+          <c-form-check>
+            <input cFormCheckInput type="checkbox" id="chk-template" [(ngModel)]="meta.isTemplate" name="isTemplate" />
+            <label cFormCheckLabel for="chk-template"><strong>Guardar como Plantilla Global (Roadmap)</strong></label>
+          </c-form-check>
+        </c-col>
       </c-row>
 
-      <!-- SELECT_FIGURE content editor -->
-      @if (isSelectFigure) {
-        <hr class="my-3" />
-        <h6 class="mb-3">Contenido — Seleccionar figura</h6>
-
-        <c-row class="mb-3">
-          <c-col xs="12">
-            <label class="form-label" for="sf-instruction">Instrucción *</label>
-            <input cFormControl id="sf-instruction" [(ngModel)]="content.instruction" name="instruction"
-                   placeholder="Ej: Seleccioná el animal que vive en la casa" />
-          </c-col>
-        </c-row>
-
-        <h6 class="mb-2">Opciones</h6>
-        @if (content.items.length > 0) {
-          <div class="items-grid mb-3">
-            @for (item of content.items; track item.id) {
-              <div class="item-card" [class.item-card--correct]="item.id === content.correctItemId">
-                <img [src]="pictogramUrl(item.pictogramId)" [alt]="item.label" class="item-img" />
-                <input cFormControl class="item-label-input" [(ngModel)]="item.label" [name]="'lbl-' + item.id" />
-                <div class="item-actions">
-                  <button cButton size="sm" color="success"                          [disabled]="item.id === content.correctItemId"
-                          (click)="setCorrect(item.id)">
-                    @if (item.id === content.correctItemId) { ✓ Correcta } @else { Marcar correcta }
-                  </button>
-                  <button cButton size="sm" color="danger" (click)="removeItem(item.id)">✕</button>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <h6 class="mb-2">Agregar pictograma (ARASAAC)</h6>
-        <c-row class="mb-2">
-          <c-col xs="12" md="6">
-            <input cFormControl [(ngModel)]="arasaacSearch" name="arasaacSearch"
-                   placeholder="Buscar pictograma..."
-                   (ngModelChange)="onArasaacSearchChange($event)" />
-          </c-col>
-          <c-col xs="auto" class="d-flex align-items-center">
-            @if (isSearching()) { <c-spinner size="sm" /> }
-          </c-col>
-        </c-row>
-
-        @if (arasaacResults().length > 0) {
-          <div class="arasaac-grid mb-3">
-            @for (pic of arasaacResults(); track pic.id) {
-              <button type="button" class="arasaac-card" (click)="addPictogram(pic)" [title]="pic.keyword">
-                <img [src]="pic.imageUrl" [alt]="pic.keyword" />
-                <span>{{ pic.keyword }}</span>
-              </button>
-            }
-          </div>
-        }
+      <!-- Dynamic Content Editor -->
+      <hr class="my-3" />
+      <h6 class="mb-3">Contenido de la actividad</h6>
+      <ng-container #editorHost></ng-container>
+      @if (editorUnavailable()) {
+        <c-alert color="warning" class="mb-3">
+          El editor para esta actividad no está disponible aún.
+        </c-alert>
       }
 
       <!-- Botones -->

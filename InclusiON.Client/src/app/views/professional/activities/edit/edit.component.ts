@@ -1,20 +1,20 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { afterNextRender, Component, inject, Injector, OnInit, signal, ViewChild, ViewContainerRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, Subject, switchMap, catchError, of } from 'rxjs';
 import { ActivitiesService } from '@services/activities.service';
-import { ArasaacService, ArasaacPictogram } from '@services/arasaac.service';
 import { CatalogsService } from '@services/catalogs.service';
 import { ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem, UpdateActivityRequest, SelectFigureContent, ActivityListItemResponse } from '@models';
+import { ActivityCategoryItem, ActivityTemplateTypeItem, SkillAreaItem, UpdateActivityRequest, ActivityListItemResponse } from '@models';
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
   ButtonDirective, ColComponent, RowComponent,
   FormControlDirective, FormSelectDirective,
   FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-  SpinnerComponent,
+  SpinnerComponent, AlertComponent,
 } from '@coreui/angular';
+import { CONTENT_EDITOR_REGISTRY } from '../new/editors/content-editor-registry';
+import { ContentEditorBaseComponent } from '../new/editors/content-editor-base.component';
 
 @Component({
   selector: 'app-activities-edit',
@@ -25,18 +25,20 @@ import {
     ButtonDirective, ColComponent, RowComponent,
     FormControlDirective, FormSelectDirective,
     FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
-    SpinnerComponent,
+    SpinnerComponent, AlertComponent,
   ],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.scss',
 })
 export class EditComponent implements OnInit {
   private readonly activitiesService = inject(ActivitiesService);
-  private readonly arasaacService    = inject(ArasaacService);
   private readonly catalogsService   = inject(CatalogsService);
   private readonly toastService      = inject(ToastService);
   private readonly router            = inject(Router);
   private readonly route             = inject(ActivatedRoute);
+  private readonly injector          = inject(Injector);
+
+  @ViewChild('editorHost', { read: ViewContainerRef }) private editorHost!: ViewContainerRef;
 
   activityId = '';
   templateTypeCode = '';
@@ -61,34 +63,18 @@ export class EditComponent implements OnInit {
     usesEasyReading: false,
     usesPictograms: true,
     resourcesUrl: '',
+    isTemplate: false,
   };
 
-  content: SelectFigureContent = {
-    instruction: '',
-    correctItemId: '',
-    items: [],
-  };
-
-  arasaacSearch  = '';
-  arasaacResults = signal<ArasaacPictogram[]>([]);
-  isSearching    = signal(false);
-  private search$ = new Subject<string>();
+  editorContentJson  = signal('{}');
+  isEditorValid      = signal(false);
+  editorUnavailable  = signal(false);
 
   similarActivities = signal<ActivityListItemResponse[]>([]);
   similarLoading = signal(false);
 
-  get isSelectFigure(): boolean { return this.templateTypeCode === 'SELECT_FIGURE'; }
-
   get isValid(): boolean {
-    if (!this.meta.title.trim() || !this.meta.categoryId) return false;
-    if (this.isSelectFigure) {
-      return (
-        !!this.content.instruction.trim() &&
-        this.content.items.length >= 2 &&
-        !!this.content.correctItemId
-      );
-    }
-    return true;
+    return !!this.meta.title.trim() && !!this.meta.categoryId && this.isEditorValid();
   }
 
   ngOnInit(): void {
@@ -115,15 +101,11 @@ export class EditComponent implements OnInit {
           usesEasyReading:          activity.usesEasyReading,
           usesPictograms:           activity.usesPictograms,
           resourcesUrl:             activity.resourcesUrl ?? '',
+          isTemplate:               activity.isTemplate,
         };
-        if (this.isSelectFigure && activity.contentJson) {
-          try {
-            this.content = JSON.parse(activity.contentJson) as SelectFigureContent;
-          } catch {
-            this.content = { instruction: '', correctItemId: '', items: [] };
-          }
-        }
+        this.editorContentJson.set(activity.contentJson ?? '{}');
         this.isLoadingData.set(false);
+        afterNextRender(() => this.mountEditor(), { injector: this.injector });
         this.loadSimilarActivities();
       },
       error: () => {
@@ -131,44 +113,29 @@ export class EditComponent implements OnInit {
         this.router.navigate([AppRoutes.Pro.Activities]);
       },
     });
-
-    this.search$.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(term => {
-        if (!term.trim()) return of([]);
-        this.isSearching.set(true);
-        return this.arasaacService.search(term).pipe(catchError(() => of([])));
-      }),
-    ).subscribe(results => {
-      this.arasaacResults.set(results);
-      this.isSearching.set(false);
-    });
   }
 
-  onArasaacSearchChange(term: string): void { this.search$.next(term); }
-
-  addPictogram(pic: ArasaacPictogram): void {
-    const id = crypto.randomUUID();
-    this.content.items.push({ id, pictogramId: pic.id, label: pic.keyword });
-    if (this.content.items.length === 1) this.content.correctItemId = id;
+  private mountEditor(): void {
+    if (!this.editorHost) return;
+    this.editorHost.clear();
+    const code = this.templateTypeCode;
+    const EditorClass = CONTENT_EDITOR_REGISTRY[code];
+    if (!EditorClass) {
+      this.editorUnavailable.set(true);
+      this.isEditorValid.set(false);
+      return;
+    }
+    this.editorUnavailable.set(false);
+    const ref = this.editorHost.createComponent<ContentEditorBaseComponent>(EditorClass);
+    ref.setInput('initialJson', this.editorContentJson() || '{}');
+    ref.instance.contentChange.subscribe((json: string) => this.editorContentJson.set(json));
+    ref.instance.validChange.subscribe((valid: boolean) => this.isEditorValid.set(valid));
+    ref.changeDetectorRef.detectChanges();
   }
-
-  removeItem(itemId: string): void {
-    this.content.items = this.content.items.filter(i => i.id !== itemId);
-    if (this.content.correctItemId === itemId)
-      this.content.correctItemId = this.content.items[0]?.id ?? '';
-  }
-
-  setCorrect(itemId: string): void { this.content.correctItemId = itemId; }
-
-  pictogramUrl(id: number): string { return this.arasaacService.getPictogramUrl(id); }
 
   submit(): void {
     if (!this.isValid) return;
     this.isLoading.set(true);
-
-    const contentJson = this.isSelectFigure ? JSON.stringify(this.content) : JSON.stringify({});
 
     const request: UpdateActivityRequest = {
       title:                    this.meta.title.trim(),
@@ -184,7 +151,8 @@ export class EditComponent implements OnInit {
       usesEasyReading:          this.meta.usesEasyReading,
       usesPictograms:           this.meta.usesPictograms,
       resourcesUrl:             this.meta.resourcesUrl.trim() || undefined,
-      contentJson,
+      contentJson:              this.editorContentJson(),
+      isTemplate:               this.meta.isTemplate,
     };
 
     this.activitiesService.update(this.activityId, request).subscribe({
