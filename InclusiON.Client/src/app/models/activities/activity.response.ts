@@ -84,6 +84,9 @@ export interface ActivityAssignmentResponse {
   assignedAt: string;
   dueDate?: string;
   isEvaluationActivity: boolean;
+  isTemplate?: boolean;
+  roadmapOrder?: number | null;
+  assignedByProfessionalId?: string;
   responses: ActivityAttemptResponse[];
 }
 

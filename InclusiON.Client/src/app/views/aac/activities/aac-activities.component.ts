@@ -22,8 +22,18 @@ export class AacActivitiesComponent implements OnInit {
 
   ngOnInit(): void {
     this.activitiesService.getMyAssignments().subscribe({
-      next:  (data) => { this.assignments.set(data); this.isLoading.set(false); },
-      error: ()     => { this.hasError.set(true);    this.isLoading.set(false); },
+      next: (data) => {
+        // En "Mis Actividades", el alumno solo visualiza las actividades asignadas por su profesor a cargo (excluyendo plantillas del Roadmap)
+        const teacherAssigned = (data ?? []).filter(
+          (a) => !a.isTemplate && (a.roadmapOrder === null || a.roadmapOrder === undefined)
+        );
+        this.assignments.set(teacherAssigned);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      },
     });
   }
 

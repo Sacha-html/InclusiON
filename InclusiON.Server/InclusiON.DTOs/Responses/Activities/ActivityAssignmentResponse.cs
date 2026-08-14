@@ -15,6 +15,9 @@ namespace InclusiON.DTOs.Responses.Activities
         public string Status { get; set; } = string.Empty;
         public DateTime AssignedAt { get; set; }
         public DateTime? DueDate { get; set; }
+        public bool IsTemplate { get; set; }
+        public int? RoadmapOrder { get; set; }
+        public Guid AssignedByProfessionalId { get; set; }
         public bool IsEvaluationActivity { get; set; }
         public List<ActivityAttemptResponse> Responses { get; set; } = [];
 
@@ -29,6 +32,9 @@ namespace InclusiON.DTOs.Responses.Activities
             Status              = a.Status?.Name ?? a.StatusId.ToString(),
             AssignedAt          = a.AssignedAt,
             DueDate             = a.DueDate,
+            IsTemplate          = a.Activity?.IsTemplate ?? false,
+            RoadmapOrder        = a.Activity?.RoadmapOrder,
+            AssignedByProfessionalId = a.AssignedByProfessionalId,
             IsEvaluationActivity = a.IsEvaluationActivity,
             Responses           = a.Responses
                                     .Select(ActivityAttemptResponse.From)
