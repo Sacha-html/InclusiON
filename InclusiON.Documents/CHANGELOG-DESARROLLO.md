@@ -273,3 +273,16 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
 * **Separación de Responsabilidades en Portal Alumno:**
   - `aac-activities.component.ts`: En el listado de "Mis Actividades" (`/app/activities`), se implementó un filtrado reactivo para mostrar **exclusivamente** las actividades asignadas directamente por el profesor a cargo (`!a.isTemplate && a.roadmapOrder == null`), evitando la duplicación de los niveles de "Mi Camino".
   - `activity.response.ts`: Actualizada la interfaz `ActivityAssignmentResponse` con las nuevas propiedades tipadas (`isTemplate`, `roadmapOrder`, `assignedByProfessionalId`).
+
+---
+
+## 17. Entidad de Sesiones y Seeder de Métricas para Dashboards de KPI (Agosto 2026)
+
+### Backend (.NET 10)
+* **Nueva Entidad `ActivitySession`:**
+  - Creada en `InclusiON.Domain/Models/ActivitySession.cs` para registrar ejecuciones analíticas de actividades completadas por alumnos con propiedades: `StudentId` (FK), `ProfessionalId` (FK), `ActivityId` (FK), `DateCompleted`, `SuccessRate` (decimal %), `ErrorCount`, `TimeSpentSeconds` y `GasScore` (Goal Attainment Scaling en rango [-2, +2]).
+  - Mapeada en `ActivitySessionConfiguration.cs` y agregada a `AppDbContext.cs` como `DbSet<ActivitySession>`.
+  - Generada y aplicada la migración EF Core `AddActivitySessions`.
+* **Servicio `MetricsDataSeeder`:**
+  - Implementado en `InclusiON.Data/Seeders/MetricsDataSeeder.cs` para sembrar entre 100 y 200 sesiones analíticas distribuidas uniformemente en los últimos 30 días sobre las 14 actividades creadas por profesionales y sus respectivos alumnos vinculados.
+  - Integrado en `DatabaseSeeder.SeedAsync` para ejecución automática condicional al inicio de la aplicación cuando la tabla está vacía.

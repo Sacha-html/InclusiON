@@ -37,6 +37,9 @@ namespace InclusiON.Data.Seeders
             // Script de limpieza manual: Scripts/cleanup_templates.sql
 
             await SeedCustomClassroomsAndStudentsAsync(userManager, context);
+
+            // Semillado de métricas analíticas y sesiones de actividades para KPIs
+            await MetricsDataSeeder.SeedAsync(serviceProvider);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)

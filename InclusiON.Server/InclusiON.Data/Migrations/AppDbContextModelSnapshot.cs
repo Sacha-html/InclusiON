@@ -155,6 +155,9 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int?>("RoadmapOrder")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("SkillAreaId")
                         .HasColumnType("integer");
 
@@ -184,6 +187,8 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("ProfessionalId");
+
+                    b.HasIndex("RoadmapOrder");
 
                     b.HasIndex("SkillAreaId");
 
@@ -576,6 +581,67 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("PersonRoadmapActivityId");
 
                     b.ToTable("ActivityResults", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivitySession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCompleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ErrorCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GasScore")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ProfessionalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("SuccessRate")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<int>("TimeSpentSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
+
+                    b.HasIndex("DateCompleted");
+
+                    b.HasIndex("ProfessionalId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ActivitySessions", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityTemplateType", b =>
@@ -3137,6 +3203,33 @@ namespace InclusiON.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("PersonRoadmapActivity");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.ActivitySession", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.Activity", "Activity")
+                        .WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
+                        .WithMany()
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InclusiON.Domain.Models.PersonWithDisability", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Activity");
+
+                    b.Navigation("Professional");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.ActivityTemplateType", b =>
