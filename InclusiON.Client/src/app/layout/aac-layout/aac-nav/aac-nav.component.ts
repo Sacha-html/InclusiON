@@ -26,6 +26,12 @@ export class AacNavComponent {
       color: 'var(--a11y-nav-home, #4CAF50)'
     },
     {
+      path: AppRoutes.Aac.MiCamino,
+      label: 'Mi Camino',
+      icon: 'cilMap',
+      color: 'var(--a11y-nav-roadmap, #673AB7)'
+    },
+    {
       path: AppRoutes.Aac.Activities,
       label: 'Actividades',
       icon: 'cilTask',

@@ -8,6 +8,7 @@ namespace InclusiON.Application.UseCases.Activities.Queries
         int? TemplateTypeId,
         bool? IsActive,
         bool? IsStandard,
+        bool? IsTemplate,
         int Page,
         int PageSize
     );

@@ -198,6 +198,30 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>Auto-asigna una actividad del roadmap a la persona autenticada para permitir su ejecución.</summary>
+        [HttpPost("activity-assignments/auto-assign/{activityId}")]
+        [Authorize(Policy = Permissions.Activities.Respond)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> AutoAssign(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityId,
+            [FromServices] ICommandHandler<AutoAssignActivityCommand, ApiResponse<ActivityAssignmentResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var personId = _httpContextService.GetCurrentEntityId();
+            if (personId is null)
+                return NotFound(ApiResponse<ActivityAssignmentResponse>.NotFound("Persona"));
+
+            var result = await handler.HandleAsync(
+                new AutoAssignActivityCommand(activityId, personId.Value),
+                cancellationToken);
+
+            if (!result.Success)
+                return result.ToActionResult();
+
+            return Ok(result);
+        }
+
         /// <summary>Cancela una asignación pendiente (solo el profesional que la creó).</summary>
         [HttpPatch("activity-assignments/{assignmentId}/cancel")]
         [Authorize(Policy = Permissions.Activities.Create)]

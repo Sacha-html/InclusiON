@@ -28,8 +28,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             if (activity is null)
                 return ApiResponse<ActivityResponse>.NotFound("Actividad");
 
-            // Profesional solo puede ver sus propias actividades o las estándar
-            if (!activity.IsStandardActivity && activity.ProfessionalId != query.ProfessionalId)
+            // Si no es estándar ni plantilla, verificar que pertenezca al profesional autenticado
+            if (!activity.IsStandardActivity && !activity.IsTemplate && activity.ProfessionalId != query.ProfessionalId)
                 return ApiResponse<ActivityResponse>.Forbidden();
 
             var dto = ActivityResponse.From(activity);

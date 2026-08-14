@@ -47,7 +47,10 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 if (activity is null)
                     return ApiResponse<ActivityResponse>.NotFound("Actividad");
 
-                if (activity.IsStandardActivity || activity.ProfessionalId != command.ProfessionalId)
+                if (activity.IsStandardActivity)
+                    return ApiResponse<ActivityResponse>.Forbidden();
+
+                if (!activity.IsTemplate && activity.ProfessionalId != command.ProfessionalId)
                     return ApiResponse<ActivityResponse>.Forbidden();
 
                 var now = _dateTime.UtcNow;
@@ -65,6 +68,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 activity.UsesEasyReading          = command.UsesEasyReading;
                 activity.UsesPictograms           = command.UsesPictograms;
                 activity.ResourcesUrl             = command.ResourcesUrl;
+                activity.IsTemplate               = command.IsTemplate;
                 activity.UpdatedAt                = now;
 
                 if (activity.Content is not null)

@@ -13,6 +13,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             int? templateTypeId,
             bool? isActive,
             bool? isStandard,
+            bool? isTemplate,
             int page,
             int pageSize,
             CancellationToken cancellationToken = default);
@@ -26,6 +27,11 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Devuelve las actividades estándar activas (IsStandardActivity = true) para regeneración nocturna de embeddings.
         /// </summary>
         Task<List<ActivityEmbeddingProjection>> GetStandardActivitiesForEmbeddingAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Devuelve la lista ordenada de plantillas del Roadmap oficial (IsTemplate = true y RoadmapOrder != null).
+        /// </summary>
+        Task<List<Activity>> GetRoadmapTemplatesAsync(CancellationToken cancellationToken = default);
     }
 
     public record ActivityEmbeddingProjection(

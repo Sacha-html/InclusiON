@@ -16,20 +16,29 @@ namespace InclusiON.Infrastructure.Seeders
 
         public static async Task EncryptAsync(IServiceProvider services)
         {
-            using var scope  = services.CreateScope();
-            var context      = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var logger       = scope.ServiceProvider.GetRequiredService<ILogger<AppDbContext>>();
-
-            var encryptedProps = GetEncryptedStringProperties();
-            var total = 0;
-
-            foreach (var (clrType, properties) in encryptedProps)
+            try
             {
-                total += await EncryptEntityTypeAsync(context, logger, clrType, properties);
-            }
+                using var scope  = services.CreateScope();
+                var context      = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var logger       = scope.ServiceProvider.GetRequiredService<ILogger<AppDbContext>>();
 
-            if (total > 0)
-                logger.LogInformation("SensitiveDataEncryptor: {Total} records encrypted.", total);
+                var encryptedProps = GetEncryptedStringProperties();
+                var total = 0;
+
+                foreach (var (clrType, properties) in encryptedProps)
+                {
+                    total += await EncryptEntityTypeAsync(context, logger, clrType, properties);
+                }
+
+                if (total > 0)
+                    logger.LogInformation("SensitiveDataEncryptor: {Total} records encrypted.", total);
+            }
+            catch (Exception ex)
+            {
+                using var scope = services.CreateScope();
+                var logger = scope.ServiceProvider.GetService<ILogger<AppDbContext>>();
+                logger?.LogWarning(ex, "SensitiveDataEncryptor: skipping initial pass due to exception.");
+            }
         }
 
         private static async Task<int> EncryptEntityTypeAsync(

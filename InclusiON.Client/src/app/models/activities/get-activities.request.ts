@@ -7,6 +7,7 @@ export interface GetActivitiesRequest {
   templateTypeId?: number;
   isActive?: boolean;
   isStandard?: boolean;
+  isTemplate?: boolean;
   sortBy?: string;
   sortDirection?: string;
 }

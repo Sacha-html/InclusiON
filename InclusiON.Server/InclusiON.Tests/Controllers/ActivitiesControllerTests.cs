@@ -244,6 +244,8 @@ namespace InclusiON.Tests.Controllers
             // Arrange
             var sut     = BuildSut(entityId: null);
             var handler = OkUpdateActivityHandler();
+            var encryption = Substitute.For<IEncryptionService>();
+            encryption.Decrypt(Arg.Any<string>()).Returns("7");
             var request = new UpdateActivityRequest
             {
                 Title       = "Test",
@@ -252,7 +254,7 @@ namespace InclusiON.Tests.Controllers
             };
 
             // Act
-            var result = await sut.UpdateActivity(7, request, handler);
+            var result = await sut.UpdateActivity("ENC:7", request, handler, encryption);
 
             // Assert
             result.Result.Should().BeOfType<NotFoundObjectResult>();
@@ -265,7 +267,9 @@ namespace InclusiON.Tests.Controllers
             var entityId = Guid.NewGuid();
             var handler  = OkUpdateActivityHandler();
             var sut      = BuildSut(entityId: entityId);
-            var request  = new UpdateActivityRequest
+            var encryption = Substitute.For<IEncryptionService>();
+            encryption.Decrypt(Arg.Any<string>()).Returns("7");
+            var request = new UpdateActivityRequest
             {
                 Title       = "Test",
                 CategoryId  = 1,
@@ -273,7 +277,7 @@ namespace InclusiON.Tests.Controllers
             };
 
             // Act
-            await sut.UpdateActivity(7, request, handler);
+            await sut.UpdateActivity("ENC:7", request, handler, encryption);
 
             // Assert
             await handler.Received(1).HandleAsync(

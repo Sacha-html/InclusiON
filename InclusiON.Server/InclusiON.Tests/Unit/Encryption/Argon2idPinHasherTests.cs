@@ -86,6 +86,25 @@ namespace InclusiON.Tests.Unit.Encryption
         }
 
         [Fact]
+        public void Verify_BCryptHashWith2yPrefix_CorrectPin_ReturnsTrue()
+        {
+            // Arrange
+            // Reemplazamos $2a$ o $2b$ con $2y$ para simular hashes con ese formato
+            var bcryptHash = BCrypt.Net.BCrypt.HashPassword("1234", workFactor: 4);
+            if (bcryptHash.StartsWith("$2a$"))
+                bcryptHash = "$2y$" + bcryptHash.Substring(4);
+            else if (bcryptHash.StartsWith("$2b$"))
+                bcryptHash = "$2y$" + bcryptHash.Substring(4);
+
+            // Act
+            var valid = _sut.Verify(bcryptHash, "1234", out var needsRehash);
+
+            // Assert
+            valid.Should().BeTrue();
+            needsRehash.Should().BeTrue();
+        }
+
+        [Fact]
         public void Verify_BCryptHash_WrongPin_ReturnsFalse_NeedsRehashFalse()
         {
             // Arrange

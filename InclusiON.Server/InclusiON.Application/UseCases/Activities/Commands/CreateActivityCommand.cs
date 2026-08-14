@@ -1,7 +1,7 @@
 namespace InclusiON.Application.UseCases.Activities.Commands
 {
     public record CreateActivityCommand(
-        Guid ProfessionalId,
+        Guid? ProfessionalId,
         string Title,
         string? Description,
         string? Instructions,
@@ -16,6 +16,7 @@ namespace InclusiON.Application.UseCases.Activities.Commands
         bool UsesPictograms,
         string? ResourcesUrl,
         int TemplateTypeId,
-        string ContentJson
+        string ContentJson,
+        bool IsTemplate = false
     );
 }

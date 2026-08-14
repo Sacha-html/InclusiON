@@ -31,6 +31,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 query.TemplateTypeId,
                 query.IsActive,
                 query.IsStandard,
+                query.IsTemplate,
                 query.Page,
                 query.PageSize,
                 cancellationToken);

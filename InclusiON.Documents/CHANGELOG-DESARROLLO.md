@@ -228,3 +228,31 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
   - **Regla Reactiva de Validación:** Al seleccionar "PIN" (`id === 2`), el campo PIN pasa a ser estrictamente obligatorio (`Validators.required` y `Validators.pattern(/^\d{4}$/)`) y se habilita. Al elegir "Asistido", se remueven las reglas de validación, se limpia el valor y se deshabilita/oculta.
   - `change-login-method-modal.component.ts` y `login-method-selector.component.ts`: Excluida la opción "Email" del listado de métodos seleccionables en el modal de cambio de método de acceso.
 
+---
+
+## 15. Aislamiento de Plantillas, "Mi Camino" Gamificado y Auto-Asignación (Agosto 2026)
+
+### Backend (.NET 10)
+* **Aislamiento de Datos de Actividades y Plantillas:**
+  - Desvinculación de las 10 actividades oficiales del Roadmap de los profesionales creadores, estableciéndolas como plantillas globales (`ProfessionalId = null`, `IsTemplate = true` y `RoadmapOrder` definido).
+  - Actualizado `ActivitiesRepository.cs` en `GetPagedAsync` para asegurar que los profesionales únicamente visualicen sus actividades propias (`ProfessionalId == currentId && !IsTemplate`) y no las plantillas globales.
+* **Flexibilización de Lectura de Actividades Plantilla:**
+  - `GetActivityByIdQueryHandler.cs`: Modificada la verificación de acceso para permitir que cualquier usuario con permiso de lectura (`Permissions.Activities.Read`), incluidos los alumnos, pueda leer actividades de tipo plantilla (`activity.IsTemplate`) o estándar (`activity.IsStandardActivity`).
+  - `ActivitiesController.cs`: Flexibilizada la obtención del `entityId` en `GET /api/Activities/{id}` para no devolver `NotFound("Profesional")` al ser invocado por alumnos.
+* **Nuevo Endpoint y Command de Auto-Asignación:**
+  - Creado `AutoAssignActivityCommand.cs` y `AutoAssignActivityCommandHandler.cs` en la capa de Aplicación.
+  - Expuesto el endpoint `POST /api/activity-assignments/auto-assign/{activityId}` en `ActivityAssignmentsController.cs` con política `Permissions.Activities.Respond`.
+  - Si el alumno ya posee una asignación activa (no cancelada) para esa actividad, se reutiliza; si no, se crea automáticamente un nuevo registro `ActivityAssignment` vinculado a su `PersonId` y a un profesional activo del sistema como fallback seguro.
+
+### Frontend (Angular)
+* **Limpieza de Interfaz del Profesional:**
+  - Removidos los botones "Ver Roadmap" y "Biblioteca de Plantillas" de la vista principal `activities-list.component.html`.
+  - Eliminadas las rutas huérfanas de plantillas y roadmap en `professional.routes.ts`.
+* **Restauración y Gamificación de "Mi Camino" (Portal Alumno):**
+  - En `AacRoadmapComponent` (`/app/roadmap`), se restauró la estética nativa violeta (`#673AB7` / `#5C6BC0`) con nodos circulares en zigzag, conectores luminosos y anillos de pulso (`.pulse-ring`).
+  - Mapeo dinámico de los 10 niveles oficiales del Roadmap mediante `ActivitiesService.getRoadmap()`.
+  - Regla de desbloqueo progresivo: Nivel 1 desbloqueado por defecto; los niveles subsiguientes se habilitan automáticamente cuando el nivel anterior alcanza un porcentaje de aciertos igual o superior al **60%**.
+* **Integración del Flujo de Auto-Asignación en Reproductor:**
+  - `activities.service.ts`: Incorporado el método `autoAssign(activityId)`.
+  - `aac-roadmap.component.ts`: La acción `onNodeClick` invoca `autoAssign()` para obtener un ID de asignación real y redirigir al reproductor `/app/activities/:assignmentEncryptedId`.
+  - `player-base.component.ts`: Modificado `finishActivity` para persistir localmente el porcentaje obtenido y reportar la finalización al backend, garantizando que el estado del Roadmap se actualice de inmediato con feedback de éxito.

@@ -10,5 +10,6 @@ namespace InclusiON.DTOs.Requests.Activities
         public int? TemplateTypeId { get; set; }
         public bool? IsActive { get; set; }
         public bool? IsStandard { get; set; }
+        public bool? IsTemplate { get; set; }
     }
 }

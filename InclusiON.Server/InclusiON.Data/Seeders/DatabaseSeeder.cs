@@ -32,8 +32,10 @@ namespace InclusiON.Data.Seeders
                 await RoadmapInitializerAccessor.InitializeStudentRoadmap(context, student.Id, student.SupervisorUserId, CancellationToken.None);
             }
 
-            // Parche: actualizar ContentJson vacío de actividades estándar existentes
-            await PatchStandardActivitiesContentAsync(context);
+            // Las plantillas del Roadmap ya no se siembran automáticamente.
+            // Los profesionales crean sus propias plantillas desde la Biblioteca de Plantillas.
+            // Script de limpieza manual: Scripts/cleanup_templates.sql
+
             await SeedCustomClassroomsAndStudentsAsync(userManager, context);
         }
 
@@ -921,68 +923,239 @@ namespace InclusiON.Data.Seeders
             await context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Parche de startup: actualiza el ContentJson de las actividades estándar
-        /// que aún tienen '{}' con contenido real compatible con los players del frontend.
-        /// Se ejecuta en cada arranque pero solo modifica registros con contenido vacío.
-        /// </summary>
-        private static async Task PatchStandardActivitiesContentAsync(AppDbContext context)
+        // ──────────────────────────────────────────────────────────────────────────────
+        // MÉTODO REMOVIDO: SeedOfficialThesisRoadmapTemplatesAsync
+        // Las plantillas del Roadmap se crean dinámicamente por los profesionales.
+        // Este código se conserva comentado como referencia histórica.
+        // Ejecutar Scripts/cleanup_templates.sql para limpiar registros existentes.
+        // ──────────────────────────────────────────────────────────────────────────────
+        /*
+        public static async Task SeedOfficialThesisRoadmapTemplatesAsync(AppDbContext context)
         {
-            // Mapa: Título de actividad → (TemplateCode, ContentJson correcto)
-            var patches = new Dictionary<string, (string TemplateCode, string ContentJson)>
+            var adminId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var skillArea = await context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria");
+            if (skillArea == null)
             {
-                ["Rompecabezas de 2 piezas"] = ("CLASSIFY",
-                    """{"instruction":"Arrastra y une cada imagen con su palabra.","pairs":[{"id":"manzana","label":"Manzana","pictogramId":7950},{"id":"pelota","label":"Pelota","pictogramId":6012}]}"""),
-
-                ["Mi rutina visual"] = ("ORDER_SEQUENCE",
-                    """{"instruction":"Ordena lo que haces primero en el día.","items":[{"id":"despertar","label":"Despertar","pictogramId":2695,"correctPosition":0},{"id":"desayunar","label":"Desayunar","pictogramId":2547,"correctPosition":1},{"id":"jugar","label":"Jugar","pictogramId":37495,"correctPosition":2}]}"""),
-
-                ["Concepto 'Muchos / Pocos'"] = ("OPTION_SELECT",
-                    """{"instruction":"Selecciona la imagen que tiene MUCHOS objetos.","question":"¿Cuál canasta tiene MUCHAS manzanas?","options":[{"id":"muchos","text":"Muchas manzanas","pictogramId":7950},{"id":"pocos","text":"Pocas manzanas","pictogramId":7951}],"correctOptionId":"muchos"}"""),
-
-                ["Explotar burbujas"] = ("PICTOGRAM_SELECT",
-                    """{"instruction":"Toca la imagen correcta.","correctItemId":"globo","items":[{"id":"globo","pictogramId":5441,"label":"Globo"},{"id":"pelota","pictogramId":6012,"label":"Pelota"},{"id":"casa","pictogramId":7034,"label":"Casa"}]}"""),
-
-                ["¿Qué quieres hacer?"] = ("PICTOGRAM_SELECT",
-                    """{"instruction":"¿Qué quieres hacer hoy?","correctItemId":"musica","items":[{"id":"musica","pictogramId":2706,"label":"Escuchar música"},{"id":"dibujar","pictogramId":6124,"label":"Dibujar"},{"id":"jugar","pictogramId":37495,"label":"Jugar"}]}"""),
-
-                ["Conciencia fonológica"] = ("OPTION_SELECT",
-                    """{"instruction":"Escucha la letra y toca el animal correcto.","question":"¿Qué animal empieza con la letra A?","options":[{"id":"arana","text":"Araña","pictogramId":2036},{"id":"bota","text":"Bota","pictogramId":5220},{"id":"casa","text":"Casa","pictogramId":7034}],"correctOptionId":"arana"}"""),
-
-                ["Colorear libre"] = ("OPTION_SELECT",
-                    """{"instruction":"Elige tu color favorito.","question":"¿Qué color te gusta más para pintar?","options":[{"id":"rojo","text":"Rojo"},{"id":"azul","text":"Azul"},{"id":"amarillo","text":"Amarillo"},{"id":"verde","text":"Verde"}],"correctOptionId":"rojo"}"""),
-
-                ["Vestirse para el frío"] = ("CLASSIFY",
-                    """{"instruction":"Une cada ropa con su nombre.","pairs":[{"id":"bufanda","label":"Bufanda","pictogramId":29557},{"id":"abrigo","label":"Abrigo","pictogramId":4933}]}"""),
-
-                ["Clasificación por tamaño"] = ("ORDER_SEQUENCE",
-                    """{"instruction":"Ordena de más grande a más pequeño.","items":[{"id":"grande","label":"Grande","pictogramId":6012,"correctPosition":0},{"id":"mediana","label":"Mediana","pictogramId":6012,"correctPosition":1},{"id":"pequena","label":"Pequeña","pictogramId":6012,"correctPosition":2}]}"""),
-
-                ["Encuentra el intruso"] = ("OPTION_SELECT",
-                    """{"instruction":"Encuentra el que no pertenece al grupo.","question":"¿Cuál NO es una fruta?","options":[{"id":"manzana","text":"Manzana","pictogramId":7950},{"id":"pera","text":"Pera","pictogramId":6540},{"id":"banana","text":"Banana","pictogramId":5170},{"id":"zapato","text":"Zapato","pictogramId":7285}],"correctOptionId":"zapato"}""")
-            };
-
-            foreach (var (title, patch) in patches)
-            {
-                var activity = await context.Activities
-                    .Include(a => a.Content)
-                    .FirstOrDefaultAsync(a => a.Title == title && a.IsStandardActivity);
-
-                if (activity?.Content == null) continue;
-
-                var needsContentPatch  = activity.Content.ContentJson == "{}" || string.IsNullOrEmpty(activity.Content.ContentJson);
-                var templateType       = await context.Set<ActivityTemplateType>().FirstOrDefaultAsync(t => t.Code == patch.TemplateCode);
-                var needsTemplatePatch = templateType != null && activity.Content.TemplateTypeId != templateType.Id;
-
-                if (needsContentPatch)
-                    activity.Content.ContentJson = patch.ContentJson;
-
-                if (needsTemplatePatch)
-                    activity.Content.TemplateTypeId = templateType!.Id;
+                skillArea = new SkillArea
+                {
+                    Name = "Trayectoria",
+                    Description = "Camino de aprendizaje estándar anti-frustración.",
+                    Icon = "map",
+                    Color = "#673AB7",
+                    DisplayOrder = 4,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = adminId
+                };
+                context.SkillAreas.Add(skillArea);
+                await context.SaveChangesAsync();
             }
 
-            await context.SaveChangesAsync();
+            var defaultProf = await context.Professionals.FirstOrDefaultAsync();
+            var defaultProfId = defaultProf?.Id ?? Guid.Parse("00000000-0000-0000-0000-000000000200");
+
+            var officialTemplates = new[]
+            {
+                new
+                {
+                    Seq = 1,
+                    Title = "Rompecabezas de 2 piezas",
+                    OldTitles = new[] { "Rompecabezas de 2 piezas" },
+                    Description = "Une la mitad de la imagen para completar el objeto cotidiano.",
+                    Instructions = "Arrastra y une la mitad de la imagen para completar el objeto cotidiano.",
+                    CatId = 8, // Estimulación Cognitiva
+                    TemplateCode = "CLASSIFY",
+                    ContentJson = """{"pairs":[{"id":1,"label":"Taza (Derecha)","pictogramId":"pic_taza_der"},{"id":2,"label":"Taza (Izquierda)","pictogramId":"pic_taza_izq"}]}"""
+                },
+                new
+                {
+                    Seq = 2,
+                    Title = "Mi rutina visual",
+                    OldTitles = new[] { "Mi rutina visual" },
+                    Description = "Ordena los pasos de tu rutina diaria.",
+                    Instructions = "Ordena los pasos de tu rutina diaria.",
+                    CatId = 3, // Habilidades Socioemocionales
+                    TemplateCode = "ORDER_SEQUENCE",
+                    ContentJson = """{"items":[{"id":1,"label":"Despertar","pictogramId":"pic_despertar","correctPosition":1},{"id":2,"label":"Comer","pictogramId":"pic_comer","correctPosition":2},{"id":3,"label":"Jugar","pictogramId":"pic_jugar","correctPosition":3}]}"""
+                },
+                new
+                {
+                    Seq = 3,
+                    Title = "Concepto Muchos / Pocos",
+                    OldTitles = new[] { "Concepto 'Muchos / Pocos'", "Concepto Muchos / Pocos" },
+                    Description = "¿Dónde hay muchas manzanas?",
+                    Instructions = "¿Dónde hay muchas manzanas?",
+                    CatId = 2, // Numeración y Matemática
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    ContentJson = """{"correctItemId":2,"items":[{"id":1,"pictogramId":"pic_una_manzana","label":"Pocas (1)"},{"id":2,"pictogramId":"pic_muchas_manzanas","label":"Muchas (8)"}]}"""
+                },
+                new
+                {
+                    Seq = 4,
+                    Title = "Secuencia de acción (Camino Visual)",
+                    OldTitles = new[] { "Explotar burbujas", "Secuencia de acción (Camino Visual)" },
+                    Description = "Toca las burbujas en orden para terminar el camino.",
+                    Instructions = "Toca las burbujas en orden para terminar el camino.",
+                    CatId = 5, // Motricidad y Coordinación
+                    TemplateCode = "ORDER_SEQUENCE",
+                    ContentJson = """{"items":[{"id":1,"label":"Burbuja 1","pictogramId":"pic_burbuja_1","correctPosition":1},{"id":2,"label":"Burbuja 2","pictogramId":"pic_burbuja_2","correctPosition":2},{"id":3,"label":"Burbuja 3","pictogramId":"pic_burbuja_3","correctPosition":3}]}"""
+                },
+                new
+                {
+                    Seq = 5,
+                    Title = "Asociación Funcional Cotidiana",
+                    OldTitles = new[] { "¿Dónde va cada cosa?", "¿Qué quieres hacer?", "Asociación Funcional Cotidiana" },
+                    Description = "Contexto: Cama. ¿Qué objeto va en la cama?",
+                    Instructions = "Contexto: Cama. ¿Qué objeto va en la cama?",
+                    CatId = 8, // Estimulación Cognitiva
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    ContentJson = """{"correctItemId":1,"items":[{"id":1,"pictogramId":"pic_almohada","label":"Almohada"},{"id":2,"pictogramId":"pic_pelota","label":"Pelota de fútbol"}]}"""
+                },
+                new
+                {
+                    Seq = 6,
+                    Title = "Reconocimiento Fonológico",
+                    OldTitles = new[] { "Conciencia fonológica", "Reconocimiento Fonológico" },
+                    Description = "¿Qué animal empieza con la letra A?",
+                    Instructions = "¿Qué animal empieza con la letra A?",
+                    CatId = 1, // Lectoescritura
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    ContentJson = """{"correctItemId":3,"items":[{"id":1,"pictogramId":"pic_perro","label":"Perro"},{"id":2,"pictogramId":"pic_gato","label":"Gato"},{"id":3,"pictogramId":"pic_arana","label":"Araña"}]}"""
+                },
+                new
+                {
+                    Seq = 7,
+                    Title = "Identificación de Formas Básicas",
+                    OldTitles = new[] { "Colorear libre", "Identificación de Formas Básicas" },
+                    Description = "¿Cuál es el círculo?",
+                    Instructions = "¿Cuál es el círculo?",
+                    CatId = 2, // Numeración y Matemática
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    ContentJson = """{"correctItemId":3,"items":[{"id":1,"pictogramId":"pic_cuadrado","label":"Cuadrado"},{"id":2,"pictogramId":"pic_triangulo","label":"Triángulo"},{"id":3,"pictogramId":"pic_circulo","label":"Círculo"}]}"""
+                },
+                new
+                {
+                    Seq = 8,
+                    Title = "Vestirse para el frío",
+                    OldTitles = new[] { "Vestirse para el frío" },
+                    Description = "Guarda la ropa de invierno en el armario.",
+                    Instructions = "Guarda la ropa de invierno en el armario.",
+                    CatId = 7, // Autonomía y Vida Diaria
+                    TemplateCode = "CLASSIFY",
+                    ContentJson = """{"pairs":[{"id":1,"label":"Invierno","pictogramId":"pic_bufanda"},{"id":2,"label":"Invierno","pictogramId":"pic_gorro"}]}"""
+                },
+                new
+                {
+                    Seq = 9,
+                    Title = "Seriación de Tamaños",
+                    OldTitles = new[] { "Clasificación por tamaño", "Seriación de Tamaños" },
+                    Description = "Ordena las pelotas de la más pequeña a la más grande.",
+                    Instructions = "Ordena las pelotas de la más pequeña a la más grande.",
+                    CatId = 2, // Numeración y Matemática
+                    TemplateCode = "ORDER_SEQUENCE",
+                    ContentJson = """{"items":[{"id":1,"label":"Pequeña","pictogramId":"pic_pelota_chica","correctPosition":1},{"id":2,"label":"Mediana","pictogramId":"pic_pelota_mediana","correctPosition":2},{"id":3,"label":"Grande","pictogramId":"pic_pelota_grande","correctPosition":3}]}"""
+                },
+                new
+                {
+                    Seq = 10,
+                    Title = "Encuentra el intruso",
+                    OldTitles = new[] { "Encuentra el intruso" },
+                    Description = "¿Qué objeto no pertenece a este grupo de frutas?",
+                    Instructions = "¿Qué objeto no pertenece a este grupo de frutas?",
+                    CatId = 8, // Estimulación Cognitiva
+                    TemplateCode = "PICTOGRAM_SELECT",
+                    ContentJson = """{"correctItemId":4,"items":[{"id":1,"pictogramId":"pic_manzana","label":"Manzana"},{"id":2,"pictogramId":"pic_pera","label":"Pera"},{"id":3,"pictogramId":"pic_banana","label":"Banana"},{"id":4,"pictogramId":"pic_zapato","label":"Zapato"}]}"""
+                }
+            };
+
+            foreach (var t in officialTemplates)
+            {
+                var templateType = await context.Set<ActivityTemplateType>().FirstOrDefaultAsync(tp => tp.Code == t.TemplateCode);
+                var templateTypeId = templateType?.Id ?? 1;
+
+                var act = await context.Activities
+                    .Include(a => a.Content)
+                    .FirstOrDefaultAsync(a => a.Title == t.Title || t.OldTitles.Contains(a.Title));
+
+                if (act == null)
+                {
+                    act = new Activity
+                    {
+                        Title = t.Title,
+                        Description = t.Description,
+                        Instructions = t.Instructions,
+                        CategoryId = t.CatId,
+                        SkillAreaId = skillArea.Id,
+                        ProfessionalId = defaultProfId,
+                        HasVisualSupport = true,
+                        HasAudioSupport = true,
+                        UsesEasyReading = true,
+                        UsesPictograms = true,
+                        RequiresSupervision = false,
+                        IsStandardActivity = true,
+                        IsTemplate = true,
+                        ComplexityLevel = 1,
+                        EstimatedDurationMinutes = 2,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = adminId
+                    };
+                    context.Activities.Add(act);
+                    await context.SaveChangesAsync();
+
+                    var content = new ActivityContent
+                    {
+                        ActivityId = act.Id,
+                        TemplateTypeId = templateTypeId,
+                        ContentJson = t.ContentJson,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = adminId
+                    };
+                    context.Set<ActivityContent>().Add(content);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    act.Title = t.Title;
+                    act.Description = t.Description;
+                    act.Instructions = t.Instructions;
+                    act.CategoryId = t.CatId;
+                    act.SkillAreaId = skillArea.Id;
+                    act.IsTemplate = true;
+                    act.IsStandardActivity = true;
+                    act.HasVisualSupport = true;
+                    act.HasAudioSupport = true;
+                    act.UsesEasyReading = true;
+                    act.UsesPictograms = true;
+                    act.ComplexityLevel = 1;
+                    act.EstimatedDurationMinutes = 2;
+                    act.UpdatedAt = DateTime.UtcNow;
+                    act.UpdatedBy = adminId;
+
+                    if (act.Content != null)
+                    {
+                        act.Content.TemplateTypeId = templateTypeId;
+                        act.Content.ContentJson = t.ContentJson;
+                        act.Content.UpdatedAt = DateTime.UtcNow;
+                        act.Content.UpdatedBy = adminId;
+                    }
+                    else
+                    {
+                        var content = new ActivityContent
+                        {
+                            ActivityId = act.Id,
+                            TemplateTypeId = templateTypeId,
+                            ContentJson = t.ContentJson,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = adminId
+                        };
+                        context.Set<ActivityContent>().Add(content);
+                    }
+
+                    await context.SaveChangesAsync();
+                }
+            }
         }
+        */ // FIN del método SeedOfficialThesisRoadmapTemplatesAsync (comentado)
 
         private static async Task SeedCustomClassroomsAndStudentsAsync(UserManager<User> userManager, AppDbContext context)
         {

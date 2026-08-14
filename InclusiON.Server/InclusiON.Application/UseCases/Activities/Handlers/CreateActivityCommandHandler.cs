@@ -79,6 +79,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     UsesPictograms           = command.UsesPictograms,
                     ResourcesUrl             = command.ResourcesUrl,
                     IsStandardActivity       = false,
+                    IsTemplate               = command.IsTemplate,
                     IsActive                 = true,
                     CreatedAt                = now,
                 };

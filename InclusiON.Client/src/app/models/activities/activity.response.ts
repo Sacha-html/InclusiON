@@ -24,7 +24,10 @@ export interface ActivityListItemResponse {
   estimatedDurationMinutes?: number;
   isActive: boolean;
   isStandardActivity: boolean;
+  isTemplate: boolean;
   createdAt: string;
+  authorName?: string;
+  roadmapOrder?: number;
 }
 
 export interface ActivityResponse {
@@ -51,6 +54,7 @@ export interface ActivityResponse {
   contentJson: string;
   isActive: boolean;
   isStandardActivity: boolean;
+  isTemplate: boolean;
   createdAt: string;
   updatedAt?: string;
 }
