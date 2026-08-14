@@ -138,7 +138,12 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
-                    b.Property<Guid>("ProfessionalId")
+                    b.Property<bool>("IsTemplate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid?>("ProfessionalId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("RequiresSupervision")
@@ -3033,8 +3038,7 @@ namespace InclusiON.Data.Migrations
                     b.HasOne("InclusiON.Domain.Models.Professional", "Professional")
                         .WithMany("Activities")
                         .HasForeignKey("ProfessionalId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("InclusiON.Domain.Models.SkillArea", "SkillArea")
                         .WithMany("Activities")

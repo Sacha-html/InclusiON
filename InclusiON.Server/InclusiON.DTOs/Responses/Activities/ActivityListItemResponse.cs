@@ -20,6 +20,8 @@ namespace InclusiON.DTOs.Responses.Activities
         public string TemplateTypeName { get; set; } = string.Empty;
         public string TemplateTypeCode { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public string AuthorName { get; set; } = string.Empty;
+        public int? RoadmapOrder { get; set; }
 
         public static ActivityListItemResponse From(Activity a) => new()
         {
@@ -38,6 +40,8 @@ namespace InclusiON.DTOs.Responses.Activities
             TemplateTypeName         = a.Content?.TemplateType?.Name ?? string.Empty,
             TemplateTypeCode         = a.Content?.TemplateType?.Code ?? string.Empty,
             CreatedAt                = a.CreatedAt,
+            AuthorName               = a.Professional != null ? $"{a.Professional.FirstName} {a.Professional.LastName}" : "Sistema",
+            RoadmapOrder             = a.RoadmapOrder,
         };
     }
 }

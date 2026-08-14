@@ -14,4 +14,5 @@ export interface CreateActivityRequest {
   resourcesUrl?: string;
   templateTypeId: number;
   contentJson: string;
+  isTemplate?: boolean;
 }

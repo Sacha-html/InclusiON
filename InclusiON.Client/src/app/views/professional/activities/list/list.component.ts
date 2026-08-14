@@ -90,6 +90,7 @@ export class ListComponent implements OnInit {
     { key: 'categoryName',     label: 'Categoría',    sortable: true },
     { key: 'complexityLevel',  label: 'Complejidad',  sortable: true },
     { key: 'estimatedDurationMinutes', label: 'Duración (min)', sortable: true },
+    { key: 'authorName',       label: 'Creado por',   sortable: true },
     {
       key: 'isActive',
       label: 'Estado',
@@ -123,11 +124,7 @@ export class ListComponent implements OnInit {
     },
   ];
 
-  get headerButtons() {
-    return this.canCreate
-      ? [{ action: 'create', label: 'Nueva actividad', icon: 'cilPlus', routerLink: AppRoutes.Pro.ActivityNew }]
-      : [];
-  }
+
 
   ngOnInit(): void {
     this.loadCatalogs();
@@ -198,9 +195,7 @@ export class ListComponent implements OnInit {
     this.loadActivities();
   }
 
-  onHeaderAction(action: string): void {
-    if (action === 'create') this.router.navigate([AppRoutes.Pro.ActivityNew]);
-  }
+
 
   onRowAction(event: { action: string; item: ActivityListItemResponse }): void {
     switch (event.action) {

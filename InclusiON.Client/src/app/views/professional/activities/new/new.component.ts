@@ -1,5 +1,5 @@
 import { afterNextRender, Component, inject, Injector, OnInit, signal, ViewChild, ViewContainerRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ActivitiesService } from '@services/activities.service';
 import { CatalogsService } from '@services/catalogs.service';
@@ -37,6 +37,7 @@ export class NewComponent implements OnInit {
   private readonly catalogsService   = inject(CatalogsService);
   private readonly toastService      = inject(ToastService);
   private readonly router            = inject(Router);
+  private readonly route             = inject(ActivatedRoute);
   private readonly injector          = inject(Injector);
 
   @ViewChild('editorHost', { read: ViewContainerRef }) private editorHost!: ViewContainerRef;
@@ -66,6 +67,7 @@ export class NewComponent implements OnInit {
     usesEasyReading: false,
     usesPictograms: true,
     resourcesUrl: '',
+    isTemplate: false,
   };
 
   // Step 2 — dynamic editor
@@ -74,6 +76,7 @@ export class NewComponent implements OnInit {
   editorUnavailable  = signal(false);
 
   isLoading = signal(false);
+  isTemplateMode = signal(false);
   savedActivity = signal<ActivityListItemResponse | null>(null);
   showAssignModal = false;
   similarActivities = signal<ActivityListItemResponse[]>([]);
@@ -103,6 +106,13 @@ export class NewComponent implements OnInit {
     this.catalogsService.getActivityCategories().subscribe({ next: c => this.categories.set(c) });
     this.catalogsService.getSkillAreas().subscribe({ next: s => this.skillAreas.set(s) });
     this.catalogsService.getActivityTemplateTypes().subscribe({ next: t => this.templateTypes.set(t) });
+
+    // Si viene con ?isTemplate=true desde la Biblioteca de Plantillas
+    const isTemplateParam = this.route.snapshot.queryParamMap.get('isTemplate');
+    if (isTemplateParam === 'true') {
+      this.isTemplateMode.set(true);
+      this.meta.isTemplate = true;
+    }
   }
 
   private mountEditor(): void {
@@ -161,24 +171,31 @@ export class NewComponent implements OnInit {
       resourcesUrl:             this.meta.resourcesUrl.trim() || undefined,
       templateTypeId:           +this.meta.templateTypeId,
       contentJson:              this.editorContentJson(),
+      isTemplate:               this.meta.isTemplate,
     };
 
     this.activitiesService.create(request).subscribe({
       next: (activity) => {
-        this.toastService.success('Actividad creada exitosamente.');
-        const saved: ActivityListItemResponse = {
-          id: activity.id,
-          encryptedId: activity.encryptedId,
-          title: activity.title,
-          templateTypeCode: this.selectedTemplateCode,
-          templateTypeName: this.selectedTemplateName,
-          isActive: true,
-          isStandardActivity: false,
-          createdAt: new Date().toISOString(),
-        };
-        this.savedActivity.set(saved);
-        this.loadSimilarActivities(saved.encryptedId);
         this.isLoading.set(false);
+        if (this.isTemplateMode()) {
+          this.toastService.success('Plantilla creada y agregada a la Biblioteca del Roadmap.');
+          this.router.navigate(['/pro/activities/templates']);
+        } else {
+          this.toastService.success('Actividad creada exitosamente.');
+          const saved: ActivityListItemResponse = {
+            id: activity.id,
+            encryptedId: activity.encryptedId,
+            title: activity.title,
+            templateTypeCode: this.selectedTemplateCode,
+            templateTypeName: this.selectedTemplateName,
+            isActive: true,
+            isStandardActivity: false,
+            isTemplate: activity.isTemplate,
+            createdAt: new Date().toISOString(),
+          };
+          this.savedActivity.set(saved);
+          this.loadSimilarActivities(saved.encryptedId);
+        }
       },
       error: () => {
         this.toastService.error('Error al crear la actividad.');

@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { ButtonDirective } from '@coreui/angular';
 import { ActivitiesService } from '@services/activities.service';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ActivityAssignmentResponse } from '@models';
+import { ActivityAssignmentResponse, ActivityAssignmentStatus } from '@models';
 import { PLAYER_REGISTRY } from './player-registry';
 import { PlayerBaseComponent } from './player-base.component';
 
@@ -38,6 +38,7 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const assignmentId = this.route.snapshot.paramMap.get('assignmentId')!;
 
+    // 1. Intentar cargar como asignación
     this.activitiesService.getAssignmentById(assignmentId).subscribe({
       next: (found) => {
         if (!PLAYER_REGISTRY[found.templateTypeCode]) {
@@ -48,14 +49,43 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
 
         this.assignment.set(found);
         this.isLoading.set(false);
-
-        // Defer un tick para que Angular procese el @else block y exponga #playerHost
         setTimeout(() => this.renderPlayer());
       },
-      error: (err) => {
-        this.hasError.set(true);
-        this.isLoading.set(false);
-        this.errorMessage.set(err?.message || 'No se pudo cargar la actividad.');
+      error: () => {
+        // 2. Si no es una asignación, intentar cargar como actividad directa del Roadmap
+        this.activitiesService.getById(assignmentId).subscribe({
+          next: (act) => {
+            const templateCode = act.templateTypeCode ?? '';
+            if (!PLAYER_REGISTRY[templateCode]) {
+              this.unsupported.set(true);
+              this.isLoading.set(false);
+              return;
+            }
+
+            const directAssignment: ActivityAssignmentResponse = {
+              id: 0,
+              encryptedId: act.encryptedId,
+              activityId: act.id,
+              activityTitle: act.title,
+              templateTypeCode: templateCode,
+              contentJson: act.contentJson ?? '{}',
+              personId: '',
+              status: ActivityAssignmentStatus.Pendiente,
+              assignedAt: new Date().toISOString(),
+              isEvaluationActivity: false,
+              responses: []
+            };
+
+            this.assignment.set(directAssignment);
+            this.isLoading.set(false);
+            setTimeout(() => this.renderPlayer());
+          },
+          error: (err) => {
+            this.hasError.set(true);
+            this.isLoading.set(false);
+            this.errorMessage.set(err?.message || 'No se pudo cargar la actividad.');
+          }
+        });
       },
     });
   }

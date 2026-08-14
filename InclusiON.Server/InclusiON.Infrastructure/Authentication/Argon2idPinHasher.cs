@@ -60,8 +60,8 @@ namespace InclusiON.Infrastructure.Authentication
             if (string.IsNullOrEmpty(storedHash))
                 return false;
 
-            // Hash BCrypt legacy — formato: $2b$12$... o $2a$12$...
-            if (storedHash.StartsWith("$2b$") || storedHash.StartsWith("$2a$"))
+            // Hash BCrypt legacy — formato: $2a$..., $2b$..., $2y$..., $2x$...
+            if (storedHash.StartsWith("$2"))
             {
                 try
                 {

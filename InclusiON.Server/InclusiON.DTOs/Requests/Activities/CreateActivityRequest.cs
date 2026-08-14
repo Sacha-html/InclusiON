@@ -39,5 +39,7 @@ namespace InclusiON.DTOs.Requests.Activities
 
         [Required(ErrorMessage = "El contenido es requerido")]
         public string ContentJson { get; set; } = string.Empty;
+
+        public bool IsTemplate { get; set; } = false;
     }
 }

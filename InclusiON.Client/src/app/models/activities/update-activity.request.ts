@@ -13,4 +13,5 @@ export interface UpdateActivityRequest {
   usesPictograms: boolean;
   resourcesUrl?: string;
   contentJson: string;
+  isTemplate?: boolean;
 }

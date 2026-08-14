@@ -96,6 +96,18 @@ export const routes: Routes = [
     loadChildren: () => import('./views/aac/routes').then((m) => m.aacRoutes),
   },
 
+  // Portal Alumno (Persona)
+  {
+    path: 'person',
+    loadComponent: () =>
+      import('./layout/aac-layout/aac-layout.component').then(
+        (m) => m.AacLayoutComponent,
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: [UserRoles.PersonWithDisability] },
+    loadChildren: () => import('./views/aac/routes').then((m) => m.aacRoutes),
+  },
+
   // Dashboard Profesional
   {
     path: 'pro',

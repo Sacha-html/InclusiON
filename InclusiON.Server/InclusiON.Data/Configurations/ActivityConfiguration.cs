@@ -44,6 +44,12 @@ namespace InclusiON.Data.Configurations
             builder.Property(a => a.IsStandardActivity)
                 .HasDefaultValue(false);
 
+            builder.Property(a => a.IsTemplate)
+                .HasDefaultValue(false);
+
+            builder.Property(a => a.RoadmapOrder)
+                .IsRequired(false);
+
             builder.Property(a => a.IsActive)
                 .HasDefaultValue(true);
 
@@ -52,10 +58,12 @@ namespace InclusiON.Data.Configurations
 
             builder.HasIndex(a => a.ProfessionalId);
             builder.HasIndex(a => a.CategoryId);
+            builder.HasIndex(a => a.RoadmapOrder);
 
             builder.HasOne(a => a.Professional)
                 .WithMany(p => p.Activities)
                 .HasForeignKey(a => a.ProfessionalId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(a => a.Category)

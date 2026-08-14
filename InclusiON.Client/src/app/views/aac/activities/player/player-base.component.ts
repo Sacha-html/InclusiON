@@ -35,6 +35,17 @@ export abstract class PlayerBaseComponent {
 
   // ── Fase intro → playing ──────────────────────────────────────────────────
   startActivity(): void {
+    if (!this.assignment?.encryptedId || this.assignment?.id === 0) {
+      // Modo juego directo (plantilla del Roadmap sin asignación persistida)
+      this._startTime = Date.now();
+      this.phase.set('playing');
+      setTimeout(() => {
+        const heading = this.el.nativeElement.querySelector('.game-instruction, [role="heading"]') as HTMLElement;
+        heading?.focus();
+      }, 80);
+      return;
+    }
+
     this.isLoading.set(true);
     this.activitiesService.startResponse(this.assignment.encryptedId).subscribe({
       next: (updated) => {
@@ -57,8 +68,22 @@ export abstract class PlayerBaseComponent {
 
   // ── Fase result → guardar y salir ─────────────────────────────────────────
   finishActivity(result: PlayerResult): void {
+    // Guardar progreso local para desbloqueo de niveles del Roadmap
+    if (this.assignment?.activityId) {
+      try {
+        localStorage.setItem(
+          'roadmap_progress_' + this.assignment.activityId,
+          JSON.stringify({
+            score: result.successPercentage,
+            passed: result.successPercentage >= 60,
+            completedAt: new Date().toISOString(),
+          })
+        );
+      } catch {}
+    }
+
     const responseId = this.responseId();
-    if (responseId === null) {
+    if (responseId === null || this.assignment?.id === 0) {
       this.completed.emit();
       return;
     }
