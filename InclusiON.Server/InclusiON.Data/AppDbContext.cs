@@ -74,9 +74,10 @@ namespace InclusiON.Data
         public DbSet<FamilyStatusHistory> FamilyStatusHistories { get; set; }
         public DbSet<PersonRepresentativeHistory> PersonRepresentativeHistories { get; set; }
 
-        // Nivel 5: Respuestas, resultados y embeddings
+        // Nivel 5: Respuestas, resultados, sesiones y embeddings
         public DbSet<ActivityResponse> ActivityResponses { get; set; }
         public DbSet<ActivityResult> ActivityResults { get; set; }
+        public DbSet<ActivitySession> ActivitySessions { get; set; }
         public DbSet<ActivityEmbedding> ActivityEmbeddings { get; set; }
         public DbSet<PersonEmbedding> PersonEmbeddings { get; set; }
 

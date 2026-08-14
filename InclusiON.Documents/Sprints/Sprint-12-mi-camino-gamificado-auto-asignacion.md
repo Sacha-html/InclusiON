@@ -52,6 +52,16 @@
 
 ---
 
+### Seeder de Métricas y Sesiones Analíticas para Dashboards (HU-19 / IN-326)
+
+| Código | Task | Backend | Frontend | Estado |
+|--------|------|---------|----------|--------|
+| IN-326a | Entidad transaccional `ActivitySession` con métricas de KPI (GAS Score, SuccessRate, errores y tiempos) | `ActivitySession.cs`, `ActivitySessionConfiguration.cs` | — | ✅ DONE |
+| IN-326b | Migración EF Core `AddActivitySessions` para tabla de sesiones analíticas | `20260814222900_AddActivitySessions.cs` | — | ✅ DONE |
+| IN-326c | Seeder relacional `MetricsDataSeeder` (100-200 sesiones simuladas en los últimos 30 días) | `MetricsDataSeeder.cs`, `DatabaseSeeder.cs` | — | ✅ DONE |
+
+---
+
 ## Resumen del Sprint
 
 1. **Aislamiento Estricto de Datos:** Los profesionales no ven contaminada su grilla con las 10 actividades oficiales del sistema y no tienen acceso a rutas de edición de plantillas globales.
@@ -59,3 +69,5 @@
 3. **Resiliencia y Cero Errores 404/403:** Al hacer clic en un nivel, la auto-asignación genera o reutiliza una asignación válida para el alumno, permitiendo que el reproductor interactivo cargue con código 200 OK y registre el progreso pedagógico en la base de datos.
 4. **Filtrado Exclusivo en "Mis Actividades":** En el portal del alumno, "Mis Actividades" contiene únicamente las asignaciones manuales del profesor a cargo, evitando la duplicación de los niveles de "Mi Camino".
 5. **Catálogo Colaborativo de Profesionales:** Las actividades creadas por cualquier profesional son visibles, consultables y asignables por toda la planta docente de la institución.
+6. **Métricas Simuladas para Dashboards de KPI:** Implementación de `ActivitySession` y `MetricsDataSeeder` con 160 sesiones analíticas distribuidas en los últimos 30 días sobre las 14 actividades creadas por profesionales y sus respectivos alumnos.
+
