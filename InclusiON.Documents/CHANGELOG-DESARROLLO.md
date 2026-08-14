@@ -256,3 +256,20 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
   - `activities.service.ts`: Incorporado el método `autoAssign(activityId)`.
   - `aac-roadmap.component.ts`: La acción `onNodeClick` invoca `autoAssign()` para obtener un ID de asignación real y redirigir al reproductor `/app/activities/:assignmentEncryptedId`.
   - `player-base.component.ts`: Modificado `finishActivity` para persistir localmente el porcentaje obtenido y reportar la finalización al backend, garantizando que el estado del Roadmap se actualice de inmediato con feedback de éxito.
+
+---
+
+## 16. Catálogo Compartido entre Profesionales y Filtrado Exclusivo de "Mis Actividades" para Alumnos (Agosto 2026)
+
+### Backend (.NET 10)
+* **Catálogo Colaborativo Compartido:**
+  - `ActivitiesRepository.cs`: En `GetPagedAsync`, se configuró la consulta para que todas las actividades creadas por profesionales y actividades estándar (`!a.IsTemplate`) sean visibles y accesibles para todos los profesionales del sistema, promoviendo la reutilización de material pedagógico.
+  - `GetActivityByIdQueryHandler.cs`: Se eliminó la restricción de pertenencia exclusiva por `ProfessionalId`, permitiendo que cualquier profesional pueda previsualizar y consultar el detalle de las actividades creadas por colegas.
+  - `CreateActivityAssignmentCommandHandler.cs`: Se habilitó a los profesionales para asignar cualquier actividad activa del catálogo a sus alumnos, sin importar qué profesional la haya creado originalmente.
+* **Metadatos en Asignaciones:**
+  - `ActivityAssignmentResponse.cs`: Se expusieron las propiedades `IsTemplate`, `RoadmapOrder` y `AssignedByProfessionalId` para permitir al cliente distinguir con precisión las asignaciones provenientes del Roadmap versus las asignadas manualmente por el docente.
+
+### Frontend (Angular)
+* **Separación de Responsabilidades en Portal Alumno:**
+  - `aac-activities.component.ts`: En el listado de "Mis Actividades" (`/app/activities`), se implementó un filtrado reactivo para mostrar **exclusivamente** las actividades asignadas directamente por el profesor a cargo (`!a.isTemplate && a.roadmapOrder == null`), evitando la duplicación de los niveles de "Mi Camino".
+  - `activity.response.ts`: Actualizada la interfaz `ActivityAssignmentResponse` con las nuevas propiedades tipadas (`isTemplate`, `roadmapOrder`, `assignedByProfessionalId`).

@@ -42,8 +42,20 @@
 
 ---
 
+### Catálogo Compartido y Filtrado Exclusivo (HU-19 / IN-324 & IN-325)
+
+| Código | Task | Backend | Frontend | Estado |
+|--------|------|---------|----------|--------|
+| IN-324 | Filtrado reactivo en "Mis Actividades" del alumno para mostrar únicamente las tareas de su profesor | `ActivityAssignmentResponse.cs` | `aac-activities.component.ts` | ✅ DONE |
+| IN-325a | Catálogo compartido colaborativo visible para todos los profesionales de la institución | `ActivitiesRepository.cs` | `list.component.ts` | ✅ DONE |
+| IN-325b | Habilitación de consulta de detalle y asignación cruzada entre profesionales | `GetActivityByIdQueryHandler.cs`, `CreateActivityAssignmentCommandHandler.cs` | `list.component.ts` | ✅ DONE |
+
+---
+
 ## Resumen del Sprint
 
 1. **Aislamiento Estricto de Datos:** Los profesionales no ven contaminada su grilla con las 10 actividades oficiales del sistema y no tienen acceso a rutas de edición de plantillas globales.
 2. **"Mi Camino" Intuitivo y Accesible:** Los alumnos disfrutan de una experiencia de gamificación con estética violeta nativa, animaciones de pulso y avance progresivo al superar cada nivel con 60% o más de aciertos.
 3. **Resiliencia y Cero Errores 404/403:** Al hacer clic en un nivel, la auto-asignación genera o reutiliza una asignación válida para el alumno, permitiendo que el reproductor interactivo cargue con código 200 OK y registre el progreso pedagógico en la base de datos.
+4. **Filtrado Exclusivo en "Mis Actividades":** En el portal del alumno, "Mis Actividades" contiene únicamente las asignaciones manuales del profesor a cargo, evitando la duplicación de los niveles de "Mi Camino".
+5. **Catálogo Colaborativo de Profesionales:** Las actividades creadas por cualquier profesional son visibles, consultables y asignables por toda la planta docente de la institución.
