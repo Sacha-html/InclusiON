@@ -57,6 +57,32 @@
 
 ---
 
+## Historia de Usuario 4 — Filtrado Exclusivo de "Mis Actividades" en Portal Alumno (IN-324)
+
+**Como** alumno (persona con discapacidad)  
+**Quiero** que al ingresar a la solapa "Mis Actividades" solo se muestren las tareas asignadas directamente por mi profesor a cargo  
+**Para** no confundir las tareas personalizadas de clase con los niveles globales de la trayectoria de "Mi Camino".
+
+### Criterios de Aceptación
+- [x] El listado de asignaciones en `aac-activities.component.ts` filtra reactivamente las actividades descartando plantillas (`!a.isTemplate && a.roadmapOrder == null`).
+- [x] Los niveles del Roadmap no aparecen duplicados en la grilla de actividades asignadas.
+- [x] Si el profesor crea una actividad personalizada y la asigna al alumno, esta se muestra de inmediato con su estado (Pendiente, En Progreso, Completada).
+
+---
+
+## Historia de Usuario 5 — Catálogo Colaborativo Compartido entre Profesionales (IN-325)
+
+**Como** profesional de la institución  
+**Quiero** visualizar en mi catálogo de actividades todas las actividades creadas por cualquier colega profesional  
+**Para** reutilizar recursos pedagógicos, ahorrar tiempo de diseño y asignar actividades enriquecidas a mis alumnos.
+
+### Criterios de Aceptación
+- [x] `ActivitiesRepository.cs` en `GetPagedAsync` retorna todas las actividades activas creadas por cualquier profesional (`!a.IsTemplate`).
+- [x] La columna "Creado por" (`authorName`) identifica con nombre y apellido al profesional autor de cada actividad.
+- [x] Cualquier profesional puede consultar el detalle (`GetActivityByIdQueryHandler.cs`) y asignar (`CreateActivityAssignmentCommandHandler.cs`) cualquier actividad del catálogo a sus alumnos a cargo.
+
+---
+
 ## Casos de Borde y Escenarios de Resiliencia (IN-323)
 
 ### Caso de Borde 1: Alumno sin Profesional Directamente Vinculado
