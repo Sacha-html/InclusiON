@@ -90,16 +90,21 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             // Push SignalR al destinatario — fire and forget
             var senderName    = $"{sender!.Name} {sender.Surname}".Trim();
             var receiverIdStr = receiver!.Id.ToString();
+            var receiverIsProfessional = receiver.Professional is not null;
+            var receiverIsFamily       = receiver.FamilyRepresentative is not null;
+            var routePrefix            = receiverIsProfessional ? "pro" : (receiverIsFamily ? "family" : "admin");
+            var actionUrl              = $"/{routePrefix}/messages?contactId={sender.Id}";
+
             _ = Task.Run(async () =>
             {
                 await _bgJobs.CreateAsync(
                     JobTypes.Push,
                     JsonSerializer.Serialize(new NotificationPayload
                     {
-                        UserId           = receiverIdStr,
-                        Title            = "Nueva respuesta",
-                        Message          = $"{senderName} respondió un mensaje.",
-                        ActionUrl        = "/#/pro/messages",
+                        UserId            = receiverIdStr,
+                        Title             = "Nueva respuesta",
+                        Message           = $"{senderName} respondió un mensaje.",
+                        ActionUrl         = actionUrl,
                         SendEmailFallback = false
                     }),
                     maxRetries: 3);

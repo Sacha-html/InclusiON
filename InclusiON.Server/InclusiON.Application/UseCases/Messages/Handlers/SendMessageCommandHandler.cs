@@ -71,24 +71,45 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
                     "No se puede enviar mensajes a una persona con discapacidad.");
 
             // 5. Determinar tipos y validar relación
-            var senderIsProfessional = sender.Professional is not null;
+            var senderIsProfessional   = sender.Professional is not null;
             var receiverIsProfessional = receiver.Professional is not null;
+            var senderIsFamily         = sender.FamilyRepresentative is not null;
+            var receiverIsFamily       = receiver.FamilyRepresentative is not null;
 
-            // Mismo tipo: no permitido (prof→prof o familiar→familiar)
-            if (senderIsProfessional == receiverIsProfessional)
-                return ApiResponse<MessageResponse>.Forbidden(
-                    "Solo se permiten mensajes entre profesionales y familiares vinculados a la misma persona.");
+            var senderIsAdmin   = !senderIsProfessional && !senderIsFamily;
+            var receiverIsAdmin = !receiverIsProfessional && !receiverIsFamily;
 
-            // 6. Verificar que comparten al menos una persona activa
-            var professionalUserId = senderIsProfessional ? command.SenderId : command.ReceiverId;
-            var familyUserId       = senderIsProfessional ? command.ReceiverId : command.SenderId;
+            if (senderIsAdmin)
+            {
+                // El administrador puede comunicarse con cualquier profesional o familiar activo
+                if (!receiverIsProfessional && !receiverIsFamily)
+                {
+                    return ApiResponse<MessageResponse>.Forbidden(
+                        "Solo se pueden enviar mensajes a profesionales o representantes familiares.");
+                }
+            }
+            else if (receiverIsAdmin)
+            {
+                // Profesionales y familiares pueden comunicarse con cualquier administrador
+            }
+            else
+            {
+                // Mismo tipo entre usuarios comunes: no permitido (prof→prof o familiar→familiar)
+                if (senderIsProfessional == receiverIsProfessional)
+                    return ApiResponse<MessageResponse>.Forbidden(
+                        "Solo se permiten mensajes entre profesionales y familiares vinculados a la misma persona.");
 
-            var share = await _assignments.HaveSharedPersonAsync(
-                professionalUserId, familyUserId, cancellationToken);
+                // 6. Verificar que comparten al menos una persona activa
+                var professionalUserId = senderIsProfessional ? command.SenderId : command.ReceiverId;
+                var familyUserId       = senderIsProfessional ? command.ReceiverId : command.SenderId;
 
-            if (!share)
-                return ApiResponse<MessageResponse>.Forbidden(
-                    "No tienes una relación activa con este usuario para enviarle mensajes.");
+                var share = await _assignments.HaveSharedPersonAsync(
+                    professionalUserId, familyUserId, cancellationToken);
+
+                if (!share)
+                    return ApiResponse<MessageResponse>.Forbidden(
+                        "No tienes una relación activa con este usuario para enviarle mensajes.");
+            }
 
             // 7. Crear el mensaje
             var message = new Message
@@ -112,18 +133,21 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             message.Receiver = receiver;
 
             // Push SignalR al destinatario — fire and forget
-            var senderName   = $"{sender!.Name} {sender.Surname}".Trim();
+            var senderName    = $"{sender!.Name} {sender.Surname}".Trim();
             var receiverIdStr = receiver!.Id.ToString();
+            var routePrefix   = receiverIsProfessional ? "pro" : (receiverIsFamily ? "family" : "admin");
+            var actionUrl     = $"/{routePrefix}/messages?contactId={sender.Id}";
+
             _ = Task.Run(async () =>
             {
                 await _bgJobs.CreateAsync(
                     JobTypes.Push,
                     JsonSerializer.Serialize(new NotificationPayload
                     {
-                        UserId           = receiverIdStr,
-                        Title            = "Nuevo mensaje",
-                        Message          = $"Tenés un nuevo mensaje de {senderName}.",
-                        ActionUrl        = "/#/pro/messages",
+                        UserId            = receiverIdStr,
+                        Title             = "Nuevo mensaje",
+                        Message           = $"Tenés un nuevo mensaje de {senderName}.",
+                        ActionUrl         = actionUrl,
                         SendEmailFallback = false
                     }),
                     maxRetries: 3);

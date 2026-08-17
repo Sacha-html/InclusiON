@@ -37,3 +37,8 @@
 .font-medium {
   font-weight: 500;
 }
+
+.student-list-scrollable {
+  max-height: 400px;
+  overflow-y: auto;
+}

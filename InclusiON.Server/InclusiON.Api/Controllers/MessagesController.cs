@@ -253,6 +253,26 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// Marca como leídos todos los mensajes recibidos del contacto especificado.
+        /// </summary>
+        [HttpPut("conversation/{contactId}/read")]
+        [HttpPost("conversation/{contactId}/read")]
+        [Authorize(Policy = Permissions.Messages.Read)]
+        [ProducesResponseType(typeof(ApiResponse<MarkReadResponse>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<MarkReadResponse>>> MarkConversationAsRead(
+            Guid contactId,
+            [FromServices] ICommandHandler<MarkConversationReadCommand, ApiResponse<MarkReadResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var userId = _httpContextService.GetCurrentUserId();
+            if (userId is null)
+                return Unauthorized();
+
+            var result = await handler.HandleAsync(new MarkConversationReadCommand(contactId, userId.Value), cancellationToken);
+            return result.ToActionResult();
+        }
+
+        /// <summary>
         /// Elimina un mensaje (soft delete). Remitente o destinatario pueden eliminarlo.
         /// </summary>
         [HttpDelete("{id}")]

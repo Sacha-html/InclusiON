@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,13 +7,14 @@ import { ProfessionalsService, AssignmentsService, ActivitiesService, FamilyServ
 import { MessagesService } from '@services/messages.service';
 import {
   ProfessionalPersonResponse,
+  ClassroomResponse,
   ActivityAssignmentResponse,
   ActivityAttemptResponse,
   ActivityAssignmentStatus,
   ActivityResponseResult,
   PersonRepresentativeResponse
 } from '@models';
-import { switchMap } from 'rxjs';
+import { forkJoin, switchMap } from 'rxjs';
 import {
   CardComponent,
   CardBodyComponent,
@@ -32,10 +33,12 @@ import {
   ModalFooterComponent,
   ModalTitleDirective,
   FormSelectDirective,
-  FormControlDirective
+  FormControlDirective,
+  AlertComponent
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
+import { TimeFormatPipe } from '@shared/pipes';
 
 @Component({
   selector: 'app-evaluations',
@@ -63,8 +66,10 @@ import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avat
     ModalTitleDirective,
     FormSelectDirective,
     FormControlDirective,
+    AlertComponent,
     IconDirective,
-    ActorAvatarComponent
+    ActorAvatarComponent,
+    TimeFormatPipe,
   ],
   templateUrl: './evaluations.component.html',
   styleUrl: './evaluations.component.scss'
@@ -79,6 +84,10 @@ export class EvaluationsComponent implements OnInit {
   private readonly toastService = inject(ToastService);
 
   persons = signal<ProfessionalPersonResponse[]>([]);
+  classrooms = signal<ClassroomResponse[]>([]);
+  selectedClassroomId = signal<string>('');
+  searchStudentQuery = signal<string>('');
+
   selectedPerson = signal<ProfessionalPersonResponse | null>(null);
   assignments = signal<ActivityAssignmentResponse[]>([]);
   
@@ -96,12 +105,39 @@ export class EvaluationsComponent implements OnInit {
   averageTimeSpent = signal<number>(0);
   totalAttempts = signal<number>(0);
 
+  // Alertas de Frustración / Estancamiento
+  hasFrustrationAlerts = signal<boolean>(false);
+  frustrationAlertCount = signal<number>(0);
+  frustratedActivities = signal<string[]>([]);
+
   // Modal State
   showShareModal = signal<boolean>(false);
   representativesList = signal<PersonRepresentativeResponse[]>([]);
   selectedTutorId = '';
   shareMessageBody = '';
   sendingShare = signal<boolean>(false);
+
+  // Computed signal to filter students by Classroom and search term
+  filteredPersons = computed(() => {
+    const classroomId = this.selectedClassroomId();
+    const search = this.searchStudentQuery().toLowerCase().trim();
+    let list = this.persons();
+
+    if (classroomId) {
+      list = list.filter(p => p.classroomId === classroomId);
+    }
+
+    if (search) {
+      list = list.filter(p => 
+        p.personFullName.toLowerCase().includes(search) ||
+        (p.personLastName && p.personLastName.toLowerCase().includes(search)) ||
+        (p.personFirstName && p.personFirstName.toLowerCase().includes(search)) ||
+        (p.personDocumentNumber && p.personDocumentNumber.includes(search))
+      );
+    }
+
+    return list;
+  });
 
   ngOnInit(): void {
     this.loadPersons();
@@ -110,15 +146,19 @@ export class EvaluationsComponent implements OnInit {
   loadPersons(): void {
     this.isLoadingPersons.set(true);
     this.professionalsService.getMyProfile().pipe(
-      switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
+      switchMap(prof => forkJoin({
+        persons: this.assignmentsService.getPersonsByProfessional(prof.id),
+        classrooms: this.assignmentsService.getClassroomsByProfessional(prof.id)
+      }))
     ).subscribe({
-      next: (data) => {
-        this.persons.set(data.filter(p => p.isActive));
+      next: ({ persons, classrooms }) => {
+        this.persons.set(persons.filter(p => p.isActive));
+        this.classrooms.set(classrooms);
         this.isLoadingPersons.set(false);
       },
       error: () => {
         this.isLoadingPersons.set(false);
-        this.toastService.error('Error al cargar la lista de alumnos');
+        this.toastService.error('Error al cargar la lista de alumnos y aulas');
       }
     });
   }
@@ -151,13 +191,24 @@ export class EvaluationsComponent implements OnInit {
     let totalSuccess = 0;
     let totalTime = 0;
     let responseCount = 0;
+    let frustrationCount = 0;
+    const frustratedActivityNames: string[] = [];
 
     data.forEach(a => {
       if (a.status === 'Completada') completed++;
       else if (a.status === 'EnProgreso') inProgress++;
       else pending++;
 
-      if (a.responses) {
+      let hasActivityFrustration = false;
+
+      if (a.responses && a.responses.length > 0) {
+        const failedAttempts = a.responses.filter(r => r.result === 'Fallido' || (r.successPercentage !== null && r.successPercentage !== undefined && Number(r.successPercentage) < 50));
+        const hasFrustrationAttempt = a.responses.some(r => (r.frustrationLevel !== undefined && r.frustrationLevel > 0) || (r.successPercentage !== null && r.successPercentage !== undefined && Number(r.successPercentage) <= 40));
+
+        if ((failedAttempts.length >= 2 && a.status !== 'Completada') || hasFrustrationAttempt) {
+          hasActivityFrustration = true;
+        }
+
         a.responses.forEach(r => {
           responseCount++;
           if (r.successPercentage !== undefined && r.successPercentage !== null) {
@@ -168,6 +219,11 @@ export class EvaluationsComponent implements OnInit {
           }
         });
       }
+
+      if (hasActivityFrustration) {
+        frustrationCount++;
+        frustratedActivityNames.push(a.activityTitle);
+      }
     });
 
     this.completedCount.set(completed);
@@ -176,6 +232,10 @@ export class EvaluationsComponent implements OnInit {
     this.totalAttempts.set(responseCount);
     this.averageSuccessRate.set(responseCount > 0 ? (totalSuccess / responseCount) : 0);
     this.averageTimeSpent.set(responseCount > 0 ? (totalTime / responseCount) : 0);
+
+    this.frustrationAlertCount.set(frustrationCount);
+    this.hasFrustrationAlerts.set(frustrationCount > 0);
+    this.frustratedActivities.set(frustratedActivityNames);
   }
 
   formatTime(seconds: number | undefined): string {

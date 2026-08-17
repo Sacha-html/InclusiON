@@ -104,5 +104,52 @@ namespace InclusiON.Infrastructure.Data.Repositories
             await _context.Messages.AddAsync(message, cancellationToken);
             return message;
         }
+
+        public async Task<Dictionary<Guid, (DateTime? LastMessageDate, int UnreadCount)>> GetConversationStatsAsync(
+            Guid currentUserId,
+            IEnumerable<Guid> contactUserIds,
+            CancellationToken cancellationToken = default)
+        {
+            var contactIdList = contactUserIds.Distinct().ToList();
+            if (contactIdList.Count == 0)
+                return new Dictionary<Guid, (DateTime?, int)>();
+
+            var stats = await _context.Messages
+                .Where(m => m.IsActive &&
+                            ((m.SenderId == currentUserId && contactIdList.Contains(m.ReceiverId)) ||
+                             (m.ReceiverId == currentUserId && contactIdList.Contains(m.SenderId))))
+                .GroupBy(m => m.SenderId == currentUserId ? m.ReceiverId : m.SenderId)
+                .Select(g => new
+                {
+                    ContactId = g.Key,
+                    LastMessageDate = g.Max(m => (DateTime?)m.SentAt),
+                    UnreadCount = g.Count(m => m.ReceiverId == currentUserId && !m.IsRead)
+                })
+                .ToListAsync(cancellationToken);
+
+            return stats.ToDictionary(s => s.ContactId, s => (s.LastMessageDate, s.UnreadCount));
+        }
+
+        public async Task<int> MarkConversationAsReadAsync(
+            Guid currentUserId,
+            Guid contactUserId,
+            CancellationToken cancellationToken = default)
+        {
+            var unreadMessages = await _context.Messages
+                .Where(m => m.IsActive && !m.IsRead && m.ReceiverId == currentUserId && m.SenderId == contactUserId)
+                .ToListAsync(cancellationToken);
+
+            if (unreadMessages.Count == 0)
+                return 0;
+
+            var now = DateTime.UtcNow;
+            foreach (var msg in unreadMessages)
+            {
+                msg.IsRead = true;
+                msg.ReadAt = now;
+            }
+
+            return unreadMessages.Count;
+        }
     }
 }

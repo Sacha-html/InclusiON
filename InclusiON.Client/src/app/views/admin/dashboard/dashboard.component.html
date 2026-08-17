@@ -22,17 +22,22 @@
 <!-- Dashboard Principal -->
 @if (!loading && !error && dashboard) {
 
-  <c-row class="mb-4 align-items-center">
-    <c-col xs="12" md="8">
-      <h1 class="h4 mb-1 fw-bold">Panel de Control del Administrador</h1>
-      <p class="text-body-secondary mb-0">Auditoría institucional, analítica pedagógica y seguimiento documental.</p>
-    </c-col>
-    <c-col xs="12" md="4" class="text-md-end mt-2 mt-md-0">
-      <a routerLink="/admin/reports" class="btn btn-outline-primary btn-sm">
-        Ver Todos los Reportes &rarr;
-      </a>
-    </c-col>
-  </c-row>
+  <div id="adminDashboardContainer" class="bg-body p-2 rounded">
+    <c-row class="mb-4 align-items-center">
+      <c-col xs="12" md="7">
+        <h1 class="h4 mb-1 fw-bold">Panel de Control del Administrador</h1>
+        <p class="text-body-secondary mb-0">Auditoría institucional, analítica pedagógica y seguimiento documental.</p>
+      </c-col>
+      <c-col xs="12" md="5" class="text-md-end mt-2 mt-md-0 d-flex gap-2 justify-content-md-end">
+        <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" (click)="exportDashboardPdf()" [disabled]="isExportingPdf">
+          <svg cIcon name="cilCloudDownload" size="sm"></svg>
+          <span>{{ isExportingPdf ? 'Generando PDF…' : 'Exportar PDF' }}</span>
+        </button>
+        <a routerLink="/admin/reports" class="btn btn-outline-primary btn-sm">
+          Ver Todos los Reportes &rarr;
+        </a>
+      </c-col>
+    </c-row>
 
   <!-- ── Fila 1: KPIs Documentales y Workflow de Reportes ─────────────────────── -->
   @if (reportsAnalytics) {
@@ -255,4 +260,5 @@
     </c-row>
   }
 
+  </div>
 }

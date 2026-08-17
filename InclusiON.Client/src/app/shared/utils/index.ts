@@ -5,3 +5,5 @@ export { getInvitationStatusColor, getActiveStatusColor } from './status.helpers
 export { getCount } from './pagination.utils';
 export type { PaginationCount } from './pagination.utils';
 export { contrastTextColor } from './color.utils';
+export { exportHtmlElementToPdf } from './pdf-export.util';
+export type { PdfExportOptions } from './pdf-export.util';

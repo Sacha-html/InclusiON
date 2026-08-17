@@ -348,5 +348,14 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
             return count;
         }
+
+        public async Task<List<FamilyRepresentative>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.FamilyRepresentatives
+                .Include(f => f.User)
+                .Where(f => f.User.IsActive)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+        }
     }
 }

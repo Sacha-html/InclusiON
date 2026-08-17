@@ -325,3 +325,68 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
 * **Servicio `MetricsDataSeeder`:**
   - Implementado en `InclusiON.Data/Seeders/MetricsDataSeeder.cs` para sembrar entre 100 y 200 sesiones analíticas distribuidas uniformemente en los últimos 30 días sobre las 14 actividades creadas por profesionales y sus respectivos alumnos vinculados.
   - Integrado en `DatabaseSeeder.SeedAsync` para ejecución automática condicional al inicio de la aplicación cuando la tabla está vacía.
+
+---
+
+## 18. Paquete de Mejoras Transversales, Exportación Dinámica a PDF en Formato A4 y Evaluaciones con Filtro por Aula (Agosto 2026)
+
+### Backend (.NET 10)
+* **Directorio Cruzado Dinámico:**
+  - `FamilyRepository.cs` e `IFamilyRepository.cs`: Implementado `GetAllActiveAsync` con carga anticipada de `User` para consulta global.
+  - `GetMessageContactsQueryHandler.cs`: Adaptado para devolver administradores a profesionales/familias y a todos los profesionales/familias activos al perfil administrador.
+  - `SendMessageCommandHandler.cs`: Adaptado para habilitar la mensajería bidireccional entre administradores y cualquier profesional o tutor familiar activo.
+
+### Frontend (Angular)
+* **Exportación Dinámica a PDF en Formato Estándar A4 (`jsPDF` y `html2canvas`):**
+  - Creado `pdf-export.util.ts` exportado en `@shared/utils`:
+    - Inicialización en formato **A4 exacto (ISO 216: 210 x 297 mm)** con compresión y márgenes estándar (10 mm).
+    - Soporte para modos `portrait` y `landscape`.
+    - Modo `fitToSinglePage` para escalado proporcional balanceado en 1 sola página A4.
+    - Paginación limpia multipágina para reportes extensos.
+    - `windowWidth: 1280` y `scale: 2` (alta resolución) para mantener la grilla de escritorio.
+  - Integrado botón de exportación a PDF en el Dashboard Profesional (`detail.component.html` / `ts`) capturando los KPIs y gráficos filtrados por aula.
+  - Integrado botón de exportación a PDF en el Dashboard Administrador (`dashboard.component.html` / `ts`) capturando el resumen institucional.
+* **Evaluaciones con Filtro por Aula y Detección de Frustración:**
+  - `evaluations.component.ts` y `.html`: Agregado selector de Aula y barra de búsqueda por nombre/apellido del alumno.
+  - Lista de alumnos acotada con scroll (`max-height: 400px; overflow-y: auto;`) mediante clase `.student-list-scrollable`.
+  - Banner de alerta visual de frustración/estancamiento destacado cuando el alumno registra actividades con múltiples fallos o bloqueos.
+  - Creado pipe standalone `timeFormat` (`time-format.pipe.ts`) exportado en `@shared/pipes` aplicando `Math.floor()` para renderizar tiempos en formato `"X min Y seg"`.
+* **Limpieza de Código Muerto (NG8113):**
+  - Depuradas importaciones sin uso en `src/app/views/admin/reports/list/list.component.ts`.
+
+---
+
+## 19. Módulo de Mensajería para Administradores, Ordenamiento Dinámico, Insignia de No Leídos, Redirección desde Notificaciones y Bugfix de Colores CSS (Agosto 2026)
+
+### Backend (.NET 10)
+* **Estadísticas de Conversación y Orden Dinámico:**
+  - `MessageContactResponse.cs`: Incorporadas las propiedades `UltimoMensajeFecha` (`DateTime?`) y `MensajesNoLeidos` (`int`).
+  - `IMessagesRepository.cs` y `MessagesRepository.cs`: Implementado método optimizado `GetConversationStatsAsync` para consultar en una única agrupación el último mensaje y el total de no leídos para cada contacto del usuario actual.
+  - `GetMessageContactsQueryHandler.cs`: Consulta las estadísticas y retorna la lista ordenada descendentemente por fecha del último mensaje (`UltimoMensajeFecha DESC`) y alfabéticamente por nombre.
+* **Comando y Endpoint para Marcar Conversación como Leída:**
+  - Creados `MarkConversationReadCommand.cs` y `MarkConversationReadCommandHandler.cs`.
+  - `MessagesRepository.cs`: Implementado `MarkConversationAsReadAsync` para actualizar en masa `IsRead = true` y `ReadAt = UtcNow` en los mensajes recibidos del contacto seleccionado.
+  - `MessagesController.cs`: Expuesto el endpoint `PUT /api/Messages/conversation/{contactId}/read` (y alias `POST`).
+* **Push Notifications con ContactId y Enlace Directo:**
+  - `SendMessageCommandHandler.cs` y `ReplyToMessageCommandHandler.cs`: Actualizado el payload de notificación de SignalR y segundo plano para incluir la ruta según rol con el ID del remitente: `ActionUrl = "/{routePrefix}/messages?contactId={sender.Id}"`.
+* **Tests Unitarios:**
+  - 660 pruebas unitarias ejecutadas con éxito con 0 errores (`InclusiON.Tests.Unit`).
+
+### Frontend (Angular)
+* **Módulo de Mensajería para el Administrador:**
+  - Registrada la ruta `/admin/messages` en `app.routes.ts` y `app-routes.ts`.
+  - Agregado el ítem de menú **"Mensajes"** en la barra lateral del Administrador (`_nav.ts`).
+  - Incorporados filtros por pestañas (*"Todos"*, *"Profesionales"*, *"Familiares"*) en `messages.component.html` para el perfil Administrador.
+* **Indicador Visual de Mensajes No Leídos (Badge):**
+  - En la lista de contactos (`messages.component.html`), se muestra una insignia circular roja sobre el avatar con el conteo exacto de mensajes no leídos cuando `c.mensajesNoLeidos > 0` y la fecha/hora del último mensaje.
+* **Ordenamiento Dinámico en Tiempo Real:**
+  - En `messages.component.ts`, al enviar o recibir mensajes vía SignalR, el chat salta automáticamente a la posición superior `[0]`.
+* **Redirección Directa desde la Campana de Notificaciones:**
+  - `notification-bell.component.ts`: Al hacer clic en una notificación de mensaje, utiliza `router.navigateByUrl()` para navegar directamente a `/messages?contactId=...` y marca la notificación como leída.
+  - `messages.component.ts`: Inyectado `ActivatedRoute` para capturar el query param `contactId`/`userId` tanto al inicio como de forma reactiva, abriendo inmediatamente la conversación correspondiente y marcándola como leída en la base de datos.
+* **Sincronización de Dashboard:**
+  - Filtrada la suscripción de SignalR en el Dashboard Profesional para contar únicamente mensajes.
+  - Al leer los mensajes, `unreadMessages` se restablece a `0` y la alerta visual del dashboard se normaliza.
+* **Bugfix de Exportación a PDF (Unsupported color function):**
+  - En `pdf-export.util.ts`, se implementó el hook `onclone` en `html2canvas` para inyectar estilos universales (`rgba(...)` / `#HEX`) y sanitizar mediante un canvas 2D auxiliar cualquier propiedad de color computada moderna (`color(srgb ...)`, `color-mix(...)`, `oklch(...)`, `lab(...)`).
+  - En `_accessibility-themes.scss`, se reemplazaron las variables `--cui-*-bg-subtle` con `color-mix()` en `:root` por valores `rgba(...)` universales.

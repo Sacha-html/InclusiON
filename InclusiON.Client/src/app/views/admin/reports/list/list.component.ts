@@ -16,11 +16,6 @@ import {
   FormLabelDirective,
   FormSelectDirective,
   GridModule,
-  ModalModule,
-  SpinnerComponent,
-  FormCheckComponent,
-  FormCheckInputDirective,
-  FormCheckLabelDirective,
 } from '@coreui/angular';
 
 @Component({
@@ -35,11 +30,6 @@ import {
     FormLabelDirective,
     FormSelectDirective,
     GridModule,
-    ModalModule,
-    SpinnerComponent,
-    FormCheckComponent,
-    FormCheckInputDirective,
-    FormCheckLabelDirective,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
