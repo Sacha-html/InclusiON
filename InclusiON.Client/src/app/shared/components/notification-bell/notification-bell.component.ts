@@ -164,24 +164,16 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     this.updateUnreadCount();
 
     if (notif.actionUrl) {
-      // If it starts with / or http, navigate directly
-      if (notif.actionUrl.startsWith('/') || notif.actionUrl.startsWith('http')) {
-        let path = notif.actionUrl;
-        if (path.startsWith('/#')) {
-          path = path.substring(2);
-        }
-        this.router.navigateByUrl(path);
-      } else {
-        // Build role path
-        const role = this.authService.getUserRole();
-        if (role === UserRoles.Professional) {
-          this.router.navigate([`/pro/${notif.actionUrl}`]);
-        } else if (role === UserRoles.FamilyRepresentative) {
-          this.router.navigate([`/family/${notif.actionUrl}`]);
-        } else if (role === UserRoles.Admin) {
-          this.router.navigate([`/admin/${notif.actionUrl}`]);
-        }
+      let path = notif.actionUrl;
+      if (path.startsWith('/#')) {
+        path = path.substring(2);
       }
+      if (!path.startsWith('/') && !path.startsWith('http')) {
+        const role = this.authService.getUserRole();
+        const prefix = role === UserRoles.Professional ? '/pro/' : (role === UserRoles.FamilyRepresentative ? '/family/' : '/admin/');
+        path = prefix + path;
+      }
+      this.router.navigateByUrl(path);
     }
   }
 
@@ -361,10 +353,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       next: (n) => {
         if (n > 0) {
           const list = this.notifications();
-          const hasMsgNotif = list.some(notif => notif.id === 'unread-messages-summary');
+          const hasMsgNotif = list.some(notif => notif.id === 'unread-messages-summary' && !notif.isRead);
           if (!hasMsgNotif) {
             const role = this.authService.getUserRole();
-            const actionUrl = role === UserRoles.Professional ? 'messages' : role === UserRoles.FamilyRepresentative ? 'messages' : 'dashboard';
+            const actionUrl = role === UserRoles.Professional ? 'messages' : role === UserRoles.FamilyRepresentative ? 'messages' : 'messages';
             const msgNotif: AppNotification = {
               id: 'unread-messages-summary',
               title: 'Mensajes sin leer',
@@ -375,9 +367,12 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
               createdAt: new Date(),
               timeLabel: 'Ahora'
             };
-            this.notifications.update(arr => [msgNotif, ...arr]);
+            this.notifications.update(arr => [msgNotif, ...arr.filter(x => x.id !== 'unread-messages-summary')]);
             this.saveToStorage();
           }
+        } else {
+          this.notifications.update(arr => arr.map(x => x.id === 'unread-messages-summary' ? { ...x, isRead: true } : x));
+          this.saveToStorage();
         }
         this.updateUnreadCount();
       },

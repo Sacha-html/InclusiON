@@ -15,7 +15,7 @@ import { IconDirective } from '@coreui/icons-angular';
 import { ProfessionalsService, AssignmentsService, InvitationsService, ReportsService, ToastService } from '@services';
 import { MessagesService } from '@services/messages.service';
 import { SignalrService } from '@services/signalr.service';
-import { getInvitationStatusColor, getCount } from '@shared/utils';
+import { getInvitationStatusColor, getCount, exportHtmlElementToPdf } from '@shared/utils';
 import {
   ProfessionalResponse,
   ProfessionalPersonResponse,
@@ -131,8 +131,12 @@ export class DetailComponent implements OnInit, OnDestroy {
       },
     });
 
-    this.#notifSub = this.signalrService.notification$.subscribe(() => {
-      this.unreadMessages++;
+    this.#notifSub = this.signalrService.notification$.subscribe((notif) => {
+      const title = notif.title?.toLowerCase() ?? '';
+      const url = notif.actionUrl?.toLowerCase() ?? '';
+      if (title.includes('mensaje') || url.includes('messages')) {
+        this.unreadMessages++;
+      }
     });
   }
 
@@ -233,77 +237,45 @@ export class DetailComponent implements OnInit, OnDestroy {
     return 'Buenas noches';
   }
 
-  // ── Download Metrics PDF ───────────────────────────────────────────────
-  downloadWeeklyProgressPdf(): void {
-    const wp = this.weeklyProgress;
-    if (!wp) return;
+  isExportingPdf = false;
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      this.toastService.error('Por favor, permite ventanas emergentes para descargar el PDF.');
+  // ── Download Metrics PDF ───────────────────────────────────────────────
+  async downloadWeeklyProgressPdf(): Promise<void> {
+    const container = document.getElementById('proDashboardMetricsArea');
+    if (!container) {
+      this.toastService.error('No se encontró el contenedor de métricas para exportar.');
       return;
     }
 
-    const start = new Date(wp.periodStart).toLocaleDateString('es-ES');
-    const end = new Date(wp.periodEnd).toLocaleDateString('es-ES');
+    try {
+      this.isExportingPdf = true;
+      this.toastService.info('Generando PDF con las métricas y gráficos del aula...');
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Reporte de Métricas Semanales - InclusiON</title>
-          <style>
-            body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 40px; color: #333; }
-            .header { border-bottom: 2px solid #0096c7; padding-bottom: 20px; margin-bottom: 30px; }
-            .logo { font-size: 26px; font-weight: bold; color: #0077b6; }
-            .title { font-size: 20px; margin-top: 10px; font-weight: 600; }
-            .period { font-size: 14px; color: #666; margin-top: 5px; }
-            .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px; }
-            .card { border: 1px solid #e0e0e0; padding: 25px; border-radius: 12px; background: #fbfbfb; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-            .label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #777; font-weight: 600; }
-            .value { font-size: 32px; font-weight: 800; color: #0077b6; margin-top: 8px; }
-            .success-high { color: #2e7d32; }
-            .alert-danger { color: #c62828; }
-            .footer { border-top: 1px solid #eee; padding-top: 20px; font-size: 11px; color: #999; margin-top: 60px; text-align: center; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="logo">InclusiON</div>
-            <div class="title">Resumen de Métricas Semanales de Alumnos</div>
-            <div class="period">Período de evaluación: ${start} — ${end}</div>
-          </div>
-          <div class="grid">
-            <div class="card">
-              <div class="label">Personas Activas</div>
-              <div class="value">${wp.personCount}</div>
-            </div>
-            <div class="card">
-              <div class="label">Actividades Completadas</div>
-              <div class="value">${wp.totalCompleted}</div>
-            </div>
-            <div class="card">
-              <div class="label">Promedio de Éxito</div>
-              <div class="value ${wp.avgSuccess >= 70 ? 'success-high' : ''}">${wp.avgSuccess}%</div>
-            </div>
-            <div class="card">
-              <div class="label">Alertas de Frustración</div>
-              <div class="value ${wp.frustrationAlerts > 0 ? 'alert-danger' : ''}">${wp.frustrationAlerts}</div>
-            </div>
-          </div>
-          <div class="footer">
-            Generado automáticamente por el portal profesional de InclusiON el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}.
-          </div>
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(function() { window.close(); }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    this.toastService.success('Preparando PDF de métricas...');
+      const classroomName = this.selectedClassroomId
+        ? (this.classrooms.find(c => c.id === this.selectedClassroomId)?.name || 'Aula')
+        : 'Todas_las_Aulas';
+
+      const fileName = `Dashboard_Metricas_${classroomName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+      // Esperar brevemente para asegurar que los gráficos estén completamente renderizados
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      await exportHtmlElementToPdf(container, {
+        filename: fileName,
+        orientation: 'landscape',
+        format: 'a4',
+        margin: 10,
+        scale: 2,
+        fitToSinglePage: true,
+      });
+
+      this.toastService.success('PDF exportado exitosamente.');
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      this.toastService.error('Error al generar el PDF del dashboard.');
+    } finally {
+      this.isExportingPdf = false;
+    }
   }
 
   // ── Share Metrics Modal ────────────────────────────────────────────────

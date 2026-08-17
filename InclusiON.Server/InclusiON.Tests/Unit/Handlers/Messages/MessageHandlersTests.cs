@@ -703,13 +703,23 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
 
     public class GetMessageContactsQueryHandlerTests
     {
-        private readonly IUsersRepository       _users       = Substitute.For<IUsersRepository>();
-        private readonly IAssignmentsRepository _assignments = Substitute.For<IAssignmentsRepository>();
+        private readonly IUsersRepository            _users         = Substitute.For<IUsersRepository>();
+        private readonly IAssignmentsRepository      _assignments   = Substitute.For<IAssignmentsRepository>();
+        private readonly IAdminInstitutionRepository _admins        = Substitute.For<IAdminInstitutionRepository>();
+        private readonly IProfessionalsRepository    _professionals = Substitute.For<IProfessionalsRepository>();
+        private readonly IFamilyRepository           _families      = Substitute.For<IFamilyRepository>();
+        private readonly IMessagesRepository         _messages      = Substitute.For<IMessagesRepository>();
 
         private static readonly Guid UserId    = Guid.NewGuid();
         private static readonly Guid ContactId = Guid.NewGuid();
 
-        private GetMessageContactsQueryHandler BuildSut() => new(_users, _assignments);
+        public GetMessageContactsQueryHandlerTests()
+        {
+            _messages.GetConversationStatsAsync(Arg.Any<Guid>(), Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                     .Returns(new Dictionary<Guid, (DateTime?, int)>());
+        }
+
+        private GetMessageContactsQueryHandler BuildSut() => new(_users, _assignments, _admins, _professionals, _families, _messages);
 
         private static User AProfessionalUser(Guid id) => new()
         {
@@ -727,6 +737,12 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
         {
             Id = id, Name = "María", Surname = "Pérez", Email = "maria@test.com",
             IsActive = true, PersonWithDisability = new PersonWithDisability { Id = Guid.NewGuid() }
+        };
+
+        private static User AnAdminUser(Guid id) => new()
+        {
+            Id = id, Name = "Carlos", Surname = "Admin", Email = "admin@test.com",
+            IsActive = true
         };
 
         [Fact]
@@ -753,7 +769,7 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
         }
 
         [Fact]
-        public async Task HandleAsync_Professional_ReturnsFamilyContacts()
+        public async Task HandleAsync_Professional_ReturnsFamilyContactsAndAdmins()
         {
             _users.GetByIdWithProfileAsync(UserId, Arg.Any<CancellationToken>())
                   .Returns(AProfessionalUser(UserId));
@@ -762,17 +778,20 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             _assignments.GetContactsForProfessionalAsync(UserId, Arg.Any<CancellationToken>())
                         .Returns(new List<User> { familyUser });
 
+            var adminUser = AnAdminUser(Guid.NewGuid());
+            _admins.GetAllAdminsWithInstitutionsAsync(Arg.Any<CancellationToken>())
+                   .Returns(new List<User> { adminUser });
+
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data!.Data.Should().HaveCount(1);
-            result.Data!.Data[0].UserId.Should().Be(ContactId);
-            result.Data!.Data[0].UserType.Should().Be("FamilyRepresentative");
-            result.Data!.Data[0].FullName.Should().Be("Luis López");
+            result.Data!.Data.Should().HaveCount(2);
+            result.Data!.Data.Should().Contain(c => c.UserId == ContactId && c.UserType == "FamilyRepresentative");
+            result.Data!.Data.Should().Contain(c => c.UserId == adminUser.Id && c.UserType == "Admin");
         }
 
         [Fact]
-        public async Task HandleAsync_FamilyRepresentative_ReturnsProfessionalContacts()
+        public async Task HandleAsync_FamilyRepresentative_ReturnsProfessionalContactsAndAdmins()
         {
             _users.GetByIdWithProfileAsync(UserId, Arg.Any<CancellationToken>())
                   .Returns(AFamilyUser(UserId));
@@ -781,13 +800,38 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
             _assignments.GetContactsForFamilyAsync(UserId, Arg.Any<CancellationToken>())
                         .Returns(new List<User> { profUser });
 
+            var adminUser = AnAdminUser(Guid.NewGuid());
+            _admins.GetAllAdminsWithInstitutionsAsync(Arg.Any<CancellationToken>())
+                   .Returns(new List<User> { adminUser });
+
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
-            result.Data!.Data.Should().HaveCount(1);
-            result.Data!.Data[0].UserId.Should().Be(ContactId);
-            result.Data!.Data[0].UserType.Should().Be("Professional");
-            result.Data!.Data[0].FullName.Should().Be("Ana Gómez");
+            result.Data!.Data.Should().HaveCount(2);
+            result.Data!.Data.Should().Contain(c => c.UserId == ContactId && c.UserType == "Professional");
+            result.Data!.Data.Should().Contain(c => c.UserId == adminUser.Id && c.UserType == "Admin");
+        }
+
+        [Fact]
+        public async Task HandleAsync_Admin_ReturnsAllProfessionalsAndFamilies()
+        {
+            _users.GetByIdWithProfileAsync(UserId, Arg.Any<CancellationToken>())
+                  .Returns(AnAdminUser(UserId));
+
+            var prof = new Professional { Id = Guid.NewGuid(), User = AProfessionalUser(Guid.NewGuid()) };
+            var family = new FamilyRepresentative { Id = Guid.NewGuid(), User = AFamilyUser(Guid.NewGuid()) };
+
+            _professionals.GetAllActiveAsync(Arg.Any<CancellationToken>())
+                          .Returns(new List<Professional> { prof });
+            _families.GetAllActiveAsync(Arg.Any<CancellationToken>())
+                     .Returns(new List<FamilyRepresentative> { family });
+
+            var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
+
+            result.Success.Should().BeTrue();
+            result.Data!.Data.Should().HaveCount(2);
+            result.Data!.Data.Should().Contain(c => c.UserId == prof.User.Id && c.UserType == "Professional");
+            result.Data!.Data.Should().Contain(c => c.UserId == family.User.Id && c.UserType == "FamilyRepresentative");
         }
 
         [Fact]
@@ -798,11 +842,56 @@ namespace InclusiON.Tests.Unit.Handlers.Messages
 
             _assignments.GetContactsForProfessionalAsync(UserId, Arg.Any<CancellationToken>())
                         .Returns(new List<User>());
+            _admins.GetAllAdminsWithInstitutionsAsync(Arg.Any<CancellationToken>())
+                   .Returns(new List<User>());
 
             var result = await BuildSut().HandleAsync(new GetMessageContactsQuery(UserId), default);
 
             result.Success.Should().BeTrue();
             result.Data!.Data.Should().BeEmpty();
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // MarkConversationReadCommandHandler
+    // ════════════════════════════════════════════════════════════════════════════
+
+    public class MarkConversationReadCommandHandlerTests
+    {
+        private readonly IMessagesRepository _messages = Substitute.For<IMessagesRepository>();
+        private readonly IUnitOfWork         _uow      = Substitute.For<IUnitOfWork>();
+
+        private static readonly Guid CurrentUserId = Guid.NewGuid();
+        private static readonly Guid ContactUserId = Guid.NewGuid();
+
+        private MarkConversationReadCommandHandler BuildSut() => new(_messages, _uow);
+
+        [Fact]
+        public async Task HandleAsync_WhenMessagesMarked_SavesChangesAndReturnsCount()
+        {
+            _messages.MarkConversationAsReadAsync(CurrentUserId, ContactUserId, Arg.Any<CancellationToken>())
+                     .Returns(3);
+
+            var command = new MarkConversationReadCommand(ContactUserId, CurrentUserId);
+            var result = await BuildSut().HandleAsync(command, default);
+
+            result.Success.Should().BeTrue();
+            result.Data!.MarkedCount.Should().Be(3);
+            await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_WhenNoMessagesMarked_DoesNotSaveChanges()
+        {
+            _messages.MarkConversationAsReadAsync(CurrentUserId, ContactUserId, Arg.Any<CancellationToken>())
+                     .Returns(0);
+
+            var command = new MarkConversationReadCommand(ContactUserId, CurrentUserId);
+            var result = await BuildSut().HandleAsync(command, default);
+
+            result.Success.Should().BeTrue();
+            result.Data!.MarkedCount.Should().Be(0);
+            await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         }
     }
 }

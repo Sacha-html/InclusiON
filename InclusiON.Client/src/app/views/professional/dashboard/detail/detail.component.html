@@ -69,135 +69,138 @@
     </c-col>
   </c-row>
 
-  <!-- Resumen semanal de progreso -->
-  @if (weeklyProgress) {
-    <c-row class="mb-4">
-      <c-col xs="12">
-        <c-card class="weekly-progress-card">
-          <c-card-body>
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-              <div>
-                <h5 class="mb-0">Resumen semanal</h5>
-                <small class="text-body-secondary">
-                  {{ weeklyProgress.periodStart | date:'dd/MM' }} — {{ weeklyProgress.periodEnd | date:'dd/MM/yyyy' }}
-                </small>
-              </div>
-              <div class="d-flex align-items-center gap-2 flex-wrap">
-                <select class="form-select form-select-sm w-auto bg-body text-body border-secondary-subtle"
-                        [value]="selectedClassroomId"
-                        (change)="onChangeClassroom($event)"
-                        aria-label="Filtro de Aula">
-                  <option value="">Todas mis aulas</option>
-                  @for (c of classrooms; track c.id) {
-                    <option [value]="c.id">{{ c.name }}</option>
-                  }
-                </select>
-                <button cButton color="primary" size="sm" (click)="downloadWeeklyProgressPdf()">
-                  <svg cIcon name="cilCloudDownload" size="sm" class="me-1"></svg>
-                  Exportar PDF
-                </button>
-                <button cButton color="outline-primary" size="sm" (click)="openShareModal()">
-                  <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
-                  Compartir con Tutor
-                </button>
-              </div>
-            </div>
-            <c-row class="g-3 text-center">
-              <c-col xs="6" md="3">
-                <div class="weekly-stat">
-                  <div class="weekly-stat__value">{{ weeklyProgress.personCount }}</div>
-                  <div class="weekly-stat__label">Personas activas</div>
-                </div>
-              </c-col>
-              <c-col xs="6" md="3">
-                <div class="weekly-stat">
-                  <div class="weekly-stat__value text-primary">{{ weeklyProgress.totalCompleted }}</div>
-                  <div class="weekly-stat__label">Actividades completadas</div>
-                </div>
-              </c-col>
-              <c-col xs="6" md="3">
-                <div class="weekly-stat">
-                  <div class="weekly-stat__value"
-                       [class.text-success]="weeklyProgress.avgSuccess >= 70"
-                       [class.text-warning]="weeklyProgress.avgSuccess >= 40 && weeklyProgress.avgSuccess < 70"
-                       [class.text-danger]="weeklyProgress.avgSuccess < 40">
-                    {{ weeklyProgress.avgSuccess }}%
-                  </div>
-                  <div class="weekly-stat__label">Promedio de éxito</div>
-                </div>
-              </c-col>
-              <c-col xs="6" md="3">
-                <div class="weekly-stat clickable-card"
-                     (click)="openFrustrationDetails()"
-                     title="Haz clic para ver el detalle de alumnos y actividades con alertas de frustración">
-                  <div class="weekly-stat__value"
-                       [class.text-danger]="weeklyProgress.frustrationAlerts > 0"
-                       [class.text-body-secondary]="weeklyProgress.frustrationAlerts === 0">
-                    {{ weeklyProgress.frustrationAlerts }}
-                    @if (weeklyProgress.frustrationAlerts > 0) { <span class="fs-6">⚠️</span> }
-                  </div>
-                  <div class="weekly-stat__label d-flex align-items-center justify-content-center gap-1">
-                    <span>Alertas de frustración</span>
-                    <span class="badge bg-danger-subtle text-danger border" style="font-size: 0.65rem;">Ver detalle</span>
-                  </div>
-                </div>
-              </c-col>
-            </c-row>
-          </c-card-body>
-        </c-card>
-      </c-col>
-    </c-row>
-  }
-
-  <!-- Fila de Gráficos Analíticos de Alto Contraste -->
-  @if (analytics) {
-    <c-row class="mb-4">
-      <!-- Tarjeta Izquierda (Gráfico de Torta) -->
-      <c-col xs="12" md="6" class="mb-3 mb-md-0">
-        <c-card class="h-100 shadow-sm">
-          <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
-            <div class="fw-semibold">Rendimiento por Categoría Pedagógica</div>
-            @if (isLoadingAnalytics) {
-              <c-spinner size="sm" color="primary"></c-spinner>
-            }
-          </c-card-header>
-          <c-card-body>
-            <app-high-contrast-pie-chart [items]="analytics.rendimiento_Por_Categoria" />
-          </c-card-body>
-        </c-card>
-      </c-col>
-
-      <!-- Tarjeta Derecha (Gráfico de Barras / Histograma) -->
-      <c-col xs="12" md="6">
-        <c-card class="h-100 shadow-sm">
-          <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
-            <div class="fw-semibold">Distribución del Aula por Niveles</div>
-            <span class="badge bg-primary-subtle text-primary border font-monospace">Niveles 1 - 10</span>
-          </c-card-header>
-          <c-card-body>
-            <app-level-histogram-chart [items]="analytics.distribucion_Por_Nivel" />
-          </c-card-body>
-        </c-card>
-      </c-col>
-    </c-row>
-
-    <!-- Fila de Ranking Comparativo de Aulas (Visible solo en vista global "Todas mis aulas") -->
-    @if (!selectedClassroomId && analytics.rankingMisAulas && analytics.rankingMisAulas.length > 0) {
+  <!-- Contenedor para exportación dinámica a PDF -->
+  <div id="proDashboardMetricsArea" class="bg-body p-2 rounded">
+    <!-- Resumen semanal de progreso -->
+    @if (weeklyProgress) {
       <c-row class="mb-4">
         <c-col xs="12">
-          <c-card class="shadow-sm">
-            <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
-              <div class="fw-semibold">Comparativa de Rendimiento por Aula</div>
-              <span class="badge bg-success-subtle text-success border">Ranking de Aulas</span>
-            </c-card-header>
+          <c-card class="weekly-progress-card">
             <c-card-body>
-              <app-classroom-ranking-chart [items]="analytics.rankingMisAulas" />
+              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                  <h5 class="mb-0">Resumen semanal</h5>
+                  <small class="text-body-secondary">
+                    {{ weeklyProgress.periodStart | date:'dd/MM' }} — {{ weeklyProgress.periodEnd | date:'dd/MM/yyyy' }}
+                  </small>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <select class="form-select form-select-sm w-auto bg-body text-body border-secondary-subtle"
+                          [value]="selectedClassroomId"
+                          (change)="onChangeClassroom($event)"
+                          aria-label="Filtro de Aula">
+                    <option value="">Todas mis aulas</option>
+                    @for (c of classrooms; track c.id) {
+                      <option [value]="c.id">{{ c.name }}</option>
+                    }
+                  </select>
+                  <button cButton color="primary" size="sm" [disabled]="isExportingPdf" (click)="downloadWeeklyProgressPdf()">
+                    <svg cIcon name="cilCloudDownload" size="sm" class="me-1"></svg>
+                    @if (isExportingPdf) { Generando PDF… } @else { Exportar PDF }
+                  </button>
+                  <button cButton color="outline-primary" size="sm" (click)="openShareModal()">
+                    <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
+                    Compartir con Tutor
+                  </button>
+                </div>
+              </div>
+              <c-row class="g-3 text-center">
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat">
+                    <div class="weekly-stat__value">{{ weeklyProgress.personCount }}</div>
+                    <div class="weekly-stat__label">Personas activas</div>
+                  </div>
+                </c-col>
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat">
+                    <div class="weekly-stat__value text-primary">{{ weeklyProgress.totalCompleted }}</div>
+                    <div class="weekly-stat__label">Actividades completadas</div>
+                  </div>
+                </c-col>
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat">
+                    <div class="weekly-stat__value"
+                         [class.text-success]="weeklyProgress.avgSuccess >= 70"
+                         [class.text-warning]="weeklyProgress.avgSuccess >= 40 && weeklyProgress.avgSuccess < 70"
+                         [class.text-danger]="weeklyProgress.avgSuccess < 40">
+                      {{ weeklyProgress.avgSuccess }}%
+                    </div>
+                    <div class="weekly-stat__label">Promedio de éxito</div>
+                  </div>
+                </c-col>
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat clickable-card"
+                       (click)="openFrustrationDetails()"
+                       title="Haz clic para ver el detalle de alumnos y actividades con alertas de frustración">
+                    <div class="weekly-stat__value"
+                         [class.text-danger]="weeklyProgress.frustrationAlerts > 0"
+                         [class.text-body-secondary]="weeklyProgress.frustrationAlerts === 0">
+                      {{ weeklyProgress.frustrationAlerts }}
+                      @if (weeklyProgress.frustrationAlerts > 0) { <span class="fs-6">⚠️</span> }
+                    </div>
+                    <div class="weekly-stat__label d-flex align-items-center justify-content-center gap-1">
+                      <span>Alertas de frustración</span>
+                      <span class="badge bg-danger-subtle text-danger border" style="font-size: 0.65rem;">Ver detalle</span>
+                    </div>
+                  </div>
+                </c-col>
+              </c-row>
             </c-card-body>
           </c-card>
         </c-col>
       </c-row>
     }
-  }
+
+    <!-- Fila de Gráficos Analíticos de Alto Contraste -->
+    @if (analytics) {
+      <c-row class="mb-4">
+        <!-- Tarjeta Izquierda (Gráfico de Torta) -->
+        <c-col xs="12" md="6" class="mb-3 mb-md-0">
+          <c-card class="h-100 shadow-sm">
+            <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
+              <div class="fw-semibold">Rendimiento por Categoría Pedagógica</div>
+              @if (isLoadingAnalytics) {
+                <c-spinner size="sm" color="primary"></c-spinner>
+              }
+            </c-card-header>
+            <c-card-body>
+              <app-high-contrast-pie-chart [items]="analytics.rendimiento_Por_Categoria" />
+            </c-card-body>
+          </c-card>
+        </c-col>
+
+        <!-- Tarjeta Derecha (Gráfico de Barras / Histograma) -->
+        <c-col xs="12" md="6">
+          <c-card class="h-100 shadow-sm">
+            <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
+              <div class="fw-semibold">Distribución del Aula por Niveles</div>
+              <span class="badge bg-primary-subtle text-primary border font-monospace">Niveles 1 - 10</span>
+            </c-card-header>
+            <c-card-body>
+              <app-level-histogram-chart [items]="analytics.distribucion_Por_Nivel" />
+            </c-card-body>
+          </c-card>
+        </c-col>
+      </c-row>
+
+      <!-- Fila de Ranking Comparativo de Aulas (Visible solo en vista global "Todas mis aulas") -->
+      @if (!selectedClassroomId && analytics.rankingMisAulas && analytics.rankingMisAulas.length > 0) {
+        <c-row class="mb-4">
+          <c-col xs="12">
+            <c-card class="shadow-sm">
+              <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
+                <div class="fw-semibold">Comparativa de Rendimiento por Aula</div>
+                <span class="badge bg-success-subtle text-success border">Ranking de Aulas</span>
+              </c-card-header>
+              <c-card-body>
+                <app-classroom-ranking-chart [items]="analytics.rankingMisAulas" />
+              </c-card-body>
+            </c-card>
+          </c-col>
+        </c-row>
+      }
+    }
+  </div>
 
   <!-- Reportes resumen -->
   @if (recentReports.length > 0) {

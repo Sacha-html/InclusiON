@@ -10,7 +10,7 @@ import {
   SpinnerComponent,
   AlertComponent,
 } from '@coreui/angular';
-import { AuthService } from '@services';
+import { AuthService, ToastService } from '@services';
 import { AdminUsersService } from '@services/admin-users.service';
 import { AnalyticsService } from '@services/analytics.service';
 import {
@@ -25,6 +25,8 @@ import {
   ProfessionalProductivityChartComponent,
   ReportStatusPieChartComponent,
 } from '@shared/components';
+import { IconDirective } from '@coreui/icons-angular';
+import { exportHtmlElementToPdf } from '@shared/utils';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -46,12 +48,14 @@ import { forkJoin } from 'rxjs';
     LevelHistogramChartComponent,
     ProfessionalProductivityChartComponent,
     ReportStatusPieChartComponent,
+    IconDirective,
   ],
 })
 export class DashboardComponent implements OnInit {
   private readonly adminUsersService = inject(AdminUsersService);
   private readonly analyticsService = inject(AnalyticsService);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   dashboard: AdminDashboardResponse | null = null;
@@ -61,6 +65,7 @@ export class DashboardComponent implements OnInit {
   loading = true;
   error = false;
   isGlobalAdmin = false;
+  isExportingPdf = false;
 
   ngOnInit(): void {
     this.isGlobalAdmin = this.authService.isGlobalAdmin();
@@ -94,5 +99,39 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/admin/reports'], {
       queryParams: { status: 'Submitted' },
     });
+  }
+
+  async exportDashboardPdf(): Promise<void> {
+    const container = document.getElementById('adminDashboardContainer');
+    if (!container) {
+      this.toastService.error('No se encontró el contenedor del dashboard para exportar.');
+      return;
+    }
+
+    try {
+      this.isExportingPdf = true;
+      this.toastService.info('Generando PDF del panel de administración...');
+
+      const fileName = `Dashboard_Admin_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+      // Esperar brevemente a que los gráficos svg/canvas terminen de asentarse
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      await exportHtmlElementToPdf(container, {
+        filename: fileName,
+        orientation: 'landscape',
+        format: 'a4',
+        margin: 10,
+        scale: 2,
+        fitToSinglePage: true,
+      });
+
+      this.toastService.success('PDF del dashboard exportado exitosamente.');
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+      this.toastService.error('Error al generar el PDF del dashboard.');
+    } finally {
+      this.isExportingPdf = false;
+    }
   }
 }
