@@ -17,12 +17,45 @@
           #searchInput
           cFormControl
           type="text" 
-          placeholder="Buscar tutor o contacto..." 
+          placeholder="Buscar tutor, profesional o contacto..." 
           class="border-start-0 bg-body-secondary ps-0"
           [value]="searchQuery()"
           (input)="searchQuery.set(searchInput.value)"
         />
       </div>
+
+      <!-- Filtro de tipo para Administrador -->
+      @if (isAdmin()) {
+        <div class="btn-group btn-group-sm w-100 mt-2 shadow-none" role="group" aria-label="Filtro de contactos">
+          <button 
+            type="button" 
+            class="btn btn-sm" 
+            [class.btn-primary]="contactTypeFilter() === 'ALL'" 
+            [class.btn-outline-primary]="contactTypeFilter() !== 'ALL'"
+            (click)="setContactTypeFilter('ALL')"
+          >
+            Todos
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-sm" 
+            [class.btn-primary]="contactTypeFilter() === 'PROFESSIONAL'" 
+            [class.btn-outline-primary]="contactTypeFilter() !== 'PROFESSIONAL'"
+            (click)="setContactTypeFilter('PROFESSIONAL')"
+          >
+            Profesionales
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-sm" 
+            [class.btn-primary]="contactTypeFilter() === 'FAMILY'" 
+            [class.btn-outline-primary]="contactTypeFilter() !== 'FAMILY'"
+            (click)="setContactTypeFilter('FAMILY')"
+          >
+            Familiares
+          </button>
+        </div>
+      }
     </div>
 
     <!-- Lista de Contactos (Scrollable) -->
@@ -44,13 +77,33 @@
               [class.contact-item--active]="selectedContact()?.userId === c.userId"
               (click)="loadChatForContact(c)"
             >
-              <app-actor-avatar [name]="c.fullName" size="md" class="flex-shrink-0" />
+              <div class="position-relative flex-shrink-0">
+                <app-actor-avatar [name]="c.fullName" size="md" />
+                @if ((c.mensajesNoLeidos || c.unreadCount || 0) > 0) {
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm" style="font-size: 0.65rem;">
+                    {{ c.mensajesNoLeidos || c.unreadCount }}
+                    <span class="visually-hidden">mensajes no leídos</span>
+                  </span>
+                }
+              </div>
               <div class="flex-grow-1 overflow-hidden">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="fw-semibold text-truncate text-body">{{ c.fullName }}</span>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-semibold text-truncate text-body" [class.fw-bold]="(c.mensajesNoLeidos || c.unreadCount || 0) > 0">
+                    {{ c.fullName }}
+                  </span>
+                  @if (c.ultimoMensajeFecha || c.lastMessageDate) {
+                    <small class="text-body-secondary flex-shrink-0 ms-2" style="font-size: 0.75rem;">
+                      {{ (c.ultimoMensajeFecha || c.lastMessageDate) | date:'dd/MM HH:mm' }}
+                    </small>
+                  }
                 </div>
-                <div class="small text-body-secondary text-truncate">
-                  {{ contactLabel(c) }}
+                <div class="d-flex justify-content-between align-items-center small text-body-secondary text-truncate">
+                  <span>{{ contactLabel(c) }}</span>
+                  @if ((c.mensajesNoLeidos || c.unreadCount || 0) > 0) {
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 0.65rem;">
+                      {{ c.mensajesNoLeidos || c.unreadCount }} nuevo(s)
+                    </span>
+                  }
                 </div>
               </div>
             </li>

@@ -105,17 +105,17 @@
 :root {
   // Colores semánticos
   --cui-primary:             var(--a11y-primary);
-  --cui-primary-bg-subtle:   color-mix(in srgb, var(--a11y-primary) 15%, transparent);
+  --cui-primary-bg-subtle:   rgba(0, 102, 204, 0.12);
   --cui-primary-text-emphasis: var(--a11y-primary-dark, var(--a11y-primary));
   --cui-secondary:           var(--a11y-text-secondary);
   --cui-success:             var(--a11y-success);
-  --cui-success-bg-subtle:   color-mix(in srgb, var(--a11y-success) 15%, transparent);
+  --cui-success-bg-subtle:   rgba(27, 94, 32, 0.12);
   --cui-success-text-emphasis: var(--a11y-success);
   --cui-danger:              var(--a11y-danger);
-  --cui-danger-bg-subtle:    color-mix(in srgb, var(--a11y-danger) 15%, transparent);
+  --cui-danger-bg-subtle:    rgba(198, 40, 40, 0.12);
   --cui-danger-text-emphasis: var(--a11y-danger);
   --cui-warning:             var(--a11y-warning);
-  --cui-warning-bg-subtle:   color-mix(in srgb, var(--a11y-warning) 15%, transparent);
+  --cui-warning-bg-subtle:   rgba(230, 81, 0, 0.12);
   --cui-warning-text-emphasis: var(--a11y-warning);
   --cui-info:                var(--a11y-primary);
   --cui-link-color:          var(--a11y-link, var(--a11y-primary));

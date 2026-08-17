@@ -45,5 +45,21 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// Persiste un nuevo mensaje en la base de datos.
         /// </summary>
         Task<Message> CreateAsync(Message message, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Obtiene estadísticas de conversación (último mensaje y conteo de no leídos) para una lista de contactos.
+        /// </summary>
+        Task<Dictionary<Guid, (DateTime? LastMessageDate, int UnreadCount)>> GetConversationStatsAsync(
+            Guid currentUserId,
+            IEnumerable<Guid> contactUserIds,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Marca como leídos todos los mensajes recibidos del contacto indicado por parte del usuario actual.
+        /// </summary>
+        Task<int> MarkConversationAsReadAsync(
+            Guid currentUserId,
+            Guid contactUserId,
+            CancellationToken cancellationToken = default);
     }
 }

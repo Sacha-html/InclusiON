@@ -64,7 +64,11 @@ export interface MessageContactResponse {
   userId: string;
   fullName: string;
   email: string;
-  userType: string;  // "Professional" | "FamilyRepresentative"
+  userType: string;  // "Professional" | "FamilyRepresentative" | "Admin"
+  ultimoMensajeFecha?: string;
+  lastMessageDate?: string;
+  mensajesNoLeidos?: number;
+  unreadCount?: number;
 }
 
 // ── Requests ─────────────────────────────────────────────────────────────────
@@ -153,6 +157,13 @@ export class MessagesService {
   markAsRead(id: string): Observable<MessageDetailResponse> {
     return this.http
       .put<ApiResponse<MessageDetailResponse>>(`${this.baseUrl}/${id}/read`, {})
+      .pipe(unwrapResponse());
+  }
+
+  // Mark all unread messages from a contact as read
+  markConversationAsRead(contactUserId: string): Observable<number> {
+    return this.http
+      .put<ApiResponse<number>>(`${this.baseUrl}/conversation/${contactUserId}/read`, {})
       .pipe(unwrapResponse());
   }
 }

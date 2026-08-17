@@ -50,12 +50,12 @@ export const navItems: INavData[] = [
     url: AppRoutes.Admin.Catalogs.Root,
     iconComponent: { name: 'cil-notes' },
     children: [
-      { name: 'Áreas de Habilidad',       url: AppRoutes.Admin.Catalogs.SkillAreas },
-      { name: 'Categorías de Actividad',   url: AppRoutes.Admin.Catalogs.ActivityCategories },
-      { name: 'Métodos de Login',          url: AppRoutes.Admin.Catalogs.LoginMethods },
-      { name: 'Niveles de Autonomía',      url: AppRoutes.Admin.Catalogs.AutonomyLevels },
-      { name: 'Tipos de Discapacidad',     url: AppRoutes.Admin.Catalogs.DisabilityTypes },
-      { name: 'Tipos de Plantilla',        url: AppRoutes.Admin.Catalogs.TemplateTypes },
+      { name: 'Áreas de Habilidad', url: AppRoutes.Admin.Catalogs.SkillAreas },
+      { name: 'Categorías de Actividad', url: AppRoutes.Admin.Catalogs.ActivityCategories },
+      { name: 'Métodos de Login', url: AppRoutes.Admin.Catalogs.LoginMethods },
+      { name: 'Niveles de Autonomía', url: AppRoutes.Admin.Catalogs.AutonomyLevels },
+      { name: 'Tipos de Discapacidad', url: AppRoutes.Admin.Catalogs.DisabilityTypes },
+      { name: 'Tipos de Plantilla', url: AppRoutes.Admin.Catalogs.TemplateTypes },
     ],
   },
   {
