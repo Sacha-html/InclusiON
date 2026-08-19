@@ -42,6 +42,11 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-description' },
   },
   {
+    name: 'Mensajes',
+    url: AppRoutes.Admin.Messages,
+    iconComponent: { name: 'cil-envelope-closed' },
+  },
+  {
     title: true,
     name: 'Configuración',
   },
