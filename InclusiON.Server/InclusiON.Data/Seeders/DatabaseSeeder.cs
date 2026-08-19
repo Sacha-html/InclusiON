@@ -1249,62 +1249,47 @@ namespace InclusiON.Data.Seeders
                     .Where(x => userIds.Contains(x.UserId))
                     .ExecuteDeleteAsync();
 
-                await context.SaveChangesAsync();
+                // 7. Identity Users y roles/claims asociados
+                await context.UserRoles.Where(ur => userIds.Contains(ur.UserId)).ExecuteDeleteAsync();
+                await context.UserClaims.Where(uc => userIds.Contains(uc.UserId)).ExecuteDeleteAsync();
+                await context.Users.Where(u => userIds.Contains(u.Id)).ExecuteDeleteAsync();
 
-                // 7. Identity Users (a través de userManager)
-                foreach (var user in usersToDelete)
-                {
-                    await userManager.DeleteAsync(user);
-                }
+                context.ChangeTracker.Clear();
             }
 
-            // 0. Eliminar profesionales o usuarios duplicados de "Sacha" (manteniendo únicamente el oficial)
+            // 0. Eliminar profesionales duplicados de "Sacha" (manteniendo únicamente el oficial)
             var sachaFixedProfId = Guid.Parse("00000000-0000-0000-0000-000000000203");
             var sachaFixedUserId = Guid.Parse("00000000-0000-0000-0000-000000000023");
             var duplicateSachaProfs = await context.Professionals
-                .Include(p => p.User)
                 .Where(p => p.Id != sachaFixedProfId &&
                             (p.FirstName.ToLower().Contains("sacha") ||
                              p.LastName.ToLower().Contains("del barrio") ||
-                             (p.User != null && p.User.Email.ToLower().Contains("sacha"))))
+                             (p.User != null && p.User.Email != null && p.User.Email.ToLower().Contains("sacha"))))
+                .Select(p => new { p.Id, p.UserId })
                 .ToListAsync();
 
             foreach (var dup in duplicateSachaProfs)
             {
-                var dupUser = dup.User;
+                await context.Classrooms.Where(c => c.ProfessionalId == dup.Id).ExecuteDeleteAsync();
+                await context.ProfessionalPersons.Where(pp => pp.ProfessionalId == dup.Id).ExecuteDeleteAsync();
+                await context.ProfessionalInstitutions.Where(pi => pi.ProfessionalId == dup.Id).ExecuteDeleteAsync();
+                await context.Reports.Where(r => r.ProfessionalId == dup.Id).ExecuteDeleteAsync();
+                await context.Professionals.Where(p => p.Id == dup.Id).ExecuteDeleteAsync();
 
-                var dupClassrooms = await context.Classrooms.Where(c => c.ProfessionalId == dup.Id).ToListAsync();
-                context.Classrooms.RemoveRange(dupClassrooms);
-
-                var dupPersons = await context.ProfessionalPersons.Where(pp => pp.ProfessionalId == dup.Id).ToListAsync();
-                context.ProfessionalPersons.RemoveRange(dupPersons);
-
-                var dupInsts = await context.ProfessionalInstitutions.Where(pi => pi.ProfessionalId == dup.Id).ToListAsync();
-                context.ProfessionalInstitutions.RemoveRange(dupInsts);
-
-                await context.SaveChangesAsync();
-
-                context.Professionals.Remove(dup);
-                await context.SaveChangesAsync();
-
-                if (dupUser != null && dupUser.Id != sachaFixedUserId)
+                if (dup.UserId != sachaFixedUserId)
                 {
-                    await userManager.DeleteAsync(dupUser);
+                    var isStudent = await context.PersonsWithDisability.AnyAsync(p => p.UserId == dup.UserId);
+                    var isFamily = await context.FamilyRepresentatives.AnyAsync(f => f.UserId == dup.UserId);
+                    if (!isStudent && !isFamily)
+                    {
+                        await context.UserRoles.Where(ur => ur.UserId == dup.UserId).ExecuteDeleteAsync();
+                        await context.UserClaims.Where(uc => uc.UserId == dup.UserId).ExecuteDeleteAsync();
+                        await context.Users.Where(u => u.Id == dup.UserId).ExecuteDeleteAsync();
+                    }
                 }
             }
 
-            var duplicateSachaUsers = await userManager.Users
-                .Where(u => u.Id != sachaFixedUserId &&
-                            u.Email != "sacha.delbarrio@test.com" &&
-                            (u.Name.ToLower().Contains("sacha") ||
-                             (u.Surname != null && u.Surname.ToLower().Contains("del barrio")) ||
-                             (u.Email != null && u.Email.ToLower().Contains("sacha"))))
-                .ToListAsync();
-
-            foreach (var dupUser in duplicateSachaUsers)
-            {
-                await userManager.DeleteAsync(dupUser);
-            }
+            context.ChangeTracker.Clear();
 
             // 1. Asegurar profesionales y estado Approved
             // Sacha Del Barrio

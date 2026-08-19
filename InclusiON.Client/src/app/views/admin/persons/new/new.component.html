@@ -83,13 +83,14 @@
           </c-col>
           <c-col sm="6">
             <label cLabel for="birthDate">Fecha de nacimiento *</label>
-            <input cFormControl id="birthDate" formControlName="birthDate"
-                   placeholder="dd/mm/aaaa (Ej: 15/08/2012)"
-                   [valid]="submittedStep1 ? f['birthDate'].valid : undefined" />
-            @if (submittedStep1 && f['birthDate'].errors) {
+            <input cFormControl type="date" id="birthDate" formControlName="birthDate"
+                   [min]="minBirthDate" [max]="maxBirthDate"
+                   [valid]="(submittedStep1 || f['birthDate'].touched) ? (f['birthDate'].valid ? true : false) : undefined" />
+            @if ((submittedStep1 || f['birthDate'].touched) && f['birthDate'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['birthDate'].errors['required']) { La fecha de nacimiento es obligatoria. }
-                @else if (f['birthDate'].errors['invalidDate']) { Formato inválido. Use dd/mm/aaaa. }
+                @else if (f['birthDate'].errors['ageOutOfRange']) { El usuario debe tener entre 12 y 40 años de edad }
+                @else if (f['birthDate'].errors['invalidDate']) { Formato inválido. }
                 @else if (f['birthDate'].errors['futureDate']) { La fecha no puede ser futura. }
               </c-form-feedback>
             }
@@ -422,7 +423,7 @@
 
         <div class="mt-4 d-flex gap-2">
           <button cButton color="secondary" type="button" (click)="prevStep()" aria-label="Volver al Paso 2">Atrás</button>
-          <button cButton color="primary" type="submit" aria-label="Finalizar y guardar registro">Guardar Alumno y Tutor</button>
+          <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Finalizar y guardar registro">Guardar Alumno y Tutor</button>
         </div>
       }
 

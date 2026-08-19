@@ -42,17 +42,24 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
+        /// <summary>
         /// Obtiene métricas analíticas y KPIs para el dashboard del Profesional autenticado.
-        /// Opcionalmente filtra por aula específica (aulaId / classroomId).
+        /// Opcionalmente filtra por aula específica (aulaId / classroomId) y rango de fechas (desde / hasta).
         /// </summary>
         [HttpGet("professional")]
         [ProducesResponseType(typeof(ApiResponse<AnalyticsDashboardResponse>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<AnalyticsDashboardResponse>>> GetProfessionalAnalytics(
             [FromQuery] Guid? aulaId = null,
             [FromQuery] Guid? classroomId = null,
+            [FromQuery] DateTime? desde = null,
+            [FromQuery] DateTime? hasta = null,
+            [FromQuery] DateTime? dateFrom = null,
+            [FromQuery] DateTime? dateTo = null,
             CancellationToken cancellationToken = default)
         {
             var targetClassroomId = aulaId ?? classroomId;
+            var from = desde ?? dateFrom;
+            var to = hasta ?? dateTo;
             var currentEntityId = _httpContextService.GetCurrentEntityId();
             var currentUserId = _httpContextService.GetCurrentUserId();
 
@@ -82,7 +89,7 @@ namespace InclusiON.Api.Controllers
 
             var studentIds = await query.Select(pp => pp.PersonId).Distinct().ToListAsync(cancellationToken);
 
-            var analytics = await CalculateAnalyticsAsync(studentIds, cancellationToken);
+            var analytics = await CalculateAnalyticsAsync(studentIds, from, to, cancellationToken);
 
             // Si se consulta la vista global del profesional ("Todas mis aulas"), calcular el ranking comparativo entre sus aulas
             if (!targetClassroomId.HasValue || targetClassroomId.Value == Guid.Empty)
@@ -101,9 +108,18 @@ namespace InclusiON.Api.Controllers
                         .Distinct()
                         .ToListAsync(cancellationToken);
 
-                    var classroomSessions = await _context.ActivitySessions
-                        .Where(s => classroomStudentIds.Contains(s.StudentId) && s.IsActive)
-                        .ToListAsync(cancellationToken);
+                    var classroomSessionsQuery = _context.ActivitySessions
+                        .Where(s => classroomStudentIds.Contains(s.StudentId) && s.IsActive);
+
+                    if (from.HasValue)
+                        classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted >= from.Value);
+                    if (to.HasValue)
+                    {
+                        var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
+                        classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted <= toDate);
+                    }
+
+                    var classroomSessions = await classroomSessionsQuery.ToListAsync(cancellationToken);
 
                     var avgSuccess = classroomSessions.Count != 0
                         ? Math.Round(classroomSessions.Average(s => s.SuccessRate), 1)
@@ -130,16 +146,22 @@ namespace InclusiON.Api.Controllers
 
         /// <summary>
         /// Obtiene el listado detallado de sesiones con alerta de frustración o bloqueo
-        /// para el modal de drill-down del profesional.
+        /// para el modal de drill-down del profesional con filtro opcional de fechas.
         /// </summary>
         [HttpGet("professional/frustration-details")]
         [ProducesResponseType(typeof(ApiResponse<List<FrustrationDetailResponse>>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<List<FrustrationDetailResponse>>>> GetFrustrationDetails(
             [FromQuery] Guid? aulaId = null,
             [FromQuery] Guid? classroomId = null,
+            [FromQuery] DateTime? desde = null,
+            [FromQuery] DateTime? hasta = null,
+            [FromQuery] DateTime? dateFrom = null,
+            [FromQuery] DateTime? dateTo = null,
             CancellationToken cancellationToken = default)
         {
             var targetClassroomId = aulaId ?? classroomId;
+            var from = desde ?? dateFrom;
+            var to = hasta ?? dateTo;
             var currentEntityId = _httpContextService.GetCurrentEntityId();
             var currentUserId = _httpContextService.GetCurrentUserId();
 
@@ -166,15 +188,24 @@ namespace InclusiON.Api.Controllers
 
             var studentIds = await query.Select(pp => pp.PersonId).Distinct().ToListAsync(cancellationToken);
 
-            var oneMonthAgo = DateTime.UtcNow.AddDays(-30);
+            var defaultSinceDate = DateTime.UtcNow.AddDays(-30);
+            var minDate = from ?? defaultSinceDate;
 
             // Obtener sesiones con indicadores de frustración (éxito <= 60%, errores >= 4 o GAS <= -1)
-            var frustrationSessions = await _context.ActivitySessions
+            var frustrationQuery = _context.ActivitySessions
                 .Include(s => s.Student)
                 .Include(s => s.Activity)
                     .ThenInclude(a => a.Category)
-                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive && s.DateCompleted >= oneMonthAgo &&
-                           (s.SuccessRate <= 60 || s.ErrorCount >= 4 || s.GasScore <= -1))
+                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive && s.DateCompleted >= minDate &&
+                           (s.SuccessRate <= 60 || s.ErrorCount >= 4 || s.GasScore <= -1));
+
+            if (to.HasValue)
+            {
+                var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
+                frustrationQuery = frustrationQuery.Where(s => s.DateCompleted <= toDate);
+            }
+
+            var frustrationSessions = await frustrationQuery
                 .OrderByDescending(s => s.DateCompleted)
                 .ToListAsync(cancellationToken);
 
@@ -206,35 +237,59 @@ namespace InclusiON.Api.Controllers
 
         /// <summary>
         /// Obtiene métricas analíticas globales de toda la institución para el dashboard del Administrador.
+        /// Opcionalmente filtra por rango de fechas (desde / hasta).
         /// </summary>
         [HttpGet("admin")]
         [Authorize(Policy = "users:read")]
         [ProducesResponseType(typeof(ApiResponse<AnalyticsDashboardResponse>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<AnalyticsDashboardResponse>>> GetAdminAnalytics(
+            [FromQuery] DateTime? desde = null,
+            [FromQuery] DateTime? hasta = null,
+            [FromQuery] DateTime? dateFrom = null,
+            [FromQuery] DateTime? dateTo = null,
             CancellationToken cancellationToken = default)
         {
+            var from = desde ?? dateFrom;
+            var to = hasta ?? dateTo;
+
             var studentIds = await _context.PersonsWithDisability
                 .Where(p => p.IsActive)
                 .Select(p => p.Id)
                 .ToListAsync(cancellationToken);
 
-            var analytics = await CalculateAnalyticsAsync(studentIds, cancellationToken);
+            var analytics = await CalculateAnalyticsAsync(studentIds, from, to, cancellationToken);
             return Ok(ApiResponse<AnalyticsDashboardResponse>.SuccessResult(analytics));
         }
 
         /// <summary>
-        /// Obtiene analítica documental de reportes y estado del workflow para el Administrador.
+        /// Obtiene analítica documental de reportes y estado del workflow para el Administrador con filtro opcional de fechas.
         /// </summary>
         [HttpGet("admin/reports")]
         [Authorize(Policy = "reports:read")]
         [ProducesResponseType(typeof(ApiResponse<AdminReportsAnalyticsResponse>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<AdminReportsAnalyticsResponse>>> GetAdminReportsAnalytics(
+            [FromQuery] DateTime? desde = null,
+            [FromQuery] DateTime? hasta = null,
+            [FromQuery] DateTime? dateFrom = null,
+            [FromQuery] DateTime? dateTo = null,
             CancellationToken cancellationToken = default)
         {
-            var reports = await _context.Reports
+            var from = desde ?? dateFrom;
+            var to = hasta ?? dateTo;
+
+            var reportsQuery = _context.Reports
                 .Include(r => r.Professional)
-                .Where(r => r.IsActive)
-                .ToListAsync(cancellationToken);
+                .Where(r => r.IsActive);
+
+            if (from.HasValue)
+                reportsQuery = reportsQuery.Where(r => r.ReportDate >= from.Value);
+            if (to.HasValue)
+            {
+                var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
+                reportsQuery = reportsQuery.Where(r => r.ReportDate <= toDate);
+            }
+
+            var reports = await reportsQuery.ToListAsync(cancellationToken);
 
             var total = reports.Count;
             var pendientes = reports.Count(r => r.Status == ReportStatus.Submitted);
@@ -327,6 +382,8 @@ namespace InclusiON.Api.Controllers
 
         private async Task<AnalyticsDashboardResponse> CalculateAnalyticsAsync(
             List<Guid> studentIds,
+            DateTime? from,
+            DateTime? to,
             CancellationToken cancellationToken)
         {
             var response = new AnalyticsDashboardResponse
@@ -340,11 +397,22 @@ namespace InclusiON.Api.Controllers
             }
 
             // Obtener sesiones de estos alumnos
-            var sessions = await _context.ActivitySessions
+            var sessionsQuery = _context.ActivitySessions
                 .Include(s => s.Activity)
                     .ThenInclude(a => a.Category)
-                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive)
-                .ToListAsync(cancellationToken);
+                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive);
+
+            if (from.HasValue)
+            {
+                sessionsQuery = sessionsQuery.Where(s => s.DateCompleted >= from.Value);
+            }
+            if (to.HasValue)
+            {
+                var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
+                sessionsQuery = sessionsQuery.Where(s => s.DateCompleted <= toDate);
+            }
+
+            var sessions = await sessionsQuery.ToListAsync(cancellationToken);
 
             // Obtener las 10 actividades del Roadmap
             var roadmapActivities = await _context.Activities

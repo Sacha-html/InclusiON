@@ -8,7 +8,7 @@ import { unwrapResponse } from '@shared/utils';
 export interface CalendarEvent {
   id: string;
   title: string;
-  type: 'Consulta' | 'Tutoría' | 'Clase' | 'Tarea';
+  type: 'Tutoría' | 'Clase' | 'Tarea';
   date: string; // YYYY-MM-DD
   time: string; // HH:MM
   description?: string;

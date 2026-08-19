@@ -12,6 +12,8 @@ export interface GetReportsRequest {
   status?: string;
   dateFrom?: string;
   dateTo?: string;
+  desde?: string;
+  hasta?: string;
   sortBy?: string;
   sortDirection?: string;
 }

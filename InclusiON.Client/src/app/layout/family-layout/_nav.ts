@@ -22,16 +22,6 @@ export const familyNavItems: INavData[] = [
     iconComponent: { name: 'cil-calendar' }
   },
   {
-    name: 'Profesionales',
-    url: AppRoutes.Family.Professionals,
-    iconComponent: { name: 'cil-medical-cross' }
-  },
-  {
-    name: 'Progreso',
-    url: AppRoutes.Family.Progress,
-    iconComponent: { name: 'cil-chart-line' }
-  },
-  {
     name: 'Reportes',
     url: AppRoutes.Family.Reports,
     iconComponent: { name: 'cil-description' }
