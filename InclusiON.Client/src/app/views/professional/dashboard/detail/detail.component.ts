@@ -74,6 +74,8 @@ export class DetailComponent implements OnInit, OnDestroy {
 
   classrooms: ClassroomResponse[] = [];
   selectedClassroomId = '';
+  dateFrom = '';
+  dateTo = '';
   analytics: AnalyticsDashboardResponse | null = null;
 
   draftReportsCount     = 0;
@@ -195,7 +197,7 @@ export class DetailComponent implements OnInit, OnDestroy {
 
   loadAnalytics(classroomId?: string): void {
     this.isLoadingAnalytics = true;
-    this.analyticsService.getProfessionalAnalytics(classroomId).subscribe({
+    this.analyticsService.getProfessionalAnalytics(classroomId, this.dateFrom || null, this.dateTo || null).subscribe({
       next: (data) => {
         this.analytics = data;
         this.isLoadingAnalytics = false;
@@ -216,6 +218,16 @@ export class DetailComponent implements OnInit, OnDestroy {
         this.toastService.error('Error al actualizar las métricas analíticas.');
       }
     });
+  }
+
+  onDateFilterChange(): void {
+    this.loadAnalytics(this.selectedClassroomId);
+  }
+
+  clearDateFilters(): void {
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.loadAnalytics(this.selectedClassroomId);
   }
 
   onChangeClassroom(event: Event): void {
@@ -342,7 +354,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     this.isLoadingFrustrationDetails = true;
     this.frustrationDetails = [];
 
-    this.analyticsService.getFrustrationDetails(this.selectedClassroomId).subscribe({
+    this.analyticsService.getFrustrationDetails(this.selectedClassroomId, this.dateFrom || null, this.dateTo || null).subscribe({
       next: (details) => {
         this.frustrationDetails = details || [];
         this.isLoadingFrustrationDetails = false;

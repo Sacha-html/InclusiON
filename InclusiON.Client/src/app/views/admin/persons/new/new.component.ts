@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { CatalogsService, PersonsService, ProfessionalsService, AssignmentsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest, CreatePersonWithTutorRequest, ClassroomResponse, ProfessionalListItemResponse } from '@models';
-import { validDate, notFutureDate, toIsoDate } from '@shared/utils';
+import { validDate, notFutureDate, ageRangeValidator, toIsoDate, toInputDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
 import { NgClass } from '@angular/common';
 import {
@@ -81,12 +81,23 @@ export class NewComponent implements OnInit {
   professionals: ProfessionalListItemResponse[] = [];
   classrooms: ClassroomResponse[] = [];
 
+  // Límites dinámicos de fecha de nacimiento (entre 12 y 40 años)
+  readonly minBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 40, today.getMonth(), today.getDate()));
+  })();
+
+  readonly maxBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 12, today.getMonth(), today.getDate()));
+  })();
+
   form: FormGroup = this.fb.group({
     // Alumno - Datos personales
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
-    birthDate: ['', [Validators.required, validDate, notFutureDate]],
+    birthDate: ['', [Validators.required, validDate, notFutureDate, ageRangeValidator(12, 40)]],
     // Alumno - Discapacidad
     disabilityTypeId: [null, [Validators.required]],
     // Alumno - Perfil funcional

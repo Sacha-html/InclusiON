@@ -72,6 +72,15 @@ $border-color:      #BDBDBD;  // Contraste 3.1:1 (cumple para UI)
 $divider-color:     #E0E0E0;
 
 // -----------------------------------------
+// Estados Activos / Clics Suaves (Celeste Pastel)
+// -----------------------------------------
+$pastel-blue-light:   #E1F5FE;  // Celeste muy claro
+$pastel-blue-active:  #E3F2FD;  // Celeste pastel suave para estado :active / clic
+$pastel-blue-hover:   #F0F9FF;  // Celeste sutil para hover
+$pastel-blue-border:  #90CAF9;  // Borde celeste pastel
+$pastel-blue-text:    #0D47A1;  // Texto legible sobre celeste pastel
+
+// -----------------------------------------
 // Focus y Accesibilidad
 // -----------------------------------------
 $focus-ring-color:  rgba($primary, 0.5);

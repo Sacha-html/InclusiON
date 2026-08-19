@@ -390,3 +390,32 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
 * **Bugfix de Exportación a PDF (Unsupported color function):**
   - En `pdf-export.util.ts`, se implementó el hook `onclone` en `html2canvas` para inyectar estilos universales (`rgba(...)` / `#HEX`) y sanitizar mediante un canvas 2D auxiliar cualquier propiedad de color computada moderna (`color(srgb ...)`, `color-mix(...)`, `oklch(...)`, `lab(...)`).
   - En `_accessibility-themes.scss`, se reemplazaron las variables `--cui-*-bg-subtle` con `color-mix()` en `:root` por valores `rgba(...)` universales.
+
+---
+
+## 20. Validaciones de Fecha, Refactor UI/UX en Familia y Persona, Calendario y Notificaciones Segmentadas (Agosto 2026)
+
+### Backend (.NET 10)
+* **Calendario UTC & Manejo Defensivo (`CalendarController.cs`):**
+  - Normalización de fechas de eventos con `DateTime.SpecifyKind(dateVal.Date, DateTimeKind.Utc)` para compatibilidad con PostgreSQL.
+  - Bloqueo de fechas inválidas y captura de errores con retorno controlado `BadRequest(ApiResponse<CalendarEventResponse>)`.
+* **Notificaciones Segmentadas de Calendario (`SendCalendarNotificationsAsync`):**
+  - Si el evento es de tipo **`Tutoría`** (personalizada / refuerzo), se despacha notificación push en segundo plano exclusivamente al tutor principal (`IsPrimary`) del alumno.
+  - Si el evento es de tipo **`Clase`** o **`Tarea`**, se notifica a todos los tutores activos vinculados al alumno (o a todos los tutores si el alcance es general `all`).
+* **Filtros de Reportes (`GetReportsRequest.cs`):**
+  - Agregado soporte tipado para filtros por fecha (`FromDate` y `ToDate`) en solicitudes de reportes.
+
+### Frontend (Angular)
+* **Validaciones Robustas de Fecha de Nacimiento:**
+  - Creados los validadores reutilizables `maxDateTodayValidator` y `validBirthDateValidator` en `@shared/utils/date.validators.ts`.
+  - Integrados en los formularios reactivos de creación (`new.component.ts` y `.html`) y edición (`edit.component.ts` y `.html`) de personas en el panel de administración.
+  - Restricción de entrada con atributos `[max]="today"` y `[min]="minBirthDate"` (120 años atrás) impidiendo fechas futuras o irreales.
+* **Limpieza de Interfaz en Perfil Familiar y Persona (AAC):**
+  - `_nav.ts` (Familia): Eliminados los accesos redundantes a *"Profesionales"* y *"Progreso"* del menú lateral familiar, consolidando el seguimiento y acceso a reportes directamente en el `family-dashboard.component.html`.
+  - `aac-layout.component.html` y `.ts`: Retirado el botón flotante de campana de ayuda (`<app-help-button />`) del layout del estudiante.
+* **Calendario de Actividades:**
+  - Eliminado el tipo de evento *"Consulta"* (unificado bajo el concepto de *"Tutoría"*). Tipos disponibles: `Tutoría`, `Clase`, `Tarea`.
+  - Sincronizada la interfaz `CalendarEvent` en `calendar.service.ts` y re-exportada centralizadamente en `@services`.
+  - Incorporada la propiedad `[min]="todayDate"` en el selector de fecha del formulario de eventos y bloqueo reactivo de guardado para fechas anteriores a hoy.
+  - Eliminado el despacho redundante de mensajes directos por chat desde el cliente, delegando el flujo de notificaciones de forma limpia al backend y resolviendo errores `404` en `/api/Messages`.
+
