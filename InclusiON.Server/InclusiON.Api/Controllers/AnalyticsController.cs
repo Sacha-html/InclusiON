@@ -42,7 +42,6 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>
-        /// <summary>
         /// Obtiene métricas analíticas y KPIs para el dashboard del Profesional autenticado.
         /// Opcionalmente filtra por aula específica (aulaId / classroomId) y rango de fechas (desde / hasta).
         /// </summary>
@@ -58,8 +57,8 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
             var targetClassroomId = aulaId ?? classroomId;
-            var from = desde ?? dateFrom;
-            var to = hasta ?? dateTo;
+            var from = NormalizeToUtc(desde ?? dateFrom, isEndOfDay: false);
+            var to = NormalizeToUtc(hasta ?? dateTo, isEndOfDay: true);
             var currentEntityId = _httpContextService.GetCurrentEntityId();
             var currentUserId = _httpContextService.GetCurrentUserId();
 
@@ -114,10 +113,7 @@ namespace InclusiON.Api.Controllers
                     if (from.HasValue)
                         classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted >= from.Value);
                     if (to.HasValue)
-                    {
-                        var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
-                        classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted <= toDate);
-                    }
+                        classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted <= to.Value);
 
                     var classroomSessions = await classroomSessionsQuery.ToListAsync(cancellationToken);
 
@@ -160,8 +156,8 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
             var targetClassroomId = aulaId ?? classroomId;
-            var from = desde ?? dateFrom;
-            var to = hasta ?? dateTo;
+            var from = NormalizeToUtc(desde ?? dateFrom, isEndOfDay: false);
+            var to = NormalizeToUtc(hasta ?? dateTo, isEndOfDay: true);
             var currentEntityId = _httpContextService.GetCurrentEntityId();
             var currentUserId = _httpContextService.GetCurrentUserId();
 
@@ -201,8 +197,7 @@ namespace InclusiON.Api.Controllers
 
             if (to.HasValue)
             {
-                var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
-                frustrationQuery = frustrationQuery.Where(s => s.DateCompleted <= toDate);
+                frustrationQuery = frustrationQuery.Where(s => s.DateCompleted <= to.Value);
             }
 
             var frustrationSessions = await frustrationQuery
@@ -249,8 +244,8 @@ namespace InclusiON.Api.Controllers
             [FromQuery] DateTime? dateTo = null,
             CancellationToken cancellationToken = default)
         {
-            var from = desde ?? dateFrom;
-            var to = hasta ?? dateTo;
+            var from = NormalizeToUtc(desde ?? dateFrom, isEndOfDay: false);
+            var to = NormalizeToUtc(hasta ?? dateTo, isEndOfDay: true);
 
             var studentIds = await _context.PersonsWithDisability
                 .Where(p => p.IsActive)
@@ -274,8 +269,8 @@ namespace InclusiON.Api.Controllers
             [FromQuery] DateTime? dateTo = null,
             CancellationToken cancellationToken = default)
         {
-            var from = desde ?? dateFrom;
-            var to = hasta ?? dateTo;
+            var from = NormalizeToUtc(desde ?? dateFrom, isEndOfDay: false);
+            var to = NormalizeToUtc(hasta ?? dateTo, isEndOfDay: true);
 
             var reportsQuery = _context.Reports
                 .Include(r => r.Professional)
@@ -284,10 +279,7 @@ namespace InclusiON.Api.Controllers
             if (from.HasValue)
                 reportsQuery = reportsQuery.Where(r => r.ReportDate >= from.Value);
             if (to.HasValue)
-            {
-                var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
-                reportsQuery = reportsQuery.Where(r => r.ReportDate <= toDate);
-            }
+                reportsQuery = reportsQuery.Where(r => r.ReportDate <= to.Value);
 
             var reports = await reportsQuery.ToListAsync(cancellationToken);
 
@@ -378,6 +370,25 @@ namespace InclusiON.Api.Controllers
             };
 
             return Ok(ApiResponse<AdminReportsAnalyticsResponse>.SuccessResult(response));
+        }
+
+        private static DateTime? NormalizeToUtc(DateTime? date, bool isEndOfDay = false)
+        {
+            if (!date.HasValue) return null;
+            var d = date.Value;
+            // Validar que el año sea razonable (evita errores cuando el usuario empieza a tipear "0002", etc.)
+            if (d.Year < 1900 || d.Year > 3000) return null;
+
+            if (isEndOfDay)
+            {
+                d = d.Date.AddDays(1).AddTicks(-1);
+            }
+            else
+            {
+                d = d.Date;
+            }
+
+            return DateTime.SpecifyKind(d, DateTimeKind.Utc);
         }
 
         private async Task<AnalyticsDashboardResponse> CalculateAnalyticsAsync(

@@ -195,7 +195,18 @@ export class DetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  private isValidDateString(val: string): boolean {
+    if (!val) return true;
+    if (val.length !== 10) return false;
+    const year = parseInt(val.substring(0, 4), 10);
+    return !isNaN(year) && year >= 1900 && year <= 3000;
+  }
+
   loadAnalytics(classroomId?: string): void {
+    if (!this.isValidDateString(this.dateFrom) || !this.isValidDateString(this.dateTo)) {
+      return;
+    }
+
     this.isLoadingAnalytics = true;
     this.analyticsService.getProfessionalAnalytics(classroomId, this.dateFrom || null, this.dateTo || null).subscribe({
       next: (data) => {
