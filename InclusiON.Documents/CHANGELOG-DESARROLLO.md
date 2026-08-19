@@ -17,6 +17,9 @@ Este documento detalla las nuevas funcionalidades, mejoras técnicas, refactoriz
     * `Indice_Lectura_Familiar`: Porcentaje de informes aprobados leídos por los tutores (`IsReadByFamily`).
     * `Ranking_Profesionales`: Ranking de productividad docente consultando a todos los profesionales activos en la base de datos (con inclusión automática inmediata de nuevos registros).
     * `Distribucion_Estados`: Distribución cuantitativa y porcentual para gráficos de auditoría.
+  - **Normalización UTC y Validación de Rango (`NormalizeToUtc`):** Descarte defensivo de años parciales/inválidos ($1900 \le \text{año} \le 3000$) y conversión estricta a `DateTimeKind.Utc` para todas las consultas contra columnas PostgreSQL `timestamptz`.
+* **Controlador de Calendario (`CalendarController.cs`):**
+  - Corrección de tipado en despacho de notificaciones y resolución limpia de sobrecarga en `ApiResponse<object>.SuccessResult`.
 * **Transiciones de Workflow (`ReportsController.cs`):**
   - Soporte de métodos `PATCH` y `PUT` para `/api/Reports/{id}/approve` y `/api/Reports/{id}/reject`.
   - Aprobación transaccional con disparo en segundo plano de notificación al familiar/tutor a cargo del alumno.

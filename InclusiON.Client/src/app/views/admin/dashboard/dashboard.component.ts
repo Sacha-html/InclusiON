@@ -83,8 +83,23 @@ export class DashboardComponent implements OnInit {
     this.loadAllData();
   }
 
-  loadAllData(): void {
-    this.loading = true;
+  private isValidDateString(val: string): boolean {
+    if (!val) return true;
+    if (val.length !== 10) return false;
+    const year = parseInt(val.substring(0, 4), 10);
+    return !isNaN(year) && year >= 1900 && year <= 3000;
+  }
+
+  loadAllData(isFilterChange = false): void {
+    if (isFilterChange) {
+      if (!this.isValidDateString(this.dateFrom) || !this.isValidDateString(this.dateTo)) {
+        return; // Evita disparar peticiones con fechas incompletas mientras se escribe en el datepicker
+      }
+    }
+
+    this.loading = !this.dashboard;
+    this.error = false;
+
     forkJoin({
       dashboard: this.adminUsersService.getDashboard(),
       analytics: this.analyticsService.getAdminAnalytics(this.dateFrom || null, this.dateTo || null),
@@ -95,22 +110,27 @@ export class DashboardComponent implements OnInit {
         this.analytics = analytics;
         this.reportsAnalytics = reportsAnalytics;
         this.loading = false;
+        this.error = false;
       },
       error: () => {
-        this.error = true;
         this.loading = false;
+        if (!this.dashboard) {
+          this.error = true;
+        } else {
+          this.toastService.error('No se pudieron actualizar los datos con las fechas seleccionadas.');
+        }
       },
     });
   }
 
   onDateFilterChange(): void {
-    this.loadAllData();
+    this.loadAllData(true);
   }
 
   clearDateFilters(): void {
     this.dateFrom = '';
     this.dateTo = '';
-    this.loadAllData();
+    this.loadAllData(true);
   }
 
   /**
