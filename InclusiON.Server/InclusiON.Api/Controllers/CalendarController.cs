@@ -215,12 +215,6 @@ namespace InclusiON.Api.Controllers
                     foreach (var rep in targetReps)
                     {
                         var tutorUserId = rep.Representative.UserId.ToString();
-                        // Restricción: El Administrador no tiene módulo de calendario y no debe recibir alertas de eventos
-                        if (rep.Representative.User != null && rep.Representative.User.UserRoles != null &&
-                            rep.Representative.User.UserRoles.Any(ur => ur.Role.Name == Roles.Admin))
-                        {
-                            continue;
-                        }
 
                         await _backgroundJobs.CreateAsync(
                             JobTypes.Push,
@@ -249,13 +243,6 @@ namespace InclusiON.Api.Controllers
                         var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(personId, cancellationToken);
                         foreach (var rep in representatives.Where(r => r.IsActive && r.Representative.IsActive))
                         {
-                            // Restricción: Excluir administradores
-                            if (rep.Representative.User != null && rep.Representative.User.UserRoles != null &&
-                                rep.Representative.User.UserRoles.Any(ur => ur.Role.Name == Roles.Admin))
-                            {
-                                continue;
-                            }
-
                             if (notifiedTutorIds.Add(rep.Representative.UserId))
                             {
                                 var tutorUserId = rep.Representative.UserId.ToString();
@@ -300,7 +287,7 @@ namespace InclusiON.Api.Controllers
             await _calendarEventsRepository.DeleteAsync(ev, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Ok(ApiResponse<object>.SuccessResult(null, "Evento eliminado exitosamente."));
+            return Ok(ApiResponse<object>.SuccessResult("Evento eliminado exitosamente."));
         }
     }
 }
