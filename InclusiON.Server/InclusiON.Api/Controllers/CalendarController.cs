@@ -215,6 +215,13 @@ namespace InclusiON.Api.Controllers
                     foreach (var rep in targetReps)
                     {
                         var tutorUserId = rep.Representative.UserId.ToString();
+                        // Restricción: El Administrador no tiene módulo de calendario y no debe recibir alertas de eventos
+                        if (rep.Representative.User != null && rep.Representative.User.UserRoles != null &&
+                            rep.Representative.User.UserRoles.Any(ur => ur.Role.Name == Roles.Admin))
+                        {
+                            continue;
+                        }
+
                         await _backgroundJobs.CreateAsync(
                             JobTypes.Push,
                             System.Text.Json.JsonSerializer.Serialize(new NotificationPayload
@@ -242,6 +249,13 @@ namespace InclusiON.Api.Controllers
                         var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(personId, cancellationToken);
                         foreach (var rep in representatives.Where(r => r.IsActive && r.Representative.IsActive))
                         {
+                            // Restricción: Excluir administradores
+                            if (rep.Representative.User != null && rep.Representative.User.UserRoles != null &&
+                                rep.Representative.User.UserRoles.Any(ur => ur.Role.Name == Roles.Admin))
+                            {
+                                continue;
+                            }
+
                             if (notifiedTutorIds.Add(rep.Representative.UserId))
                             {
                                 var tutorUserId = rep.Representative.UserId.ToString();

@@ -27,6 +27,7 @@ export const AppRoutes = {
     Professionals: '/admin/professionals',
     Users: '/admin/users',
     Reports: '/admin/reports',
+    Messages: '/admin/messages',
     MyInstitutions: '/admin/my-institutions',
     Admins: '/admin/admins',
     Roles: '/admin/roles',

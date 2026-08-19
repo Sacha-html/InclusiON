@@ -419,3 +419,23 @@ Revisión del modelo de negocio que derivó en la eliminación de funcionalidade
   - Incorporada la propiedad `[min]="todayDate"` en el selector de fecha del formulario de eventos y bloqueo reactivo de guardado para fechas anteriores a hoy.
   - Eliminado el despacho redundante de mensajes directos por chat desde el cliente, delegando el flujo de notificaciones de forma limpia al backend y resolviendo errores `404` en `/api/Messages`.
 
+---
+
+## 21. Módulo de Mensajería para Administrador, Bloqueo de Calendario y Ruteo de Notificaciones (Agosto 2026)
+
+### Backend (.NET 10)
+* **Exclusión Estricta del Administrador en Notificaciones de Calendario (`CalendarController.cs`):**
+  - Se agregó validación en `SendCalendarNotificationsAsync` para excluir explícitamente a cualquier usuario con rol `Admin` de los destinatarios de alertas de eventos de calendario (ya sea por asignación directa o general).
+
+### Frontend (Angular)
+* **Módulo de Mensajería en Panel Administrador:**
+  - Registrada la ruta `/admin/messages` en `app.routes.ts` y constante `AppRoutes.Admin.Messages` en `app-routes.ts`.
+  - Agregado el ítem de navegación **"Mensajes"** en el menú lateral del Administrador (`default-layout/_nav.ts`) bajo la sección de Gestión.
+  - Filtro visual con botones ("Todos", "Profesionales", "Familiares") activo para administradores en `messages.component.html` y `.ts`.
+* **Ruteo de Notificaciones y Prevención de 404:**
+  - `notification-bell.component.ts`:
+    - Al hacer clic en notificaciones de mensajes siendo Administrador, redirige con exactitud a `/admin/messages`.
+    - Bloqueo en tiempo real y en almacenamiento local de cualquier notificación de tipo calendario para el rol Administrador.
+    - Fallback de seguridad que redirige a `/admin/dashboard` en caso de que alguna alerta de calendario residual sea accionada por un Administrador, evitando páginas de error 404.
+
+

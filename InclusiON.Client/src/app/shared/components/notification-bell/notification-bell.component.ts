@@ -155,6 +155,16 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
     // Increment badge and append notification on each real-time push notification
     this.sub = this.signalrService.notification$.subscribe((data: SignalRNotification) => {
+      const role = this.authService.getUserRole();
+      // Bloquear notificaciones de calendario para el Administrador
+      if (role === UserRoles.Admin) {
+        const titleLower = data.title?.toLowerCase() ?? '';
+        const urlLower = data.actionUrl?.toLowerCase() ?? '';
+        if (titleLower.includes('calendario') || urlLower.includes('calendar')) {
+          return; // Ignorar notificación de calendario para Admin
+        }
+      }
+
       const type = this.detectNotificationType(data.title, data.actionUrl);
       const newNotif: AppNotification = {
         id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000),
@@ -184,8 +194,12 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       if (path.startsWith('/#')) {
         path = path.substring(2);
       }
-      if (!path.startsWith('/') && !path.startsWith('http')) {
-        const role = this.authService.getUserRole();
+      const role = this.authService.getUserRole();
+      
+      // Si el Administrador recibe por error una notificación de calendario, llevarlo a dashboard
+      if (role === UserRoles.Admin && (notif.type === 'calendar' || path.includes('calendar'))) {
+        path = '/admin/dashboard';
+      } else if (!path.startsWith('/') && !path.startsWith('http')) {
         const prefix = role === UserRoles.Professional ? '/pro/' : (role === UserRoles.FamilyRepresentative ? '/family/' : '/admin/');
         path = prefix + path;
       }
@@ -231,8 +245,12 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     const stored = localStorage.getItem('app_notifications');
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as AppNotification[];
+        let parsed = JSON.parse(stored) as AppNotification[];
         parsed.forEach(n => n.createdAt = new Date(n.createdAt));
+        const role = this.authService.getUserRole();
+        if (role === UserRoles.Admin) {
+          parsed = parsed.filter(n => n.type !== 'calendar' && !n.actionUrl?.includes('calendar'));
+        }
         this.notifications.set(parsed);
         this.updateUnreadCount();
         return;
@@ -327,6 +345,16 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     } else if (role === UserRoles.Admin) {
       list.push(
         {
+          id: 'seed-admin-msg',
+          title: 'Nuevo mensaje',
+          message: 'Tenés un nuevo mensaje de Pedro Martínez (Profesional).',
+          actionUrl: 'messages',
+          type: 'message',
+          isRead: false,
+          createdAt: new Date(Date.now() - 5 * 60000),
+          timeLabel: 'Hace 5 min'
+        },
+        {
           id: 'seed-msg',
           title: 'Nuevo profesional',
           message: 'La profesional Laura González se ha registrado y está pendiente de aprobación.',
@@ -347,11 +375,11 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           timeLabel: 'Hace 30 min'
         },
         {
-          id: 'seed-cal',
+          id: 'seed-sys',
           title: 'Mantenimiento del servidor',
           message: 'Recordatorio: Mantenimiento programado de la base de datos a las 23:00.',
           actionUrl: 'dashboard',
-          type: 'calendar',
+          type: 'system',
           isRead: false,
           createdAt: new Date(Date.now() - 120 * 60000),
           timeLabel: 'Hace 2 horas'
