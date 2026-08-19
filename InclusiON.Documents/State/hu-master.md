@@ -329,3 +329,11 @@ Features implementadas sin Story formal en Jira:
 | IN-213 | Eliminar módulo de Instituciones del dashboard Admin (modelo de negocio) | ✅ | HU-16 |
 | IN-214 | Permitir repetir actividades completadas desde "Mi Camino" y backend | ✅ | HU-16 |
 | IN-215 | Redireccionar a la pantalla de "Mi Camino" (/app/roadmap) al finalizar | ✅ | HU-16 |
+| IN-216 | Módulo de mensajería para perfil Administrador con filtro por tipo de actor | ✅ | HU-20 |
+| IN-217 | Bloqueo de notificaciones y rutas de calendario para rol Administrador | ✅ | HU-20 |
+| IN-218 | Redirección contextual exacta al hacer clic en notificaciones por rol | ✅ | HU-20 |
+| IN-219 | Segmentación de notificaciones de calendario por tipo de evento (Tutoría / Clase / Tarea) | ✅ | HU-20 |
+| IN-220 | Prevención de selección y guardado de fechas pasadas en calendario | ✅ | HU-20 |
+| IN-221 | Validaciones de fecha de nacimiento en ABM Personas (120 años / no futuras) | ✅ | HU-20 |
+| IN-222 | Limpieza de interfaz en menú Familiar y retiro de botón de ayuda en AAC | ✅ | HU-20 |
+
