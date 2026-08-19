@@ -195,6 +195,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'messages',
+        data: { title: 'Mensajes' },
+        loadComponent: () =>
+          import('./views/messages/messages.component').then(
+            (m) => m.MessagesComponent,
+          ),
+      },
+      {
         path: 'invitations',
         data: { title: 'Invitaciones', permission: Permissions.Invitations.Read },
         canActivate: [permissionGuard],
