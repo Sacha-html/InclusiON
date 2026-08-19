@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
   CardBodyComponent,
@@ -9,6 +10,9 @@ import {
   RowComponent,
   SpinnerComponent,
   AlertComponent,
+  FormControlDirective,
+  FormLabelDirective,
+  ButtonDirective,
 } from '@coreui/angular';
 import { AuthService, ToastService } from '@services';
 import { AdminUsersService } from '@services/admin-users.service';
@@ -35,6 +39,7 @@ import { forkJoin } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterLink,
     CardComponent,
     CardBodyComponent,
@@ -43,6 +48,9 @@ import { forkJoin } from 'rxjs';
     ColComponent,
     SpinnerComponent,
     AlertComponent,
+    FormControlDirective,
+    FormLabelDirective,
+    ButtonDirective,
     StatCardComponent,
     HighContrastPieChartComponent,
     LevelHistogramChartComponent,
@@ -62,6 +70,9 @@ export class DashboardComponent implements OnInit {
   analytics: AnalyticsDashboardResponse | null = null;
   reportsAnalytics: AdminReportsAnalyticsResponse | null = null;
 
+  dateFrom = '';
+  dateTo = '';
+
   loading = true;
   error = false;
   isGlobalAdmin = false;
@@ -76,8 +87,8 @@ export class DashboardComponent implements OnInit {
     this.loading = true;
     forkJoin({
       dashboard: this.adminUsersService.getDashboard(),
-      analytics: this.analyticsService.getAdminAnalytics(),
-      reportsAnalytics: this.analyticsService.getAdminReportsAnalytics(),
+      analytics: this.analyticsService.getAdminAnalytics(this.dateFrom || null, this.dateTo || null),
+      reportsAnalytics: this.analyticsService.getAdminReportsAnalytics(this.dateFrom || null, this.dateTo || null),
     }).subscribe({
       next: ({ dashboard, analytics, reportsAnalytics }) => {
         this.dashboard = dashboard;
@@ -90,6 +101,16 @@ export class DashboardComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  onDateFilterChange(): void {
+    this.loadAllData();
+  }
+
+  clearDateFilters(): void {
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.loadAllData();
   }
 
   /**

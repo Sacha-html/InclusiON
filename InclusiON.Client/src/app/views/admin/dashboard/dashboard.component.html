@@ -39,6 +39,24 @@
       </c-col>
     </c-row>
 
+    <!-- Filtros de Fecha de Corte -->
+    <fieldset class="p-3 border rounded mb-4 bg-body-tertiary">
+      <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtro por Rango de Fechas (Corte de Métricas e Informes)</legend>
+      <c-row class="align-items-end g-2">
+        <c-col xs="12" sm="4" md="3">
+          <label cLabel>Fecha Desde</label>
+          <input cFormControl type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateFilterChange()" />
+        </c-col>
+        <c-col xs="12" sm="4" md="3">
+          <label cLabel>Fecha Hasta</label>
+          <input cFormControl type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateFilterChange()" />
+        </c-col>
+        <c-col xs="12" sm="auto">
+          <button cButton color="secondary" size="sm" (click)="clearDateFilters()">Limpiar Filtros</button>
+        </c-col>
+      </c-row>
+    </fieldset>
+
   <!-- ── Fila 1: KPIs Documentales y Workflow de Reportes ─────────────────────── -->
   @if (reportsAnalytics) {
     <c-row class="mb-4">

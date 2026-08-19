@@ -2,8 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserRoles } from '@shared/constants/roles';
-import { AuthService, ToastService, ProfessionalsService, AssignmentsService, FamilyService, CalendarService } from '@services';
-import { MessagesService } from '@services/messages.service';
+import { AuthService, ToastService, ProfessionalsService, AssignmentsService, FamilyService, CalendarService, CalendarEvent } from '@services';
 import { switchMap } from 'rxjs';
 import {
   CardBodyComponent, CardComponent,
@@ -12,19 +11,6 @@ import {
   ModalFooterComponent, ModalTitleDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
-
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  type: 'Consulta' | 'Tutoría' | 'Clase' | 'Tarea';
-  date: string; // YYYY-MM-DD
-  time: string; // HH:MM
-  description?: string;
-  studentName?: string;
-  createdBy?: string;
-  targetScope?: 'all' | 'single';
-  studentId?: string;
-}
 
 @Component({
   selector: 'app-calendar',
@@ -48,7 +34,6 @@ export class CalendarComponent implements OnInit {
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService   = inject(AssignmentsService);
   private readonly familyService        = inject(FamilyService);
-  private readonly messagesService      = inject(MessagesService);
   private readonly calendarService      = inject(CalendarService);
 
   // ── State ──────────────────────────────────────────────────────────────
@@ -59,6 +44,8 @@ export class CalendarComponent implements OnInit {
   events = signal<CalendarEvent[]>([]);
   isProfessional = false;
   assignedStudents = signal<any[]>([]);
+
+  readonly todayDate = this.formatDateKey(new Date());
 
   // Month-Year Picker Popover State
   showMonthYearPicker = false;
@@ -86,8 +73,8 @@ export class CalendarComponent implements OnInit {
   eventForm = {
     id: '',
     title: '',
-    type: 'Consulta' as 'Consulta' | 'Tutoría' | 'Clase' | 'Tarea',
-    date: '',
+    type: 'Tutoría' as 'Tutoría' | 'Clase' | 'Tarea',
+    date: this.todayDate,
     time: '',
     description: '',
     targetScope: 'all' as 'all' | 'single',
@@ -217,15 +204,28 @@ export class CalendarComponent implements OnInit {
     });
   }
 
+  isDateInvalid(): boolean {
+    if (!this.eventForm.date) return true;
+    return this.eventForm.date < this.todayDate;
+  }
+
+  isFormInvalid(): boolean {
+    if (!this.eventForm.title.trim() || !this.eventForm.date || !this.eventForm.time) return true;
+    if (this.isDateInvalid()) return true;
+    if (this.eventForm.targetScope === 'single' && !this.eventForm.studentId) return true;
+    return false;
+  }
+
   openCreateModal(date?: Date): void {
     if (!this.isProfessional) return;
 
-    const dateStr = date ? this.formatDateKey(date) : this.formatDateKey(new Date());
+    const chosenDateStr = date ? this.formatDateKey(date) : this.todayDate;
+    const dateStr = chosenDateStr >= this.todayDate ? chosenDateStr : this.todayDate;
 
     this.eventForm = {
       id: '',
       title: '',
-      type: 'Consulta',
+      type: 'Tutoría',
       date: dateStr,
       time: '12:00',
       description: '',
@@ -245,8 +245,13 @@ export class CalendarComponent implements OnInit {
       return;
     }
 
+    if (this.isDateInvalid()) {
+      this.toastService.error('No se pueden agendar eventos en fechas pasadas.');
+      return;
+    }
+
     if (this.eventForm.targetScope === 'single' && !this.eventForm.studentId) {
-      this.toastService.error('Por favor, selecciona un alumno para la clase de refuerzo.');
+      this.toastService.error('Por favor, selecciona un alumno para la actividad.');
       return;
     }
 
@@ -262,66 +267,16 @@ export class CalendarComponent implements OnInit {
     };
 
     this.calendarService.saveEvent(payload).subscribe({
-      next: (savedEvent) => {
+      next: (_savedEvent) => {
         this.toastService.success(this.eventForm.id ? 'Evento actualizado exitosamente.' : 'Evento agendado exitosamente.');
-        if (!this.eventForm.id) {
-          this.notifyTutorsAboutEvent(savedEvent);
-        }
         this.loadEvents();
         this.showEventModal = false;
       },
-      error: () => {
-        this.toastService.error('Error al guardar el evento en el servidor.');
+      error: (err) => {
+        const errorMsg = err?.error?.message || 'Error al guardar el evento en el servidor.';
+        this.toastService.error(errorMsg);
       }
     });
-  }
-
-  notifyTutorsAboutEvent(event: CalendarEvent): void {
-    if (event.targetScope === 'single' && event.studentId) {
-      this.familyService.getPersonRepresentatives(event.studentId).subscribe({
-        next: (reps) => {
-          reps.forEach(r => {
-            if (r.representativeId) {
-              const body = `Hola, le notifico que he agendado una nueva ${event.type}:\n\n` +
-                `- Título: ${event.title}\n` +
-                `- Fecha: ${new Date(event.date + 'T12:00:00').toLocaleDateString('es-ES')}\n` +
-                `- Hora: ${event.time} hs\n\n` +
-                `Detalles: ${event.description || 'Sin descripción adicional.'}`;
-
-              this.messagesService.send({
-                receiverId: r.representativeId,
-                subject: `Nueva ${event.type} Agendada`,
-                content: body
-              }).subscribe();
-            }
-          });
-        }
-      });
-    } else if (event.targetScope === 'all') {
-      this.assignedStudents().forEach(s => {
-        if (s.personId) {
-          this.familyService.getPersonRepresentatives(s.personId).subscribe({
-            next: (reps) => {
-              reps.forEach(r => {
-                if (r.representativeId) {
-                  const body = `Hola, le notifico que he agendado una ${event.type} general:\n\n` +
-                    `- Título: ${event.title}\n` +
-                    `- Fecha: ${new Date(event.date + 'T12:00:00').toLocaleDateString('es-ES')}\n` +
-                    `- Hora: ${event.time} hs\n\n` +
-                    `Detalles: ${event.description || 'Sin descripción adicional.'}`;
-
-                  this.messagesService.send({
-                    receiverId: r.representativeId,
-                    subject: `Nueva ${event.type} Agendada (General)`,
-                    content: body
-                  }).subscribe();
-                }
-              });
-            }
-          });
-        }
-      });
-    }
   }
 
   openDetail(event: CalendarEvent, clickEvent: MouseEvent): void {
@@ -370,7 +325,6 @@ export class CalendarComponent implements OnInit {
 
   getEventTypeBadgeColor(type: string): string {
     switch (type) {
-      case 'Consulta': return 'info';
       case 'Tutoría': return 'primary';
       case 'Clase': return 'success';
       case 'Tarea': return 'warning';

@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import {
   ColComponent, RowComponent, SpinnerComponent,
-  ButtonDirective, FormControlDirective, BadgeComponent
+  ButtonDirective, FormControlDirective
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import {
@@ -30,7 +30,6 @@ import { ToastService, AuthService, SignalrService } from '@services';
     ButtonDirective,
     FormControlDirective,
     IconDirective,
-    BadgeComponent,
   ],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',

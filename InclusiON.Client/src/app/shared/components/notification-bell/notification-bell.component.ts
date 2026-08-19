@@ -68,10 +68,10 @@ export interface AppNotification {
           } @else {
             @for (notif of notifications(); track notif.id) {
               <button cDropdownItem 
-                      class="d-flex align-items-start border-bottom py-2 px-3 text-wrap" 
+                      class="d-flex align-items-start border-bottom py-2 px-3 text-wrap notification-item" 
                       [class.bg-light]="!notif.isRead"
                       (click)="onNotificationClick(notif)"
-                      style="border: none; background: none; width: 100%;">
+                      style="border: none; width: 100%;">
                 <div class="me-3 mt-1">
                   <svg cIcon [name]="getNotificationIcon(notif)" size="md" [class]="getNotificationColorClass(notif)"></svg>
                 </div>
@@ -91,6 +91,22 @@ export interface AppNotification {
     :host { display: contents; }
 
     button { position: relative; }
+
+    .notification-item {
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out;
+
+      &:hover,
+      &:focus {
+        background-color: #F0F9FF !important;
+        color: #212121 !important;
+      }
+
+      &:active {
+        background-color: #E3F2FD !important;
+        color: #0D47A1 !important;
+      }
+    }
 
     .bell-badge {
       position: absolute;

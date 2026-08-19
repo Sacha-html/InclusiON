@@ -465,3 +465,81 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+// =======================================================
+// ESTADOS ACTIVOS Y DE FOCO (CLICS SUAVES EN CELESTE PASTEL)
+// =======================================================
+:root {
+  --pastel-blue-light: #E1F5FE;
+  --pastel-blue-active: #E3F2FD;
+  --pastel-blue-hover: #F0F9FF;
+  --pastel-blue-border: #90CAF9;
+  --pastel-blue-text: #0D47A1;
+  --cui-dropdown-link-active-bg: #E3F2FD;
+  --cui-dropdown-link-active-color: #0D47A1;
+  --cui-dropdown-link-hover-bg: #F0F9FF;
+  --cui-dropdown-link-hover-color: #212121;
+  --cui-list-group-action-active-bg: #E3F2FD;
+  --cui-list-group-action-active-color: #0D47A1;
+  --cui-list-group-action-hover-bg: #F0F9FF;
+}
+
+// Ítems de Menús Dropdown y Notificaciones
+.dropdown-item {
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--pastel-blue-hover, #F0F9FF) !important;
+    color: var(--a11y-text, #212121) !important;
+  }
+
+  &:focus {
+    background-color: var(--pastel-blue-hover, #F0F9FF) !important;
+    color: var(--a11y-text, #212121) !important;
+  }
+
+  &:active,
+  &.active {
+    background-color: var(--pastel-blue-active, #E3F2FD) !important;
+    color: var(--pastel-blue-text, #0D47A1) !important;
+
+    * {
+      color: inherit;
+    }
+  }
+}
+
+// Ítems de Listas Interactivas (List Groups)
+.list-group-item-action {
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--pastel-blue-hover, #F0F9FF) !important;
+  }
+
+  &:focus {
+    background-color: var(--pastel-blue-hover, #F0F9FF) !important;
+  }
+
+  &:active {
+    background-color: var(--pastel-blue-active, #E3F2FD) !important;
+    color: var(--pastel-blue-text, #0D47A1) !important;
+  }
+}
+
+.list-group-item.active {
+  background-color: var(--pastel-blue-active, #E3F2FD) !important;
+  color: var(--pastel-blue-text, #0D47A1) !important;
+  border-color: var(--pastel-blue-border, #90CAF9) !important;
+}
+
+// Tarjetas interactivas y elementos clickeables
+.clickable-card,
+.clickable-kpi-card,
+.cursor-pointer {
+  &:active {
+    background-color: var(--pastel-blue-active, #E3F2FD) !important;
+    color: var(--pastel-blue-text, #0D47A1);
+  }
+}
+

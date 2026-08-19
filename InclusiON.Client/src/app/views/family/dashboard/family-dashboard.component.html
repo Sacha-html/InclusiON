@@ -70,16 +70,24 @@
     <c-row class="mb-4">
       <c-col xs="12">
         <c-card>
-          <!-- Encabezado con avatar y nombre -->
-          <c-card-header class="d-flex align-items-center gap-3">
-            <span
-              class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
-              [style.background-color]="person.avatarColor"
-              style="width: 42px; height: 42px; font-size: 1.1rem; flex-shrink: 0;"
-              aria-hidden="true">
-              {{ person.fullName.charAt(0).toUpperCase() }}
-            </span>
-            <h2 class="h6 mb-0">{{ person.fullName }}</h2>
+          <!-- Encabezado con avatar, nombre y referencia de progreso -->
+          <c-card-header class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <span
+                class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
+                [style.background-color]="person.avatarColor"
+                style="width: 42px; height: 42px; font-size: 1.1rem; flex-shrink: 0;"
+                aria-hidden="true">
+                {{ person.fullName.charAt(0).toUpperCase() }}
+              </span>
+              <div>
+                <h2 class="h6 mb-0 fw-bold">{{ person.fullName }}</h2>
+                <small class="text-body-secondary">Seguimiento de progreso y actividades</small>
+              </div>
+            </div>
+            <a routerLink="/family/activities" class="btn btn-sm btn-outline-secondary">
+              Ver actividades &rarr;
+            </a>
           </c-card-header>
 
           <c-card-body>

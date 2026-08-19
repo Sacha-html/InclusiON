@@ -25,6 +25,7 @@ export { RoadmapService } from './roadmap.service';
 export { MessagesService } from './messages.service';
 export { SignalrService } from './signalr.service';
 export { CalendarService } from './calendar.service';
+export type { CalendarEvent } from './calendar.service';
 export type { MessageListItemResponse, MessageDetailResponse, MessageContactResponse, SendMessageRequest } from './messages.service';
 
 export type { StorageKey } from './local-storage.service';

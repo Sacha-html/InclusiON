@@ -49,13 +49,14 @@
           </c-col>
           <c-col sm="6">
             <label cLabel for="birthDate">Fecha de nacimiento *</label>
-            <input cFormControl id="birthDate" formControlName="birthDate"
-                   placeholder="dd/mm/aaaa"
-                   [valid]="submitted ? f['birthDate'].valid : undefined" />
-            @if (submitted && f['birthDate'].errors) {
+            <input cFormControl type="date" id="birthDate" formControlName="birthDate"
+                   [min]="minBirthDate" [max]="maxBirthDate"
+                   [valid]="(submitted || f['birthDate'].touched) ? (f['birthDate'].valid ? true : false) : undefined" />
+            @if ((submitted || f['birthDate'].touched) && f['birthDate'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['birthDate'].errors['required']) { La fecha de nacimiento es obligatoria. }
-                @else if (f['birthDate'].errors['invalidDate']) { Formato inválido. Use dd/mm/aaaa. }
+                @else if (f['birthDate'].errors['ageOutOfRange']) { El usuario debe tener entre 12 y 40 años de edad }
+                @else if (f['birthDate'].errors['invalidDate']) { Formato inválido. }
                 @else if (f['birthDate'].errors['futureDate']) { La fecha no puede ser futura. }
               </c-form-feedback>
             }

@@ -20,8 +20,22 @@ namespace InclusiON.DTOs.Requests.Reports
         /// <summary>Filtro desde fecha de reporte (inclusive).</summary>
         public DateTime? DateFrom { get; set; }
 
+        /// <summary>Alias en español para DateFrom.</summary>
+        public DateTime? Desde
+        {
+            get => DateFrom;
+            set => DateFrom ??= value;
+        }
+
         /// <summary>Filtro hasta fecha de reporte (inclusive).</summary>
         public DateTime? DateTo { get; set; }
+
+        /// <summary>Alias en español para DateTo.</summary>
+        public DateTime? Hasta
+        {
+            get => DateTo;
+            set => DateTo ??= value;
+        }
 
         public int? InstitutionId { get; set; }
 

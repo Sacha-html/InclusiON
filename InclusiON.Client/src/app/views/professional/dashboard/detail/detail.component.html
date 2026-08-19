@@ -94,6 +94,21 @@
                       <option [value]="c.id">{{ c.name }}</option>
                     }
                   </select>
+                  <div class="d-inline-flex align-items-center gap-1">
+                    <label class="small text-body-secondary mb-0">Desde:</label>
+                    <input type="date" class="form-control form-control-sm w-auto bg-body text-body border-secondary-subtle"
+                           [(ngModel)]="dateFrom" (ngModelChange)="onDateFilterChange()" title="Fecha Desde" />
+                  </div>
+                  <div class="d-inline-flex align-items-center gap-1">
+                    <label class="small text-body-secondary mb-0">Hasta:</label>
+                    <input type="date" class="form-control form-control-sm w-auto bg-body text-body border-secondary-subtle"
+                           [(ngModel)]="dateTo" (ngModelChange)="onDateFilterChange()" title="Fecha Hasta" />
+                  </div>
+                  @if (dateFrom || dateTo) {
+                    <button cButton color="secondary" size="sm" (click)="clearDateFilters()" title="Limpiar rango de fechas">
+                      ✕
+                    </button>
+                  }
                   <button cButton color="primary" size="sm" [disabled]="isExportingPdf" (click)="downloadWeeklyProgressPdf()">
                     <svg cIcon name="cilCloudDownload" size="sm" class="me-1"></svg>
                     @if (isExportingPdf) { Generando PDF… } @else { Exportar PDF }

@@ -35,8 +35,14 @@ export class ReportsService {
     if (request.onlyDeactivatedProfessionals !== undefined && request.onlyDeactivatedProfessionals !== null) {
       params = params.set('onlyDeactivatedProfessionals', request.onlyDeactivatedProfessionals.toString());
     }
-    if (request.dateFrom) params = params.set('dateFrom', request.dateFrom);
-    if (request.dateTo) params = params.set('dateTo', request.dateTo);
+    const dateFromVal = request.desde || request.dateFrom;
+    const dateToVal = request.hasta || request.dateTo;
+    if (dateFromVal) {
+      params = params.set('dateFrom', dateFromVal).set('desde', dateFromVal);
+    }
+    if (dateToVal) {
+      params = params.set('dateTo', dateToVal).set('hasta', dateToVal);
+    }
     if (request.sortBy) params = params.set('sortBy', request.sortBy);
     if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
 
@@ -52,8 +58,14 @@ export class ReportsService {
     if (request.page) params = params.set('page', request.page.toString());
     if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
     if (request.reportTypeId) params = params.set('reportTypeId', request.reportTypeId.toString());
-    if (request.dateFrom) params = params.set('dateFrom', request.dateFrom);
-    if (request.dateTo) params = params.set('dateTo', request.dateTo);
+    const dateFromVal = request.desde || request.dateFrom;
+    const dateToVal = request.hasta || request.dateTo;
+    if (dateFromVal) {
+      params = params.set('dateFrom', dateFromVal).set('desde', dateFromVal);
+    }
+    if (dateToVal) {
+      params = params.set('dateTo', dateToVal).set('hasta', dateToVal);
+    }
     if (request.sortBy) params = params.set('sortBy', request.sortBy);
     if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
 

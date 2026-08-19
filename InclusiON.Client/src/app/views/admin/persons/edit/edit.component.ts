@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogsService, PersonsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, PersonResponse, UpdateLoginMethodResponse, UpdatePersonRequest } from '@models';
-import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
+import { validDate, notFutureDate, ageRangeValidator, toIsoDate, toDisplayDate, toInputDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
 import { ChangeLoginMethodModalComponent } from './change-login-method-modal.component';
 import {
@@ -63,11 +63,21 @@ export class EditComponent implements OnInit {
   autonomyLevels: AutonomyLevelItem[] = [];
   loginMethods: LoginMethodItem[] = [];
 
+  readonly minBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 40, today.getMonth(), today.getDate()));
+  })();
+
+  readonly maxBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 12, today.getMonth(), today.getDate()));
+  })();
+
   form: FormGroup = this.fb.group({
     // Datos personales
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    birthDate: ['', [Validators.required, validDate, notFutureDate]],
+    birthDate: ['', [Validators.required, validDate, notFutureDate, ageRangeValidator(12, 40)]],
     // Discapacidad
     disabilityTypeId: [null, [Validators.required]],
     // Perfil funcional
@@ -123,7 +133,7 @@ export class EditComponent implements OnInit {
     this.form.patchValue({
       firstName: p.firstName,
       lastName: p.lastName,
-      birthDate: toDisplayDate(p.birthDate),
+      birthDate: toInputDate(p.birthDate),
       disabilityTypeId: p.disabilityTypeId ?? null,
       attentionLevel: p.attentionLevel ?? null,
       communicationLevel: p.communicationLevel ?? null,
