@@ -74,8 +74,6 @@ export class DetailComponent implements OnInit, OnDestroy {
 
   classrooms: ClassroomResponse[] = [];
   selectedClassroomId = '';
-  dateFrom = '';
-  dateTo = '';
   analytics: AnalyticsDashboardResponse | null = null;
 
   draftReportsCount     = 0;
@@ -195,20 +193,9 @@ export class DetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  private isValidDateString(val: string): boolean {
-    if (!val) return true;
-    if (val.length !== 10) return false;
-    const year = parseInt(val.substring(0, 4), 10);
-    return !isNaN(year) && year >= 1900 && year <= 3000;
-  }
-
   loadAnalytics(classroomId?: string): void {
-    if (!this.isValidDateString(this.dateFrom) || !this.isValidDateString(this.dateTo)) {
-      return;
-    }
-
     this.isLoadingAnalytics = true;
-    this.analyticsService.getProfessionalAnalytics(classroomId, this.dateFrom || null, this.dateTo || null).subscribe({
+    this.analyticsService.getProfessionalAnalytics(classroomId, null, null).subscribe({
       next: (data) => {
         this.analytics = data;
         this.isLoadingAnalytics = false;
@@ -229,16 +216,6 @@ export class DetailComponent implements OnInit, OnDestroy {
         this.toastService.error('Error al actualizar las métricas analíticas.');
       }
     });
-  }
-
-  onDateFilterChange(): void {
-    this.loadAnalytics(this.selectedClassroomId);
-  }
-
-  clearDateFilters(): void {
-    this.dateFrom = '';
-    this.dateTo = '';
-    this.loadAnalytics(this.selectedClassroomId);
   }
 
   onChangeClassroom(event: Event): void {
@@ -365,7 +342,7 @@ export class DetailComponent implements OnInit, OnDestroy {
     this.isLoadingFrustrationDetails = true;
     this.frustrationDetails = [];
 
-    this.analyticsService.getFrustrationDetails(this.selectedClassroomId, this.dateFrom || null, this.dateTo || null).subscribe({
+    this.analyticsService.getFrustrationDetails(this.selectedClassroomId, null, null).subscribe({
       next: (details) => {
         this.frustrationDetails = details || [];
         this.isLoadingFrustrationDetails = false;

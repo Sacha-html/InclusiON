@@ -13,7 +13,10 @@
     "start": "ng serve --configuration development",
     "start:prod": "ng serve --configuration production",
     "build": "ng build --configuration production",
-    "build:dev": "ng build --configuration development"
+    "build:dev": "ng build --configuration development",
+    "cap:build": "ng build --configuration production && npx cap sync",
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android"
   },
   "private": true,
   "dependencies": {
@@ -28,6 +31,9 @@
     "@angular/platform-browser": "^20.2.2",
     "@angular/platform-browser-dynamic": "^20.2.2",
     "@angular/router": "^20.2.2",
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@coreui/angular": "^5.5.11",
     "@coreui/coreui": "~5.4.2",
     "@coreui/icons": "^3.0.1",
