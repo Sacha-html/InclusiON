@@ -22,6 +22,7 @@ import {
   ButtonDirective,
   GridModule,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
   selector: 'app-user-management-list',
@@ -41,6 +42,7 @@ import {
     ModalTitleDirective,
     ButtonDirective,
     GridModule,
+    IconDirective,
   ],
   templateUrl: './list.component.html',
 })
@@ -61,6 +63,36 @@ export class UserManagementListComponent implements OnInit {
   sortBy = 'FirstName';
   sortDirection: 'ASC' | 'DESC' = 'ASC';
   loading = false;
+
+  get dynamicTotalLabel(): string {
+    switch (this.selectedRole) {
+      case 'Admin':
+        return 'Total de administradores';
+      case 'Professional':
+        return 'Total de profesionales';
+      case 'FamilyRepresentative':
+        return 'Total de familiares';
+      case 'PersonWithDisability':
+        return 'Total de personas';
+      default:
+        return 'Total de usuarios';
+    }
+  }
+
+  get selectedRoleLabel(): string {
+    switch (this.selectedRole) {
+      case 'Admin':
+        return 'Administrador';
+      case 'Professional':
+        return 'Profesional';
+      case 'FamilyRepresentative':
+        return 'Representante Familiar';
+      case 'PersonWithDisability':
+        return 'Persona con Discapacidad';
+      default:
+        return 'Todos los roles';
+    }
+  }
 
   ngOnInit(): void {
     this.loadUsers();

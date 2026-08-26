@@ -171,12 +171,14 @@ app.UseForwardedHeaders();
 app.UseResponseCompression();
 
 if (!app.Environment.IsDevelopment())
+{
     app.UseHsts();
+    app.UseHttpsRedirection();
+}
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-app.UseHttpsRedirection();
 app.UseCors("AllowFrontendClient");
 
 if (!builder.Configuration.GetValue<bool>("RateLimiter:Disabled"))
