@@ -1,4 +1,4 @@
-﻿# Sprint 10 — Roadmap Estándar, Corrección de Players y Refinamiento de Modelo de Negocio
+# Sprint 10 — Roadmap Estándar, Corrección de Players y Refinamiento de Modelo de Negocio
 
 **Período:** Julio – Agosto 2026
 
