@@ -124,7 +124,24 @@ export class EvaluationsComponent implements OnInit {
     let list = this.persons();
 
     if (classroomId) {
-      list = list.filter(p => p.classroomId === classroomId);
+      const selectedRoom = this.classrooms().find(
+        c => c.id === classroomId || (c.id && c.id.toLowerCase() === classroomId.toLowerCase())
+      );
+      const targetName = selectedRoom?.name?.toLowerCase()?.trim();
+      const targetIdRaw = classroomId.replace(/^ENC:/i, '').toLowerCase().trim();
+
+      list = list.filter(p => {
+        if (targetName && p.classroomName?.toLowerCase()?.trim() === targetName) {
+          return true;
+        }
+        if (p.classroomId) {
+          const personRoomIdRaw = p.classroomId.replace(/^ENC:/i, '').toLowerCase().trim();
+          if (personRoomIdRaw === targetIdRaw) {
+            return true;
+          }
+        }
+        return false;
+      });
     }
 
     if (search) {

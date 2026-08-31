@@ -1,8 +1,8 @@
 export const environment = {
   production: false,
 
-  // URLs del Backend (IP local para conexiones desde teléfono/tablet)
-  apiUrl: 'http://192.168.0.12:5000/api',
+  // URLs del Backend
+  apiUrl: 'http://localhost:5000/api',
 
   // Configuración de la Aplicación
   appName: 'InclusiON',

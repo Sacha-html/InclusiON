@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'InclusiON',
   webDir: 'dist/inclusion-client/browser',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
     cleartext: true
   }
 };
