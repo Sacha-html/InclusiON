@@ -54,17 +54,11 @@ namespace InclusiON.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.Sql(@"
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'Activities' AND column_name = 'RoadmapOrder'
-    ) THEN
-        ALTER TABLE ""Activities"" ADD COLUMN ""RoadmapOrder"" integer NULL;
-    END IF;
-END $$;");
+            migrationBuilder.AddColumn<int>(
+                name: "RoadmapOrder",
+                table: "Activities",
+                type: "integer",
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Activities_RoadmapOrder",
@@ -97,6 +91,10 @@ END $$;");
         {
             migrationBuilder.DropTable(
                 name: "ActivitySessions");
+
+            migrationBuilder.DropColumn(
+                name: "RoadmapOrder",
+                table: "Activities");
         }
     }
 }
