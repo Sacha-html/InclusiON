@@ -41,7 +41,7 @@
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
     "@fontsource/lexend": "^5.2.11",
     "@microsoft/signalr": "^9.0.6",
-    "@ng-select/ng-select": "^21.8.0",
+    "@ng-select/ng-select": "^20.7.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "material-icons": "^1.13.14",
