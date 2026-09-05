@@ -15,7 +15,6 @@ COPY ["InclusiON.Infrastructure.Telemetry/InclusiON.Infrastructure.Telemetry.csp
 COPY ["InclusiON.Data/InclusiON.Data.csproj", "InclusiON.Data/"]
 COPY ["InclusiON.DTOs/InclusiON.DTOs.csproj", "InclusiON.DTOs/"]
 COPY ["InclusiON.Shared/InclusiON.Shared.csproj", "InclusiON.Shared/"]
-COPY ["InclusiON.Workers/InclusiON.Workers.csproj", "InclusiON.Workers/"]
 RUN dotnet restore "InclusiON.Api/InclusiON.Api.csproj"
 
 COPY . .

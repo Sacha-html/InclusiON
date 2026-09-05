@@ -1,178 +1,136 @@
-# InclusiON — Infraestructura Local
+# InclusiON — Infraestructura y Docker
 
-Instrucciones para levantar PostgreSQL con pgvector usando Docker y conectarlo a la API.
-
----
-
-## Requisitos
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y corriendo
-- .NET 10 SDK
-- (Opcional) [DBeaver](https://dbeaver.io/) u otro cliente para inspeccionar la base de datos
+Instrucciones para levantar la infraestructura de **PostgreSQL 17 con pgvector** usando Docker y conectarlo a la API y Frontend en cualquier entorno (local o compartido).
 
 ---
 
-## Setup completo desde cero
+## 📋 Requisitos Previos
 
-### 1. Levantar PostgreSQL
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y en ejecución
+- .NET 10 SDK (si corres el backend localmente)
+- Node.js 20+ y Angular CLI (si corres el frontend localmente)
+- (Opcional) [DBeaver](https://dbeaver.io/) u otro cliente SQL
 
-Desde esta carpeta (`Infra/`), ejecutar:
+---
+
+## 🚀 Modos de Ejecución
+
+### Modo 1: Base de Datos en Docker + Apps Locales (Recomendado para Desarrollo)
+Este es el modo más rápido y habitual de desarrollo diario: Docker solo gestiona la base de datos, mientras que la API y Angular se ejecutan desde tu IDE (Rider, Visual Studio, VS Code) o terminal.
+
+#### 1. Levantar el contenedor de Base de Datos
+Desde la carpeta `InclusiON.Documents/Infra/`, ejecutar:
 
 ```powershell
 docker compose up -d postgres
 ```
 
-Postgres inicializa el volumen y ejecuta automáticamente `db-users-setup.sql`, que crea:
-- Usuarios: `inclusion_dev_app`, `inclusion_uat_app`, `inclusion_prod_app`
-- Bases: `inclusion_dev`, `inclusion_test`
-- Extensión `vector` en ambas bases
+O si prefieres ejecutarlo con un comando directo de Docker:
+```powershell
+docker run -d --name postgres-vector -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=inclusion_dev -v inclusion_pgdata:/var/lib/postgresql/data pgvector/pgvector:pg17
+```
 
-| Parámetro | Valor |
-|-----------|-------|
-| Imagen | `pgvector/pgvector:pg17` |
-| Contenedor | `postgres` |
-| Usuario superusuario | `postgres` |
-| Puerto | `5432` |
+> **Nota sobre el script de inicialización:**  
+> Al crearse el volumen por primera vez, PostgreSQL ejecuta automáticamente `InclusiON.Server/InclusiON.Data/Scripts/db-users-setup.sql`, creando:
+> - Usuarios: `inclusion_dev_app`, `inclusion_uat_app`, `inclusion_prod_app`
+> - Bases de datos: `inclusion_dev`, `inclusion_test`
+> - Extensión `vector` habilitada para Inteligencia Artificial y búsqueda semántica.
 
-Los datos persisten en el volumen Docker `inclusion_pgdata` — sobreviven reinicios. El script de init solo corre cuando el volumen está vacío (primera vez o tras `docker compose down -v`).
+#### 2. Configurar la Conexión en `appsettings.Development.json`
+Ubica el archivo `InclusiON.Server/InclusiON.Api/appsettings.Development.json`:
 
----
+* **Si Docker corre en tu misma computadora (Local):**
+  ```json
+  "ConnectionStrings": {
+    "PostgreSqlConn": "Host=localhost;Port=5432;Database=inclusion_dev;Username=inclusion_dev_app;Password=Inclusion_Dev_2025_!"
+  }
+  ```
+  *(O si usas el superusuario: `Username=postgres;Password=postgres`)*
 
-### 2. Correr migraciones y seed
+* **Si Docker corre en otra máquina de la red local (por ejemplo la PC de un compañero):**
+  ```json
+  "ConnectionStrings": {
+    "PostgreSqlConn": "Host=192.168.0.X;Port=5432;Database=inclusion_dev;Username=postgres;Password=postgres"
+  }
+  ```
+  *(Reemplazar `192.168.0.X` por la IP de la máquina donde está corriendo Docker).*
 
-La API aplica migraciones y corre el seeder automáticamente al iniciar. No es necesario correr `dotnet ef database update` manualmente.
-
+#### 3. Iniciar Backend y Frontend
 ```bash
+# Terminal 1 - Backend:
 cd InclusiON.Server/InclusiON.Api
 dotnet run
-```
 
-O desde Rider: seleccionar el launch profile `Development`.
+# Terminal 2 - Frontend:
+cd InclusiON.Client
+npm start
+```
+*La API aplica migraciones y seed de datos automáticamente al iniciar.*
 
 ---
 
-## Recrear bases desde cero
-
-Si las bases están corruptas o se quiere empezar limpio:
+### Modo 2: Stack Completo en Docker (`docker compose up`)
+Levanta todos los servicios en contenedores independientes (Postgres + Backend + Frontend):
 
 ```powershell
-# 1. Detener y eliminar contenedor + volumen
-docker compose down -v
-
-# 2. Volver a levantar (init corre automáticamente: usuarios, bases, extensión vector)
-docker compose up -d postgres
-
-# 3. Levantar la API (aplica migraciones y seed automáticamente)
-cd InclusiON.Server/InclusiON.Api && dotnet run
-```
-
----
-
-## Ambientes y usuarios de base de datos
-
-| Ambiente | Base de datos | Usuario de app | Contraseña |
-|----------|--------------|----------------|------------|
-| Development | `inclusion_dev` | `inclusion_dev_app` | `Inclusion_Dev_2025_!` |
-| Testing (E2E) | `inclusion_test` | `inclusion_dev_app` | `Inclusion_Dev_2025_!` |
-| UAT | `inclusion_uat` | `inclusion_uat_app` | (ver appsettings.UAT.json) |
-| Production | `inclusion_prod` | `inclusion_prod_app` | (var de entorno) |
-
-> Los usuarios de app tienen permisos DML (SELECT/INSERT/UPDATE/DELETE). Son **owners** de sus bases para que EF Core pueda ejecutar migraciones (ALTER TABLE, etc.).
-
----
-
-## Stack completo (todos los servicios)
-
-Para levantar API + frontend + agente Python además de la DB:
-
-```powershell
+# Desde InclusiON.Documents/Infra/:
 docker compose up -d
 ```
 
 Servicios incluidos en `docker-compose.yml`:
 
-| Servicio | Puerto | Descripción |
-|----------|--------|-------------|
-| `postgres` | 5432 | PostgreSQL 17 con pgvector |
-| `inclusion_api` | 5000 | Backend .NET 10 |
-| `inclusion_agent` | 5001 | Agente Python (embeddings) |
-| `inclusion_frontend` | 4200 | Frontend Angular |
+| Servicio | Contenedor | Puerto Host | Descripción |
+| :--- | :--- | :--- | :--- |
+| **`postgres`** | `postgres-vector` | `5432` | PostgreSQL 17 con extensión `pgvector` |
+| **`api`** | `inclusion_api` | `5000` | Backend .NET 10 Web API |
+| **`frontend`** | `inclusion_frontend` | `4200` | Frontend Angular servido con Nginx |
+
+> 🧠 **Nota de Arquitectura:** El procesamiento de embeddings y búsqueda semántica por IA corre internamente en .NET mediante modelos locales ONNX (`InclusiON.Infrastructure`), eliminando la necesidad de un microservicio Python externo.
 
 ---
 
-## Verificar conexión
+## 🔍 Conexión desde DBeaver / Clientes SQL
 
-```powershell
-# Conectarse a la base de desarrollo
-docker exec -it postgres psql -U inclusion_dev_app -d inclusion_dev
-
-# Listar tablas (después de correr migraciones)
-\dt
-
-# Salir
-\q
-```
-
-Desde DBeaver:
-
-| Campo | Valor |
-|-------|-------|
-| Host | `localhost` |
-| Port | `5432` |
-| Database | `inclusion_dev` |
-| Username | `inclusion_dev_app` |
-| Password | `Inclusion_Dev_2025_!` |
+| Parámetro | Valor Local | Valor Red Compartida |
+| :--- | :--- | :--- |
+| **Host** | `localhost` | `192.168.0.X` (IP del equipo con Docker) |
+| **Puerto** | `5432` (o `5433` si se modificó) | `5432` (o `5433`) |
+| **Base de Datos** | `inclusion_dev` | `inclusion_dev` |
+| **Usuario** | `inclusion_dev_app` (o `postgres`) | `postgres` |
+| **Contraseña** | `Inclusion_Dev_2025_!` (o `postgres`) | `postgres` |
 
 ---
 
-## Comandos útiles
+## 🛠️ Comandos de Mantenimiento
 
 ```powershell
-# Ver logs del contenedor
-docker logs postgres
+# Ver logs del contenedor de base de datos
+docker logs postgres-vector
 
-# Detener sin borrar datos
+# Reiniciar base de datos
+docker compose restart postgres
+
+# Detener contenedores manteniendo datos
 docker compose stop
 
-# Detener y eliminar contenedor (el volumen queda)
+# Detener y eliminar contenedores (los datos se conservan en el volumen)
 docker compose down
 
-# Eliminar todo, incluyendo datos
+# REINICIO TOTAL (elimina la base de datos y recrea volumen desde cero)
 docker compose down -v
-
-# Reiniciar
-docker compose restart postgres
+docker compose up -d postgres
 ```
 
 ---
 
-## Migraciones EF Core
+## ⚠️ Troubleshooting (Problemas Comunes)
 
-Las migraciones se crean desde CLI (desde `InclusiON.Server/`):
+1. **Error: Puerto 5432 ya ocupado**  
+   Si tienes una instancia local de PostgreSQL instalada en Windows, puedes cambiar el puerto de Docker en `docker-compose.yml` (por ejemplo `"5433:5432"`) o detener el servicio local de Windows:
+   ```powershell
+   net stop postgresql-x64-17
+   ```
 
-```bash
-dotnet ef migrations add NombreMigracion --project InclusiON.Data --startup-project InclusiON.Api
-dotnet ef database update --project InclusiON.Data --startup-project InclusiON.Api
-```
-
----
-
-## Troubleshooting
-
-**Puerto 5432 ocupado**
-```powershell
-netstat -ano | findstr :5432
-# Si hay un proceso PostgreSQL local corriendo:
-net stop postgresql-x64-17
-```
-
-**Error `must be owner of table`**
-El usuario de la app no es owner de la tabla. Ocurre si las migraciones se corrieron con un usuario distinto. Solución: recrear la base siguiendo los pasos de [Recrear bases desde cero](#recrear-bases-desde-cero).
-
-**Error `permission denied to create extension "vector"`**
-La extensión requiere superusuario. Correr el paso 5 del setup con `-U postgres`.
-
-**Contenedor no inicia**
-```powershell
-docker logs postgres
-```
+2. **Error de conexión desde otra máquina en la red local:**
+   - Asegúrate de que el firewall de Windows en la máquina host permita conexiones entrantes al puerto `5432` o `5433`.
+   - Verifica que el IP de la máquina host sea estático o no haya cambiado (`ipconfig`).

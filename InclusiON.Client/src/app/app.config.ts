@@ -5,7 +5,6 @@ import {
   withHashLocation,
   withInMemoryScrolling,
   withRouterConfig,
-  withViewTransitions,
 } from '@angular/router';
 
 import { DropdownModule, SidebarModule } from '@coreui/angular';
@@ -26,7 +25,6 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'top',
         anchorScrolling: 'enabled',
       }),
-      withViewTransitions({ skipInitialTransition: isDevMode() }),
       withHashLocation()
     ),
     provideHttpClient(withInterceptors([spinnerInterceptor, authInterceptor])),
