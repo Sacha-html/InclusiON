@@ -55,6 +55,17 @@ namespace InclusiON.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.Sql(@"
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'Activities' AND column_name = 'RoadmapOrder'
+    ) THEN
+        ALTER TABLE ""Activities"" ADD COLUMN ""RoadmapOrder"" integer NULL;
+    END IF;
+END $$;");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Activities_RoadmapOrder",
                 table: "Activities",
