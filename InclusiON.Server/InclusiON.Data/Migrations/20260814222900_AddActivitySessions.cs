@@ -54,6 +54,11 @@ namespace InclusiON.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
+            migrationBuilder.AddColumn<int>(
+                name: "RoadmapOrder",
+                table: "Activities",
+                type: "integer",
+                nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Activities_RoadmapOrder",
@@ -86,6 +91,10 @@ namespace InclusiON.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ActivitySessions");
+
+            migrationBuilder.DropColumn(
+                name: "RoadmapOrder",
+                table: "Activities");
         }
     }
 }
