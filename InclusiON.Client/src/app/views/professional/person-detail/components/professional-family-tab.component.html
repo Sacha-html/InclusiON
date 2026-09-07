@@ -69,13 +69,9 @@
         <label cFormLabel for="relationship">Relación</label>
         <select cSelect id="relationship" [(ngModel)]="linkRelationship">
           <option value="">Seleccionar...</option>
-          <option value="Madre">Madre</option>
-          <option value="Padre">Padre</option>
-          <option value="Hermano/a">Hermano/a</option>
-          <option value="Abuelo/a">Abuelo/a</option>
-          <option value="Tío/a">Tío/a</option>
-          <option value="Tutor Legal">Tutor legal</option>
-          <option value="Otro">Otro</option>
+          @for (rel of relationships; track rel) {
+            <option [value]="rel">{{ rel }}</option>
+          }
         </select>
       </div>
 

@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CatalogsService, PersonsService, ProfessionalsService, AssignmentsService, ToastService } from '@services';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, RELATIONSHIPS } from '@shared/constants';
 import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest, CreatePersonWithTutorRequest, ClassroomResponse, ProfessionalListItemResponse } from '@models';
 import { validDate, notFutureDate, ageRangeValidator, toIsoDate, toInputDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
@@ -82,6 +82,8 @@ export class NewComponent implements OnInit {
   loginMethods: LoginMethodItem[] = [];
   professionals: ProfessionalListItemResponse[] = [];
   classrooms: ClassroomResponse[] = [];
+
+  readonly relationships = RELATIONSHIPS;
 
   // Límites dinámicos de fecha de nacimiento (entre 12 y 40 años)
   readonly minBirthDate: string = (() => {

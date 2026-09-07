@@ -18,7 +18,7 @@ namespace InclusiON.Tests.Unit
         }
 
         [Fact]
-        public async Task InspectDatabaseUsers()
+        public async Task InspectRelationships()
         {
             string[] connStrings = new[]
             {
@@ -56,53 +56,138 @@ namespace InclusiON.Tests.Unit
                 return;
             }
 
-            var roles = await context.Roles.ToListAsync();
-            var users = await context.Users.ToListAsync();
-            var userRoles = await context.UserRoles.ToListAsync();
-            var persons = await context.PersonsWithDisability.Include(p => p.LoginMethod).ToListAsync();
-            var professionals = await context.Professionals.ToListAsync();
-            var families = await context.FamilyRepresentatives.ToListAsync();
-            var loginMethods = await context.LoginMethods.ToListAsync();
+            var famRels = await context.FamilyRepresentatives
+                .Select(f => f.Relationship)
+                .Where(r => !string.IsNullOrEmpty(r))
+                .Distinct()
+                .ToListAsync();
 
-            _output.WriteLine("=== ROLES EN DB ===");
-            foreach (var r in roles)
+            var personRepRels = await context.PersonRepresentatives
+                .Select(pr => pr.Relationship)
+                .Where(r => !string.IsNullOrEmpty(r))
+                .Distinct()
+                .ToListAsync();
+
+            var historyRels = await context.PersonRepresentativeHistories
+                .Select(h => h.Relationship)
+                .Where(r => !string.IsNullOrEmpty(r))
+                .Distinct()
+                .ToListAsync();
+
+            var invitationRels = await context.Invitations
+                .Select(i => i.Relationship)
+                .Where(r => !string.IsNullOrEmpty(r))
+                .Distinct()
+                .ToListAsync();
+
+            var allRels = famRels
+                .Concat(personRepRels)
+                .Concat(historyRels)
+                .Concat(invitationRels)
+                .Distinct()
+                .OrderBy(r => r)
+                .ToList();
+
+            _output.WriteLine("=== PARENTESCOS / RELACIONES ENCONTRADAS EN DB ===");
+            foreach (var rel in allRels)
             {
-                _output.WriteLine($"Role: {r.Name} (Id: {r.Id})");
+                _output.WriteLine($"RELATIONSHIP: '{rel}'");
             }
 
-            _output.WriteLine("\n=== METODOS DE LOGIN EN DB ===");
-            foreach (var lm in loginMethods)
+            _output.WriteLine("\n=== DETALLE POR TABLA ===");
+            _output.WriteLine($"FamilyRepresentatives: {string.Join(", ", famRels.Select(r => $"'{r}'"))}");
+            _output.WriteLine($"PersonRepresentatives: {string.Join(", ", personRepRels.Select(r => $"'{r}'"))}");
+            _output.WriteLine($"PersonRepresentativeHistories: {string.Join(", ", historyRels.Select(r => $"'{r}'"))}");
+            _output.WriteLine($"Invitations: {string.Join(", ", invitationRels.Select(r => $"'{r}'"))}");
+
+            var allFamilyRecords = await context.FamilyRepresentatives
+                .Select(f => new { f.Id, f.FirstName, f.LastName, f.Relationship })
+                .ToListAsync();
+            _output.WriteLine("\n=== REGISTROS DE FAMILIARES Y SU PARENTESCO ===");
+            foreach (var f in allFamilyRecords)
             {
-                _output.WriteLine($"Id: {lm.Id}, Name: {lm.Name}, Code: {lm.Code}, IsActive: {lm.IsActive}");
+                _output.WriteLine($"Familiar: {f.FirstName} {f.LastName} | Relationship: '{f.Relationship}'");
             }
 
-            _output.WriteLine("\n=== USUARIOS EN DB (AspNetUsers) ===");
-            foreach (var u in users)
+            var allPersonReps = await context.PersonRepresentatives
+                .Include(pr => pr.Person)
+                .Include(pr => pr.Representative)
+                .Select(pr => new {
+                    Alumno = pr.Person.FirstName + " " + pr.Person.LastName,
+                    Familiar = pr.Representative.FirstName + " " + pr.Representative.LastName,
+                    pr.Relationship,
+                    pr.IsPrimary
+                })
+                .ToListAsync();
+            _output.WriteLine("\n=== VINCULOS ALUMNO-FAMILIAR ===");
+            foreach (var pr in allPersonReps)
             {
-                var roleIds = userRoles.Where(ur => ur.UserId == u.Id).Select(ur => ur.RoleId).ToList();
-                var userRoleNames = roles.Where(r => roleIds.Contains(r.Id)).Select(r => r.Name).ToList();
-                var roleStr = string.Join(", ", userRoleNames);
-
-                var person = persons.FirstOrDefault(p => p.UserId == u.Id);
-                var prof = professionals.FirstOrDefault(p => p.UserId == u.Id);
-                var fam = families.FirstOrDefault(f => f.UserId == u.Id);
-
-                string detail = "";
-                if (prof != null)
-                {
-                    detail = $"[PROFESIONAL] Especialidad: {prof.Specialty}, Matrícula: {prof.LicenseNumber}, Estado: {prof.Status}, Activo: {prof.IsActive}";
-                }
-                else if (fam != null)
-                {
-                    detail = $"[FAMILIAR] Parentesco: {fam.Relationship}, Teléfono: {fam.Phone}, DNI: {fam.DocumentNumber}";
-                }
-                else if (person != null)
-                {
-                    detail = $"[PERSONA/ALUMNO] DNI: {person.DocumentNumber}, Método Login: {person.LoginMethod?.Name} (Id: {person.LoginMethodId}), Tiene PIN: {person.PinCodeHash != null}, SupervisorId: {person.SupervisorUserId}";
-                }
-
-                _output.WriteLine($"USER: {u.Email} | Nombre: {u.Name} {u.Surname} | Activo: {u.IsActive} | Roles: [{roleStr}] | Detalle: {detail}");
+                _output.WriteLine($"Alumno: {pr.Alumno} | Familiar: {pr.Familiar} | Relationship: '{pr.Relationship}' | Principal: {pr.IsPrimary}");
             }
+
+            // Normalizar 'madre' a 'Madre'
+            var lowercaseMothers = await context.FamilyRepresentatives
+                .Where(f => f.Relationship == "madre")
+                .ToListAsync();
+            if (lowercaseMothers.Any())
+            {
+                foreach (var f in lowercaseMothers)
+                {
+                    f.Relationship = "Madre";
+                }
+                _output.WriteLine($"[NORMALIZADO] Se normalizaron {lowercaseMothers.Count} registros de 'madre' a 'Madre'.");
+            }
+
+            // Normalizar 'Tutor Legal' a 'Tutor/a'
+            var famTutors = await context.FamilyRepresentatives
+                .Where(f => f.Relationship == "Tutor Legal" || f.Relationship == "Tutor" || f.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var f in famTutors)
+            {
+                f.Relationship = "Tutor/a";
+            }
+            if (famTutors.Any())
+            {
+                _output.WriteLine($"[NORMALIZADO] Se normalizaron {famTutors.Count} FamilyRepresentatives a 'Tutor/a'.");
+            }
+
+            var personRepTutors = await context.PersonRepresentatives
+                .Where(pr => pr.Relationship == "Tutor Legal" || pr.Relationship == "Tutor" || pr.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var pr in personRepTutors)
+            {
+                pr.Relationship = "Tutor/a";
+            }
+            if (personRepTutors.Any())
+            {
+                _output.WriteLine($"[NORMALIZADO] Se normalizaron {personRepTutors.Count} PersonRepresentatives a 'Tutor/a'.");
+            }
+
+            var histTutors = await context.PersonRepresentativeHistories
+                .Where(h => h.Relationship == "Tutor Legal" || h.Relationship == "Tutor" || h.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var h in histTutors)
+            {
+                h.Relationship = "Tutor/a";
+            }
+            if (histTutors.Any())
+            {
+                _output.WriteLine($"[NORMALIZADO] Se normalizaron {histTutors.Count} PersonRepresentativeHistories a 'Tutor/a'.");
+            }
+
+            var invTutors = await context.Invitations
+                .Where(i => i.Relationship == "Tutor Legal" || i.Relationship == "Tutor" || i.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var i in invTutors)
+            {
+                i.Relationship = "Tutor/a";
+            }
+            if (invTutors.Any())
+            {
+                _output.WriteLine($"[NORMALIZADO] Se normalizaron {invTutors.Count} Invitations a 'Tutor/a'.");
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }

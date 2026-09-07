@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { GridModule } from '@coreui/angular';
 import { FamilyService, AuthService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
+import { RELATIONSHIPS } from '@shared/constants';
 import {
   PersonRepresentativeResponse,
   FamilyResponse,
@@ -52,6 +53,7 @@ import { TableColumn, HeaderButton } from '@shared/components/data-table/data-ta
   styleUrl: './professional-family-tab.component.scss',
 })
 export class ProfessionalFamilyTabComponent {
+  readonly relationships = RELATIONSHIPS;
   private readonly familyService = inject(FamilyService);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);

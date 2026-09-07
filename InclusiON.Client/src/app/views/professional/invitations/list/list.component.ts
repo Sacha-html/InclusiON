@@ -9,6 +9,7 @@ import {
 } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn, HeaderButton } from '@shared/components/data-table/data-table.models';
+import { RELATIONSHIPS } from '@shared/constants';
 import {
   ModalComponent,
   ModalHeaderComponent,
@@ -67,7 +68,7 @@ export class ListComponent implements OnInit {
   searchTerm        = '';
   statusFilter      = '';
 
-  readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+  readonly relationships = RELATIONSHIPS;
 
   readonly columns: TableColumn[] = [
     { key: 'email',        label: 'Email',      sortable: true },

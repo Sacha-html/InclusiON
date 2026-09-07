@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FamilyService, PersonsService } from '@services';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, RELATIONSHIPS } from '@shared/constants';
 import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '@models';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
@@ -37,7 +37,7 @@ export class NewComponent {
   showPasswordModal = false;
   createdFamily: FamilyResponse | null = null;
 
-  readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+  readonly relationships = RELATIONSHIPS;
 
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
