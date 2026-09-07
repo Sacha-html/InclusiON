@@ -43,6 +43,9 @@ namespace InclusiON.Data.Seeders
 
             // Semillado relacional de reportes para flujos de aprobación y dashboards
             await ReportsDataSeeder.SeedAsync(serviceProvider);
+
+            // Normalización de parentescos para integridad de datos con el combo frontend
+            await NormalizeRelationshipsAsync(context);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
@@ -1362,6 +1365,56 @@ namespace InclusiON.Data.Seeders
                 context.Classrooms.Add(new Classroom { Id = Guid.NewGuid(), Name = "Aula Pedro Avanzada", ProfessionalId = pedroProf.Id, IsActive = true, CreatedAt = DateTime.UtcNow });
 
             await context.SaveChangesAsync();
+        }
+
+        private static async Task NormalizeRelationshipsAsync(AppDbContext context)
+        {
+            // 1. Normalizar minúsculas ('madre' -> 'Madre')
+            var lowercaseMothers = await context.FamilyRepresentatives
+                .Where(f => f.Relationship == "madre")
+                .ToListAsync();
+            foreach (var f in lowercaseMothers)
+            {
+                f.Relationship = "Madre";
+            }
+
+            // 2. Unificar 'Tutor Legal', 'Tutor', 'tutor' a 'Tutor/a' en todas las tablas
+            var famTutors = await context.FamilyRepresentatives
+                .Where(f => f.Relationship == "Tutor Legal" || f.Relationship == "Tutor" || f.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var f in famTutors)
+            {
+                f.Relationship = "Tutor/a";
+            }
+
+            var personRepTutors = await context.PersonRepresentatives
+                .Where(pr => pr.Relationship == "Tutor Legal" || pr.Relationship == "Tutor" || pr.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var pr in personRepTutors)
+            {
+                pr.Relationship = "Tutor/a";
+            }
+
+            var histTutors = await context.PersonRepresentativeHistories
+                .Where(h => h.Relationship == "Tutor Legal" || h.Relationship == "Tutor" || h.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var h in histTutors)
+            {
+                h.Relationship = "Tutor/a";
+            }
+
+            var invTutors = await context.Invitations
+                .Where(i => i.Relationship == "Tutor Legal" || i.Relationship == "Tutor" || i.Relationship == "tutor")
+                .ToListAsync();
+            foreach (var i in invTutors)
+            {
+                i.Relationship = "Tutor/a";
+            }
+
+            if (context.ChangeTracker.HasChanges())
+            {
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

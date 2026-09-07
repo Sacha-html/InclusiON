@@ -1,12 +1,13 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { ToastService } from '@services';
 import { UserRoles } from '@shared/constants/roles';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { UserManagementService } from '@services/user-management.service';
 import { AdminUserDetailResponse, UserRecentSessionResponse } from '@models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
+import { IconDirective } from '@coreui/icons-angular';
 import {
   CardComponent,
   CardBodyComponent,
@@ -24,7 +25,6 @@ import {
   SpinnerComponent,
   TableDirective,
 } from '@coreui/angular';
-
 
 @Component({
   selector: 'app-user-management-detail',
@@ -46,8 +46,11 @@ import {
     ConfirmModalComponent,
     SpinnerComponent,
     TableDirective,
+    IconDirective,
+    NgClass,
   ],
   templateUrl: './detail.component.html',
+  styleUrl: './detail.component.scss',
 })
 export class UserManagementDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -119,10 +122,10 @@ export class UserManagementDetailComponent implements OnInit {
 
   get roleBadgeColor(): string {
     switch (this.user?.role) {
-      case UserRoles.Admin:                return 'primary';
-      case UserRoles.Professional:         return 'info';
+      case UserRoles.Admin:                return 'danger';
+      case UserRoles.Professional:         return 'primary';
       case UserRoles.FamilyRepresentative: return 'warning';
-      case UserRoles.PersonWithDisability: return 'success';
+      case UserRoles.PersonWithDisability: return 'info';
       default: return 'secondary';
     }
   }
@@ -131,9 +134,79 @@ export class UserManagementDetailComponent implements OnInit {
     switch (this.user?.role) {
       case UserRoles.Admin:                return 'Administrador';
       case UserRoles.Professional:         return 'Profesional';
-      case UserRoles.FamilyRepresentative: return 'Familiar';
+      case UserRoles.FamilyRepresentative: return 'Representante Familiar';
       case UserRoles.PersonWithDisability: return 'Alumno';
       default: return this.user?.role ?? '';
+    }
+  }
+
+  get roleIcon(): string {
+    switch (this.user?.role) {
+      case UserRoles.Admin:                return 'cilSettings';
+      case UserRoles.Professional:         return 'cilUser';
+      case UserRoles.FamilyRepresentative: return 'cilHome';
+      case UserRoles.PersonWithDisability: return 'cilPeople';
+      default: return 'cilUser';
+    }
+  }
+
+  get initials(): string {
+    if (!this.user?.fullName) return 'U';
+    const parts = this.user.fullName.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+
+  get avatarClass(): string {
+    switch (this.user?.role) {
+      case UserRoles.Admin:                return 'avatar-admin';
+      case UserRoles.Professional:         return 'avatar-professional';
+      case UserRoles.FamilyRepresentative: return 'avatar-family';
+      case UserRoles.PersonWithDisability: return 'avatar-person';
+      default: return 'avatar-professional';
+    }
+  }
+
+  get linkedEntityTitle(): string {
+    switch (this.user?.linkedEntity?.entityType) {
+      case UserRoles.Professional:         return 'Datos Profesionales';
+      case UserRoles.FamilyRepresentative: return 'Datos del Representante Familiar';
+      case UserRoles.PersonWithDisability: return 'Datos del Alumno';
+      default: return 'Entidad Vinculada';
+    }
+  }
+
+  get linkedEntityIcon(): string {
+    switch (this.user?.linkedEntity?.entityType) {
+      case UserRoles.Professional:         return 'cilUser';
+      case UserRoles.FamilyRepresentative: return 'cilHome';
+      case UserRoles.PersonWithDisability: return 'cilPeople';
+      default: return 'cilLink';
+    }
+  }
+
+  get viewProfileButtonText(): string {
+    switch (this.user?.linkedEntity?.entityType) {
+      case UserRoles.Professional:         return 'Ver perfil completo del profesional';
+      case UserRoles.FamilyRepresentative: return 'Ver perfil completo del familiar';
+      case UserRoles.PersonWithDisability: return 'Ver perfil completo del alumno';
+      default: return 'Ver perfil vinculado';
+    }
+  }
+
+  goToLinkedEntity(): void {
+    if (!this.user?.linkedEntity?.entityId) return;
+    const { entityType, entityId } = this.user.linkedEntity;
+    switch (entityType) {
+      case UserRoles.Professional:
+        this.router.navigate([AppRoutes.Admin.Professionals, entityId]);
+        break;
+      case UserRoles.FamilyRepresentative:
+        this.router.navigate([AppRoutes.Admin.Family, entityId]);
+        break;
+      case UserRoles.PersonWithDisability:
+        this.router.navigate([AppRoutes.Admin.Persons, entityId]);
+        break;
     }
   }
 
@@ -141,7 +214,7 @@ export class UserManagementDetailComponent implements OnInit {
     switch (this.user?.linkedEntity?.entityType) {
       case UserRoles.Professional:         return 'Profesional';
       case UserRoles.PersonWithDisability: return 'Alumno';
-      case UserRoles.FamilyRepresentative: return 'Familiar';
+      case UserRoles.FamilyRepresentative: return 'Representante Familiar';
       case UserRoles.Admin:                return 'Administrador';
       default: return '';
     }

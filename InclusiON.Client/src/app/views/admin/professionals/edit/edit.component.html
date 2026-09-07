@@ -63,8 +63,15 @@
             </select>
           </c-col>
           <c-col sm="6">
-            <label cLabel for="licenseNumber">Matrícula</label>
-            <input cFormControl id="licenseNumber" formControlName="licenseNumber" />
+            <label cLabel for="licenseNumber">Matrícula *</label>
+            <input cFormControl id="licenseNumber" formControlName="licenseNumber"
+                   [valid]="(submitted || f['licenseNumber'].touched) ? f['licenseNumber'].valid : undefined" />
+            @if ((submitted || f['licenseNumber'].touched) && f['licenseNumber'].errors) {
+              <c-form-feedback [valid]="false">
+                @if (f['licenseNumber'].errors['required']) { La matrícula es obligatoria. }
+                @if (f['licenseNumber'].errors['maxlength']) { Máximo 50 caracteres. }
+              </c-form-feedback>
+            }
           </c-col>
         </c-row>
 

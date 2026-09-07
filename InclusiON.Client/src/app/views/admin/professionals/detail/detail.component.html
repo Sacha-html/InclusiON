@@ -43,14 +43,6 @@
           </button>
         </li>
         <li class="nav-item">
-          <button type="button" class="nav-link" [class.active]="activeTab === 'instituciones'" (click)="activeTab = 'instituciones'">
-            Instituciones
-            @if (assignedInstitutions.length > 0) {
-              <c-badge color="info" class="ms-1">{{ assignedInstitutions.length }}</c-badge>
-            }
-          </button>
-        </li>
-        <li class="nav-item">
           <button type="button" class="nav-link" [class.active]="activeTab === 'reportes'" (click)="activeTab = 'reportes'">
             Reportes
           </button>
@@ -73,13 +65,6 @@
         />
       }
 
-      @if (activeTab === 'instituciones') {
-        <app-professional-institutions
-          [professionalId]="professional.id"
-          [institutions]="assignedInstitutions"
-          (institutionsChange)="onInstitutionsChange($event)"
-        />
-      }
 
       @if (activeTab === 'reportes') {
         <app-professional-reports [professionalId]="professional.id" />

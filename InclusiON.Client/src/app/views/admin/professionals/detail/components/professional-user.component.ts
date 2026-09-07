@@ -43,6 +43,9 @@ export class ProfessionalUserComponent {
         this.tempPassword = result.temporaryPassword;
         this.tempPasswordEmail = result.userEmail;
         this.showPasswordModal = true;
+        if (this.professional) {
+          this.professional.mustChangePassword = true;
+        }
         this.toastService.success('Contraseña reseteada exitosamente');
       },
       error: () => {
