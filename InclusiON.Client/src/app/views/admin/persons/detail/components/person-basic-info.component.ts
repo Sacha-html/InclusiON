@@ -26,6 +26,7 @@ import {
 export class PersonBasicInfoComponent {
   @Input({ required: true }) person!: PersonResponse;
   @Output() deactivate = new EventEmitter<void>();
+  @Output() reactivate = new EventEmitter<void>();
 
   readonly formatDate = formatDate;
   readonly formatDateTime = formatDateTime;

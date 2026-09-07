@@ -158,6 +158,15 @@ export class PersonsService {
       .pipe(unwrapResponse());
   }
 
+  /**
+   * Reactiva una persona con discapacidad.
+   */
+  reactivatePerson(personId: string): Observable<PersonResponse> {
+    return this.http
+      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}/reactivate`, {})
+      .pipe(unwrapResponse());
+  }
+
   updateMyProfile(
     request: UpdatePersonRequest
   ): Observable<PersonResponse> {

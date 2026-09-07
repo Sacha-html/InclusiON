@@ -44,6 +44,7 @@ export class DetailComponent implements OnInit {
 
   person: PersonResponse | null = null;
   showDeactivateModal = false;
+  showReactivateModal = false;
   activeTab = 'datos';
 
   readonly tabs = ['datos', 'habilidades', 'vinculos', 'diagnosticos', 'accesibilidad', 'reportes'];
@@ -195,6 +196,21 @@ export class DetailComponent implements OnInit {
       error: () => {
         this.toastService.error('Error al desactivar el alumno');
         this.showDeactivateModal = false;
+      },
+    });
+  }
+
+  confirmReactivate(): void {
+    if (!this.person) return;
+    this.personsService.reactivatePerson(this.person.id).subscribe({
+      next: () => {
+        this.toastService.success('Alumno activado exitosamente');
+        this.showReactivateModal = false;
+        this.person!.isActive = true;
+      },
+      error: () => {
+        this.toastService.error('Error al activar el alumno');
+        this.showReactivateModal = false;
       },
     });
   }

@@ -1,19 +1,19 @@
 <app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="loadPersons()"></app-institution-filter>
 
-<fieldset class="p-3 border rounded mb-4">
-  <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
+<fieldset class="p-2 px-3 border rounded mb-3">
+  <legend class="px-1 mb-1 fw-semibold text-body-secondary" style="font-size: 0.8rem; float: none; width: auto;">Filtros</legend>
   <!-- d-flex flex-wrap evita los negative gutters de c-row que causan overflow en mobile -->
-  <div class="d-flex flex-wrap align-items-end gap-3">
-    <div style="width: 160px; max-width: 100%;">
-      <label cLabel for="filter-status">Estado</label>
-      <select cSelect id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+  <div class="d-flex flex-wrap align-items-end gap-2">
+    <div style="width: 140px; max-width: 100%;">
+      <label cLabel sizing="sm" class="mb-1 text-body-secondary small fw-medium" for="filter-status">Estado</label>
+      <select cSelect sizing="sm" id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="true">Activos</option>
         <option value="false">Inactivos</option>
       </select>
     </div>
     <div class="flex-shrink-0">
-      <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
+      <button cButton color="secondary" size="sm" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
     </div>
   </div>
 </fieldset>

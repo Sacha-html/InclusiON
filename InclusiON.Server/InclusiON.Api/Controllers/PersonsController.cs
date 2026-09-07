@@ -271,6 +271,26 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        /// <summary>
+        /// Reactiva una persona con discapacidad.
+        /// </summary>
+        [HttpPut("{personId}/reactivate")]
+        [Authorize(Policy = "persons:update")]
+        [PersonAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PersonResponse>>> ReactivatePerson(
+            Guid personId,
+            [FromServices] ICommandHandler<ReactivatePersonCommand, ApiResponse<PersonResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new ReactivatePersonCommand(personId), cancellationToken);
+            return result.ToActionResult();
+        }
+
         #endregion
 
         #region Login Method

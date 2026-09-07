@@ -71,7 +71,8 @@
         <div role="tabpanel" id="panel-datos" aria-labelledby="tab-datos" tabindex="0">
           <app-person-basic-info
             [person]="person"
-            (deactivate)="showDeactivateModal = true">
+            (deactivate)="showDeactivateModal = true"
+            (reactivate)="showReactivateModal = true">
           </app-person-basic-info>
         </div>
       }
@@ -160,4 +161,17 @@
   confirmLabel="Desactivar"
   (confirm)="confirmDeactivate()"
   (cancel)="showDeactivateModal = false">
+</app-confirm-modal>
+
+<app-confirm-modal
+  [visible]="showReactivateModal"
+  title="Confirmar activación"
+  messagePrefix="¿Está seguro de que desea activar a "
+  [itemName]="person?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se restaurará su acceso al sistema."
+  confirmLabel="Activar"
+  confirmColor="success"
+  (confirm)="confirmReactivate()"
+  (cancel)="showReactivateModal = false">
 </app-confirm-modal>
