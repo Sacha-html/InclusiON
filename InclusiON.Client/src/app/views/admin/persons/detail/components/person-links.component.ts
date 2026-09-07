@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { PersonResponse, PersonRepresentativeResponse, FamilyResponse, PersonRepresentativeHistoryResponse } from '@models';
+import { RELATIONSHIPS } from '@shared/constants';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -83,7 +84,7 @@ export class PersonLinksComponent implements OnChanges {
   @Output() openHistoryModal = new EventEmitter<void>();
   @Output() closeHistoryModal = new EventEmitter<void>();
 
-  readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+  readonly relationships = RELATIONSHIPS;
   readonly PARENT_RELATIONSHIPS = ['Madre', 'Padre'];
 
   selectedFamilyControl = new FormControl<string | null>(null);

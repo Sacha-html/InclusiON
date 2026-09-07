@@ -347,9 +347,13 @@
           </c-col>
           <c-col sm="6">
             <label cLabel for="tutorRelationship">Parentesco / Relación *</label>
-            <input cFormControl id="tutorRelationship" formControlName="tutorRelationship"
-                   placeholder="Ej: Madre, Padre, Abuelo/a, Tutor Legal"
-                   [valid]="submittedStep2 ? tutorF.tutorRelationship.valid : undefined" />
+            <select cSelect id="tutorRelationship" formControlName="tutorRelationship"
+                    [valid]="submittedStep2 ? tutorF.tutorRelationship.valid : undefined">
+              <option value="">-- Seleccionar parentesco --</option>
+              @for (rel of relationships; track rel) {
+                <option [value]="rel">{{ rel }}</option>
+              }
+            </select>
             @if (submittedStep2 && tutorF.tutorRelationship.errors) {
               <c-form-feedback [valid]="false">
                 @if (tutorF.tutorRelationship.errors['required']) { La relación o parentesco es obligatoria. }
