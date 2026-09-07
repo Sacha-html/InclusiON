@@ -15,22 +15,31 @@
 
 @if (activeTab === 'active') {
 <div class="mb-3">
-  <fieldset class="p-3 border rounded mb-4">
-    <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
-    <c-row class="align-items-end">
-      <c-col sm="3">
-        <label cLabel for="statusFilter">Estado</label>
-        <select cSelect id="statusFilter" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
+  <fieldset class="p-2 px-3 border rounded mb-3">
+    <legend class="px-1 mb-1 fw-semibold text-body-secondary" style="font-size: 0.8rem; float: none; width: auto;">Filtros</legend>
+    <div class="d-flex flex-wrap align-items-end gap-2">
+      <div style="width: 140px; max-width: 100%;">
+        <label cLabel sizing="sm" class="mb-1 text-body-secondary small fw-medium" for="statusFilter">Estado</label>
+        <select cSelect sizing="sm" id="statusFilter" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange($event)">
           <option value="">Todos</option>
           <option value="active">Activos</option>
           <option value="suspended">Suspendidos</option>
           <option value="terminated">Dados de baja</option>
         </select>
-      </c-col>
-      <c-col sm="auto">
-        <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
-      </c-col>
-    </c-row>
+      </div>
+      <div style="width: 220px; max-width: 100%;">
+        <label cLabel sizing="sm" class="mb-1 text-body-secondary small fw-medium" for="specialtyFilter">Especialidad</label>
+        <select cSelect sizing="sm" id="specialtyFilter" [(ngModel)]="specialtyFilter" (ngModelChange)="onSpecialtyFilterChange($event)">
+          <option value="">Todas</option>
+          @for (spec of specialties; track spec) {
+            <option [value]="spec">{{ spec }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex-shrink-0">
+        <button cButton color="secondary" size="sm" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
+      </div>
+    </div>
   </fieldset>
   <app-data-table
     title="Gestionar Profesionales"
@@ -48,15 +57,15 @@
     (rowAction)="onRowAction($event)"
     (headerAction)="onHeaderAction($event)">
   </app-data-table>
-  @if (!professionals.length && !statusFilter) {
+  @if (!professionals.length && !statusFilter && !specialtyFilter) {
     <div class="text-center text-body-secondary py-4">
       <svg cIcon name="cilUser" size="3xl" class="mb-2"></svg>
       <p class="mb-0">No hay profesionales registrados.</p>
     </div>
   }
-  @if (!professionals.length && statusFilter) {
+  @if (!professionals.length && (statusFilter || specialtyFilter)) {
     <div class="text-center text-body-secondary py-4">
-      <p class="mb-0">No se encontraron profesionales con el filtro seleccionado.</p>
+      <p class="mb-0">No se encontraron profesionales con los filtros seleccionados.</p>
     </div>
   }
 </div>

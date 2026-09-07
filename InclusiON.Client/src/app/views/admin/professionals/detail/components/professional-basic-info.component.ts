@@ -34,6 +34,7 @@ import {
 export class ProfessionalBasicInfoComponent {
   @Input({ required: true }) professional!: ProfessionalResponse;
   @Output() deactivate = new EventEmitter<void>();
+  @Output() reactivate = new EventEmitter<void>();
 
   readonly formatDate = formatDate;
   readonly formatDateTime = formatDateTime;

@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, ProfessionalsService, ToastService, UserManagementService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, SPECIALTIES } from '@shared/constants';
 import { ProfessionalListItemResponse, ValidateProfessionalRequest } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
@@ -50,10 +50,13 @@ export class ListComponent implements OnInit {
   canCreate = this.authService.hasPermission(Permissions.Professionals.Create);
   canValidate = this.authService.hasPermission(Permissions.Professionals.Update) || this.authService.isGlobalAdmin();
 
+  readonly specialties = SPECIALTIES;
+
   selectedInstitutionId: number | undefined;
   activeTab: 'active' | 'validations' = 'active';
   private isInitialized = false;
   statusFilter = '';
+  specialtyFilter = '';
 
   professionals: ProfessionalListItemResponse[] = [];
   pendingProfessionals: ProfessionalListItemResponse[] = [];
@@ -105,9 +108,6 @@ export class ListComponent implements OnInit {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
-        { action: 'reset-password', label: 'Resetear', icon: 'cilReload', visible: (item) => item.status === 'Approved' },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.status === 'Approved' },
-        { action: 'reactivate', label: 'Reactivar', icon: 'cilReload', visible: (item) => item.status !== 'Approved' },
       ],
     },
   ];
@@ -162,8 +162,15 @@ export class ListComponent implements OnInit {
     this.loadProfessionals();
   }
 
+  onSpecialtyFilterChange(specialty: string): void {
+    this.specialtyFilter = specialty;
+    this.currentPage = 1;
+    this.loadProfessionals();
+  }
+
   clearFilters(): void {
     this.statusFilter = '';
+    this.specialtyFilter = '';
     this.currentPage = 1;
     this.loadProfessionals();
   }
@@ -341,6 +348,7 @@ export class ListComponent implements OnInit {
         search,
         institutionId: this.selectedInstitutionId,
         status: this.statusFilter || undefined,
+        specialty: this.specialtyFilter || undefined,
         sortBy: this.sortBy,
         sortDirection: this.sortDirection,
       })

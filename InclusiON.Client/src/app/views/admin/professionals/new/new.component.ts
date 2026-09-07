@@ -2,9 +2,9 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, SPECIALTIES } from '@shared/constants';
 import { CreateProfessionalRequest } from '@models';
-import { validDate, notFutureDate, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
+import { validDate, notFutureDate, minAge, toIsoDate, toInputDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -14,6 +14,7 @@ import {
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
+  FormSelectDirective,
   RowComponent,
 } from '@coreui/angular';
 import { ProfessionalResponse } from '@models';
@@ -32,6 +33,7 @@ import { OnlyNumbersDirective } from '@shared/directives';
     FormControlDirective,
     FormLabelDirective,
     FormFeedbackComponent,
+    FormSelectDirective,
     ButtonDirective,
     PasswordModalComponent,
     OnlyNumbersDirective,
@@ -43,6 +45,18 @@ export class NewComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
+
+  readonly specialties = SPECIALTIES;
+
+  readonly minBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()));
+  })();
+
+  readonly maxBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()));
+  })();
 
   submitted = false;
   serverError = '';
@@ -63,7 +77,7 @@ export class NewComponent {
       phone: ['', [Validators.maxLength(20)]],
       specialty: ['', [Validators.maxLength(100)]],
       licenseNumber: ['', [Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
-      birthDate: ['', [Validators.required, validDate, notFutureDate]],
+      birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
     });
   }
 
