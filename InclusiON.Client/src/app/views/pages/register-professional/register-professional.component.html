@@ -81,8 +81,13 @@
               <c-row class="mb-3">
                 <c-col sm="6">
                   <label cLabel for="specialty">Especialidad *</label>
-                  <input cFormControl id="specialty" formControlName="specialty"
-                         [valid]="showFieldError('specialty') ? (f['specialty'].valid ? true : false) : undefined" />
+                  <select cSelect id="specialty" formControlName="specialty"
+                          [valid]="showFieldError('specialty') ? (f['specialty'].valid ? true : false) : undefined">
+                    <option value="">-- Seleccionar especialidad --</option>
+                    @for (spec of specialties; track spec) {
+                      <option [value]="spec">{{ spec }}</option>
+                    }
+                  </select>
                   @if (showFieldError('specialty')) {
                     <c-form-feedback [valid]="false">
                       @if (f['specialty'].errors?.['required']) { La especialidad es obligatoria. }
@@ -111,13 +116,13 @@
                 </c-col>
                 <c-col sm="6">
                   <label cLabel for="birthDate">Fecha de nacimiento *</label>
-                  <input cFormControl id="birthDate" formControlName="birthDate"
-                         placeholder="dd/mm/aaaa"
+                  <input cFormControl type="date" id="birthDate" formControlName="birthDate"
+                         [min]="minBirthDate" [max]="maxBirthDate"
                          [valid]="showFieldError('birthDate') ? (f['birthDate'].valid ? true : false) : undefined" />
                   @if (showFieldError('birthDate')) {
                     <c-form-feedback [valid]="false">
                       @if (f['birthDate'].errors?.['required']) { La fecha de nacimiento es obligatoria. }
-                      @else if (f['birthDate'].errors?.['invalidDate']) { Formato inválido. Use dd/mm/aaaa. }
+                      @else if (f['birthDate'].errors?.['invalidDate']) { Formato o fecha inválida. }
                       @else if (f['birthDate'].errors?.['futureDate']) { La fecha no puede ser futura. }
                       @else if (f['birthDate'].errors?.['minAge']) { Debe ser mayor de 18 años. }
                     </c-form-feedback>

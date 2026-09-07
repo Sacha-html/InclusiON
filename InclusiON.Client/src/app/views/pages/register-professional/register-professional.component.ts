@@ -2,9 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ProfessionalsService, InstitutionsService } from '@services';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, SPECIALTIES } from '@shared/constants';
 import { InstitutionResponse, RegisterProfessionalRequest } from '@models';
-import { validDate, notFutureDate, minAge, toIsoDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
+import { validDate, notFutureDate, minAge, toIsoDate, toInputDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 
 import {
   ButtonDirective,
@@ -53,6 +53,18 @@ export class RegisterProfessionalComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly institutionsService = inject(InstitutionsService);
+
+  readonly specialties = SPECIALTIES;
+
+  readonly minBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()));
+  })();
+
+  readonly maxBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()));
+  })();
 
   institutions: InstitutionResponse[] = [];
   submitted = false;

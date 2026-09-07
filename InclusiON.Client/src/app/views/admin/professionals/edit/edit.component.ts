@@ -2,9 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProfessionalsService } from '@services';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, SPECIALTIES } from '@shared/constants';
 import { ProfessionalResponse, UpdateProfessionalRequest } from '@models';
-import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
+import { validDate, notFutureDate, minAge, toIsoDate, toInputDate } from '@shared/utils';
 import { OnlyNumbersDirective } from '@shared/directives';
 import {
   ButtonDirective,
@@ -15,6 +15,7 @@ import {
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
+  FormSelectDirective,
   RowComponent,
 } from '@coreui/angular';
 
@@ -30,6 +31,7 @@ import {
     FormControlDirective,
     FormLabelDirective,
     FormFeedbackComponent,
+    FormSelectDirective,
     ButtonDirective,
     OnlyNumbersDirective,
   ],
@@ -42,6 +44,19 @@ export class EditComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
 
+  readonly defaultSpecialties = SPECIALTIES;
+  specialties: string[] = [...SPECIALTIES];
+
+  readonly minBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 100, today.getMonth(), today.getDate()));
+  })();
+
+  readonly maxBirthDate: string = (() => {
+    const today = new Date();
+    return toInputDate(new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()));
+  })();
+
   professional: ProfessionalResponse | null = null;
   submitted = false;
   serverError = '';
@@ -53,7 +68,7 @@ export class EditComponent implements OnInit {
     phone: ['', [Validators.maxLength(20)]],
     specialty: ['', [Validators.maxLength(100)]],
     licenseNumber: ['', [Validators.maxLength(50)]],
-    birthDate: ['', [Validators.required, validDate, notFutureDate]],
+    birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
   });
 
   get f() {
@@ -74,6 +89,9 @@ export class EditComponent implements OnInit {
   }
 
   private patchForm(p: ProfessionalResponse): void {
+    if (p.specialty && !this.specialties.includes(p.specialty)) {
+      this.specialties = [p.specialty, ...this.defaultSpecialties];
+    }
     this.form.patchValue({
       firstName: p.firstName,
       lastName: p.lastName,
@@ -81,7 +99,7 @@ export class EditComponent implements OnInit {
       phone: p.phone ?? '',
       specialty: p.specialty ?? '',
       licenseNumber: p.licenseNumber ?? '',
-      birthDate: toDisplayDate(p.birthDate),
+      birthDate: toInputDate(p.birthDate),
     });
   }
 

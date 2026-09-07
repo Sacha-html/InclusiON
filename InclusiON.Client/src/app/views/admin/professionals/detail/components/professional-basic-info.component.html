@@ -75,6 +75,8 @@
       </div>
       @if (professional.isActive) {
         <button cButton color="danger" (click)="deactivate.emit()" [attr.aria-label]="'Desactivar profesional ' + professional.fullName">Desactivar</button>
+      } @else if (professional.statusName === 'Dado de baja' || (professional.statusName !== 'Pendiente' && professional.statusName !== 'Rechazado')) {
+        <button cButton color="success" (click)="reactivate.emit()" [attr.aria-label]="'Reactivar profesional ' + professional.fullName">Reactivar</button>
       }
     </div>
 
