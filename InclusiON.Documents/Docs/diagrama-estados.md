@@ -102,15 +102,15 @@ stateDiagram-v2
 
 ## Entidad: FamilyRepresentative (Familiar / Representante)
 
-Controla el acceso del familiar al portal de seguimiento. A diferencia del Profesional, el familiar **no tiene flujo de aprobación**: se activa directamente al registrarse (vía invitación o directamente por admin) y solo puede desactivarse.
+Controla el acceso del familiar al portal de seguimiento. A diferencia del Profesional, el familiar **no tiene flujo de aprobación**: se activa directamente al registrarse (vía invitación o directamente por admin) y puede reactivarse administrativamente sin restaurar responsabilidades previas.
 
 ### Tabla de estados
 
 | Estado | Puede ir a → | Quién genera la transición | Condición necesaria | Transiciones NO permitidas |
 |--------|-------------|--------------------------|--------------------|-----------------------------|
 | ⬤ INICIO ↓ | | | | |
-| **Active** | Terminated | Admin desactiva | El familiar dejó de tener relación activa con la institución | No puede volver a Active una vez Terminated (se debe crear un nuevo registro). |
-| **Terminated** | *(estado final)* | Admin | Decisión administrativa de dar de baja al familiar | No puede reactivarse. |
+| **Active** | Terminated | Admin desactiva | El familiar dejó de tener relación activa con la institución | Desactiva la cuenta y los vínculos activos. |
+| **Terminated** | Active | Admin con alcance sobre el familiar | Genera contraseña temporal y restablece el acceso | No restaura vínculos, alumnos ni responsabilidades históricas. |
 
 > **Nota:** No existe flujo de aprobación (Pending/Rejected) para familiares. El familiar queda Active al registrarse. El historial de cambios se registra en `FamilyStatusHistory`.
 
@@ -121,7 +121,7 @@ stateDiagram-v2
     direction LR
     [*] --> Active : Familiar se registra\n(invitación o alta directa)
     Active --> Terminated : Admin da de baja\n(PUT .../deactivate)
-    Terminated --> [*]
+    Terminated --> Active : Admin reactiva\n(PUT .../reactivate)
 ```
 
 ---

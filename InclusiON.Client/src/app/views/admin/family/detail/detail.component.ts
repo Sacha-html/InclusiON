@@ -4,6 +4,7 @@ import { FamilyService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { FamilyResponse } from '@models';
 import { formatDateTime } from '@shared/utils';
+import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 import {
   AlertComponent, BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormLabelDirective, RowComponent,
@@ -15,7 +16,7 @@ import {
   imports: [
     AlertComponent, BadgeComponent, CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent,
     ColComponent, FormControlDirective, FormLabelDirective, ButtonDirective,
-    ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
+    ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, PasswordModalComponent,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
@@ -28,6 +29,9 @@ export class DetailComponent implements OnInit {
 
   family: FamilyResponse | null = null;
   showConfirmModal = false;
+  showReactivateModal = false;
+  showPasswordModal = false;
+  temporaryPassword = '';
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -69,6 +73,39 @@ export class DetailComponent implements OnInit {
 
   cancelDeactivate(): void {
     this.showConfirmModal = false;
+  }
+
+  reactivate(): void {
+    this.showReactivateModal = true;
+  }
+
+  confirmReactivate(): void {
+    if (!this.family) return;
+
+    this.familyService.reactivateFamily(this.family.id).subscribe({
+      next: (family) => {
+        this.family = family;
+        this.showReactivateModal = false;
+        this.temporaryPassword = family.temporaryPassword ?? '';
+        this.showPasswordModal = !!this.temporaryPassword;
+        this.toastService.success('Familiar reactivado exitosamente');
+      },
+      error: (err) => {
+        this.showReactivateModal = false;
+        if (!err?.errorCode) {
+          this.toastService.error('Error al reactivar el familiar');
+        }
+      },
+    });
+  }
+
+  cancelReactivate(): void {
+    this.showReactivateModal = false;
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal = false;
+    this.temporaryPassword = '';
   }
 
   formatDateTime = formatDateTime;
