@@ -4,6 +4,8 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Family.Commands;
 using InclusiON.Application.UseCases.Family.Queries;
+using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Family;
@@ -34,7 +36,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
         public async Task<ApiResponse<FamilyResponse>> HandleAsync(DeactivateFamilyCommand command, CancellationToken cancellationToken)
         {
-            var family = await _repository.GetByIdAsync(command.FamilyId, cancellationToken);
+            var family = await _repository.GetByIdForUpdateAsync(command.FamilyId, cancellationToken);
 
             if (family == null)
             {
@@ -51,8 +53,17 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             }
 
             family.IsActive = false;
+            family.Status = FamilyStatusEnum.Terminated;
             family.UpdatedAt = _dateTime.UtcNow;
 
+            await _repository.CreateFamilyStatusHistoryAsync(new FamilyStatusHistory
+            {
+                FamilyId = family.Id,
+                OldStatus = FamilyStatusEnum.Active,
+                NewStatus = FamilyStatusEnum.Terminated,
+                Observation = "Familiar desactivado",
+                CreatedAt = _dateTime.UtcNow
+            }, cancellationToken);
             await _repository.UpdateAsync(family, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -10,6 +10,7 @@ import { DataTableComponent } from '@shared/components/data-table/data-table.com
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
+import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 
 @Component({
   selector: 'app-family-list',
@@ -23,6 +24,7 @@ import { InstitutionFilterComponent } from '@shared/components/institution-filte
     DataTableComponent,
     ConfirmModalComponent,
     InstitutionFilterComponent,
+    PasswordModalComponent,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -50,6 +52,11 @@ export class ListComponent {
 
   showConfirmModal = false;
   itemToDeactivate: FamilyListItemResponse | null = null;
+  showReactivateModal = false;
+  itemToReactivate: FamilyListItemResponse | null = null;
+  showPasswordModal = false;
+  temporaryPassword = '';
+  reactivatedFamilyName = '';
 
   public cols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre', sortable: true },
@@ -63,6 +70,7 @@ export class ListComponent {
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
         { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.isActive },
         { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.isActive },
+        { action: 'reactivate', label: 'Reactivar', icon: 'cilCheck', visible: (item) => !item.isActive },
       ],
     },
   ];
@@ -128,6 +136,10 @@ export class ListComponent {
         this.itemToDeactivate = event.item;
         this.showConfirmModal = true;
         break;
+      case 'reactivate':
+        this.itemToReactivate = event.item;
+        this.showReactivateModal = true;
+        break;
     }
   }
 
@@ -154,6 +166,40 @@ export class ListComponent {
   cancelDeactivate(): void {
     this.showConfirmModal = false;
     this.itemToDeactivate = null;
+  }
+
+  confirmReactivate(): void {
+    if (!this.itemToReactivate) return;
+
+    this.familyService.reactivateFamily(this.itemToReactivate.id).subscribe({
+      next: (family) => {
+        this.toastService.success('Familiar reactivado exitosamente');
+        this.showReactivateModal = false;
+        this.temporaryPassword = family.temporaryPassword ?? '';
+        this.reactivatedFamilyName = family.fullName;
+        this.showPasswordModal = !!this.temporaryPassword;
+        this.itemToReactivate = null;
+        this.loadFamily();
+      },
+      error: (err) => {
+        this.showReactivateModal = false;
+        this.itemToReactivate = null;
+        if (!err?.errorCode) {
+          this.toastService.error('Error al reactivar el familiar');
+        }
+      },
+    });
+  }
+
+  cancelReactivate(): void {
+    this.showReactivateModal = false;
+    this.itemToReactivate = null;
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal = false;
+    this.temporaryPassword = '';
+    this.reactivatedFamilyName = '';
   }
 
   loadFamily(search?: string): void {
