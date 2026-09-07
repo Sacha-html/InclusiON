@@ -87,15 +87,16 @@ export class NewComponent {
 
   showFieldError(fieldName: string): boolean {
     const control = this.form.get(fieldName);
-    if (!control) return false;
+    if (!control || !control.invalid) return false;
     if (this.submitted) return true;
     if (control.errors?.['emailExists'] || control.errors?.['licenseExists']) return true;
-    return control.touched && control.invalid;
+    return control.touched;
   }
 
   onSubmit(): void {
     this.submitted = true;
     this.serverError = '';
+    this.form.markAllAsTouched();
 
     if (this.form.pending) {
       this.form.statusChanges.subscribe(status => {

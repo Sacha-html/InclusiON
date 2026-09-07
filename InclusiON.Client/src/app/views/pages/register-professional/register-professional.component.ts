@@ -97,10 +97,10 @@ export class RegisterProfessionalComponent implements OnInit {
 
   showFieldError(fieldName: string): boolean {
     const control = this.form.get(fieldName);
-    if (!control) return false;
+    if (!control || !control.invalid) return false;
     if (this.submitted) return true;
     if (control.errors?.['emailExists'] || control.errors?.['licenseExists']) return true;
-    return control.touched && control.invalid;
+    return control.touched;
   }
 
   ngOnInit(): void {
@@ -113,6 +113,7 @@ export class RegisterProfessionalComponent implements OnInit {
   onSubmit(): void {
     this.submitted = true;
     this.serverError = '';
+    this.form.markAllAsTouched();
 
     // Esperar a que terminen las validaciones async antes de enviar
     if (this.form.pending) {

@@ -20,8 +20,8 @@
             <label cLabel for="firstName">Nombre *</label>
             <input cFormControl id="firstName" formControlName="firstName"
                    autocomplete="given-name"
-                   [valid]="submitted ? f['firstName'].valid : undefined" />
-            @if (submitted && f['firstName'].errors) {
+                   [valid]="(submitted || f['firstName'].touched) ? f['firstName'].valid : undefined" />
+            @if ((submitted || f['firstName'].touched) && f['firstName'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['firstName'].errors['required']) { El nombre es obligatorio. }
                 @if (f['firstName'].errors['minlength']) { Mínimo 2 caracteres. }
@@ -32,8 +32,8 @@
             <label cLabel for="lastName">Apellido *</label>
             <input cFormControl id="lastName" formControlName="lastName"
                    autocomplete="family-name"
-                   [valid]="submitted ? f['lastName'].valid : undefined" />
-            @if (submitted && f['lastName'].errors) {
+                   [valid]="(submitted || f['lastName'].touched) ? f['lastName'].valid : undefined" />
+            @if ((submitted || f['lastName'].touched) && f['lastName'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['lastName'].errors['required']) { El apellido es obligatorio. }
                 @if (f['lastName'].errors['minlength']) { Mínimo 2 caracteres. }
@@ -47,7 +47,7 @@
             <label cLabel for="edit-documentNumber">Documento *</label>
             <input cFormControl id="edit-documentNumber" formControlName="documentNumber"
                    appOnlyNumbers inputmode="numeric" maxlength="8" placeholder="Ej: 12345678"
-                   [valid]="submitted ? f['documentNumber'].valid : (f['documentNumber'].touched ? f['documentNumber'].valid : undefined)" />
+                   [valid]="(submitted || f['documentNumber'].touched) ? f['documentNumber'].valid : undefined" />
             @if ((submitted || f['documentNumber'].touched) && f['documentNumber'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
@@ -247,7 +247,7 @@
         </c-row>
 
         <div class="mt-3 d-flex gap-2">
-          <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Guardar cambios">Guardar</button>
+          <button cButton color="primary" type="submit" aria-label="Guardar cambios">Guardar</button>
           <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edición">Cancelar</button>
         </div>
       </form>

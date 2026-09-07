@@ -80,6 +80,7 @@ export class EditComponent implements OnInit {
   onSubmit(): void {
     this.submitted = true;
     this.serverError = '';
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
 
     const request: UpdateAdminUserRequest = {
