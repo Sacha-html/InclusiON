@@ -28,6 +28,16 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
         }
 
+        public async Task<FamilyRepresentative?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _context.FamilyRepresentatives
+                .Include(f => f.User)
+                .Include(f => f.PersonRepresentatives)
+                    .ThenInclude(pr => pr.Person)
+                        .ThenInclude(p => p.DisabilityType)
+                .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
+        }
+
         public async Task<FamilyRepresentative?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _context.FamilyRepresentatives

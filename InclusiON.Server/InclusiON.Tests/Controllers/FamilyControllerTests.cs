@@ -5,6 +5,7 @@ using Xunit;
 using InclusiON.Api.Controllers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
+using InclusiON.Application.Authorization;
 using InclusiON.Application.UseCases.Family.Commands;
 using InclusiON.Application.UseCases.Family.Queries;
 using InclusiON.DTOs.Common;
@@ -17,7 +18,7 @@ namespace InclusiON.Tests.Controllers
     public class FamilyControllerTests
     {
         private static FamilyController BuildSut(IHttpContextService httpCtx)
-            => new FamilyController(httpCtx);
+            => new FamilyController(httpCtx, Substitute.For<IResourceAuthorizationService>());
 
         private static IQueryHandler<GetFamilyDashboardQuery, ApiResponse<FamilyDashboardResponse>> OkDashboardHandler()
         {
@@ -138,6 +139,24 @@ namespace InclusiON.Tests.Controllers
 
             // Assert
             result.Result.Should().BeOfType<UnauthorizedResult>();
+        }
+
+        [Fact]
+        public async Task ReactivateFamily_ValidCurrentUser_PassesFamilyAndRequesterToHandler()
+        {
+            var familyId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var httpCtx = Substitute.For<IHttpContextService>();
+            httpCtx.GetCurrentUserId().Returns(userId);
+            var handler = Substitute.For<ICommandHandler<ReactivateFamilyCommand, ApiResponse<FamilyResponse>>>();
+            handler.HandleAsync(Arg.Any<ReactivateFamilyCommand>(), Arg.Any<CancellationToken>())
+                .Returns(ApiResponse<FamilyResponse>.SuccessResult(new FamilyResponse()));
+
+            await BuildSut(httpCtx).ReactivateFamily(familyId, handler);
+
+            await handler.Received(1).HandleAsync(
+                Arg.Is<ReactivateFamilyCommand>(c => c.FamilyId == familyId && c.RequestedByUserId == userId),
+                Arg.Any<CancellationToken>());
         }
     }
 }
