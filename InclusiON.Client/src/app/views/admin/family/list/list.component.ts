@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ButtonDirective, FormControlDirective, FormLabelDirective, FormSelectDirective, GridModule } from '@coreui/angular';
 import { AuthService, FamilyService, ToastService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, RELATIONSHIPS } from '@shared/constants';
 import { FamilyListItemResponse } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
@@ -44,7 +44,7 @@ export class ListComponent {
   relationshipFilter = '';
   isPrimaryFilter = '';
   statusFilter = '';
-  readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+  readonly relationships = RELATIONSHIPS;
 
   families: FamilyListItemResponse[] = [];
   totalItems = 0;
@@ -72,9 +72,6 @@ export class ListComponent {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
-        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.isActive },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.isActive },
-        { action: 'reactivate', label: 'Reactivar', icon: 'cilCheck', visible: (item) => !item.isActive },
       ],
     },
   ];

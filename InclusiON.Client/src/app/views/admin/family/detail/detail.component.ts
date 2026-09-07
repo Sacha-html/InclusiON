@@ -8,7 +8,7 @@ import { PasswordModalComponent } from '@shared/components/password-modal/passwo
 import {
   AlertComponent, BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormLabelDirective, RowComponent,
-  ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent,
+  ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, TableDirective,
 } from '@coreui/angular';
 
 @Component({
@@ -17,6 +17,7 @@ import {
     AlertComponent, BadgeComponent, CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent,
     ColComponent, FormControlDirective, FormLabelDirective, ButtonDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, PasswordModalComponent,
+    TableDirective,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
