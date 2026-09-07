@@ -1,4 +1,4 @@
-﻿using InclusiON.Domain.Enums;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 
 namespace InclusiON.DTOs.Responses.Professionals
@@ -34,6 +34,9 @@ namespace InclusiON.DTOs.Responses.Professionals
         /// </summary>
         public string? TemporaryPassword { get; set; }
         public string? Email { get; set; }
+        public DateTime? LastLoginDate { get; set; }
+        public string? LastLoginIpAddress { get; set; }
+        public bool MustChangePassword { get; set; }
 
         public static ProfessionalResponse MapToResponse(Professional professional)
         {
@@ -65,7 +68,10 @@ namespace InclusiON.DTOs.Responses.Professionals
                 IsActive = professional.User?.IsActive ?? false,
                 CreatedAt = professional.CreatedAt,
                 UpdatedAt = professional.UpdatedAt,
-                Email = professional.User?.Email
+                Email = professional.User?.Email,
+                LastLoginDate = professional.User?.LastLoginDate,
+                LastLoginIpAddress = professional.User?.LastLoginIpAddress,
+                MustChangePassword = professional.User?.MustChangePassword ?? false
             };
         }
     }

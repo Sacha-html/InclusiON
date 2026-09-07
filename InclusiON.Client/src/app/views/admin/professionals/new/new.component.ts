@@ -76,7 +76,7 @@ export class NewComponent {
       documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
       phone: ['', [Validators.maxLength(20)]],
       specialty: ['', [Validators.maxLength(100)]],
-      licenseNumber: ['', [Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
+      licenseNumber: ['', [Validators.required, Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
       birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
     });
   }
