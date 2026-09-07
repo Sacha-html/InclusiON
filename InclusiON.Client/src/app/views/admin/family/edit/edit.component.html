@@ -79,29 +79,42 @@
     <c-card-header><strong>Alumnos vinculados</strong></c-card-header>
     <c-card-body>
       @if (family.linkedPersons && family.linkedPersons.length > 0) {
-        @for (person of family.linkedPersons; track person.personId) {
-          <c-row class="mb-2 align-items-center linked-person-row">
-            <c-col sm="4">
-              <strong>{{ person.fullName }}</strong>
-              @if (person.isPrimary) {
-                <c-badge color="primary" class="ms-2">Principal</c-badge>
+        <div class="table-responsive">
+          <table cTable hover class="align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Alumno</th>
+                <th scope="col">Parentesco</th>
+                <th scope="col">Familiar principal</th>
+                <th scope="col" class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (person of family.linkedPersons; track person.personId) {
+                <tr class="linked-person-row">
+                  <td>
+                    <strong>{{ person.fullName }}</strong>
+                  </td>
+                  <td class="text-body-secondary">
+                    {{ person.relationship ?? 'Sin parentesco' }}
+                  </td>
+                  <td>
+                    <c-badge [color]="person.isPrimary ? 'primary' : 'secondary'">
+                      {{ person.isPrimary ? 'Sí' : 'No' }}
+                    </c-badge>
+                  </td>
+                  <td class="text-end">
+                    <button cButton color="danger" size="sm"
+                            (click)="openUnlinkModal(person)"
+                            [attr.aria-label]="'Desvincular ' + person.fullName">
+                      Desvincular
+                    </button>
+                  </td>
+                </tr>
               }
-            </c-col>
-            <c-col sm="3" class="text-body-secondary">
-              {{ person.relationship ?? 'Sin parentesco' }}
-            </c-col>
-            <c-col sm="3" class="text-body-secondary">
-              @if (person.disabilityType) { {{ person.disabilityType }} }
-            </c-col>
-            <c-col sm="2" class="text-end">
-              <button cButton color="danger" size="sm"
-                      (click)="openUnlinkModal(person)"
-                      [attr.aria-label]="'Desvincular ' + person.fullName">
-                Desvincular
-              </button>
-            </c-col>
-          </c-row>
-        }
+            </tbody>
+          </table>
+        </div>
       } @else {
         <p class="text-body-secondary mb-0">No hay alumnos vinculados.</p>
       }
