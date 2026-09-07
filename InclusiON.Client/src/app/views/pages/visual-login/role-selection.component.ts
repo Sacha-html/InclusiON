@@ -33,7 +33,7 @@ export class RoleSelectionComponent {
   roles: RoleOption[] = [
     {
       type: 'PERSON',
-      title: 'Soy una Persona',
+      title: 'Soy un alumno',
       description: 'Ingresa con tu cuenta personal',
       icon: 'cilUser',
       color: 'var(--a11y-role-person, #4CAF50)',
@@ -41,7 +41,7 @@ export class RoleSelectionComponent {
     },
     {
       type: 'PROFESSIONAL',
-      title: 'Soy Profesional',
+      title: 'Soy profesional',
       description: 'Acceso para profesionales de apoyo',
       icon: 'cilMedicalCross',
       color: 'var(--a11y-role-professional, #2196F3)',
@@ -49,7 +49,7 @@ export class RoleSelectionComponent {
     },
     {
       type: 'FAMILY',
-      title: 'Soy Familia',
+      title: 'Soy familia',
       description: 'Acceso para familiares o tutores',
       icon: 'cilPeople',
       color: 'var(--a11y-role-family, #9C27B0)',

@@ -73,7 +73,7 @@ export class UserManagementListComponent implements OnInit {
       case 'FamilyRepresentative':
         return 'Total de familiares';
       case 'PersonWithDisability':
-        return 'Total de personas';
+        return 'Total de alumnos';
       default:
         return 'Total de usuarios';
     }
@@ -88,7 +88,7 @@ export class UserManagementListComponent implements OnInit {
       case 'FamilyRepresentative':
         return 'Representante Familiar';
       case 'PersonWithDisability':
-        return 'Persona con Discapacidad';
+        return 'Alumno';
       default:
         return 'Todos los roles';
     }
@@ -122,7 +122,7 @@ export class UserManagementListComponent implements OnInit {
         'Admin':                { color: 'danger',  label: 'Administrador'            },
         'Professional':         { color: 'primary', label: 'Profesional'              },
         'FamilyRepresentative': { color: 'success', label: 'Representante Familiar'   },
-        'PersonWithDisability': { color: 'info',    label: 'Persona con Discapacidad' },
+        'PersonWithDisability': { color: 'info',    label: 'Alumno'                   },
       },
     },
     { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },

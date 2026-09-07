@@ -38,7 +38,7 @@ import {
   </c-card-header>
   <c-card-body>
     <p class="text-body-secondary mb-4">
-      Estas preferencias se aplican automáticamente cuando la persona inicia sesión en su interfaz AAC.
+      Estas preferencias se aplican automáticamente cuando el alumno inicia sesión en su interfaz AAC.
     </p>
 
     <form [formGroup]="form">

@@ -1,5 +1,5 @@
 <c-card>
-  <c-card-header><strong>Registrar Familiar</strong></c-card-header>
+  <c-card-header><strong>Registrar familiar</strong></c-card-header>
   <c-card-body>
     @if (serverError) {
       <div class="alert alert-danger">{{ serverError }}</div>
@@ -10,7 +10,7 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel for="personId">Persona a cargo *</label>
+          <label cLabel for="personId">Alumno a cargo *</label>
           <app-searchable-select
             id="personId"
             formControlName="personId"
@@ -20,11 +20,11 @@
             [valueFn]="valueFromPerson"
             placeholder="Buscar por nombre o documento..."
             hintText="Escriba al menos 2 caracteres para buscar"
-            noResultsText="No se encontraron personas disponibles"
+            noResultsText="No se encontraron alumnos disponibles"
           />
           @if (submitted && f['personId'].errors) {
             <c-form-feedback [valid]="false" id="personId-error">
-              Debe seleccionar una persona.
+              Debe seleccionar un alumno.
             </c-form-feedback>
           }
         </c-col>
@@ -38,7 +38,7 @@
           @if (submitted && f['firstName'].errors) {
             <c-form-feedback [valid]="false">
               @if (f['firstName'].errors['required']) { El nombre es obligatorio. }
-              @if (f['firstName'].errors['minlength']) { Minimo 2 caracteres. }
+              @if (f['firstName'].errors['minlength']) { Mínimo 2 caracteres. }
             </c-form-feedback>
           }
         </c-col>
@@ -49,7 +49,7 @@
           @if (submitted && f['lastName'].errors) {
             <c-form-feedback [valid]="false">
               @if (f['lastName'].errors['required']) { El apellido es obligatorio. }
-              @if (f['lastName'].errors['minlength']) { Minimo 2 caracteres. }
+              @if (f['lastName'].errors['minlength']) { Mínimo 2 caracteres. }
             </c-form-feedback>
           }
         </c-col>
@@ -63,19 +63,28 @@
           @if (submitted && f['email'].errors) {
             <c-form-feedback [valid]="false">
               @if (f['email'].errors['required']) { El email es obligatorio. }
-              @if (f['email'].errors['email']) { Ingrese un email valido. }
+              @if (f['email'].errors['email']) { Ingrese un email válido. }
             </c-form-feedback>
           }
         </c-col>
         <c-col sm="6">
-          <label cLabel for="documentNumber">Documento</label>
-          <input cFormControl id="documentNumber" formControlName="documentNumber" />
+          <label cLabel for="documentNumber">Documento *</label>
+          <input cFormControl id="documentNumber" formControlName="documentNumber"
+                 appOnlyNumbers inputmode="numeric" maxlength="8" placeholder="Ej: 12345678"
+                 [valid]="submitted ? f['documentNumber'].valid : (f['documentNumber'].touched ? f['documentNumber'].valid : undefined)" />
+          @if ((submitted || f['documentNumber'].touched) && f['documentNumber'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
+              @else if (f['documentNumber'].errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
+              @else if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+            </c-form-feedback>
+          }
         </c-col>
       </c-row>
 
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel for="phone">Telefono</label>
+          <label cLabel for="phone">Teléfono</label>
           <input cFormControl id="phone" formControlName="phone" />
         </c-col>
         <c-col sm="6">

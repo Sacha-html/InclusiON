@@ -120,8 +120,8 @@ export class ErrorCodeService {
       severity: 'warning'
     }],
     [ErrorCode.PersonNotFound, {
-      message: 'Persona no encontrada',
-      userAction: 'Verifica que la persona esté registrada',
+      message: 'Alumno no encontrado',
+      userAction: 'Verifica que el alumno esté registrado',
       severity: 'warning'
     }],
     [ErrorCode.ResourceNotFound, {
@@ -153,7 +153,7 @@ export class ErrorCodeService {
     }],
     [ErrorCode.DocumentAlreadyExists, {
       message: 'Documento ya registrado',
-      userAction: 'Ya existe una persona con este número de documento',
+      userAction: 'Ya existe un alumno con este número de documento',
       severity: 'warning'
     }],
     [ErrorCode.EmailAlreadyExists, {

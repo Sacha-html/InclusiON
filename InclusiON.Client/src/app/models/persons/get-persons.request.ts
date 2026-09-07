@@ -11,4 +11,6 @@ export interface GetPersonsRequest {
   isActive?: boolean;
   institutionId?: number;
   representativeSearch?: string;
+  relationship?: string;
+  isPrimary?: boolean;
 }

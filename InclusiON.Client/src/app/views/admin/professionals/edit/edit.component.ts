@@ -5,6 +5,7 @@ import { ProfessionalsService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { ProfessionalResponse, UpdateProfessionalRequest } from '@models';
 import { validDate, notFutureDate, toIsoDate, toDisplayDate } from '@shared/utils';
+import { OnlyNumbersDirective } from '@shared/directives';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -30,6 +31,7 @@ import {
     FormLabelDirective,
     FormFeedbackComponent,
     ButtonDirective,
+    OnlyNumbersDirective,
   ],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.scss',
@@ -47,7 +49,7 @@ export class EditComponent implements OnInit {
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+    documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
     specialty: ['', [Validators.maxLength(100)]],
     licenseNumber: ['', [Validators.maxLength(50)]],

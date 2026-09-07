@@ -1,5 +1,5 @@
 <c-card>
-  <c-card-header><strong>Registrar Administrador</strong></c-card-header>
+  <c-card-header><strong>Registrar administrador</strong></c-card-header>
   <c-card-body>
     @if (serverError) {
       <div class="alert alert-danger">{{ serverError }}</div>
@@ -16,7 +16,7 @@
           @if (submitted && f['firstName'].errors) {
             <c-form-feedback [valid]="false">
               @if (f['firstName'].errors['required']) { El nombre es obligatorio. }
-              @if (f['firstName'].errors['minlength']) { Minimo 2 caracteres. }
+              @if (f['firstName'].errors['minlength']) { Mínimo 2 caracteres. }
             </c-form-feedback>
           }
         </c-col>
@@ -27,7 +27,7 @@
           @if (submitted && f['lastName'].errors) {
             <c-form-feedback [valid]="false">
               @if (f['lastName'].errors['required']) { El apellido es obligatorio. }
-              @if (f['lastName'].errors['minlength']) { Minimo 2 caracteres. }
+              @if (f['lastName'].errors['minlength']) { Mínimo 2 caracteres. }
             </c-form-feedback>
           }
         </c-col>
@@ -41,12 +41,12 @@
           @if (submitted && f['email'].errors) {
             <c-form-feedback [valid]="false">
               @if (f['email'].errors['required']) { El email es obligatorio. }
-              @if (f['email'].errors['email']) { Ingrese un email valido. }
+              @if (f['email'].errors['email']) { Ingrese un email válido. }
             </c-form-feedback>
           }
         </c-col>
         <c-col sm="6">
-          <label cLabel for="institutionId">Institucion *</label>
+          <label cLabel for="institutionId">Institución *</label>
           <select cSelect id="institutionId" formControlName="institutionId"
                   [valid]="submitted ? f['institutionId'].valid : undefined">
             <option value="">-- Seleccionar --</option>
@@ -55,7 +55,7 @@
             }
           </select>
           @if (submitted && f['institutionId'].errors) {
-            <c-form-feedback [valid]="false">La institucion es obligatoria.</c-form-feedback>
+            <c-form-feedback [valid]="false">La institución es obligatoria.</c-form-feedback>
           }
         </c-col>
       </c-row>

@@ -1,6 +1,6 @@
 <c-card>
   <c-card-header class="d-flex justify-content-between align-items-center">
-    <h2 class="h5 mb-0">Registrar Alumno</h2>
+    <h2 class="h5 mb-0">Registrar alumno</h2>
     <span class="badge bg-secondary py-2 px-3 fs-6">Paso {{ currentStep }} de 3</span>
   </c-card-header>
   <c-card-body>
@@ -22,7 +22,7 @@
         <span class="rounded-circle px-3 py-2 me-1 border d-inline-block" 
               [class.bg-primary]="currentStep === 3" 
               [class.text-white]="currentStep === 3">3</span>
-        Aula (Opcional)
+        Aula (opcional)
       </div>
     </div>
 
@@ -34,10 +34,10 @@
 
       <!-- ================= PASO 1: ALUMNO ================= -->
       @if (currentStep === 1) {
-        <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios para el Alumno.</p>
+        <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios para el alumno.</p>
         
         <!-- Datos Personales -->
-        <h3 class="h5 mb-3">Datos personales del Alumno</h3>
+        <h3 class="h5 mb-3">Datos personales del alumno</h3>
 
         <c-row class="mb-3">
           <c-col sm="6">
@@ -70,14 +70,16 @@
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="documentNumber">Documento</label>
+            <label cLabel for="documentNumber">Documento *</label>
             <input cFormControl id="documentNumber" formControlName="documentNumber"
+                   appOnlyNumbers inputmode="numeric" maxlength="8"
                    placeholder="Ej: 12345678"
-                   [valid]="submittedStep1 && f['documentNumber'].value ? f['documentNumber'].valid : undefined" />
-            @if (submittedStep1 && f['documentNumber'].errors) {
+                   [valid]="submittedStep1 ? f['documentNumber'].valid : (f['documentNumber'].touched ? f['documentNumber'].valid : undefined)" />
+            @if ((submittedStep1 || f['documentNumber'].touched) && f['documentNumber'].errors) {
               <c-form-feedback [valid]="false">
-                @if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 6 y 20 caracteres. }
-                @if (f['documentNumber'].errors['pattern']) { Solo se permiten letras y números. }
+                @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
+                @else if (f['documentNumber'].errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                @else if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
               </c-form-feedback>
             }
           </c-col>
@@ -265,7 +267,7 @@
             <c-col sm="6">
               <label cLabel for="pin">PIN (4 dígitos) *</label>
               <input cFormControl id="pin" formControlName="pin" type="password" maxlength="4"
-                     autofocus inputmode="numeric"
+                     autofocus inputmode="numeric" appOnlyNumbers
                      placeholder="Ej: 1234"
                      [valid]="submittedStep1 ? f['pin'].valid : undefined" />
               @if (submittedStep1 && f['pin'].errors) {
@@ -286,7 +288,7 @@
             <label cLabel id="avatarColorLabel">Color de avatar</label>
             <app-avatar-color-picker
               formControlName="avatarColor"
-              ariaLabel="Seleccionar color de avatar de la persona">
+              ariaLabel="Seleccionar color de avatar del alumno">
             </app-avatar-color-picker>
           </c-col>
         </c-row>
@@ -299,9 +301,9 @@
 
       <!-- ================= PASO 2: TUTOR A CARGO ================= -->
       @if (currentStep === 2) {
-        <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios para el Tutor.</p>
+        <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios para el tutor.</p>
         
-        <h3 class="h5 mb-3">Datos del Representante Familiar / Tutor a cargo</h3>
+        <h3 class="h5 mb-3">Datos del representante familiar / tutor a cargo</h3>
 
         <c-row class="mb-3">
           <c-col sm="6">
@@ -358,19 +360,21 @@
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="tutorDocumentNumber">Documento del Tutor</label>
+            <label cLabel for="tutorDocumentNumber">Documento del tutor *</label>
             <input cFormControl id="tutorDocumentNumber" formControlName="tutorDocumentNumber"
+                   appOnlyNumbers inputmode="numeric" maxlength="8"
                    placeholder="Ej: 87654321"
-                   [valid]="submittedStep2 && tutorF.tutorDocumentNumber.value ? tutorF.tutorDocumentNumber.valid : undefined" />
-            @if (submittedStep2 && tutorF.tutorDocumentNumber.errors) {
+                   [valid]="submittedStep2 ? tutorF.tutorDocumentNumber.valid : (tutorF.tutorDocumentNumber.touched ? tutorF.tutorDocumentNumber.valid : undefined)" />
+            @if ((submittedStep2 || tutorF.tutorDocumentNumber.touched) && tutorF.tutorDocumentNumber.errors) {
               <c-form-feedback [valid]="false">
-                @if (tutorF.tutorDocumentNumber.errors['minlength'] || tutorF.tutorDocumentNumber.errors['maxlength']) { Debe tener entre 6 y 20 caracteres. }
-                @if (tutorF.tutorDocumentNumber.errors['pattern']) { Solo se permiten letras y números. }
+                @if (tutorF.tutorDocumentNumber.errors['required']) { El documento del tutor es obligatorio. }
+                @else if (tutorF.tutorDocumentNumber.errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                @else if (tutorF.tutorDocumentNumber.errors['minlength'] || tutorF.tutorDocumentNumber.errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
               </c-form-feedback>
             }
           </c-col>
           <c-col sm="6">
-            <label cLabel for="tutorPhone">Teléfono del Tutor</label>
+            <label cLabel for="tutorPhone">Teléfono del tutor</label>
             <input cFormControl id="tutorPhone" formControlName="tutorPhone"
                    placeholder="Ej: +54 9 11 1234-5678" />
           </c-col>
@@ -384,7 +388,7 @@
 
       <!-- ================= PASO 3: ASIGNACIÓN DE PROFESIONAL Y AULA ================= -->
       @if (currentStep === 3) {
-        <h3 class="h5 mb-3">Asignación de Profesional y Aula *</h3>
+        <h3 class="h5 mb-3">Asignación de profesional y aula *</h3>
 
         <p class="text-body-secondary mb-4">
           Debe seleccionar un profesional responsable y asociar al alumno a una de sus aulas.
@@ -396,7 +400,7 @@
             <select cSelect id="selectedProfessionalId" formControlName="selectedProfessionalId"
                     (change)="onProfessionalChange()"
                     [valid]="submitted && classroomF.selectedProfessionalId.invalid ? false : undefined">
-              <option [ngValue]="null">-- Seleccionar Profesional --</option>
+              <option [ngValue]="null">-- Seleccionar profesional --</option>
               @for (p of professionals; track p.id) {
                 <option [value]="p.id">{{ p.lastName }}, {{ p.firstName }} ({{ p.specialty }})</option>
               }
@@ -410,7 +414,7 @@
             <label cLabel for="selectedClassroomId">Aula *</label>
             <select cSelect id="selectedClassroomId" formControlName="selectedClassroomId"
                     [valid]="submitted && classroomF.selectedClassroomId.invalid ? false : undefined">
-              <option [ngValue]="null">-- Seleccionar Aula --</option>
+              <option [ngValue]="null">-- Seleccionar aula --</option>
               @for (c of classrooms; track c.id) {
                 <option [value]="c.id">{{ c.name }}</option>
               }
@@ -423,7 +427,7 @@
 
         <div class="mt-4 d-flex gap-2">
           <button cButton color="secondary" type="button" (click)="prevStep()" aria-label="Volver al Paso 2">Atrás</button>
-          <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Finalizar y guardar registro">Guardar Alumno y Tutor</button>
+          <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Finalizar y guardar registro">Guardar alumno y tutor</button>
         </div>
       }
 

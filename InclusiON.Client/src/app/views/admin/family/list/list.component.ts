@@ -39,8 +39,12 @@ export class ListComponent {
 
   selectedInstitutionId: number | undefined;
 
+  familySearch = '';
   linkedPersonSearch = '';
+  relationshipFilter = '';
+  isPrimaryFilter = '';
   statusFilter = '';
+  readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
 
   families: FamilyListItemResponse[] = [];
   totalItems = 0;
@@ -62,7 +66,7 @@ export class ListComponent {
     { key: 'fullName', label: 'Nombre', sortable: true },
     { key: 'linkedPersonNames', label: 'Familiar de' },
     { key: 'relationship', label: 'Parentesco' },
-    { key: 'phone', label: 'Telefono' },
+    { key: 'phone', label: 'Teléfono' },
     { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
     {
       key: 'actions', label: 'Acciones', type: 'actions',
@@ -96,7 +100,22 @@ export class ListComponent {
     this.loadFamily();
   }
 
+  onFamilySearch(): void {
+    this.currentPage = 1;
+    this.loadFamily();
+  }
+
   onLinkedPersonSearch(): void {
+    this.currentPage = 1;
+    this.loadFamily();
+  }
+
+  onRelationshipFilterChange(): void {
+    this.currentPage = 1;
+    this.loadFamily();
+  }
+
+  onIsPrimaryFilterChange(): void {
     this.currentPage = 1;
     this.loadFamily();
   }
@@ -107,7 +126,10 @@ export class ListComponent {
   }
 
   clearFilters(): void {
+    this.familySearch = '';
     this.linkedPersonSearch = '';
+    this.relationshipFilter = '';
+    this.isPrimaryFilter = '';
     this.statusFilter = '';
     this.currentPage = 1;
     this.loadFamily();
@@ -202,22 +224,27 @@ export class ListComponent {
     this.reactivatedFamilyName = '';
   }
 
-  loadFamily(search?: string): void {
+  loadFamily(tableSearch?: string): void {
     this.loading = true;
     const isActive = this.statusFilter === 'true' ? true
                    : this.statusFilter === 'false' ? false
                    : undefined;
+    const isPrimary = this.isPrimaryFilter === 'true' ? true
+                    : this.isPrimaryFilter === 'false' ? false
+                    : undefined;
 
     this.familyService
       .getFamily({
         page: this.currentPage,
         pageSize: this.pageSize,
-        search,
+        search: tableSearch || this.familySearch || undefined,
         sortBy: this.sortBy,
         sortDirection: this.sortDirection,
         institutionId: this.selectedInstitutionId,
         linkedPersonSearch: this.linkedPersonSearch || undefined,
         isActive,
+        isPrimary,
+        relationship: this.relationshipFilter || undefined,
       })
       .subscribe({
         next: (response) => {

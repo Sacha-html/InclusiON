@@ -33,6 +33,16 @@ namespace InclusiON.DTOs.Requests.Persons
         public string? RepresentativeSearch { get; set; }
 
         /// <summary>
+        /// Filtro por parentesco o tipo de relación (Madre, Padre, Tutor/a, etc.).
+        /// </summary>
+        public string? Relationship { get; set; }
+
+        /// <summary>
+        /// Filtro por si es familiar/representante principal.
+        /// </summary>
+        public bool? IsPrimary { get; set; }
+
+        /// <summary>
         /// Filtro por institucion educativa.
         /// </summary>
         public int? InstitutionId { get; set; }

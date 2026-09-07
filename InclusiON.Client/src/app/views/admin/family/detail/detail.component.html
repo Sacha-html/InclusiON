@@ -1,7 +1,7 @@
 @if (family) {
   <c-card>
     <c-card-header>
-      <strong>Detalle del Familiar</strong>
+      <strong>Detalle del familiar</strong>
       <c-badge class="ms-2" [color]="family.isActive ? 'success' : 'danger'">
         {{ family.isActive ? 'Activo' : 'Inactivo' }}
       </c-badge>
@@ -31,7 +31,7 @@
 
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel>Telefono</label>
+          <label cLabel>Teléfono</label>
           <input cFormControl [value]="family.phone ?? 'Sin especificar'" readonly />
         </c-col>
         <c-col sm="6">
@@ -46,14 +46,14 @@
           <input cFormControl [value]="formatDateTime(family.createdAt)" readonly />
         </c-col>
         <c-col sm="6">
-          <label cLabel>Ultima actualizacion</label>
+          <label cLabel>Última actualización</label>
           <input cFormControl [value]="family.updatedAt ? formatDateTime(family.updatedAt) : 'Sin actualizar'" readonly />
         </c-col>
       </c-row>
 
       @if (family.linkedPersons && family.linkedPersons.length > 0) {
         <c-card class="mb-3 mt-3">
-          <c-card-header><strong>Personas vinculadas</strong></c-card-header>
+          <c-card-header><strong>Alumnos vinculados</strong></c-card-header>
           <c-card-body>
             @for (person of family.linkedPersons; track person.personId) {
               <c-row class="mb-2 align-items-center">
@@ -72,7 +72,7 @@
         </c-card>
       } @else {
         <c-alert color="warning" class="mt-3">
-          Este familiar no tiene personas vinculadas.
+          Este familiar no tiene alumnos vinculados.
         </c-alert>
       }
 
@@ -113,7 +113,7 @@
     </c-modal-header>
     <c-modal-body>
       <p>¿Está seguro de que desea reactivar al familiar <strong>{{ family.fullName }}</strong>?</p>
-      <p class="text-body-secondary mb-0">Se generará una contraseña temporal. No se restaurarán personas a cargo ni vínculos previos.</p>
+      <p class="text-body-secondary mb-0">Se generará una contraseña temporal. No se restaurarán alumnos a cargo ni vínculos previos.</p>
     </c-modal-body>
     <c-modal-footer>
       <button cButton color="secondary" (click)="cancelReactivate()">Cancelar</button>

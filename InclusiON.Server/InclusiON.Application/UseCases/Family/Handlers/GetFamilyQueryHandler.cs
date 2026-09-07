@@ -23,6 +23,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 query.Page, query.PageSize, query.Search, query.IsActive,
                 query.SortBy, query.SortDirection, query.InstitutionIds,
                 query.LinkedPersonSearch,
+                query.IsPrimary,
+                query.Relationship,
                 cancellationToken);
 
             var response = new PagedResponse<FamilyListItemResponse>

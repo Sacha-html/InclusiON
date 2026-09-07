@@ -83,6 +83,8 @@ namespace InclusiON.Application.Interfaces.Repositories
             string sortDirection,
             List<int>? institutionIds = null,
             string? representativeSearch = null,
+            string? relationship = null,
+            bool? isPrimary = null,
             IReadOnlyList<Guid>? accessiblePersonIds = null,
             CancellationToken cancellationToken = default);
 

@@ -9,7 +9,7 @@
     </h6>
     <button cButton color="success" size="sm" (click)="openCreateClassroomModal()">
       <svg cIcon name="cilPlus" class="me-1" aria-hidden="true"></svg>
-      Nueva Aula
+      Nueva aula
     </button>
   </div>
 
@@ -117,7 +117,7 @@
   </div>
   <button cButton color="primary" size="sm" (click)="openAssignPersonModal()">
     <svg cIcon name="cilUserFollow" class="me-1" aria-hidden="true"></svg>
-    Asignar persona
+    Asignar alumno
   </button>
 </div>
 
@@ -129,7 +129,7 @@
   [currentPage]="1"
   [pageSize]="filteredPersons().length || 1"
   [totalItems]="filteredPersons().length"
-  emptyMessage="No hay personas asignadas."
+  emptyMessage="No hay alumnos asignados."
   emptyIcon="cil-people"
   (rowAction)="onRowAction($event)"
 />
@@ -141,13 +141,13 @@
   <c-modal-header>
     <h5 cModalTitle>
       <svg cIcon name="cilUserFollow" class="me-2" aria-hidden="true"></svg>
-      Asignar persona
+      Asignar alumno
     </h5>
   </c-modal-header>
   <c-modal-body>
     <form [formGroup]="assignPersonForm">
       <div class="mb-4">
-        <label class="form-label fw-semibold mb-1" [for]="'ss-input'">Persona</label>
+        <label class="form-label fw-semibold mb-1" [for]="'ss-input'">Alumno</label>
         <app-searchable-select
           formControlName="personId"
           [searchFn]="searchPersonsFn"
@@ -156,14 +156,14 @@
           [valueFn]="valueFromPerson"
           placeholder="Buscar por nombre o documento..."
           hintText="Escriba al menos 2 caracteres para buscar"
-          noResultsText="No se encontraron personas disponibles"
+          noResultsText="No se encontraron alumnos disponibles"
         />
       </div>
 
       <div class="mb-4">
-        <label class="form-label fw-semibold mb-1" for="assign-classroom-id">Aula asignada (Opcional)</label>
+        <label class="form-label fw-semibold mb-1" for="assign-classroom-id">Aula asignada (opcional)</label>
         <select cSelect id="assign-classroom-id" formControlName="classroomId">
-          <option [ngValue]="null">Sin Aula (Asignación General)</option>
+          <option [ngValue]="null">Sin aula (asignación general)</option>
           @for (c of classrooms(); track c.id) {
             <option [value]="c.id">{{ c.name }}</option>
           }
@@ -176,14 +176,14 @@
           <input cFormCheckInput type="checkbox" id="isPrimaryProfessional" formControlName="isPrimaryProfessional" />
           <label cFormCheckLabel for="isPrimaryProfessional" class="fw-medium">
             Profesional principal
-            <small class="d-block text-body-secondary fw-normal">Este profesional aparece como referente principal de la persona</small>
+            <small class="d-block text-body-secondary fw-normal">Este profesional aparece como referente principal del alumno</small>
           </label>
         </c-form-check>
         <c-form-check>
           <input cFormCheckInput type="checkbox" id="canSuperviseLogin" formControlName="canSuperviseLogin" />
           <label cFormCheckLabel for="canSuperviseLogin" class="fw-medium">
             Puede supervisar login
-            <small class="d-block text-body-secondary fw-normal">Este profesional puede asistir el inicio de sesión de la persona</small>
+            <small class="d-block text-body-secondary fw-normal">Este profesional puede asistir el inicio de sesión del alumno</small>
           </label>
         </c-form-check>
       </div>
@@ -223,7 +223,7 @@
       <div class="mb-3">
         <label class="form-label fw-semibold mb-1" for="move-classroom-id">Mover a aula</label>
         <select cSelect id="move-classroom-id" formControlName="classroomId">
-          <option [ngValue]="null">Sin Aula (Asignación General)</option>
+          <option [ngValue]="null">Sin aula (asignación general)</option>
           @for (c of classrooms(); track c.id) {
             <option [value]="c.id">{{ c.name }}</option>
           }
@@ -262,14 +262,14 @@
      ════════════════════════════════════════════════════ -->
 <c-modal [visible]="showTransferModal()" (visibleChange)="showTransferModal.set($event)" alignment="center">
   <c-modal-header>
-    <h5 cModalTitle>Transferir Alumno</h5>
+    <h5 cModalTitle>Transferir alumno</h5>
   </c-modal-header>
   <c-modal-body>
     <p>Vas a transferir al alumno <strong>"{{ personToTransfer()?.personFullName }}"</strong>. Esto desactivará su vínculo con el profesional actual y lo vinculará al nuevo profesional.</p>
     <p class="text-warning fw-semibold">Todas sus actividades en curso y reportes pendientes se reasignarán automáticamente.</p>
 
     <div class="mb-3">
-      <label cLabel for="transferTargetProfSelect" class="form-label fw-semibold">Seleccionar Nuevo Profesional</label>
+      <label cLabel for="transferTargetProfSelect" class="form-label fw-semibold">Seleccionar nuevo profesional</label>
       <select cSelect id="transferTargetProfSelect" [ngModel]="selectedTargetProfessionalId()" (ngModelChange)="selectedTargetProfessionalId.set($event)">
         <option value="" disabled>Seleccione un profesional...</option>
         @for (p of activeProfessionalsList(); track p.id) {
@@ -298,14 +298,14 @@
   <c-modal-header>
     <h5 cModalTitle>
       <svg cIcon name="cilHome" class="me-2" aria-hidden="true"></svg>
-      Crear Aula y Asignar Alumnos
+      Crear aula y asignar alumnos
     </h5>
   </c-modal-header>
   <c-modal-body>
     <form [formGroup]="createClassroomForm">
       <!-- Nombre del aula -->
       <div class="mb-4">
-        <label class="form-label fw-semibold mb-1" for="classroom-name">Nombre del Aula</label>
+        <label class="form-label fw-semibold mb-1" for="classroom-name">Nombre del aula</label>
         <input
           cFormControl
           id="classroom-name"
@@ -321,7 +321,7 @@
 
       <!-- Buscar y agregar alumno -->
       <div class="mb-4">
-        <label class="form-label fw-semibold mb-1">Buscar Alumnos para el Aula <small class="text-body-secondary fw-normal">(opcional)</small></label>
+        <label class="form-label fw-semibold mb-1">Buscar alumnos para el aula <small class="text-body-secondary fw-normal">(opcional)</small></label>
         <div class="d-flex gap-2 align-items-start">
           <div class="flex-grow-1">
             <app-searchable-select
@@ -332,7 +332,7 @@
               [valueFn]="fullPersonValue"
               placeholder="Buscar por nombre o documento..."
               hintText="Escriba al menos 2 caracteres para buscar"
-              noResultsText="No se encontraron personas disponibles"
+              noResultsText="No se encontraron alumnos disponibles"
             />
           </div>
           <button
@@ -351,7 +351,7 @@
 
       <!-- Alumnos agregados temporalmente -->
       <div class="mb-4">
-        <label class="form-label fw-semibold mb-2">Alumnos en este Aula ({{ selectedPersonsToAssign().length }})</label>
+        <label class="form-label fw-semibold mb-2">Alumnos en este aula ({{ selectedPersonsToAssign().length }})</label>
         @if (selectedPersonsToAssign().length === 0) {
           <div class="alert alert-info py-2 small mb-0">
             El aula se creará sin alumnos asignados (podrá asignarlos más tarde).
@@ -419,7 +419,7 @@
         <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
         Creando...
       } @else {
-        Crear Aula
+        Crear aula
       }
     </button>
   </c-modal-footer>
@@ -432,7 +432,7 @@
   <c-modal-header>
     <h5 cModalTitle>
       <svg cIcon name="cilPencil" class="me-2" aria-hidden="true"></svg>
-      Renombrar Aula
+      Renombrar aula
     </h5>
   </c-modal-header>
   <c-modal-body>

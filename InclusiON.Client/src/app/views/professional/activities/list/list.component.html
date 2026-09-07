@@ -1,7 +1,7 @@
 <div role="region" aria-labelledby="pro-activities-title">
 <c-row class="mb-3 align-items-center">
   <c-col>
-    <h1 id="pro-activities-title" class="h4 mb-0" tabindex="-1">Mis Actividades</h1>
+    <h1 id="pro-activities-title" class="h4 mb-0" tabindex="-1">Mis actividades</h1>
   </c-col>
   <c-col xs="auto" class="d-flex gap-2 align-items-center">
     @if (canCreate) {
@@ -130,7 +130,7 @@
 
 <app-confirm-modal
   [visible]="showDeactivateModal"
-  title="Desactivar Actividad"
+  title="Desactivar actividad"
   [itemName]="itemToDeactivate?.title ?? ''"
   (confirm)="confirmDeactivate()"
   (cancel)="cancelDeactivate()"

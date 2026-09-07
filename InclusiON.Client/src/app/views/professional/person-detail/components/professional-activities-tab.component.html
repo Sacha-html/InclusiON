@@ -19,7 +19,7 @@
   <app-empty-state
     icon="cil-task"
     message="Sin actividades asignadas"
-    detail="Aún no se han asignado actividades a esta persona."
+    detail="Aún no se han asignado actividades a este alumno."
   />
 }
 
@@ -153,7 +153,7 @@
 
 @if (recommendedActivities().length > 0) {
   <div class="mt-4 p-3 bg-light rounded">
-    <h6 class="mb-3">Actividades recomendadas para esta persona</h6>
+    <h6 class="mb-3">Actividades recomendadas para este alumno</h6>
     <div class="d-flex flex-wrap gap-2">
       @for (act of recommendedActivities(); track act.encryptedId) {
         <span class="badge bg-secondary-subtle text-dark fs-6">

@@ -39,7 +39,7 @@
         <c-card-body class="d-flex justify-content-between align-items-center">
           <div>
             <div class="fs-4 fw-semibold">{{ personCount }}</div>
-            <div class="counter-card-muted">Personas a cargo</div>
+            <div class="counter-card-muted">Alumnos a cargo</div>
           </div>
           <svg cIcon name="cil-people" size="3xl" class="counter-card-muted" aria-hidden="true"></svg>
         </c-card-body>
@@ -94,13 +94,24 @@
                       <option [value]="c.id">{{ c.name }}</option>
                     }
                   </select>
-                  <button cButton color="primary" size="sm" [disabled]="isExportingPdf" (click)="downloadWeeklyProgressPdf()">
-                    <svg cIcon name="cilCloudDownload" size="sm" class="me-1"></svg>
-                    @if (isExportingPdf) { Generando PDF… } @else { Exportar PDF }
+                  <button class="btn btn-export-pdf btn-sm" [disabled]="isExportingPdf" (click)="downloadWeeklyProgressPdf()">
+                    @if (isExportingPdf) {
+                      <c-spinner size="sm"></c-spinner>
+                      <span>Generando PDF…</span>
+                    } @else {
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" class="pdf-icon-svg" aria-hidden="true">
+                        <path d="M2.5 5.5H4.5V19.5H16.5V21.5H2.5V5.5Z" fill="#000000" />
+                        <path d="M5.5 2H15.5L21.5 8V19.5H5.5V2Z" fill="#000000" />
+                        <path d="M15.5 2V8H21.5L15.5 2Z" fill="#000000" stroke="#ffffff" stroke-width="1" stroke-linejoin="round" />
+                        <text x="13.5" y="13.8" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="5.2" fill="#ffffff" text-anchor="middle" letter-spacing="-0.2">PDF</text>
+                        <rect x="8.5" y="15.5" width="10" height="1.8" rx="0.9" fill="#ffffff" />
+                      </svg>
+                      <span>Exportar PDF</span>
+                    }
                   </button>
                   <button cButton color="outline-primary" size="sm" (click)="openShareModal()">
                     <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
-                    Compartir con Tutor
+                    Compartir con tutor
                   </button>
                 </div>
               </div>
@@ -108,7 +119,7 @@
                 <c-col xs="6" md="3">
                   <div class="weekly-stat">
                     <div class="weekly-stat__value">{{ weeklyProgress.personCount }}</div>
-                    <div class="weekly-stat__label">Personas activas</div>
+                    <div class="weekly-stat__label">Alumnos activos</div>
                   </div>
                 </c-col>
                 <c-col xs="6" md="3">
@@ -158,7 +169,7 @@
         <c-col xs="12" md="6" class="mb-3 mb-md-0">
           <c-card class="h-100 shadow-sm">
             <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
-              <div class="fw-semibold">Rendimiento por Categoría Pedagógica</div>
+              <div class="fw-semibold">Rendimiento por categoría pedagógica</div>
               @if (isLoadingAnalytics) {
                 <c-spinner size="sm" color="primary"></c-spinner>
               }
@@ -173,7 +184,7 @@
         <c-col xs="12" md="6">
           <c-card class="h-100 shadow-sm">
             <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
-              <div class="fw-semibold">Distribución del Aula por Niveles</div>
+              <div class="fw-semibold">Distribución del aula por niveles</div>
               <span class="badge bg-primary-subtle text-primary border font-monospace">Niveles 1 - 10</span>
             </c-card-header>
             <c-card-body>
@@ -189,8 +200,8 @@
           <c-col xs="12">
             <c-card class="shadow-sm">
               <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
-                <div class="fw-semibold">Comparativa de Rendimiento por Aula</div>
-                <span class="badge bg-success-subtle text-success border">Ranking de Aulas</span>
+                <div class="fw-semibold">Comparativa de rendimiento por aula</div>
+                <span class="badge bg-success-subtle text-success border">Ranking de aulas</span>
               </c-card-header>
               <c-card-body>
                 <app-classroom-ranking-chart [items]="analytics.rankingMisAulas" />
@@ -249,13 +260,13 @@
       <c-card class="mb-4">
         <c-card-body>
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Mi Aula</h5>
+            <h5 class="mb-0">Mi aula</h5>
             <button cButton color="primary" size="sm" (click)="navigateTo('/pro/persons')">
               Ver aula
             </button>
           </div>
           @if (recentPersons.length === 0) {
-            <p class="text-body-secondary text-center py-3">No tienes personas asignadas</p>
+            <p class="text-body-secondary text-center py-3">No tienes alumnos asignados</p>
           } @else {
             <table cTable hover small>
               <tbody>
@@ -358,7 +369,7 @@
   <!-- ── Modal Compartir Métricas por Mensajería ────────────────────────── -->
   <c-modal [visible]="showShareModal" (visibleChange)="showShareModal = $event">
     <c-modal-header>
-      <h5 cModalTitle>Compartir Métricas con Tutor</h5>
+      <h5 cModalTitle>Compartir métricas con tutor</h5>
     </c-modal-header>
     <c-modal-body>
       <div class="mb-3">
@@ -388,7 +399,7 @@
     <c-modal-header class="border-bottom">
       <h5 cModalTitle class="d-flex align-items-center gap-2">
         <span class="fs-5">⚠️</span>
-        <span>Detalle de Alertas de Frustración y Bloqueos</span>
+        <span>Detalle de alertas de frustración y bloqueos</span>
       </h5>
     </c-modal-header>
     <c-modal-body>

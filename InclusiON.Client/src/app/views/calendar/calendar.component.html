@@ -3,7 +3,7 @@
   <!-- ── Encabezado y Navegación ────────────────────────────────────────── -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h4 class="fw-semibold text-body mb-1">Calendario de Actividades</h4>
+      <h4 class="fw-semibold text-body mb-1">Calendario de actividades</h4>
       <p class="text-body-secondary small mb-0">
         {{ isProfessional ? 'Agenda y gestiona las clases, consultas y tareas de tus alumnos.' : 'Visualiza el cronograma de clases y consultas de tu hijo.' }}
       </p>
@@ -27,7 +27,7 @@
       @if (showMonthYearPicker) {
         <div class="position-absolute top-100 end-0 mt-2 p-3 border rounded bg-body shadow-lg z-3 month-year-popover" style="width: 280px;">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="mb-0 fw-semibold small text-body">Seleccionar Fecha</h6>
+            <h6 class="mb-0 fw-semibold small text-body">Seleccionar fecha</h6>
             <select cSelect size="sm" [(ngModel)]="pickerYear" (change)="applyMonthYearPicker()" style="width: 90px;" class="py-1 px-2">
               @for (y of [2024, 2025, 2026, 2027, 2028, 2029, 2030]; track y) {
                 <option [value]="y">{{ y }}</option>
@@ -54,7 +54,7 @@
       @if (isProfessional) {
         <button cButton color="primary" size="sm" (click)="openCreateModal()">
           <svg cIcon name="cilPlus" size="sm" class="me-1"></svg>
-          Agendar Actividad
+          Agendar actividad
         </button>
       }
     </div>
@@ -133,7 +133,7 @@
 <!-- ── Modal Crear/Editar Evento (Sólo Profesional) ────────────────────── -->
 <c-modal [visible]="showEventModal" (visibleChange)="showEventModal = $event">
   <c-modal-header>
-    <h5 cModalTitle>{{ eventForm.id ? 'Editar Evento' : 'Agendar Actividad' }}</h5>
+    <h5 cModalTitle>{{ eventForm.id ? 'Editar evento' : 'Agendar actividad' }}</h5>
   </c-modal-header>
   <c-modal-body>
     <div class="mb-3">
@@ -143,7 +143,7 @@
 
     <div class="row g-3 mb-3">
       <div class="col-6">
-        <label cLabel class="mb-1">Tipo de Evento</label>
+        <label cLabel class="mb-1">Tipo de evento</label>
         <select cSelect [(ngModel)]="eventForm.type">
           <option value="Tutoría">Tutoría</option>
           <option value="Clase">Clase</option>
@@ -154,14 +154,14 @@
         <label cLabel class="mb-1">Dirigido a</label>
         <select cSelect [(ngModel)]="eventForm.targetScope">
           <option value="all">Todos los alumnos a cargo</option>
-          <option value="single">Un alumno específico (Personalizado)</option>
+          <option value="single">Un alumno específico (personalizado)</option>
         </select>
       </div>
     </div>
 
     @if (eventForm.targetScope === 'single') {
       <div class="mb-3">
-        <label cLabel class="mb-1">Seleccionar Alumno *</label>
+        <label cLabel class="mb-1">Seleccionar alumno *</label>
         <select cSelect [(ngModel)]="eventForm.studentId">
           <option value="">— Selecciona un alumno —</option>
           @for (s of assignedStudents(); track s.personId) {
@@ -206,7 +206,7 @@
 <!-- ── Modal Detalle de Evento ─────────────────────────────────────────── -->
 <c-modal [visible]="showDetailModal" (visibleChange)="showDetailModal = $event" size="sm">
   <c-modal-header>
-    <h5 cModalTitle>Detalle del Evento</h5>
+    <h5 cModalTitle>Detalle del evento</h5>
   </c-modal-header>
   <c-modal-body>
     @if (selectedEvent()) {

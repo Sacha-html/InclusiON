@@ -7,4 +7,6 @@ export interface GetFamilyRequest {
   sortDirection?: string;
   institutionId?: number;
   linkedPersonSearch?: string;
+  isPrimary?: boolean;
+  relationship?: string;
 }

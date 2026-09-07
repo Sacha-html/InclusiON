@@ -73,7 +73,7 @@ export class ListComponent implements OnInit {
     { key: 'email',        label: 'Email',      sortable: true },
     { key: 'fullName',     label: 'Nombre',     sortable: true },
     { key: 'relationship', label: 'Parentesco', sortable: true },
-    { key: 'personName',   label: 'Persona',    sortable: true },
+    { key: 'personName',   label: 'Alumno',     sortable: true },
     {
       key: 'status', label: 'Estado', type: 'badge', sortable: true,
       badgeMap: {
@@ -200,7 +200,7 @@ export class ListComponent implements OnInit {
       switchMap(profile => this.assignmentsService.getPersonsByProfessional(profile.id))
     ).subscribe({
       next: (persons) => { this.persons = persons.filter(p => p.isActive); },
-      error: () => { this.toastService.error('Error al cargar personas'); },
+      error: () => { this.toastService.error('Error al cargar alumnos'); },
     });
   }
 

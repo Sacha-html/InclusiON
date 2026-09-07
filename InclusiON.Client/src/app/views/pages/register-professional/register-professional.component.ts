@@ -22,6 +22,7 @@ import {
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { AccessibilityPanelComponent } from '@components/accessibility-panel/accessibility-panel.component';
+import { OnlyNumbersDirective } from '@shared/directives';
 
 @Component({
   selector: 'app-register-professional',
@@ -42,6 +43,7 @@ import { AccessibilityPanelComponent } from '@components/accessibility-panel/acc
     ModalModule,
     IconDirective,
     AccessibilityPanelComponent,
+    OnlyNumbersDirective,
   ],
   templateUrl: './register-professional.component.html',
   styleUrl: './register-professional.component.scss',
@@ -68,7 +70,7 @@ export class RegisterProfessionalComponent implements OnInit {
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
-      documentNumber: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+      documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
       phone: ['', [Validators.maxLength(20)]],
       specialty: ['', [Validators.required, Validators.maxLength(100)]],
       licenseNumber: ['', [Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],

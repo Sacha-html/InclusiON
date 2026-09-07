@@ -42,42 +42,64 @@ export interface AppNotification {
               cDropdownToggle
               [attr.aria-label]="unreadLabel()"
               cTooltip="Notificaciones"
-              class="d-flex align-items-center"
-              style="position: relative; cursor: pointer; background: none; border: none; padding: 0; color: inherit;">
-        <svg cIcon class="my-1" name="cilBell" size="lg" aria-hidden="true"></svg>
+              class="d-flex align-items-center justify-content-center"
+              style="position: relative; cursor: pointer; background: none; border: none; color: inherit;">
+        <svg cIcon name="cilBell" size="lg" aria-hidden="true"></svg>
         @if (unreadCount() > 0) {
           <span class="bell-badge" aria-hidden="true">
             {{ unreadCount() > 99 ? '99+' : unreadCount() }}
           </span>
         }
       </button>
-      <div cDropdownMenu style="min-width: 320px; max-width: 360px; padding: 0;" class="shadow border">
+      <div cDropdownMenu style="min-width: 320px; max-width: 360px; padding: 0;" class="shadow border rounded-2">
         <div class="d-flex justify-content-between align-items-center bg-body-secondary px-3 py-2 border-bottom fw-bold rounded-top">
-          <span style="font-size: 14px;">Notificaciones</span>
-          @if (notifications().length > 0) {
-            <button class="btn btn-sm btn-link p-0 text-decoration-none text-danger" (click)="clearAll($event)" style="font-size: 12px; font-weight: 600;">Limpiar todo</button>
-          }
+          <div class="d-flex align-items-center gap-2">
+            <span style="font-size: 14px;">Notificaciones</span>
+            @if (unreadCount() > 0) {
+              <span class="badge bg-primary rounded-pill" style="font-size: 11px;">{{ unreadCount() }} nuevas</span>
+            }
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            @if (unreadCount() > 0) {
+              <button class="btn btn-sm btn-link p-0 text-decoration-none text-primary" (click)="markAllAsRead($event)" style="font-size: 12px; font-weight: 600;">
+                Marcar leídas
+              </button>
+            }
+            @if (notifications().length > 0) {
+              <button class="btn btn-sm btn-link p-0 text-decoration-none text-danger" (click)="clearAll($event)" style="font-size: 12px; font-weight: 600;">
+                Limpiar
+              </button>
+            }
+          </div>
         </div>
         
-        <div style="max-height: 320px; overflow-y: auto;">
+        <div style="max-height: 340px; overflow-y: auto;">
           @if (notifications().length === 0) {
             <div class="text-center py-4 text-body-secondary">
               <svg cIcon name="cilBell" size="xl" class="mb-2 text-opacity-50" style="color: #6c757d; opacity: 0.5;"></svg>
-              <p class="mb-0 small">No tenés notificaciones nuevas</p>
+              <p class="mb-0 small">No tenés notificaciones</p>
             </div>
           } @else {
             @for (notif of notifications(); track notif.id) {
               <button cDropdownItem 
                       class="d-flex align-items-start border-bottom py-2 px-3 text-wrap notification-item" 
-                      [class.bg-light]="!notif.isRead"
+                      [class.notification-unread]="!notif.isRead"
+                      [class.notification-read]="notif.isRead"
                       (click)="onNotificationClick(notif)"
                       style="border: none; width: 100%;">
-                <div class="me-3 mt-1">
-                  <svg cIcon [name]="getNotificationIcon(notif)" size="md" [class]="getNotificationColorClass(notif)"></svg>
+                <div class="me-3 mt-1 flex-shrink-0">
+                  <div class="icon-container" [class.unread-icon-container]="!notif.isRead" [class.read-icon-container]="notif.isRead">
+                    <svg cIcon [name]="getNotificationIcon(notif)" size="md" [class]="getNotificationColorClass(notif)"></svg>
+                  </div>
                 </div>
-                <div class="d-flex flex-column text-start" style="font-size: 13px;">
-                  <span class="fw-semibold text-body">{{ notif.title }}</span>
-                  <span class="text-body-secondary mt-1" style="font-size: 12px; line-height: 1.3;">{{ notif.message }}</span>
+                <div class="d-flex flex-column text-start flex-grow-1" style="font-size: 13px;">
+                  <div class="d-flex align-items-center justify-content-between gap-1">
+                    <span class="notif-title" [class.fw-bold]="!notif.isRead" [class.text-dark]="!notif.isRead" [class.text-secondary]="notif.isRead">{{ notif.title }}</span>
+                    @if (!notif.isRead) {
+                      <span class="unread-dot" title="No leído"></span>
+                    }
+                  </div>
+                  <span class="notif-message mt-1" [class.text-body]="!notif.isRead" [class.text-muted]="notif.isRead" style="font-size: 12px; line-height: 1.35;">{{ notif.message }}</span>
                   <span class="text-muted mt-1" style="font-size: 10px;">{{ notif.timeLabel }}</span>
                 </div>
               </button>
@@ -94,36 +116,76 @@ export interface AppNotification {
 
     .notification-item {
       cursor: pointer;
-      transition: background-color 0.15s ease-in-out;
+      transition: all 0.15s ease-in-out;
+      position: relative;
 
-      &:hover,
-      &:focus {
-        background-color: #F0F9FF !important;
-        color: #212121 !important;
+      &.notification-unread {
+        background-color: #f0f7ff !important;
+        border-left: 4px solid var(--a11y-primary, #1565C0) !important;
+
+        &:hover,
+        &:focus {
+          background-color: #e0f2fe !important;
+        }
       }
 
-      &:active {
-        background-color: #E3F2FD !important;
-        color: #0D47A1 !important;
+      &.notification-read {
+        background-color: #ffffff !important;
+        border-left: 4px solid transparent !important;
+        opacity: 0.85;
+
+        &:hover,
+        &:focus {
+          background-color: #f8fafc !important;
+          opacity: 1;
+        }
       }
+    }
+
+    .icon-container {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .unread-icon-container {
+      background-color: rgba(21, 101, 192, 0.1);
+    }
+
+    .read-icon-container {
+      background-color: #f1f5f9;
+      opacity: 0.7;
+    }
+
+    .unread-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--a11y-primary, #1565C0);
+      flex-shrink: 0;
+      display: inline-block;
     }
 
     .bell-badge {
       position: absolute;
       top: -2px;
       right: -6px;
-      min-width: 16px;
-      height: 16px;
-      padding: 0 3px;
-      border-radius: 8px;
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      border-radius: 9px;
       background: #D32F2F;
       color: #fff;
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 700;
-      line-height: 16px;
+      line-height: 17px;
       text-align: center;
       pointer-events: none;
       border: 1.5px solid var(--a11y-bg, #fff);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -184,10 +246,11 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   }
 
   onNotificationClick(notif: AppNotification): void {
-    notif.isRead = true;
-    this.notifications.update(arr => arr.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
-    this.saveToStorage();
-    this.updateUnreadCount();
+    if (!notif.isRead) {
+      this.notifications.update(arr => arr.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
+      this.saveToStorage();
+      this.updateUnreadCount();
+    }
 
     if (notif.actionUrl) {
       let path = notif.actionUrl;
@@ -205,6 +268,20 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       }
       this.router.navigateByUrl(path);
     }
+  }
+
+  markAllAsRead(event?: Event): void {
+    event?.stopPropagation();
+    this.notifications.update(arr => arr.map(n => ({ ...n, isRead: true })));
+    this.saveToStorage();
+    this.updateUnreadCount();
+  }
+
+  clearAll(event: Event): void {
+    event.stopPropagation();
+    this.notifications.set([]);
+    this.saveToStorage();
+    this.updateUnreadCount();
   }
 
   getNotificationIcon(notif: AppNotification): string {
@@ -225,13 +302,6 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     }
   }
 
-  clearAll(event: Event): void {
-    event.stopPropagation();
-    this.notifications.set([]);
-    this.saveToStorage();
-    this.updateUnreadCount();
-  }
-
   private detectNotificationType(title: string, actionUrl?: string): 'message' | 'activity' | 'calendar' | 'system' {
     const t = title.toLowerCase();
     const url = actionUrl?.toLowerCase() ?? '';
@@ -241,8 +311,15 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     return 'system';
   }
 
+  private getStorageKey(): string {
+    const user = this.authService.getCurrentUser();
+    const id = user?.id ?? this.authService.getUserRole() ?? 'guest';
+    return `app_notifications_${id}`;
+  }
+
   private loadFromStorage(): void {
-    const stored = localStorage.getItem('app_notifications');
+    const storageKey = this.getStorageKey();
+    const stored = localStorage.getItem(storageKey);
     if (stored) {
       try {
         let parsed = JSON.parse(stored) as AppNotification[];
@@ -263,8 +340,8 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   }
 
   private saveToStorage(): void {
-    const list = this.notifications().slice(0, 20);
-    localStorage.setItem('app_notifications', JSON.stringify(list));
+    const list = this.notifications().slice(0, 30);
+    localStorage.setItem(this.getStorageKey(), JSON.stringify(list));
   }
 
   private updateUnreadCount(): void {
@@ -304,7 +381,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           message: 'Recordatorio: Sesión de terapia con Sofía Rodríguez mañana a las 10:00.',
           actionUrl: 'calendar',
           type: 'calendar',
-          isRead: false,
+          isRead: true,
           createdAt: new Date(Date.now() - 60 * 60000),
           timeLabel: 'Hace 1 hora'
         }
@@ -337,7 +414,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           message: 'Recordatorio: Sesión de terapia para Tomás Pérez mañana a las 10:00.',
           actionUrl: 'calendar',
           type: 'calendar',
-          isRead: false,
+          isRead: true,
           createdAt: new Date(Date.now() - 60 * 60000),
           timeLabel: 'Hace 1 hora'
         }
@@ -370,7 +447,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           message: 'Se ha presentado un reporte semanal para evaluación.',
           actionUrl: 'reports',
           type: 'activity',
-          isRead: false,
+          isRead: true,
           createdAt: new Date(Date.now() - 30 * 60000),
           timeLabel: 'Hace 30 min'
         },
@@ -380,7 +457,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           message: 'Recordatorio: Mantenimiento programado de la base de datos a las 23:00.',
           actionUrl: 'dashboard',
           type: 'system',
-          isRead: false,
+          isRead: true,
           createdAt: new Date(Date.now() - 120 * 60000),
           timeLabel: 'Hace 2 horas'
         }

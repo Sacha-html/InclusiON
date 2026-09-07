@@ -2,7 +2,7 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <c-row class="align-items-end g-2">
     <c-col sm="3">
-      <label cLabel>Personas</label>
+      <label cLabel>Alumnos</label>
       <select cSelect multiple style="height: 120px" (change)="onPersonFilterChange($event)">
         @for (p of persons(); track p.id) {
         <option [value]="p.id" [selected]="selectedPersonIds.includes(p.id)">
@@ -11,7 +11,7 @@
         }
       </select>
       @if (selectedPersonIds.length > 0) {
-      <small class="text-body-secondary">{{ selectedPersonIds.length }} seleccionada(s)</small>
+      <small class="text-body-secondary">{{ selectedPersonIds.length }} seleccionado(s)</small>
       }
     </c-col>
     <c-col sm="3">
@@ -45,11 +45,11 @@
       </select>
     </c-col>
     <c-col sm="2">
-      <label cLabel>Fecha Desde</label>
+      <label cLabel>Fecha desde</label>
       <input cFormControl type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateChange()" />
     </c-col>
     <c-col sm="2">
-      <label cLabel>Fecha Hasta</label>
+      <label cLabel>Fecha hasta</label>
       <input cFormControl type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
     </c-col>
     <c-col sm="auto">

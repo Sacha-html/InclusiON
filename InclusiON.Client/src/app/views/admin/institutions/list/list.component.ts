@@ -30,8 +30,8 @@ export class ListComponent implements OnInit {
 
   public cols: TableColumn[] = [
     { key: 'name', label: 'Nombre', sortable: true },
-    { key: 'address', label: 'Direccion', sortable: true },
-    { key: 'phone', label: 'Telefono', sortable: true },
+    { key: 'address', label: 'Dirección', sortable: true },
+    { key: 'phone', label: 'Teléfono', sortable: true },
     { key: 'isActive', label: 'Estado', type: 'badge', sortable: true, badgeMap: { 'true': { color: 'success', label: 'Activo' }, 'false': { color: 'danger', label: 'Inactivo' } } },
     {
       key: 'actions', label: 'Acciones', type: 'actions',

@@ -10,13 +10,13 @@
   </c-alert>
 } @else if (persons().length === 0) {
   <div class="empty-state">
-    <p>No tenés personas asignadas todavía.</p>
+    <p>No tenés alumnos asignados todavía.</p>
   </div>
 } @else {
 
-  <!-- Selector de persona (si hay más de una) -->
+  <!-- Selector de alumno (si hay más de uno) -->
   @if (persons().length > 1) {
-    <div class="person-selector" role="group" aria-label="Seleccionar persona">
+    <div class="person-selector" role="group" aria-label="Seleccionar alumno">
       <p class="selector-label">¿De quién querés ver el roadmap?</p>
       <div class="person-pills">
         @for (p of persons(); track p.personId) {
@@ -38,10 +38,10 @@
     </div>
   }
 
-  <!-- Sin persona seleccionada -->
+  <!-- Sin alumno seleccionado -->
   @if (!selectedPersonId()) {
     <div class="empty-state">
-      <p>Seleccioná una persona para ver su roadmap.</p>
+      <p>Seleccioná un alumno para ver su roadmap.</p>
     </div>
   }
 

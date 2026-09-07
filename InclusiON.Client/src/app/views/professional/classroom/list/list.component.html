@@ -7,7 +7,7 @@
   <c-card class="mb-4">
     <!-- listado de aula del profesional -->
     <c-card-header>
-      <h5 class="mb-0">Mi Aula</h5>
+      <h5 class="mb-0">Mi aula</h5>
     </c-card-header>
     <c-card-body>
 
@@ -19,7 +19,7 @@
               @for (c of classrooms; track c.id) {
                 <option [value]="c.id">{{ c.name }} ({{ c.studentCount }} alumno{{ c.studentCount !== 1 ? 's' : '' }})</option>
               }
-              <option value="unassigned">Sin Aula (Asignación General)</option>
+              <option value="unassigned">Sin aula (asignación general)</option>
             </select>
           </div>
         </div>

@@ -1,6 +1,6 @@
 <c-card>
   <c-card-header>
-    <strong>Datos Personales</strong>
+    <strong>Datos personales</strong>
     <c-badge class="ms-2" [color]="professional.isActive ? 'success' : 'danger'"
           role="status"
           [attr.aria-label]="'Estado: ' + (professional.isActive ? 'Activo' : 'Inactivo')">
@@ -37,14 +37,14 @@
         <input cFormControl id="detail-specialty" [value]="professional.specialty ?? 'Sin especificar'" readonly />
       </c-col>
       <c-col sm="6">
-        <label cLabel for="detail-licenseNumber">Matricula</label>
+        <label cLabel for="detail-licenseNumber">Matrícula</label>
         <input cFormControl id="detail-licenseNumber" [value]="professional.licenseNumber ?? 'Sin especificar'" readonly />
       </c-col>
     </c-row>
 
     <c-row class="mb-3">
       <c-col sm="6">
-        <label cLabel for="detail-phone">Telefono</label>
+        <label cLabel for="detail-phone">Teléfono</label>
         <input cFormControl id="detail-phone" [value]="professional.phone ?? 'Sin especificar'" readonly />
       </c-col>
       <c-col sm="6">
@@ -53,7 +53,7 @@
       </c-col>
     </c-row>
 
-    <h5 class="mt-4 mb-3">Auditoria</h5>
+    <h5 class="mt-4 mb-3">Auditoría</h5>
 
     <c-row class="mb-3">
       <c-col sm="6">
@@ -61,7 +61,7 @@
         <input cFormControl id="detail-createdAt" [value]="formatDateTime(professional.createdAt)" readonly />
       </c-col>
       <c-col sm="6">
-        <label cLabel for="detail-updatedAt">Ultima actualizacion</label>
+        <label cLabel for="detail-updatedAt">Última actualización</label>
         <input cFormControl id="detail-updatedAt" [value]="professional.updatedAt ? formatDateTime(professional.updatedAt) : 'Sin actualizar'" readonly />
       </c-col>
     </c-row>

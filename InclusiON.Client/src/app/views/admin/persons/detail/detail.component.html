@@ -1,12 +1,12 @@
 @if (person) {
   <c-card>
     <c-card-header>
-      <h2 class="h5 mb-0">Detalle de Persona con Discapacidad</h2>
+      <h2 class="h5 mb-0">Detalle del Alumno</h2>
     </c-card-header>
     <c-card-body>
 
       <!-- Tabs -->
-      <ul class="nav nav-tabs mb-3" role="tablist" aria-label="Secciones de persona" (keydown)="onTabKeydown($event)">
+      <ul class="nav nav-tabs mb-3" role="tablist" aria-label="Secciones del alumno" (keydown)="onTabKeydown($event)">
         <li class="nav-item" role="presentation">
           <button type="button" class="nav-link" id="tab-datos" role="tab"
                   [class.active]="activeTab === 'datos'"

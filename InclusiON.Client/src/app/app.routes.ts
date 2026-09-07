@@ -164,7 +164,7 @@ export const routes: Routes = [
       },
       {
         path: 'persons',
-        data: { title: 'Personas' },
+        data: { title: 'Alumnos' },
         loadChildren: () =>
           import('./views/admin/persons/routes').then(
             (m) => m.personRoutes,

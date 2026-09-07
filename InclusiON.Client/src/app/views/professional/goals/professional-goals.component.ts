@@ -46,7 +46,7 @@ export class ProfessionalGoalsComponent implements OnInit {
       error: () => {
         this.hasError.set(true);
         this.isLoading.set(false);
-        this.toastService.error('Error al cargar las personas asignadas');
+        this.toastService.error('Error al cargar los alumnos asignados');
       },
     });
   }

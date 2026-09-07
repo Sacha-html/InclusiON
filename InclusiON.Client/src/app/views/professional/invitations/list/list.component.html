@@ -17,7 +17,7 @@
 </fieldset>
 
 <app-data-table
-  title="Invitaciones Familiares"
+  title="Invitaciones familiares"
   [columns]="columns"
   [items]="invitations"
   [totalItems]="totalRecords"
@@ -38,9 +38,9 @@
   <c-modal-header>
     <h5 cModalTitle>
       @if (createdInvitationCode) {
-        Invitación Creada
+        Invitación creada
       } @else {
-        Agregar Invitación
+        Agregar invitación
       }
     </h5>
   </c-modal-header>
@@ -48,15 +48,12 @@
 
     @if (createdInvitationCode) {
       <c-alert color="success">
-        Invitación creada exitosamente. Compartí el siguiente link con el familiar:
+        <h6 class="alert-heading">Código de invitación generado</h6>
+        <p class="mb-0">Compartí este enlace con el familiar para que complete su registro:</p>
       </c-alert>
       <div class="input-group mb-3">
-        <input
-          class="form-control"
-          readonly
-          [value]="getInviteUrl(createdInvitationCode)"
-        />
-        <button cButton color="primary" (click)="copyToClipboard(createdInvitationCode)">
+        <input class="form-control" [value]="getInviteUrl(createdInvitationCode)" readonly />
+        <button class="btn btn-outline-secondary" type="button" (click)="copyToClipboard(createdInvitationCode)">
           Copiar
         </button>
       </div>
@@ -70,7 +67,7 @@
       <form [formGroup]="invitationForm" (ngSubmit)="onSubmit()">
 
         <div class="mb-3">
-          <label cFormLabel>Persona vinculada</label>
+          <label cFormLabel>Alumno (opcional)</label>
           <select cSelect formControlName="personId">
             <option value="">-- Seleccionar (opcional) --</option>
             @for (person of persons; track person.personId) {
@@ -86,7 +83,7 @@
             <div class="text-danger small mt-1">El email es requerido</div>
           }
           @if (hasError('email', 'email')) {
-            <div class="text-danger small mt-1">Ingresa un email valido</div>
+            <div class="text-danger small mt-1">Ingresa un email válido</div>
           }
         </div>
 

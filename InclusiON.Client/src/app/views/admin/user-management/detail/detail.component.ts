@@ -132,7 +132,7 @@ export class UserManagementDetailComponent implements OnInit {
       case UserRoles.Admin:                return 'Administrador';
       case UserRoles.Professional:         return 'Profesional';
       case UserRoles.FamilyRepresentative: return 'Familiar';
-      case UserRoles.PersonWithDisability: return 'Persona';
+      case UserRoles.PersonWithDisability: return 'Alumno';
       default: return this.user?.role ?? '';
     }
   }
@@ -140,7 +140,7 @@ export class UserManagementDetailComponent implements OnInit {
   get entityTypeLabel(): string {
     switch (this.user?.linkedEntity?.entityType) {
       case UserRoles.Professional:         return 'Profesional';
-      case UserRoles.PersonWithDisability: return 'Persona con Discapacidad';
+      case UserRoles.PersonWithDisability: return 'Alumno';
       case UserRoles.FamilyRepresentative: return 'Familiar';
       case UserRoles.Admin:                return 'Administrador';
       default: return '';

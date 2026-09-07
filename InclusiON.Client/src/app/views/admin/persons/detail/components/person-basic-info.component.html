@@ -1,6 +1,6 @@
 <c-card>
   <c-card-header class="d-flex align-items-center gap-2">
-    <h3 class="h6 mb-0">Datos Personales</h3>
+    <h3 class="h6 mb-0">Datos personales</h3>
     <c-badge class="ms-1" [color]="person.isActive ? 'success' : 'danger'"
           [attr.aria-label]="'Estado: ' + (person.isActive ? 'Activo' : 'Inactivo')">
       {{ person.isActive ? 'Activo' : 'Inactivo' }}
@@ -144,13 +144,13 @@
 
     <div class="mt-4 d-flex justify-content-between">
       <div class="d-flex gap-2">
-        <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado de personas">Volver</button>
+        <button cButton color="secondary" (click)="goBack()" aria-label="Volver al listado de alumnos">Volver</button>
         @if (person.isActive) {
-          <button cButton color="primary" (click)="goToEdit()" [attr.aria-label]="'Editar persona ' + person.fullName">Editar</button>
+          <button cButton color="primary" (click)="goToEdit()" [attr.aria-label]="'Editar alumno ' + person.fullName">Editar</button>
         }
       </div>
       @if (person.isActive) {
-        <button cButton color="danger" (click)="deactivate.emit()" [attr.aria-label]="'Desactivar persona ' + person.fullName">Desactivar</button>
+        <button cButton color="danger" (click)="deactivate.emit()" [attr.aria-label]="'Desactivar alumno ' + person.fullName">Desactivar</button>
       }
     </div>
 

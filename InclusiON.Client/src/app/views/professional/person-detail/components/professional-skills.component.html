@@ -9,10 +9,10 @@
     />
   }
   @if (currentSkillProfile().length === 0) {
-    <span class="text-body-secondary">Sin areas de habilidad asignadas.</span>
+    <span class="text-body-secondary">Sin áreas de habilidad asignadas.</span>
   }
 </div>
-<button cButton color="primary" size="sm" (click)="openModal()">Agregar Area</button>
+<button cButton color="primary" size="sm" (click)="openModal()">Agregar área</button>
 
 <!-- Radar chart de habilidades (IN-90) -->
 @if (!radarLoading()) {
@@ -25,7 +25,7 @@
 }
 
 <c-modal [visible]="showModal()" (visibleChange)="showModal.set($event)" (visibleChange)="!$event && closeModal()">
-  <c-modal-header><strong>Agregar Áreas de Habilidad</strong></c-modal-header>
+  <c-modal-header><strong>Agregar áreas de habilidad</strong></c-modal-header>
   <c-modal-body>
     @if (allSkillAreas().length === 0) {
       <p class="text-body-secondary">No hay áreas disponibles para agregar.</p>

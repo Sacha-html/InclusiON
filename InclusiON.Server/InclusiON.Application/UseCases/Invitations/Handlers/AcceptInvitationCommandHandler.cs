@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
@@ -128,11 +128,14 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     // Crear PersonRepresentative si hay persona asociada
                     if (invitation.ForPersonId.HasValue)
                     {
+                        var hasActivePrimary = await _invitationsRepository.HasActivePrimaryRepresentativeAsync(invitation.ForPersonId.Value, ct);
+                        bool isPrimary = !hasActivePrimary;
+
                         var personRep = new PersonRepresentative
                         {
                             PersonId = invitation.ForPersonId.Value,
                             RepresentativeId = familyRep.Id,
-                            IsPrimary = true,
+                            IsPrimary = isPrimary,
                             HasInformedConsent = false,
                             CanSuperviseLogin = true,
                             IsActive = true,

@@ -63,17 +63,19 @@
                     <small style="color: var(--a11y-text-muted)">Verificando email...</small>
                   }
                 </c-col>
-                <c-col sm="6">
-                  <label cLabel for="documentNumber">Documento *</label>
-                  <input cFormControl id="documentNumber" formControlName="documentNumber"
-                         [valid]="showFieldError('documentNumber') ? (f['documentNumber'].valid ? true : false) : undefined" />
-                  @if (showFieldError('documentNumber')) {
-                    <c-form-feedback [valid]="false">
-                      @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
-                      @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength'] || f['documentNumber'].errors?.['pattern']) { El documento debe tener entre 6 y 20 caracteres alfanuméricos. }
-                    </c-form-feedback>
-                  }
-                </c-col>
+                  <c-col sm="6">
+                    <label cLabel for="documentNumber">Documento *</label>
+                    <input cFormControl id="documentNumber" formControlName="documentNumber"
+                           appOnlyNumbers inputmode="numeric" maxlength="8" placeholder="Ej: 12345678"
+                           [valid]="showFieldError('documentNumber') ? (f['documentNumber'].valid ? true : false) : undefined" />
+                    @if (showFieldError('documentNumber')) {
+                      <c-form-feedback [valid]="false">
+                        @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
+                        @else if (f['documentNumber'].errors?.['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                        @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                      </c-form-feedback>
+                    }
+                  </c-col>
               </c-row>
 
               <c-row class="mb-3">

@@ -59,7 +59,7 @@
   <app-empty-state
     icon="cil-notes"
     message="No hay diagnósticos registrados"
-    detail="Aún no se han cargado diagnósticos para esta persona."
+    detail="Aún no se han cargado diagnósticos para este alumno."
   />
 }
 
@@ -112,10 +112,10 @@
   <c-modal-header>
     <strong>
       @if (editing() && !editingIsCreator()) {
-        Ver Diagnóstico
+        Ver diagnóstico
         <c-badge color="secondary" class="ms-2">Solo lectura</c-badge>
       } @else {
-        {{ editing() ? 'Editar Diagnóstico' : 'Nuevo Diagnóstico' }}
+        {{ editing() ? 'Editar diagnóstico' : 'Nuevo diagnóstico' }}
       }
     </strong>
   </c-modal-header>

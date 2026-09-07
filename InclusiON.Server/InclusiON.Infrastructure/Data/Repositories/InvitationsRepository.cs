@@ -154,5 +154,11 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             await _context.PersonRepresentatives.AddAsync(personRepresentative, cancellationToken);
         }
+
+        public async Task<bool> HasActivePrimaryRepresentativeAsync(Guid personId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonRepresentatives
+                .AnyAsync(pr => pr.PersonId == personId && pr.IsActive && pr.IsPrimary, cancellationToken);
+        }
     }
 }

@@ -32,6 +32,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 query.SortDirection,
                 query.InstitutionIds,
                 query.RepresentativeSearch,
+                query.Relationship,
+                query.IsPrimary,
                 query.AccessiblePersonIds,
                 cancellationToken);
 

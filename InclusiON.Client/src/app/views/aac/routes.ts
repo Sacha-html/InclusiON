@@ -29,7 +29,7 @@ export const aacRoutes: Routes = [
       import('./roadmap/aac-roadmap.component').then(
         (m) => m.AacRoadmapComponent
       ),
-    data: { title: 'Mi Camino' }
+    data: { title: 'Mi camino' }
   },
   {
     path: 'mi-camino',
@@ -42,6 +42,6 @@ export const aacRoutes: Routes = [
       import('./communication/aac-communication.component').then(
         (m) => m.AacCommunicationComponent
       ),
-    data: { title: 'Comunicacion' }
+    data: { title: 'Comunicación' }
   }
 ];

@@ -11,6 +11,7 @@ import {
 } from '@coreui/angular';
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
+import { OnlyNumbersDirective } from '@shared/directives';
 import { map } from 'rxjs';
 
 @Component({
@@ -20,7 +21,7 @@ import { map } from 'rxjs';
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective,
-    PasswordModalComponent, SearchableSelectComponent,
+    PasswordModalComponent, SearchableSelectComponent, OnlyNumbersDirective,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
@@ -42,7 +43,7 @@ export class NewComponent {
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+    documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
     relationship: ['', [Validators.required]],
     personId: [null, [Validators.required]],

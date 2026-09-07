@@ -16,7 +16,7 @@
 <!-- Modal Vincular Familiar -->
 <c-modal [visible]="showLinkModal" (visibleChange)="showLinkModal = $event">
   <c-modal-header>
-    <h5 cModalTitle>Vincular Familiar</h5>
+    <h5 cModalTitle>Vincular familiar</h5>
   </c-modal-header>
   <c-modal-body>
     <div class="mb-3">
@@ -74,7 +74,7 @@
           <option value="Hermano/a">Hermano/a</option>
           <option value="Abuelo/a">Abuelo/a</option>
           <option value="Tío/a">Tío/a</option>
-          <option value="Tutor Legal">Tutor Legal</option>
+          <option value="Tutor Legal">Tutor legal</option>
           <option value="Otro">Otro</option>
         </select>
       </div>
@@ -116,7 +116,7 @@
   </c-modal-header>
   <c-modal-body>
     <p>¿Está seguro que desea vincular nuevamente a este familiar?</p>
-    <p class="text-muted">Esta acción restaurará el vínculo anterior con esta persona.</p>
+    <p class="text-muted">Esta acción restaurará el vínculo anterior con este alumno.</p>
   </c-modal-body>
   <c-modal-footer>
     <button type="button" cButton color="secondary" (click)="showConfirmLinkModal = false">Cancelar</button>
@@ -132,10 +132,10 @@
 <!-- Modal Desvincular Familiar -->
 <c-modal [visible]="showUnlinkModal" (visibleChange)="showUnlinkModal = $event">
   <c-modal-header>
-    <h5 cModalTitle>Desvincular Familiar</h5>
+    <h5 cModalTitle>Desvincular familiar</h5>
   </c-modal-header>
   <c-modal-body>
-    <p>¿Está seguro que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de esta persona?</p>
+    <p>¿Está seguro que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de este alumno?</p>
     <div class="mb-3">
       <label cLabel for="observation">Motivo de desvinculación *</label>
       <textarea cFormControl id="observation" [(ngModel)]="unlinkObservation" rows="3" aria-required="true" aria-describedby="observation-help"></textarea>

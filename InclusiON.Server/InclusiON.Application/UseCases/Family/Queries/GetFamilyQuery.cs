@@ -6,6 +6,8 @@ namespace InclusiON.Application.UseCases.Family.Queries
         int Page, int PageSize, string? Search, bool? IsActive,
         SortField? SortBy, string SortDirection,
         List<int>? InstitutionIds = null,
-        string? LinkedPersonSearch = null
+        string? LinkedPersonSearch = null,
+        bool? IsPrimary = null,
+        string? Relationship = null
     );
 }

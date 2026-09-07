@@ -77,6 +77,12 @@ export class PersonsService {
       if (request.representativeSearch) {
         params = params.set('representativeSearch', request.representativeSearch);
       }
+      if (request.relationship) {
+        params = params.set('relationship', request.relationship);
+      }
+      if (request.isPrimary !== undefined) {
+        params = params.set('isPrimary', request.isPrimary.toString());
+      }
     }
 
     return this.http

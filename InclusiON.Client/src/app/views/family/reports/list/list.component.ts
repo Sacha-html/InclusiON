@@ -73,7 +73,7 @@ export class ListComponent implements OnInit {
     { key: 'title', label: 'Título', sortable: true },
     { key: 'reportTypeName', label: 'Tipo', sortable: true },
     { key: 'professionalName', label: 'Profesional', sortable: true },
-    { key: 'personName', label: 'Persona', sortable: true },
+    { key: 'personName', label: 'Alumno', sortable: true },
   ];
 
   ngOnInit(): void {

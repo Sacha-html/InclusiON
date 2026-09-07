@@ -10,14 +10,14 @@
   </c-alert>
 } @else {
 
-  <h1 id="progress-title" class="visually-hidden" tabindex="-1">Progreso Familiar</h1>
+  <h1 id="progress-title" class="visually-hidden" tabindex="-1">Progreso familiar</h1>
 
-  <!-- Selector de persona (si hay más de una) -->
+  <!-- Selector de alumno (si hay más de uno) -->
   @if (persons().length > 1) {
     <fieldset class="person-selector">
-      <legend class="visually-hidden">Seleccionar persona</legend>
+      <legend class="visually-hidden">Seleccionar alumno</legend>
       <p class="selector-label">¿De quién querés ver el progreso?</p>
-      <div class="person-pills" role="radiogroup" aria-label="Seleccionar persona">
+      <div class="person-pills" role="radiogroup" aria-label="Seleccionar alumno">
         @for (person of persons(); track person.personId) {
           <button
             class="person-pill"
@@ -38,10 +38,10 @@
     </fieldset>
   }
 
-  <!-- Sin persona seleccionada -->
+  <!-- Sin alumno seleccionado -->
   @if (!selectedPersonId()) {
     <div class="empty-state">
-      <p>Seleccioná una persona para ver su progreso.</p>
+      <p>Seleccioná un alumno para ver su progreso.</p>
     </div>
   }
 

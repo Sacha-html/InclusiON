@@ -1,6 +1,6 @@
 @if (family) {
   <c-card>
-    <c-card-header><strong>Editar Familiar</strong></c-card-header>
+    <c-card-header><strong>Editar familiar</strong></c-card-header>
     <c-card-body>
       @if (serverError) {
         <div class="alert alert-danger" role="alert">{{ serverError }}</div>
@@ -15,7 +15,7 @@
             @if (submitted && f['firstName'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['firstName'].errors['required']) { El nombre es obligatorio. }
-                @if (f['firstName'].errors['minlength']) { Minimo 2 caracteres. }
+                @if (f['firstName'].errors['minlength']) { Mínimo 2 caracteres. }
               </c-form-feedback>
             }
           </c-col>
@@ -26,7 +26,7 @@
             @if (submitted && f['lastName'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['lastName'].errors['required']) { El apellido es obligatorio. }
-                @if (f['lastName'].errors['minlength']) { Minimo 2 caracteres. }
+                @if (f['lastName'].errors['minlength']) { Mínimo 2 caracteres. }
               </c-form-feedback>
             }
           </c-col>
@@ -40,26 +40,35 @@
             @if (submitted && f['email'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['email'].errors['required']) { El email es obligatorio. }
-                @if (f['email'].errors['email']) { Ingrese un email valido. }
+                @if (f['email'].errors['email']) { Ingrese un email válido. }
               </c-form-feedback>
             }
           </c-col>
           <c-col sm="6">
-            <label cLabel for="documentNumber">Documento</label>
-            <input cFormControl id="documentNumber" formControlName="documentNumber" />
+            <label cLabel for="documentNumber">Documento *</label>
+            <input cFormControl id="documentNumber" formControlName="documentNumber"
+                   appOnlyNumbers inputmode="numeric" maxlength="8" placeholder="Ej: 12345678"
+                   [valid]="submitted ? f['documentNumber'].valid : (f['documentNumber'].touched ? f['documentNumber'].valid : undefined)" />
+            @if ((submitted || f['documentNumber'].touched) && f['documentNumber'].errors) {
+              <c-form-feedback [valid]="false">
+                @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
+                @else if (f['documentNumber'].errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                @else if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+              </c-form-feedback>
+            }
           </c-col>
         </c-row>
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="phone">Telefono</label>
+            <label cLabel for="phone">Teléfono</label>
             <input cFormControl id="phone" formControlName="phone" />
           </c-col>
         </c-row>
 
         <div class="mt-3 d-flex gap-2">
           <button cButton color="primary" type="submit" [disabled]="form.invalid" aria-label="Guardar cambios">Guardar</button>
-          <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edicion">Cancelar</button>
+          <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar edición">Cancelar</button>
         </div>
       </form>
     </c-card-body>
@@ -67,7 +76,7 @@
 
   <!-- Personas vinculadas -->
   <c-card class="mt-3">
-    <c-card-header><strong>Personas vinculadas</strong></c-card-header>
+    <c-card-header><strong>Alumnos vinculados</strong></c-card-header>
     <c-card-body>
       @if (family.linkedPersons && family.linkedPersons.length > 0) {
         @for (person of family.linkedPersons; track person.personId) {
@@ -94,14 +103,14 @@
           </c-row>
         }
       } @else {
-        <p class="text-body-secondary mb-0">No hay personas vinculadas.</p>
+        <p class="text-body-secondary mb-0">No hay alumnos vinculados.</p>
       }
     </c-card-body>
   </c-card>
 
   <!-- Vincular nueva persona -->
   <c-card class="mt-3">
-    <c-card-header><strong>Vincular persona</strong></c-card-header>
+    <c-card-header><strong>Vincular alumno</strong></c-card-header>
     <c-card-body>
       @if (linkError) {
         <div class="alert alert-danger mb-3" role="alert">{{ linkError }}</div>
@@ -112,7 +121,7 @@
 
       <c-row class="align-items-end">
         <c-col sm="4">
-          <label cLabel for="search-person">Persona</label>
+          <label cLabel for="search-person">Alumno</label>
           <app-searchable-select
             [formControl]="linkPersonControl"
             [searchFn]="searchPersonsFn"
@@ -120,7 +129,7 @@
             [subDisplayFn]="subDisplayPerson"
             placeholder="Buscar por nombre o documento..."
             hintText="Escriba al menos 2 caracteres para buscar"
-            noResultsText="No se encontraron personas disponibles"
+            noResultsText="No se encontraron alumnos disponibles"
           />
         </c-col>
 
@@ -142,7 +151,7 @@
         <c-col sm="2">
           <button cButton color="primary" (click)="linkPerson()"
                   [disabled]="!linkPersonControl.value || !linkRelationship || !!validateParentLimit() || isLinking"
-                  aria-label="Vincular persona seleccionada">
+                  aria-label="Vincular alumno seleccionado">
             @if (isLinking) { <c-spinner size="sm" aria-hidden="true"></c-spinner> }
             Vincular
           </button>
@@ -155,7 +164,7 @@
 <!-- Modal de confirmacion para desvincular -->
 <app-confirm-modal
   [visible]="showUnlinkModal"
-  title="Desvincular persona"
+  title="Desvincular alumno"
   messagePrefix="¿Esta seguro de que desea desvincular a "
   [itemName]="unlinkingPerson?.fullName ?? ''"
   messageSuffix="?"

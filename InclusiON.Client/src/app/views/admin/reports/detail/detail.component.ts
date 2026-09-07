@@ -61,6 +61,7 @@ export class DetailComponent implements OnInit {
   showReassignModal = false;
   showDeleteReportModal = false;
   isActioning = false;
+  isExportingPdf = false;
 
   professionals = signal<ProfessionalListItemResponse[]>([]);
   selectedProfessionalId = '';
@@ -74,6 +75,29 @@ export class DetailComponent implements OnInit {
     this.reportsService.getById(id).subscribe({
       next: (data) => { this.report.set(data); this.isLoading.set(false); },
       error: () => { this.isLoading.set(false); this.router.navigate([AppRoutes.Admin.Reports]); },
+    });
+  }
+
+  downloadPdf(): void {
+    const r = this.report();
+    if (!r) return;
+    this.isExportingPdf = true;
+    this.reportsService.exportPdf(r.encryptedId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const sanitizedTitle = (r.title || 'reporte').replace(/[^a-zA-Z0-9_\-]/g, '_');
+        a.download = `reporte-${sanitizedTitle}-${new Date().toISOString().slice(0, 10)}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.isExportingPdf = false;
+        this.toastService.success('Reporte exportado a PDF exitosamente.');
+      },
+      error: () => {
+        this.isExportingPdf = false;
+        this.toastService.error('Error al exportar el reporte a PDF.');
+      }
     });
   }
 
