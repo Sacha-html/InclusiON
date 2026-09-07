@@ -95,12 +95,13 @@
                   }
                 </c-col>
                 <c-col sm="6">
-                  <label cLabel for="licenseNumber">Matrícula</label>
+                  <label cLabel for="licenseNumber">Matrícula *</label>
                   <input cFormControl id="licenseNumber" formControlName="licenseNumber"
                          [valid]="showFieldError('licenseNumber') ? (f['licenseNumber'].valid ? true : false) : undefined" />
                   @if (showFieldError('licenseNumber')) {
                     <c-form-feedback [valid]="false">
-                      @if (f['licenseNumber'].errors?.['licenseExists']) { {{ f['licenseNumber'].errors?.['message'] || 'Esta matrícula ya está registrada.' }} }
+                      @if (f['licenseNumber'].errors?.['required']) { La matrícula es obligatoria. }
+                      @else if (f['licenseNumber'].errors?.['licenseExists']) { {{ f['licenseNumber'].errors?.['message'] || 'Esta matrícula ya está registrada.' }} }
                     </c-form-feedback>
                   }
                   @if (f['licenseNumber'].pending) {

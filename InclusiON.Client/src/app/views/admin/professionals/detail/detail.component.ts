@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AssignmentsService, ProfessionalsService, ToastService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { ProfessionalInstitutionResponse, ProfessionalPersonResponse, ProfessionalResponse } from '@models';
+import { ProfessionalPersonResponse, ProfessionalResponse } from '@models';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -13,7 +13,6 @@ import {
 } from '@coreui/angular';
 import { ProfessionalBasicInfoComponent } from './components/professional-basic-info.component';
 import { ProfessionalPersonsComponent } from './components/professional-persons.component';
-import { ProfessionalInstitutionsComponent } from './components/professional-institutions.component';
 import { ProfessionalUserComponent } from './components/professional-user.component';
 import { ProfessionalReportsComponent } from './components/professional-reports.component';
 import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent } from '@coreui/angular';
@@ -33,7 +32,6 @@ import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderCo
     FormsModule,
     ProfessionalBasicInfoComponent,
     ProfessionalPersonsComponent,
-    ProfessionalInstitutionsComponent,
     ProfessionalUserComponent,
     ProfessionalReportsComponent,
   ],
@@ -47,7 +45,7 @@ export class DetailComponent implements OnInit {
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
 
-  activeTab: 'datos' | 'personas' | 'instituciones' | 'usuario' | 'reportes' = 'datos';
+  activeTab: 'datos' | 'personas' | 'usuario' | 'reportes' = 'datos';
 
   professional: ProfessionalResponse | null = null;
   showConfirmModal = false;
@@ -60,12 +58,11 @@ export class DetailComponent implements OnInit {
   isValidating = false;
 
   assignedPersons: ProfessionalPersonResponse[] = [];
-  assignedInstitutions: ProfessionalInstitutionResponse[] = [];
 
   ngOnInit(): void {
     const tab = this.route.snapshot.queryParams['tab'];
-    if (tab && ['datos', 'personas', 'instituciones', 'usuario', 'reportes'].includes(tab)) {
-      this.activeTab = tab as 'datos' | 'personas' | 'instituciones' | 'usuario' | 'reportes';
+    if (tab && ['datos', 'personas', 'usuario', 'reportes'].includes(tab)) {
+      this.activeTab = tab as 'datos' | 'personas' | 'usuario' | 'reportes';
     }
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -75,9 +72,6 @@ export class DetailComponent implements OnInit {
           this.professional = data;
           this.assignmentsService.getPersonsByProfessional(id).subscribe({
             next: (persons: ProfessionalPersonResponse[]) => this.assignedPersons = persons,
-          });
-          this.assignmentsService.getInstitutionsByProfessional(id).subscribe({
-            next: (institutions: ProfessionalInstitutionResponse[]) => this.assignedInstitutions = institutions,
           });
         },
         error: () => this.router.navigate([AppRoutes.Admin.Professionals]),
@@ -91,10 +85,6 @@ export class DetailComponent implements OnInit {
 
   onPersonsChange(persons: ProfessionalPersonResponse[]): void {
     this.assignedPersons = persons;
-  }
-
-  onInstitutionsChange(institutions: ProfessionalInstitutionResponse[]): void {
-    this.assignedInstitutions = institutions;
   }
 
   deactivate(): void {

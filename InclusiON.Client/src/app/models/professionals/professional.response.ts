@@ -33,4 +33,7 @@ export interface ProfessionalResponse {
   updatedAt?: string;
   temporaryPassword?: string;
   email?: string;
+  lastLoginDate?: string | null;
+  lastLoginIpAddress?: string | null;
+  mustChangePassword?: boolean;
 }
