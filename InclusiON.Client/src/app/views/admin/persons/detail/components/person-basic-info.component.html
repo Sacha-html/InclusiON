@@ -151,6 +151,8 @@
       </div>
       @if (person.isActive) {
         <button cButton color="danger" (click)="deactivate.emit()" [attr.aria-label]="'Desactivar alumno ' + person.fullName">Desactivar</button>
+      } @else {
+        <button cButton color="success" (click)="reactivate.emit()" [attr.aria-label]="'Activar alumno ' + person.fullName">Activar</button>
       }
     </div>
 
