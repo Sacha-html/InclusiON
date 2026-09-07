@@ -131,9 +131,9 @@ export class UserManagementListComponent implements OnInit {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
-        { action: 'reset-password', label: 'Resetear', icon: 'cilLockUnlocked', visible: (item) => item.isActive },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.isActive },
-        { action: 'reactivate', label: 'Reactivar', icon: 'cilCheck', visible: (item) => !item.isActive },
+        { action: 'reset-password', label: 'Resetear', icon: 'cilLockUnlocked', visible: (item) => item.isActive || item.role === 'FamilyRepresentative' },
+        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.isActive && item.role !== 'FamilyRepresentative' },
+        { action: 'reactivate', label: 'Reactivar', icon: 'cilCheck', visible: (item) => !item.isActive && item.role !== 'FamilyRepresentative' },
       ],
     },
   ];
@@ -188,10 +188,12 @@ export class UserManagementListComponent implements OnInit {
         this.showResetPasswordModal = true;
         break;
       case 'deactivate':
+        if (user.role === 'FamilyRepresentative') break;
         this.itemToDeactivate = user;
         this.showConfirmModal = true;
         break;
       case 'reactivate':
+        if (user.role === 'FamilyRepresentative') break;
         this.reactivateUser(user);
         break;
     }
@@ -222,6 +224,10 @@ export class UserManagementListComponent implements OnInit {
 
   confirmDeactivate(): void {
     if (!this.itemToDeactivate) return;
+    if (this.itemToDeactivate.role === 'FamilyRepresentative') {
+      this.cancelDeactivate();
+      return;
+    }
 
     this.userService.deactivateUser(this.itemToDeactivate.userId).subscribe({
       next: () => {
@@ -243,6 +249,8 @@ export class UserManagementListComponent implements OnInit {
   }
 
   reactivateUser(user: AdminUserListItemResponse): void {
+    if (user.role === 'FamilyRepresentative') return;
+
     this.userService.reactivateUser(user.userId).subscribe({
       next: (result) => {
         this.tempPassword = result.temporaryPassword;

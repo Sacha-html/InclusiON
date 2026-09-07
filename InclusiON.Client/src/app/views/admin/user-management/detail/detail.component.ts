@@ -170,6 +170,11 @@ export class UserManagementDetailComponent implements OnInit {
 
   confirmDeactivate(): void {
     if (!this.user) return;
+    if (this.user.role === UserRoles.FamilyRepresentative) {
+      this.showDeactivateModal = false;
+      return;
+    }
+
     this.userService.deactivateUser(this.user.userId).subscribe({
       next: () => {
         this.toastService.success('Usuario desactivado exitosamente');
@@ -185,6 +190,8 @@ export class UserManagementDetailComponent implements OnInit {
 
   reactivateUser(): void {
     if (!this.user) return;
+    if (this.user.role === UserRoles.FamilyRepresentative) return;
+
     this.userService.reactivateUser(this.user.userId).subscribe({
       next: (result) => {
         this.tempPassword = result.temporaryPassword;

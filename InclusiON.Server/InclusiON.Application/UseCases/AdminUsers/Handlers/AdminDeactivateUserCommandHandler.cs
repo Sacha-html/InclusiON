@@ -71,6 +71,13 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             }
 
             var roles = await _identityService.GetRolesAsync(user);
+            if (roles.Contains(RoleNames.FamilyRepresentative))
+            {
+                return ApiResponse<object>.ErrorResult(
+                    ErrorCode.BusinessRuleViolation,
+                    "Los familiares deben desactivarse desde la gestión de familiares.");
+            }
+
             var primaryRole = roles.FirstOrDefault();
 
             if (primaryRole == RoleNames.Professional)

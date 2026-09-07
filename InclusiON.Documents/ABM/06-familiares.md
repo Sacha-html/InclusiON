@@ -92,9 +92,22 @@ Permite vincular un familiar ya registrado con una persona con discapacidad (o a
 
 **Actor:** Profesional / Administrador Institucional
 
+La baja se realiza exclusivamente desde este ABM. La gestión centralizada de Usuarios permite al administrador resetear la contraseña de un familiar, pero no desactivarlo ni reactivarlo.
+
 - Cambia `Estado = Terminated` en `FamilyRepresentative` e `IsActive = false` en `User`.
 - Se desactivan todos los `PersonRepresentative` activos del familiar.
 - Se registra en `FamilyStatusHistory`.
+
+## Reactivación — Familiar
+
+**Actor:** Profesional / Administrador Institucional con acceso al familiar.
+
+La reactivación se realiza exclusivamente desde este ABM; la ruta genérica de Gestión de Usuarios la rechaza.
+
+- Restaura `IsActive = true` en `FamilyRepresentative` y su `User`, y devuelve el estado a `Active`.
+- Genera una contraseña temporal, obliga el cambio en el próximo inicio de sesión, restablece intentos fallidos/bloqueo y notifica por email.
+- Registra la transición en `FamilyStatusHistory`.
+- No reactiva `PersonRepresentative`, no restaura alumnos suspendidos ni elimina el historial. Las responsabilidades se asignan explícitamente mediante un nuevo vínculo.
 
 ---
 

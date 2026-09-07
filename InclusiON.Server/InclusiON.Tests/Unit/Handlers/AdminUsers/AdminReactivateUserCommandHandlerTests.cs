@@ -142,22 +142,27 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
         }
 
         [Fact]
-        public async Task InactiveFamily_ReactivatesLinkedFamily()
+        public async Task InactiveFamily_RequiresDedicatedFamilyReactivation_BeforeAnyMutation()
         {
             var user = InactiveUser();
-            var innerUser = new User { Id = TargetId, IsActive = false };
-            var family = new FamilyRepresentative
-                { Id = Guid.NewGuid(), UserId = TargetId, User = innerUser };
 
             _identity.FindByIdAsync(TargetId).Returns(user);
-            SetupSuccessfulReset(user);
-            _identity.GetRolesAsync(user).Returns(new List<string> { "FamilyRepresentative" });
-            _familyRepo.GetByUserIdAsync(TargetId, Arg.Any<CancellationToken>()).Returns(family);
+            _identity.GetRolesAsync(user).Returns(new List<string> { "Professional", "FamilyRepresentative" });
 
-            await BuildSut().HandleAsync(Cmd(), default);
+            var result = await BuildSut().HandleAsync(Cmd(), default);
 
-            family.User.IsActive.Should().BeTrue();
-            await _familyRepo.Received(1).UpdateAsync(family, Arg.Any<CancellationToken>());
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
+            user.IsActive.Should().BeFalse();
+            await _identity.DidNotReceive().ResetPasswordAsync(user, Arg.Any<string>());
+            await _identity.DidNotReceive().UpdateUserAsync(user);
+            await _familyRepo.DidNotReceive().UpdateAsync(Arg.Any<FamilyRepresentative>(), Arg.Any<CancellationToken>());
+            await _proRepo.DidNotReceive().UpdateAsync(Arg.Any<Professional>(), Arg.Any<CancellationToken>());
+            await _personRepo.DidNotReceive().UpdateAsync(Arg.Any<PersonWithDisability>(), Arg.Any<CancellationToken>());
+            await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+            await _audit.DidNotReceive().LogAsync(Arg.Any<AccessAuditEntry>(), Arg.Any<CancellationToken>());
+            await _backgroundJobs.DidNotReceive().CreateAsync(
+                Arg.Any<int>(), Arg.Any<string>(), Arg.Any<DateTime?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
         }
     }
 }
