@@ -2,14 +2,14 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FamilyService, PersonsService, ToastService } from '@services';
-import { AppRoutes } from '@shared/constants/app-routes';
+import { AppRoutes, RELATIONSHIPS } from '@shared/constants';
 import {
   FamilyResponse, LinkedPersonInfo, UpdateFamilyRequest, PersonListItemResponse,
 } from '@models';
 import {
   BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
-  FormSelectDirective, RowComponent, SpinnerComponent,
+  FormSelectDirective, RowComponent, SpinnerComponent, TableDirective,
 } from '@coreui/angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
@@ -24,6 +24,7 @@ import { map } from 'rxjs';
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective, SpinnerComponent,
     BadgeComponent, ConfirmModalComponent, SearchableSelectComponent, OnlyNumbersDirective,
+    TableDirective,
   ],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.scss',
@@ -61,7 +62,7 @@ export class EditComponent implements OnInit {
   readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
   readonly subDisplayPerson = (p: PersonListItemResponse) => p.documentNumber ? `${p.disabilityTypeName ?? 'Sin tipo'} (DNI: ${p.documentNumber})` : p.disabilityTypeName ?? '';
 
-  readonly relationships = ['Madre', 'Padre', 'Tutor/a', 'Abuelo/a', 'Hermano/a', 'Tio/a', 'Otro'];
+  readonly relationships = RELATIONSHIPS;
   readonly PARENT_RELATIONSHIPS = ['Madre', 'Padre'];
   linkRelationship = '';
   linkIsPrimary    = false;
