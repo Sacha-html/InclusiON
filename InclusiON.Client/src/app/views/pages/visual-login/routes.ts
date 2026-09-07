@@ -6,7 +6,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./role-selection.component').then((m) => m.RoleSelectionComponent),
     data: {
-      title: 'Seleccionar Rol',
+      title: 'Seleccionar rol',
     },
   },
   {
@@ -22,7 +22,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./visual-standard-login.component').then((m) => m.VisualStandardLoginComponent),
     data: {
-      title: 'Ingresar Contraseña',
+      title: 'Ingresar contraseña',
     },
   },
   {
@@ -38,7 +38,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./family-login.component').then((m) => m.FamilyLoginComponent),
     data: {
-      title: 'Login Familiar',
+      title: 'Login familiar',
     },
   },
   {
@@ -46,7 +46,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./assisted-login.component').then((m) => m.AssistedLoginComponent),
     data: {
-      title: 'Login Asistido',
+      title: 'Login asistido',
     },
   },
   {
@@ -54,7 +54,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./login-method-selector.component').then((m) => m.LoginMethodSelectorComponent),
     data: {
-      title: 'Configurar Metodo de Login',
+      title: 'Configurar método de login',
     },
   },
 ];

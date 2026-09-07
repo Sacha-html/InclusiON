@@ -68,7 +68,8 @@ namespace InclusiON.Api.Controllers
                 request.Page, request.PageSize, request.Search,
                 request.DisabilityTypeId, request.AutonomyLevelId, request.IsActive,
                 request.SortBy, request.SortDirection, request.InstitutionIds,
-                request.RepresentativeSearch, accessibleIds);
+                request.RepresentativeSearch, request.Relationship, request.IsPrimary,
+                accessibleIds);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);

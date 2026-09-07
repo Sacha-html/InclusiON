@@ -30,7 +30,7 @@ export class InvitationsComponent implements OnInit {
     { key: 'email',                     label: 'Email',        sortable: true },
     { key: 'firstName',                 label: 'Nombre',       sortable: true },
     { key: 'relationship',              label: 'Parentesco' },
-    { key: 'personName',                label: 'Persona' },
+    { key: 'personName',                label: 'Alumno' },
     { key: 'createdByProfessionalName', label: 'Profesional' },
     {
       key: 'status', label: 'Estado', type: 'badge', sortable: true,

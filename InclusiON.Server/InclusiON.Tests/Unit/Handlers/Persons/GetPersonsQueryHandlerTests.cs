@@ -58,7 +58,9 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
                 Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(),
                 Arg.Any<int?>(), Arg.Any<int?>(), Arg.Any<bool?>(),
                 Arg.Any<SortField?>(), Arg.Any<string>(),
-                Arg.Any<List<int>?>(), Arg.Any<string?>(), Arg.Any<IReadOnlyList<Guid>?>(),
+                Arg.Any<List<int>?>(), Arg.Any<string?>(),
+                Arg.Any<string?>(), Arg.Any<bool?>(),
+                Arg.Any<IReadOnlyList<Guid>?>(),
                 Arg.Any<CancellationToken>())
             .Returns(new PagedResponse<PersonWithDisability>
             {

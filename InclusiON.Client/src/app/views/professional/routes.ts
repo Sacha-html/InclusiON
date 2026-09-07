@@ -10,7 +10,7 @@ export const professionalRoutes: Routes = [
       import('./dashboard/detail/detail.component').then(
         (m) => m.DetailComponent
       ),
-    data: { title: 'Dashboard Profesional' }
+    data: { title: 'Dashboard profesional' }
   },
   {
     path: 'persons',
@@ -18,7 +18,7 @@ export const professionalRoutes: Routes = [
       import('./classroom/list/list.component').then(
         (m) => m.ListComponent
       ),
-    data: { title: 'Mi Aula' }
+    data: { title: 'Mi aula' }
   },
   {
     path: 'persons/:id',
@@ -26,7 +26,7 @@ export const professionalRoutes: Routes = [
       import('./person-detail/person-detail.component').then(
         (m) => m.PersonDetailComponent
       ),
-    data: { title: 'Detalle de Persona' }
+    data: { title: 'Detalle de alumno' }
   },
   {
     path: 'activities',
@@ -43,7 +43,7 @@ export const professionalRoutes: Routes = [
         (m) => m.NewComponent
       ),
     canActivate: [permissionGuard],
-    data: { title: 'Nueva Actividad', permission: Permissions.Activities.Create, redirectTo: AppRoutes.Pro.Activities }
+    data: { title: 'Nueva actividad', permission: Permissions.Activities.Create, redirectTo: AppRoutes.Pro.Activities }
   },
   {
     path: 'activities/:id',
@@ -51,7 +51,7 @@ export const professionalRoutes: Routes = [
       import('./activities/detail/detail.component').then(
         (m) => m.DetailComponent
       ),
-    data: { title: 'Detalle de Actividad' }
+    data: { title: 'Detalle de actividad' }
   },
   {
     path: 'activities/:id/edit',
@@ -60,7 +60,7 @@ export const professionalRoutes: Routes = [
         (m) => m.EditComponent
       ),
     canActivate: [permissionGuard],
-    data: { title: 'Editar Actividad', permission: Permissions.Activities.Update, redirectTo: AppRoutes.Pro.Activities }
+    data: { title: 'Editar actividad', permission: Permissions.Activities.Update, redirectTo: AppRoutes.Pro.Activities }
   },
   {
     path: 'goals',
@@ -92,7 +92,7 @@ export const professionalRoutes: Routes = [
       import('./reports/new/new.component').then(
         (m) => m.NewComponent
       ),
-    data: { title: 'Crear Reporte' }
+    data: { title: 'Crear reporte' }
   },
   {
     path: 'reports/:id/edit',
@@ -100,7 +100,7 @@ export const professionalRoutes: Routes = [
       import('./reports/edit/edit.component').then(
         (m) => m.EditComponent
       ),
-    data: { title: 'Editar Reporte' }
+    data: { title: 'Editar reporte' }
   },
   {
     path: 'reports/:id',
@@ -108,7 +108,7 @@ export const professionalRoutes: Routes = [
       import('./reports/detail/detail.component').then(
         (m) => m.DetailComponent
       ),
-    data: { title: 'Detalle de Reporte' }
+    data: { title: 'Detalle de reporte' }
   },
   {
     path: 'messages',

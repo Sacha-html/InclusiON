@@ -2,23 +2,44 @@
 
 <fieldset class="p-3 border rounded mb-4">
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
-  <c-row class="align-items-end">
-    <c-col sm="3">
-      <label cLabel for="filter-linked-person">Persona a cargo</label>
-      <input cFormControl id="filter-linked-person" type="text" [(ngModel)]="linkedPersonSearch" (ngModelChange)="onLinkedPersonSearch()" placeholder="Nombre o documento de la persona">
-    </c-col>
-    <c-col sm="3">
+  <div class="d-flex flex-wrap align-items-end gap-3">
+    <div style="flex: 1 1 160px; min-width: 0;">
+      <label cLabel for="filter-family-search">Responsable</label>
+      <input cFormControl id="filter-family-search" type="text" [(ngModel)]="familySearch" (ngModelChange)="onFamilySearch()" placeholder="Nombre o DNI del responsable">
+    </div>
+    <div style="flex: 1 1 160px; min-width: 0;">
+      <label cLabel for="filter-linked-person">Alumno a cargo</label>
+      <input cFormControl id="filter-linked-person" type="text" [(ngModel)]="linkedPersonSearch" (ngModelChange)="onLinkedPersonSearch()" placeholder="Nombre o documento del alumno">
+    </div>
+    <div style="flex: 1 1 130px; min-width: 0;">
+      <label cLabel for="filter-relationship">Parentesco</label>
+      <select cSelect id="filter-relationship" [(ngModel)]="relationshipFilter" (ngModelChange)="onRelationshipFilterChange()">
+        <option value="">Todos</option>
+        @for (rel of relationships; track rel) {
+          <option [value]="rel">{{ rel }}</option>
+        }
+      </select>
+    </div>
+    <div style="flex: 1 1 130px; min-width: 0;">
+      <label cLabel for="filter-is-primary">Familiar principal</label>
+      <select cSelect id="filter-is-primary" [(ngModel)]="isPrimaryFilter" (ngModelChange)="onIsPrimaryFilterChange()">
+        <option value="">Todos</option>
+        <option value="true">Sí</option>
+        <option value="false">No</option>
+      </select>
+    </div>
+    <div style="flex: 1 1 130px; min-width: 0;">
       <label cLabel for="filter-status">Estado</label>
       <select cSelect id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
         <option value="true">Activos</option>
         <option value="false">Inactivos</option>
       </select>
-    </c-col>
-    <c-col sm="auto">
+    </div>
+    <div class="flex-shrink-0">
       <button cButton color="secondary" (click)="clearFilters()">Limpiar filtros</button>
-    </c-col>
-  </c-row>
+    </div>
+  </div>
 </fieldset>
 
 <app-data-table
@@ -65,7 +86,7 @@
   messagePrefix="¿Está seguro de que desea reactivar al familiar "
   [itemName]="itemToReactivate?.fullName ?? ''"
   messageSuffix="?"
-  detail="Se generará una contraseña temporal y deberá cambiarla al iniciar sesión. No se restaurarán personas a cargo ni vínculos previos."
+  detail="Se generará una contraseña temporal y deberá cambiarla al iniciar sesión. No se restaurarán alumnos a cargo ni vínculos previos."
   confirmLabel="Reactivar"
   confirmColor="success"
   (confirm)="confirmReactivate()"

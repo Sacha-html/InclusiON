@@ -13,6 +13,7 @@ import {
 } from '@coreui/angular';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
+import { OnlyNumbersDirective } from '@shared/directives';
 import { map } from 'rxjs';
 
 @Component({
@@ -22,7 +23,7 @@ import { map } from 'rxjs';
     CardComponent, CardBodyComponent, CardHeaderComponent,
     RowComponent, ColComponent, FormControlDirective, FormLabelDirective,
     FormFeedbackComponent, FormSelectDirective, ButtonDirective, SpinnerComponent,
-    BadgeComponent, ConfirmModalComponent, SearchableSelectComponent,
+    BadgeComponent, ConfirmModalComponent, SearchableSelectComponent, OnlyNumbersDirective,
   ],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.scss',
@@ -43,7 +44,7 @@ export class EditComponent implements OnInit {
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+    documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
   });
 
@@ -98,7 +99,7 @@ export class EditComponent implements OnInit {
       lp => lp.relationship === this.linkRelationship
     );
     return exists
-      ? `Ya existe una persona vinculada con la relación "${this.linkRelationship}". Solo puede haber una.`
+      ? `Ya existe un alumno vinculado con la relación "${this.linkRelationship}". Solo puede haber uno.`
       : '';
   }
 
@@ -123,7 +124,7 @@ export class EditComponent implements OnInit {
         this.refreshFamily();
       },
       error: (err) => {
-        this.linkError = err?.userMessage || 'Error al vincular la persona';
+        this.linkError = err?.userMessage || 'Error al vincular el alumno';
         this.isLinking = false;
       },
     });
@@ -155,7 +156,7 @@ export class EditComponent implements OnInit {
       error: () => {
         this.isUnlinking = false;
         this.showUnlinkModal = false;
-        this.toastService.error('Error al desvincular la persona');
+        this.toastService.error('Error al desvincular el alumno');
       },
     });
   }

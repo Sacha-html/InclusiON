@@ -5,7 +5,7 @@
         <c-card class="mx-4">
           <c-card-body class="p-4">
             <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-              <h1 style="color: var(--a11y-text)">Registrar Usuario</h1>
+              <h1 style="color: var(--a11y-text)">Registrar usuario</h1>
               <p class="mb-0" style="color: var(--a11y-text-muted)">Crea tu cuenta</p>
 
               <!-- Mensaje de error general -->
@@ -192,7 +192,7 @@
                   [disabled]="isLoading || registerForm.invalid"
                 >
                   @if (!isLoading) {
-                  <span>Crear Cuenta</span>
+                  <span>Crear cuenta</span>
                   } @else {
                   <span>
                     <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>

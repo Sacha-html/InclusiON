@@ -10,9 +10,9 @@
   </c-alert>
 } @else {
 
-  <!-- Selector de persona (si hay más de una) -->
+  <!-- Selector de alumno (si hay más de uno) -->
   @if (persons().length > 1) {
-    <div class="person-selector" role="group" aria-label="Seleccionar persona">
+    <div class="person-selector" role="group" aria-label="Seleccionar alumno">
       <p class="selector-label">¿De quién querés ver las actividades?</p>
       <div class="person-pills">
         @for (person of persons(); track person.personId) {
@@ -34,10 +34,10 @@
     </div>
   }
 
-  <!-- Sin persona seleccionada -->
+  <!-- Sin alumno seleccionado -->
   @if (!selectedPersonId()) {
     <div class="empty-state">
-      <p>Seleccioná una persona para ver sus actividades.</p>
+      <p>Seleccioná un alumno para ver sus actividades.</p>
     </div>
   }
 

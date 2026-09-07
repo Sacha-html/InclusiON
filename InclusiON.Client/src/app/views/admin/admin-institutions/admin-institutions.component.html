@@ -1,6 +1,6 @@
 <c-card class="mb-4">
   <c-card-header>
-    <h5 class="mb-0">{{ isGlobalAdmin ? 'Gestion de Instituciones por Admin' : 'Mis Instituciones' }}</h5>
+    <h5 class="mb-0">{{ isGlobalAdmin ? 'Gestión de instituciones por administrador' : 'Mis instituciones' }}</h5>
   </c-card-header>
   <c-card-body>
 
@@ -24,8 +24,8 @@
       <table cTable hover responsive class="mb-3">
         <thead>
           <tr>
-            <th>Institucion</th>
-            <th>Fecha de asignacion</th>
+            <th>Institución</th>
+            <th>Fecha de asignación</th>
             <th>Estado</th>
             <th *appIfGlobalAdmin>Acciones</th>
           </tr>
@@ -54,7 +54,7 @@
     <ng-container *appIfGlobalAdmin>
       @if (!isLoading) {
         <button cButton color="primary" (click)="openAssignModal()">
-          Agregar Institucion
+          Agregar institución
         </button>
       }
     </ng-container>
@@ -66,13 +66,13 @@
 <ng-container *appIfGlobalAdmin>
   <c-modal [visible]="showAssignModal" (visibleChange)="showAssignModal = $event" alignment="center">
     <c-modal-header>
-      <h5 cModalTitle>Asignar Institucion</h5>
+      <h5 cModalTitle>Asignar institución</h5>
     </c-modal-header>
     <c-modal-body>
       @if (availableInstitutions.length === 0) {
         <p class="text-body-secondary">No hay instituciones disponibles para asignar.</p>
       } @else {
-        <label for="institutionSelect" class="form-label">Seleccione una institucion</label>
+        <label for="institutionSelect" class="form-label">Seleccione una institución</label>
         <select cSelect id="institutionSelect" [(ngModel)]="selectedInstitutionId">
           <option [ngValue]="null" disabled>-- Seleccionar --</option>
           @for (inst of availableInstitutions; track inst.id) {

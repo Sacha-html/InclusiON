@@ -28,7 +28,7 @@ export const familyNavItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Comunicacion'
+    name: 'Comunicación'
   },
   {
     name: 'Mensajes',

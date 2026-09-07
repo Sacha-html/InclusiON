@@ -27,6 +27,7 @@ import {
   ModalFooterComponent,
   AlertComponent,
 } from '@coreui/angular';
+import { OnlyNumbersDirective } from '@shared/directives';
 
 @Component({
   selector: 'app-new',
@@ -51,6 +52,7 @@ import {
     ModalBodyComponent,
     ModalFooterComponent,
     AlertComponent,
+    OnlyNumbersDirective,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
@@ -96,7 +98,7 @@ export class NewComponent implements OnInit {
     // Alumno - Datos personales
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    documentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+    documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate, ageRangeValidator(12, 40)]],
     // Alumno - Discapacidad
     disabilityTypeId: [null, [Validators.required]],
@@ -127,7 +129,7 @@ export class NewComponent implements OnInit {
     tutorFirstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     tutorLastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     tutorEmail: ['', [Validators.required, Validators.email]],
-    tutorDocumentNumber: ['', [Validators.minLength(6), Validators.maxLength(20), Validators.pattern(/^[a-zA-Z0-9]+$/)]],
+    tutorDocumentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     tutorPhone: ['', [Validators.maxLength(20)]],
     tutorRelationship: ['', [Validators.required, Validators.maxLength(50)]],
 

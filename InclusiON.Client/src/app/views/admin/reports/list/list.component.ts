@@ -75,7 +75,7 @@ export class ListComponent implements OnInit {
   columns: TableColumn[] = [
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
     { key: 'title', label: 'Título', sortable: true },
-    { key: 'personName', label: 'Persona', sortable: true },
+    { key: 'personName', label: 'Alumno', sortable: true },
     { key: 'professionalName', label: 'Profesional', sortable: true },
     { key: 'reportTypeName', label: 'Tipo', sortable: true },
     {

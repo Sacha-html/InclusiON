@@ -1,7 +1,7 @@
 @if (professional) {
   <c-card>
     <c-card-header>
-      <strong>Editar Profesional</strong>
+      <strong>Editar profesional</strong>
     </c-card-header>
     <c-card-body>
       @if (serverError) {
@@ -38,9 +38,17 @@
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel>Documento</label>
-            <input cFormControl [value]="professional.documentNumber ?? 'Sin especificar'" readonly
-                   aria-label="Documento (no editable)" />
+            <label cLabel for="documentNumber">Documento *</label>
+            <input cFormControl id="documentNumber" formControlName="documentNumber"
+                   appOnlyNumbers inputmode="numeric" maxlength="8" placeholder="Ej: 12345678"
+                   [valid]="submitted ? f['documentNumber'].valid : (f['documentNumber'].touched ? f['documentNumber'].valid : undefined)" />
+            @if ((submitted || f['documentNumber'].touched) && f['documentNumber'].errors) {
+              <c-form-feedback [valid]="false">
+                @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
+                @else if (f['documentNumber'].errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                @else if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+              </c-form-feedback>
+            }
           </c-col>
         </c-row>
 

@@ -138,6 +138,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string sortDirection,
             List<int>? institutionIds = null,
             string? representativeSearch = null,
+            string? relationship = null,
+            bool? isPrimary = null,
             IReadOnlyList<Guid>? accessiblePersonIds = null,
             CancellationToken cancellationToken = default)
         {
@@ -187,6 +189,20 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     pr.IsActive &&
                     (EF.Functions.ILike(pr.Representative.FirstName, repPattern) ||
                      EF.Functions.ILike(pr.Representative.LastName, repPattern))));
+            }
+
+            if (!string.IsNullOrWhiteSpace(relationship))
+            {
+                var relPattern = $"%{relationship.Trim()}%";
+                query = query.Where(p => p.PersonRepresentatives.Any(pr =>
+                    pr.IsActive && pr.Relationship != null &&
+                    EF.Functions.ILike(pr.Relationship, relPattern)));
+            }
+
+            if (isPrimary.HasValue)
+            {
+                query = query.Where(p => p.PersonRepresentatives.Any(pr =>
+                    pr.IsActive && pr.IsPrimary == isPrimary.Value));
             }
 
             if (accessiblePersonIds is not null)

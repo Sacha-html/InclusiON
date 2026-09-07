@@ -1,11 +1,11 @@
 <app-data-table
-  title="Familiares Vinculados"
+  title="Familiares vinculados"
   [columns]="tableColumns"
   [items]="representatives"
   [loading]="loading"
   [showSearch]="false"
   [showPagination]="false"
-  [emptyMessage]="'No hay familiares vinculados a esta persona.'"
+  [emptyMessage]="'No hay familiares vinculados a este alumno.'"
   [headerButtons]="repHeaderButtons"
   (headerAction)="onHeaderAction($event)"
   (rowAction)="onRowAction($event)"
@@ -15,7 +15,7 @@
 <c-modal [visible]="showLinkModal" (visibleChange)="!$event && closeLinkModal.emit()"
          aria-labelledby="link-family-modal-title" [size]="'lg'">
   <c-modal-header>
-    <strong id="link-family-modal-title">Vincular Familiar</strong>
+    <strong id="link-family-modal-title">Vincular familiar</strong>
   </c-modal-header>
   <c-modal-body>
     @if (linkError) {
@@ -41,7 +41,7 @@
       <hr class="my-3" />
 
       <div class="mb-3">
-        <label cLabel for="link-relationship">Relacion</label>
+        <label cLabel for="link-relationship">Relación</label>
         <select cSelect id="link-relationship" [(ngModel)]="selectedRelationship">
           <option value="">Seleccione...</option>
           @for (rel of relationships; track rel) {
@@ -77,13 +77,13 @@
 <c-modal [visible]="showUnlinkModal" (visibleChange)="!$event && closeUnlinkModal.emit()"
          aria-labelledby="unlink-family-modal-title">
   <c-modal-header>
-    <strong id="unlink-family-modal-title">Desvincular Familiar</strong>
+    <strong id="unlink-family-modal-title">Desvincular familiar</strong>
   </c-modal-header>
   <c-modal-body>
-    <p>Esta seguro de que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de esta persona?</p>
+    <p>¿Está seguro de que desea desvincular a <strong>{{ unlinkingRepresentative?.representativeFullName }}</strong> de este alumno?</p>
     
     <div class="mb-3">
-      <label cLabel for="unlink-observation">Motivo de desvinculacion (requerido)</label>
+      <label cLabel for="unlink-observation">Motivo de desvinculación (requerido)</label>
       <textarea cFormControl id="unlink-observation" 
                 [(ngModel)]="unlinkObservation"
                 rows="3"
@@ -105,7 +105,7 @@
 <c-modal [visible]="showHistoryModal" (visibleChange)="!$event && closeHistoryModal.emit()"
          aria-labelledby="history-modal-title" size="lg">
   <c-modal-header>
-    <strong id="history-modal-title">Historial de Vinculaciones</strong>
+    <strong id="history-modal-title">Historial de vinculaciones</strong>
   </c-modal-header>
   <c-modal-body>
     @if (loadingHistory) {
@@ -120,8 +120,8 @@
           <tr>
             <th>Fecha</th>
             <th>Familiar</th>
-            <th>Accion</th>
-            <th>Relacion</th>
+            <th>Acción</th>
+            <th>Relación</th>
             <th>Motivo</th>
           </tr>
         </thead>

@@ -38,7 +38,7 @@ export class IdentifyUserComponent implements OnInit {
   matches: UserMatchSummary[] | null = null;
 
   userTypeLabels: Record<string, string> = {
-    PERSON: 'Persona',
+    PERSON: 'Alumno',
     PROFESSIONAL: 'Profesional',
     FAMILY: 'Familiar',
   };

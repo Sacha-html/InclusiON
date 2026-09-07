@@ -59,9 +59,14 @@ namespace InclusiON.DTOs.Responses.Persons
                 LoginMethodName = p.LoginMethod?.Name,
                 IsActive = p.User?.IsActive ?? false,
                 RepresentativeNames = p.PersonRepresentatives != null && p.PersonRepresentatives.Any(pr => pr.IsActive)
-                    ? string.Join(", ", p.PersonRepresentatives
+                    ? (p.PersonRepresentatives
+                        .Where(pr => pr.IsActive && pr.IsPrimary)
+                        .Select(pr => $"{pr.Representative.LastName}, {pr.Representative.FirstName}".Trim())
+                        .FirstOrDefault()
+                      ?? p.PersonRepresentatives
                         .Where(pr => pr.IsActive)
-                        .Select(pr => $"{pr.Representative.LastName}, {pr.Representative.FirstName}".Trim()))
+                        .Select(pr => $"{pr.Representative.LastName}, {pr.Representative.FirstName}".Trim())
+                        .FirstOrDefault())
                     : null
             };
         }

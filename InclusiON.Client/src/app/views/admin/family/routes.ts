@@ -10,7 +10,7 @@ export const familyRoutes: Routes = [
     path: 'new',
     loadComponent: () =>
       import('./new/new.component').then((m) => m.NewComponent),
-    data: { title: 'Crear Familiar' },
+    data: { title: 'Crear familiar' },
   },
   {
     path: ':id',

@@ -16,5 +16,6 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task UpdateAsync(Invitation invitation, CancellationToken cancellationToken = default);
         Task<FamilyRepresentative> CreateFamilyRepresentativeAsync(FamilyRepresentative representative, CancellationToken cancellationToken = default);
         Task CreatePersonRepresentativeAsync(PersonRepresentative personRepresentative, CancellationToken cancellationToken = default);
+        Task<bool> HasActivePrimaryRepresentativeAsync(Guid personId, CancellationToken cancellationToken = default);
     }
 }

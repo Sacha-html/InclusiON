@@ -57,7 +57,7 @@ namespace InclusiON.Tests.Unit.Handlers.Family
             _repo.GetPagedAsync(
                 Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<bool?>(),
                 Arg.Any<SortField?>(), Arg.Any<string>(), Arg.Any<List<int>?>(),
-                Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                Arg.Any<string?>(), Arg.Any<bool?>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResponse<FamilyRepresentative>
             {
                 Data = new List<FamilyRepresentative> { AFamily() },

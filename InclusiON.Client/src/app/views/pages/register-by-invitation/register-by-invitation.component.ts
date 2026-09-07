@@ -177,12 +177,12 @@ export class RegisterByInvitationComponent implements OnInit {
     if (!field?.touched) return '';
 
     if (field.hasError('required')) return 'Este campo es requerido';
-    if (field.hasError('email')) return 'Ingresa un email valido';
+    if (field.hasError('email')) return 'Ingresa un email válido';
     if (field.hasError('minlength')) {
       const min = field.getError('minlength').requiredLength;
-      return `Minimo ${min} caracteres`;
+      return `Mínimo ${min} caracteres`;
     }
-    if (field.hasError('pattern')) return 'Debe contener al menos una mayuscula, una minuscula, un numero y un caracter especial';
+    if (field.hasError('pattern')) return 'Debe contener al menos una mayúscula, una minúscula, un número y un carácter especial';
     return '';
   }
 }

@@ -108,11 +108,11 @@ export class CatalogsComponent implements OnInit {
 
   private configs: Record<CatalogType, CatalogConfig> = {
     'disability-types': {
-      title: 'Tipos de Discapacidad',
+      title: 'Tipos de discapacidad',
       canCreate: true,
       columns: [
         { key: 'name',        label: 'Nombre' },
-        { key: 'description', label: 'Descripcion' },
+        { key: 'description', label: 'Descripción' },
         { key: 'isActive',    label: 'Estado', type: 'badge', badgeMap: {
           'true':  { color: 'success', label: ActiveStatus.Activo   },
           'false': { color: 'danger',  label: ActiveStatus.Inactivo },
@@ -120,7 +120,7 @@ export class CatalogsComponent implements OnInit {
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
-        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'description', label: 'Descripción', type: 'text' },
         { key: 'isActive', label: 'Activo', type: 'checkbox', default: true, editOnly: true },
       ],
       load: () => this.catalogsService.getDisabilityTypes(),
@@ -129,13 +129,13 @@ export class CatalogsComponent implements OnInit {
       deactivate: (id) => this.adminService.patchDisabilityTypeStatus(id, false),
     },
     'autonomy-levels': {
-      title: 'Niveles de Autonomia',
+      title: 'Niveles de autonomía',
       canCreate: true,
       columns: [
         { key: 'name',                label: 'Nombre' },
-        { key: 'description',         label: 'Descripcion' },
-        { key: 'requiresSupervision', label: 'Supervision', type: 'badge', badgeMap: {
-          'true':  { color: 'warning', label: 'Si' },
+        { key: 'description',         label: 'Descripción' },
+        { key: 'requiresSupervision', label: 'Supervisión', type: 'badge', badgeMap: {
+          'true':  { color: 'warning', label: 'Sí' },
           'false': { color: 'success', label: 'No' },
         }},
         { key: 'displayOrder', label: 'Orden' },
@@ -146,8 +146,8 @@ export class CatalogsComponent implements OnInit {
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
-        { key: 'description', label: 'Descripcion', type: 'text' },
-        { key: 'requiresSupervision', label: 'Requiere Supervision', type: 'checkbox', default: false },
+        { key: 'description', label: 'Descripción', type: 'text' },
+        { key: 'requiresSupervision', label: 'Requiere supervisión', type: 'checkbox', default: false },
         { key: 'displayOrder', label: 'Orden', type: 'number', default: 0 },
       ],
       load: () => this.catalogsService.getAutonomyLevels(),
@@ -156,11 +156,11 @@ export class CatalogsComponent implements OnInit {
       deactivate: (id) => this.adminService.patchAutonomyLevelStatus(id, false),
     },
     'activity-categories': {
-      title: 'Categorias de Actividad',
+      title: 'Categorías de actividad',
       canCreate: true,
       columns: [
         { key: 'name',        label: 'Nombre' },
-        { key: 'description', label: 'Descripcion' },
+        { key: 'description', label: 'Descripción' },
         { key: 'isActive',    label: 'Estado', type: 'badge', badgeMap: {
           'true':  { color: 'success', label: ActiveStatus.Activo   },
           'false': { color: 'danger',  label: ActiveStatus.Inactivo },
@@ -168,7 +168,7 @@ export class CatalogsComponent implements OnInit {
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
-        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'description', label: 'Descripción', type: 'text' },
         { key: 'isActive', label: 'Activo', type: 'checkbox', default: true, editOnly: true },
       ],
       load: () => this.catalogsService.getActivityCategories(),
@@ -177,11 +177,11 @@ export class CatalogsComponent implements OnInit {
       deactivate: (id) => this.adminService.patchActivityCategoryStatus(id, false),
     },
     'skill-areas': {
-      title: 'Areas de Habilidad',
+      title: 'Áreas de habilidad',
       canCreate: true,
       columns: [
         { key: 'name',         label: 'Nombre' },
-        { key: 'icon',         label: 'Icono' },
+        { key: 'icon',         label: 'Ícono' },
         { key: 'color',        label: 'Color',  type: 'color' },
         { key: 'displayOrder', label: 'Orden' },
         { key: 'isActive',     label: 'Estado', type: 'badge', badgeMap: {
@@ -191,8 +191,8 @@ export class CatalogsComponent implements OnInit {
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
-        { key: 'description', label: 'Descripcion', type: 'text' },
-        { key: 'icon', label: 'Icono', type: 'text' },
+        { key: 'description', label: 'Descripción', type: 'text' },
+        { key: 'icon', label: 'Ícono', type: 'text' },
         { key: 'color', label: 'Color', type: 'color', default: '#000000' },
         { key: 'displayOrder', label: 'Orden', type: 'number', default: 0 },
       ],
@@ -202,18 +202,18 @@ export class CatalogsComponent implements OnInit {
       deactivate: (id) => this.adminService.patchSkillAreaStatus(id, false),
     },
     'template-types': {
-      title: 'Tipos de Template',
+      title: 'Tipos de plantilla',
       canCreate: true,
       columns: [
         { key: 'name',               label: 'Nombre' },
-        { key: 'code',               label: 'Codigo',      type: 'code' },
-        { key: 'skillAreaName',      label: 'Area' },
+        { key: 'code',               label: 'Código',      type: 'code' },
+        { key: 'skillAreaName',      label: 'Área' },
         { key: 'supportsPictograms', label: 'Pictogramas', type: 'badge', badgeMap: {
-          'true':  { color: 'success',   label: 'Si' },
+          'true':  { color: 'success',   label: 'Sí' },
           'false': { color: 'secondary', label: 'No' },
         }},
         { key: 'supportsAudio',      label: 'Audio',       type: 'badge', badgeMap: {
-          'true':  { color: 'success',   label: 'Si' },
+          'true':  { color: 'success',   label: 'Sí' },
           'false': { color: 'secondary', label: 'No' },
         }},
         { key: 'isActive',           label: 'Estado',      type: 'badge', badgeMap: {
@@ -223,10 +223,10 @@ export class CatalogsComponent implements OnInit {
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
-        { key: 'code', label: 'Codigo', type: 'text', required: true },
-        { key: 'skillAreaId', label: 'Area de Habilidad', type: 'select', options: () => this.skillAreasCache },
-        { key: 'supportsPictograms', label: 'Soporta Pictogramas', type: 'checkbox', default: false },
-        { key: 'supportsAudio', label: 'Soporta Audio', type: 'checkbox', default: false },
+        { key: 'code', label: 'Código', type: 'text', required: true },
+        { key: 'skillAreaId', label: 'Área de habilidad', type: 'select', options: () => this.skillAreasCache },
+        { key: 'supportsPictograms', label: 'Soporta pictogramas', type: 'checkbox', default: false },
+        { key: 'supportsAudio', label: 'Soporta audio', type: 'checkbox', default: false },
       ],
       load: () => this.catalogsService.getActivityTemplateTypes(),
       create: (v) => this.adminService.createActivityTemplateType(v),
@@ -234,16 +234,16 @@ export class CatalogsComponent implements OnInit {
       deactivate: (id) => this.adminService.patchActivityTemplateTypeStatus(id, false),
     },
     'login-methods': {
-      title: 'Metodos de Login',
+      title: 'Métodos de login',
       canCreate: false,
       columns: [
         { key: 'name',        label: 'Nombre' },
-        { key: 'code',        label: 'Codigo', type: 'code' },
-        { key: 'description', label: 'Descripcion' },
+        { key: 'code',        label: 'Código', type: 'code' },
+        { key: 'description', label: 'Descripción' },
       ],
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
-        { key: 'description', label: 'Descripcion', type: 'text' },
+        { key: 'description', label: 'Descripción', type: 'text' },
         { key: 'displayOrder', label: 'Orden', type: 'number', default: 0 },
       ],
       load: () => this.catalogsService.getLoginMethods(),

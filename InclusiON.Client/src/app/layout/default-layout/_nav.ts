@@ -22,7 +22,7 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-link' },
   },
   {
-    name: 'Personas',
+    name: 'Alumnos',
     url: AppRoutes.Admin.Persons,
     iconComponent: { name: 'cil-people' },
   },
@@ -55,12 +55,12 @@ export const navItems: INavData[] = [
     url: AppRoutes.Admin.Catalogs.Root,
     iconComponent: { name: 'cil-notes' },
     children: [
-      { name: 'Áreas de Habilidad', url: AppRoutes.Admin.Catalogs.SkillAreas },
-      { name: 'Categorías de Actividad', url: AppRoutes.Admin.Catalogs.ActivityCategories },
-      { name: 'Métodos de Login', url: AppRoutes.Admin.Catalogs.LoginMethods },
-      { name: 'Niveles de Autonomía', url: AppRoutes.Admin.Catalogs.AutonomyLevels },
-      { name: 'Tipos de Discapacidad', url: AppRoutes.Admin.Catalogs.DisabilityTypes },
-      { name: 'Tipos de Plantilla', url: AppRoutes.Admin.Catalogs.TemplateTypes },
+      { name: 'Áreas de habilidad', url: AppRoutes.Admin.Catalogs.SkillAreas },
+      { name: 'Categorías de actividad', url: AppRoutes.Admin.Catalogs.ActivityCategories },
+      { name: 'Métodos de login', url: AppRoutes.Admin.Catalogs.LoginMethods },
+      { name: 'Niveles de autonomía', url: AppRoutes.Admin.Catalogs.AutonomyLevels },
+      { name: 'Tipos de discapacidad', url: AppRoutes.Admin.Catalogs.DisabilityTypes },
+      { name: 'Tipos de plantilla', url: AppRoutes.Admin.Catalogs.TemplateTypes },
     ],
   },
   {
@@ -73,7 +73,7 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-settings' },
   },
   {
-    name: 'Roles y Permisos',
+    name: 'Roles y permisos',
     url: AppRoutes.Admin.Roles,
     iconComponent: { name: 'cil-lock-locked' },
   },

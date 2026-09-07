@@ -76,6 +76,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             SortField? sortBy, string sortDirection,
             List<int>? institutionIds = null,
             string? linkedPersonSearch = null,
+            bool? isPrimary = null,
+            string? relationship = null,
             CancellationToken cancellationToken = default)
         {
             var query = _context.FamilyRepresentatives
@@ -127,6 +129,19 @@ namespace InclusiON.Infrastructure.Data.Repositories
                         (EF.Functions.ILike(pr.Person.FirstName, linkedPattern) ||
                          EF.Functions.ILike(pr.Person.LastName, linkedPattern) ||
                          (pr.Person.DocumentNumber != null && EF.Functions.ILike(pr.Person.DocumentNumber, linkedPattern)))));
+            }
+
+            if (isPrimary.HasValue)
+            {
+                query = query.Where(f => f.PersonRepresentatives.Any(pr => pr.IsActive && pr.IsPrimary == isPrimary.Value));
+            }
+
+            if (!string.IsNullOrWhiteSpace(relationship))
+            {
+                var relPattern = $"%{relationship.Trim()}%";
+                query = query.Where(f =>
+                    (f.Relationship != null && EF.Functions.ILike(f.Relationship, relPattern)) ||
+                    f.PersonRepresentatives.Any(pr => pr.IsActive && pr.Relationship != null && EF.Functions.ILike(pr.Relationship, relPattern)));
             }
 
             var sortMappings = new Dictionary<SortField, Expression<Func<FamilyRepresentative, object>>>

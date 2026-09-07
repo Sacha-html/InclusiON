@@ -18,27 +18,20 @@
       </c-nav-item>
     </c-header-nav>
 
-    <c-header-nav class="d-none d-md-flex ms-auto">
+    <c-header-nav class="d-flex align-items-center ms-auto">
       @if (showNotificationBell) {
         <app-notification-bell />
+        <div class="vr header-vr"></div>
       }
-    </c-header-nav>
 
-    <c-header-nav class="ms-auto ms-md-0">
-      <div class="nav-item py-1">
-        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
-      </div>
       <ng-container *ngTemplateOutlet="accessibilityDropdown" />
-      <div class="nav-item py-1">
-        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
-      </div>
-      <ng-container *ngTemplateOutlet="themeDropdown" />
-      <div class="nav-item py-1">
-        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
-      </div>
-    </c-header-nav>
 
-    <c-header-nav class="mx-0">
+      <div class="vr header-vr"></div>
+
+      <ng-container *ngTemplateOutlet="themeDropdown" />
+
+      <div class="vr header-vr"></div>
+
       <ng-container *ngTemplateOutlet="userDropdown" />
     </c-header-nav>
   </c-container>
@@ -55,7 +48,8 @@
     <button
       [caret]="false"
       cDropdownToggle
-      class="py-0 pe-0"
+      class="d-flex align-items-center justify-content-center p-0"
+      style="height: 40px; width: 40px; border-radius: 8px;"
       aria-label="Open user menu"
     >
       <c-avatar
@@ -123,6 +117,7 @@
     <button
       [caret]="false"
       cDropdownToggle
+      class="d-flex align-items-center justify-content-center"
       aria-label="Seleccionar tema de accesibilidad"
       cTooltip="Accesibilidad"
     >
@@ -155,6 +150,7 @@
     <button
       [caret]="false"
       cDropdownToggle
+      class="d-flex align-items-center justify-content-center"
       aria-label="Cambiar modo de color"
       cTooltip="Modo de color"
     >

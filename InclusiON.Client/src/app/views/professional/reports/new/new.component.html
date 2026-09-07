@@ -1,15 +1,15 @@
 <c-card>
   <c-card-header>
-    <h5 cCardTitle>Nuevo Reporte</h5>
+    <h5 cCardTitle>Nuevo reporte</h5>
   </c-card-header>
   <c-card-body>
     <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
 
     <form (ngSubmit)="onSubmit()">
       <c-row class="mb-4">
-        <!-- Persona -->
+        <!-- Alumno -->
         <c-col xs="12" md="6">
-          <label class="form-label" id="report-person-label">Persona con discapacidad *</label>
+          <label class="form-label" id="report-person-label">Alumno *</label>
 
           <app-searchable-select
             [formControl]="personControl"

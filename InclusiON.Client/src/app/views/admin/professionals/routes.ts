@@ -10,7 +10,7 @@ export const professionalRoutes: Routes = [
     path: 'new',
     loadComponent: () =>
       import('./new/new.component').then((m) => m.NewComponent),
-    data: { title: 'Crear Profesional' },
+    data: { title: 'Crear profesional' },
   },
   {
     path: ':id',

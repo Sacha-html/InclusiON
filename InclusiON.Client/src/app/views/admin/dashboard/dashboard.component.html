@@ -25,34 +25,49 @@
   <div id="adminDashboardContainer" class="bg-body p-2 rounded">
     <c-row class="mb-4 align-items-center">
       <c-col xs="12" md="7">
-        <h1 class="h4 mb-1 fw-bold">Panel de Control del Administrador</h1>
+        <h1 class="h4 mb-1 fw-bold">Panel de control del administrador</h1>
         <p class="text-body-secondary mb-0">Auditoría institucional, analítica pedagógica y seguimiento documental.</p>
       </c-col>
       <c-col xs="12" md="5" class="text-md-end mt-2 mt-md-0 d-flex gap-2 justify-content-md-end">
-        <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" (click)="exportDashboardPdf()" [disabled]="isExportingPdf">
-          <svg cIcon name="cilCloudDownload" size="sm"></svg>
-          <span>{{ isExportingPdf ? 'Generando PDF…' : 'Exportar PDF' }}</span>
+        <button class="btn btn-export-pdf btn-sm" (click)="exportDashboardPdf()" [disabled]="isExportingPdf">
+          @if (isExportingPdf) {
+            <c-spinner size="sm"></c-spinner>
+            <span>Generando PDF…</span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" class="pdf-icon-svg" aria-hidden="true">
+              <path d="M2.5 5.5H4.5V19.5H16.5V21.5H2.5V5.5Z" fill="#000000" />
+              <path d="M5.5 2H15.5L21.5 8V19.5H5.5V2Z" fill="#000000" />
+              <path d="M15.5 2V8H21.5L15.5 2Z" fill="#000000" stroke="#ffffff" stroke-width="1" stroke-linejoin="round" />
+              <text x="13.5" y="13.8" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="5.2" fill="#ffffff" text-anchor="middle" letter-spacing="-0.2">PDF</text>
+              <rect x="8.5" y="15.5" width="10" height="1.8" rx="0.9" fill="#ffffff" />
+            </svg>
+            <span>Exportar PDF</span>
+          }
         </button>
-        <a routerLink="/admin/reports" class="btn btn-outline-primary btn-sm">
-          Ver Todos los Reportes &rarr;
+        <a routerLink="/admin/reports" class="btn btn-export-pdf btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" viewBox="0 0 16 16" class="pdf-icon-svg" aria-hidden="true">
+            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+          </svg>
+          <span>Ver reportes</span>
         </a>
       </c-col>
     </c-row>
 
     <!-- Filtros de Fecha de Corte -->
     <fieldset class="p-3 border rounded mb-4 bg-body-tertiary">
-      <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtro por Rango de Fechas (Corte de Métricas e Informes)</legend>
+      <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtro por rango de fechas (corte de métricas e informes)</legend>
       <c-row class="align-items-end g-2">
         <c-col xs="12" sm="4" md="3">
-          <label cLabel>Fecha Desde</label>
+          <label cLabel>Fecha desde</label>
           <input cFormControl type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateFilterChange()" />
         </c-col>
         <c-col xs="12" sm="4" md="3">
-          <label cLabel>Fecha Hasta</label>
+          <label cLabel>Fecha hasta</label>
           <input cFormControl type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateFilterChange()" />
         </c-col>
         <c-col xs="12" sm="auto">
-          <button cButton color="secondary" size="sm" (click)="clearDateFilters()">Limpiar Filtros</button>
+          <button cButton color="secondary" size="sm" (click)="clearDateFilters()">Limpiar filtros</button>
         </c-col>
       </c-row>
     </fieldset>
@@ -72,7 +87,7 @@
           title="Haz clic para ver y gestionar los reportes pendientes de revisión">
           <c-card-body class="d-flex flex-column justify-content-between text-center">
             <div>
-              <p class="text-body-secondary small mb-1 fw-semibold">Pendientes de Revisión</p>
+              <p class="text-body-secondary small mb-1 fw-semibold">Pendientes de revisión</p>
               <div class="display-6 fw-bold my-1"
                    [class.text-warning]="reportsAnalytics.pendientes_Revision > 0"
                    [class.text-success]="reportsAnalytics.pendientes_Revision === 0">
@@ -97,7 +112,7 @@
         <c-card class="h-100 shadow-sm" style="border-left: 5px solid #00C853;">
           <c-card-body class="d-flex flex-column justify-content-between text-center">
             <div>
-              <p class="text-body-secondary small mb-1 fw-semibold">Índice de Lectura Familiar</p>
+              <p class="text-body-secondary small mb-1 fw-semibold">Índice de lectura familiar</p>
               <div class="display-6 fw-bold text-success my-1">
                 {{ reportsAnalytics.indice_Lectura_Familiar }}%
               </div>
@@ -114,7 +129,7 @@
         <c-card class="h-100 shadow-sm" style="border-left: 5px solid #D50000;">
           <c-card-body class="d-flex flex-column justify-content-between text-center">
             <div>
-              <p class="text-body-secondary small mb-1 fw-semibold">Tasa de Rechazo</p>
+              <p class="text-body-secondary small mb-1 fw-semibold">Tasa de rechazo</p>
               <div class="display-6 fw-bold text-danger my-1">
                 {{ reportsAnalytics.tasa_Rechazo }}%
               </div>
@@ -131,7 +146,7 @@
         <c-card class="h-100 shadow-sm" style="border-left: 5px solid #1A237E;">
           <c-card-body class="d-flex flex-column justify-content-between text-center">
             <div>
-              <p class="text-body-secondary small mb-1 fw-semibold">Total de Informes</p>
+              <p class="text-body-secondary small mb-1 fw-semibold">Total de informes</p>
               <div class="display-6 fw-bold text-primary my-1">
                 {{ reportsAnalytics.total_Reportes }}
               </div>
@@ -153,7 +168,7 @@
         <c-card class="h-100 shadow-sm">
           <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
             <div class="fw-semibold">Informes realizados</div>
-            <span class="badge bg-success-subtle text-success border">Informes Aprobados</span>
+            <span class="badge bg-success-subtle text-success border">Informes aprobados</span>
           </c-card-header>
           <c-card-body>
             <app-professional-productivity-chart [items]="reportsAnalytics.ranking_Profesionales" />
@@ -165,8 +180,8 @@
       <c-col xs="12" md="6">
         <c-card class="h-100 shadow-sm">
           <c-card-header class="d-flex justify-content-between align-items-center bg-transparent border-bottom">
-            <div class="fw-semibold">Distribución de Estados de Informes</div>
-            <span class="badge bg-primary-subtle text-primary border font-monospace">Auditoría de Estados</span>
+            <div class="fw-semibold">Distribución de estados de informes</div>
+            <span class="badge bg-primary-subtle text-primary border font-monospace">Auditoría de estados</span>
           </c-card-header>
           <c-card-body>
             <app-report-status-pie-chart [items]="reportsAnalytics.distribucion_Estados" />
@@ -198,9 +213,9 @@
 
     <c-col xs="12" sm="6" lg="3" class="mb-3">
       <app-stat-card
-        label="Personas registradas"
+        label="Alumnos registrados"
         [value]="dashboard.totalPersons"
-        linkText="Ver todas"
+        linkText="Ver todos"
         linkUrl="/admin/persons"
       />
     </c-col>
@@ -219,7 +234,7 @@
       <c-col xs="12" sm="6" lg="4" class="mb-3">
         <c-card class="h-100 shadow-sm border-primary">
           <c-card-body class="text-center">
-            <p class="text-body-secondary small mb-1 fw-semibold">KPI GAS Promedio</p>
+            <p class="text-body-secondary small mb-1 fw-semibold">KPI GAS promedio</p>
             <div class="display-6 fw-bold text-primary my-1">
               {{ analytics.promedio_GAS >= 0 ? '+' : '' }}{{ analytics.promedio_GAS }}
             </div>
@@ -231,7 +246,7 @@
       <c-col xs="12" sm="6" lg="4" class="mb-3">
         <c-card class="h-100 shadow-sm border-success">
           <c-card-body class="text-center">
-            <p class="text-body-secondary small mb-1 fw-semibold">Tasa de Éxito Global</p>
+            <p class="text-body-secondary small mb-1 fw-semibold">Tasa de éxito global</p>
             <div class="display-6 fw-bold text-success my-1">
               {{ analytics.promedioExito }}%
             </div>
@@ -243,7 +258,7 @@
       <c-col xs="12" sm="6" lg="4" class="mb-3">
         <c-card class="h-100 shadow-sm" [class.border-warning]="analytics.alertasFrustracion > 0">
           <c-card-body class="text-center">
-            <p class="text-body-secondary small mb-1 fw-semibold">Alertas de Estancamiento</p>
+            <p class="text-body-secondary small mb-1 fw-semibold">Alertas de estancamiento</p>
             <div class="display-6 fw-bold my-1" [class.text-warning]="analytics.alertasFrustracion > 0">
               {{ analytics.alertasFrustracion }}
             </div>
@@ -258,7 +273,7 @@
       <c-col xs="12" md="6" class="mb-3 mb-md-0">
         <c-card class="h-100 shadow-sm">
           <c-card-body>
-            <h5 class="card-title fw-semibold mb-3">Rendimiento por Categoría Pedagógica</h5>
+            <h5 class="card-title fw-semibold mb-3">Rendimiento por categoría pedagógica</h5>
             <app-high-contrast-pie-chart [items]="analytics.rendimiento_Por_Categoria" />
           </c-card-body>
         </c-card>
@@ -268,7 +283,7 @@
         <c-card class="h-100 shadow-sm">
           <c-card-body>
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="card-title fw-semibold mb-0">Distribución Institucional por Niveles</h5>
+              <h5 class="card-title fw-semibold mb-0">Distribución institucional por niveles</h5>
               <span class="badge bg-primary font-monospace">Niveles 1 - 10</span>
             </div>
             <app-level-histogram-chart [items]="analytics.distribucion_Por_Nivel" />

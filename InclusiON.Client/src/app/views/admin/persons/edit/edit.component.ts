@@ -7,6 +7,7 @@ import { CatalogItem, AutonomyLevelItem, LoginMethodItem, PersonResponse, Update
 import { validDate, notFutureDate, ageRangeValidator, toIsoDate, toDisplayDate, toInputDate } from '@shared/utils';
 import { AvatarColorPickerComponent } from '@shared/components';
 import { ChangeLoginMethodModalComponent } from './change-login-method-modal.component';
+import { OnlyNumbersDirective } from '@shared/directives';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -42,6 +43,7 @@ import {
     ButtonDirective,
     AvatarColorPickerComponent,
     ChangeLoginMethodModalComponent,
+    OnlyNumbersDirective,
   ],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.scss',
@@ -77,6 +79,7 @@ export class EditComponent implements OnInit {
     // Datos personales
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate, ageRangeValidator(12, 40)]],
     // Discapacidad
     disabilityTypeId: [null, [Validators.required]],
@@ -133,6 +136,7 @@ export class EditComponent implements OnInit {
     this.form.patchValue({
       firstName: p.firstName,
       lastName: p.lastName,
+      documentNumber: p.documentNumber ?? '',
       birthDate: toInputDate(p.birthDate),
       disabilityTypeId: p.disabilityTypeId ?? null,
       attentionLevel: p.attentionLevel ?? null,
@@ -164,6 +168,7 @@ export class EditComponent implements OnInit {
     const request: UpdatePersonRequest = {
       firstName: raw.firstName,
       lastName: raw.lastName,
+      ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       birthDate: toIsoDate(raw.birthDate),
       usesAAC: raw.usesAAC ?? false,
       usesSignLanguage: raw.usesSignLanguage ?? false,
@@ -189,7 +194,7 @@ export class EditComponent implements OnInit {
         this.router.navigate([AppRoutes.Admin.Persons, this.person!.id]);
       },
       error: (err) => {
-        this.serverError = err?.userMessage || 'Error al actualizar la persona';
+        this.serverError = err?.userMessage || 'Error al actualizar el alumno';
       },
     });
   }
@@ -212,11 +217,11 @@ export class EditComponent implements OnInit {
     }
     if (response.temporaryPassword) {
       this.toastService.warning(
-        'Recordá compartir la contraseña temporal con la persona. Solo se muestra una vez.',
+        'Recordá compartir la contraseña temporal con el alumno. Solo se muestra una vez.',
         'Método actualizado'
       );
     } else {
-      this.toastService.success(`Ahora la persona ingresa con: ${response.loginMethodName}`);
+      this.toastService.success(`Ahora el alumno ingresa con: ${response.loginMethodName}`);
     }
   }
 

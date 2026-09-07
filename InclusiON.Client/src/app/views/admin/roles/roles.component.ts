@@ -71,7 +71,7 @@ export class RolesComponent implements OnInit {
     Admin:                  { color: 'danger',  label: 'Administrador'            },
     Professional:           { color: 'primary', label: 'Profesional'              },
     FamilyRepresentative:   { color: 'success', label: 'Representante Familiar'   },
-    PersonWithDisability:   { color: 'info',    label: 'Persona con Discapacidad' },
+    PersonWithDisability:   { color: 'info',    label: 'Alumno' },
   };
 
   ngOnInit(): void {
@@ -127,7 +127,7 @@ export class RolesComponent implements OnInit {
   getModuleLabel(module: string): string {
     const labels: Record<string, string> = {
       users: 'Usuarios',
-      persons: 'Personas',
+      persons: 'Alumnos',
       professionals: 'Profesionales',
       family: 'Familiares',
       activities: 'Actividades',

@@ -36,7 +36,7 @@
         </li>
         <li class="nav-item">
           <button type="button" class="nav-link" [class.active]="activeTab === 'personas'" (click)="activeTab = 'personas'">
-            Personas a cargo
+            Alumnos a cargo
             @if (assignedPersons.length > 0) {
               <c-badge color="primary" class="ms-1">{{ assignedPersons.length }}</c-badge>
             }

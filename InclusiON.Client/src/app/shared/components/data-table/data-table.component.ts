@@ -209,7 +209,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
       case 'admin': return 'Administrador';
       case 'professional': return 'Profesional';
       case 'familyrepresentative': return 'Familiar';
-      case 'personwithdisability': return 'Persona';
+      case 'personwithdisability': return 'Alumno';
       default: return value ?? '';
     }
   }

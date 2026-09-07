@@ -7,11 +7,11 @@
   <app-empty-state
     icon="cil-list"
     message="Sin hoja de ruta"
-    detail="Esta persona no tiene una hoja de ruta asignada."
+    detail="Este alumno no tiene una hoja de ruta asignada."
   />
   @if (canCreate) {
     <div class="text-center mt-2">
-      <button cButton color="primary" (click)="openCreateModal()">Crear Hoja de Ruta</button>
+      <button cButton color="primary" (click)="openCreateModal()">Crear hoja de ruta</button>
     </div>
   }
 
@@ -202,7 +202,7 @@
 <!-- Modal: Crear roadmap -->
 <c-modal [visible]="showCreateModal" (visibleChange)="showCreateModal = $event">
   <c-modal-header>
-    <h5 cModalTitle>Crear Hoja de Ruta</h5>
+    <h5 cModalTitle>Crear hoja de ruta</h5>
   </c-modal-header>
   <c-modal-body>
     <div class="mb-3">
@@ -223,7 +223,7 @@
 <!-- Modal: Editar notas -->
 <c-modal [visible]="showEditNotesModal" (visibleChange)="showEditNotesModal = $event">
   <c-modal-header>
-    <h5 cModalTitle>Editar Notas</h5>
+    <h5 cModalTitle>Editar notas</h5>
   </c-modal-header>
   <c-modal-body>
     <div class="mb-3">
@@ -243,7 +243,7 @@
 <!-- Modal: Agregar área -->
 <c-modal [visible]="showAddAreaModal" (visibleChange)="showAddAreaModal = $event">
   <c-modal-header>
-    <h5 cModalTitle>Agregar Área de Habilidad</h5>
+    <h5 cModalTitle>Agregar área de habilidad</h5>
   </c-modal-header>
   <c-modal-body>
     @if (availableSkillAreas().length === 0) {
@@ -276,7 +276,7 @@
 <!-- Modal: Agregar actividad -->
 <c-modal [visible]="showAddActivityModal" (visibleChange)="showAddActivityModal = $event" size="lg">
   <c-modal-header>
-    <h5 cModalTitle>Agregar Actividad — {{ targetArea?.skillAreaName }}</h5>
+    <h5 cModalTitle>Agregar actividad — {{ targetArea?.skillAreaName }}</h5>
   </c-modal-header>
   <c-modal-body>
     <c-row>
@@ -374,7 +374,7 @@
 <!-- Modal: Configuración del motor adaptativo (IN-116) -->
 <c-modal [visible]="showAdaptiveConfigModal" (visibleChange)="!$event && closeAdaptiveConfigModal()" size="lg">
   <c-modal-header>
-    <strong>Motor Adaptativo</strong>
+    <strong>Motor adaptativo</strong>
     @if (adaptiveConfigTarget) {
       <span class="ms-2 text-body-secondary">— {{ adaptiveConfigTarget.activity.activityTitle }}</span>
     }
