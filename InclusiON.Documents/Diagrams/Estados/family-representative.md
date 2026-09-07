@@ -11,7 +11,7 @@
 | Estado | Descripción |
 |--------|-------------|
 | `Active` | Familiar registrado y habilitado para acceder al portal. |
-| `Terminated` | Baja definitiva. `IsActive = false` en `User` y `FamilyRepresentative`. |
+| `Terminated` | Perfil y cuenta desactivados hasta una reactivación administrativa. |
 
 ---
 
@@ -25,7 +25,7 @@ stateDiagram-v2
 
     Active --> Terminated : Baja por Profesional o Admin
 
-    Terminated --> [*]
+    Terminated --> Active : Reactivación administrativa
 
     note right of Active
         OnboardingCompleted = false al registrarse
@@ -48,7 +48,8 @@ stateDiagram-v2
 | Desde | Hacia | Actor | Condición |
 |-------|-------|-------|-----------|
 | — | `Active` | Sistema (auto) | Familiar completa registro con código de `Invitation` válido |
-| `Active` | `Terminated` | Profesional / Admin Institucional | Registrado en `FamilyStatusHistory`. Irreversible |
+| `Active` | `Terminated` | Profesional / Admin Institucional | Desactiva cuenta y vínculos activos; registrado en `FamilyStatusHistory` |
+| `Terminated` | `Active` | Profesional / Admin Institucional con acceso al familiar | Nueva contraseña temporal; no restaura vínculos ni alumnos |
 
 > A diferencia de `Professional`, el familiar no pasa por estado `Pending` ni requiere aprobación del admin. El acceso es inmediato al completar el registro.
 
@@ -63,3 +64,4 @@ El estado de `FamilyRepresentative` es independiente del estado de cada vínculo
 | Alta del vínculo | `PersonRepresentative.IsActive = true`; entrada en `PersonRepresentativeHistory` (tipo: `Linked`) |
 | Baja del vínculo | `PersonRepresentative.IsActive = false`; entrada en `PersonRepresentativeHistory` (tipo: `Unlinked`) |
 | `Terminated` del familiar | Todos los `PersonRepresentative` activos pasan a `IsActive = false` |
+| Reactivación del familiar | No modifica `PersonRepresentative` ni el estado de alumnos; asignación futura explícita |

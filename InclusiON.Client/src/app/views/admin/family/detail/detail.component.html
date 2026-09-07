@@ -85,6 +85,8 @@
         </div>
         @if (family.isActive) {
           <button cButton color="danger" (click)="deactivate()" [attr.aria-label]="'Desactivar familiar ' + family.fullName">Desactivar</button>
+        } @else {
+          <button cButton color="success" (click)="reactivate()" [attr.aria-label]="'Reactivar familiar ' + family.fullName">Reactivar</button>
         }
       </div>
     </c-card-body>
@@ -104,4 +106,29 @@
       <button cButton color="danger" (click)="confirmDeactivate()">Desactivar</button>
     </c-modal-footer>
   </c-modal>
+
+  <c-modal [visible]="showReactivateModal" (visibleChange)="showReactivateModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>Confirmar reactivación</h5>
+    </c-modal-header>
+    <c-modal-body>
+      <p>¿Está seguro de que desea reactivar al familiar <strong>{{ family.fullName }}</strong>?</p>
+      <p class="text-body-secondary mb-0">Se generará una contraseña temporal. No se restaurarán personas a cargo ni vínculos previos.</p>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="cancelReactivate()">Cancelar</button>
+      <button cButton color="success" (click)="confirmReactivate()">Reactivar</button>
+    </c-modal-footer>
+  </c-modal>
+
+  <app-password-modal
+    [visible]="showPasswordModal"
+    entityType="Familiar"
+    entityArticle="el"
+    [entityName]="family?.fullName ?? ''"
+    [password]="temporaryPassword"
+    title="Familiar reactivado exitosamente"
+    description="Se reactivo el familiar"
+    (close)="closePasswordModal()">
+  </app-password-modal>
 }

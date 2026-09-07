@@ -63,6 +63,14 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
                     "El usuario ya se encuentra activo.");
             }
 
+            var roles = await _identityService.GetRolesAsync(user);
+            if (roles.Contains(RoleNames.FamilyRepresentative))
+            {
+                return ApiResponse<ResetPasswordResultResponse>.ErrorResult(
+                    ErrorCode.BusinessRuleViolation,
+                    "Los familiares deben reactivarse desde la gestión de familiares.");
+            }
+
             var tempPassword = PasswordGenerator.GenerateTemporary();
 
             var (succeeded, errors) = await _identityService.ResetPasswordAsync(user, tempPassword);

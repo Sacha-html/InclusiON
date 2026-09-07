@@ -39,10 +39,11 @@ El admin desactiva la cuenta de un usuario. Se revoca el acceso inmediatamente.
 - **Frontend:** Botón "Desactivar" con modal de confirmación y motivo opcional
 
 ### 5. Reactivar Usuario
-El admin reactiva una cuenta previamente desactivada. Se genera nueva contraseña temporal.
+El admin reactiva una cuenta previamente desactivada. Se genera nueva contraseña temporal. Los representantes familiares se reactivan únicamente desde su ABM para restaurar de forma consistente cuenta y perfil, sin restaurar responsabilidades previas.
 - **Endpoint:** `PUT /api/admin/users/{id}/reactivate`
 - **Transacción:** `IsActive = true` + genera contraseña temporal + `MustChangePassword = true` + reactiva entidad asociada
 - **Frontend:** Botón "Reactivar" visible solo en usuarios inactivos → muestra contraseña temporal
+- **Excepción Familiar:** la ruta genérica rechaza representantes familiares. `PUT /api/Family/{familyId}/reactivate` activa `User` y `FamilyRepresentative`, registra historial y no reactiva vínculos `PersonRepresentative` ni alumnos.
 
 ### 6. Consultar Actividad
 El admin puede ver un resumen de actividad reciente del usuario: último login, cantidad de accesos, acciones recientes.

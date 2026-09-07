@@ -22,6 +22,8 @@ export class PasswordModalComponent implements OnChanges {
   @Input() entityArticle = 'el';
   @Input() entityName = '';
   @Input() password = '';
+  @Input() title = '';
+  @Input() description = '';
   @Output() close = new EventEmitter<void>();
 
   @ViewChild('closeBtn', { read: ElementRef }) closeBtn?: ElementRef<HTMLButtonElement>;
@@ -30,6 +32,8 @@ export class PasswordModalComponent implements OnChanges {
 
   get entityTypeLower(): string { return this.entityType.toLowerCase(); }
   get entityArticleUpper(): string { return this.entityArticle.charAt(0).toUpperCase() + this.entityArticle.slice(1); }
+  get modalTitle(): string { return this.title || `${this.entityType} creado exitosamente`; }
+  get modalDescription(): string { return this.description || `Se creo ${this.entityArticle} ${this.entityTypeLower}`; }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['visible']?.currentValue === true) {
