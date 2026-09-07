@@ -16,6 +16,8 @@ namespace InclusiON.Application.Interfaces.Repositories
             SortField? sortBy, string sortDirection,
             List<int>? institutionIds = null,
             string? linkedPersonSearch = null,
+            bool? isPrimary = null,
+            string? relationship = null,
             CancellationToken cancellationToken = default);
 
         Task<(List<(FamilyRepresentative Family, bool WasPreviouslyLinked)> Items, int Total)> GetAvailableFamiliesAsync(

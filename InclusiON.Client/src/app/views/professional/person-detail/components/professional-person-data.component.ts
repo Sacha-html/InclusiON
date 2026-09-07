@@ -11,6 +11,7 @@ import {
   RowComponent,
   SpinnerComponent,
 } from '@coreui/angular';
+import { OnlyNumbersDirective } from '@shared/directives';
 
 @Component({
   selector: 'app-professional-person-data',
@@ -23,6 +24,7 @@ import {
     RowComponent,
     SpinnerComponent,
     FormsModule,
+    OnlyNumbersDirective,
   ],
   templateUrl: './professional-person-data.component.html',
 })
@@ -70,12 +72,12 @@ export class ProfessionalPersonDataComponent {
 
     if (this.editingField() === 'documentNumber' && this.draft.documentNumber) {
       const doc = this.draft.documentNumber;
-      if (!/^[a-zA-Z0-9]+$/.test(doc)) {
-        this.fieldError.set('Solo letras y números, sin espacios ni caracteres especiales');
+      if (!/^[0-9]+$/.test(doc)) {
+        this.fieldError.set('Solo se permiten números (sin puntos ni letras)');
         return;
       }
-      if (doc.length < 6 || doc.length > 20) {
-        this.fieldError.set('El documento debe tener entre 6 y 20 caracteres');
+      if (doc.length < 7 || doc.length > 8) {
+        this.fieldError.set('El documento debe tener entre 7 y 8 dígitos');
         return;
       }
     }

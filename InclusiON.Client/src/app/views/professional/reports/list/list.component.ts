@@ -82,7 +82,7 @@ actions: [
     },
     { key: 'reportDate', label: 'Fecha', type: 'date', sortable: true },
     { key: 'title', label: 'Título', sortable: true },
-    { key: 'personName', label: 'Persona', sortable: true },
+    { key: 'personName', label: 'Alumno', sortable: true },
     { key: 'reportTypeName', label: 'Tipo', sortable: true },
     {
       key: 'status',

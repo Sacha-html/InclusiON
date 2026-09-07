@@ -188,12 +188,12 @@ export class DetailComponent implements OnInit {
     if (!this.person) return;
     this.personsService.deactivatePerson(this.person.id).subscribe({
       next: () => {
-        this.toastService.success('Persona desactivada exitosamente');
+        this.toastService.success('Alumno desactivado exitosamente');
         this.showDeactivateModal = false;
         this.person!.isActive = false;
       },
       error: () => {
-        this.toastService.error('Error al desactivar la persona');
+        this.toastService.error('Error al desactivar el alumno');
         this.showDeactivateModal = false;
       },
     });

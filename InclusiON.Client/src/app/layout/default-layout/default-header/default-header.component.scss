@@ -1,23 +1,43 @@
 // ============================================
 // HEADER - ESTILOS ACCESIBLES
-// Solo para el dropdown de accesibilidad
+// Alineación y estilos de la cabecera
 // ============================================
 
 :host ::ng-deep {
-  // Botones de dropdown más grandes
+  // Divisor vertical entre elementos de la cabecera
+  .header-vr {
+    height: 24px;
+    width: 1px;
+    margin: 0 0.5rem;
+    background-color: var(--a11y-border, #dee2e6);
+    opacity: 0.8;
+    align-self: center;
+  }
+
+  // Botones de dropdown del header (campana, accesibilidad, tema, avatar)
   .nav-item [cDropdownToggle] {
-    padding: 0.5rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.5rem;
     border-radius: 8px;
+    min-height: 40px;
+    min-width: 40px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
 
     &:hover {
       background-color: var(--a11y-dropdown-hover-bg, rgba(0, 0, 0, 0.08));
     }
 
     svg {
-      width: 26px !important;
-      height: 26px !important;
+      width: 24px !important;
+      height: 24px !important;
       // Iconos de toggle del header: neutros, no azul primario
       color: var(--a11y-header-text, #212121);
+      display: block;
+      margin: 0 auto;
     }
 
     &:hover svg,
@@ -29,9 +49,17 @@
   // Iconos del header: hamburger, campana, etc.
   .header-toggler svg,
   c-header-nav svg {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     color: var(--a11y-header-text, #212121);
+  }
+
+  // Avatar de usuario en el header
+  .nav-item c-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
   }
 
   // Iconos en dropdown items (menú usuario, accesibilidad)

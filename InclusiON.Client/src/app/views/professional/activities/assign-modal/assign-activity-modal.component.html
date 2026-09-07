@@ -19,23 +19,23 @@
 
     <p class="text-body-secondary small mb-3">El campo marcado con (*) es obligatorio.</p>
 
-    <!-- Persona -->
+    <!-- Alumno -->
     <c-row class="mb-3">
       <c-col xs="12">
-        <label class="form-label" for="assign-person">Estudiante *</label>
+        <label class="form-label" for="assign-person">Alumno *</label>
 
         @if (isLoadingPersons()) {
           <div class="d-flex align-items-center gap-2 text-body-secondary">
             <c-spinner size="sm" />
-            <span>Cargando estudiantes...</span>
+            <span>Cargando alumnos...</span>
           </div>
         } @else if (activePersons.length === 0) {
           <p class="text-warning small mb-0">
-            No tenés estudiantes asignados. Primero asigná personas desde el panel de estudiantes.
+            No tenés alumnos asignados. Primero asigná alumnos desde Mi Aula.
           </p>
         } @else {
           <select cSelect id="assign-person" [(ngModel)]="form.personId" name="personId" required>
-            <option value="">Seleccionar estudiante...</option>
+            <option value="">Seleccionar alumno...</option>
             @for (p of activePersons; track p.personId) {
               <option [value]="p.personId">
                 {{ p.personLastName }}, {{ p.personFirstName }} @if (p.personDocumentNumber) { (DNI: {{ p.personDocumentNumber }}) }

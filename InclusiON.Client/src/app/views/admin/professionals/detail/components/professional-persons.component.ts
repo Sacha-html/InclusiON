@@ -281,13 +281,13 @@ export class ProfessionalPersonsComponent implements OnInit {
         next: () => {
           this.isSubmitting.set(false);
           this.showAssignPersonModal.set(false);
-          this.toastService.success('Persona asignada exitosamente');
+          this.toastService.success('Alumno asignado exitosamente');
           this.loadAssignedPersons();
           this.loadClassrooms();
         },
         error: () => {
           this.isSubmitting.set(false);
-          this.toastService.error('Error al asignar persona');
+          this.toastService.error('Error al asignar alumno');
         },
       });
   }
@@ -539,7 +539,7 @@ export class ProfessionalPersonsComponent implements OnInit {
         this.persons = data;
         this.personsChange.emit(data);
       },
-      error: () => this.toastService.error('Error al cargar personas asignadas'),
+      error: () => this.toastService.error('Error al cargar alumnos asignados'),
     });
   }
 }

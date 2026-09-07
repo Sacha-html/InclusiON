@@ -61,7 +61,6 @@ export class ListComponent {
   canCreate = this.#authService.hasPermission(Permissions.Persons.Create);
 
   selectedInstitutionId: number | undefined;
-  representativeSearch = '';
   statusFilter = '';
 
   isLoading = false;
@@ -95,7 +94,7 @@ export class ListComponent {
 
   public cols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre completo', sortable: true },
-    { key: 'representativeNames', label: 'Responsables' },
+    { key: 'representativeNames', label: 'Responsable' },
     { key: 'disabilityTypeName', label: 'Tipo de discapacidad' },
     { key: 'autonomyLevelName', label: 'Nivel de autonomía' },
     { key: 'age', label: 'Edad', type: 'number', sortable: true },
@@ -110,8 +109,6 @@ export class ListComponent {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
-        { action: 'edit', label: 'Editar', icon: 'cilNotes', visible: (item) => item.isActive },
-        { action: 'login-method', label: 'Método login', icon: 'cilLockLocked', visible: (item) => item.isActive },
       ],
     },
   ];
@@ -149,18 +146,12 @@ export class ListComponent {
     this.loadPersons();
   }
 
-  onRepresentativeSearch(): void {
-    this.currentPage = 1;
-    this.loadPersons();
-  }
-
   onStatusFilterChange(): void {
     this.currentPage = 1;
     this.loadPersons();
   }
 
   clearFilters(): void {
-    this.representativeSearch = '';
     this.statusFilter = '';
     this.currentPage = 1;
     this.loadPersons();
@@ -293,7 +284,6 @@ export class ListComponent {
         sortDirection: this.sortDirection,
         institutionId: this.selectedInstitutionId,
         isActive,
-        representativeSearch: this.representativeSearch || undefined,
       })
       .subscribe({
         next: (response) => {
@@ -302,7 +292,7 @@ export class ListComponent {
           this.isLoading = false;
         },
         error: () => {
-          this.#toastService.error('Error al obtener personas');
+          this.#toastService.error('Error al obtener alumnos');
           this.isLoading = false;
         },
       });

@@ -1,7 +1,7 @@
 @if (institution) {
   <c-card>
     <c-card-header>
-      <strong>Editar Institucion</strong>
+      <strong>Editar institución</strong>
     </c-card-header>
     <c-card-body>
       @if (serverError) {
@@ -19,7 +19,7 @@
             @if (submitted && f['name'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['name'].errors['required']) { El nombre es obligatorio. }
-                @if (f['name'].errors['minlength']) { Minimo 2 caracteres. }
+                @if (f['name'].errors['minlength']) { Mínimo 2 caracteres. }
               </c-form-feedback>
             }
           </c-col>
@@ -30,7 +30,7 @@
           @if (submitted && f['email'].errors) {
             <c-form-feedback [valid]="false">
               @if (f['email'].errors['required']) { El email es obligatorio. }
-              @if (f['email'].errors['email']) { Ingrese un email valido. }
+              @if (f['email'].errors['email']) { Ingrese un email válido. }
             </c-form-feedback>
           }
           </c-col>
@@ -38,11 +38,11 @@
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="address">Direccion</label>
+            <label cLabel for="address">Dirección</label>
             <input cFormControl id="address" formControlName="address" />
           </c-col>
           <c-col sm="6">
-            <label cLabel for="phone">Telefono</label>
+            <label cLabel for="phone">Teléfono</label>
             <input cFormControl id="phone" formControlName="phone" />
           </c-col>
         </c-row>

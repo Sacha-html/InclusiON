@@ -65,10 +65,13 @@
       <input cFormControl
              id="field-documentNumber"
              [(ngModel)]="draft.documentNumber"
+             appOnlyNumbers
+             inputmode="numeric"
+             placeholder="Ej: 12345678"
              [disabled]="isSaving()"
              (blur)="saveField()"
              (keydown)="onKeydown($event)"
-             maxlength="20"
+             maxlength="8"
              autofocus />
       @if (fieldError()) {
         <div class="text-danger small mt-1" role="alert">{{ fieldError() }}</div>

@@ -124,5 +124,54 @@ namespace InclusiON.Tests.Unit.Handlers.Family
                 Arg.Is<User>(u => u.Email == "maria@test.com" && u.MustChangePassword),
                 Arg.Any<string>());
         }
+
+        [Fact]
+        public async Task HandleAsync_PersonAlreadyHasPrimaryRepresentative_CreatesFamilyAsSecondary()
+        {
+            _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>())
+                        .Returns(new PersonWithDisability { Id = PersonId });
+            _identity.FindByEmailAsync(Arg.Any<string>()).Returns((User?)null);
+            _familyRepo.GetPersonRepresentativesByPersonIdAsync(PersonId, Arg.Any<CancellationToken>())
+                       .Returns(new List<PersonRepresentative>
+                       {
+                           new() { PersonId = PersonId, IsPrimary = true, IsActive = true }
+                       });
+            SetupTransaction();
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
+
+            FamilyRepresentative? savedFamily = null;
+            _familyRepo.CreateAsync(Arg.Do<FamilyRepresentative>(f => savedFamily = f), Arg.Any<CancellationToken>())
+                       .Returns(ci => (FamilyRepresentative)ci[0]);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            savedFamily.Should().NotBeNull();
+            savedFamily!.PersonRepresentatives.Should().HaveCount(1);
+            savedFamily.PersonRepresentatives.First().IsPrimary.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task HandleAsync_PersonHasNoActivePrimaryRepresentative_CreatesFamilyAsPrimary()
+        {
+            _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>())
+                        .Returns(new PersonWithDisability { Id = PersonId });
+            _identity.FindByEmailAsync(Arg.Any<string>()).Returns((User?)null);
+            _familyRepo.GetPersonRepresentativesByPersonIdAsync(PersonId, Arg.Any<CancellationToken>())
+                       .Returns(new List<PersonRepresentative>());
+            SetupTransaction();
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
+
+            FamilyRepresentative? savedFamily = null;
+            _familyRepo.CreateAsync(Arg.Do<FamilyRepresentative>(f => savedFamily = f), Arg.Any<CancellationToken>())
+                       .Returns(ci => (FamilyRepresentative)ci[0]);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            savedFamily.Should().NotBeNull();
+            savedFamily!.PersonRepresentatives.Should().HaveCount(1);
+            savedFamily.PersonRepresentatives.First().IsPrimary.Should().BeTrue();
+        }
     }
 }

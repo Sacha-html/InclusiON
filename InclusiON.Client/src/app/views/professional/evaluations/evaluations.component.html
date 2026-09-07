@@ -3,12 +3,12 @@
   <c-col lg="3" md="4" class="mb-4">
     <c-card class="shadow-sm border-0">
       <c-card-header class="bg-dark text-white py-3">
-        <h5 class="mb-0 text-uppercase tracking-wider font-semibold">Alumnos Asignados</h5>
+        <h5 class="mb-0 text-uppercase tracking-wider font-semibold">Alumnos asignados</h5>
       </c-card-header>
 
       <!-- Selector de Aula y Búsqueda Rápida -->
       <div class="p-3 border-bottom bg-body-tertiary">
-        <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Filtrar por Aula</label>
+        <label class="form-label small fw-semibold text-muted text-uppercase mb-1">Filtrar por aula</label>
         <select class="form-select form-select-sm mb-2" [ngModel]="selectedClassroomId()" (ngModelChange)="selectedClassroomId.set($event)">
           <option value="">Todas las aulas</option>
           @for (c of classrooms(); track c.id) {
@@ -88,15 +88,21 @@
       <div class="d-flex gap-2">
         <button cButton color="success" size="sm" (click)="navigateToNewActivity()">
           <svg cIcon name="cilPlus" size="sm" class="me-1"></svg>
-          Nueva Actividad
+          Nueva actividad
         </button>
-        <button cButton color="primary" size="sm" (click)="downloadStudentMetricsPdf()">
-          <svg cIcon name="cilCloudDownload" size="sm" class="me-1"></svg>
-          Descargar PDF
+        <button class="btn btn-export-pdf btn-sm" (click)="downloadStudentMetricsPdf()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" class="pdf-icon-svg" aria-hidden="true">
+            <path d="M2.5 5.5H4.5V19.5H16.5V21.5H2.5V5.5Z" fill="#000000" />
+            <path d="M5.5 2H15.5L21.5 8V19.5H5.5V2Z" fill="#000000" />
+            <path d="M15.5 2V8H21.5L15.5 2Z" fill="#000000" stroke="#ffffff" stroke-width="1" stroke-linejoin="round" />
+            <text x="13.5" y="13.8" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="5.2" fill="#ffffff" text-anchor="middle" letter-spacing="-0.2">PDF</text>
+            <rect x="8.5" y="15.5" width="10" height="1.8" rx="0.9" fill="#ffffff" />
+          </svg>
+          <span>Exportar PDF</span>
         </button>
         <button cButton color="outline-primary" size="sm" (click)="openShareModal()">
           <svg cIcon name="cilPaperPlane" size="sm" class="me-1"></svg>
-          Compartir con Tutor
+          Compartir con tutor
         </button>
       </div>
     </div>
@@ -106,7 +112,7 @@
       <c-alert color="warning" class="d-flex align-items-center gap-3 mb-4 shadow-sm border border-warning bg-warning-subtle">
         <div class="fs-3 text-warning">⚠️</div>
         <div class="flex-grow-1">
-          <h6 class="alert-heading fw-bold mb-1 text-dark">Alerta de Estancamiento / Dificultades Detectadas</h6>
+          <h6 class="alert-heading fw-bold mb-1 text-dark">Alerta de estancamiento / dificultades detectadas</h6>
           <p class="small mb-0 text-dark">
             Este alumno presenta <strong>{{ frustrationAlertCount() }} actividad(es)</strong> con dificultades recurrentes o bloqueos (ej. <em>{{ frustratedActivities().slice(0, 2).join(', ') }}</em>). Se recomienda evaluar asistencia o modular dificultad en su plan.
           </p>
@@ -179,7 +185,7 @@
     <!-- Assignments list & responses detail -->
     <c-card class="shadow-sm border-0">
       <c-card-header class="bg-light py-3 border-0">
-        <strong class="text-dark">Historial de Actividades Asignadas</strong>
+        <strong class="text-dark">Historial de actividades asignadas</strong>
       </c-card-header>
       <c-card-body class="p-0">
         @if (isLoadingAssignments()) {
@@ -198,9 +204,9 @@
               <tr>
                 <th class="ps-4">Actividad</th>
                 <th>Estado</th>
-                <th>Fecha Asignación</th>
+                <th>Fecha de asignación</th>
                 <th>Intentos</th>
-                <th>Mejor Acierto</th>
+                <th>Mejor acierto</th>
                 <th>Detalle</th>
               </tr>
             </thead>
@@ -285,7 +291,7 @@
                           <td>{{ getFrustrationEmoji(resp.frustrationLevel) }}</td>
                           <td>
                             <c-badge [color]="resp.requiredSupport ? 'warning' : 'success'" class="px-2 py-1">
-                              {{ resp.requiredSupport ? 'Con Apoyo' : 'Autónomo' }}
+                              {{ resp.requiredSupport ? 'Con apoyo' : 'Autónomo' }}
                             </c-badge>
                           </td>
                         </tr>
@@ -307,11 +313,11 @@
     <!-- ── Modal Compartir Métricas por Mensajería ────────────────────────── -->
     <c-modal [visible]="showShareModal()" (visibleChange)="showShareModal.set($event)">
       <c-modal-header>
-        <h5 cModalTitle>Compartir Métricas de {{ selectedPerson()?.personFullName }}</h5>
+        <h5 cModalTitle>Compartir métricas de {{ selectedPerson()?.personFullName }}</h5>
       </c-modal-header>
       <c-modal-body>
         <div class="mb-3">
-          <label cLabel class="mb-1">Tutor / Familiar Destinatario *</label>
+          <label cLabel class="mb-1">Tutor / familiar destinatario *</label>
           <select cSelect [(ngModel)]="selectedTutorId">
             <option value="">— Selecciona un tutor —</option>
             @for (t of representativesList(); track t.representativeId) {
@@ -328,7 +334,7 @@
         <button cButton color="secondary" size="sm" (click)="closeShareModal()">Cancelar</button>
         <button cButton color="primary" size="sm" [disabled]="!selectedTutorId || sendingShare()"
           (click)="sendSharedMetrics()">
-          @if (sendingShare()) { Enviando… } @else { Enviar Mensaje }
+          @if (sendingShare()) { Enviando… } @else { Enviar mensaje }
         </button>
       </c-modal-footer>
     </c-modal>

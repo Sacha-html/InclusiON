@@ -4,11 +4,7 @@
   <legend class="px-2 mb-2 fw-bold text-body-secondary" style="font-size: 0.9rem; float: none;">Filtros</legend>
   <!-- d-flex flex-wrap evita los negative gutters de c-row que causan overflow en mobile -->
   <div class="d-flex flex-wrap align-items-end gap-3">
-    <div style="flex: 1 1 160px; min-width: 0;">
-      <label cLabel for="filter-representative">Responsable</label>
-      <input cFormControl id="filter-representative" type="text" [(ngModel)]="representativeSearch" (ngModelChange)="onRepresentativeSearch()" placeholder="Nombre del responsable">
-    </div>
-    <div style="flex: 1 1 130px; min-width: 0;">
+    <div style="width: 160px; max-width: 100%;">
       <label cLabel for="filter-status">Estado</label>
       <select cSelect id="filter-status" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
         <option value="">Todos</option>
@@ -23,7 +19,7 @@
 </fieldset>
 
 <app-data-table
-  title="Gestionar Personas"
+  title="Gestionar Alumnos"
   [columns]="cols"
   [items]="persons"
   [totalItems]="totalItems"
@@ -47,7 +43,7 @@
   <c-modal-body>
     @if (selectedPerson) {
       <p class="text-body-secondary mb-3">
-        Persona: <strong>{{ selectedPerson.fullName }}</strong>
+        Alumno: <strong>{{ selectedPerson.fullName }}</strong>
       </p>
       <p class="text-body-secondary mb-3">
         Método actual: <strong>{{ selectedPerson.loginMethodName ?? 'Sin asignar' }}</strong>
@@ -76,7 +72,7 @@
           </c-alert>
           <p class="text-body-secondary mb-0">
             Asegúrese de copiar esta contraseña. No se podrá volver a consultar.
-            La persona deberá cambiarla en su primer inicio de sesión.
+            El alumno deberá cambiarla en su primer inicio de sesión.
           </p>
         }
       }

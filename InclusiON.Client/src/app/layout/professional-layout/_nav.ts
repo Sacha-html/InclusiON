@@ -9,7 +9,7 @@ export const professionalNavItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Gestion'
+    name: 'Gestión'
   },
   {
     name: 'Actividades',
@@ -17,7 +17,7 @@ export const professionalNavItems: INavData[] = [
     iconComponent: { name: 'cil-task' }
   },
   {
-    name: 'Mi Aula',
+    name: 'Mi aula',
     url: AppRoutes.Pro.Persons,
     iconComponent: { name: 'cil-people' }
   },
@@ -28,7 +28,7 @@ export const professionalNavItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Evaluacion'
+    name: 'Evaluación'
   },
   {
     name: 'Evaluaciones',
@@ -42,7 +42,7 @@ export const professionalNavItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Comunicacion'
+    name: 'Comunicación'
   },
   {
     name: 'Calendario',

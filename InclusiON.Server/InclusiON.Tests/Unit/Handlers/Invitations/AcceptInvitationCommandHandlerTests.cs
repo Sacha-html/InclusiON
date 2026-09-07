@@ -153,5 +153,63 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
             await _identity.Received(1).CreateUserAsync(Arg.Any<User>(), "Passw0rd!");
             await _identity.Received(1).AddToRoleAsync(Arg.Any<User>(), "FamilyRepresentative");
         }
+
+        [Fact]
+        public async Task HandleAsync_InvitationForPersonWithExistingPrimary_CreatesPersonRepAsSecondary()
+        {
+            var now = DateTime.UtcNow;
+            _dateTime.UtcNow.Returns(now);
+            var personId = Guid.NewGuid();
+            var inv = ValidInvitation();
+            inv.ExpiresAt = now.AddDays(7);
+            inv.ForPersonId = personId;
+            _invRepo.GetByCodeAsync("abc-code", Arg.Any<CancellationToken>()).Returns(inv);
+            _invRepo.HasActivePrimaryRepresentativeAsync(personId, Arg.Any<CancellationToken>()).Returns(true);
+            _identity.FindByEmailAsync("nuevo@test.com").Returns((User?)null);
+            _identity.CreateUserAsync(Arg.Any<User>(), Arg.Any<string>())
+                     .Returns((true, Array.Empty<string>()));
+            _invRepo.CreateFamilyRepresentativeAsync(Arg.Any<FamilyRepresentative>(), Arg.Any<CancellationToken>())
+                    .Returns(ci => (FamilyRepresentative)ci[0]);
+            SetupTransaction();
+
+            PersonRepresentative? createdPersonRep = null;
+            _invRepo.CreatePersonRepresentativeAsync(Arg.Do<PersonRepresentative>(pr => createdPersonRep = pr), Arg.Any<CancellationToken>())
+                    .Returns(Task.CompletedTask);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            createdPersonRep.Should().NotBeNull();
+            createdPersonRep!.IsPrimary.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task HandleAsync_InvitationForPersonWithoutExistingPrimary_CreatesPersonRepAsPrimary()
+        {
+            var now = DateTime.UtcNow;
+            _dateTime.UtcNow.Returns(now);
+            var personId = Guid.NewGuid();
+            var inv = ValidInvitation();
+            inv.ExpiresAt = now.AddDays(7);
+            inv.ForPersonId = personId;
+            _invRepo.GetByCodeAsync("abc-code", Arg.Any<CancellationToken>()).Returns(inv);
+            _invRepo.HasActivePrimaryRepresentativeAsync(personId, Arg.Any<CancellationToken>()).Returns(false);
+            _identity.FindByEmailAsync("nuevo@test.com").Returns((User?)null);
+            _identity.CreateUserAsync(Arg.Any<User>(), Arg.Any<string>())
+                     .Returns((true, Array.Empty<string>()));
+            _invRepo.CreateFamilyRepresentativeAsync(Arg.Any<FamilyRepresentative>(), Arg.Any<CancellationToken>())
+                    .Returns(ci => (FamilyRepresentative)ci[0]);
+            SetupTransaction();
+
+            PersonRepresentative? createdPersonRep = null;
+            _invRepo.CreatePersonRepresentativeAsync(Arg.Do<PersonRepresentative>(pr => createdPersonRep = pr), Arg.Any<CancellationToken>())
+                    .Returns(Task.CompletedTask);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            createdPersonRep.Should().NotBeNull();
+            createdPersonRep!.IsPrimary.Should().BeTrue();
+        }
     }
 }

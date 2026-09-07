@@ -11,6 +11,6 @@ export const familyReportRoutes: Routes = [
     path: ':id',
     loadComponent: () =>
       import('./detail/detail.component').then((m) => m.DetailComponent),
-    data: { title: 'Detalle de Reporte' },
+    data: { title: 'Detalle de reporte' },
   },
 ];

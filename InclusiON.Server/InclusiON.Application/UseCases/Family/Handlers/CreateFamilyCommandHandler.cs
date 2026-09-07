@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
@@ -111,6 +111,14 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
                     family.UserId = user.Id;
 
+                    // Regla de negocio y caso de borde:
+                    // El único familiar principal automático es el registrado al crear el alumno.
+                    // Si se añade un familiar posterior a un alumno ya registrado, queda como secundario (IsPrimary = false).
+                    // Caso de borde: Si el alumno no cuenta con ningún familiar principal activo, este asume el rol principal.
+                    var existingReps = await _repository.GetPersonRepresentativesByPersonIdAsync(command.PersonId, ct);
+                    bool hasActivePrimary = existingReps?.Any(r => r.IsActive && r.IsPrimary) == true;
+                    bool isPrimary = !hasActivePrimary;
+
                     // Vincular familiar con la persona antes del primer SaveChanges.
                     // family.Id ya está asignado en el constructor (Guid.NewGuid()).
                     // Usar un solo SaveChanges evita la excepción de concurrencia de EF
@@ -120,7 +128,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     {
                         PersonId = command.PersonId,
                         RepresentativeId = family.Id,
-                        IsPrimary = true,
+                        IsPrimary = isPrimary,
                         IsActive = true,
                         CreatedAt = _dateTime.UtcNow
                     });

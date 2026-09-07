@@ -54,7 +54,7 @@ export class ProfessionalReportsComponent implements OnInit {
   readonly columns: TableColumn[] = [
     { key: 'reportDateFmt',  label: 'Fecha',   sortable: false },
     { key: 'title',          label: 'Título',  sortable: false },
-    { key: 'personName',     label: 'Persona', sortable: false },
+    { key: 'personName',     label: 'Alumno', sortable: false },
     { key: 'reportTypeName', label: 'Tipo',    sortable: false },
     {
       key: 'status', label: 'Estado', type: 'badge',
