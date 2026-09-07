@@ -58,7 +58,7 @@
       </ul>
 
       @if (activeTab === 'datos') {
-        <app-professional-basic-info [professional]="professional" (deactivate)="deactivate()" />
+        <app-professional-basic-info [professional]="professional" (deactivate)="deactivate()" (reactivate)="openReactivate()" />
       }
 
       @if (activeTab === 'usuario') {

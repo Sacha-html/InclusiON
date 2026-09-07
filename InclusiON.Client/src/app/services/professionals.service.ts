@@ -39,6 +39,7 @@ export class ProfessionalsService {
       if (request.pageSize) params = params.set('pageSize', request.pageSize.toString());
       if (request.search) params = params.set('search', request.search);
       if (request.institutionId) params = params.set('institutionId', request.institutionId.toString());
+      if (request.specialty) params = params.set('specialty', request.specialty);
       if (request.status) params = params.set('status', request.status);
       if (request.isActive !== undefined) params = params.set('isActive', request.isActive.toString());
     }
