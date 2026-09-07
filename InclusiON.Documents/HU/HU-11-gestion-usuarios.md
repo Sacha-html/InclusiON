@@ -29,7 +29,7 @@ El administrador necesita una vista centralizada de todas las cuentas del sistem
 - **Listar usuarios** con filtros por rol, estado activo/inactivo, institución y búsqueda por nombre/email
 - **Resetear contraseña** generando una nueva temporal, forzando cambio en el próximo login y revocando sesiones activas
 - **Desactivar una cuenta** cortando el acceso inmediatamente (soft-delete + revocación de tokens)
-- **Reactivar una cuenta** previamente desactivada, con nueva contraseña temporal
+- **Reactivar una cuenta** previamente desactivada, con nueva contraseña temporal. Los representantes familiares usan su ABM específico para no restituir responsabilidades automáticamente.
 - **Consultar actividad** del usuario: último login, cantidad de accesos, acciones recientes del audit log
 
 ---
@@ -57,6 +57,7 @@ El administrador necesita una vista centralizada de todas las cuentas del sistem
 | POST | `/api/admin/users/{id}/reset-password` | Reset de contraseña |
 | PUT | `/api/admin/users/{id}/deactivate` | Desactivar cuenta |
 | PUT | `/api/admin/users/{id}/reactivate` | Reactivar cuenta |
+| PUT | `/api/Family/{familyId}/reactivate` | Reactivar perfil y cuenta familiar sin restaurar vínculos o alumnos |
 | GET | `/api/admin/users/{id}/activity` | Actividad reciente |
 
 ---

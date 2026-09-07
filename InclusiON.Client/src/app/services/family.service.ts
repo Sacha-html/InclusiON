@@ -71,6 +71,12 @@ export class FamilyService {
       .pipe(handleApiError());
   }
 
+  reactivateFamily(id: string): Observable<FamilyResponse> {
+    return this.http
+      .put<ApiResponse<FamilyResponse>>(`${this.apiUrl}/${id}/reactivate`, {})
+      .pipe(unwrapResponse());
+  }
+
   getAvailableFamilies(search?: string, page = 1, pageSize = 50): Observable<FamilyResponse[]> {
     let params = new HttpParams()
       .set('page', page.toString())

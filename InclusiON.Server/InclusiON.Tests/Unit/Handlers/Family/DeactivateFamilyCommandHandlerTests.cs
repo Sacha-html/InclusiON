@@ -7,6 +7,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Family.Commands;
 using InclusiON.Application.UseCases.Family.Handlers;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 
@@ -39,7 +40,7 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         [Fact]
         public async Task HandleAsync_FamilyNotFound_ReturnsNotFound()
         {
-            _familyRepo.GetByIdAsync(FamilyId, Arg.Any<CancellationToken>())
+            _familyRepo.GetByIdForUpdateAsync(FamilyId, Arg.Any<CancellationToken>())
                        .Returns((FamilyRepresentative?)null);
 
             var result = await BuildSut().HandleAsync(new DeactivateFamilyCommand(FamilyId), default);
@@ -55,7 +56,7 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         {
             var family = AFamily();
             var now    = DateTime.UtcNow;
-            _familyRepo.GetByIdAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
+            _familyRepo.GetByIdForUpdateAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
             _familyRepo.DeactivateRepresentativeAndSuspendDependentStudentsAsync(family.UserId, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
                        .Returns(new List<string>());
             _dateTime.UtcNow.Returns(now);
@@ -64,9 +65,13 @@ namespace InclusiON.Tests.Unit.Handlers.Family
  
             result.Success.Should().BeTrue();
             family.IsActive.Should().BeFalse();
+            family.Status.Should().Be(FamilyStatusEnum.Terminated);
             family.User.IsActive.Should().BeFalse();
             family.UpdatedAt.Should().Be(now);
             await _familyRepo.Received(1).UpdateAsync(family, Arg.Any<CancellationToken>());
+            await _familyRepo.Received(1).CreateFamilyStatusHistoryAsync(
+                Arg.Is<FamilyStatusHistory>(h => h.NewStatus == FamilyStatusEnum.Terminated),
+                Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         }
  
@@ -75,7 +80,7 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         {
             var family = AFamily();
             var now = DateTime.UtcNow;
-            _familyRepo.GetByIdAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
+            _familyRepo.GetByIdForUpdateAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
             _familyRepo.DeactivateRepresentativeAndSuspendDependentStudentsAsync(family.UserId, Arg.Any<DateTime>(), Arg.Any<CancellationToken>())
                        .Returns(new List<string> { "Juan Perez" });
             _dateTime.UtcNow.Returns(now);

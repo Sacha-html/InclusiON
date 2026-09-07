@@ -134,7 +134,7 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
         }
 
         [Fact]
-        public async Task ActiveFamily_DeactivatesLinkedFamily()
+        public async Task ActiveFamily_RequiresDedicatedFamilyDeactivation_BeforeAnyMutation()
         {
             var user = ActiveUser();
             var innerUser = new User { Id = TargetId, IsActive = true };
@@ -142,13 +142,25 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
                 { Id = Guid.NewGuid(), UserId = TargetId, User = innerUser };
 
             _identity.FindByIdAsync(TargetId).Returns(user);
-            _identity.GetRolesAsync(user).Returns(new List<string> { "FamilyRepresentative" });
+            _identity.GetRolesAsync(user).Returns(new List<string> { "Professional", "FamilyRepresentative" });
             _familyRepo.GetByUserIdAsync(TargetId, Arg.Any<CancellationToken>()).Returns(family);
 
-            await BuildSut().HandleAsync(Cmd(), default);
+            var result = await BuildSut().HandleAsync(Cmd(), default);
 
-            family.User.IsActive.Should().BeFalse();
-            await _familyRepo.Received(1).UpdateAsync(family, Arg.Any<CancellationToken>());
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
+            user.IsActive.Should().BeTrue();
+            family.User.IsActive.Should().BeTrue();
+            await _identity.DidNotReceive().UpdateUserAsync(user);
+            await _tokens.DidNotReceive().RevokeAllUserTokensAsync(
+                TargetId, Arg.Any<string>(), Arg.Any<CancellationToken>());
+            await _familyRepo.DidNotReceive().UpdateAsync(family, Arg.Any<CancellationToken>());
+            await _familyRepo.DidNotReceive().DeactivateRepresentativeAndSuspendDependentStudentsAsync(
+                TargetId, Arg.Any<DateTime>(), Arg.Any<CancellationToken>());
+            await _proRepo.DidNotReceive().UpdateAsync(Arg.Any<Professional>(), Arg.Any<CancellationToken>());
+            await _personRepo.DidNotReceive().UpdateAsync(Arg.Any<PersonWithDisability>(), Arg.Any<CancellationToken>());
+            await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+            await _audit.DidNotReceive().LogAsync(Arg.Any<AccessAuditEntry>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]

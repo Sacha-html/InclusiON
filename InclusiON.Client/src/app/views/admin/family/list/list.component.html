@@ -47,3 +47,27 @@
   (confirm)="confirmDeactivate()"
   (cancel)="cancelDeactivate()">
 </app-confirm-modal>
+
+<app-password-modal
+  [visible]="showPasswordModal"
+  entityType="Familiar"
+  entityArticle="el"
+  [entityName]="reactivatedFamilyName"
+  [password]="temporaryPassword"
+  title="Familiar reactivado exitosamente"
+  description="Se reactivo el familiar"
+  (close)="closePasswordModal()">
+</app-password-modal>
+
+<app-confirm-modal
+  [visible]="showReactivateModal"
+  title="Confirmar reactivación"
+  messagePrefix="¿Está seguro de que desea reactivar al familiar "
+  [itemName]="itemToReactivate?.fullName ?? ''"
+  messageSuffix="?"
+  detail="Se generará una contraseña temporal y deberá cambiarla al iniciar sesión. No se restaurarán personas a cargo ni vínculos previos."
+  confirmLabel="Reactivar"
+  confirmColor="success"
+  (confirm)="confirmReactivate()"
+  (cancel)="cancelReactivate()">
+</app-confirm-modal>

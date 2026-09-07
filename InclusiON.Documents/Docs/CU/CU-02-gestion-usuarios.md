@@ -183,13 +183,16 @@
 2a. El Admin selecciona "Desactivar cuenta".
 3a. El sistema aplica soft-delete, revoca tokens activos y corta el acceso inmediatamente.
 4a. El sistema registra la operación en `AccessAudit`.
+5a. Los representantes familiares se desactivan exclusivamente desde el ABM de Familiares; la gestión centralizada conserva únicamente el reseteo de contraseña.
 
 **Flujo alternativo — Reactivar cuenta**
 2b. El Admin selecciona "Reactivar cuenta".
 3b. El sistema reactiva el usuario, genera contraseña temporal y activa `MustChangePassword`.
+3c. Para un representante familiar, el Admin usa el ABM de Familiares: se reactiva cuenta y perfil, pero no vínculos previos ni alumnos suspendidos.
 
 **Restricciones**
 - El Admin no puede desactivar su propio usuario.
+- La gestión centralizada no permite desactivar ni reactivar representantes familiares; esas transiciones pertenecen al ABM de Familiares.
 - Todas las operaciones quedan registradas en `AccessAudit`.
 
 **Postcondiciones**

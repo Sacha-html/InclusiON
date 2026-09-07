@@ -203,6 +203,26 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        [HttpPut("{familyId}/reactivate")]
+        [Authorize(Policy = "family:update")]
+        [FamilyAccess(AccessMode.Write)]
+        [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<FamilyResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<FamilyResponse>>> ReactivateFamily(
+            Guid familyId,
+            [FromServices] ICommandHandler<ReactivateFamilyCommand, ApiResponse<FamilyResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var userId = _httpContextService.GetCurrentUserId();
+            if (userId is null)
+                return Unauthorized();
+
+            var result = await handler.HandleAsync(new ReactivateFamilyCommand(familyId, userId.Value), cancellationToken);
+            return result.ToActionResult();
+        }
+
         [HttpPost("{familyId}/link/{personId}")]
         [Authorize(Policy = "family:link")]
         [FamilyAccess(AccessMode.Write)]
