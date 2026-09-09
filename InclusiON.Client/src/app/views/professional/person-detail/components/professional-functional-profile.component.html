@@ -9,19 +9,19 @@
   <h4 class="h6 mb-3 border-bottom pb-2 text-body-secondary">Niveles funcionales</h4>
   <dl class="row g-3 mb-0">
     <div class="col-sm-4">
-      <dt class="form-label text-body-secondary mb-1">Atención</dt>
+      <dt class="form-label text-body-secondary mb-1">Atención (1-5)</dt>
       <dd class="mb-0 fw-medium">{{ formatLevel(person.attentionLevel) }}</dd>
     </div>
     <div class="col-sm-4">
-      <dt class="form-label text-body-secondary mb-1">Comunicación</dt>
+      <dt class="form-label text-body-secondary mb-1">Comunicación (1-5)</dt>
       <dd class="mb-0 fw-medium">{{ formatLevel(person.communicationLevel) }}</dd>
     </div>
     <div class="col-sm-4">
-      <dt class="form-label text-body-secondary mb-1">Motricidad</dt>
+      <dt class="form-label text-body-secondary mb-1">Motricidad (1-5)</dt>
       <dd class="mb-0 fw-medium">{{ formatLevel(person.motorSkillLevel) }}</dd>
     </div>
     <div class="col-sm-6">
-      <dt class="form-label text-body-secondary mb-1">Usa CAA</dt>
+      <dt class="form-label text-body-secondary mb-1">Usa Comunicación Aumentativa y Alternativa (CAA)</dt>
       <dd class="mb-0 fw-medium">{{ formatBoolean(person.usesAAC) }}</dd>
     </div>
     <div class="col-sm-6">
@@ -53,20 +53,43 @@
   <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Accesibilidad</h4>
   <dl class="row g-3 mb-0">
     <div class="col-sm-3">
-      <dt class="form-label text-body-secondary mb-1">Fuente grande</dt>
+      <dt class="form-label text-body-secondary mb-1">Requiere fuente grande</dt>
       <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresLargeFont) }}</dd>
     </div>
     <div class="col-sm-3">
-      <dt class="form-label text-body-secondary mb-1">Alto contraste</dt>
+      <dt class="form-label text-body-secondary mb-1">Requiere alto contraste</dt>
       <dd class="mb-0 fw-medium">{{ formatBoolean(person.requiresHighContrast) }}</dd>
     </div>
     <div class="col-sm-3">
-      <dt class="form-label text-body-secondary mb-1">Ruido visual</dt>
+      <dt class="form-label text-body-secondary mb-1">Sensibilidad al ruido visual</dt>
       <dd class="mb-0 fw-medium">{{ formatBoolean(person.visualNoiseSensitivity) }}</dd>
     </div>
     <div class="col-sm-3">
-      <dt class="form-label text-body-secondary mb-1">Sonido</dt>
+      <dt class="form-label text-body-secondary mb-1">Sensibilidad al sonido</dt>
       <dd class="mb-0 fw-medium">{{ formatBoolean(person.soundSensitivity) }}</dd>
+    </div>
+    <div class="col-sm-6">
+      <dt class="form-label text-body-secondary mb-1">Tipo de daltonismo</dt>
+      <dd class="mb-0 fw-medium">{{ formatColorBlindness(person.colorBlindnessType) }}</dd>
+    </div>
+  </dl>
+
+  <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Configuración de acceso</h4>
+  <dl class="row g-3 mb-0">
+    <div class="col-sm-4">
+      <dt class="form-label text-body-secondary mb-1">Nivel de autonomía</dt>
+      <dd class="mb-0 fw-medium">{{ person.autonomyLevelName ?? 'Sin especificar' }}</dd>
+    </div>
+    <div class="col-sm-4">
+      <dt class="form-label text-body-secondary mb-1">Método de login</dt>
+      <dd class="mb-0 fw-medium">{{ person.loginMethodName ?? 'Sin especificar' }}</dd>
+    </div>
+    <div class="col-sm-4">
+      <dt class="form-label text-body-secondary mb-1">Color de avatar</dt>
+      <dd class="mb-0 fw-medium d-flex align-items-center gap-2">
+        <span class="rounded-circle d-inline-block" style="width: 1rem; height: 1rem;" [style.background-color]="person.avatarColor"></span>
+        {{ person.avatarColor ?? 'Sin especificar' }}
+      </dd>
     </div>
   </dl>
 
@@ -74,19 +97,19 @@
   <h4 class="h6 mb-3 border-bottom pb-2 text-body-secondary">Niveles funcionales</h4>
   <c-row class="mb-3">
     <c-col sm="4">
-      <label cLabel for="edit-attentionLevel">Atención</label>
+      <label cLabel for="edit-attentionLevel">Atención (1-5)</label>
       <select cSelect id="edit-attentionLevel" [(ngModel)]="editData.attentionLevel">
         @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
       </select>
     </c-col>
     <c-col sm="4">
-      <label cLabel for="edit-communicationLevel">Comunicación</label>
+      <label cLabel for="edit-communicationLevel">Comunicación (1-5)</label>
       <select cSelect id="edit-communicationLevel" [(ngModel)]="editData.communicationLevel">
         @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
       </select>
     </c-col>
     <c-col sm="4">
-      <label cLabel for="edit-motorSkillLevel">Motricidad</label>
+      <label cLabel for="edit-motorSkillLevel">Motricidad (1-5)</label>
       <select cSelect id="edit-motorSkillLevel" [(ngModel)]="editData.motorSkillLevel">
         @for (l of levels; track l.value) { <option [ngValue]="l.value">{{ l.label }}</option> }
       </select>
@@ -94,9 +117,20 @@
   </c-row>
   <c-row class="mb-3">
     <c-col sm="6">
+      <label cLabel for="edit-colorBlindnessType">Tipo de daltonismo</label>
+      <select cSelect id="edit-colorBlindnessType" [(ngModel)]="editData.colorBlindnessType">
+        <option value="">Ninguno</option>
+        <option value="deuteranopia">Deuteranopia</option>
+        <option value="protanopia">Protanopia</option>
+        <option value="tritanopia">Tritanopia</option>
+      </select>
+    </c-col>
+  </c-row>
+  <c-row class="mb-3">
+    <c-col sm="6">
       <c-form-check>
         <input cFormCheckInput type="checkbox" id="edit-usesAAC" [(ngModel)]="editData.usesAAC" />
-        <label cFormCheckLabel for="edit-usesAAC">Usa CAA</label>
+        <label cFormCheckLabel for="edit-usesAAC">Usa Comunicación Aumentativa y Alternativa (CAA)</label>
       </c-form-check>
     </c-col>
     <c-col sm="6">
@@ -134,28 +168,60 @@
     <c-col sm="3">
       <c-form-check>
         <input cFormCheckInput type="checkbox" id="edit-largeFont" [(ngModel)]="editData.requiresLargeFont" />
-        <label cFormCheckLabel for="edit-largeFont">Fuente grande</label>
+        <label cFormCheckLabel for="edit-largeFont">Requiere fuente grande</label>
       </c-form-check>
     </c-col>
     <c-col sm="3">
       <c-form-check>
         <input cFormCheckInput type="checkbox" id="edit-highContrast" [(ngModel)]="editData.requiresHighContrast" />
-        <label cFormCheckLabel for="edit-highContrast">Alto contraste</label>
+        <label cFormCheckLabel for="edit-highContrast">Requiere alto contraste</label>
       </c-form-check>
     </c-col>
     <c-col sm="3">
       <c-form-check>
         <input cFormCheckInput type="checkbox" id="edit-visualNoise" [(ngModel)]="editData.visualNoiseSensitivity" />
-        <label cFormCheckLabel for="edit-visualNoise">Ruido visual</label>
+        <label cFormCheckLabel for="edit-visualNoise">Sensibilidad al ruido visual</label>
       </c-form-check>
     </c-col>
     <c-col sm="3">
       <c-form-check>
         <input cFormCheckInput type="checkbox" id="edit-sound" [(ngModel)]="editData.soundSensitivity" />
-        <label cFormCheckLabel for="edit-sound">Sonido</label>
+        <label cFormCheckLabel for="edit-sound">Sensibilidad al sonido</label>
       </c-form-check>
     </c-col>
   </c-row>
+
+  <h4 class="h6 mt-4 mb-3 border-bottom pb-2 text-body-secondary">Configuración de acceso</h4>
+  <c-row class="mb-3">
+    <c-col sm="6">
+      <label cLabel for="edit-autonomyLevel">Nivel de autonomía</label>
+      <select cSelect id="edit-autonomyLevel" [(ngModel)]="editData.autonomyLevelId">
+        <option [ngValue]="0">Sin especificar</option>
+        @for (level of autonomyLevels; track level.id) { <option [ngValue]="level.id">{{ level.name }}</option> }
+      </select>
+    </c-col>
+    <c-col sm="6">
+      <label cLabel for="edit-loginMethod">Método de login</label>
+      <select cSelect id="edit-loginMethod" [(ngModel)]="editData.loginMethodId">
+        <option [ngValue]="0">Sin especificar</option>
+        @for (method of loginMethods; track method.id) { <option [ngValue]="method.id">{{ method.name }}</option> }
+      </select>
+    </c-col>
+  </c-row>
+  <c-row class="mb-3">
+    <c-col sm="6">
+      <label cLabel for="edit-avatarColor">Color de avatar</label>
+      <app-avatar-color-picker id="edit-avatarColor" [(ngModel)]="editData.avatarColor" ariaLabel="Color de avatar" />
+    </c-col>
+  </c-row>
+  @if (editData.loginMethodId === 2) {
+    <c-row class="mb-3">
+      <c-col sm="4">
+        <label cLabel for="edit-pin">PIN</label>
+        <input cFormControl id="edit-pin" type="password" inputmode="numeric" maxlength="6" [(ngModel)]="editData.pin" placeholder="PIN nuevo (opcional)" />
+      </c-col>
+    </c-row>
+  }
 
   <div class="d-flex gap-2 mt-3">
     <button cButton color="primary" (click)="save()" [disabled]="isSaving()">
