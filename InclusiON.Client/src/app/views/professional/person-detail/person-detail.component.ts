@@ -24,7 +24,6 @@ import { ProfessionalFamilyTabComponent } from './components/professional-family
 import { ProfessionalActivitiesTabComponent } from './components/professional-activities-tab.component';
 import { ProfessionalRoadmapTabComponent } from './components/professional-roadmap-tab.component';
 import { ProfessionalReportsTabComponent } from './components/professional-reports-tab.component';
-import { ProfessionalAccessibilityComponent } from './components/professional-accessibility.component';
 import { AppRoutes } from '@shared/constants/app-routes';
 
 @Component({
@@ -44,7 +43,6 @@ import { AppRoutes } from '@shared/constants/app-routes';
     ProfessionalActivitiesTabComponent,
     ProfessionalRoadmapTabComponent,
     ProfessionalReportsTabComponent,
-    ProfessionalAccessibilityComponent,
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -66,10 +64,9 @@ export class PersonDetailComponent implements OnInit {
     | 'familiares'
     | 'actividades'
     | 'roadmap'
-    | 'reportes'
-    | 'accesibilidad' = 'datos';
+    | 'reportes' = 'datos';
 
-  readonly tabs = ['datos', 'funcional', 'habilidades', 'diagnosticos', 'familiares', 'actividades', 'roadmap', 'reportes', 'accesibilidad'];
+  readonly tabs = ['datos', 'funcional', 'habilidades', 'diagnosticos', 'familiares', 'actividades', 'roadmap', 'reportes'];
 
   onTabKeydown(event: KeyboardEvent): void {
     const idx = this.tabs.indexOf(this.activeTab);

@@ -22,7 +22,6 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IPersonsRepository _repository;
         private readonly IIdentityService _identityService;
         private readonly IPasswordHasher _passwordHasher;
-        private readonly IPinHasher _pinHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly ILogger<CreatePersonCommandHandler> _logger;
@@ -34,7 +33,6 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             IPersonsRepository repository,
             IIdentityService identityService,
             IPasswordHasher passwordHasher,
-            IPinHasher pinHasher,
             IUnitOfWork unitOfWork,
             IBackgroundJobRepository backgroundJobs,
             ILogger<CreatePersonCommandHandler> logger,
@@ -44,7 +42,6 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             _repository = repository;
             _identityService = identityService;
             _passwordHasher = passwordHasher;
-            _pinHasher = pinHasher;
             _unitOfWork = unitOfWork;
             _backgroundJobs = backgroundJobs;
             _logger = logger;
@@ -93,37 +90,10 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     LastName = command.LastName,
                     DocumentNumber = command.DocumentNumber,
                     BirthDate = command.BirthDate,
-                    DisabilityTypeId = command.DisabilityTypeId,
                     PhotoUrl = command.PhotoUrl,
-                    // Perfil funcional
-                    AttentionLevel = command.AttentionLevel,
-                    CommunicationLevel = command.CommunicationLevel,
-                    UsesAAC = command.UsesAAC,
-                    UsesSignLanguage = command.UsesSignLanguage,
-                    MotorSkillLevel = command.MotorSkillLevel,
-                    // Preferencias
-                    InterestsAndMotivators = command.InterestsAndMotivators,
-                    LearningStyle = command.LearningStyle,
-                    AvailableResources = command.AvailableResources,
-                    AdditionalTherapies = command.AdditionalTherapies,
-                    // Accesibilidad
-                    RequiresLargeFont = command.RequiresLargeFont,
-                    RequiresHighContrast = command.RequiresHighContrast,
-                    VisualNoiseSensitivity = command.VisualNoiseSensitivity,
-                    SoundSensitivity = command.SoundSensitivity,
-                    ColorBlindnessType = command.ColorBlindnessType,
-                    // Configuracion de acceso
-                    AutonomyLevelId = command.AutonomyLevelId,
-                    LoginMethodId = command.LoginMethodId,
-                    SupervisorUserId = command.SupervisorUserId,
-                    AvatarColor = command.AvatarColor ?? AvatarColors.Random()
+                    // Valores iniciales del dominio; el perfil funcional se evalua despues.
+                    AvatarColor = AvatarColors.Random()
                 };
-
-                // Hash del PIN si se proporciona
-                if (!string.IsNullOrWhiteSpace(command.Pin))
-                {
-                    person.PinCodeHash = _pinHasher.Hash(command.Pin);
-                }
 
                 person.Embedding = new PersonEmbedding();
 
@@ -148,7 +118,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 
                 await _backgroundJobs.CreateAsync(
                     JobTypes.Embedding,
-                    BuildEmbeddingPayload(person, command),
+                    BuildEmbeddingPayload(person),
                     maxRetries: 3,
                     cancellationToken: cancellationToken);
 
@@ -198,24 +168,24 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             return stringBuilder.ToString().Normalize(System.Text.NormalizationForm.FormC);
         }
 
-        private static string BuildEmbeddingPayload(PersonWithDisability person, CreatePersonCommand command) =>
+        private static string BuildEmbeddingPayload(PersonWithDisability person) =>
             JsonSerializer.Serialize(new
             {
                 entity_type = "person",
                 entity_id   = person.Id.ToString(),
-                description = string.Join(" ", new[] { command.InterestsAndMotivators, command.LearningStyle }
+                description = string.Join(" ", new[] { person.InterestsAndMotivators, person.LearningStyle }
                                   .Where(s => !string.IsNullOrWhiteSpace(s))),
-                instructions = string.Join(" ", new[] { command.AdditionalTherapies, command.AvailableResources }
+                instructions = string.Join(" ", new[] { person.AdditionalTherapies, person.AvailableResources }
                                   .Where(s => !string.IsNullOrWhiteSpace(s))),
                 content_json = JsonSerializer.Serialize(new
                 {
-                    uses_aac             = command.UsesAAC,
-                    uses_sign_language   = command.UsesSignLanguage,
-                    attention_level      = command.AttentionLevel,
-                    communication_level  = command.CommunicationLevel,
-                    motor_skill_level    = command.MotorSkillLevel,
-                    autonomy_level_id    = command.AutonomyLevelId,
-                    disability_type_id   = command.DisabilityTypeId,
+                    uses_aac             = person.UsesAAC,
+                    uses_sign_language   = person.UsesSignLanguage,
+                    attention_level      = person.AttentionLevel,
+                    communication_level  = person.CommunicationLevel,
+                    motor_skill_level    = person.MotorSkillLevel,
+                    autonomy_level_id    = person.AutonomyLevelId,
+                    disability_type_id   = person.DisabilityTypeId,
                 }),
             });
     }

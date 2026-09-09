@@ -375,8 +375,16 @@ namespace InclusiON.Api.Scalar
             FirstName = "Sofia",
             LastName = "Ramirez",
             DocumentNumber = "40123456",
-            BirthDate = new DateTime(2015, 5, 20),
-            DisabilityTypeId = 1,
+            BirthDate = new DateTime(2015, 5, 20)
+        };
+
+        public static UpdatePersonDisabilityTypeRequest UpdatePersonDisabilityType => new()
+        {
+            DisabilityTypeId = 1
+        };
+
+        public static UpdatePersonFunctionalProfileRequest UpdatePersonFunctionalProfile => new()
+        {
             AttentionLevel = 3,
             CommunicationLevel = 2,
             UsesAAC = true,
@@ -388,18 +396,13 @@ namespace InclusiON.Api.Scalar
             RequiresHighContrast = false,
             VisualNoiseSensitivity = true,
             SoundSensitivity = false,
-            AutonomyLevelId = 2,
-            LoginMethodId = 2,
-            Pin = "1234",
-            AvatarColor = "#4CAF50"
+            ColorBlindnessType = null
         };
 
         public static UpdatePersonRequest UpdatePerson => new()
         {
             FirstName = "Sofia",
-            AttentionLevel = 4,
-            CommunicationLevel = 3,
-            LearningStyle = "Auditivo"
+            LastName = "Ramirez"
         };
 
         public static UpdateLoginMethodRequest UpdateLoginMethod => new()

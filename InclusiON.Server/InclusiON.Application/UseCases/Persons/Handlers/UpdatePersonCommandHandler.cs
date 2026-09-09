@@ -61,33 +61,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             if (command.LastName != null) person.LastName = command.LastName;
             if (command.DocumentNumber != null) person.DocumentNumber = command.DocumentNumber;
             if (command.BirthDate.HasValue) person.BirthDate = command.BirthDate.Value;
-            if (command.DisabilityTypeId.HasValue) person.DisabilityTypeId = command.DisabilityTypeId;
             if (command.PhotoUrl != null) person.PhotoUrl = command.PhotoUrl;
-
-            // Perfil funcional
-            if (command.AttentionLevel.HasValue) person.AttentionLevel = command.AttentionLevel;
-            if (command.CommunicationLevel.HasValue) person.CommunicationLevel = command.CommunicationLevel;
-            if (command.UsesAAC.HasValue) person.UsesAAC = command.UsesAAC.Value;
-            if (command.UsesSignLanguage.HasValue) person.UsesSignLanguage = command.UsesSignLanguage.Value;
-            if (command.MotorSkillLevel.HasValue) person.MotorSkillLevel = command.MotorSkillLevel;
-
-            // Preferencias
-            if (command.InterestsAndMotivators != null) person.InterestsAndMotivators = command.InterestsAndMotivators;
-            if (command.LearningStyle != null) person.LearningStyle = command.LearningStyle;
-            if (command.AvailableResources != null) person.AvailableResources = command.AvailableResources;
-            if (command.AdditionalTherapies != null) person.AdditionalTherapies = command.AdditionalTherapies;
-
-            // Accesibilidad
-            if (command.RequiresLargeFont.HasValue) person.RequiresLargeFont = command.RequiresLargeFont.Value;
-            if (command.RequiresHighContrast.HasValue) person.RequiresHighContrast = command.RequiresHighContrast.Value;
-            if (command.VisualNoiseSensitivity.HasValue) person.VisualNoiseSensitivity = command.VisualNoiseSensitivity.Value;
-            if (command.SoundSensitivity.HasValue) person.SoundSensitivity = command.SoundSensitivity.Value;
-            if (command.ColorBlindnessType != null) person.ColorBlindnessType = command.ColorBlindnessType;
-
-            // Configuracion de acceso
-            if (command.AutonomyLevelId.HasValue) person.AutonomyLevelId = command.AutonomyLevelId;
-            if (command.SupervisorUserId.HasValue) person.SupervisorUserId = command.SupervisorUserId;
-            if (command.AvatarColor != null) person.AvatarColor = command.AvatarColor;
 
             await _repository.UpdateAsync(person, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
