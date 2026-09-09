@@ -30,7 +30,6 @@ namespace InclusiON.Application.Constants
             public const string Read = "users:read";
             public const string Create = "users:create";
             public const string Update = "users:update";
-            public const string Delete = "users:delete";
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -166,7 +165,7 @@ namespace InclusiON.Application.Constants
         /// </summary>
         public static IReadOnlyList<string> GetAll() => new[]
         {
-            Users.Read, Users.Create, Users.Update, Users.Delete,
+            Users.Read, Users.Create, Users.Update,
             Persons.Read, Persons.Create, Persons.Update, Persons.Delete,
             Professionals.Read, Professionals.Create, Professionals.Update, Professionals.Delete,
             Family.Read, Family.Create, Family.Update, Family.Delete, Family.Link, Family.Unlink,

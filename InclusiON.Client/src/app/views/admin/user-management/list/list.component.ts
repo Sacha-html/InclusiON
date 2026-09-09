@@ -98,10 +98,6 @@ export class UserManagementListComponent implements OnInit {
     this.loadUsers();
   }
 
-  // Deactivate modal
-  showConfirmModal = false;
-  itemToDeactivate: AdminUserListItemResponse | null = null;
-
   // Reset password modal
   showResetPasswordModal = false;
   itemToReset: AdminUserListItemResponse | null = null;
@@ -131,9 +127,7 @@ export class UserManagementListComponent implements OnInit {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
-        { action: 'reset-password', label: 'Resetear', icon: 'cilLockUnlocked', visible: (item) => item.isActive || item.role === 'FamilyRepresentative' },
-        { action: 'deactivate', label: 'Desactivar', icon: 'cilX', visible: (item) => item.isActive && item.role !== 'FamilyRepresentative' },
-        { action: 'reactivate', label: 'Reactivar', icon: 'cilCheck', visible: (item) => !item.isActive && item.role !== 'FamilyRepresentative' },
+        { action: 'reset-password', label: 'Resetear', icon: 'cilLockUnlocked' },
       ],
     },
   ];
@@ -187,15 +181,6 @@ export class UserManagementListComponent implements OnInit {
         this.itemToReset = user;
         this.showResetPasswordModal = true;
         break;
-      case 'deactivate':
-        if (user.role === 'FamilyRepresentative') break;
-        this.itemToDeactivate = user;
-        this.showConfirmModal = true;
-        break;
-      case 'reactivate':
-        if (user.role === 'FamilyRepresentative') break;
-        this.reactivateUser(user);
-        break;
     }
   }
 
@@ -220,49 +205,6 @@ export class UserManagementListComponent implements OnInit {
   cancelResetPassword(): void {
     this.showResetPasswordModal = false;
     this.itemToReset = null;
-  }
-
-  confirmDeactivate(): void {
-    if (!this.itemToDeactivate) return;
-    if (this.itemToDeactivate.role === 'FamilyRepresentative') {
-      this.cancelDeactivate();
-      return;
-    }
-
-    this.userService.deactivateUser(this.itemToDeactivate.userId).subscribe({
-      next: () => {
-        this.toastService.success('Usuario desactivado exitosamente');
-        this.showConfirmModal = false;
-        this.itemToDeactivate = null;
-        this.loadUsers();
-      },
-      error: () => {
-        this.toastService.error('Error al desactivar el usuario');
-        this.showConfirmModal = false;
-      },
-    });
-  }
-
-  cancelDeactivate(): void {
-    this.showConfirmModal = false;
-    this.itemToDeactivate = null;
-  }
-
-  reactivateUser(user: AdminUserListItemResponse): void {
-    if (user.role === 'FamilyRepresentative') return;
-
-    this.userService.reactivateUser(user.userId).subscribe({
-      next: (result) => {
-        this.tempPassword = result.temporaryPassword;
-        this.tempPasswordEmail = result.userEmail;
-        this.showPasswordModal = true;
-        this.toastService.success('Usuario reactivado exitosamente');
-        this.loadUsers();
-      },
-      error: () => {
-        this.toastService.error('Error al reactivar el usuario');
-      },
-    });
   }
 
   closePasswordModal(): void {

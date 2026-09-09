@@ -41,25 +41,10 @@
 
         <!-- Acciones rápidas -->
         <div class="d-flex flex-wrap gap-2 align-self-stretch align-self-md-auto">
-          @if (user.isActive || user.role === 'FamilyRepresentative') {
-            <button cButton color="warning" variant="outline" size="sm" class="d-inline-flex align-items-center gap-1" (click)="resetPassword()">
-              <svg cIcon name="cilLockUnlocked" size="sm"></svg>
-              <span>Resetear contraseña</span>
-            </button>
-          }
-          @if (user.isActive) {
-            @if (user.role !== 'FamilyRepresentative') {
-              <button cButton color="danger" variant="outline" size="sm" class="d-inline-flex align-items-center gap-1" (click)="showDeactivateModal = true">
-                <svg cIcon name="cilXCircle" size="sm"></svg>
-                <span>Desactivar cuenta</span>
-              </button>
-            }
-          } @else if (user.role !== 'FamilyRepresentative') {
-            <button cButton color="success" size="sm" class="d-inline-flex align-items-center gap-1" (click)="reactivateUser()">
-              <svg cIcon name="cilCheckCircle" size="sm"></svg>
-              <span>Reactivar cuenta</span>
-            </button>
-          }
+          <button cButton color="warning" variant="outline" size="sm" class="d-inline-flex align-items-center gap-1" (click)="resetPassword()">
+            <svg cIcon name="cilLockUnlocked" size="sm"></svg>
+            <span>Resetear contraseña</span>
+          </button>
         </div>
       </div>
 
@@ -306,18 +291,6 @@
     confirmColor="warning"
     (confirm)="confirmResetPassword()"
     (cancel)="showResetPasswordModal = false">
-  </app-confirm-modal>
-
-  <app-confirm-modal
-    [visible]="showDeactivateModal"
-    title="Confirmar desactivación"
-    messagePrefix="¿Está seguro de que desea desactivar al usuario "
-    [itemName]="user.fullName"
-    messageSuffix="?"
-    detail="Se revocará su acceso al sistema inmediatamente."
-    confirmLabel="Desactivar"
-    (confirm)="confirmDeactivate()"
-    (cancel)="showDeactivateModal = false">
   </app-confirm-modal>
 
   <c-modal [visible]="showPasswordModal" (visibleChange)="showPasswordModal = $event">
