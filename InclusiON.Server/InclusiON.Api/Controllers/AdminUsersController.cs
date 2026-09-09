@@ -119,38 +119,5 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPut("{userId}/deactivate")]
-        [Authorize(Policy = "users:delete")]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse<object>>> DeactivateUser(
-            Guid userId,
-            [FromServices] ICommandHandler<AdminDeactivateUserCommand, ApiResponse<object>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            var currentUserId = _httpContextService.GetCurrentUserId();
-            if (currentUserId is null) return Unauthorized(ApiResponse<object>.Unauthorized());
-            var command = new AdminDeactivateUserCommand(userId, currentUserId.Value);
-            var result = await handler.HandleAsync(command, cancellationToken);
-            return result.ToActionResult();
-        }
-
-        [HttpPut("{userId}/reactivate")]
-        [Authorize(Policy = "users:update")]
-        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<ResetPasswordResultResponse>), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse<ResetPasswordResultResponse>>> ReactivateUser(
-            Guid userId,
-            [FromServices] ICommandHandler<AdminReactivateUserCommand, ApiResponse<ResetPasswordResultResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            var currentUserId = _httpContextService.GetCurrentUserId();
-            if (currentUserId is null) return Unauthorized(ApiResponse<ResetPasswordResultResponse>.Unauthorized());
-            var command = new AdminReactivateUserCommand(userId, currentUserId.Value);
-            var result = await handler.HandleAsync(command, cancellationToken);
-            return result.ToActionResult();
-        }
     }
 }
