@@ -18,14 +18,15 @@
             [displayFn]="displayPerson"
             [subDisplayFn]="subDisplayPerson"
             [valueFn]="valueFromPerson"
+            [invalid]="(submitted || f['personId'].touched) && f['personId'].invalid"
             placeholder="Buscar por nombre o documento..."
             hintText="Escriba al menos 2 caracteres para buscar"
             noResultsText="No se encontraron alumnos disponibles"
           />
           @if ((submitted || f['personId'].touched) && f['personId'].errors) {
-            <c-form-feedback [valid]="false" id="personId-error">
-              Debe seleccionar un alumno.
-            </c-form-feedback>
+            <div class="invalid-feedback d-block" id="personId-error">
+              Alumno a cargo es obligatorio.
+            </div>
           }
         </c-col>
       </c-row>
