@@ -19,44 +19,7 @@ namespace InclusiON.DTOs.Requests.Persons
 
         public DateTime? BirthDate { get; set; }
 
-        public int? DisabilityTypeId { get; set; }
-
         public string? PhotoUrl { get; set; }
 
-        #region Perfil Funcional
-        [Range(1, 5, ErrorMessage = "El nivel de atencion debe estar entre 1 y 5")]
-        public int? AttentionLevel { get; set; }
-
-        [Range(1, 5, ErrorMessage = "El nivel de comunicacion debe estar entre 1 y 5")]
-        public int? CommunicationLevel { get; set; }
-
-        public bool? UsesAAC { get; set; }
-
-        public bool? UsesSignLanguage { get; set; }
-
-        [Range(1, 5, ErrorMessage = "El nivel de motricidad debe estar entre 1 y 5")]
-        public int? MotorSkillLevel { get; set; }
-        #endregion
-
-        #region Preferencias
-        public string? InterestsAndMotivators { get; set; }
-        public string? LearningStyle { get; set; }
-        public string? AvailableResources { get; set; }
-        public string? AdditionalTherapies { get; set; }
-        #endregion
-
-        #region Accesibilidad
-        public bool? RequiresLargeFont { get; set; }
-        public bool? RequiresHighContrast { get; set; }
-        public bool? VisualNoiseSensitivity { get; set; }
-        public bool? SoundSensitivity { get; set; }
-        public string? ColorBlindnessType { get; set; }
-        #endregion
-
-        #region Configuracion de Acceso
-        public int? AutonomyLevelId { get; set; }
-        public Guid? SupervisorUserId { get; set; }
-        public string? AvatarColor { get; set; }
-        #endregion
     }
 }

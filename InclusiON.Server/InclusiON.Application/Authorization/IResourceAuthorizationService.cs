@@ -26,6 +26,11 @@ namespace InclusiON.Application.Authorization
         Task<bool> CanAccessPersonAsync(Guid personId, AccessMode mode, CancellationToken ct = default);
 
         /// <summary>
+        /// Verifica que el solicitante sea el profesional aprobado, activo y principal de la persona.
+        /// </summary>
+        Task<bool> CanEditPersonFunctionalProfileAsync(Guid personId, CancellationToken ct = default);
+
+        /// <summary>
         /// Devuelve la lista de <c>PersonId</c> a los que el usuario autenticado tiene acceso en modo lectura.
         /// Usado para filtrar listados en repositorios (evita post-filtrado en memoria).
         /// Para GlobalAdmin retorna la lista completa de personas activas.

@@ -25,11 +25,7 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
 
         private static UpdatePersonCommand Cmd(string? doc = null) =>
             new(PersonId, "Nuevo", "Apellido", doc,
-                null, null, null,
-                null, null, null, null, null,
-                null, null, null, null,
-                null, null, null, null, null,
-                null, null, null);
+                BirthDate: null, PhotoUrl: null);
 
         private static PersonWithDisability APerson() => new()
         {

@@ -227,6 +227,14 @@ public class OpenApiExamplesTransformer : IOpenApiOperationTransformer
             {
                 ["Actualizar"] = RequestExamples.UpdatePerson,
             },
+            ("Persons", "UpdateFunctionalProfile") => new()
+            {
+                ["Perfil funcional"] = RequestExamples.UpdatePersonFunctionalProfile,
+            },
+            ("Persons", "UpdateDisabilityType") => new()
+            {
+                ["Tipo de discapacidad"] = RequestExamples.UpdatePersonDisabilityType,
+            },
             ("Persons", "UpdateLoginMethod") => new()
             {
                 ["Cambiar a PIN"] = RequestExamples.UpdateLoginMethod,

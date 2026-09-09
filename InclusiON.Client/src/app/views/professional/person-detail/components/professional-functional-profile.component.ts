@@ -1,7 +1,9 @@
 import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PersonsService, ToastService } from '@services';
-import { PersonResponse, UpdatePersonRequest } from '@models';
+import { CatalogsService, PersonsService, ToastService } from '@services';
+import { AutonomyLevelItem, LoginMethodItem, PersonResponse, UpdatePersonAccessConfigurationRequest, UpdatePersonFunctionalProfileRequest } from '@models';
+import { AvatarColorPickerComponent } from '@shared/components/avatar-color-picker/avatar-color-picker.component';
+import { switchMap } from 'rxjs';
 import {
   BadgeComponent,
   ButtonDirective,
@@ -32,6 +34,7 @@ import {
     RowComponent,
     SpinnerComponent,
     FormsModule,
+    AvatarColorPickerComponent,
   ],
   templateUrl: './professional-functional-profile.component.html',
 })
@@ -41,9 +44,12 @@ export class ProfessionalFunctionalProfileComponent {
 
   private readonly personsService = inject(PersonsService);
   private readonly toastService = inject(ToastService);
+  private readonly catalogsService = inject(CatalogsService);
 
   isEditing = signal(false);
   isSaving = signal(false);
+  autonomyLevels: AutonomyLevelItem[] = [];
+  loginMethods: LoginMethodItem[] = [];
 
   editData = {
     attentionLevel: 0,
@@ -59,7 +65,19 @@ export class ProfessionalFunctionalProfileComponent {
     requiresHighContrast: false,
     visualNoiseSensitivity: false,
     soundSensitivity: false,
+    colorBlindnessType: '',
+    autonomyLevelId: 0,
+    loginMethodId: 0,
+    avatarColor: '',
+    pin: '',
   };
+
+  constructor() {
+    this.catalogsService.getAutonomyLevels().subscribe({ next: levels => this.autonomyLevels = levels });
+    this.catalogsService.getLoginMethods().subscribe({
+      next: methods => this.loginMethods = methods.filter(method => method.id !== 1),
+    });
+  }
 
   /** Percentage of informational profile fields filled (7 total). */
   get profileCompletion(): number {
@@ -100,6 +118,15 @@ export class ProfessionalFunctionalProfileComponent {
     return value ? 'Si' : 'No';
   }
 
+  formatColorBlindness(type?: 'deuteranopia' | 'protanopia' | 'tritanopia' | null): string {
+    switch (type) {
+      case 'deuteranopia': return 'Deuteranopía (rojo-verde)';
+      case 'protanopia': return 'Protanopía (rojo)';
+      case 'tritanopia': return 'Tritanopía (azul-amarillo)';
+      default: return 'Sin especificar';
+    }
+  }
+
   startEditing(): void {
     this.editData = {
       attentionLevel: this.person.attentionLevel ?? 0,
@@ -115,6 +142,11 @@ export class ProfessionalFunctionalProfileComponent {
       requiresHighContrast: this.person.requiresHighContrast ?? false,
       visualNoiseSensitivity: this.person.visualNoiseSensitivity ?? false,
       soundSensitivity: this.person.soundSensitivity ?? false,
+      colorBlindnessType: this.person.colorBlindnessType ?? '',
+      autonomyLevelId: this.person.autonomyLevelId ?? 0,
+      loginMethodId: this.person.loginMethodId ?? 0,
+      avatarColor: this.person.avatarColor ?? '',
+      pin: '',
     };
     this.isEditing.set(true);
   }
@@ -124,8 +156,10 @@ export class ProfessionalFunctionalProfileComponent {
   }
 
   save(): void {
+    if (this.isSaving()) return;
+
     this.isSaving.set(true);
-    const request: UpdatePersonRequest = {
+    const request: UpdatePersonFunctionalProfileRequest = {
       attentionLevel: this.editData.attentionLevel || undefined,
       communicationLevel: this.editData.communicationLevel || undefined,
       motorSkillLevel: this.editData.motorSkillLevel || undefined,
@@ -139,18 +173,30 @@ export class ProfessionalFunctionalProfileComponent {
       requiresHighContrast: this.editData.requiresHighContrast,
       visualNoiseSensitivity: this.editData.visualNoiseSensitivity,
       soundSensitivity: this.editData.soundSensitivity,
+      colorBlindnessType: (this.editData.colorBlindnessType as 'deuteranopia' | 'protanopia' | 'tritanopia') || null,
     };
 
-    this.personsService.updatePerson(this.person.id, request).subscribe({
+    this.personsService.updateFunctionalProfile(this.person.id, request).pipe(
+      switchMap(() => {
+        const accessRequest: UpdatePersonAccessConfigurationRequest = {
+          autonomyLevelId: this.editData.autonomyLevelId,
+          loginMethodId: this.editData.loginMethodId,
+          avatarColor: this.editData.avatarColor,
+          pin: this.editData.pin || undefined,
+          supervisorUserId: this.person.supervisorUserId,
+        };
+        return this.personsService.updateAccessConfiguration(this.person.id, accessRequest);
+      }),
+    ).subscribe({
       next: (person) => {
         this.personChange.emit(person);
         this.isEditing.set(false);
         this.isSaving.set(false);
-        this.toastService.success('Perfil funcional actualizado');
+        this.toastService.success('Perfil funcional y configuración de acceso actualizados');
       },
       error: () => {
         this.isSaving.set(false);
-        this.toastService.error('Error al actualizar el perfil');
+        this.toastService.error('Error al actualizar el perfil y la configuración de acceso');
       },
     });
   }

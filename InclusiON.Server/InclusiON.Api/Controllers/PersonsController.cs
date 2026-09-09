@@ -163,16 +163,7 @@ namespace InclusiON.Api.Controllers
         {
             var command = new CreatePersonCommand(
                 request.FirstName, request.LastName, request.DocumentNumber,
-                request.BirthDate, request.DisabilityTypeId, request.PhotoUrl,
-                request.AttentionLevel, request.CommunicationLevel,
-                request.UsesAAC, request.UsesSignLanguage, request.MotorSkillLevel,
-                request.InterestsAndMotivators, request.LearningStyle,
-                request.AvailableResources, request.AdditionalTherapies,
-                request.RequiresLargeFont, request.RequiresHighContrast,
-                request.VisualNoiseSensitivity, request.SoundSensitivity,
-                request.ColorBlindnessType, request.AutonomyLevelId,
-                request.LoginMethodId, request.Pin, request.SupervisorUserId,
-                request.AvatarColor);
+                request.BirthDate, request.PhotoUrl);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -198,15 +189,7 @@ namespace InclusiON.Api.Controllers
         {
             var command = new CreatePersonWithTutorCommand(
                 request.Student.FirstName, request.Student.LastName, request.Student.DocumentNumber,
-                request.Student.BirthDate, request.Student.DisabilityTypeId, request.Student.PhotoUrl,
-                request.Student.AttentionLevel, request.Student.CommunicationLevel,
-                request.Student.UsesAAC, request.Student.UsesSignLanguage, request.Student.MotorSkillLevel,
-                request.Student.InterestsAndMotivators, request.Student.LearningStyle,
-                request.Student.AvailableResources, request.Student.AdditionalTherapies,
-                request.Student.RequiresLargeFont, request.Student.RequiresHighContrast,
-                request.Student.VisualNoiseSensitivity, request.Student.SoundSensitivity,
-                request.Student.ColorBlindnessType, request.Student.AutonomyLevelId,
-                request.Student.LoginMethodId, request.Student.Pin, request.Student.AvatarColor,
+                request.Student.BirthDate, request.Student.PhotoUrl,
                 request.TutorFirstName, request.TutorLastName, request.TutorEmail,
                 request.TutorDocumentNumber, request.TutorPhone, request.TutorRelationship,
                 request.ClassroomId);
@@ -238,15 +221,7 @@ namespace InclusiON.Api.Controllers
         {
             var command = new UpdatePersonCommand(
                 personId, request.FirstName, request.LastName, request.DocumentNumber,
-                request.BirthDate, request.DisabilityTypeId, request.PhotoUrl,
-                request.AttentionLevel, request.CommunicationLevel,
-                request.UsesAAC, request.UsesSignLanguage, request.MotorSkillLevel,
-                request.InterestsAndMotivators, request.LearningStyle,
-                request.AvailableResources, request.AdditionalTherapies,
-                request.RequiresLargeFont, request.RequiresHighContrast,
-                request.VisualNoiseSensitivity, request.SoundSensitivity,
-                request.ColorBlindnessType, request.AutonomyLevelId,
-                request.SupervisorUserId, request.AvatarColor);
+                request.BirthDate, request.PhotoUrl);
 
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
@@ -289,6 +264,80 @@ namespace InclusiON.Api.Controllers
         {
             var result = await handler.HandleAsync(new ReactivatePersonCommand(personId), cancellationToken);
             return result.ToActionResult();
+        }
+
+        #endregion
+
+        #region Functional Profile
+
+        /// <summary>
+        /// Actualiza exclusivamente el tipo de discapacidad de una persona.
+        /// Solo el profesional principal, aprobado y activo de la asignacion puede escribirlo.
+        /// </summary>
+        [HttpPut("{personId}/disability-type")]
+        [Authorize(Policy = Permissions.Persons.Update)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PersonResponse>>> UpdateDisabilityType(
+            Guid personId,
+            [FromBody] UpdatePersonDisabilityTypeRequest request,
+            [FromServices] ICommandHandler<UpdatePersonDisabilityTypeCommand, ApiResponse<PersonResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!await _resourceAuthz.CanEditPersonFunctionalProfileAsync(personId, cancellationToken))
+                return ApiResponse<PersonResponse>.Forbidden().ToActionResult();
+
+            var command = new UpdatePersonDisabilityTypeCommand(personId, request.DisabilityTypeId);
+            return (await handler.HandleAsync(command, cancellationToken)).ToActionResult();
+        }
+
+        /// <summary>
+        /// Actualiza el perfil funcional y los apoyos de accesibilidad de una persona.
+        /// Solo el profesional principal, aprobado y activo de la asignacion puede escribirlo.
+        /// </summary>
+        [HttpPut("{personId}/functional-profile")]
+        [Authorize(Policy = Permissions.Persons.Update)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PersonResponse>>> UpdateFunctionalProfile(
+            Guid personId,
+            [FromBody] UpdatePersonFunctionalProfileRequest request,
+            [FromServices] ICommandHandler<UpdatePersonFunctionalProfileCommand, ApiResponse<PersonResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!await _resourceAuthz.CanEditPersonFunctionalProfileAsync(personId, cancellationToken))
+                return ApiResponse<PersonResponse>.Forbidden().ToActionResult();
+
+            var command = new UpdatePersonFunctionalProfileCommand(
+                personId,
+                request.AttentionLevel, request.CommunicationLevel,
+                request.UsesAAC, request.UsesSignLanguage, request.MotorSkillLevel,
+                request.InterestsAndMotivators, request.LearningStyle,
+                request.AvailableResources, request.AdditionalTherapies,
+                request.RequiresLargeFont, request.RequiresHighContrast,
+                request.VisualNoiseSensitivity, request.SoundSensitivity,
+                request.ColorBlindnessType);
+
+            return (await handler.HandleAsync(command, cancellationToken)).ToActionResult();
+        }
+
+        [HttpPut("{personId}/access-configuration")]
+        [Authorize(Policy = Permissions.Persons.Update)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<PersonResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<PersonResponse>>> UpdateAccessConfiguration(
+            Guid personId,
+            [FromBody] UpdatePersonAccessConfigurationRequest request,
+            [FromServices] ICommandHandler<UpdatePersonAccessConfigurationCommand, ApiResponse<PersonResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            if (!await _resourceAuthz.CanEditPersonFunctionalProfileAsync(personId, cancellationToken))
+                return ApiResponse<PersonResponse>.Forbidden().ToActionResult();
+
+            var command = new UpdatePersonAccessConfigurationCommand(
+                personId, request.AutonomyLevelId, request.LoginMethodId,
+                request.Pin, request.SupervisorUserId, request.AvatarColor);
+            return (await handler.HandleAsync(command, cancellationToken)).ToActionResult();
         }
 
         #endregion
@@ -464,32 +513,6 @@ namespace InclusiON.Api.Controllers
             CancellationToken cancellationToken = default)
         {
             var result = await handler.HandleAsync(new GetPersonAccessibilityQuery(personId), cancellationToken);
-            return result.ToActionResult();
-        }
-
-        /// <summary>
-        /// Actualiza la configuración de accesibilidad de una persona.
-        /// </summary>
-        [HttpPut("{personId}/accessibility")]
-        [Authorize(Policy = Permissions.Persons.Update)]
-        [PersonAccess(AccessMode.Write)]
-        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<PersonAccessibilityResponse>), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse<PersonAccessibilityResponse>>> UpdateAccessibility(
-            Guid personId,
-            [FromBody] UpdatePersonAccessibilityRequest request,
-            [FromServices] ICommandHandler<UpdatePersonAccessibilityCommand, ApiResponse<PersonAccessibilityResponse>> handler,
-            CancellationToken cancellationToken = default)
-        {
-            var result = await handler.HandleAsync(
-                new UpdatePersonAccessibilityCommand(
-                    personId,
-                    request.RequiresLargeFont,
-                    request.RequiresHighContrast,
-                    request.VisualNoiseSensitivity,
-                    request.SoundSensitivity,
-                    request.ColorBlindnessType),
-                cancellationToken);
             return result.ToActionResult();
         }
 

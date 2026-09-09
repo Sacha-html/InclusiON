@@ -81,6 +81,23 @@ namespace InclusiON.Infrastructure.Authorization
             return allowed;
         }
 
+        public async Task<bool> CanEditPersonFunctionalProfileAsync(Guid personId, CancellationToken ct = default)
+        {
+            var userId = _httpContext.GetCurrentUserId();
+            if (userId is null || _httpContext.GetCurrentUserRole() != nameof(IdentityRoles.Professional))
+                return false;
+
+            return await _context.ProfessionalPersons.AnyAsync(pp =>
+                pp.PersonId == personId &&
+                pp.IsActive &&
+                pp.IsPrimaryProfessional &&
+                pp.Professional.UserId == userId.Value &&
+                pp.Professional.IsActive &&
+                pp.Professional.User.IsActive &&
+                pp.Professional.Status == ProfessionalStatusEnum.Approved,
+                ct);
+        }
+
         public Task<IReadOnlyList<Guid>> GetAccessiblePersonIdsAsync(CancellationToken ct = default)
         {
             // Cache por request: primera invocacion computa, siguientes reutilizan

@@ -29,7 +29,6 @@ import {
   ProfessionalProductivityChartComponent,
   ReportStatusPieChartComponent,
 } from '@shared/components';
-import { IconDirective } from '@coreui/icons-angular';
 import { exportHtmlElementToPdf } from '@shared/utils';
 import { forkJoin } from 'rxjs';
 
@@ -56,7 +55,6 @@ import { forkJoin } from 'rxjs';
     LevelHistogramChartComponent,
     ProfessionalProductivityChartComponent,
     ReportStatusPieChartComponent,
-    IconDirective,
   ],
 })
 export class DashboardComponent implements OnInit {

@@ -1,117 +1,22 @@
-<div class="d-flex justify-content-end align-items-center mb-3 gap-2">
-  @if (isSaving()) {
-    <c-spinner size="sm" aria-hidden="true"></c-spinner>
-    <small class="text-muted">Guardando...</small>
-  } @else {
-    <small class="text-muted">
-      <em>Hacé clic en un campo para editarlo</em>
-    </small>
-  }
-</div>
-
 <c-row class="mb-3">
   <c-col sm="6">
     <label cLabel for="field-firstName">Nombre</label>
-    @if (editingField() === 'firstName') {
-      <input cFormControl
-             id="field-firstName"
-             [(ngModel)]="draft.firstName"
-             [disabled]="isSaving()"
-             (blur)="saveField()"
-             (keydown)="onKeydown($event)"
-             autofocus />
-    } @else {
-      <div class="form-control-plaintext border-bottom cursor-pointer"
-           role="button"
-           tabindex="0"
-           [attr.aria-label]="'Editar Nombre: ' + (person.firstName || 'sin valor')"
-           (click)="startField('firstName')"
-           (keydown.enter)="startField('firstName')"
-           (keydown.space)="startField('firstName'); $event.preventDefault()"
-           title="Clic para editar">
-        {{ person.firstName || '—' }}
-      </div>
-    }
+    <div id="field-firstName" class="form-control-plaintext">{{ person.firstName || '—' }}</div>
   </c-col>
   <c-col sm="6">
     <label cLabel for="field-lastName">Apellido</label>
-    @if (editingField() === 'lastName') {
-      <input cFormControl
-             id="field-lastName"
-             [(ngModel)]="draft.lastName"
-             [disabled]="isSaving()"
-             (blur)="saveField()"
-             (keydown)="onKeydown($event)"
-             autofocus />
-    } @else {
-      <div class="form-control-plaintext border-bottom cursor-pointer"
-           role="button"
-           tabindex="0"
-           [attr.aria-label]="'Editar Apellido: ' + (person.lastName || 'sin valor')"
-           (click)="startField('lastName')"
-           (keydown.enter)="startField('lastName')"
-           (keydown.space)="startField('lastName'); $event.preventDefault()"
-           title="Clic para editar">
-        {{ person.lastName || '—' }}
-      </div>
-    }
+    <div id="field-lastName" class="form-control-plaintext">{{ person.lastName || '—' }}</div>
   </c-col>
 </c-row>
 
 <c-row class="mb-3">
   <c-col sm="4">
     <label cLabel for="field-documentNumber">Documento</label>
-    @if (editingField() === 'documentNumber') {
-      <input cFormControl
-             id="field-documentNumber"
-             [(ngModel)]="draft.documentNumber"
-             appOnlyNumbers
-             inputmode="numeric"
-             placeholder="Ej: 12345678"
-             [disabled]="isSaving()"
-             (blur)="saveField()"
-             (keydown)="onKeydown($event)"
-             maxlength="8"
-             autofocus />
-      @if (fieldError()) {
-        <div class="text-danger small mt-1" role="alert">{{ fieldError() }}</div>
-      }
-    } @else {
-      <div class="form-control-plaintext border-bottom cursor-pointer"
-           role="button"
-           tabindex="0"
-           [attr.aria-label]="'Editar Documento: ' + (person.documentNumber || 'sin valor')"
-           (click)="startField('documentNumber')"
-           (keydown.enter)="startField('documentNumber')"
-           (keydown.space)="startField('documentNumber'); $event.preventDefault()"
-           title="Clic para editar">
-        {{ person.documentNumber || 'Sin especificar' }}
-      </div>
-    }
+    <div id="field-documentNumber" class="form-control-plaintext">{{ person.documentNumber || 'Sin especificar' }}</div>
   </c-col>
   <c-col sm="4">
     <label cLabel for="field-birthDate">Fecha de nacimiento</label>
-    @if (editingField() === 'birthDate') {
-      <input cFormControl
-             id="field-birthDate"
-             [(ngModel)]="draft.birthDate"
-             placeholder="dd/mm/aaaa"
-             [disabled]="isSaving()"
-             (blur)="saveField()"
-             (keydown)="onKeydown($event)"
-             autofocus />
-    } @else {
-      <div class="form-control-plaintext border-bottom cursor-pointer"
-           role="button"
-           tabindex="0"
-           [attr.aria-label]="'Editar Fecha de nacimiento: ' + ((person.birthDate | date:'dd/MM/yyyy') || 'sin valor')"
-           (click)="startField('birthDate')"
-           (keydown.enter)="startField('birthDate')"
-           (keydown.space)="startField('birthDate'); $event.preventDefault()"
-           title="Clic para editar">
-        {{ (person.birthDate | date:'dd/MM/yyyy') || '—' }}
-      </div>
-    }
+    <div id="field-birthDate" class="form-control-plaintext">{{ (person.birthDate | date:'dd/MM/yyyy') || '—' }}</div>
   </c-col>
   <c-col sm="4">
     <label cLabel for="field-age">Edad</label>
@@ -122,6 +27,30 @@
 <c-row class="mb-3">
   <c-col sm="6">
     <label cLabel for="field-disabilityType">Tipo de discapacidad</label>
-    <div id="field-disabilityType" class="form-control-plaintext">{{ person.disabilityTypeName ?? 'Sin especificar' }}</div>
+    @if (isEditing()) {
+      <select cSelect id="field-disabilityType" [(ngModel)]="disabilityTypeId" [disabled]="isSaving()">
+        <option [ngValue]="null">-- Seleccionar --</option>
+        @for (type of disabilityTypes; track type.id) {
+          <option [ngValue]="type.id">{{ type.name }}</option>
+        }
+      </select>
+    } @else {
+      <div id="field-disabilityType" class="form-control-plaintext">{{ person.disabilityTypeName ?? 'Sin especificar' }}</div>
+    }
   </c-col>
+  @if (!isEditing()) {
+    <c-col sm="6" class="d-flex align-items-end justify-content-end">
+      <button cButton color="primary" size="sm" (click)="startEditing()">Editar</button>
+    </c-col>
+  }
 </c-row>
+
+@if (isEditing()) {
+  <div class="d-flex gap-2 mt-3">
+    <button cButton color="primary" (click)="save()" [disabled]="isSaving() || disabilityTypeId === null">
+      @if (isSaving()) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
+      Guardar
+    </button>
+    <button cButton color="secondary" (click)="cancel()" [disabled]="isSaving()">Cancelar</button>
+  </div>
+}

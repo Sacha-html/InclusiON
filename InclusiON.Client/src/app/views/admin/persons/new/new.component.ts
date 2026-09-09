@@ -1,12 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CatalogsService, PersonsService, ProfessionalsService, AssignmentsService, ToastService } from '@services';
+import { PersonsService, ProfessionalsService, AssignmentsService, ToastService } from '@services';
 import { AppRoutes, RELATIONSHIPS } from '@shared/constants';
-import { CatalogItem, AutonomyLevelItem, LoginMethodItem, CreatePersonRequest, CreatePersonWithTutorRequest, ClassroomResponse, ProfessionalListItemResponse } from '@models';
+import { CreatePersonRequest, CreatePersonWithTutorRequest, ClassroomResponse, ProfessionalListItemResponse } from '@models';
 import { validDate, notFutureDate, ageRangeValidator, toIsoDate, toInputDate } from '@shared/utils';
-import { AvatarColorPickerComponent } from '@shared/components';
-import { NgClass } from '@angular/common';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -16,9 +14,6 @@ import {
   FormControlDirective,
   FormFeedbackComponent,
   FormLabelDirective,
-  FormCheckComponent,
-  FormCheckInputDirective,
-  FormCheckLabelDirective,
   FormSelectDirective,
   RowComponent,
   ModalComponent,
@@ -41,12 +36,8 @@ import { OnlyNumbersDirective } from '@shared/directives';
     FormControlDirective,
     FormLabelDirective,
     FormFeedbackComponent,
-    FormCheckComponent,
-    FormCheckInputDirective,
-    FormCheckLabelDirective,
     FormSelectDirective,
     ButtonDirective,
-    AvatarColorPickerComponent,
     ModalComponent,
     ModalHeaderComponent,
     ModalBodyComponent,
@@ -61,7 +52,6 @@ export class NewComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly personsService = inject(PersonsService);
-  private readonly catalogsService = inject(CatalogsService);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
@@ -77,9 +67,6 @@ export class NewComponent implements OnInit {
   tempPasswordEmail = '';
   createdPersonId: string | null = null;
 
-  disabilityTypes: CatalogItem[] = [];
-  autonomyLevels: AutonomyLevelItem[] = [];
-  loginMethods: LoginMethodItem[] = [];
   professionals: ProfessionalListItemResponse[] = [];
   classrooms: ClassroomResponse[] = [];
 
@@ -102,31 +89,6 @@ export class NewComponent implements OnInit {
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate, ageRangeValidator(12, 40)]],
-    // Alumno - Discapacidad
-    disabilityTypeId: [null, [Validators.required]],
-    // Alumno - Perfil funcional
-    attentionLevel: [null],
-    communicationLevel: [null],
-    motorSkillLevel: [null],
-    usesAAC: [false],
-    usesSignLanguage: [false],
-    // Alumno - Preferencias
-    interestsAndMotivators: [''],
-    learningStyle: [''],
-    availableResources: [''],
-    additionalTherapies: [''],
-    // Alumno - Accesibilidad
-    requiresLargeFont: [false],
-    requiresHighContrast: [false],
-    visualNoiseSensitivity: [false],
-    soundSensitivity: [false],
-    colorBlindnessType: [null],
-    // Alumno - Configuración de acceso
-    autonomyLevelId: [null],
-    loginMethodId: [null],
-    pin: ['', [Validators.pattern(/^\d{4}$/)]],
-    avatarColor: ['#2196F3'],
-
     // Tutor - Datos personales
     tutorFirstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     tutorLastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -162,45 +124,18 @@ export class NewComponent implements OnInit {
     };
   }
 
-  get selectedLoginMethod(): LoginMethodItem | undefined {
-    const id = this.form.get('loginMethodId')?.value;
-    return id ? this.loginMethods.find(m => m.id === +id) : undefined;
-  }
-
   ngOnInit(): void {
-    this.catalogsService.getDisabilityTypes().subscribe({
-      next: (data) => this.disabilityTypes = data,
-    });
-    this.catalogsService.getAutonomyLevels().subscribe({
-      next: (data) => this.autonomyLevels = data,
-    });
-    this.catalogsService.getLoginMethods().subscribe({
-      next: (data) => this.loginMethods = data.filter(m => m.code !== 'STANDARD' && m.id !== 1),
-    });
     this.professionalsService.getProfessionals({ page: 1, pageSize: 200, status: 'active' }).subscribe({
       next: (res) => this.professionals = res.data,
     });
 
-    this.form.get('loginMethodId')?.valueChanges.subscribe((val) => {
-      const pinCtrl = this.form.get('pin');
-      const methodId = val ? +val : null;
-      if (methodId === 2) {
-        pinCtrl?.setValidators([Validators.required, Validators.pattern(/^\d{4}$/)]);
-        pinCtrl?.enable();
-      } else {
-        pinCtrl?.clearValidators();
-        pinCtrl?.setValue('');
-        pinCtrl?.disable();
-      }
-      pinCtrl?.updateValueAndValidity();
-    });
   }
 
   nextToStep2(): void {
     this.submittedStep1 = true;
     
     const studentControls = [
-      'firstName', 'lastName', 'documentNumber', 'birthDate', 'disabilityTypeId', 'pin'
+      'firstName', 'lastName', 'documentNumber', 'birthDate'
     ];
     let isStudentValid = true;
     for (const ctrlName of studentControls) {
@@ -269,26 +204,7 @@ export class NewComponent implements OnInit {
       firstName: raw.firstName,
       lastName: raw.lastName,
       birthDate: toIsoDate(raw.birthDate),
-      usesAAC: raw.usesAAC ?? false,
-      usesSignLanguage: raw.usesSignLanguage ?? false,
-      requiresLargeFont: raw.requiresLargeFont ?? false,
-      requiresHighContrast: raw.requiresHighContrast ?? false,
-      visualNoiseSensitivity: raw.visualNoiseSensitivity ?? false,
-      soundSensitivity: raw.soundSensitivity ?? false,
-      ...(raw.colorBlindnessType && { colorBlindnessType: raw.colorBlindnessType }),
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
-      disabilityTypeId: +raw.disabilityTypeId,
-      ...(raw.attentionLevel && { attentionLevel: +raw.attentionLevel }),
-      ...(raw.communicationLevel && { communicationLevel: +raw.communicationLevel }),
-      ...(raw.motorSkillLevel && { motorSkillLevel: +raw.motorSkillLevel }),
-      ...(raw.interestsAndMotivators && { interestsAndMotivators: raw.interestsAndMotivators }),
-      ...(raw.learningStyle && { learningStyle: raw.learningStyle }),
-      ...(raw.availableResources && { availableResources: raw.availableResources }),
-      ...(raw.additionalTherapies && { additionalTherapies: raw.additionalTherapies }),
-      ...(raw.autonomyLevelId && { autonomyLevelId: +raw.autonomyLevelId }),
-      ...(raw.loginMethodId && { loginMethodId: +raw.loginMethodId }),
-      ...(raw.pin && { pin: raw.pin }),
-      ...(raw.avatarColor && { avatarColor: raw.avatarColor }),
     };
 
     const request: CreatePersonWithTutorRequest = {

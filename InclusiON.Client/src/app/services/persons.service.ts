@@ -10,7 +10,10 @@ import {
   PersonSkillProfileResponse,
   ActivityListItemResponse,
   CreatePersonRequest,
-  UpdatePersonRequest,
+    UpdatePersonRequest,
+    UpdatePersonFunctionalProfileRequest,
+    UpdatePersonDisabilityTypeRequest,
+    UpdatePersonAccessConfigurationRequest,
   CreatePersonWithTutorRequest,
   GetPersonsRequest,
   ProfessionalPersonResponse,
@@ -148,6 +151,36 @@ export class PersonsService {
       .pipe(unwrapResponse());
   }
 
+  /** Actualiza exclusivamente el perfil funcional y apoyos del alumno. */
+  updateFunctionalProfile(
+    personId: string,
+    request: UpdatePersonFunctionalProfileRequest
+  ): Observable<PersonResponse> {
+    return this.http
+      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}/functional-profile`, request)
+      .pipe(unwrapResponse());
+  }
+
+  /** Actualiza exclusivamente el tipo de discapacidad del alumno. */
+  updateDisabilityType(
+    personId: string,
+    request: UpdatePersonDisabilityTypeRequest
+  ): Observable<PersonResponse> {
+    return this.http
+      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}/disability-type`, request)
+      .pipe(unwrapResponse());
+  }
+
+  /** Actualiza en una operación la configuración de acceso del alumno. */
+  updateAccessConfiguration(
+    personId: string,
+    request: UpdatePersonAccessConfigurationRequest
+  ): Observable<PersonResponse> {
+    return this.http
+      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}/access-configuration`, request)
+      .pipe(unwrapResponse());
+  }
+
   /**
    * Actualiza el perfil de la persona autenticada.
    * Requiere autenticación.
@@ -245,25 +278,6 @@ export class PersonsService {
       .pipe(unwrapResponse(), map((r) => r.data));
   }
 
-  /**
-   * Actualiza solo la configuración de accesibilidad de una persona.
-   * @deprecated Usar updateAccessibility con el endpoint dedicado.
-   */
-  updateAccessibilityConfig(
-    personId: string,
-    config: {
-      requiresLargeFont: boolean;
-      requiresHighContrast: boolean;
-      visualNoiseSensitivity: boolean;
-      soundSensitivity: boolean;
-      colorBlindnessType: string;
-    }
-  ): Observable<PersonResponse> {
-    return this.http
-      .put<ApiResponse<PersonResponse>>(`${this.apiUrl}/${personId}`, config)
-      .pipe(unwrapResponse());
-  }
-
   /** Obtiene la configuración de accesibilidad de una persona. */
   getAccessibility(personId: string): Observable<{
     requiresLargeFont: boolean;
@@ -274,22 +288,6 @@ export class PersonsService {
   }> {
     return this.http
       .get<ApiResponse<any>>(`${this.apiUrl}/${personId}/accessibility`)
-      .pipe(unwrapResponse());
-  }
-
-  /** Actualiza la configuración de accesibilidad de una persona (endpoint dedicado). */
-  updateAccessibility(
-    personId: string,
-    config: {
-      requiresLargeFont: boolean;
-      requiresHighContrast: boolean;
-      visualNoiseSensitivity: boolean;
-      soundSensitivity: boolean;
-      colorBlindnessType: string | null;
-    }
-  ): Observable<any> {
-    return this.http
-      .put<ApiResponse<any>>(`${this.apiUrl}/${personId}/accessibility`, config)
       .pipe(unwrapResponse());
   }
 

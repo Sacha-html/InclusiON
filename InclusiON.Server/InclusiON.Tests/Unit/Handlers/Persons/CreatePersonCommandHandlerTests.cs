@@ -17,28 +17,18 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         private readonly IPersonsRepository      _personsRepo   = Substitute.For<IPersonsRepository>();
         private readonly IIdentityService        _identity      = Substitute.For<IIdentityService>();
         private readonly IPasswordHasher         _pwdHasher     = Substitute.For<IPasswordHasher>();
-        private readonly IPinHasher              _pinHasher     = Substitute.For<IPinHasher>();
         private readonly IUnitOfWork             _uow           = Substitute.For<IUnitOfWork>();
         private readonly IBackgroundJobRepository _bgJobs       = Substitute.For<IBackgroundJobRepository>();
         private readonly IDateTimeProvider       _dateTime      = Substitute.For<IDateTimeProvider>();
         private readonly IRoadmapInitializer    _roadmapInit   = Substitute.For<IRoadmapInitializer>();
 
         private CreatePersonCommandHandler BuildSut() =>
-            new(_personsRepo, _identity, _pwdHasher, _pinHasher, _uow, _bgJobs,
+            new(_personsRepo, _identity, _pwdHasher, _uow, _bgJobs,
                 NullLogger<CreatePersonCommandHandler>.Instance, _dateTime, _roadmapInit);
 
         private static CreatePersonCommand Cmd(string? doc = null) =>
             new("Lucas", "Pérez", doc,
-                BirthDate: new DateTime(2000, 1, 1), DisabilityTypeId: 1, PhotoUrl: null,
-                AttentionLevel: null, CommunicationLevel: null,
-                UsesAAC: false, UsesSignLanguage: false, MotorSkillLevel: null,
-                InterestsAndMotivators: null, LearningStyle: null,
-                AvailableResources: null, AdditionalTherapies: null,
-                RequiresLargeFont: false, RequiresHighContrast: false,
-                VisualNoiseSensitivity: false, SoundSensitivity: false,
-                ColorBlindnessType: null,
-                AutonomyLevelId: 1, LoginMethodId: 1,
-                Pin: null, SupervisorUserId: null, AvatarColor: null);
+                BirthDate: new DateTime(2000, 1, 1), PhotoUrl: null);
 
         private void SetupTransaction()
         {

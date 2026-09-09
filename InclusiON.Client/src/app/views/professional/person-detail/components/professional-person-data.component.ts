@@ -1,104 +1,78 @@
-import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PersonsService, ToastService } from '@services';
-import { PersonResponse, UpdatePersonRequest } from '@models';
-import { toDisplayDate, toIsoDate } from '@shared/utils';
+import { CatalogsService, PersonsService, ToastService } from '@services';
+import { CatalogItem, PersonResponse, UpdatePersonDisabilityTypeRequest } from '@models';
 import {
+  ButtonDirective,
   ColComponent,
-  FormControlDirective,
   FormLabelDirective,
+  FormSelectDirective,
   RowComponent,
   SpinnerComponent,
 } from '@coreui/angular';
-import { OnlyNumbersDirective } from '@shared/directives';
 
 @Component({
   selector: 'app-professional-person-data',
   standalone: true,
   imports: [
     DatePipe,
+    ButtonDirective,
     ColComponent,
-    FormControlDirective,
     FormLabelDirective,
+    FormSelectDirective,
     RowComponent,
     SpinnerComponent,
     FormsModule,
-    OnlyNumbersDirective,
   ],
   templateUrl: './professional-person-data.component.html',
 })
-export class ProfessionalPersonDataComponent {
+export class ProfessionalPersonDataComponent implements OnInit {
   @Input({ required: true }) person!: PersonResponse;
   @Output() personChange = new EventEmitter<PersonResponse>();
 
+  private readonly catalogsService = inject(CatalogsService);
   private readonly personsService = inject(PersonsService);
-  private readonly toastService   = inject(ToastService);
+  private readonly toastService = inject(ToastService);
 
-  editingField = signal<string | null>(null);
-  isSaving     = signal(false);
-  fieldError   = signal<string | null>(null);
-  private _cancelling = false;
+  disabilityTypes: CatalogItem[] = [];
+  disabilityTypeId: number | null = null;
+  isEditing = signal(false);
+  isSaving = signal(false);
 
-  draft = { firstName: '', lastName: '', documentNumber: '', birthDate: '' };
-
-  startField(field: string): void {
-    if (this.isSaving()) return;
-    this._cancelling = false;
-    this.fieldError.set(null);
-    this.draft = {
-      firstName:      this.person.firstName,
-      lastName:       this.person.lastName,
-      documentNumber: this.person.documentNumber ?? '',
-      birthDate:      toDisplayDate(this.person.birthDate),
-    };
-    this.editingField.set(field);
+  ngOnInit(): void {
+    this.catalogsService.getDisabilityTypes().subscribe({
+      next: (types) => this.disabilityTypes = types,
+    });
   }
 
-  cancelField(): void {
-    this._cancelling = true;
-    this.fieldError.set(null);
-    this.editingField.set(null);
+  startEditing(): void {
+    this.disabilityTypeId = this.person.disabilityTypeId ?? null;
+    this.isEditing.set(true);
   }
 
-  onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter')  { event.preventDefault(); this.saveField(); }
-    if (event.key === 'Escape') { event.preventDefault(); this.cancelField(); }
+  cancel(): void {
+    this.isEditing.set(false);
   }
 
-  saveField(): void {
-    if (this._cancelling) { this._cancelling = false; return; }
-    if (!this.editingField()) return;
+  save(): void {
+    if (this.disabilityTypeId === null) return;
 
-    if (this.editingField() === 'documentNumber' && this.draft.documentNumber) {
-      const doc = this.draft.documentNumber;
-      if (!/^[0-9]+$/.test(doc)) {
-        this.fieldError.set('Solo se permiten números (sin puntos ni letras)');
-        return;
-      }
-      if (doc.length < 7 || doc.length > 8) {
-        this.fieldError.set('El documento debe tener entre 7 y 8 dígitos');
-        return;
-      }
-    }
-    this.fieldError.set(null);
     this.isSaving.set(true);
-    const request: UpdatePersonRequest = {
-      firstName:      this.draft.firstName,
-      lastName:       this.draft.lastName,
-      documentNumber: this.draft.documentNumber || undefined,
-      birthDate:      this.draft.birthDate ? toIsoDate(this.draft.birthDate) : undefined,
+    const request: UpdatePersonDisabilityTypeRequest = {
+      disabilityTypeId: this.disabilityTypeId,
     };
-    this.personsService.updatePerson(this.person.id, request).subscribe({
+
+    this.personsService.updateDisabilityType(this.person.id, request).subscribe({
       next: (person) => {
         this.personChange.emit(person);
-        this.editingField.set(null);
+        this.isEditing.set(false);
         this.isSaving.set(false);
-        this.toastService.success('Dato actualizado');
+        this.toastService.success('Tipo de discapacidad actualizado');
       },
       error: () => {
         this.isSaving.set(false);
-        this.toastService.error('Error al actualizar');
+        this.toastService.error('Error al actualizar el tipo de discapacidad');
       },
     });
   }
