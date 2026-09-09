@@ -8,7 +8,6 @@ export const Permissions = {
     Read:   'users:read',
     Create: 'users:create',
     Update: 'users:update',
-    Delete: 'users:delete',
   },
   Persons: {
     Read:   'persons:read',

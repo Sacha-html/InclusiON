@@ -4,7 +4,7 @@ import { environment } from '@env';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponse, PagedResponse, AdminUserListItemResponse, AdminUserDetailResponse, ResetPasswordResultResponse, UserRecentSessionResponse, GetAdminUsersRequest } from '@models';
-import { unwrapResponse, handleApiError } from '@shared/utils';
+import { unwrapResponse } from '@shared/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -46,18 +46,6 @@ export class UserManagementService {
   resetPassword(userId: string): Observable<ResetPasswordResultResponse> {
     return this.http
       .post<ApiResponse<ResetPasswordResultResponse>>(`${this.apiUrl}/${userId}/reset-password`, {})
-      .pipe(unwrapResponse());
-  }
-
-  deactivateUser(userId: string): Observable<ApiResponse<void>> {
-    return this.http
-      .put<ApiResponse<void>>(`${this.apiUrl}/${userId}/deactivate`, {})
-      .pipe(handleApiError());
-  }
-
-  reactivateUser(userId: string): Observable<ResetPasswordResultResponse> {
-    return this.http
-      .put<ApiResponse<ResetPasswordResultResponse>>(`${this.apiUrl}/${userId}/reactivate`, {})
       .pipe(unwrapResponse());
   }
 

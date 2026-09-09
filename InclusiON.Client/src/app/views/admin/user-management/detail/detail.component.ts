@@ -63,7 +63,6 @@ export class UserManagementDetailComponent implements OnInit {
   recentSessions: UserRecentSessionResponse[] = [];
   sessionsLoading = true;
 
-  showDeactivateModal = false;
   showResetPasswordModal = false;
   showPasswordModal = false;
   tempPassword = '';
@@ -237,44 +236,6 @@ export class UserManagementDetailComponent implements OnInit {
       },
       error: () => {
         this.toastService.error('Error al resetear la contraseña');
-      },
-    });
-  }
-
-  confirmDeactivate(): void {
-    if (!this.user) return;
-    if (this.user.role === UserRoles.FamilyRepresentative) {
-      this.showDeactivateModal = false;
-      return;
-    }
-
-    this.userService.deactivateUser(this.user.userId).subscribe({
-      next: () => {
-        this.toastService.success('Usuario desactivado exitosamente');
-        this.showDeactivateModal = false;
-        this.loadUser(this.user!.userId);
-      },
-      error: () => {
-        this.toastService.error('Error al desactivar el usuario');
-        this.showDeactivateModal = false;
-      },
-    });
-  }
-
-  reactivateUser(): void {
-    if (!this.user) return;
-    if (this.user.role === UserRoles.FamilyRepresentative) return;
-
-    this.userService.reactivateUser(this.user.userId).subscribe({
-      next: (result) => {
-        this.tempPassword = result.temporaryPassword;
-        this.tempPasswordEmail = result.userEmail;
-        this.showPasswordModal = true;
-        this.toastService.success('Usuario reactivado exitosamente');
-        this.loadUser(this.user!.userId);
-      },
-      error: () => {
-        this.toastService.error('Error al reactivar el usuario');
       },
     });
   }

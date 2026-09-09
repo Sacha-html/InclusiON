@@ -100,7 +100,6 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:read" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:create" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:update" },
-                new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "users:delete" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "persons:read" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "persons:create" },
                 new() { RoleId = adminRoleId, ClaimType = "permission", ClaimValue = "persons:update" },
