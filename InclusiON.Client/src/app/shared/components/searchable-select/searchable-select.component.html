@@ -1,6 +1,9 @@
 <!-- Ítem seleccionado -->
 @if (selectedItem()) {
-  <div class="ss-selected" [class.ss-selected--disabled]="isDisabled">
+  <div class="ss-selected"
+       [class.ss-selected--disabled]="isDisabled"
+       [class.is-invalid]="invalid"
+       [attr.aria-invalid]="invalid ? 'true' : null">
     <span class="ss-selected__label">{{ displayFn(selectedItem()) }}</span>
     @if (!isDisabled) {
       <button type="button" class="ss-selected__clear"
@@ -13,12 +16,15 @@
 } @else {
   <!-- Combobox input -->
   <div class="ss-combobox"
+       [class.is-invalid]="invalid"
        role="combobox"
        [attr.aria-expanded]="isOpen()"
        aria-haspopup="listbox"
-       [attr.aria-owns]="uid + '-listbox'">
+       [attr.aria-owns]="uid + '-listbox'"
+       [attr.aria-invalid]="invalid ? 'true' : null">
     <input
       class="ss-input form-control"
+      [class.is-invalid]="invalid"
       type="text"
       [value]="query()"
       [placeholder]="placeholder"
@@ -27,6 +33,7 @@
       aria-autocomplete="list"
       [attr.aria-controls]="uid + '-listbox'"
       [attr.aria-activedescendant]="activeIndex() >= 0 ? uid + '-opt-' + activeIndex() : null"
+      [attr.aria-invalid]="invalid ? 'true' : null"
       (input)="onInput($any($event.target).value)"
       (focus)="openDropdown()"
     />

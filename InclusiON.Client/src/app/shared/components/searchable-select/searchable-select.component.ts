@@ -72,6 +72,8 @@ export class SearchableSelectComponent implements ControlValueAccessor, OnInit, 
   @Input() debounceMs = 350;
   @Input() noResultsText = 'Sin resultados';
   @Input() hintText = 'Escriba para buscar';
+  /** Indica que el control debe mostrar su estado de validación inválido */
+  @Input() invalid = false;
 
   private readonly el = inject(ElementRef);
   private readonly destroy$ = new Subject<void>();
