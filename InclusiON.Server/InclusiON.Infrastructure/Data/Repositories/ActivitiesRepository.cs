@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Infrastructure.Extensions;
@@ -38,6 +39,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             bool? isTemplate,
             int page,
             int pageSize,
+            string? sortBy = null,
+            string sortDirection = "ASC",
             CancellationToken cancellationToken = default)
         {
             var query = _context.Activities
@@ -78,12 +81,31 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (isStandard.HasValue)
                 query = query.Where(a => a.IsStandardActivity == isStandard.Value);
 
-            var paged = await query
-                .OrderByDescending(a => a.CreatedAt)
-                .ToPagedAsync(page, pageSize, cancellationToken);
+            var descending = string.Equals(sortDirection, "DESC", StringComparison.OrdinalIgnoreCase);
+
+            var ordered = sortBy?.ToLowerInvariant() switch
+            {
+                "title"                    => Order(query, a => a.Title, descending),
+                "templatetypename"         => Order(query, a => a.Content != null && a.Content.TemplateType != null ? a.Content.TemplateType.Name : string.Empty, descending),
+                "categoryname"             => Order(query, a => a.Category != null ? a.Category.Name : string.Empty, descending),
+                "complexitylevel"          => Order(query, a => a.ComplexityLevel, descending),
+                "estimateddurationminutes" => Order(query, a => a.EstimatedDurationMinutes, descending),
+                "authorname"               => Order(query, a => a.Professional != null ? a.Professional.FirstName + " " + a.Professional.LastName : "Sistema", descending),
+                "isactive"                 => Order(query, a => a.IsActive, descending),
+                _                          => query.OrderByDescending(a => a.CreatedAt),
+            };
+
+            var paged = await ordered.ToPagedAsync(page, pageSize, cancellationToken);
 
             return (paged.Data, paged.TotalRecords);
         }
+
+        /// <summary>Ordena por la columna pedida por el cliente; las claves no reconocidas caen al orden por defecto.</summary>
+        private static IOrderedQueryable<Activity> Order<TKey>(
+            IQueryable<Activity> query,
+            Expression<Func<Activity, TKey>> keySelector,
+            bool descending) =>
+            descending ? query.OrderByDescending(keySelector) : query.OrderBy(keySelector);
 
         public async Task<Activity> CreateAsync(Activity activity, CancellationToken cancellationToken = default)
         {

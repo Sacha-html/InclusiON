@@ -156,7 +156,9 @@ export class DetailComponent implements OnInit, OnDestroy {
 
     forkJoin({
       persons:         this.assignmentsService.getPersonsByProfessional(professionalId),
-      invitations:     this.invitationsService.getAll(),
+      // pageSize alto: el contador de la portada necesita el total real de invitaciones,
+      // no solo la primera página (con el tamaño por defecto quedaba subcontado).
+      invitations:     this.invitationsService.getAll(1, 1000),
       classrooms:      this.assignmentsService.getClassroomsByProfessional(professionalId),
       reports:         this.reportsService.getReports({
                          page: 1,

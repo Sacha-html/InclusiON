@@ -48,7 +48,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         {
             _activitiesRepo.GetPagedAsync(
                     ProfId, null, null, null, null, null, null, null,
-                    Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+                    Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns((new List<Activity> { AnActivity(1), AnActivity(2) }, 2));
 
             var handler = new GetActivitiesQueryHandler(_activitiesRepo, _encryption);
@@ -66,7 +66,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             _activitiesRepo.GetPagedAsync(
                     Arg.Any<Guid>(), Arg.Any<string?>(), Arg.Any<int?>(), Arg.Any<int?>(),
                     Arg.Any<int?>(), Arg.Any<bool?>(), Arg.Any<bool?>(), Arg.Any<bool?>(),
-                    Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+                    Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns((new List<Activity>(), 0));
 
             var query = new GetActivitiesQuery(ProfId, null, null, null, null, null, null, null, 1, 10);

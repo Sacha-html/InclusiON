@@ -16,6 +16,8 @@ namespace InclusiON.Application.Interfaces.Repositories
             bool? isTemplate,
             int page,
             int pageSize,
+            string? sortBy = null,
+            string sortDirection = "ASC",
             CancellationToken cancellationToken = default);
         Task<Activity> CreateAsync(Activity activity, CancellationToken cancellationToken = default);
         Task UpdateAsync(Activity activity, CancellationToken cancellationToken = default);
