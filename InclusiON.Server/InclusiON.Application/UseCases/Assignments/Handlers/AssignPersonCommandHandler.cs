@@ -20,19 +20,22 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IPersonsRepository _personsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IRealTimeNotifier _notifier;
 
         public AssignPersonCommandHandler(
             IAssignmentsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IPersonsRepository personsRepository,
             IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IRealTimeNotifier notifier)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _personsRepository = personsRepository;
             _unitOfWork = unitOfWork;
             _dateTime = dateTime;
+            _notifier = notifier;
         }
 
         public async Task<ApiResponse<ProfessionalPersonResponse>> HandleAsync(
@@ -88,6 +91,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 {
                     existing.Classroom = await _repository.GetClassroomByIdAsync(existing.ClassroomId.Value, cancellationToken);
                 }
+                await NotifyNewStudentAsync(professional.UserId, person, cancellationToken);
+
                 var reactivatedResponse = ProfessionalPersonResponse.MapToResponse(existing);
                 return ApiResponse<ProfessionalPersonResponse>.SuccessResult(reactivatedResponse, "Asignacion reactivada exitosamente.");
             }
@@ -111,8 +116,21 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             {
                 assignment.Classroom = await _repository.GetClassroomByIdAsync(assignment.ClassroomId.Value, cancellationToken);
             }
+            await NotifyNewStudentAsync(professional.UserId, person, cancellationToken);
+
             var response = ProfessionalPersonResponse.MapToResponse(assignment);
             return ApiResponse<ProfessionalPersonResponse>.SuccessResult(response, "Persona asignada al profesional exitosamente.");
+        }
+
+        private Task NotifyNewStudentAsync(Guid professionalUserId, PersonWithDisability person, CancellationToken cancellationToken)
+        {
+            var personName = $"{person.FirstName} {person.LastName}";
+            return _notifier.NotifyUserAsync(
+                professionalUserId.ToString(),
+                "🎓 Nuevo alumno asignado",
+                $"Tienes un nuevo alumno, {personName}. Llená el perfil funcional.",
+                actionUrl: $"/#/pro/persons/{person.Id}",
+                cancellationToken: cancellationToken);
         }
     }
 }

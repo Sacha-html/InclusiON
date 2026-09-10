@@ -19,9 +19,10 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         private readonly IPersonsRepository       _personsRepo = Substitute.For<IPersonsRepository>();
         private readonly IUnitOfWork              _uow         = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider        _dateTime    = Substitute.For<IDateTimeProvider>();
+        private readonly IRealTimeNotifier        _notifier    = Substitute.For<IRealTimeNotifier>();
 
         private AssignPersonCommandHandler BuildSut() =>
-            new(_assignRepo, _prosRepo, _personsRepo, _uow, _dateTime);
+            new(_assignRepo, _prosRepo, _personsRepo, _uow, _dateTime, _notifier);
 
         private static readonly Guid ProfId   = Guid.NewGuid();
         private static readonly Guid PersonId = Guid.NewGuid();
@@ -120,6 +121,30 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
                 Arg.Is<ProfessionalPerson>(a => a.ProfessionalId == ProfId && a.IsActive),
                 Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        // ── Notificación al profesional ──────────────────────────────────────
+
+        [Fact]
+        public async Task HandleAsync_NewAssignment_NotifiesProfessional()
+        {
+            var pro = ApprovedPro();
+            var person = APerson();
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(pro);
+            _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(person);
+            _assignRepo.GetAssignmentAsync(ProfId, PersonId, Arg.Any<CancellationToken>())
+                       .Returns((ProfessionalPerson?)null);
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            await _notifier.Received(1).NotifyUserAsync(
+                pro.UserId.ToString(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string?>(),
+                Arg.Any<CancellationToken>());
         }
     }
 }

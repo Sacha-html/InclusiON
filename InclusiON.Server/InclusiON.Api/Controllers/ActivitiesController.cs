@@ -123,7 +123,9 @@ namespace InclusiON.Api.Controllers
                 request.IsStandard,
                 request.IsTemplate,
                 request.Page,
-                request.PageSize);
+                request.PageSize,
+                request.SortBy,
+                request.SortDirection);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
@@ -293,7 +295,9 @@ namespace InclusiON.Api.Controllers
                 request.IsStandard,
                 true, // IsTemplate = true
                 request.Page,
-                request.PageSize);
+                request.PageSize,
+                request.SortBy,
+                request.SortDirection);
 
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
