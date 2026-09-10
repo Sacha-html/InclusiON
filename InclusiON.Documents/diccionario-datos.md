@@ -1,4 +1,4 @@
-﻿# Diccionario de Datos — Sistema InclusiON
+# Diccionario de Datos — Sistema InclusiON
 
 **Última actualización:** 2026-05-31
 
@@ -219,7 +219,7 @@ Familiares o tutores que acompañan el proceso de la persona con discapacidad.
 | Apellido | Texto (100) | Sí | No | García | Apellido del usuario. |
 | DNI | Texto (20) | No | Sí | 35789012 | DNI de la persona. Único si está cargado; puede omitirse. |
 | Teléfono | Texto (20) | No | No | — | Número de contacto |
-| Relación | Texto (50) | No | No | — | Madre, Padre, Tutor, Abuelo, etc. |
+| Relación | Texto (50) | No | No | — | Madre, Padre, Tutor/a, Abuelo/a, Hermano/a, Tío/a (sin opción 'Otro') |
 | Onboarding completado | Booleano | Sí | No | — | Si el familiar completó la pantalla de bienvenida. Default: false |
 | Estado | Enum (FamilyStatusEnum) | Sí | No | — | Estado del familiar en el sistema (Active/Terminated). Default: Active |
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: entidad desactivada, oculta en la interfaz. |
@@ -293,7 +293,7 @@ Vinculación de personas con discapacidad a sus representantes familiares.
 | Id | Identificador único | Sí | No | — | ID del registro de vinculación |
 | Persona | Referencia | Sí | No | — | La persona con discapacidad |
 | Familiar | Referencia | Sí | No | — | El representante familiar |
-| Relación | Texto (50) | No | No | — | Tipo de parentesco (Madre, Padre, Tutor, etc.) |
+| Relación | Texto (50) | No | No | — | Madre, Padre, Tutor/a, Abuelo/a, Hermano/a, Tío/a (sin opción 'Otro') |
 | Es primario | Booleano | Sí | No | — | Si es el representante principal |
 | Tiene consentimiento informado | Booleano | Sí | No | — | Si firmó consentimiento |
 | Fecha de consentimiento | Fecha | No | No | — | Cuándo firmó el consentimiento |
