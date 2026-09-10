@@ -3,7 +3,9 @@
     <c-badge [color]="profileCompletionColor" shape="rounded-pill" class="small">
       Perfil: {{ profileCompletion }}% completo
     </c-badge>
-    <button cButton color="primary" size="sm" (click)="startEditing()">Editar perfil</button>
+    <button cButton [color]="hasFunctionalProfile ? 'primary' : 'success'" size="sm" (click)="startEditing()">
+      {{ hasFunctionalProfile ? 'Editar perfil' : 'Crear perfil' }}
+    </button>
   </div>
 
   <h4 class="h6 mb-3 border-bottom pb-2 text-body-secondary">Niveles funcionales</h4>
