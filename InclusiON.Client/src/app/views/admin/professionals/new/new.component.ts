@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProfessionalsService } from '@services';
-import { AppRoutes, SPECIALTIES } from '@shared/constants';
+import { ProfessionalsService, CatalogsService } from '@services';
+import { AppRoutes } from '@shared/constants';
 import { CreateProfessionalRequest } from '@models';
 import { validDate, notFutureDate, minAge, toIsoDate, toInputDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 import {
@@ -41,12 +42,14 @@ import { OnlyNumbersDirective } from '@shared/directives';
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
 })
-export class NewComponent {
+export class NewComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly specialties = SPECIALTIES;
+  specialties: { id: number; name: string }[] = [];
 
   readonly minBirthDate: string = (() => {
     const today = new Date();
@@ -68,17 +71,24 @@ export class NewComponent {
   constructor() {
     const fb = inject(FormBuilder);
     const professionalsService = inject(ProfessionalsService);
-
     this.form = fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
       documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
       phone: ['', [Validators.maxLength(20)]],
-      specialty: ['', [Validators.maxLength(100)]],
+      specialtyId: ['', [Validators.required]],
       licenseNumber: ['', [Validators.required, Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
       birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
     });
+  }
+
+  ngOnInit(): void {
+    this.catalogsService.getSpecialties()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => {
+        this.specialties = data.filter(specialty => specialty.isActive === true);
+      });
   }
 
   get f() {
@@ -124,7 +134,7 @@ export class NewComponent {
       email: raw.email,
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       ...(raw.phone && { phone: raw.phone }),
-      ...(raw.specialty && { specialty: raw.specialty }),
+      ...(raw.specialtyId && { specialtyId: +raw.specialtyId, specialty: this.specialties.find(x => x.id === +raw.specialtyId)?.name }),
       ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
       ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
     };

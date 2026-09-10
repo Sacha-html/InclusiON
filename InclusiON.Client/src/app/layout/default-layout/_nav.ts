@@ -60,6 +60,7 @@ export const navItems: INavData[] = [
       { name: 'Métodos de login', url: AppRoutes.Admin.Catalogs.LoginMethods },
       { name: 'Niveles de autonomía', url: AppRoutes.Admin.Catalogs.AutonomyLevels },
       { name: 'Tipos de discapacidad', url: AppRoutes.Admin.Catalogs.DisabilityTypes },
+      { name: 'Especialidades', url: AppRoutes.Admin.Catalogs.Specialties },
       { name: 'Tipos de plantilla', url: AppRoutes.Admin.Catalogs.TemplateTypes },
     ],
   },

@@ -5,11 +5,13 @@ using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using Xunit;
 using InclusiON.Api.Controllers;
+using InclusiON.Application.Constants;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Catalogs;
+using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Infrastructure.Services;
 using InclusiON.Tests.TestSupport;
 
@@ -19,14 +21,57 @@ namespace InclusiON.Tests.Controllers
     {
         private readonly IOutputCacheStore _cacheStore = Substitute.For<IOutputCacheStore>();
         private readonly IMemoryCache _memoryCache = Substitute.For<IMemoryCache>();
+        private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
 
         public CatalogAdminControllerPatchStatusTests()
         {
             _cacheStore.EvictByTagAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
                        .Returns(ValueTask.CompletedTask);
+            _encryption.Encrypt(Arg.Any<string>()).Returns("encrypted");
         }
 
-        private CatalogAdminController BuildSut() => new(new CatalogAdminService(Db), _cacheStore, _memoryCache);
+        private CatalogAdminController BuildSut() => new(new CatalogAdminService(Db), _cacheStore, _memoryCache, _encryption);
+
+        [Fact]
+        public async Task GetSpecialties_ReturnsActiveAndInactiveWithRealStatus()
+        {
+            Db.Specialties.AddRange(
+                new Specialty { Name = "Activa", IsActive = true },
+                new Specialty { Name = "Inactiva", IsActive = false });
+            await Db.SaveChangesAsync();
+
+            var result = await BuildSut().GetSpecialties(default);
+
+            var body = ((OkObjectResult)result.Result!).Value as ApiResponse<List<CatalogItemResponse>>;
+            body!.Data.Should().HaveCount(2);
+            body.Data!.Should().ContainSingle(x => x.Name == "Activa" && x.IsActive);
+            body.Data.Should().ContainSingle(x => x.Name == "Inactiva" && !x.IsActive);
+            body.Data.Should().OnlyContain(x => x.EncryptedId == "encrypted");
+        }
+
+        [Fact]
+        public async Task PatchSpecialtyStatus_Reactivate_ReturnsRealActiveStatus()
+        {
+            Db.Specialties.Add(new Specialty { Name = "Inactiva", IsActive = false });
+            await Db.SaveChangesAsync();
+
+            var result = await BuildSut().PatchSpecialtyStatus(1, new PatchStatusRequest(true), default);
+
+            var body = ((OkObjectResult)result.Result!).Value as ApiResponse<CatalogItemResponse>;
+            body!.Data!.IsActive.Should().BeTrue();
+            body.Data.Name.Should().Be("Inactiva");
+        }
+
+        [Fact]
+        public async Task PatchSpecialtyStatus_Reactivate_InvalidatesSpecialtiesCache()
+        {
+            Db.Specialties.Add(new Specialty { Name = "Pediatría", IsActive = false });
+            await Db.SaveChangesAsync();
+
+            await BuildSut().PatchSpecialtyStatus(1, new PatchStatusRequest(true), default);
+
+            _memoryCache.Received(1).Remove(CatalogCacheKeys.Specialties);
+        }
 
         private static DisabilityType ActiveDisabilityType(int id = 1) =>
             new() { Id = id, Name = "Motriz", IsActive = true };

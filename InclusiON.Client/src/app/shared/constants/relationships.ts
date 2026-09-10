@@ -5,6 +5,5 @@ export const RELATIONSHIPS = [
   'Abuelo/a',
   'Hermano/a',
   'Tío/a',
-  'Otro',
 ] as const;
 

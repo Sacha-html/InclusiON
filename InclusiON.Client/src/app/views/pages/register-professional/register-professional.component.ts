@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProfessionalsService, InstitutionsService } from '@services';
-import { AppRoutes, SPECIALTIES } from '@shared/constants';
+import { ProfessionalsService, InstitutionsService, CatalogsService } from '@services';
+import { AppRoutes } from '@shared/constants';
 import { InstitutionResponse, RegisterProfessionalRequest } from '@models';
 import { validDate, notFutureDate, minAge, toIsoDate, toInputDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
 
@@ -53,8 +54,10 @@ export class RegisterProfessionalComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly institutionsService = inject(InstitutionsService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly specialties = SPECIALTIES;
+  specialties: { id: number; name: string }[] = [];
 
   readonly minBirthDate: string = (() => {
     const today = new Date();
@@ -84,7 +87,7 @@ export class RegisterProfessionalComponent implements OnInit {
       email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
       documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
       phone: ['', [Validators.maxLength(20)]],
-      specialty: ['', [Validators.required, Validators.maxLength(100)]],
+      specialtyId: ['', [Validators.required]],
       licenseNumber: ['', [Validators.required, Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
       birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
       institutionId: [''],
@@ -104,6 +107,12 @@ export class RegisterProfessionalComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.catalogsService.getSpecialties()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: data => this.specialties = data.filter(specialty => specialty.isActive === true),
+        error: () => this.specialties = [],
+      });
     this.institutionsService.getAll().subscribe({
       next: (data) => this.institutions = data.filter(i => i.isActive),
       error: () => this.institutions = [],
@@ -145,7 +154,8 @@ export class RegisterProfessionalComponent implements OnInit {
       email: raw.email,
       documentNumber: raw.documentNumber || undefined,
       phone: raw.phone || undefined,
-      specialty: raw.specialty,
+      specialtyId: +raw.specialtyId,
+      specialty: this.specialties.find(x => x.id === +raw.specialtyId)?.name ?? '',
       licenseNumber: raw.licenseNumber || undefined,
       birthDate: raw.birthDate ? toIsoDate(raw.birthDate) : undefined,
       institutionId: raw.institutionId ? +raw.institutionId : undefined,
