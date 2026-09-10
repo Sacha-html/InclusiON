@@ -13,12 +13,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 24px;
+  gap: var(--big-button-gap, 12px);
+  padding: var(--big-button-padding, 24px);
   min-width: var(--big-button-min-size, 140px);
   min-height: var(--big-button-min-size, 140px);
   border: 2px solid var(--a11y-border, #E0E0E0);
-  border-radius: 24px;
+  border-radius: var(--big-button-border-radius, 24px);
   background: var(--btn-bg);
   color: var(--btn-color);
   cursor: pointer;
@@ -59,26 +59,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
+  width: var(--big-button-icon-box, 72px);
+  height: var(--big-button-icon-box, 72px);
+  border-radius: var(--big-button-icon-radius, 20px);
   background: var(--btn-color);
   color: var(--a11y-primary-text);
 
   svg {
-    width: 40px;
-    height: 40px;
+    width: var(--big-button-icon-size, 40px);
+    height: var(--big-button-icon-size, 40px);
   }
 }
 
 .btn-image {
-  width: 72px;
-  height: 72px;
+  width: var(--big-button-icon-box, 72px);
+  height: var(--big-button-icon-box, 72px);
   object-fit: contain;
 }
 
 .btn-label {
-  font-size: 20px;
+  font-size: var(--big-button-font-size, 20px);
   font-weight: 600;
   text-align: center;
   line-height: 1.2;

@@ -76,8 +76,8 @@ export class DataTableComponent implements OnInit, OnDestroy {
   @Output() rowAction = new EventEmitter<{ action: string; item: any }>();
   @Output() headerAction = new EventEmitter<string>();
 
-  sortField = '';
-  sortDirection: 'ASC' | 'DESC' = 'ASC';
+  @Input() sortField = '';
+  @Input() sortDirection: 'ASC' | 'DESC' = 'ASC';
 
   private searchSubject = new Subject<string>();
   private searchSub!: Subscription;

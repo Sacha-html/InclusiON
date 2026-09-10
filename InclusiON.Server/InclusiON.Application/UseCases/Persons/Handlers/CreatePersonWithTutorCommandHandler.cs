@@ -29,33 +29,39 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IPersonsRepository _repository;
         private readonly IFamilyRepository _familyRepository;
         private readonly IAssignmentsRepository _assignmentsRepository;
+        private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly ILogger<CreatePersonWithTutorCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
         private readonly IRoadmapInitializer _roadmapInitializer;
+        private readonly IRealTimeNotifier _notifier;
 
         public CreatePersonWithTutorCommandHandler(
             IPersonsRepository repository,
             IFamilyRepository familyRepository,
             IAssignmentsRepository assignmentsRepository,
+            IProfessionalsRepository professionalsRepository,
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
             IBackgroundJobRepository backgroundJobs,
             ILogger<CreatePersonWithTutorCommandHandler> logger,
             IDateTimeProvider dateTime,
-            IRoadmapInitializer roadmapInitializer)
+            IRoadmapInitializer roadmapInitializer,
+            IRealTimeNotifier notifier)
         {
             _repository = repository;
             _familyRepository = familyRepository;
             _assignmentsRepository = assignmentsRepository;
+            _professionalsRepository = professionalsRepository;
             _identityService = identityService;
             _unitOfWork = unitOfWork;
             _backgroundJobs = backgroundJobs;
             _logger = logger;
             _dateTime = dateTime;
             _roadmapInitializer = roadmapInitializer;
+            _notifier = notifier;
         }
 
         public async Task<ApiResponse<PersonResponse>> HandleAsync(CreatePersonWithTutorCommand command, CancellationToken cancellationToken)
@@ -111,6 +117,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                         "El aula especificada no existe.");
                 }
                 Guid professionalId = classroom.ProfessionalId;
+                var professional = await _professionalsRepository.GetByIdAsync(professionalId, cancellationToken);
 
                 // 5. Preparar creación del alumno
                 var baseStudentUsername = GenerateUsername(command.FirstName, command.LastName);
@@ -252,6 +259,12 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     maxRetries: 2,
                     cancellationToken: cancellationToken);
 
+                // 11. Notificar en tiempo real al profesional asignado
+                if (professional != null && professional.UserId != Guid.Empty)
+                {
+                    await NotifyNewStudentAsync(professional.UserId, student, cancellationToken);
+                }
+
                 _logger.LogInformation("Alumno {StudentId} y Tutor {TutorId} creados exitosamente en transacción.", student.Id, tutor.Id);
 
                 var response = PersonMapper.ToResponse(student);
@@ -263,6 +276,17 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 _logger.LogError(ex, "Error al registrar alumno con tutor");
                 return ApiResponse<PersonResponse>.ErrorResult(ErrorCode.InternalError, $"Error en el servidor: {ex.Message}");
             }
+        }
+
+        private Task NotifyNewStudentAsync(Guid professionalUserId, PersonWithDisability person, CancellationToken cancellationToken)
+        {
+            var personName = $"{person.FirstName} {person.LastName}";
+            return _notifier.NotifyUserAsync(
+                professionalUserId.ToString(),
+                "🎓 Nuevo alumno asignado",
+                $"Tienes un nuevo alumno, {personName}. Llená el perfil funcional.",
+                actionUrl: $"/#/pro/persons/{person.Id}",
+                cancellationToken: cancellationToken);
         }
 
         private string GenerateUsername(string firstName, string lastName)

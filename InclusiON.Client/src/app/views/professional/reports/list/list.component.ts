@@ -49,8 +49,8 @@ export class ListComponent implements OnInit {
   totalRecords = signal(0);
   totalPages = signal(0);
   searchTerm = signal('');
-  sortBy = signal('createdAt');
-  sortDirection = signal('DESC');
+  sortBy = signal('personName');
+  sortDirection = signal('ASC');
 
   // ID del profesional autenticado — se carga en ngOnInit antes de loadReports
   private professionalId = '';

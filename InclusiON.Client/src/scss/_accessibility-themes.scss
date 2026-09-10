@@ -14,7 +14,7 @@
   color-scheme: light;
 
   // Tipografía
-  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-family: 'Montserrat', Arial, sans-serif;
   --a11y-font-size: 16px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
@@ -290,7 +290,7 @@
 [data-color-mode="light"][data-theme="high-contrast"],
 [data-color-mode="light"][data-profile="high-contrast"],
 :root:not([data-color-mode="dark"])[data-theme="high-contrast"] {
-  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-family: 'Montserrat', Arial, sans-serif;
   --a11y-font-size: 18px;
   --a11y-line-height: 1.6;
   --a11y-letter-spacing: 0.02em;
@@ -568,7 +568,7 @@
 [data-color-mode="light"][data-theme="low-vision"],
 [data-color-mode="light"][data-profile="low-vision"],
 :root:not([data-color-mode="dark"])[data-theme="low-vision"] {
-  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-family: 'Montserrat', Arial, sans-serif;
   --a11y-font-size: 20px;
   --a11y-line-height: 1.6;
   --a11y-letter-spacing: 0.03em;
@@ -707,7 +707,7 @@
 [data-color-mode="light"][data-theme="deuteranopia"],
 [data-color-mode="light"][data-profile="deuteranopia"],
 :root:not([data-color-mode="dark"])[data-theme="deuteranopia"] {
-  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-family: 'Montserrat', Arial, sans-serif;
   --a11y-font-size: 16px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
@@ -847,7 +847,7 @@
 [data-color-mode="light"][data-theme="protanopia"],
 [data-color-mode="light"][data-profile="protanopia"],
 :root:not([data-color-mode="dark"])[data-theme="protanopia"] {
-  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-family: 'Montserrat', Arial, sans-serif;
   --a11y-font-size: 16px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
@@ -987,7 +987,7 @@
 [data-color-mode="light"][data-theme="tritanopia"],
 [data-color-mode="light"][data-profile="tritanopia"],
 :root:not([data-color-mode="dark"])[data-theme="tritanopia"] {
-  --a11y-font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+  --a11y-font-family: 'Montserrat', Arial, sans-serif;
   --a11y-font-size: 16px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
