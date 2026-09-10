@@ -9,10 +9,20 @@ namespace InclusiON.Data.Seeders
     public static class RoadmapInitializerAccessor
     {
         private static Func<AppDbContext, Guid, Guid?, CancellationToken, Task>? _initialize;
+        private static Func<AppDbContext, CancellationToken, Task>? _ensureActivities;
 
         public static Func<AppDbContext, Guid, Guid?, CancellationToken, Task> InitializeStudentRoadmap =>
             _initialize ?? throw new InvalidOperationException("RoadmapInitializerAccessor not initialized.");
 
-        public static void Initialize(Func<AppDbContext, Guid, Guid?, CancellationToken, Task> initialize) => _initialize = initialize;
+        public static Func<AppDbContext, CancellationToken, Task> EnsureStandardActivities =>
+            _ensureActivities ?? ((_, _) => Task.CompletedTask);
+
+        public static void Initialize(
+            Func<AppDbContext, Guid, Guid?, CancellationToken, Task> initialize,
+            Func<AppDbContext, CancellationToken, Task>? ensureActivities = null)
+        {
+            _initialize = initialize;
+            _ensureActivities = ensureActivities;
+        }
     }
 }
