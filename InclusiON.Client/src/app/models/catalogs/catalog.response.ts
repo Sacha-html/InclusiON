@@ -6,6 +6,8 @@ export interface CatalogItem {
   isActive: boolean;
 }
 
+export type SpecialtyItem = CatalogItem;
+
 export interface AutonomyLevelItem {
   id: number;
   encryptedId: string;

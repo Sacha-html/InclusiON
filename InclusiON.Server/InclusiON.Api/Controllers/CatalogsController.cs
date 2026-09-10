@@ -36,6 +36,15 @@ namespace InclusiON.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("specialties")]
+        [AllowAnonymous]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
+        public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetSpecialties(
+            [FromServices] IQueryHandler<GetSpecialtiesQuery, ApiResponse<List<CatalogItemResponse>>> handler,
+            CancellationToken cancellationToken = default)
+            => Ok(await handler.HandleAsync(new GetSpecialtiesQuery(), cancellationToken));
+
         /// <summary>
         /// Obtiene los niveles de autonomia activos.
         /// </summary>

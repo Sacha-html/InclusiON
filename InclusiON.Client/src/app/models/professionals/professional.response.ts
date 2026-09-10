@@ -7,6 +7,7 @@ export interface ProfessionalListItemResponse {
   documentNumber?: string;
   phone?: string;
   specialty?: string;
+  specialtyId?: number;
   licenseNumber?: string;
   isActive: boolean;
   status: string;
@@ -22,6 +23,7 @@ export interface ProfessionalResponse {
   documentNumber?: string;
   phone?: string;
   specialty?: string;
+  specialtyId?: number;
   licenseNumber?: string;
   birthDate?: string;
   isActive: boolean;

@@ -2316,6 +2316,9 @@ namespace InclusiON.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int?>("SpecialtyId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
@@ -2349,6 +2352,8 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("LastName");
 
                     b.HasIndex("LicenseNumber");
+
+                    b.HasIndex("SpecialtyId");
 
                     b.HasIndex("Status");
 
@@ -2738,6 +2743,112 @@ namespace InclusiON.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("SkillAreas", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.Specialty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Specialties", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsActive = true,
+                            Name = "Educación Especial"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsActive = true,
+                            Name = "Psicología"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsActive = true,
+                            Name = "Psicopedagogía"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            IsActive = true,
+                            Name = "Fonoaudiología"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            IsActive = true,
+                            Name = "Terapia Ocupacional"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            IsActive = true,
+                            Name = "Kinesiología"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            IsActive = true,
+                            Name = "Trabajo Social"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            IsActive = true,
+                            Name = "Musicoterapia"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            IsActive = true,
+                            Name = "Psicomotricidad"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            IsActive = true,
+                            Name = "Acompañamiento Terapéutico"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            IsActive = true,
+                            Name = "Docente de Apoyo a la Inclusión (DAI)"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            IsActive = true,
+                            Name = "Neurología"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            IsActive = true,
+                            Name = "Pediatría"
+                        });
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.TrustedDevice", b =>
@@ -3616,11 +3727,18 @@ namespace InclusiON.Data.Migrations
 
             modelBuilder.Entity("InclusiON.Domain.Models.Professional", b =>
                 {
+                    b.HasOne("InclusiON.Domain.Models.Specialty", "SpecialtyCatalog")
+                        .WithMany("Professionals")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("InclusiON.Domain.Models.User", "User")
                         .WithOne("Professional")
                         .HasForeignKey("InclusiON.Domain.Models.Professional", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("SpecialtyCatalog");
 
                     b.Navigation("User");
                 });
@@ -3938,6 +4056,11 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("RoadmapAreas");
 
                     b.Navigation("TemplateTypes");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.Specialty", b =>
+                {
+                    b.Navigation("Professionals");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.User", b =>

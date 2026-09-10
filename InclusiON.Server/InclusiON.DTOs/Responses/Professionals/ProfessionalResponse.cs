@@ -17,6 +17,7 @@ namespace InclusiON.DTOs.Responses.Professionals
         public string? DocumentNumber { get; set; }
         public string? Phone { get; set; }
         public string? Specialty { get; set; }
+        public int? SpecialtyId { get; set; }
         public string? LicenseNumber { get; set; }
         public DateTime? BirthDate { get; set; }
 
@@ -58,7 +59,8 @@ namespace InclusiON.DTOs.Responses.Professionals
                 LastName = professional.LastName,
                 DocumentNumber = professional.DocumentNumber,
                 Phone = professional.Phone,
-                Specialty = professional.Specialty,
+                Specialty = professional.SpecialtyCatalog?.Name ?? professional.Specialty,
+                SpecialtyId = professional.SpecialtyId,
                 LicenseNumber = professional.LicenseNumber,
                 BirthDate = professional.BirthDate,
                 Status = (int)professional.Status,

@@ -12,6 +12,7 @@ namespace InclusiON.DTOs.Responses.Professionals
         public string? DocumentNumber { get; set; }
         public string? Phone { get; set; }
         public string? Specialty { get; set; }
+        public int? SpecialtyId { get; set; }
         public string? LicenseNumber { get; set; }
         public bool IsActive { get; set; }
         public string Status { get; set; } = string.Empty;
@@ -28,7 +29,8 @@ namespace InclusiON.DTOs.Responses.Professionals
                 LastName = p.LastName,
                 DocumentNumber = p.DocumentNumber,
                 Phone = p.Phone,
-                Specialty = p.Specialty,
+                Specialty = p.SpecialtyCatalog?.Name ?? p.Specialty,
+                SpecialtyId = p.SpecialtyId,
                 LicenseNumber = p.LicenseNumber,
                 IsActive = p.User?.IsActive ?? false,
                 Status = p.Status.ToString(),
