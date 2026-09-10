@@ -65,11 +65,17 @@ namespace InclusiON.Infrastructure
                 Microsoft.Extensions.Logging.Abstractions.NullLogger<Argon2idPinHasher>.Instance);
             PinHashAccessor.Initialize(pinHasher.Hash);
 
-            RoadmapInitializerAccessor.Initialize(async (context, studentId, supervisorUserId, ct) =>
-            {
-                var initializer = new RoadmapInitializer(context);
-                await initializer.InitializeStudentRoadmapAsync(studentId, supervisorUserId, ct);
-            });
+            RoadmapInitializerAccessor.Initialize(
+                async (context, studentId, supervisorUserId, ct) =>
+                {
+                    var initializer = new RoadmapInitializer(context);
+                    await initializer.InitializeStudentRoadmapAsync(studentId, supervisorUserId, ct);
+                },
+                async (context, ct) =>
+                {
+                    var initializer = new RoadmapInitializer(context);
+                    await initializer.EnsureStandardActivitiesAsync(ct);
+                });
 
             var connectionString = configuration.GetConnectionString("PostgreSqlConn");
 

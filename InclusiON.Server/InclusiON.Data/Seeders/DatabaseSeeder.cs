@@ -24,6 +24,9 @@ namespace InclusiON.Data.Seeders
             await SeedFamilyAsync(userManager, context);
             await SeedFiveAdditionalStudentsAndTutorsAsync(userManager, context);
 
+            // Asegurar las 10 actividades oficiales del Roadmap con sus títulos y contenidos definitivos
+            await RoadmapInitializerAccessor.EnsureStandardActivities(context, CancellationToken.None);
+
             // Inicializar Roadmap Estándar para todos los alumnos existentes
             // El RoadmapInitializer ya verifica si el alumno tiene roadmap y lo omite si existe
             var students = await context.PersonsWithDisability.ToListAsync();
