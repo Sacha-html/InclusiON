@@ -47,7 +47,8 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         public async Task GetActivities_ReturnsPagedResult()
         {
             _activitiesRepo.GetPagedAsync(
-                    ProfId, null, null, null, null, null, null, null,
+                    Arg.Is(ProfId), Arg.Any<string?>(), Arg.Any<int?>(), Arg.Any<int?>(),
+                    Arg.Any<int?>(), Arg.Any<bool?>(), Arg.Any<bool?>(), Arg.Any<bool?>(),
                     Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns((new List<Activity> { AnActivity(1), AnActivity(2) }, 2));
 

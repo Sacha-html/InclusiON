@@ -9,17 +9,7 @@ export const navItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Gestión',
-  },
-  {
-    name: 'Familiares',
-    url: AppRoutes.Admin.Family,
-    iconComponent: { name: 'cil-home' },
-  },
-  {
-    name: 'Invitaciones',
-    url: AppRoutes.Admin.Invitations,
-    iconComponent: { name: 'cil-link' },
+    name: 'Comunidad',
   },
   {
     name: 'Alumnos',
@@ -32,9 +22,18 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-user' },
   },
   {
+    name: 'Familiares',
+    url: AppRoutes.Admin.Family,
+    iconComponent: { name: 'cil-home' },
+  },
+  {
     name: 'Usuarios',
     url: AppRoutes.Admin.Users,
     iconComponent: { name: 'cil-group' },
+  },
+  {
+    title: true,
+    name: 'Seguimiento y Comunicación',
   },
   {
     name: 'Reportes',
@@ -45,6 +44,11 @@ export const navItems: INavData[] = [
     name: 'Mensajes',
     url: AppRoutes.Admin.Messages,
     iconComponent: { name: 'cil-envelope-closed' },
+  },
+  {
+    name: 'Invitaciones',
+    url: AppRoutes.Admin.Invitations,
+    iconComponent: { name: 'cil-link' },
   },
   {
     title: true,

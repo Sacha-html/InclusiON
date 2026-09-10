@@ -7,6 +7,9 @@ namespace InclusiON.DTOs.Requests.Reports
     /// </summary>
     public class GetReportsRequest : PagedRequest, IInstitutionFilterable
     {
+        public new string? SortBy { get; set; }
+        public new string SortDirection { get; set; } = "DESC";
+
         public string? Search { get; set; }
         public string? PersonId { get; set; }
         public List<string>? PersonIds { get; set; }

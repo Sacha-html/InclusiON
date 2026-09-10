@@ -12,14 +12,14 @@ export const familyNavItems: INavData[] = [
     name: 'Seguimiento'
   },
   {
-    name: 'Actividades',
-    url: AppRoutes.Family.Activities,
-    iconComponent: { name: 'cil-task' }
-  },
-  {
     name: 'Calendario',
     url: AppRoutes.Family.Calendar,
     iconComponent: { name: 'cil-calendar' }
+  },
+  {
+    name: 'Actividades',
+    url: AppRoutes.Family.Activities,
+    iconComponent: { name: 'cil-task' }
   },
   {
     name: 'Reportes',
