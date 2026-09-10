@@ -89,7 +89,7 @@ namespace InclusiON.Infrastructure.Services
                 },
                 new {
                     Seq = 4,
-                    Title = "Secuencia de acción (Camino Visual)",
+                    Title = "Explotar burbujas",
                     OldTitles = new[] { "Explotar burbujas", "Secuencia de acción (Camino Visual)" },
                     Desc = "Toca las burbujas en orden para terminar el camino.",
                     CatId = 5,
@@ -99,7 +99,7 @@ namespace InclusiON.Infrastructure.Services
                 },
                 new {
                     Seq = 5,
-                    Title = "Asociación Funcional Cotidiana",
+                    Title = "¿Dónde va cada cosa?",
                     OldTitles = new[] { "¿Dónde va cada cosa?", "¿Qué quieres hacer?", "Asociación Funcional Cotidiana" },
                     Desc = "Contexto: Cama. ¿Qué objeto va en la cama?",
                     CatId = 8,
@@ -109,7 +109,7 @@ namespace InclusiON.Infrastructure.Services
                 },
                 new {
                     Seq = 6,
-                    Title = "Reconocimiento Fonológico",
+                    Title = "Conciencia fonológica",
                     OldTitles = new[] { "Conciencia fonológica", "Reconocimiento Fonológico" },
                     Desc = "¿Qué animal empieza con la letra A?",
                     CatId = 1,
@@ -119,7 +119,7 @@ namespace InclusiON.Infrastructure.Services
                 },
                 new {
                     Seq = 7,
-                    Title = "Identificación de Formas Básicas",
+                    Title = "Colorear libre",
                     OldTitles = new[] { "Colorear libre", "Identificación de Formas Básicas" },
                     Desc = "¿Cuál es el círculo?",
                     CatId = 2,
@@ -139,7 +139,7 @@ namespace InclusiON.Infrastructure.Services
                 },
                 new {
                     Seq = 9,
-                    Title = "Seriación de Tamaños",
+                    Title = "Clasificación por tamaño",
                     OldTitles = new[] { "Clasificación por tamaño", "Seriación de Tamaños" },
                     Desc = "Ordena las pelotas de la más pequeña a la más grande.",
                     CatId = 2,

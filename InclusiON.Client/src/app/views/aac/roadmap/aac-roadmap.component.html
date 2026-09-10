@@ -101,13 +101,16 @@
                   <span class="node-hint">Necesitas {{ node.activity.unlockThresholdPercent }}% en la anterior</span>
                 }
                 @if (node.status === 'completed') {
-                  <span class="node-badge completed">Completada @if(node.score !== undefined) { ({{ node.score }}%) } ✓</span>
+                  <span class="node-badge completed">Completada ✓</span>
                 }
                 @if (node.status === 'in-progress') {
                   <span class="node-badge in-progress">En progreso</span>
                 }
                 @if (node.status === 'available') {
                   <span class="node-badge available">Disponible</span>
+                }
+                @if (node.status === 'pending') {
+                  <span class="node-badge pending">Pendiente</span>
                 }
               </div>
             </div>
