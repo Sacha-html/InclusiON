@@ -34,6 +34,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                 query.IsTemplate,
                 query.Page,
                 query.PageSize,
+                query.SortBy,
+                query.SortDirection,
                 cancellationToken);
 
             var totalPages = (int)Math.Ceiling((double)total / query.PageSize);
