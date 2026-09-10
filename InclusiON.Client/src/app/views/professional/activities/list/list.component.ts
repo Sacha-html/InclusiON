@@ -106,7 +106,7 @@ export class ListComponent implements OnInit {
       label: 'Origen',
       type: 'badge',
       badgeMap: {
-        true:  { color: 'info',    label: 'Estándar' },
+        true:  { color: 'info',    label: 'Compartida' },
         false: { color: 'primary', label: 'Propia'   },
       },
     },

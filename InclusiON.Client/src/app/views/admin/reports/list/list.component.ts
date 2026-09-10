@@ -106,9 +106,18 @@ export class ListComponent implements OnInit {
       this.statusFilter = statusParam;
     }
     this.loadReports();
-    this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
-    this.personsService.getPersons({ pageSize: 500 }).subscribe(r => this.persons.set(r.data));
-    this.professionalsService.getProfessionals({ pageSize: 500, status: 'active' }).subscribe(r => this.professionals.set(r.data));
+    this.catalogsService.getReportTypes().subscribe(types => {
+      const sorted = [...types].sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+      this.reportTypes.set(sorted);
+    });
+    this.personsService.getPersons({ pageSize: 500 }).subscribe(r => {
+      const sorted = [...r.data].sort((a, b) => a.fullName.localeCompare(b.fullName, 'es', { sensitivity: 'base' }));
+      this.persons.set(sorted);
+    });
+    this.professionalsService.getProfessionals({ pageSize: 500, status: 'active' }).subscribe(r => {
+      const sorted = [...r.data].sort((a, b) => a.fullName.localeCompare(b.fullName, 'es', { sensitivity: 'base' }));
+      this.professionals.set(sorted);
+    });
   }
 
   loadReports(): void {

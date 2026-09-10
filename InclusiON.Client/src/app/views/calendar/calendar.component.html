@@ -131,7 +131,7 @@
 </div>
 
 <!-- ── Modal Crear/Editar Evento (Sólo Profesional) ────────────────────── -->
-<c-modal [visible]="showEventModal" (visibleChange)="showEventModal = $event">
+<c-modal [visible]="showEventModal" (visibleChange)="showEventModal = $event" size="lg">
   <c-modal-header>
     <h5 cModalTitle>{{ eventForm.id ? 'Editar evento' : 'Agendar actividad' }}</h5>
   </c-modal-header>
@@ -142,7 +142,7 @@
     </div>
 
     <div class="row g-3 mb-3">
-      <div class="col-6">
+      <div class="col-12 col-md-6">
         <label cLabel class="mb-1">Tipo de evento</label>
         <select cSelect [(ngModel)]="eventForm.type">
           <option value="Tutoría">Tutoría</option>
@@ -150,11 +150,11 @@
           <option value="Tarea">Tarea</option>
         </select>
       </div>
-      <div class="col-6">
+      <div class="col-12 col-md-6">
         <label cLabel class="mb-1">Dirigido a</label>
         <select cSelect [(ngModel)]="eventForm.targetScope">
-          <option value="all">Todos los alumnos a cargo</option>
-          <option value="single">Un alumno específico (personalizado)</option>
+          <option value="all">Todos los alumnos</option>
+          <option value="single">Alumno específico</option>
         </select>
       </div>
     </div>
@@ -172,7 +172,7 @@
     }
 
     <div class="row g-3 mb-3">
-      <div class="col-6">
+      <div class="col-12 col-md-6">
         <label cLabel class="mb-1">Fecha *</label>
         <input
           cFormControl
@@ -186,7 +186,7 @@
           </small>
         }
       </div>
-      <div class="col-6">
+      <div class="col-12 col-md-6">
         <label cLabel class="mb-1">Hora *</label>
         <input cFormControl type="time" [(ngModel)]="eventForm.time" />
       </div>

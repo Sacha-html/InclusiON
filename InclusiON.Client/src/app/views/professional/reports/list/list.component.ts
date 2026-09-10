@@ -114,9 +114,17 @@ actions: [
       next: (profile) => {
         this.professionalId = profile.id;
         this.loadReports();
-        this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
+        this.catalogsService.getReportTypes().subscribe(types => {
+          const sorted = [...types].sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+          this.reportTypes.set(sorted);
+        });
         this.assignmentsService.getPersonsByProfessional(profile.id).subscribe({
-          next: (persons) => this.persons.set(persons.filter(p => p.isActive)),
+          next: (persons) => {
+            const sorted = persons
+              .filter(p => p.isActive)
+              .sort((a, b) => a.personFullName.localeCompare(b.personFullName, 'es', { sensitivity: 'base' }));
+            this.persons.set(sorted);
+          },
         });
       },
     });

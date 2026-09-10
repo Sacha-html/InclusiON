@@ -30,7 +30,7 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
                 Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(),
                 Arg.Any<bool?>(), Arg.Any<string?>(),
                 Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
-                Arg.Any<SortField?>(), Arg.Any<string>(), Arg.Any<List<int>?>(),
+                Arg.Any<string?>(), Arg.Any<string>(), Arg.Any<List<int>?>(),
                 Arg.Any<List<string>?>(), Arg.Any<CancellationToken>())
             .Returns(new PagedResponse<Report>
             {
@@ -73,7 +73,7 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
                 familyId,
                 Arg.Any<int>(), Arg.Any<int>(),
                 Arg.Any<string?>(), Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
-                Arg.Any<SortField?>(), Arg.Any<string>(),
+                Arg.Any<string?>(), Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
             .Returns(new PagedResponse<Report>
             {

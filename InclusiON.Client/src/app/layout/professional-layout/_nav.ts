@@ -12,14 +12,14 @@ export const professionalNavItems: INavData[] = [
     name: 'Gestión'
   },
   {
-    name: 'Actividades',
-    url: AppRoutes.Pro.Activities,
-    iconComponent: { name: 'cil-task' }
-  },
-  {
     name: 'Mi aula',
     url: AppRoutes.Pro.Persons,
     iconComponent: { name: 'cil-people' }
+  },
+  {
+    name: 'Actividades',
+    url: AppRoutes.Pro.Activities,
+    iconComponent: { name: 'cil-task' }
   },
   {
     name: 'Objetivos',
@@ -50,13 +50,13 @@ export const professionalNavItems: INavData[] = [
     iconComponent: { name: 'cil-calendar' }
   },
   {
-    name: 'Invitaciones',
-    url: AppRoutes.Pro.Invitations,
-    iconComponent: { name: 'cil-link' }
-  },
-  {
     name: 'Mensajes',
     url: AppRoutes.Pro.Messages,
     iconComponent: { name: 'cil-envelope-closed' }
+  },
+  {
+    name: 'Invitaciones',
+    url: AppRoutes.Pro.Invitations,
+    iconComponent: { name: 'cil-link' }
   }
 ];

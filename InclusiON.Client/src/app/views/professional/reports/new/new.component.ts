@@ -104,7 +104,10 @@ export class NewComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPersons();
-    this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
+    this.catalogsService.getReportTypes().subscribe(types => {
+      const sorted = [...types].sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+      this.reportTypes.set(sorted);
+    });
   }
 
   loadPersons(): void {
@@ -112,7 +115,10 @@ export class NewComponent implements OnInit {
       switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
     ).subscribe({
       next: (persons) => {
-        this.persons.set(persons.filter(p => p.isActive));
+        const sorted = persons
+          .filter(p => p.isActive)
+          .sort((a, b) => a.personFullName.localeCompare(b.personFullName, 'es', { sensitivity: 'base' }));
+        this.persons.set(sorted);
       },
       error: () => {},
     });
