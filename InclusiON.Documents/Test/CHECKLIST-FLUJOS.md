@@ -16,22 +16,25 @@
 - [ ] Cambio de contraseña exitoso → redirige al portal
 - [ ] Refresh token automático al expirar access token → sesión continúa sin re-login
 
-### 1.2 Login visual (Persona con Discapacidad)
-- [ ] Identificación por nombre → lista de personas filtrada
-- [ ] Selección de persona + contraseña visual → acceso al portal AAC
-- [ ] PIN incorrecto → mensaje de error
+### ~~1.2 Login visual (Persona con Discapacidad)~~ — ⚠️ DISCONTINUADO
+> **Decisión de arquitectura y accesibilidad (IN-310):** El login visual con identificación por nombre y contraseña alfanumérica fue discontinuado. El backend rechaza este método con `400 Bad Request` en `VisualStandardLoginCommandHandler.cs`. Para alumnos rigen exclusivamente **2 métodos adaptativos**: PIN numérico (1.2) y Login Asistido (1.3).
 
-### 1.3 Login por PIN
-- [ ] Ingresar 4 dígitos correctos → acceso al portal AAC
-- [ ] PIN incorrecto → mensaje de error
+### 1.2 Login adaptativo por PIN (Persona con Discapacidad)
+- [ ] Ingresar 4 dígitos numéricos válidos → acceso al portal AAC del alumno
+- [ ] PIN incorrecto → mensaje de error accesible
+- [ ] Rate limiting: tras 5 intentos fallidos en 5 minutos se bloquea temporalmente (429)
+- [ ] Alumnos preexistentes migrados con PIN por defecto `1234` (IN-312)
 
-### 1.4 Login asistido
-- [ ] Supervisor autorizado aprueba acceso → persona entra al portal AAC
-- [ ] Supervisor no autorizado → acceso denegado
+### 1.3 Login adaptativo asistido (Persona con Discapacidad)
+- [ ] Supervisor autorizado (`CanSuperviseLogin = true`) autoriza el acceso → persona entra al portal AAC
+- [ ] Profesional sin vinculación o sin permiso de supervisión → acceso denegado (403/404)
+- [ ] Login desde dispositivo de confianza registrado (`TrustedDevice`) → acceso facilitado
 
-### 1.5 Login familiar
-- [ ] Email + contraseña correctos → portal familiar
-- [ ] Credenciales incorrectas → error
+### 1.4 Login familiar
+- [ ] Login mediante solapa Familiar solicitando explícitamente Email + contraseña (IN-313)
+- [ ] Credenciales válidas → redirige al portal familiar
+- [ ] Credenciales incorrectas → mensaje de error
+
 
 ---
 
@@ -93,8 +96,13 @@
 - [ ] Contadores reales: personas, invitaciones, reportes
 - [ ] Acceso rápido a Mi Aula y últimas actividades
 
-### 3.2 Mi Aula
-- [ ] Cards de personas asignadas con avatar y datos
+### 3.2 Mi Aula y Gestión de Aulas (`Classroom`)
+- [ ] Ver listado de aulas activas asignadas al profesional (`GetClassroomsByProfessionalQuery`)
+- [ ] Crear aula vacía sin alumnos obligatorios (`CreateClassroomCommand` / IN-301)
+- [ ] Editar denominación de aula (`UpdateClassroomCommand`)
+- [ ] Mover / reasignar alumno a otra aula (`MovePersonToClassroomCommand`)
+- [ ] Desactivar aula sin alumnos (`DeactivateClassroomCommand`)
+- [ ] Cards de personas asignadas agrupadas por aula con avatar y datos
 - [ ] Click en card → navega a detalle de persona
 
 ### 3.3 Detalle de Persona
@@ -156,6 +164,23 @@
 - [ ] Responder en hilo → respuesta visible para el otro actor
 - [ ] Badge en sidebar muestra conteo de no leídos
 - [ ] Badge se actualiza al abrir mensaje
+
+### 3.10 Agenda y Calendario (`CalendarEvents`)
+- [ ] Vista de calendario con eventos del mes/semana organizados por el profesional
+- [ ] Crear evento de calendario: título, tipo (`Consulta`, `Tutoría`, `Clase`, `Tarea`), fecha y hora
+- [ ] Validación: prevención de selección o guardado de fechas pasadas (IN-220)
+- [ ] Definir alcance del evento: alumno específico (`single`) o aula/grupo completo (`all`)
+- [ ] Segmentación de notificaciones de calendario por tipo de evento (IN-219)
+- [ ] Ver detalle de evento agendado
+- [ ] Cancelar / dar de baja lógica a un evento
+
+### 3.11 Analítica Pedagógica y KPIs (`ActivitySessions`)
+- [ ] Dashboard analítico del profesional (`/api/analytics/professional`)
+- [ ] Filtro interactivo de métricas por aula (`classroomId` / `aulaId`) y rango de fechas (`desde` / `hasta`)
+- [ ] Lectura de puntajes Goal Attainment Scaling (GAS) en escala [-2, +2]
+- [ ] Tasa de éxito global y distribución de rendimiento por área de habilidad
+- [ ] Tasa de errores promedio (0 a 6) y tiempo dedicado por actividad (30 a 300 segundos)
+- [ ] Detección de frustración o estancamiento del alumno en actividades pedagógicas
 
 ---
 

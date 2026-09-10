@@ -24,7 +24,7 @@ flowchart TD
     SMTP["Servicio de
     correo electrónico"]
     ARASAAC["ARASAAC
-    (Pictogramas)"]
+    (API REST / Pictogramas)"]
 
     ADMIN -->|Configura sistema, gestiona cuentas, atiende soporte| SYS
     SYS -->|Panel de administración, gestión de usuarios, tickets| ADMIN
@@ -43,8 +43,8 @@ flowchart TD
     SYS -->|Envía invitaciones por email| SMTP
     SMTP -->|Entrega email al familiar| FAM
 
-    SYS -->|Busca pictogramas| ARASAAC
-    ARASAAC -->|Devuelve imágenes| SYS
+    SYS -->|Busca pictogramas (HTTP REST)| ARASAAC
+    ARASAAC -->|Devuelve imágenes y datos (HTTP)| SYS
 
     SYS@{ shape: rounded, label: "InclusiON
     Plataforma web de
@@ -63,7 +63,7 @@ flowchart TD
 | **Representante familiar** | Usuario | Se registra por invitación del profesional. Consulta el progreso de su familiar, lee reportes y se comunica con el profesional desde su portal. |
 | **Institución educativa** | Entidad | No interactúa directamente con el sistema. Es una unidad organizativa que agrupa profesionales y personas, y define el alcance de los administradores institucionales. |
 | **Servicio de correo (SMTP)** | Sistema externo | El sistema envía invitaciones por email a los familiares a través del servicio de correo. |
-| **ARASAAC** | Sistema externo | Repositorio de pictogramas de uso libre. El profesional busca e integra pictogramas en las actividades desde la API pública de ARASAAC. |
+| **ARASAAC** | Sistema externo | Repositorio de pictogramas de uso libre. El profesional busca e integra pictogramas en las actividades a través de la API pública REST (vía HTTP) de ARASAAC (`api.arasaac.org`). |
 
 ---
 
@@ -77,7 +77,7 @@ flowchart TD
 | Profesional | Diagnósticos, actividades, planes de trabajo, reportes, mensajes, invitaciones | 07, 09-11, 15, 16 |
 | Persona con discapacidad | Respuestas a actividades (tiempos, aciertos, errores, patrones) | 12 |
 | Familiar | Mensajes al profesional, tickets de soporte | 16, 19 |
-| ARASAAC | Pictogramas para actividades | 10 |
+| ARASAAC | Pictogramas y respuestas JSON (vía HTTP API) para actividades | 10 |
 
 ### Salida del sistema (lo que entrega InclusiON)
 
@@ -113,7 +113,7 @@ El sistema InclusiON **incluye:**
 - Gestión centralizada de cuentas de usuario (reset password, desactivar, reactivar)
 - Onboarding guiado por rol (wizard de perfil, tour, bienvenida)
 - Centro de ayuda (FAQ) y sistema de tickets de soporte
-- Accesibilidad con 7 perfiles visuales y 4 métodos de login
+- Accesibilidad con 7 perfiles visuales y 2 métodos de login adaptativo para estudiantes (PIN y Asistido)
 
 El sistema InclusiON **no incluye:**
 - Gestión administrativa de la institución (nómina, presupuesto, infraestructura)

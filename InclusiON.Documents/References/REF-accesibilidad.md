@@ -44,12 +44,16 @@ Cada perfil tiene variante **Light** y **Dark** = **14 combinaciones** totales.
 
 ## Métodos de login adaptativo ✅ Implementado
 
+Para las personas con discapacidad, el acceso se adaptó y consolidó en **2 métodos principales**:
+
 | Método | Nivel de autonomía | Endpoint | Descripción |
 |--------|-------------------|----------|-------------|
-| Standard | Alta | `POST /api/auth/login/visual-standard` | Contraseña visual tras identificación por nombre |
-| PIN | Media | `POST /api/auth/login/pin` | PIN numérico de 4 dígitos con pad visual |
-| Assisted | Baja | `POST /api/auth/login/assisted` | Supervisor autoriza el login |
-| Family | N/A | `POST /api/auth/login/family` | Contraseña del familiar vinculado |
+| PIN | Media | `POST /api/auth/login/pin` | PIN numérico de 4 dígitos con pad visual accesible |
+| Assisted | Baja | `POST /api/auth/login/assisted` | Supervisor (profesional o familiar) autoriza el acceso |
+
+Los demás actores acceden mediante:
+- **Estándar:** `POST /api/auth/login` — Administradores y Profesionales (email + contraseña).
+- **Familiar:** `POST /api/auth/login/family` — Representantes familiares (identificación + contraseña familiar).
 
 El método de login se configura por persona:
 - **Endpoint:** `PUT /api/persons/{id}/login-method` o `PUT /api/persons/me/login-method`

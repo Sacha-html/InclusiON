@@ -242,19 +242,21 @@ Valores disponibles: `Id`, `CreatedAt`, `Name`, `FirstName`, `LastName`, `BirthD
 | `IMessagesRepository` | `MessagesRepository` | `Message` |
 | `IRoadmapRepository` | `RoadmapRepository` | `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity` |
 | `IRefreshTokensRepository` | `RefreshTokensRepository` | `RefreshToken` |
-| `IVisualLoginRepository` | `VisualLoginRepository` | `TrustedDevice`, `LoginMethod` (login visual estándar y PIN) |
+| `IVisualLoginRepository` | `VisualLoginRepository` | `TrustedDevice`, `LoginMethod` (login adaptativo PIN y Asistido) |
+| `IClassroomsRepository` | `ClassroomsRepository` | `Classroom` (gestión de aulas Mi Aula) |
+| `ICalendarRepository` | `CalendarRepository` | `CalendarEvent` (eventos y turnos de agenda) |
 
 ---
 
-## Entidades del Dominio (39 entidades)
+## Entidades del Dominio (Persistidas en EF Core / PostgreSQL)
 
-### Implementadas con handlers
-`User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`, `PersonSkillProfile`, `ProfessionalStatusHistory`, `FamilyStatusHistory`, `PersonRepresentativeHistory`, `Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `Message`, `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`
+### Implementadas con handlers y controladores
+`User`, `PersonWithDisability`, `Professional`, `FamilyRepresentative`, `EducationalInstitution`, `Classroom`, `CalendarEvent`, `Report`, `Invitation`, `Diagnosis`, `RefreshToken`, `PasswordResetToken`, `LoginMethod`, `TrustedDevice`, `AccessAudit`, `ProfessionalInstitution`, `ProfessionalPerson`, `PersonRepresentative`, `PersonSkillProfile`, `ProfessionalStatusHistory`, `FamilyStatusHistory`, `PersonRepresentativeHistory`, `Activity`, `ActivityContent`, `ActivityAssignment`, `ActivityResponse`, `ActivitySession`, `Message`, `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`, `PersonEmbedding`, `ActivityEmbedding`
 
-### Con migración pero sin handlers (pendientes)
-`ActivityEmbedding` (implementado con búsqueda semántica), `ActivityResult`, `ActivityCategory`\*, `ActivityTemplateType`\*, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`\*, `DisabilityType`\*, `ReportType`, `SkillArea`\*
+### Catálogos y Entidades Adicionales
+`ActivityResult`, `ActivityCategory`*, `ActivityTemplateType`*, `AdaptiveEngineConfig`, `AdaptiveAdjustmentLog`, `AutonomyLevel`*, `DisabilityType`*, `ReportType`, `SkillArea`*
 
-\* Catálogos leídos solo por el `CatalogsController`, no necesitan handlers de escritura propios.
+\* Catálogos leídos por el `CatalogsController`, con persistencia relacional en base de datos.
 
 ---
 

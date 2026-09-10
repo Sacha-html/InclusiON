@@ -37,6 +37,8 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 | 11 | [Diagnósticos](./11-diagnosticos.md) | Profesional | `Diagnosis` | ✅ |
 | 12 | [Reportes de Progreso](./12-reportes.md) | Profesional | `Report` | ✅ |
 | 13 | [Mensajes](./13-mensajes.md) | Profesional / Representante Familiar | `Message` | ✅ |
+| 15 | Gestión de Aulas (Mi Aula) | Profesional / Admin Institucional | `Classroom` | ✅ |
+| 16 | Agenda y Calendario | Profesional / Admin / Familiar | `CalendarEvent` | ✅ |
 
 ---
 ---
@@ -75,7 +77,7 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 | 16 | `EducationalInstitution` | 01 — Instituciones | MVP |
 | 17 | `AdminInstitution` | 01 — Instituciones | MVP |
 | 18 | `ProfessionalInstitution` | 04 — Profesionales | MVP |
-| 19 | `ProfessionalPerson` | 07 — Asignación Profesional–Persona | MVP |
+| 19 | `ProfessionalPerson` | 07 — Asignación Profesional–Persona (asocia `ClassroomId`) | MVP |
 | 20 | `PersonRepresentative` | 06 — Familiares | MVP |
 | 21 | `PersonRepresentativeHistory` | 06 — Familiares (historial automático) | MVP |
 | 22 | `PersonSkillProfile` | 05 — Personas | MVP |
@@ -95,6 +97,11 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 | 36 | `Report` | 12 — Reportes | MVP |
 | 37 | `Message` | 13 — Mensajes | MVP |
 | 38 | `AccessAudit` | Auditoría (append-only — sin ABM de usuario) | MVP |
+| 39 | `Classroom` | 15 — Gestión de Aulas (`Mi Aula`) | MVP |
+| 40 | `CalendarEvent` | 16 — Agenda y Calendario (`CalendarController`) | MVP |
+| 41 | `ActivitySession` | 10 — Asignaciones / Analítica (registro automático de ejecución y frustración) | MVP |
+| 42 | `PersonEmbedding` | 05 — Personas / IA (vector semántico para matching de actividades) | MVP |
+| 43 | `PasswordResetToken` | 02 — Gestión de Usuarios / Seguridad (tokens de un solo uso) | MVP |
 
 ---
 
@@ -102,9 +109,9 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 
 | Fase | ABMs | Entidades DER |
 |------|------|---------------|
-| ✅ MVP | 13 | 36 |
+| ✅ MVP | 15 | 41 |
 | 🔜 Post-MVP | 1 | 2 |
-| **Total** | **14** | **38** |
+| **Total** | **16** | **43** |
 
 ---
 

@@ -193,8 +193,8 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - `DefaultLayoutComponent` — Para admin
 
 ### Vistas implementadas
-- **Login visual completo:** identify-user (con multi-match por homónimos), role-selection, login-method-selector, pin-login, visual-standard-login, assisted-login, family-login
-- **Admin — Personas:** list (con modal cambiar método de login), detail, edit, new
+- **Login adaptativo PCD:** identify-user (con multi-match por homónimos), role-selection, login-method-selector, pin-login (PIN numérico de 4 dígitos), assisted-login (supervisado), family-login. *(Nota: visual-standard-login deprecado por IN-310)*
+- **Admin — Personas:** list (con modal cambiar método de login), detail, edit, new (wizard unificado con PIN y selección de aula)
 - **Admin — Profesionales:** list (tabs activos/pendientes, validación), detail (tabs personas/instituciones/reportes), edit, new
 - **Admin — Familiares:** list, detail, edit, new
 - **Admin — Instituciones:** list, detail, edit, new
@@ -202,7 +202,7 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - **Admin — Usuarios:** list paginado con acciones (reset, desactivar, reactivar)
 - **Admin — Catálogos:** submenú por tipo (6 tipos) con CRUD
 - **Admin — Roles:** listado con checkboxes de permisos por módulo
-- **Portal Profesional:** dashboard con datos reales, Mi Aula (personas asignadas), lista de reportes, invitaciones
+- **Portal Profesional:** dashboard analítico con KPIs GAS en tiempo real, Mi Aula (gestión de aulas y personas asignadas), lista de reportes, invitaciones, Agenda/Calendario integrado (`/pro/calendar`)
   - **Actividades** (`/pro/activities`): lista con filtros (categoría, tipo, estado, origen), acciones asignar/editar/activar/desactivar
     - **Búsqueda semántica** (botón ⚡): modo alternativo a filtros — muestra columna "Relevancia" con porcentaje coseno (ej: "87%"). `ActivityListItemResponse.similarityScore?: number` solo presente en resultados semánticos.
   - **Detalle actividad** (`/pro/activities/:id`): muestra sección "Actividades similares" (IA badge) con hasta 5 resultados usando `GET /api/activities/{id}/similar`, incluye score de similitud
@@ -210,9 +210,9 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
   - **Editar actividad** (`/pro/activities/:id/edit`): misma lógica que nueva, pre-carga datos
   - **Modal asignar** (`AssignActivityModalComponent`): selección de estudiante, fecha límite, flag evaluación
   - **Roadmap — modal agregar actividad**: usa `app-searchable-select` con búsqueda semántica (≥2 chars → `GET /api/activities/search`; <2 chars → `GET /api/activities?pageSize=20`). Reemplazó el `pageSize:100` anterior.
-- **Portal Familiar:** registro por invitación (/invite/:code), lista de reportes, dashboard con datos reales (personas, actividades recientes, mensajes no leídos)
+- **Portal Familiar:** registro por invitación (/invite/:code), lista de reportes, dashboard con datos reales (personas, actividades recientes, mensajes no leídos), Agenda y Calendario (`/family/calendar`)
 - **Mensajería** (`/pro/messages`, `/family/messages`): `MessagesComponent` compartido — inbox/enviados con paginación, detalle de mensaje, hilo de respuestas, modal redactar nuevo mensaje, badge de no leídos en sidebar
-- **Próximamente** (`/pro/goals`, `/pro/evaluations`, `/pro/calendar`, `/family/activities`, `/family/calendar`, `/family/professionals`, `/family/progress`): `ComingSoonComponent` con mensaje 🚧
+- **Próximamente** (`/pro/goals`, `/pro/evaluations`, `/family/activities`, `/family/professionals`, `/family/progress`): `ComingSoonComponent` con mensaje 🚧
 - **Dashboards:** admin (8 KPIs con badge de pendientes), profesional (personas, reportes, mensajes no leídos), familiar (personas a cargo, actividades recientes, mensajes no leídos)
 - **AAC:**
   - home, calendar, communication (stubs)

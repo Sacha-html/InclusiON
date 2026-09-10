@@ -17,16 +17,22 @@ Visión general de la arquitectura y decisiones técnicas del proyecto.
 │       └─────────────┴────────────┴────────────┘         │
 │                  HTTP + JWT Bearer                       │
 │               http://localhost:4200                      │
-└──────────────────────────┬──────────────────────────────┘
-                           │ CORS
-┌──────────────────────────▼──────────────────────────────┐
+└───────────────┬─────────────────────────┬───────────────┘
+                │ HTTP REST               │ HTTP GET (Pictogramas)
+                │                         ▼
+                │                ┌──────────────────┐
+                │                │ API de ARASAAC   │
+                │                │ (api.arasaac.org)│
+                │                └──────────────────┘
+                │ CORS
+┌───────────────▼─────────────────────────────────────────┐
 │                   InclusiON.Api                          │
 │              ASP.NET Core Web API                        │
 │         Controllers → Command/Query → Handler           │
-│              https://localhost:7xxx                      │
+│              http://localhost:5000                      │
 ├─────────────────────────────────────────────────────────┤
 │              InclusiON.Application                       │
-│     CQRS Handlers (auto-registrados por reflexión)      │
+│     CQRS Handlers (159 auto-registrados por reflexión)  │
 │     ICommandHandler<TCmd, TResult>                      │
 │     IQueryHandler<TQuery, TResult>                      │
 │     Extensions: Paginación, Filtros Auditable           │
@@ -36,19 +42,21 @@ Visión general de la arquitectura y decisiones técnicas del proyecto.
 │     Unit of Work │ Identity │ Connection Factory        │
 ├─────────────────────────────────────────────────────────┤
 │               InclusiON.Data                             │
-│     EF Core DbContext │ Configurations (36)             │
-│     Migrations (13) │ DatabaseSeeder                    │
+│     EF Core DbContext │ Configurations (49)             │
+│     Migrations (16) │ DatabaseSeeder                    │
 ├─────────────────────────────────────────────────────────┤
 │              InclusiON.Domain                            │
-│     39 Entidades │ Base Classes │ Enums                 │
+│     50 Entidades │ Base Classes │ Enums                 │
 ├──────────────┬──────────────────────────────────────────┤
 │ InclusiON.DTOs │ InclusiON.Shared │ InclusiON.SemanticSearch │
 │ Req/Res DTOs   │ Constantes/Resx  │ ONNX Embeddings         │
 └──────────────┴──────────────┴───────────────────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │ PostgreSQL  │
-                    └─────────────┘
+                            │
+                     ┌──────▼──────────────┐
+                     │    PostgreSQL 17    │
+                     │ (Contenedor Docker) │
+                     │     + pgvector      │
+                     └─────────────────────┘
 ```
 
 ---
@@ -125,13 +133,14 @@ Controller → Handler → IRepository (interface en Application)
 
 ### Métodos de login
 
-| Método | Ruta | Quién lo usa |
-|--------|------|-------------|
-| Estándar (email/pass) | `/admin-login` | Admin, Professional |
-| Visual estándar | `/login/visual-standard` | PersonWithDisability |
-| PIN | `/login/pin` | PersonWithDisability |
-| Asistido | `/login/assisted` | PersonWithDisability (con supervisor) |
-| Familiar | `/login/family` | FamilyRepresentative |
+El acceso para personas con discapacidad se consolidó en **2 métodos adaptativos** principales:
+
+| Método | Ruta | Quién lo usa | Descripción |
+|--------|------|-------------|-------------|
+| PIN | `/login/pin` | PersonWithDisability | Identificación con nombre y PIN numérico de 4 dígitos |
+| Asistido | `/login/assisted` | PersonWithDisability | Acceso autorizado y supervisado por profesional o familiar |
+| Estándar | `/admin-login` | Admin, Professional | Acceso administrativo y docente con email y contraseña |
+| Familiar | `/login/family` | FamilyRepresentative | Acceso de familiares vinculados |
 
 ---
 
@@ -217,9 +226,9 @@ SemanticSearch → Application (implementa IEmbeddingService)
 
 ## Base de Datos
 
-- **PostgreSQL** con Npgsql + EF Core 10
-- **13+ migraciones** aplicadas (Enero-Abril 2026)
-- **39 entidades** mapeadas con Fluent API
+- **PostgreSQL 17** en contenedor Docker (`pgvector/pgvector:pg17`) con Npgsql + EF Core 10
+- **16 migraciones** aplicadas
+- **50 entidades** mapeadas con Fluent API en 49 configuraciones independientes
 - **DatabaseSeeder** con datos iniciales (roles, catálogos)
 - Auto-migración en `Program.cs` al iniciar la API
 - Usar `EF.Functions.ILike()` para búsquedas case-insensitive (no `Like()`)

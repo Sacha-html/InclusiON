@@ -280,7 +280,7 @@ El funcionamiento del profesional se basa en etapas secuenciales:
 
 - **Seguridad y confidencialidad:** Autenticación JWT con múltiples métodos de login, encriptación de datos, control de accesos por roles, auditoría de acciones.
 - **Marco legal:** Cumplimiento de Ley 26.206, Resolución CFE 311/16, Resolución 1825/19, Ley 27.044.
-- **Accesibilidad y usabilidad:** 7 perfiles de accesibilidad (default, alto contraste, dislexia, baja visión, deuteranopía, protanopía, tritanopía) con modo claro y oscuro (14 combinaciones). 4 métodos de login adaptados al nivel de autonomía. Diseño responsivo.
+- **Accesibilidad y usabilidad:** 7 perfiles de accesibilidad (default, alto contraste, dislexia, baja visión, deuteranopía, protanopía, tritanopía) con modo claro y oscuro (14 combinaciones). 2 métodos de login adaptativo para estudiantes (PIN numérico y Login Asistido). Diseño responsivo.
 
 ### Oportunidades
 
@@ -312,14 +312,14 @@ Diseñar y desarrollar una plataforma educativa inclusiva orientada a optimizar 
 | **Informes y reportes** | Generación de reportes formales de progreso. Dashboard con indicadores visuales y radar chart. Exportación a PDF. |
 | **Onboarding** | Flujo guiado de primer ingreso por rol: cambio de contraseña, completar perfil, tour del portal, pantalla de bienvenida. |
 | **Soporte** | Centro de ayuda con FAQ. Sistema de tickets para reportar problemas. Guías contextuales dentro de la aplicación. |
-| **Accesibilidad y usabilidad** | 7 perfiles de accesibilidad × 2 modos (claro/oscuro) = 14 combinaciones visuales. 4 métodos de login según nivel de autonomía. |
+| **Accesibilidad y usabilidad** | 7 perfiles de accesibilidad × 2 modos (claro/oscuro) = 14 combinaciones visuales. 2 métodos de login adaptativo para estudiantes según nivel de autonomía (PIN y Asistido), más login administrativo y familiar. |
 | **Seguridad y marco legal** | JWT con refresh tokens, auditoría de acciones, cumplimiento normativo. |
 
 ### Estudio de factibilidad
 
 **Factibilidad técnica:**
 - Compatibilidad multi-dispositivo y estándares de accesibilidad.
-- Stack tecnológico probado: Angular 20 + ASP.NET Core + SQL Server.
+- Stack tecnológico probado: Angular 20 + ASP.NET Core (.NET 10) + PostgreSQL 17 en contenedor Docker con pgvector.
 - Seguridad mediante JWT, ASP.NET Identity y control de accesos por roles.
 - Arquitectura escalable con patrón CQRS.
 
@@ -473,7 +473,7 @@ Persona realiza actividad → Sistema registra respuesta → MDA evalúa rendimi
 | Profesional | Diagnósticos, actividades, planes de trabajo, reportes, mensajes, invitaciones |
 | Persona con discapacidad | Respuestas a actividades (tiempos, aciertos, errores, patrones) |
 | Familiar | Mensajes al profesional, tickets de soporte |
-| ARASAAC | Pictogramas para actividades |
+| ARASAAC | Pictogramas para actividades (consultados vía HTTP REST API) |
 
 **Salida del sistema:**
 
@@ -503,11 +503,11 @@ Persona realiza actividad → Sistema registra respuesta → MDA evalúa rendimi
 | Capa | Tecnología | Descripción |
 |------|------------|-------------|
 | **Frontend** | Angular 20 + CoreUI | Interfaz interactiva con 4 portales (AAC, Profesional, Familiar, Admin). Accesibilidad con 14 combinaciones visuales. |
-| **Backend** | ASP.NET Core Web API (.NET) | Lógica de negocio con patrón CQRS. Handlers auto-registrados por reflexión. |
-| **Base de datos** | SQL Server | Almacenamiento estructurado. Entity Framework Core con 36 configuraciones de entidades. |
-| **Autenticación** | JWT + ASP.NET Identity | 5 métodos de login, refresh tokens, auditoría de accesos. |
+| **Backend** | ASP.NET Core Web API (.NET 10) | Lógica de negocio con patrón CQRS (159 handlers auto-registrados por reflexión). |
+| **Base de datos / Infra** | PostgreSQL 17 (Docker) | Almacenamiento estructurado en contenedor Docker con extensión pgvector para embeddings de IA. Entity Framework Core con 49 configuraciones de entidades y 16 migraciones. |
+| **Autenticación** | JWT + ASP.NET Identity | Métodos de login adaptativo (PIN y Asistido para estudiantes; email/contraseña para profesionales/admins; login familiar), refresh tokens, auditoría de accesos. |
 | **Email** | MailKit (SMTP) | Envío de invitaciones por email con templates HTML. |
-| **Comunicación API** | REST + JSON | Intercambio de datos vía endpoints RESTful. |
+| **Comunicación e Integración** | HTTP REST + JSON | Intercambio interno vía endpoints RESTful (Frontend ↔ Backend) y consumo externo vía HTTP de la API pública de ARASAAC para pictogramas. |
 
 ### Arquitectura del sistema
 
@@ -521,9 +521,15 @@ Persona realiza actividad → Sistema registra respuesta → MDA evalúa rendimi
 │  └────┬─────┘ └──┬───┘ └──┬───┘ └──┬───┘    │
 │       └───────────┴────────┴────────┘        │
 │              HTTP + JWT Bearer                │
-└──────────────────┬───────────────────────────┘
-                   │ CORS
-┌──────────────────▼───────────────────────────┐
+└───────────────┬─────────────────┬────────────┘
+                │ HTTP REST       │ HTTP GET (Pictogramas)
+                │                 ▼
+                │        ┌──────────────────┐
+                │        │ API de ARASAAC   │
+                │        │ (api.arasaac.org)│
+                │        └──────────────────┘
+                │ CORS
+┌───────────────▼──────────────────────────────┐
 │             InclusiON.Api                     │
 │        ASP.NET Core Web API                   │
 │   Controllers → Command/Query → Handler       │
@@ -538,19 +544,21 @@ Persona realiza actividad → Sistema registra respuesta → MDA evalúa rendimi
 │   Unit of Work │ Identity │ Mail Service      │
 ├───────────────────────────────────────────────┤
 │            InclusiON.Data                     │
-│   EF Core DbContext │ 36 Configurations       │
-│   13+ Migraciones │ DatabaseSeeder            │
+│   EF Core DbContext │ 49 Configurations       │
+│   16 Migraciones │ DatabaseSeeder             │
 ├───────────────────────────────────────────────┤
 │           InclusiON.Domain                    │
-│   39+ Entidades │ Base Classes │ Enums        │
+│   50 Entidades │ Base Classes │ Enums         │
 ├──────────────┬────────────────────────────────┤
 │ InclusiON.DTOs │ InclusiON.Shared │ Semantic  │
 │ Req/Res DTOs   │ Constantes      │ Search    │
 └──────────────┴────────────────────────────────┘
                    │
-            ┌──────▼──────┐
-            │  SQL Server │
-            └─────────────┘
+            ┌──────▼──────────────┐
+            │   PostgreSQL 17     │
+            │ (Contenedor Docker) │
+            │    + pgvector       │
+            └─────────────────────┘
 ```
 
 ### Diagrama de contexto
@@ -569,7 +577,7 @@ flowchart TD
     SMTP["Servicio de
     correo electrónico"]
     ARASAAC["ARASAAC
-    (Pictogramas)"]
+    (API REST / Pictogramas)"]
 
     ADMIN -->|Configura sistema, gestiona cuentas, atiende soporte| SYS
     SYS -->|Panel de administración, tickets| ADMIN
@@ -583,11 +591,11 @@ flowchart TD
     FAM -->|Consulta progreso, lee reportes, envía mensajes| SYS
     SYS -->|Dashboard familiar, reportes, ayuda| FAM
 
-    SYS -->|Envía invitaciones por email| SMTP
+    SYS -->|Envía invitaciones por email (SMTP)| SMTP
     SMTP -->|Entrega email al familiar| FAM
 
-    SYS -->|Busca pictogramas| ARASAAC
-    ARASAAC -->|Devuelve imágenes| SYS
+    SYS -->|Búsqueda y consumo vía HTTP REST| ARASAAC
+    ARASAAC -->|Devuelve datos y pictogramas vía HTTP| SYS
 
     SYS@{ shape: rounded, label: "InclusiON
     Plataforma web de
@@ -605,7 +613,7 @@ flowchart TD
 - Motor de dificultad adaptativa con detección de frustración
 - Evaluación, diagnósticos funcionales y reportes de progreso
 - Mensajería interna entre profesionales y familias
-- Accesibilidad con 7 perfiles visuales, 2 modos y 4 métodos de login
+- Accesibilidad con 7 perfiles visuales, 2 modos y 2 métodos de login adaptativo para estudiantes (PIN y Asistido)
 - Centro de ayuda (FAQ) y sistema de tickets de soporte
 
 **InclusiON no incluye:**
@@ -631,8 +639,8 @@ flowchart TD
 | Gestión de tareas y versiones | GitHub |
 | Entorno de desarrollo | Visual Studio Code / Visual Studio |
 | Frontend | Angular 20 + CoreUI + TypeScript |
-| Backend | C# (.NET / ASP.NET Core Web API) |
-| Base de datos | SQL Server + Entity Framework Core |
+| Backend | C# (.NET 10 / ASP.NET Core Web API) |
+| Base de datos | PostgreSQL 17 (Docker con pgvector) + Entity Framework Core |
 | Documentación | Markdown + Mermaid (versionada en Git) |
 
 ### Roles del equipo
@@ -673,7 +681,7 @@ flowchart TD
 
 | Funcionalidad | Estado |
 |---------------|--------|
-| Autenticación JWT (5 métodos de login + refresh tokens) | Implementado |
+| Autenticación JWT (Login adaptativo PIN y Asistido, más Estándar y Familiar + refresh tokens) | Implementado |
 | CRUD Profesionales con contraseña temporal | Implementado |
 | CRUD Personas con discapacidad (perfil funcional + accesibilidad) | Implementado |
 | CRUD Familiares (alta directa + invitación por email) | Implementado |
@@ -710,10 +718,10 @@ flowchart TD
 | 13 historias de usuario (HU) | Criterios de aceptación, descripción funcional |
 | 41 historias técnicas (BE + FE) | Especificaciones de endpoints, componentes y criterios |
 | Diagrama de contexto | Actores externos, flujos de entrada/salida, límites del sistema |
-| Diccionario de datos | 18 entidades con campos, tipos y relaciones |
+| Diccionario de datos | 50 entidades con campos, tipos y relaciones |
 | Glosario | Términos del dominio del proyecto |
 | Arquitectura técnica | Stack, capas, patrón CQRS, diagrama general |
-| Referencias transversales | Accesibilidad (14 combinaciones) y autenticación (5 métodos) |
+| Referencias transversales | Accesibilidad (14 combinaciones) y autenticación (métodos adaptativos PIN y Asistido) |
 
 ---
 

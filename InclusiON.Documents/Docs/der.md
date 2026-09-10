@@ -47,6 +47,17 @@ erDiagram
         timestamptz LastUsedAt             "nullable"
     }
 
+    %% Tokens seguros de restablecimiento de contraseña generados para recuperación de acceso.
+    PasswordResetToken {
+        uuid        Id          PK  "NOT NULL"
+        uuid        UserId      FK  "NOT NULL"
+        varchar256  TokenHash       "NOT NULL - SHA256"
+        timestamptz CreatedAt       "NOT NULL"
+        timestamptz ExpiresAt       "NOT NULL"
+        timestamptz UsedAt          "nullable"
+        bool        IsUsed          "NOT NULL"
+    }
+
     %% ─── CATÁLOGOS ──────────────────────────────────────────────────────────
 
     %% Catálogo de tipos de discapacidad reconocidos. Valores de referencia
@@ -147,6 +158,15 @@ erDiagram
         bool        IsActive            "NOT NULL"
     }
 
+    %% Aulas asociadas a un profesional responsable para agrupar y organizar alumnos.
+    Classroom {
+        uuid        Id              PK  "NOT NULL"
+        varchar150  Name                "NOT NULL"
+        uuid        ProfessionalId  FK  "NOT NULL"
+        bool        IsActive            "NOT NULL"
+        timestamptz CreatedAt           "NOT NULL"
+    }
+
     %% ─── PERFILES DE USUARIO ─────────────────────────────────────────────────
 
     %% Perfil extendido del usuario con rol profesional. Incluye datos académicos
@@ -233,10 +253,11 @@ erDiagram
     }
 
     %% Relación de atención entre un profesional y una persona con discapacidad.
-    %% Indica si es el profesional principal y si puede supervisar el login.
+    %% Indica si es el profesional principal, si puede supervisar el login y su aula asignada.
     ProfessionalPerson {
         uuid        ProfessionalId          FK  "NOT NULL - PK compuesto"
         uuid        PersonId                FK  "NOT NULL - PK compuesto"
+        uuid        ClassroomId             FK  "nullable"
         bool        IsPrimaryProfessional       "NOT NULL"
         bool        CanSuperviseLogin           "NOT NULL"
         timestamptz AssignedAt                  "NOT NULL"
@@ -335,6 +356,13 @@ erDiagram
         text   EmbeddingJson      "NOT NULL - vector serializado"
     }
 
+    %% Vector semántico del perfil del alumno para recomendaciones y similitud (pgvector).
+    PersonEmbedding {
+        uuid   PersonId       PK  "NOT NULL - FK 1:1"
+        varchar100 Model          "NOT NULL"
+        int    Dimensions         "NOT NULL"
+    }
+
     %% ─── ROADMAP ─────────────────────────────────────────────────────────────
 
     %% Plan de aprendizaje personalizado de una persona. Cada persona tiene
@@ -415,6 +443,20 @@ erDiagram
         timestamptz CompletedAt                 "NOT NULL"
     }
 
+    %% Sesión y métricas analíticas de una actividad finalizada por un alumno.
+    %% Alimenta dashboards de KPIs pedagógicos (GAS, tasa de éxito, tiempos y errores).
+    ActivitySession {
+        int         Id                  PK  "NOT NULL"
+        uuid        StudentId           FK  "NOT NULL"
+        uuid        ProfessionalId      FK  "NOT NULL"
+        int         ActivityId          FK  "NOT NULL"
+        timestamptz DateCompleted           "NOT NULL"
+        numeric5_2  SuccessRate             "NOT NULL - 0.00 a 100.00"
+        int         ErrorCount              "NOT NULL"
+        int         TimeSpentSeconds        "NOT NULL"
+        int         GasScore                "NOT NULL - [-2 a +2]"
+    }
+
     %% ─── MDA ─────────────────────────────────────────────────────────────────
 
     %% Configuración del motor de dificultad adaptativa para una actividad del roadmap.
@@ -491,6 +533,24 @@ erDiagram
         bool        IsActive            "NOT NULL"
     }
 
+    %% ─── CALENDARIO Y AGENDA ─────────────────────────────────────────────────
+
+    %% Eventos de calendario y agenda vinculados a profesionales y alumnos.
+    CalendarEvent {
+        uuid        Id                          PK  "NOT NULL"
+        varchar150  Title                           "NOT NULL"
+        varchar50   Type                            "NOT NULL"
+        timestamptz Date                            "NOT NULL"
+        varchar10   Time                            "NOT NULL"
+        text        Description                     "nullable"
+        uuid        StudentId                   FK  "nullable"
+        varchar100  StudentName                     "nullable"
+        uuid        CreatedByProfessionalId     FK  "NOT NULL"
+        varchar20   TargetScope                     "NOT NULL"
+        bool        IsActive                        "NOT NULL"
+        timestamptz CreatedAt                       "NOT NULL"
+    }
+
     %% ─── AUDITORÍA ───────────────────────────────────────────────────────────
 
     %% Registro de auditoría de acceso a recursos (IN-172). Detecta accesos
@@ -513,6 +573,7 @@ erDiagram
     User ||--o{ RefreshToken       : "tokens"
     User ||--o{ TrustedDevice      : "dispositivos"
     User ||--o{ AdminInstitution   : "admin de"
+    User ||--o{ PasswordResetToken : "solicita reset"
 
     %% User → perfiles (1:1)
     User ||--o| Professional         : "perfil"
@@ -530,10 +591,12 @@ erDiagram
     %% Catálogos → ActivityTemplateType
     SkillArea ||--o{ ActivityTemplateType : "agrupa templates"
 
-    %% Instituciones
+    %% Instituciones y Aulas
     EducationalInstitution ||--o{ AdminInstitution        : "admins"
     EducationalInstitution ||--o{ ProfessionalInstitution : "profesionales"
     Professional           ||--o{ ProfessionalInstitution : "trabaja en"
+    Professional           ||--o{ Classroom               : "gestiona"
+    Classroom              ||--o{ ProfessionalPerson      : "alumnos"
 
     %% Historiales de estado
     Professional         ||--o{ ProfessionalStatusHistory   : "historial estado"
@@ -549,6 +612,7 @@ erDiagram
 
     PersonWithDisability ||--o{ PersonSkillProfile : "perfil habilidades"
     SkillArea            ||--o{ PersonSkillProfile : "asignada a"
+    PersonWithDisability ||--o| PersonEmbedding    : "embedding (1:1)"
 
     %% Invitaciones
     Professional         ||--o{ Invitation : "crea"
@@ -571,11 +635,15 @@ erDiagram
     PersonRoadmapArea    ||--o{ PersonRoadmapActivity : "actividades"
     Activity             ||--o{ PersonRoadmapActivity : "incluida en"
 
-    %% Asignaciones
+    %% Asignaciones y Sesiones Analíticas
     Activity             ||--o{ ActivityAssignment : "asignada"
     PersonWithDisability ||--o{ ActivityAssignment : "recibe"
     Professional         ||--o{ ActivityAssignment : "asigna"
     ActivityAssignment   ||--o{ ActivityResponse   : "respuestas"
+
+    PersonWithDisability ||--o{ ActivitySession    : "ejecuta"
+    Professional         ||--o{ ActivitySession    : "supervisa"
+    Activity             ||--o{ ActivitySession    : "sesión"
 
     %% Resultados roadmap
     PersonRoadmapActivity ||--o{ ActivityResult : "resultados"
@@ -591,6 +659,10 @@ erDiagram
     PersonWithDisability ||--o{ Report    : "reportada"
     Professional         ||--o{ Report    : "genera"
     ReportType           ||--o{ Report    : "tipo"
+
+    %% Agenda y Calendario
+    Professional         ||--o{ CalendarEvent : "organiza"
+    PersonWithDisability ||--o{ CalendarEvent : "participa"
 
     %% Comunicación
     User                 ||--o{ Message : "envía"
@@ -626,9 +698,9 @@ erDiagram
 
 | Nivel | Entidades |
 |-------|-----------|
-| 1 — Catálogos | DisabilityType, ActivityCategory, ReportType, EducationalInstitution, AutonomyLevel, LoginMethod, SkillArea, ActivityTemplateType |
-| 2 — Auth/Perfiles | RefreshToken, Professional, PersonWithDisability, FamilyRepresentative, Invitation |
-| 3 — Relaciones | AdminInstitution, TrustedDevice, ProfessionalInstitution, ProfessionalPerson, PersonRepresentative, PersonSkillProfile, Diagnosis, Activity, ActivityContent, PersonRoadmap, PersonRoadmapArea, PersonRoadmapActivity |
+| 1 — Catálogos | DisabilityType, ActivityCategory, ReportType, EducationalInstitution, AutonomyLevel, LoginMethod, SkillArea, ActivityTemplateType, ActivityAssignmentStatus |
+| 2 — Auth/Perfiles | RefreshToken, PasswordResetToken, Professional, PersonWithDisability, FamilyRepresentative, Invitation |
+| 3 — Relaciones | AdminInstitution, TrustedDevice, Classroom, ProfessionalInstitution, ProfessionalPerson, PersonRepresentative, PersonSkillProfile, Diagnosis, Activity, ActivityContent, PersonRoadmap, PersonRoadmapArea, PersonRoadmapActivity, CalendarEvent |
 | 4 — Ejecución/Mensajería | ActivityAssignment, Report, Message, AccessAudit, ProfessionalStatusHistory, FamilyStatusHistory, PersonRepresentativeHistory |
-| 5 — Respuestas/Embeddings | ActivityResponse, ActivityResult, ActivityEmbedding |
+| 5 — Respuestas/Embeddings | ActivityResponse, ActivityResult, ActivitySession, ActivityEmbedding, PersonEmbedding |
 | 6 — MDA | AdaptiveEngineConfig, AdaptiveAdjustmentLog |

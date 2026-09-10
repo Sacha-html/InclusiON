@@ -3,13 +3,13 @@
 **Área:** Seguridad y Acceso
 
 ## Descripción
-Proceso de registro de usuarios y autenticación multi-método en la plataforma. El sistema soporta dos flujos paralelos: (1) registro y login estándar para administradores, profesionales y familiares; (2) login visual accesible para personas con discapacidad, con variantes PIN, asistido y visual estándar.
+Proceso de registro de usuarios y autenticación multi-método en la plataforma. El sistema soporta dos flujos principales: (1) registro y login estándar para administradores, profesionales y familiares; (2) login visual accesible para personas con discapacidad, consolidado en 2 métodos adaptativos: **PIN** numérico y login **asistido**.
 
 ## Participantes
 - **Admin Global** — Registra profesionales y admins institucionales
 - **Profesional** — Se registra; inicia sesión con email/contraseña
 - **Familiar** — Se registra vía invitación; inicia sesión con método familiar
-- **Persona (PCD)** — Inicia sesión con PIN, método visual o login asistido
+- **Persona (PCD)** — Inicia sesión mediante método adaptativo: PIN numérico o login asistido
 - **Sistema** — Valida credenciales, emite JWT, envía emails de recuperación
 
 ## Métodos de login
@@ -17,10 +17,10 @@ Proceso de registro de usuarios y autenticación multi-método en la plataforma.
 | Método | Endpoint | Rol | Descripción |
 |--------|----------|-----|-------------|
 | Estándar | `POST /api/auth/login` | Admin / Profesional | Email + contraseña |
-| Familiar | `POST /api/auth/login/family` | Familiar | Email + contraseña simplificada |
-| Visual Estándar | `POST /api/auth/login/visual-standard` | PCD | UserId + contraseña visual |
-| PIN | `POST /api/auth/login/pin` | PCD | UserId + PIN numérico |
-| Asistido | `POST /api/auth/login/assisted` | PCD | UserId + credenciales del supervisor |
+| Familiar | `POST /api/auth/login/family` | Familiar | Email/identificador + contraseña simplificada |
+| PIN | `POST /api/auth/login/pin` | PCD | UserId + PIN numérico de 4 dígitos |
+| Asistido | `POST /api/auth/login/assisted` | PCD | UserId + autorización y credenciales del supervisor |
+| *Visual Estándar* | `POST /api/auth/login/visual-standard` | PCD | *(Descartado)* Consolidado en PIN y Asistido |
 
 ## Pasos del proceso
 
@@ -68,10 +68,9 @@ flowchart TD
 
     IDENT --> MET{Método activo}
     MET -->|PIN| PIN[Login PIN\nPOST /auth/login/pin]
-    MET -->|Visual| VIS[Login Visual\nPOST /auth/login/visual-standard]
     MET -->|Asistido| ASI[Login Asistido\nPOST /auth/login/assisted]
 
-    STD & FAM & PIN & VIS & ASI -->|JWT emitido| JWT[Token JWT\nrole + permissions + entityId]
+    STD & FAM & PIN & ASI -->|JWT emitido| JWT[Token JWT\nrole + permissions + entityId]
 
     JWT -->|Token expirado| REF[Refresh\nPOST /auth/refresh]
     REF --> JWT
