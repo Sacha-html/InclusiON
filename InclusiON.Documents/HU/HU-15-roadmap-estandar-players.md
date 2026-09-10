@@ -1,4 +1,4 @@
-﻿# HU-15 — Roadmap Estándar y Corrección de Players
+# HU-15 — Roadmap Estándar y Corrección de Players
 
 | Campo | Contenido |
 |---|---|
@@ -35,17 +35,17 @@ Al iniciar el servidor (arranque), `DatabaseSeeder.PatchStandardActivitiesConten
 ### Los 10 niveles estándar
 
 | Nivel | Actividad | Tipo de Player |
-|-------|-----------|----------------|
-| 1 | Señala el animal | OPTION_SELECT |
-| 2 | Ordena la secuencia | ORDER_SEQUENCE |
-| 3 | Muchos o pocos | OPTION_SELECT |
-| 4 | Encuentra el igual | PICTOGRAM_SELECT |
-| 5 | ¿Qué viene después? | ORDER_SEQUENCE |
-| 6 | Conciencia fonológica | OPTION_SELECT |
-| 7 | Clasifica por categoría | CLASSIFY |
-| 8 | Une la imagen con la palabra | MATCH_IMAGE_WORD |
-| 9 | Lectura global | GLOBAL_READING |
-| 10 | Encuentra el intruso | OPTION_SELECT |
+|---|---|---|
+| 1 | ¿Qué dice aquí? | GLOBAL_READING |
+| 2 | ¿Cómo se siente el niño? | OPTION_SELECT |
+| 3 | Armando la palabra Sol | BUILD_WORD |
+| 4 | Contando las manzanas | NUMERATION |
+| 5 | Pasos para lavarse las manos | ORDER_SEQUENCE |
+| 6 | Tengo hambre | PICTOGRAM_SELECT |
+| 7 | Armando la palabra Casa | BUILD_WORD |
+| 8 | ¿Para qué sirve? | OPTION_SELECT |
+| 9 | Contando los lápices | NUMERATION |
+| 10 | Ropa de verano e invierno | CLASSIFY |
 
 ---
 

@@ -41,13 +41,13 @@ export interface EnrichedArea extends RoadmapAreaResponse {
   styleUrl: './aac-roadmap.component.scss',
 })
 export class AacRoadmapComponent implements OnInit {
-  private readonly roadmapService    = inject(RoadmapService);
+  private readonly roadmapService = inject(RoadmapService);
   private readonly activitiesService = inject(ActivitiesService);
-  private readonly router            = inject(Router);
+  private readonly router = inject(Router);
 
-  loading   = signal(true);
-  hasError  = signal(false);
-  roadmap   = signal<RoadmapResponse | null>(null);
+  loading = signal(true);
+  hasError = signal(false);
+  roadmap = signal<RoadmapResponse | null>(null);
   assignments = signal<ActivityAssignmentResponse[]>([]);
 
   enrichedAreas = computed<EnrichedArea[]>(() => {
@@ -67,11 +67,11 @@ export class AacRoadmapComponent implements OnInit {
         })[0];
 
         return {
-          activity:   act,
-          areaId:     area.id,
+          activity: act,
+          areaId: area.id,
           assignment,
-          status:     this.resolveStatus(act, assignment),
-          side:       (idx % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
+          status: this.resolveStatus(act, assignment),
+          side: (idx % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
         };
       }),
     }));
@@ -86,7 +86,7 @@ export class AacRoadmapComponent implements OnInit {
     this.hasError.set(false);
 
     forkJoin({
-      roadmap:     this.roadmapService.getMyRoadmap().pipe(catchError(() => of(null))),
+      roadmap: this.roadmapService.getMyRoadmap().pipe(catchError(() => of(null))),
       assignments: this.activitiesService.getMyAssignments().pipe(catchError(() => of([] as ActivityAssignmentResponse[]))),
     }).subscribe({
       next: ({ roadmap, assignments }) => {
@@ -127,21 +127,21 @@ export class AacRoadmapComponent implements OnInit {
 
   nodeLabel(node: RoadmapNode): string {
     switch (node.status) {
-      case 'locked':      return '🔒';
-      case 'completed':   return '✓';
+      case 'locked': return '🔒';
+      case 'completed': return '✓';
       case 'in-progress': return '▶';
-      default:            return String(node.activity.sequenceOrder);
+      default: return String(node.activity.sequenceOrder);
     }
   }
 
   nodeAriaLabel(node: RoadmapNode): string {
     const title = node.activity.activityTitle;
     switch (node.status) {
-      case 'locked':      return `${title} - bloqueada`;
-      case 'completed':   return `${title} - completada`;
+      case 'locked': return `${title} - bloqueada`;
+      case 'completed': return `${title} - completada`;
       case 'in-progress': return `${title} - en progreso, tap para continuar`;
-      case 'available':   return `${title} - disponible, tap para iniciar`;
-      default:            return `${title} - pendiente, tap para iniciar`;
+      case 'available': return `${title} - disponible, tap para iniciar`;
+      default: return `${title} - pendiente, tap para iniciar`;
     }
   }
 
@@ -156,11 +156,11 @@ export class AacRoadmapComponent implements OnInit {
 
   private resolveStatus(act: RoadmapActivityResponse, assignment?: ActivityAssignmentResponse): NodeStatus {
     if (!act.isUnlocked) return 'locked';
-    if (!assignment)     return 'pending';
+    if (!assignment) return 'pending';
     switch (assignment.status) {
-      case ActivityAssignmentStatus.Completada:  return 'completed';
-      case ActivityAssignmentStatus.EnProgreso:  return 'in-progress';
-      default:                                   return 'pending';
+      case ActivityAssignmentStatus.Completada: return 'completed';
+      case ActivityAssignmentStatus.EnProgreso: return 'in-progress';
+      default: return 'pending';
     }
   }
 }
