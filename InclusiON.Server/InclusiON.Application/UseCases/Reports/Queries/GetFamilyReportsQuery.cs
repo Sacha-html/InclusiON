@@ -9,7 +9,7 @@ namespace InclusiON.Application.UseCases.Reports.Queries
         string? ReportTypeId,
         DateTime? DateFrom,
         DateTime? DateTo,
-        SortField? SortBy,
+        string? SortBy,
         string SortDirection
     );
 }

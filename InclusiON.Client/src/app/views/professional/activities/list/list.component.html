@@ -9,11 +9,6 @@
         + Nueva actividad
       </a>
     }
-    <button cButton [color]="semanticMode() ? 'warning' : 'secondary'" size="sm"
-            (click)="toggleSemanticMode()"
-            [title]="semanticMode() ? 'Volver a búsqueda por filtros' : 'Buscar por significado (IA)'">
-      ⚡ {{ semanticMode() ? 'Desactivar búsqueda IA' : 'Búsqueda semántica' }}
-    </button>
   </c-col>
 </c-row>
 
@@ -86,9 +81,9 @@
     <c-col xs="12" md="2">
       <label class="form-label" for="standard-filter">Origen</label>
       <select cSelect id="standard-filter" [(ngModel)]="standardFilter" (ngModelChange)="onFilterChange()">
-        <option value="">Todos</option>
+        <option value="">Todas</option>
         <option value="false">Propias</option>
-        <option value="true">Estándar</option>
+        <option value="true">Compartidas</option>
       </select>
     </c-col>
 

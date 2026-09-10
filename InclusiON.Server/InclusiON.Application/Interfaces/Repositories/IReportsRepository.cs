@@ -20,7 +20,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             string? status,
             DateTime? dateFrom,
             DateTime? dateTo,
-            SortField? sortBy,
+            string? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
             List<string>? personIds = null,
@@ -50,7 +50,7 @@ namespace InclusiON.Application.Interfaces.Repositories
             string? reportTypeId,
             DateTime? dateFrom,
             DateTime? dateTo,
-            SortField? sortBy,
+            string? sortBy,
             string sortDirection,
             CancellationToken cancellationToken = default);
         Task<Report?> GetReportWithDetailsAsync(int reportId, CancellationToken cancellationToken = default);
