@@ -10,6 +10,8 @@ namespace InclusiON.Application.UseCases.Activities.Queries
         bool? IsStandard,
         bool? IsTemplate,
         int Page,
-        int PageSize
+        int PageSize,
+        string? SortBy = null,
+        string SortDirection = "ASC"
     );
 }
