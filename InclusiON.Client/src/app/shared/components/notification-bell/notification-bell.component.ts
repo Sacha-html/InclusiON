@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   DropdownComponent,
@@ -12,6 +12,9 @@ import {
 import { MessagesService } from '@services/messages.service';
 import { SignalrService, SignalRNotification } from '@services/signalr.service';
 import { AuthService } from '@services/auth.service';
+import { ToastService } from '@services/toast.service';
+import { ProfessionalsService } from '@services/professionals.service';
+import { AssignmentsService } from '@services/assignments.service';
 import { UserRoles } from '@shared/constants/roles';
 
 export interface AppNotification {
@@ -194,10 +197,13 @@ export interface AppNotification {
   `],
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
-  private readonly messagesService = inject(MessagesService);
-  private readonly signalrService  = inject(SignalrService);
-  private readonly authService     = inject(AuthService);
-  private readonly router          = inject(Router);
+  private readonly messagesService      = inject(MessagesService);
+  private readonly signalrService       = inject(SignalrService);
+  private readonly authService          = inject(AuthService);
+  private readonly router               = inject(Router);
+  private readonly toastService         = inject(ToastService);
+  private readonly professionalsService = inject(ProfessionalsService);
+  private readonly assignmentsService   = inject(AssignmentsService);
 
   readonly notifications = signal<AppNotification[]>([]);
   readonly unreadCount = signal(0);
@@ -242,6 +248,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       this.notifications.update(arr => [newNotif, ...arr]);
       this.saveToStorage();
       this.updateUnreadCount();
+      this.toastService.info(data.message, data.title);
     });
   }
 
@@ -499,6 +506,49 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       },
       error: ()  => { /* non-critical, skip */ },
     });
+
+    // Para el rol Profesional: sincronizar asignaciones recientes si estaba desconectado
+    if (this.authService.getUserRole() === UserRoles.Professional) {
+      this.professionalsService.getMyProfile().pipe(
+        switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
+      ).subscribe({
+        next: (persons) => {
+          if (!persons || persons.length === 0) return;
+          const current = this.notifications();
+          let changed = false;
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - 7);
+
+          for (const p of persons) {
+            const assignedDate = new Date(p.assignedAt);
+            if (assignedDate >= cutoff) {
+              const notifId = `assign-${p.personId}`;
+              const exists = current.some(n => n.id === notifId || (n.actionUrl && n.actionUrl.includes(p.personId)));
+              if (!exists) {
+                const newNotif: AppNotification = {
+                  id: notifId,
+                  title: '🎓 Nuevo alumno asignado',
+                  message: `Tienes un nuevo alumno, ${p.personFullName}. Llená el perfil funcional.`,
+                  actionUrl: `/#/pro/persons/${p.personId}`,
+                  type: 'activity',
+                  isRead: false,
+                  createdAt: assignedDate,
+                  timeLabel: 'Reciente'
+                };
+                current.unshift(newNotif);
+                changed = true;
+              }
+            }
+          }
+          if (changed) {
+            this.notifications.set([...current]);
+            this.saveToStorage();
+            this.updateUnreadCount();
+          }
+        },
+        error: () => { /* non-critical, skip */ }
+      });
+    }
   }
 
   ngOnDestroy(): void {

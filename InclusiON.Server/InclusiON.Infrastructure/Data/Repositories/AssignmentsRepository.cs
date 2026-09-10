@@ -185,6 +185,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<Classroom?> GetClassroomByIdAsync(Guid classroomId, CancellationToken ct = default)
         {
             return await _context.Classrooms
+                .Include(c => c.Professional)
                 .Include(c => c.ProfessionalPersons)
                 .FirstOrDefaultAsync(c => c.Id == classroomId, ct);
         }
