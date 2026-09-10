@@ -63,7 +63,8 @@ namespace InclusiON.Data.Seeders
                 .Where(pp => pp.IsActive && pp.Person.IsActive && pp.Professional.IsActive)
                 .ToListAsync();
 
-            var defaultProf = await context.Professionals.FirstOrDefaultAsync(p => p.IsActive);
+            var allProfessionals = await context.Professionals.Where(p => p.IsActive).ToListAsync();
+            var defaultProf = allProfessionals.FirstOrDefault();
             if (defaultProf == null)
             {
                 logger?.LogWarning("MetricsDataSeeder: No se encontró ningún profesional activo.");
@@ -74,7 +75,20 @@ namespace InclusiON.Data.Seeders
             foreach (var student in students)
             {
                 var pp = professionalPersons.FirstOrDefault(x => x.PersonId == student.Id);
-                var profId = pp?.ProfessionalId ?? student.SupervisorUserId ?? defaultProf.Id;
+                Guid profId;
+                if (pp != null)
+                {
+                    profId = pp.ProfessionalId;
+                }
+                else if (student.SupervisorUserId.HasValue)
+                {
+                    var supervisorProf = allProfessionals.FirstOrDefault(p => p.UserId == student.SupervisorUserId.Value);
+                    profId = supervisorProf?.Id ?? defaultProf.Id;
+                }
+                else
+                {
+                    profId = defaultProf.Id;
+                }
                 studentProfMap[student.Id] = profId;
             }
 

@@ -20,13 +20,9 @@ namespace InclusiON.Infrastructure.Services
             _context = context;
         }
 
-        public async Task InitializeStudentRoadmapAsync(Guid studentId, Guid? supervisorUserId = null, CancellationToken cancellationToken = default)
+        public async Task<List<Activity>> EnsureStandardActivitiesAsync(CancellationToken cancellationToken = default)
         {
-            // 1. Verificar si el alumno ya tiene un roadmap
-            var hasRoadmap = await _context.PersonRoadmaps.AnyAsync(r => r.PersonId == studentId, cancellationToken);
-            if (hasRoadmap) return;
-
-            // 2. Obtener o crear el SkillArea "Trayectoria"
+            // Obtener o crear el SkillArea "Trayectoria"
             var skillArea = await _context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria", cancellationToken);
             if (skillArea == null)
             {
@@ -45,15 +41,9 @@ namespace InclusiON.Infrastructure.Services
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            // 3. Obtener o crear las 10 actividades estándar
-            Professional? profEntity = null;
-            if (supervisorUserId.HasValue)
-            {
-                profEntity = await _context.Professionals.FirstOrDefaultAsync(p => p.UserId == supervisorUserId.Value, cancellationToken);
-            }
-            profEntity ??= await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
-
+            var profEntity = await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
             var defaultProfId = profEntity?.Id ?? Guid.Parse("00000000-0000-0000-0000-000000000200");
+
             var standardActivities = new List<Activity>();
             var activitiesDefinitions = new[]
             {
@@ -226,6 +216,30 @@ namespace InclusiON.Infrastructure.Services
                 }
                 standardActivities.Add(act);
             }
+
+            return standardActivities;
+        }
+
+        public async Task InitializeStudentRoadmapAsync(Guid studentId, Guid? supervisorUserId = null, CancellationToken cancellationToken = default)
+        {
+            // 1. Asegurar o actualizar siempre las 10 actividades oficiales del Roadmap
+            var standardActivities = await EnsureStandardActivitiesAsync(cancellationToken);
+
+            // 2. Verificar si el alumno ya tiene un roadmap
+            var hasRoadmap = await _context.PersonRoadmaps.AnyAsync(r => r.PersonId == studentId, cancellationToken);
+            if (hasRoadmap) return;
+
+            var skillArea = await _context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria", cancellationToken);
+            if (skillArea == null) return;
+
+            Professional? profEntity = null;
+            if (supervisorUserId.HasValue)
+            {
+                profEntity = await _context.Professionals.FirstOrDefaultAsync(p => p.UserId == supervisorUserId.Value, cancellationToken);
+            }
+            profEntity ??= await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
+
+            var defaultProfId = profEntity?.Id ?? Guid.Parse("00000000-0000-0000-0000-000000000200");
 
             // 4. Crear el PersonRoadmap
             var roadmap = new PersonRoadmap
