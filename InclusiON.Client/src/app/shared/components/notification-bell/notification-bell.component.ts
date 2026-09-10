@@ -375,7 +375,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
         {
           id: 'seed-act',
           title: 'Actividad completada',
-          message: 'Tomás Pérez completó la actividad \'Mi rutina visual\' con 90% de éxito.',
+          message: 'Tomás Pérez completó la actividad \'¿Qué dice aquí?\' con 90% de éxito.',
           actionUrl: 'evaluations',
           type: 'activity',
           isRead: false,
@@ -408,7 +408,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
         {
           id: 'seed-act',
           title: 'Actividad asignada',
-          message: 'Pedro Martínez asignó una nueva actividad a Tomás Pérez: \'Concepto Muchos / Pocos\'.',
+          message: 'Pedro Martínez asignó una nueva actividad a Tomás Pérez: \'¿Qué dice aquí?\'.',
           actionUrl: 'activities',
           type: 'activity',
           isRead: false,
