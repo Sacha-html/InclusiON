@@ -29,6 +29,12 @@ namespace InclusiON.Data.Configurations
             builder.Property(p => p.Specialty)
                 .HasMaxLength(100);
 
+            builder.HasOne(p => p.SpecialtyCatalog)
+                .WithMany(s => s.Professionals)
+                .HasForeignKey(p => p.SpecialtyId)
+                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(p => p.SpecialtyId);
+
             builder.Property(p => p.LicenseNumber)
                 .HasMaxLength(50);
 
