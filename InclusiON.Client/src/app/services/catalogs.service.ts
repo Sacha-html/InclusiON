@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, shareReplay, Subject } from 'rxjs';
+import { Observable, shareReplay, Subject, startWith, switchMap } from 'rxjs';
 import {
   ApiResponse,
   CatalogItem,
@@ -10,6 +10,7 @@ import {
   SkillAreaItem,
   ActivityTemplateTypeItem,
   AvatarColorItem,
+  SpecialtyItem,
 } from '@models';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
@@ -26,9 +27,24 @@ export class CatalogsService {
 
   private cache = new Map<string, Observable<any>>();
   private clearCache$ = new Subject<void>();
+  private readonly specialtiesChangedSubject = new Subject<void>();
+  readonly specialtiesChanged$ = this.specialtiesChangedSubject.asObservable();
+  private readonly specialties$ = this.specialtiesChangedSubject.pipe(
+    startWith(void 0),
+    switchMap(() => this.http
+      .get<ApiResponse<SpecialtyItem[]>>(`${this.apiUrl}/specialties`)
+      .pipe(unwrapResponse())),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
 
   getDisabilityTypes(): Observable<CatalogItem[]> {
     return this.cached('disability-types');
+  }
+
+  getSpecialties(): Observable<SpecialtyItem[]> { return this.specialties$; }
+
+  invalidateSpecialties(): void {
+    this.specialtiesChangedSubject.next();
   }
 
   getAutonomyLevels(): Observable<AutonomyLevelItem[]> {

@@ -79,10 +79,10 @@ export class ProfessionalsService {
       .pipe(unwrapResponse());
   }
 
-  deactivateProfessional(id: string, request?: DeactivateProfessionalRequest): Observable<void> {
+  deactivateProfessional(id: string, request?: DeactivateProfessionalRequest): Observable<ProfessionalResponse> {
     return this.http
-      .put<void>(`${this.apiUrl}/${id}/deactivate`, request ?? {})
-      .pipe(handleApiError());
+      .put<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/${id}/deactivate`, request ?? {})
+      .pipe(unwrapResponse());
   }
 
   registerProfessional(request: RegisterProfessionalRequest): Observable<void> {
@@ -115,10 +115,10 @@ export class ProfessionalsService {
       .pipe(handleApiError());
   }
 
-  reactivateProfessional(id: string): Observable<void> {
+  reactivateProfessional(id: string): Observable<ProfessionalResponse> {
     return this.http
-      .put<void>(`${this.apiUrl}/${id}/reactivate`, {})
-      .pipe(handleApiError());
+      .put<ApiResponse<ProfessionalResponse>>(`${this.apiUrl}/${id}/reactivate`, {})
+      .pipe(unwrapResponse());
   }
 
   getStatusHistory(id: string): Observable<any[]> {

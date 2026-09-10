@@ -2,6 +2,7 @@
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Application.UseCases.Professionals.Commands;
 using InclusiON.Application.UseCases.Professionals.Queries;
 using InclusiON.DTOs.Common;
@@ -18,17 +19,20 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateProfessionalCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IReadOnlyRepository<Specialty>? _specialties;
 
         public UpdateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IUnitOfWork unitOfWork,
             ILogger<UpdateProfessionalCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IReadOnlyRepository<Specialty>? specialties = null)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _specialties = specialties;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(UpdateProfessionalCommand command, CancellationToken cancellationToken)
@@ -60,6 +64,14 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             if (command.DocumentNumber != null) professional.DocumentNumber = command.DocumentNumber;
             if (command.Phone != null) professional.Phone = command.Phone;
             if (command.Specialty != null) professional.Specialty = command.Specialty;
+            if (command.SpecialtyId.HasValue)
+            {
+                professional.SpecialtyId = command.SpecialtyId;
+                professional.Specialty = null;
+            }
+
+            if (command.SpecialtyId.HasValue && _specialties is not null && (await _specialties.GetByIdAsync(command.SpecialtyId.Value, cancellationToken))?.IsActive != true)
+                return ApiResponse<ProfessionalResponse>.ErrorResult(ErrorCode.ValidationFailed, "La especialidad seleccionada no está activa.");
             if (command.LicenseNumber != null) professional.LicenseNumber = command.LicenseNumber;
             if (command.BirthDate.HasValue) professional.BirthDate = command.BirthDate.Value;
 

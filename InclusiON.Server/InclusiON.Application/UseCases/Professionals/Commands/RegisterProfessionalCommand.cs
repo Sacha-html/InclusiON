@@ -13,6 +13,7 @@ namespace InclusiON.Application.UseCases.Professionals.Commands
         string? LicenseNumber,
         DateTime? BirthDate,
         string Email,
-        int? InstitutionId
+        int? InstitutionId,
+        int? SpecialtyId = null
     );
 }

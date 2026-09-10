@@ -38,6 +38,7 @@ export const AppRoutes = {
       LoginMethods: '/admin/catalogs/login-methods',
       AutonomyLevels: '/admin/catalogs/autonomy-levels',
       DisabilityTypes: '/admin/catalogs/disability-types',
+      Specialties: '/admin/catalogs/specialties',
       TemplateTypes: '/admin/catalogs/template-types',
     },
   },

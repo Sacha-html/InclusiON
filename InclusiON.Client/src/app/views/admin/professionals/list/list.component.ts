@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { AuthService, ProfessionalsService, ToastService, UserManagementService } from '@services';
+import { AuthService, ProfessionalsService, ToastService, UserManagementService, CatalogsService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
-import { AppRoutes, SPECIALTIES } from '@shared/constants';
-import { ProfessionalListItemResponse, ValidateProfessionalRequest } from '@models';
+import { AppRoutes } from '@shared/constants';
+import { ProfessionalListItemResponse, ProfessionalResponse, ValidateProfessionalRequest } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
@@ -46,11 +47,14 @@ export class ListComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly userService = inject(UserManagementService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   canCreate = this.authService.hasPermission(Permissions.Professionals.Create);
   canValidate = this.authService.hasPermission(Permissions.Professionals.Update) || this.authService.isGlobalAdmin();
 
-  readonly specialties = SPECIALTIES;
+  specialties: { id: number; name: string }[] = [];
+  specialtiesLoadError = false;
 
   selectedInstitutionId: number | undefined;
   activeTab: 'active' | 'validations' = 'active';
@@ -67,6 +71,8 @@ export class ListComponent implements OnInit {
   sortBy = 'lastName';
   sortDirection: 'ASC' | 'DESC' = 'ASC';
   loading = false;
+  private professionalsRequestId = 0;
+  private searchTerm = '';
 
   showConfirmModal = false;
   showValidateModal = false;
@@ -128,6 +134,20 @@ export class ListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.catalogsService.getSpecialties()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.specialties = data.filter(specialty => specialty.isActive === true);
+          this.specialtiesLoadError = false;
+        },
+        error: (error) => {
+          this.specialties = [];
+          this.specialtiesLoadError = true;
+          console.error('Failed to load active professional specialties', error);
+          this.toastService.error('No se pudieron cargar las especialidades. Revisá el endpoint /Catalogs/specialties.');
+        },
+      });
     this.loadPendingCount();
   }
 
@@ -204,6 +224,7 @@ export class ListComponent implements OnInit {
   }
 
   onSearch(term: string): void {
+    this.searchTerm = term;
     this.currentPage = 1;
     if (this.activeTab === 'active') {
       this.loadProfessionals(term);
@@ -275,11 +296,12 @@ export class ListComponent implements OnInit {
     this.isDeactivateLoading = true;
 
     this.professionalsService.deactivateProfessional(this.itemToDeactivate.id, { observation }).subscribe({
-      next: () => {
+      next: (response) => {
         this.isDeactivateLoading = false;
         this.toastService.success('Profesional desactivado exitosamente');
         this.showConfirmModal = false;
         this.itemToDeactivate = null;
+        this.replaceProfessionalFromMutation(response, 'terminated');
         this.loadProfessionals();
       },
       error: (err) => {
@@ -315,7 +337,7 @@ export class ListComponent implements OnInit {
     };
 
     this.professionalsService.validateProfessional(this.itemToValidate.id, request).subscribe({
-      next: () => {
+       next: () => {
         this.isValidationLoading = false;
         this.toastService.success(
           this.isApproveAction
@@ -340,12 +362,14 @@ export class ListComponent implements OnInit {
   }
 
   loadProfessionals(search?: string): void {
+    if (search !== undefined) this.searchTerm = search;
+    const requestId = ++this.professionalsRequestId;
     this.loading = true;
     this.professionalsService
       .getProfessionals({
         page: this.currentPage,
         pageSize: this.pageSize,
-        search,
+        search: this.searchTerm || undefined,
         institutionId: this.selectedInstitutionId,
         status: this.statusFilter || undefined,
         specialty: this.specialtyFilter || undefined,
@@ -354,11 +378,13 @@ export class ListComponent implements OnInit {
       })
       .subscribe({
         next: (response) => {
+          if (requestId !== this.professionalsRequestId) return;
           this.professionals = response.data;
           this.totalItems = response.totalRecords;
           this.loading = false;
         },
         error: () => {
+          if (requestId !== this.professionalsRequestId) return;
           this.toastService.error('Error al obtener profesionales');
           this.loading = false;
         },
@@ -470,11 +496,12 @@ export class ListComponent implements OnInit {
     if (!this.itemToReactivate) return;
     this.isReactivateLoading = true;
     this.professionalsService.reactivateProfessional(this.itemToReactivate.id).subscribe({
-      next: () => {
+      next: (response) => {
         this.isReactivateLoading = false;
         this.toastService.success('Profesional reactivado exitosamente');
         this.showReactivateModal = false;
         this.itemToReactivate = null;
+        this.replaceProfessionalFromMutation(response, 'approved');
         this.loadProfessionals();
       },
       error: () => {
@@ -487,6 +514,22 @@ export class ListComponent implements OnInit {
   cancelReactivate(): void {
     this.showReactivateModal = false;
     this.itemToReactivate = null;
+  }
+
+  private replaceProfessionalFromMutation(response: ProfessionalResponse, fallbackStatus: string): void {
+    const statusKeys: Record<string, string> = {
+      'Aprobado': 'approved',
+      'Dado de baja': 'terminated',
+      'Suspendido': 'suspended',
+      'Rechazado': 'rejected',
+      'Pendiente': 'pending',
+    };
+    const status = response.statusName
+      ? (statusKeys[response.statusName] ?? response.statusName.toLowerCase())
+      : fallbackStatus;
+    this.professionals = this.professionals.map(item => item.id === response.id
+      ? { ...item, isActive: response.isActive, status }
+      : item);
   }
 
   exportToCsv(): void {

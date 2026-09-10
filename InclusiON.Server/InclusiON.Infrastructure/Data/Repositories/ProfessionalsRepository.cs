@@ -22,6 +22,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.Professionals
                 .Include(p => p.User)
+                .Include(p => p.SpecialtyCatalog)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == professionalId, cancellationToken);
         }
@@ -30,6 +31,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.Professionals
                 .Include(p => p.User)
+                .Include(p => p.SpecialtyCatalog)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
         }
@@ -100,6 +102,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             var query = _context.Professionals
                 .Include(p => p.User)
+                .Include(p => p.SpecialtyCatalog)
                 .AsNoTracking()
                 .Where(p => p.Status != ProfessionalStatusEnum.Pending && p.Status != ProfessionalStatusEnum.Rejected);
 
@@ -118,7 +121,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (!string.IsNullOrWhiteSpace(specialty))
             {
                 var specialtyPattern = $"%{specialty}%";
-                query = query.Where(p => p.Specialty != null && EF.Functions.ILike(p.Specialty, specialtyPattern));
+                query = query.Where(p => (p.SpecialtyCatalog != null && EF.Functions.ILike(p.SpecialtyCatalog.Name, specialtyPattern)) ||
+                    (p.SpecialtyCatalog == null && p.Specialty != null && EF.Functions.ILike(p.Specialty, specialtyPattern)));
             }
 
             if (!string.IsNullOrWhiteSpace(status))
@@ -158,7 +162,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 [SortField.LastName] = p => p.LastName,
                 [SortField.CreatedAt] = p => p.CreatedAt,
                 [SortField.Email] = p => p.User.Email ?? "",
-                [SortField.Specialty] = p => p.Specialty ?? "",
+                [SortField.Specialty] = p => p.SpecialtyCatalog != null ? p.SpecialtyCatalog.Name : p.Specialty ?? "",
                 [SortField.LicenseNumber] = p => p.LicenseNumber ?? "",
                 [SortField.Status] = p => p.Status
             };
