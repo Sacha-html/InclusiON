@@ -60,6 +60,7 @@
 
 <app-data-table title="Reportes" [columns]="columns" [items]="reports()" [totalItems]="totalRecords()"
   [pageSize]="pageSize()" [currentPage]="currentPage()" [sortable]="true" [loading]="isLoading()"
+  [sortField]="sortBy" [sortDirection]="sortDirection"
   [emptyIcon]="'cilNotes'" [emptyMessage]="'No hay reportes que coincidan con los filtros.'"
   (pageChange)="onPageChange($event)" (searchAction)="onSearch($event)" (sortAction)="onSort($event)"
   (rowAction)="onRowAction($event)">

@@ -51,8 +51,8 @@ export class ListComponent implements OnInit {
   pageSize = signal(10);
   totalRecords = signal(0);
 
-  sortBy = 'createdAt';
-  sortDirection = 'DESC';
+  sortBy = 'personName';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
 
   // Filtros
   statusFilter = 'Submitted'; // Por defecto: pendientes de revisión
@@ -182,7 +182,7 @@ export class ListComponent implements OnInit {
     this.loadReports();
   }
 
-  onSort(event: { sortBy: string; sortDirection: string }): void {
+  onSort(event: { sortBy: string; sortDirection: 'ASC' | 'DESC' }): void {
     this.sortBy = event.sortBy;
     this.sortDirection = event.sortDirection;
     this.loadReports();
