@@ -101,6 +101,11 @@ export class ProfessionalFunctionalProfileComponent {
     return 'danger';
   }
 
+  /** Whether the person already has at least one functional-profile field filled. */
+  get hasFunctionalProfile(): boolean {
+    return this.profileCompletion > 0;
+  }
+
   levels = [
     { value: 0, label: 'Sin evaluar' },
     { value: 1, label: '1 - Muy bajo' },
