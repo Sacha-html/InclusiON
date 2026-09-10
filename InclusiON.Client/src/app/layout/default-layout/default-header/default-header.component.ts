@@ -75,6 +75,18 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   sidebarId = input<string>('sidebar1');
 
+  get dashboardRoute(): string {
+    const user = this.authService.getCurrentUser();
+    const role = user?.role ?? this.authService.getUserRole();
+    if (role === 'Professional') {
+      return '/pro';
+    }
+    if (role === 'FamilyRepresentative') {
+      return '/family';
+    }
+    return '/admin/dashboard';
+  }
+
   get showNotificationBell(): boolean {
     const role = this.authService.getUserRole();
     return role === 'Professional' || role === 'FamilyRepresentative' || role === 'Admin';

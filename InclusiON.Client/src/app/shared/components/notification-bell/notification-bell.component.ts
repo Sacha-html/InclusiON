@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subscription, switchMap } from 'rxjs';
+import { NavigationEnd, Router } from '@angular/router';
+import { Subscription, filter, switchMap } from 'rxjs';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   DropdownComponent,
@@ -209,6 +209,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   readonly unreadCount = signal(0);
 
   private sub?: Subscription;
+  private routerSub?: Subscription;
 
   readonly unreadLabel = () => {
     const n = this.unreadCount();
@@ -220,6 +221,14 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadFromStorage();
     this.fetchCount();
+
+    // Auto-marcar como leídas según la ruta actual (ej: al estar o entrar al perfil de un alumno)
+    this.routerSub = this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe((event: NavigationEnd) => {
+      this.checkAutoReadByUrl(event.urlAfterRedirects || event.url);
+    });
+    this.checkAutoReadByUrl(this.router.url);
 
     // Increment badge and append notification on each real-time push notification
     this.sub = this.signalrService.notification$.subscribe((data: SignalRNotification) => {
@@ -254,6 +263,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   onNotificationClick(notif: AppNotification): void {
     if (!notif.isRead) {
+      this.recordReadId(notif.id);
       this.notifications.update(arr => arr.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
       this.saveToStorage();
       this.updateUnreadCount();
@@ -279,13 +289,17 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   markAllAsRead(event?: Event): void {
     event?.stopPropagation();
-    this.notifications.update(arr => arr.map(n => ({ ...n, isRead: true })));
+    this.notifications.update(arr => arr.map(n => {
+      this.recordReadId(n.id);
+      return { ...n, isRead: true };
+    }));
     this.saveToStorage();
     this.updateUnreadCount();
   }
 
   clearAll(event: Event): void {
     event.stopPropagation();
+    this.notifications().forEach(n => this.recordReadId(n.id));
     this.notifications.set([]);
     this.saveToStorage();
     this.updateUnreadCount();
@@ -324,13 +338,100 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     return `app_notifications_${id}`;
   }
 
+  private getReadIdsKey(): string {
+    const user = this.authService.getCurrentUser();
+    const id = user?.id ?? this.authService.getUserRole() ?? 'guest';
+    return `app_notifications_read_${id}`;
+  }
+
+  private getReadIds(): Set<string> {
+    try {
+      const stored = localStorage.getItem(this.getReadIdsKey());
+      if (stored) {
+        return new Set<string>(JSON.parse(stored));
+      }
+    } catch {
+      // ignore
+    }
+    return new Set<string>();
+  }
+
+  private recordReadId(id: string): void {
+    const set = this.getReadIds();
+    set.add(id);
+    try {
+      localStorage.setItem(this.getReadIdsKey(), JSON.stringify(Array.from(set)));
+    } catch {
+      // ignore
+    }
+  }
+
+  private checkAutoReadByUrl(url: string): void {
+    if (!url) return;
+
+    // Detectar si estamos en el detalle de un alumno (/pro/persons/:id)
+    const personMatch = url.match(/persons\/([a-zA-Z0-9-]+)/);
+    if (personMatch && personMatch[1]) {
+      const personId = personMatch[1];
+      this.markNotificationsAsReadForPerson(personId);
+    }
+
+    // Detectar si estamos en mensajes
+    if (url.includes('messages')) {
+      this.markNotificationsAsReadByType('message');
+    }
+  }
+
+  private markNotificationsAsReadForPerson(personId: string): void {
+    let changed = false;
+    this.notifications.update(arr =>
+      arr.map(n => {
+        const isForPerson = n.id === `assign-${personId}` || (n.actionUrl && n.actionUrl.includes(personId));
+        if (isForPerson && !n.isRead) {
+          changed = true;
+          this.recordReadId(n.id);
+          return { ...n, isRead: true };
+        }
+        return n;
+      })
+    );
+    if (changed) {
+      this.saveToStorage();
+      this.updateUnreadCount();
+    }
+  }
+
+  private markNotificationsAsReadByType(type: 'message' | 'activity' | 'calendar' | 'system'): void {
+    let changed = false;
+    this.notifications.update(arr =>
+      arr.map(n => {
+        if (n.type === type && !n.isRead) {
+          changed = true;
+          this.recordReadId(n.id);
+          return { ...n, isRead: true };
+        }
+        return n;
+      })
+    );
+    if (changed) {
+      this.saveToStorage();
+      this.updateUnreadCount();
+    }
+  }
+
   private loadFromStorage(): void {
     const storageKey = this.getStorageKey();
     const stored = localStorage.getItem(storageKey);
+    const readIds = this.getReadIds();
     if (stored) {
       try {
         let parsed = JSON.parse(stored) as AppNotification[];
-        parsed.forEach(n => n.createdAt = new Date(n.createdAt));
+        parsed.forEach(n => {
+          n.createdAt = new Date(n.createdAt);
+          if (readIds.has(n.id)) {
+            n.isRead = true;
+          }
+        });
         const role = this.authService.getUserRole();
         if (role === UserRoles.Admin) {
           parsed = parsed.filter(n => n.type !== 'calendar' && !n.actionUrl?.includes('calendar'));
@@ -358,6 +459,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   private seedInitialNotifications(): void {
     const role = this.authService.getUserRole();
+    const readIds = this.getReadIds();
     const list: AppNotification[] = [];
 
     if (role === UserRoles.Professional) {
@@ -366,9 +468,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-msg',
           title: 'Nuevo mensaje',
           message: 'Tenés un nuevo mensaje de Miguel Fernández (Tutor).',
-          actionUrl: 'messages',
+          actionUrl: '/pro/messages',
           type: 'message',
-          isRead: false,
+          isRead: readIds.has('seed-msg') || false,
           createdAt: new Date(Date.now() - 5 * 60000),
           timeLabel: 'Hace 5 min'
         },
@@ -376,9 +478,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-act',
           title: 'Actividad completada',
           message: 'Tomás Pérez completó la actividad \'¿Qué dice aquí?\' con 90% de éxito.',
-          actionUrl: 'evaluations',
+          actionUrl: '/pro/evaluations',
           type: 'activity',
-          isRead: false,
+          isRead: readIds.has('seed-act') || false,
           createdAt: new Date(Date.now() - 15 * 60000),
           timeLabel: 'Hace 15 min'
         },
@@ -386,7 +488,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-cal',
           title: 'Recordatorio del calendario',
           message: 'Recordatorio: Sesión de terapia con Sofía Rodríguez mañana a las 10:00.',
-          actionUrl: 'calendar',
+          actionUrl: '/pro/calendar',
           type: 'calendar',
           isRead: true,
           createdAt: new Date(Date.now() - 60 * 60000),
@@ -399,9 +501,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-msg',
           title: 'Nuevo mensaje',
           message: 'Tenés un nuevo mensaje de Pedro Martínez (Terapeuta).',
-          actionUrl: 'messages',
+          actionUrl: '/family/messages',
           type: 'message',
-          isRead: false,
+          isRead: readIds.has('seed-msg') || false,
           createdAt: new Date(Date.now() - 5 * 60000),
           timeLabel: 'Hace 5 min'
         },
@@ -409,9 +511,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-act',
           title: 'Actividad asignada',
           message: 'Pedro Martínez asignó una nueva actividad a Tomás Pérez: \'¿Qué dice aquí?\'.',
-          actionUrl: 'activities',
+          actionUrl: '/family/activities',
           type: 'activity',
-          isRead: false,
+          isRead: readIds.has('seed-act') || false,
           createdAt: new Date(Date.now() - 15 * 60000),
           timeLabel: 'Hace 15 min'
         },
@@ -419,7 +521,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-cal',
           title: 'Recordatorio del calendario',
           message: 'Recordatorio: Sesión de terapia para Tomás Pérez mañana a las 10:00.',
-          actionUrl: 'calendar',
+          actionUrl: '/family/calendar',
           type: 'calendar',
           isRead: true,
           createdAt: new Date(Date.now() - 60 * 60000),
@@ -432,9 +534,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-admin-msg',
           title: 'Nuevo mensaje',
           message: 'Tenés un nuevo mensaje de Pedro Martínez (Profesional).',
-          actionUrl: 'messages',
+          actionUrl: '/admin/messages',
           type: 'message',
-          isRead: false,
+          isRead: readIds.has('seed-admin-msg') || false,
           createdAt: new Date(Date.now() - 5 * 60000),
           timeLabel: 'Hace 5 min'
         },
@@ -442,9 +544,9 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-msg',
           title: 'Nuevo profesional',
           message: 'La profesional Laura González se ha registrado y está pendiente de aprobación.',
-          actionUrl: 'professionals',
+          actionUrl: '/admin/professionals',
           type: 'system',
-          isRead: false,
+          isRead: readIds.has('seed-msg') || false,
           createdAt: new Date(Date.now() - 10 * 60000),
           timeLabel: 'Hace 10 min'
         },
@@ -452,7 +554,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-act',
           title: 'Reporte enviado',
           message: 'Se ha presentado un reporte semanal para evaluación.',
-          actionUrl: 'reports',
+          actionUrl: '/admin/reports',
           type: 'activity',
           isRead: true,
           createdAt: new Date(Date.now() - 30 * 60000),
@@ -462,7 +564,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
           id: 'seed-sys',
           title: 'Mantenimiento del servidor',
           message: 'Recordatorio: Mantenimiento programado de la base de datos a las 23:00.',
-          actionUrl: 'dashboard',
+          actionUrl: '/admin/dashboard',
           type: 'system',
           isRead: true,
           createdAt: new Date(Date.now() - 120 * 60000),
@@ -479,12 +581,15 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   private fetchCount(): void {
     this.messagesService.getUnreadCount().subscribe({
       next: (n) => {
+        const readIds = this.getReadIds();
         if (n > 0) {
           const list = this.notifications();
           const hasMsgNotif = list.some(notif => notif.id === 'unread-messages-summary' && !notif.isRead);
-          if (!hasMsgNotif) {
+          const isAlreadyRead = readIds.has('unread-messages-summary');
+
+          if (!hasMsgNotif && !isAlreadyRead) {
             const role = this.authService.getUserRole();
-            const actionUrl = role === UserRoles.Professional ? 'messages' : role === UserRoles.FamilyRepresentative ? 'messages' : 'messages';
+            const actionUrl = role === UserRoles.Professional ? '/pro/messages' : role === UserRoles.FamilyRepresentative ? '/family/messages' : '/admin/messages';
             const msgNotif: AppNotification = {
               id: 'unread-messages-summary',
               title: 'Mensajes sin leer',
@@ -515,6 +620,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
         next: (persons) => {
           if (!persons || persons.length === 0) return;
           const current = this.notifications();
+          const readIds = this.getReadIds();
           let changed = false;
           const cutoff = new Date();
           cutoff.setDate(cutoff.getDate() - 7);
@@ -523,20 +629,28 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
             const assignedDate = new Date(p.assignedAt);
             if (assignedDate >= cutoff) {
               const notifId = `assign-${p.personId}`;
+              const isAlreadyRead = readIds.has(notifId);
               const exists = current.some(n => n.id === notifId || (n.actionUrl && n.actionUrl.includes(p.personId)));
               if (!exists) {
                 const newNotif: AppNotification = {
                   id: notifId,
                   title: '🎓 Nuevo alumno asignado',
                   message: `Tienes un nuevo alumno, ${p.personFullName}. Llená el perfil funcional.`,
-                  actionUrl: `/#/pro/persons/${p.personId}`,
+                  actionUrl: `/pro/persons/${p.personId}`,
                   type: 'activity',
-                  isRead: false,
+                  isRead: isAlreadyRead,
                   createdAt: assignedDate,
                   timeLabel: 'Reciente'
                 };
                 current.unshift(newNotif);
                 changed = true;
+              } else if (isAlreadyRead) {
+                current.forEach(n => {
+                  if ((n.id === notifId || (n.actionUrl && n.actionUrl.includes(p.personId))) && !n.isRead) {
+                    n.isRead = true;
+                    changed = true;
+                  }
+                });
               }
             }
           }
@@ -553,5 +667,6 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.routerSub?.unsubscribe();
   }
 }

@@ -1,11 +1,13 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 import { roleGuard } from './guards/role.guard';
 import { globalAdminGuard } from './guards/global-admin.guard';
 import { permissionGuard } from './guards/permission.guard';
-import { UserRoles } from './shared/constants/roles';
+import { UserRoles, RoleRoutes } from './shared/constants/roles';
 import { Permissions } from './shared/constants/permissions';
+import { AuthService } from '@services';
 
 export const routes: Routes = [
   {
@@ -260,11 +262,20 @@ export const routes: Routes = [
     ],
   },
 
-  // Ruta legacy
+  // Ruta legacy /dashboard redirige según el rol del usuario autenticado
   {
     path: 'dashboard',
-    redirectTo: 'admin/dashboard',
-    pathMatch: 'full',
+    canActivate: [
+      () => {
+        const authService = inject(AuthService);
+        const router = inject(Router);
+        const user = authService.getCurrentUser();
+        const role = user?.role ?? authService.getUserRole();
+        const targetRoute = (role && RoleRoutes[role]) ? RoleRoutes[role] : '/admin/dashboard';
+        return router.parseUrl(targetRoute);
+      }
+    ],
+    children: [],
   },
 
   // Errores
