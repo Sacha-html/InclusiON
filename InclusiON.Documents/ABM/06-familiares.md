@@ -18,7 +18,7 @@ El proceso de alta de un familiar comienza con una invitación por email.
 | Email del familiar | Texto (100) | Sí | Formato válido |
 | Nombre del familiar | Texto (100) | No | — |
 | Apellido del familiar | Texto (100) | No | — |
-| Relación con la persona | Texto (50) | No | Madre, Padre, Tutor, etc. |
+| Relación con la persona | Texto (50) | No | Madre, Padre, Tutor/a, Abuelo/a, Hermano/a, Tío/a (no admite 'Otro') |
 | Persona asociada | Referencia | No | Debe existir y estar activa; el profesional debe tener asignada a esa persona |
 
 **Validaciones de integridad:**

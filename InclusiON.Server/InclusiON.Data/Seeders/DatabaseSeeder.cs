@@ -1410,6 +1410,39 @@ namespace InclusiON.Data.Seeders
                 i.Relationship = "Tutor/a";
             }
 
+            // 3. Normalizar 'Otro' / 'otro' a 'Tutor/a' en caso de que existan registros residuales
+            var famOtros = await context.FamilyRepresentatives
+                .Where(f => f.Relationship == "Otro" || f.Relationship == "otro")
+                .ToListAsync();
+            foreach (var f in famOtros)
+            {
+                f.Relationship = "Tutor/a";
+            }
+
+            var personRepOtros = await context.PersonRepresentatives
+                .Where(pr => pr.Relationship == "Otro" || pr.Relationship == "otro")
+                .ToListAsync();
+            foreach (var pr in personRepOtros)
+            {
+                pr.Relationship = "Tutor/a";
+            }
+
+            var histOtros = await context.PersonRepresentativeHistories
+                .Where(h => h.Relationship == "Otro" || h.Relationship == "otro")
+                .ToListAsync();
+            foreach (var h in histOtros)
+            {
+                h.Relationship = "Tutor/a";
+            }
+
+            var invOtros = await context.Invitations
+                .Where(i => i.Relationship == "Otro" || i.Relationship == "otro")
+                .ToListAsync();
+            foreach (var i in invOtros)
+            {
+                i.Relationship = "Tutor/a";
+            }
+
             if (context.ChangeTracker.HasChanges())
             {
                 await context.SaveChangesAsync();

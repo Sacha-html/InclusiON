@@ -25,3 +25,20 @@ WHERE "Relationship" IN ('Tutor Legal', 'Tutor', 'tutor');
 UPDATE "Invitations" 
 SET "Relationship" = 'Tutor/a' 
 WHERE "Relationship" IN ('Tutor Legal', 'Tutor', 'tutor');
+
+-- 3. Sanear 'Otro' / 'otro' unificándolo a 'Tutor/a' en todas las tablas relacionales
+UPDATE "FamilyRepresentatives" 
+SET "Relationship" = 'Tutor/a' 
+WHERE "Relationship" IN ('Otro', 'otro');
+
+UPDATE "PersonRepresentatives" 
+SET "Relationship" = 'Tutor/a' 
+WHERE "Relationship" IN ('Otro', 'otro');
+
+UPDATE "PersonRepresentativeHistories" 
+SET "Relationship" = 'Tutor/a' 
+WHERE "Relationship" IN ('Otro', 'otro');
+
+UPDATE "Invitations" 
+SET "Relationship" = 'Tutor/a' 
+WHERE "Relationship" IN ('Otro', 'otro');
