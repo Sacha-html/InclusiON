@@ -1,8 +1,8 @@
 # Diccionario de Datos — Sistema InclusiON
 
-**Última actualización:** 2026-05-31
+**Última actualización:** 2026-09-09
 
-Este documento describe las entidades de datos del sistema InclusiON, organizadas por área funcional. Para cada campo se documenta: tipo de dato, si es obligatorio, si debe ser único en el sistema, un ejemplo de valor real, y la descripción en lenguaje del negocio.
+Este documento describe las entidades de datos del sistema InclusiON, organizadas por área funcional y persistidas en PostgreSQL 17 (Docker) con pgvector. Para cada campo se documenta: tipo de dato, si es obligatorio, si debe ser único en el sistema, un ejemplo de valor real, y la descripción en lenguaje del negocio.
 
 ---
 
@@ -48,13 +48,13 @@ Dominios de competencia que se trabajan con cada persona (Comunicación, Alfabet
 | Id | Entero | Sí | Sí | 42 | Identificador interno autoincremental. No visible para el usuario. |
 | Nombre | Texto (100) | Sí | No | — | Nombre del área (único) |
 | Descripción | Texto (500) | No | No | — | Detalle del área |
-| Ícono | Texto (50) | No | No | — | Identificador del ícono visual |
-| Color | Texto (10) | No | No | — | Color hexadecimal (#RRGGBB) |
-| Orden de visualización | Entero | Sí | No | — | Orden en listados |
+| Icono | Texto (50) | No | No | — | Identificador del icono visual |
+| Color | Texto (20) | No | No | #4A90E2 | Color temático en formato hexadecimal |
+| Orden de visualización | Entero | Sí | No | — | Orden en que se muestra |
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: entidad desactivada, oculta en la interfaz. |
 
 ### Tipo de Template de Actividad
-Plantillas que definen la estructura de contenido de cada tipo de actividad interactiva.
+Estructura y comportamiento interactivo de cada tipo de actividad.
 
 | Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
 |-------|------|:-----------:|:-----:|---------|-------------|
@@ -71,19 +71,19 @@ Plantillas que definen la estructura de contenido de cada tipo de actividad inte
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: entidad desactivada, oculta en la interfaz. |
 
 ### Método de Login
-Métodos de autenticación adaptados al nivel de autonomía.
+Métodos de autenticación adaptados al nivel de autonomía. En el sistema rigen: autenticación estándar con Email/Password y JWT para usuarios de gestión (Admin, Profesional, Familiar); y **2 métodos adaptativos exclusivos para alumnos con discapacidad**: PIN numérico (autonomía media/alta) y Login Asistido supervisado (autonomía dependiente).
 
 | Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
 |-------|------|:-----------:|:-----:|---------|-------------|
 | Id | Entero | Sí | Sí | 42 | Identificador interno autoincremental. No visible para el usuario. |
-| Código | Texto (20) | Sí | Sí | STANDARD | Código técnico del método de login. Determina qué credenciales exige el portal. |
-| Nombre | Texto (100) | Sí | No | — | Nombre descriptivo |
-| Descripción | Texto (500) | No | No | — | Detalle del método |
-| Nivel mínimo de autonomía | Entero | Sí | No | — | Autonomía mínima requerida |
-| Requiere email | Booleano | Sí | No | — | Si necesita email para autenticarse |
-| Requiere contraseña | Booleano | Sí | No | — | Si necesita contraseña |
-| Requiere PIN | Booleano | Sí | No | — | Si necesita PIN numérico |
-| Requiere supervisor | Booleano | Sí | No | — | Si necesita autorización de un supervisor |
+| Código | Texto (20) | Sí | Sí | PIN | Código técnico del método (`STANDARD`, `PIN`, `ASSISTED`). |
+| Nombre | Texto (100) | Sí | No | PIN Numérico | Nombre descriptivo del método de acceso. |
+| Descripción | Texto (500) | No | No | — | Detalle explicativo de la modalidad de acceso. |
+| Nivel mínimo de autonomía | Entero | Sí | No | 2 | Autonomía mínima requerida para utilizar el método. |
+| Requiere email | Booleano | Sí | No | false | Si necesita email para autenticarse (true solo para STANDARD). |
+| Requiere contraseña | Booleano | Sí | No | false | Si necesita contraseña alfanumérica (true para STANDARD). |
+| Requiere PIN | Booleano | Sí | No | true | Si requiere ingreso de PIN de 4 dígitos numéricos. |
+| Requiere supervisor | Booleano | Sí | No | false | Si requiere autorización o dispositivo registrado por supervisor (true para ASSISTED). |
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: entidad desactivada, oculta en la interfaz. |
 
 ### Tipo de Reporte
@@ -111,6 +111,19 @@ Token de renovación de sesión JWT. Permite mantener la sesión activa sin reau
 | Expira en | Fecha/hora | Sí | No | 2026-06-15 00:00 | Cuándo vence el token. Después de esta fecha no puede usarse para renovar. |
 | Revocado en | Fecha/hora | No | No | — | Cuándo fue revocado manualmente. Null = todavía válido. |
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: token invalidado. |
+
+### Token de Restablecimiento de Contraseña (`PasswordResetToken`)
+Token seguro para flujo de recuperación de contraseña de usuarios. Almacena el hash criptográfico SHA-256 del token plano enviado por correo electrónico, evitando la persistencia de secretos en texto plano.
+
+| Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
+|-------|------|:-----------:|:-----:|---------|-------------|
+| Id | UUID | Sí | Sí | a1b2-c3d4-... | Identificador único del token de reseteo. |
+| TokenHash | Texto (256) | Sí | Sí | e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 | Hash SHA-256 del token plano enviado por email. |
+| UserId | Referencia (UUID) | Sí | No | — | Usuario titular de la cuenta a restablecer. |
+| CreatedAt | Fecha/hora UTC | Sí | No | 2026-09-01 12:00 | Momento exacto de generación y envío del token. |
+| ExpiresAt | Fecha/hora UTC | Sí | No | 2026-09-01 14:00 | Momento de caducidad del token (ventana de validez temporal). |
+| UsedAt | Fecha/hora UTC | No | No | — | Momento en el que se consumió el token (null si no ha sido usado). |
+| IsUsed | Booleano | Sí | No | false | Flag de consumo; en `true` impide la reutilización del token. |
 
 ### Dispositivo de Confianza
 Dispositivo autorizado para login asistido sin credenciales propias. Un supervisor registra el dispositivo para que la persona pueda iniciar sesión desde él sin ingresar contraseña.
@@ -273,13 +286,26 @@ Vinculación de profesionales a las instituciones donde trabajan.
 | Fecha de asignación | Fecha/hora | Sí | No | — | Cuándo se estableció la relación |
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: entidad desactivada, oculta en la interfaz. |
 
+### Aula (`Classroom`)
+Agrupación pedagógica de alumnos asociada a un profesional responsable dentro del ámbito institucional o terapéutico.
+
+| Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
+|-------|------|:-----------:|:-----:|---------|-------------|
+| Id | UUID | Sí | Sí | a1b2-c3d4-... | Identificador único del aula. |
+| Nombre | Texto (150) | Sí | No | Sala Azul - Turno Mañana | Denominación o nombre descriptivo del aula. |
+| ProfesionalId | Referencia (UUID) | Sí | No | — | Profesional docente/terapeuta responsable del aula. |
+| Activo | Booleano | Sí | No | true | Soft-delete. En false: aula desactivada u oculta. |
+| Fecha de creación | Fecha/hora UTC | Sí | No | 2026-09-01 08:00 | Fecha y hora en la que se creó el aula. |
+| Fecha de actualización | Fecha/hora UTC | No | No | — | Fecha y hora de última modificación. |
+
 ### Profesional ↔ Persona
-Vinculación de profesionales a las personas que atienden.
+Vinculación de profesionales a las personas que atienden y su asignación de aula.
 
 | Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
 |-------|------|:-----------:|:-----:|---------|-------------|
 | Profesional | Referencia | Sí | No | — | El profesional asignado |
 | Persona | Referencia | Sí | No | — | La persona atendida |
+| Aula asignada (`ClassroomId`) | Referencia (UUID) | No | No | — | Aula de pertenencia para esta vinculación profesional-alumno (FK opcional a `Classrooms`, OnDelete: SetNull). |
 | Fecha de asignación | Fecha/hora | Sí | No | — | Cuándo se estableció la relación |
 | Es profesional principal | Booleano | Sí | No | — | Si es el profesional principal de la persona |
 | Puede supervisar login | Booleano | Sí | No | — | Si puede autorizar el login asistido |
@@ -401,6 +427,18 @@ Vector semántico de la actividad generado por IA (pgvector). Permite búsqueda 
 | Dimensiones | Entero | Sí | No | 1536 | Número de dimensiones del vector. Depende del modelo usado. |
 | Embedding JSON | Texto largo | Sí | No | [0.012, -0.043, ...] | Vector serializado como JSON. Usado internamente por pgvector para búsquedas de similitud. |
 
+### Embedding de Alumno (`PersonEmbedding`)
+Vector semántico del perfil, diagnóstico y requerimientos de la persona con discapacidad. Gestionado con la extensión pgvector (`vector(384)`) mediante el modelo `paraphrase-multilingual-MiniLM-L12-v2`, permite matching semántico para recomendación adaptativa de actividades.
+
+| Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
+|-------|------|:-----------:|:-----:|---------|-------------|
+| Alumno (`PersonId`) | Referencia (UUID - PK) | Sí | Sí | a1b2-c3d4-... | Alumno con discapacidad asociado (1:1). La clave primaria es el mismo `PersonId` (OnDelete: Cascade). |
+| Modelo | Texto (100) | Sí | No | paraphrase-multilingual-MiniLM-L12-v2 | Modelo de lenguaje utilizado para la generación del embedding. |
+| Dimensiones | Entero | Sí | No | 384 | Cantidad de dimensiones del espacio vectorial en pgvector. |
+| Vector (`Embedding`) | Vector (384) | Sí | No | [0.034, -0.122, ...] | Columna nativa `vector(384)` administrada en PostgreSQL mediante pgvector (mapeada vía raw SQL en migraciones). |
+| Fecha de creación | Fecha/hora UTC | Sí | No | 2026-09-01 10:00 | Momento de generación del vector. |
+| Fecha de actualización | Fecha/hora UTC | No | No | — | Última recomputación tras cambios en el perfil pedagógico. |
+
 ---
 
 ## 6. Roadmap (Plan de Trabajo)
@@ -496,6 +534,22 @@ Resultado consolidado de un intento sobre una actividad del roadmap. Alimenta el
 | Tiempo empleado (seg) | Entero | Sí | No | 120 | Segundos que tardó la persona en completar el intento. |
 | Completado en | Fecha/hora | Sí | No | 2026-05-20 10:45 | Cuándo terminó el intento. |
 
+### Sesión de Actividad y Analítica (`ActivitySession`)
+Registro de ejecución y métricas analíticas detalladas de actividades completadas por alumnos. Alimenta dashboards de KPIs pedagógicos y clínicos basados en la metodología *Goal Attainment Scaling* (GAS), tasa de éxito, tiempos y control de errores.
+
+| Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
+|-------|------|:-----------:|:-----:|---------|-------------|
+| Id | Entero | Sí | Sí | 1024 | Identificador único autoincremental de la sesión analítica. |
+| Alumno (`StudentId`) | Referencia (UUID) | Sí | No | — | Persona con discapacidad que ejecutó la actividad (FK a `PersonsWithDisability`, OnDelete: Cascade). |
+| Profesional (`ProfessionalId`) | Referencia (UUID) | Sí | No | — | Profesional responsable o supervisor del alumno (FK a `Professionals`, OnDelete: Restrict). |
+| Actividad (`ActivityId`) | Referencia (Entero) | Sí | No | — | Actividad ejecutada (FK a `Activities`, OnDelete: Cascade). |
+| Fecha de finalización (`DateCompleted`) | Fecha/hora UTC | Sí | No | 2026-09-05 15:30 | Fecha y hora de finalización de la sesión interactiva. |
+| Tasa de éxito (`SuccessRate`) | Decimal (5,2) | Sí | No | 85.50 | Porcentaje de éxito pedagógico alcanzado (40.00% a 100.00%). |
+| Cantidad de errores (`ErrorCount`) | Entero | Sí | No | 2 | Número de errores cometidos durante la sesión (rango típico 0 a 6). |
+| Tiempo empleado (`TimeSpentSeconds`) | Entero | Sí | No | 145 | Tiempo total dedicado a la actividad en segundos (30 a 300s). |
+| Puntuación GAS (`GasScore`) | Entero | Sí | No | 0 | Puntaje Goal Attainment Scaling en escala [-2, +2] (-2: Mucho menor a lo esperado; -1: Menor; 0: Logro esperado; +1: Mayor; +2: Mucho mayor a lo esperado). |
+| Fecha de creación | Fecha/hora UTC | Sí | No | 2026-09-05 15:30 | Momento de persistencia del registro analítico. |
+
 ---
 
 ## 8. Motor de Dificultad Adaptativa
@@ -582,7 +636,7 @@ Reportes formales de avance para un período determinado.
 
 ---
 
-## 10. Comunicación
+## 10. Comunicación y Agenda
 
 ### Mensaje
 Mensajes internos entre profesionales y familiares.
@@ -600,6 +654,25 @@ Mensajes internos entre profesionales y familiares.
 | Leído | Booleano | Sí | No | — | Si fue leído |
 | Mensaje padre | Referencia | No | No | — | Mensaje al que responde (para hilos) |
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: entidad desactivada, oculta en la interfaz. |
+
+### Evento de Calendario (`CalendarEvent`)
+Eventos, turnos, sesiones de terapia, tutorías y clases programadas por profesionales para alumnos individuales o grupales.
+
+| Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
+|-------|------|:-----------:|:-----:|---------|-------------|
+| Id | UUID | Sí | Sí | a1b2-c3d4-... | Identificador único del evento agendado. |
+| Título (`Title`) | Texto (200) | Sí | No | Sesión Fonoaudiología | Título del evento. |
+| Tipo (`Type`) | Texto (50) | Sí | No | Consulta | Tipo de evento (`Consulta`, `Tutoría`, `Clase`, `Tarea`). |
+| Fecha (`Date`) | Fecha | Sí | No | 2026-09-15 | Fecha programada del evento. |
+| Hora (`Time`) | Texto (10) | Sí | No | 14:30 | Hora en formato HH:MM. |
+| Descripción (`Description`) | Texto (1000) | No | No | Ejercicios articulatorios con pictogramas | Descripción detallada del evento. |
+| Alumno (`StudentId`) | Referencia (UUID) | No | No | — | Alumno asignado (FK a `PersonsWithDisability`, OnDelete: Restrict; nullable para eventos grupales). |
+| Nombre del alumno (`StudentName`) | Texto (200) | No | No | Sofía Martínez | Nombre desnormalizado para visualización rápida. |
+| Profesional creador (`CreatedByProfessionalId`) | Referencia (UUID) | Sí | No | — | Profesional que organizó el evento (FK a `Professionals`, OnDelete: Cascade). |
+| Alcance (`TargetScope`) | Texto (20) | Sí | No | single | Ámbito de destinatarios (`single` para alumno particular, `all` para todo el grupo). |
+| Activo (`IsActive`) | Booleano | Sí | No | true | Soft-delete. En false: evento cancelado o archivado. |
+| Fecha de creación (`CreatedAt`) | Fecha/hora UTC | Sí | No | 2026-09-01 09:00 | Momento de creación. |
+| Fecha de actualización (`UpdatedAt`) | Fecha/hora UTC | No | No | — | Última edición del evento. |
 
 ---
 
@@ -633,9 +706,9 @@ Rastro de auditoría para accesos a datos sensibles. Generado por `ResourceAutho
 
 ## 12. Soporte y Ayuda
 
-> **Estado:** Planificado — estas entidades **no están en el DbContext ni tienen migraciones**. Se documentan como diseño para implementación futura (HU-13).
+> **Estado:** Diseño conceptual post-MVP — estas entidades **no están en el DbContext ni en la base de datos física actual de PostgreSQL 17**. Se documentan como diseño de arquitectura para fases posteriores (HU-13).
 
-### Entrada de FAQ
+### Entrada de FAQ *(Diseño conceptual post-MVP — no implementado en DB física actual)*
 Pregunta frecuente del centro de ayuda, gestionada por el administrador.
 
 | Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
@@ -648,7 +721,7 @@ Pregunta frecuente del centro de ayuda, gestionada por el administrador.
 | Activo | Booleano | Sí | No | true | Soft-delete. En false: elemento de FAQ desactivado, no visible en la app. |
 | Fecha de creación | Fecha/hora | Sí | No | — | Cuándo se creó |
 
-### Ticket de Soporte
+### Ticket de Soporte *(Diseño conceptual post-MVP — no implementado en DB física actual)*
 Reporte de problema o consulta creado por un usuario.
 
 | Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
@@ -665,7 +738,7 @@ Reporte de problema o consulta creado por un usuario.
 | Fecha de creación | Fecha/hora | Sí | No | — | Cuándo se creó |
 | Fecha de actualización | Fecha/hora | Sí | No | — | Última modificación |
 
-### Respuesta de Ticket
+### Respuesta de Ticket *(Diseño conceptual post-MVP — no implementado en DB física actual)*
 Respuesta del administrador a un ticket de soporte.
 
 | Campo | Tipo | Obligatorio | Único | Ejemplo | Descripción |
@@ -682,44 +755,53 @@ Respuesta del administrador a un ticket de soporte.
 
 | # | Entidad (`DbSet`) | Área | Relaciones principales |
 |---|-------------------|------|------------------------|
-| 1 | `DisabilityType` | Catálogo | → Persona |
-| 2 | `AutonomyLevel` | Catálogo | → Persona |
+| 1 | `DisabilityType` | Catálogo | → Persona con Discapacidad |
+| 2 | `AutonomyLevel` | Catálogo | → Persona con Discapacidad |
 | 3 | `ActivityCategory` | Catálogo | → Actividad |
 | 4 | `SkillArea` | Catálogo | → PerfilHabilidades, Actividad, Roadmap |
 | 5 | `ActivityTemplateType` | Catálogo | → ContenidoActividad |
-| 6 | `LoginMethod` | Catálogo | → Persona |
+| 6 | `LoginMethod` | Catálogo | → Persona con Discapacidad (PIN, Asistido) |
 | 7 | `ReportType` | Catálogo | → Reporte |
-| 8 | `User` | Auth | → Professional / PersonWithDisability / FamilyRepresentative (1:1) |
-| 9 | `RefreshToken` | Auth | → User |
-| 10 | `TrustedDevice` | Auth | → User |
-| 11 | `Professional` | Perfiles | → Instituciones, Personas, Actividades |
-| 12 | `ProfessionalStatusHistory` | Perfiles | → Professional |
-| 13 | `PersonWithDisability` | Perfiles | → Profesionales, Familiares, Roadmap |
-| 14 | `FamilyRepresentative` | Perfiles | → Personas |
-| 15 | `FamilyStatusHistory` | Perfiles | → FamilyRepresentative |
-| 16 | `EducationalInstitution` | Instituciones | → Profesionales, Admins |
-| 17 | `AdminInstitution` | Instituciones | Admin → Institución |
-| 18 | `ProfessionalInstitution` | Instituciones | Professional → Institución |
-| 19 | `ProfessionalPerson` | Relaciones | Professional → PersonWithDisability |
-| 20 | `PersonRepresentative` | Relaciones | PersonWithDisability → FamilyRepresentative |
-| 21 | `PersonRepresentativeHistory` | Relaciones | → PersonRepresentative |
-| 22 | `PersonSkillProfile` | Relaciones | PersonWithDisability → SkillArea |
-| 23 | `Invitation` | Invitaciones | Professional → FamilyRepresentative |
-| 24 | `Activity` | Actividades | Professional, Category, SkillArea |
-| 25 | `ActivityContent` | Actividades | Activity (1:1), TemplateType |
-| 26 | `ActivityEmbedding` | Actividades | Activity (1:1) — búsqueda semántica |
-| 27 | `PersonRoadmap` | Plan de Trabajo | PersonWithDisability (1:1), Professional |
-| 28 | `PersonRoadmapArea` | Plan de Trabajo | PersonRoadmap, SkillArea |
-| 29 | `PersonRoadmapActivity` | Plan de Trabajo | PersonRoadmapArea, Activity |
-| 30 | `ActivityAssignment` | Ejecución | Activity, PersonWithDisability, Professional |
-| 31 | `ActivityResponse` | Ejecución | → ActivityAssignment |
-| 32 | `ActivityResult` | Ejecución | → PersonRoadmapActivity |
-| 33 | `AdaptiveEngineConfig` | MDA | PersonRoadmapActivity (1:1) |
-| 34 | `AdaptiveAdjustmentLog` | MDA | PersonRoadmapActivity, ActivityResponse |
-| 35 | `Diagnosis` | Clínico | PersonWithDisability, Professional |
-| 36 | `Report` | Reportes | PersonWithDisability, Professional, ReportType |
-| 37 | `Message` | Comunicación | User (sender/receiver), PersonWithDisability |
-| 38 | `AccessAudit` | Auditoría | User, PersonWithDisability |
-| — | ~~EntradaFAQ~~ | Soporte *(planificado)* | No implementado — HU-13 |
-| — | ~~TicketSoporte~~ | Soporte *(planificado)* | No implementado — HU-13 |
-| — | ~~RespuestaTicket~~ | Soporte *(planificado)* | No implementado — HU-13 |
+| 8 | `ActivityAssignmentStatus` | Catálogo | → Asignación de Actividad |
+| 9 | `JobType` | Catálogo | → BackgroundJob |
+| 10 | `BackgroundJobStatus` | Catálogo | → BackgroundJob |
+| 11 | `User` | Auth / Identity | → Professional / PersonWithDisability / FamilyRepresentative (1:1) |
+| 12 | `RefreshToken` | Auth | → User (JWT rotativo) |
+| 13 | `PasswordResetToken` | Auth | → User (Hash SHA-256 para recuperación) |
+| 14 | `TrustedDevice` | Auth | → User (Login asistido en dispositivo autorizado) |
+| 15 | `Professional` | Perfiles | → Instituciones, Personas, Actividades, Aulas |
+| 16 | `ProfessionalStatusHistory` | Perfiles | → Professional (Pending, Approved, Rejected) |
+| 17 | `PersonWithDisability` | Perfiles | → Profesionales, Familiares, Roadmap, Aulas |
+| 18 | `FamilyRepresentative` | Perfiles | → Personas con Discapacidad |
+| 19 | `FamilyStatusHistory` | Perfiles | → FamilyRepresentative |
+| 20 | `EducationalInstitution` | Instituciones | → Profesionales, Admins |
+| 21 | `AdminInstitution` | Instituciones | Admin → Institución |
+| 22 | `ProfessionalInstitution` | Instituciones | Professional → Institución |
+| 23 | `Classroom` | Instituciones / Aulas | Professional → Alumnos agrupados |
+| 24 | `ProfessionalPerson` | Relaciones | Professional → PersonWithDisability (incluye ClassroomId opcional) |
+| 25 | `PersonRepresentative` | Relaciones | PersonWithDisability → FamilyRepresentative |
+| 26 | `PersonRepresentativeHistory` | Relaciones | → PersonRepresentative |
+| 27 | `PersonSkillProfile` | Relaciones | PersonWithDisability → SkillArea |
+| 28 | `Invitation` | Invitaciones | Professional → FamilyRepresentative |
+| 29 | `Activity` | Actividades | Professional, Category, SkillArea |
+| 30 | `ActivityContent` | Actividades | Activity (1:1), TemplateType |
+| 31 | `ActivityEmbedding` | Actividades / IA | Activity (1:1) — pgvector búsqueda semántica |
+| 32 | `PersonEmbedding` | Perfiles / IA | PersonWithDisability (1:1) — pgvector recomendación |
+| 33 | `PersonRoadmap` | Plan de Trabajo | PersonWithDisability (1:1), Professional |
+| 34 | `PersonRoadmapArea` | Plan de Trabajo | PersonRoadmap, SkillArea |
+| 35 | `PersonRoadmapActivity` | Plan de Trabajo | PersonRoadmapArea, Activity |
+| 36 | `ActivityAssignment` | Ejecución | Activity, PersonWithDisability, Professional |
+| 37 | `ActivityResponse` | Ejecución | → ActivityAssignment |
+| 38 | `ActivityResult` | Ejecución | → PersonRoadmapActivity |
+| 39 | `ActivitySession` | Ejecución / Analítica | Student, Professional, Activity (métrica GAS y KPIs) |
+| 40 | `AdaptiveEngineConfig` | MDA | PersonRoadmapActivity (1:1) |
+| 41 | `AdaptiveAdjustmentLog` | MDA | PersonRoadmapActivity, ActivityResponse |
+| 42 | `Diagnosis` | Clínico | PersonWithDisability, Professional |
+| 43 | `Report` | Reportes | PersonWithDisability, Professional, ReportType |
+| 44 | `Message` | Comunicación | User (sender/receiver), PersonWithDisability |
+| 45 | `CalendarEvent` | Agenda / Calendario | Professional, PersonWithDisability (turnos y clases) |
+| 46 | `AccessAudit` | Auditoría | User, PersonWithDisability (HU-IN-172) |
+| 47 | `BackgroundJob` | Infraestructura | JobType, BackgroundJobStatus (procesamiento asíncrono) |
+| — | ~~EntradaFAQ~~ | Soporte *(post-MVP)* | No implementado en DB física actual — diseño conceptual |
+| — | ~~TicketSoporte~~ | Soporte *(post-MVP)* | No implementado en DB física actual — diseño conceptual |
+| — | ~~RespuestaTicket~~ | Soporte *(post-MVP)* | No implementado en DB física actual — diseño conceptual |

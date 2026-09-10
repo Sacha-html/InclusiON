@@ -128,7 +128,7 @@
 | IN | Historia | Estado | Notas |
 |----|----------|--------|-------|
 | IN-65 | Login estándar (email + contraseña) | 🔵 | |
-| IN-66 | Login visual estándar (identificación por nombre + contraseña) | 🔵 | |
+| IN-66 | ~~Login visual estándar (identificación por nombre + contraseña)~~ | ⛔ Deprecado | Discontinuado en favor de IN-310 (exclusivamente PIN y Asistido para PCD) |
 | IN-67 | Login por PIN (4 dígitos) | 🔵 | |
 | IN-68 | Login asistido (supervisor autoriza) | 🔵 | |
 | IN-69 | Login familiar | 🔵 | |
@@ -336,4 +336,22 @@ Features implementadas sin Story formal en Jira:
 | IN-220 | Prevención de selección y guardado de fechas pasadas en calendario | ✅ | HU-20 |
 | IN-221 | Validaciones de fecha de nacimiento en ABM Personas (120 años / no futuras) | ✅ | HU-20 |
 | IN-222 | Limpieza de interfaz en menú Familiar y retiro de botón de ayuda en AAC | ✅ | HU-20 |
+
+---
+
+## Sprint 11 — Gestión de Aulas, Registro Unificado y Autonomía de Alumnos (Agosto 2026)
+
+| IN | Historia | Estado | HU |
+|----|----------|--------|----|
+| IN-301 | Creación de aulas vacías sin alumnos obligatorios | ✅ | HU-17 |
+| IN-302 | Endpoint transaccional de registro unificado Alumno + Tutor + Aula | ✅ | HU-17 |
+| IN-303 | Rediseño de Asistente de Registro (Wizard) de 3 Pasos | ✅ | HU-17 |
+| IN-304 | Normalización de filtrado por nombre de aula para resolver encriptación dinámica | ✅ | HU-17 |
+| IN-310 | Restricción de inicio de sesión por email para rol `PersonWithDisability` | ✅ | HU-18 |
+| IN-311 | Restricción de reasignación del método Email/STANDARD en ABM de alumnos | ✅ | HU-18 |
+| IN-312 | Migración de base de datos a PIN por defecto (1234) para alumnos existentes | ✅ | HU-18 |
+| IN-313 | Actualización de UI/Copy para Login de Familiares (`userType === 'FAMILY'`) a Email | ✅ | HU-18 |
+| IN-314 | Filtrado de opción Email en dropdown "Método de Login" en ABM de Alumnos | ✅ | HU-18 |
+| IN-315 | Validación dinámica de PIN obligatorio cuando `loginMethodId == 2` (PIN) y desactivación en Asistido | ✅ | HU-18 |
+
 

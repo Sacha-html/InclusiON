@@ -17,10 +17,11 @@
 | Apellido | Texto (100) | Sí | No vacío |
 | DNI | Texto (20) | No | Único si se ingresa |
 | Fecha de nacimiento | Fecha | Sí | Debe ser pasada |
-| Email (para cuenta) | Texto (255) | No | Formato válido; único en `User` si se ingresa |
+| Método de login | Referencia | Sí | Catálogo `LoginMethod`: `PIN` (autónomo) o `Asistido` (supervisado) |
+| PIN de acceso | Numérico (4) | Condicional | Obligatorio si el método es `PIN` (exactamente 4 dígitos, IN-315) |
+| Aula (`Classroom`) | Referencia | No | Debe pertenecer a la institución del profesional (IN-303) |
 | Tipo de discapacidad | Referencia | Sí | Debe existir y estar activo en el catálogo |
-| Nivel de autonomía | Referencia | No | Debe existir y estar activo |
-| Método de login | Referencia | No | Debe existir y estar activo; coherente con nivel de autonomía |
+| Nivel de autonomía | Referencia | No | Catálogo `AutonomyLevel` |
 | Color de avatar | Texto (10) | No | Hex válido (`#RRGGBB`) |
 | **Perfil funcional** | | | |
 | Nivel de atención | Entero (1-5) | No | Entre 1 y 5 |
@@ -39,14 +40,15 @@
 | Sensibilidad al sonido | Booleano | No | — |
 
 **Validaciones de integridad:**
-- El email (si se ingresa) no puede existir ya en `User`.
+- Los alumnos **no poseen email propio** (IN-310: protección de privacidad e identidad infantil).
+- Si el método es PIN, el PIN de 4 dígitos numéricos es obligatorio (`PinHash`).
+- Si el método es Asistido, el acceso se realiza bajo supervisión docente autorizada.
 - El DNI (si se ingresa) no puede existir en otro `PersonWithDisability`.
-- El método de login debe ser coherente con el nivel de autonomía seleccionado.
 
 **Resultado:**
 - Se crea `PersonWithDisability` con `Activo = true`.
-- Si se ingresó email, se crea `User` con `MustChangePassword = true`.
-- Se vincula automáticamente el Profesional creador con la persona en `ProfessionalPerson` (como profesional principal).
+- Se crea la cuenta `User` asociada con rol `Person` adaptada a su método de autenticación.
+- Se vincula automáticamente el Profesional creador con la persona en `ProfessionalPerson` (asociando `ClassroomId` si se especificó aula).
 
 ---
 

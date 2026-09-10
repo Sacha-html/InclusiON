@@ -15,7 +15,7 @@
 | A-02 | **Admin Global** | Primario | Gestiona el sistema completo: instituciones, catálogos, cuentas, reportes. Sin restricción de institución. | Email + contraseña |
 | A-03 | **Admin Institucional** | Primario | Igual que Admin Global pero limitado a las instituciones que tiene asignadas. | Email + contraseña |
 | A-04 | **Profesional** | Primario | Docente, terapeuta o psicólogo. Crea actividades, gestiona roadmaps y hace seguimiento de personas asignadas. | Email + contraseña |
-| A-05 | **Persona** | Primario | Persona con discapacidad. Ejecuta actividades de su roadmap. Interfaz AAC adaptada. | PIN / login asistido / login visual |
+| A-05 | **Persona** | Primario | Persona con discapacidad. Ejecuta actividades de su roadmap. Interfaz AAC adaptada. | PIN / login asistido |
 | A-06 | **Familiar** | Primario | Representante o tutor. Acceso de solo lectura al progreso de su persona vinculada. | Email + contraseña (por invitación) |
 | A-07 | **Sistema** | Secundario | Componente automatizado que ejecuta acciones sin intervención humana (ajuste adaptativo, desbloqueos, auditoría). | — |
 
