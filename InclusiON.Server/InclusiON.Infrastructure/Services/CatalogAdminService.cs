@@ -28,6 +28,20 @@ namespace InclusiON.Infrastructure.Services
             return await _context.Set<TEntity>().AnyAsync(predicate, cancellationToken);
         }
 
+        public async Task<ApiResponse<List<TResponse>>> GetAllAsync<TEntity, TResponse>(
+            Func<TEntity, TResponse> toResponse,
+            CancellationToken cancellationToken)
+            where TEntity : class
+            where TResponse : class
+        {
+            var entities = await _context.Set<TEntity>()
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            return ApiResponse<List<TResponse>>.SuccessResult(
+                entities.Select(toResponse).ToList());
+        }
+
         public async Task<ApiResponse<TResponse>> CreateAsync<TEntity, TResponse>(
             Expression<Func<TEntity, bool>> duplicateCheck,
             Func<TEntity> createEntity,

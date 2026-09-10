@@ -20,6 +20,15 @@ namespace InclusiON.Application.Interfaces.Infrastructure
             where TEntity : class;
 
         /// <summary>
+        /// Obtiene todos los registros de un catálogo, incluidos los inactivos.
+        /// </summary>
+        Task<ApiResponse<List<TResponse>>> GetAllAsync<TEntity, TResponse>(
+            Func<TEntity, TResponse> toResponse,
+            CancellationToken cancellationToken)
+            where TEntity : class
+            where TResponse : class;
+
+        /// <summary>
         /// Crea una nueva entidad de catálogo verificando duplicados.
         /// </summary>
         Task<ApiResponse<TResponse>> CreateAsync<TEntity, TResponse>(

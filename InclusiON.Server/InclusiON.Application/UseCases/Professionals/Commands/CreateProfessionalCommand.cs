@@ -9,6 +9,7 @@ namespace InclusiON.Application.UseCases.Professionals.Commands
         string? Specialty = null,
         string? LicenseNumber = null,
         DateTime? BirthDate = null,
-        List<int>? InstitutionIds = null
+        List<int>? InstitutionIds = null,
+        int? SpecialtyId = null
     );
 }

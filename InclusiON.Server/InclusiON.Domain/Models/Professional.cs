@@ -42,7 +42,10 @@ namespace InclusiON.Domain.Models
         /// <summary>
         /// Especialidad del profesional (ej: Educacion Especial, Psicologia, Terapia Ocupacional).
         /// </summary>
+        /// <summary>Legacy display value retained for unmapped historical rows.</summary>
         public string? Specialty { get; set; }
+        public int? SpecialtyId { get; set; }
+        public virtual Specialty? SpecialtyCatalog { get; set; }
 
         /// <summary>
         /// Numero de licencia o matricula profesional.

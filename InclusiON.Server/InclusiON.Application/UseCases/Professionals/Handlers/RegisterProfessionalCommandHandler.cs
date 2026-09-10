@@ -4,6 +4,7 @@ using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Application.UseCases.Professionals.Commands;
 using InclusiON.Application.UseCases.Professionals.Queries;
 using InclusiON.Domain.Enums;
@@ -28,6 +29,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RegisterProfessionalCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IReadOnlyRepository<Specialty>? _specialties;
 
         public RegisterProfessionalCommandHandler(
             IProfessionalsRepository repository,
@@ -35,7 +37,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             ILogger<RegisterProfessionalCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IReadOnlyRepository<Specialty>? specialties = null)
         {
             _repository = repository;
             _identityService = identityService;
@@ -43,12 +46,15 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _specialties = specialties;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(RegisterProfessionalCommand command, CancellationToken cancellationToken)
         {
             try
             {
+                if (command.SpecialtyId.HasValue && _specialties is not null && (await _specialties.GetByIdAsync(command.SpecialtyId.Value, cancellationToken))?.IsActive != true)
+                    return ApiResponse<ProfessionalResponse>.ErrorResult(ErrorCode.ValidationFailed, "La especialidad seleccionada no está activa.");
                 if (!string.IsNullOrWhiteSpace(command.DocumentNumber))
                 {
                     var documentExists = await _repository.ExistsDocumentAsync(command.DocumentNumber, null, cancellationToken);
@@ -104,6 +110,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     DocumentNumber = command.DocumentNumber,
                     Phone = command.Phone,
                     Specialty = command.Specialty,
+                    SpecialtyId = command.SpecialtyId,
                     LicenseNumber = command.LicenseNumber,
                     BirthDate = command.BirthDate,
                     Email = command.Email,
