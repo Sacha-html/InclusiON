@@ -15,7 +15,7 @@
 
   // Tipografía
   --a11y-font-family: 'Montserrat', Arial, sans-serif;
-  --a11y-font-size: 16px;
+  --a11y-font-size: 18px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
   --a11y-word-spacing: 0.05em;
@@ -291,7 +291,7 @@
 [data-color-mode="light"][data-profile="high-contrast"],
 :root:not([data-color-mode="dark"])[data-theme="high-contrast"] {
   --a11y-font-family: 'Montserrat', Arial, sans-serif;
-  --a11y-font-size: 18px;
+  --a11y-font-size: 20px;
   --a11y-line-height: 1.6;
   --a11y-letter-spacing: 0.02em;
   --a11y-word-spacing: 0.08em;
@@ -430,7 +430,7 @@
 [data-color-mode="light"][data-profile="dyslexia"],
 :root:not([data-color-mode="dark"])[data-theme="dyslexia"] {
   --a11y-font-family: 'Lexend', Arial, sans-serif;
-  --a11y-font-size: 18px;
+  --a11y-font-size: 20px;
   --a11y-line-height: 1.8;
   --a11y-letter-spacing: 0.12em;
   --a11y-word-spacing: 0.16em;
@@ -569,7 +569,7 @@
 [data-color-mode="light"][data-profile="low-vision"],
 :root:not([data-color-mode="dark"])[data-theme="low-vision"] {
   --a11y-font-family: 'Montserrat', Arial, sans-serif;
-  --a11y-font-size: 20px;
+  --a11y-font-size: 22px;
   --a11y-line-height: 1.6;
   --a11y-letter-spacing: 0.03em;
   --a11y-word-spacing: 0.1em;
@@ -708,7 +708,7 @@
 [data-color-mode="light"][data-profile="deuteranopia"],
 :root:not([data-color-mode="dark"])[data-theme="deuteranopia"] {
   --a11y-font-family: 'Montserrat', Arial, sans-serif;
-  --a11y-font-size: 16px;
+  --a11y-font-size: 18px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
   --a11y-word-spacing: 0.05em;
@@ -848,7 +848,7 @@
 [data-color-mode="light"][data-profile="protanopia"],
 :root:not([data-color-mode="dark"])[data-theme="protanopia"] {
   --a11y-font-family: 'Montserrat', Arial, sans-serif;
-  --a11y-font-size: 16px;
+  --a11y-font-size: 18px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
   --a11y-word-spacing: 0.05em;
@@ -988,7 +988,7 @@
 [data-color-mode="light"][data-profile="tritanopia"],
 :root:not([data-color-mode="dark"])[data-theme="tritanopia"] {
   --a11y-font-family: 'Montserrat', Arial, sans-serif;
-  --a11y-font-size: 16px;
+  --a11y-font-size: 18px;
   --a11y-line-height: 1.5;
   --a11y-letter-spacing: 0.01em;
   --a11y-word-spacing: 0.05em;
@@ -1384,6 +1384,7 @@ a {
 
 .btn {
   font-family: var(--a11y-font-family) !important;
+  font-size: var(--a11y-font-size-override, var(--a11y-font-size)) !important;
   border-width: 2px !important;
   min-height: 44px; // WCAG 2.5.5 - touch target mínimo 44px
 }
@@ -1391,6 +1392,7 @@ a {
 .btn.small,
 .btn-sm {
   min-height: 44px; // WCAG 2.5.5 - aplica también a botones pequeños
+  font-size: calc(var(--a11y-font-size-override, var(--a11y-font-size)) * 0.9) !important;
 }
 
 .btn-primary {
@@ -1529,7 +1531,7 @@ a {
 .form-control,
 .form-select {
   font-family: var(--a11y-font-family) !important;
-  font-size: var(--a11y-font-size) !important;
+  font-size: var(--a11y-font-size-override, var(--a11y-font-size)) !important;
   background-color: var(--a11y-bg) !important;
   color: var(--a11y-text) !important;
   border: 2px solid var(--a11y-border) !important;

@@ -146,10 +146,10 @@ export class AccessibilityService {
   readonly themes: ThemeOption[] = this.profiles;
 
   readonly fontSizes: FontSizeOption[] = [
-    { id: 'small', name: 'Pequeño', value: '14px' },
-    { id: 'medium', name: 'Mediano', value: '16px' },
-    { id: 'large', name: 'Grande', value: '18px' },
-    { id: 'x-large', name: 'Muy Grande', value: '20px' }
+    { id: 'small', name: 'Pequeño', value: '16px' },
+    { id: 'medium', name: 'Mediano', value: '18px' },
+    { id: 'large', name: 'Grande', value: '20px' },
+    { id: 'x-large', name: 'Muy Grande', value: '22px' }
   ];
 
   readonly lineSpacings: SpacingOption[] = [
