@@ -24,7 +24,7 @@ Definición de términos utilizados en la documentación y en la plataforma.
 | **Perfil de habilidades** | Conjunto de áreas de habilidad asignadas a una persona. Define qué áreas se van a trabajar y aparecen en el roadmap y el radar chart. |
 | **Perfil funcional** | Datos que describen las capacidades y necesidades de la persona: nivel de atención, comunicación, motricidad, estilo de aprendizaje, uso de CAA, terapias adicionales, etc. |
 | **Diagnóstico funcional** | Evaluación formal registrada por un profesional que documenta el punto de partida de la persona: capacidades, desafíos, apoyos requeridos, objetivos pedagógicos y estrategias recomendadas. |
-| **Nivel de autonomía** | Grado de independencia de la persona para interactuar con la plataforma. Determina el método de login: Alta (login visual estándar: identificación por nombre + contraseña), Media (PIN), Baja (login asistido con supervisor). |
+| **Nivel de autonomía** | Grado de independencia de la persona para interactuar con la plataforma. Determina el método adaptativo de login para personas con discapacidad: **PIN** numérico (mayor autonomía) o **Asistido** con supervisor (apoyo/baja autonomía). (Nota: el login visual estándar por nombre+contraseña fue discontinuado por IN-310). |
 | **Plan de trabajo** | Conjunto de actividades organizadas secuencialmente por área de habilidad para una persona. Sinónimo de roadmap. |
 | **Reporte de progreso** | Documento formal generado por el profesional que describe los avances de la persona durante un período determinado. Exportable a PDF y visible para la familia. |
 
@@ -75,8 +75,9 @@ Definición de términos utilizados en la documentación y en la plataforma.
 | **Pictograma** | Imagen esquemática que representa un concepto, objeto o acción. InclusiON usa pictogramas de ARASAAC para las actividades. |
 | **ARASAAC** | Portal Aragonés de la Comunicación Aumentativa y Alternativa. Proporciona pictogramas de uso libre que InclusiON integra en las actividades educativas. |
 | **WCAG** | Web Content Accessibility Guidelines. Pautas de accesibilidad web del W3C. La plataforma cumple con nivel AA. |
-| **Login visual estándar** | Método de autenticación para personas con alta autonomía. La persona se identifica seleccionando su nombre de una lista visual (sin ingresar email), y luego ingresa su contraseña alfanumérica. Endpoint: `/Auth/login/visual-standard`. |
-| **Login asistido** | Método de login para personas con baja autonomía. Un profesional con permiso de supervisión autoriza el acceso. |
+| **Login PIN** | Método de autenticación adaptativo para personas con discapacidad mediante teclado visual numérico simplificado de 4 dígitos. |
+| **Login asistido** | Método de autenticación adaptativo para personas con baja autonomía donde un profesional o supervisor autorizado valida el acceso. |
+| **Login visual estándar** | *(Discontinuado / Deprecado en IN-310)* Antiguo método por nombre y contraseña alfanumérica, hoy reemplazado exclusivamente por PIN y Asistido. |
 
 ---
 

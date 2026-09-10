@@ -15,13 +15,14 @@
 |-------|------|:---------:|--------------|
 | Profesional | Referencia | Sí | Debe existir, estar activo y tener `Status = Approved` |
 | Persona con discapacidad | Referencia | Sí | Debe existir y estar activa |
+| Aula (`ClassroomId`) | Referencia | No | Debe pertenecer a la misma institución educativa |
 | Es profesional principal | Booleano | Sí | — |
 | Puede supervisar login | Booleano | Sí | — |
 
 **Validaciones de integridad:**
 - No puede existir ya una asignación activa entre el mismo profesional y la misma persona.
 - Si `EsPrincipal = true`, la asignación principal anterior se actualiza a `EsPrincipal = false`.
-- El profesional y la persona deben pertenecer a la misma institución.
+- El profesional, el aula y la persona deben pertenecer a la misma institución.
 
 **Resultado:** Se crea registro en `ProfessionalPerson` con `Activo = true`.
 

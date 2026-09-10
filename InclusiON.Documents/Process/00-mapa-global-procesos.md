@@ -216,7 +216,7 @@ Estos documentos describen capacidades que soportan todos los procesos:
 | Referencia | Descripción | Ubicación |
 |------------|-------------|-----------|
 | Accesibilidad | 7 perfiles × 2 modos = 14 combinaciones visuales | `References/REF-accesibilidad.md` |
-| Autenticación | 5 métodos de login + JWT + refresh tokens | `References/REF-autenticacion.md` |
+| Autenticación | Métodos de login adaptativo (PIN y Asistido) + JWT + refresh tokens | `References/REF-autenticacion.md` |
 | Gestión de Usuarios | Administración centralizada de cuentas | `Process/17-gestion-usuarios.md` |
 | Onboarding | Primer ingreso y configuración por rol | `Process/18-onboarding.md` |
 | Soporte | Centro de ayuda, FAQ y tickets | `Process/19-soporte.md` |

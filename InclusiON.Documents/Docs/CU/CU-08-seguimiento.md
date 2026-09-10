@@ -56,28 +56,35 @@
 
 ---
 
-## CU-34: Consultar Mi Aula
+## CU-34: Consultar y gestionar Mi Aula (`Classrooms`)
 
 | Campo | Detalle |
 |-------|---------|
 | **Actor principal** | Profesional |
-| **Actores secundarios** | — |
-| **HU de referencia** | HU-07 |
+| **Actores secundarios** | Sistema |
+| **HU de referencia** | HU-07, HU-17 (IN-301, IN-304) |
 | **Prioridad** | Alta |
 
 **Precondiciones**
-- El Profesional está autenticado y tiene al menos una persona asignada.
+- El Profesional está autenticado.
 
 **Flujo principal**
-1. El Profesional accede a la sección "Mi Aula" desde el dashboard o el menú lateral.
-2. El sistema muestra una card visual por cada persona asignada: avatar coloreado, nombre, estado del roadmap (último acceso, actividades completadas).
-3. El Profesional selecciona una card para acceder al perfil completo de esa persona.
+1. El Profesional accede a la sección "Mi Aula" (`/pro/aulas`).
+2. El sistema lista las aulas creadas por el profesional (`GetClassroomsByProfessionalQuery`).
+3. Para cada aula, muestra los alumnos asignados con avatar, nombre, nivel de autonomía y estado del roadmap.
+4. El Profesional puede:
+   - Crear una nueva aula indicando su nombre (`CreateClassroomCommand` / IN-301). El aula se crea vacía sin obligar alumnos.
+   - Modificar la denominación de un aula existente (`UpdateClassroomCommand`).
+   - Reasignar o mover un alumno a otra de sus aulas (`MovePersonToClassroomCommand`).
+   - Dar de baja un aula desocupada (`DeactivateClassroomCommand`).
+5. Al seleccionar la card de un alumno, el sistema redirige a su perfil clínico/pedagógico detallado.
 
 **Flujos alternativos**
-- **Sin personas asignadas:** El sistema muestra estado vacío "Aún no tenés personas asignadas."
+- **Sin aulas creadas:** El sistema ofrece crear la primera aula o muestra alumnos sin aula asignada.
+- **Intento de desactivar aula con alumnos:** El sistema exige reasignar o desvincular a los alumnos previamente.
 
 **Postcondiciones**
-- El Profesional accede al perfil completo de la persona seleccionada.
+- La estructura de aulas y las asignaciones alumno-profesional persisten en la base de datos relacional.
 
 ---
 
@@ -135,3 +142,40 @@
 
 **Postcondiciones**
 - El Profesional puede tomar decisiones pedagógicas basadas en el rendimiento real.
+
+---
+
+## CU-37: Consultar métricas analíticas y KPIs pedagógicos (GAS)
+
+| Campo | Detalle |
+|-------|---------|
+| **Actor principal** | Profesional |
+| **Actores secundarios** | Sistema |
+| **HU de referencia** | HU-07, HU-19 |
+| **Prioridad** | Alta |
+
+**Precondiciones**
+- El Profesional está autenticado.
+- Existen sesiones analíticas registradas en la base de datos (`ActivitySession`).
+
+**Flujo principal**
+1. El Profesional ingresa a la sección de Analítica (`/pro/analytics`).
+2. El sistema consume el endpoint `GET /api/analytics/professional`.
+3. El Profesional puede aplicar filtros:
+   - Aula específica (`classroomId` / `aulaId`).
+   - Rango de fechas (`desde` y `hasta`).
+4. El sistema consolida y renderiza los siguientes indicadores:
+   - **Puntuación GAS (*Goal Attainment Scaling*):** Promedio en escala continua [-2, +2] que refleja si los objetivos pedagógicos están por debajo (-2, -1), en el nivel esperado (0) o superados (+1, +2).
+   - **Tasa de éxito promedio (`SuccessRate`):** Porcentaje global y desglose por área de habilidad.
+   - **Tasa de error promedio (`ErrorCount`):** Cantidad de fallas por sesión (rango 0 a 6).
+   - **Tiempo dedicado (`TimeSpentSeconds`):** Duración media por sesión interactiva.
+   - **Distribución de competencias:** Gráfico de rendimiento comparado por áreas de habilidad.
+   - **Detección de alertas:** Indicadores de frustración o estancamiento para actividades con alta tasa de fallas repetidas.
+
+**Flujos alternativos**
+- **Sin registros en el rango seleccionado:** Muestra estado informativo "No se registraron sesiones en el período indicado" invitando a ampliar el filtro temporal.
+- **Profesional sin alumnos vinculados:** Muestra panel vacío con invitación a matricular alumnos o crear aulas.
+
+**Postcondiciones**
+- El Profesional dispone de métricas cuantitativas y estandarizadas (GAS) para seguimiento clínico y emisión de reportes.
+

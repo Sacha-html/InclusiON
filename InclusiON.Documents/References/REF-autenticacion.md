@@ -4,11 +4,11 @@
 
 ## Descripción
 
-Sistema de autenticación multi-método adaptado a diferentes niveles de autonomía. Cada tipo de usuario accede a la plataforma con un método de login acorde a sus capacidades. La autenticación se basa en JWT con refresh tokens. Todo el flujo está completamente implementado.
+Sistema de autenticación adaptado a diferentes niveles de autonomía. Cada tipo de usuario accede a la plataforma con un método acorde a sus capacidades. Para personas con discapacidad el acceso se consolidó en **2 métodos adaptativos**: **PIN numérico** y **Login Asistido**. La autenticación se basa en JWT con refresh tokens. Todo el flujo está completamente implementado.
 
 ## Participantes
 
-- **Persona con Discapacidad** — Login visual (PIN, estándar o asistido) desde `/login`
+- **Persona con Discapacidad** — Login visual adaptativo (**PIN** o **Asistido**) desde `/login`
 - **Profesional** — Login con email y contraseña desde `/admin-login`
 - **Familiar** — Login visual con contraseña familiar desde `/login`
 - **Admin** — Login con email y contraseña desde `/admin-login`
@@ -18,14 +18,14 @@ Sistema de autenticación multi-método adaptado a diferentes niveles de autonom
 | Método | Endpoint | Autonomía | Descripción |
 |--------|----------|-----------|-------------|
 | Estándar | `POST /api/auth/login` | Alta | Email + contraseña (admins y profesionales) |
-| Visual Estándar | `POST /api/auth/login/visual-standard` | Alta | Identificación por nombre + contraseña visual |
-| PIN | `POST /api/auth/login/pin` | Media | Identificación por nombre + PIN 4 dígitos |
-| Asistido | `POST /api/auth/login/assisted` | Baja | Supervisor autoriza el acceso |
-| Familiar | `POST /api/auth/login/family` | N/A | Identificación por nombre + contraseña |
+| PIN | `POST /api/auth/login/pin` | Media | Identificación por nombre + PIN 4 dígitos (Persona con Discapacidad) |
+| Asistido | `POST /api/auth/login/assisted` | Baja | Supervisor autoriza el acceso (Persona con Discapacidad) |
+| Familiar | `POST /api/auth/login/family` | N/A | Identificación por nombre + contraseña familiar |
 | Identificación | `POST /api/auth/identify` | Todos | Paso previo: busca usuario por nombre y devuelve método de login configurado |
 | Refresh | `POST /api/auth/refresh` | Todos | Renueva JWT antes de expiración |
 | Cambiar contraseña | `PUT /api/auth/change-password` | Todos | Cambio obligatorio o voluntario |
 | Registro | `POST /api/auth/register` | — | Registro vía invitación |
+| *Visual Estándar* | `POST /api/auth/login/visual-standard` | — | *Descartado/Deprecado:* Consolidado en PIN y Asistido para reducir carga cognitiva |
 
 ## Pasos del proceso
 
@@ -39,10 +39,10 @@ Para personas y familiares: escriben su nombre y el sistema los identifica, most
 
 ### 3. Autenticación según método ✅ Implementado
 Dependiendo del método configurado, se muestra la interfaz correspondiente:
-- **Standard:** Campo de contraseña visual
-- **PIN:** Pad numérico de 4 dígitos
-- **Assisted:** Pantalla de supervisor (profesional con CanSuperviseLogin autoriza)
+- **PIN:** Pad numérico accesible de 4 dígitos (Persona con Discapacidad)
+- **Assisted:** Pantalla de supervisor donde profesional o familiar autoriza el acceso (Persona con Discapacidad)
 - **Family:** Campo de contraseña del familiar vinculado
+- **Standard:** Email y contraseña desde portal administrativo (/admin-login)
 
 ### 4. Generación de JWT ✅ Implementado
 Al autenticarse correctamente, se genera un JWT con claims y un refresh token.

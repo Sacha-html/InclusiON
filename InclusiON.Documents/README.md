@@ -14,7 +14,7 @@ La plataforma permite:
 - **Monitorear el progreso** con dashboards, gráficos y reportes
 - **Ajustar automáticamente la dificultad** según el rendimiento del estudiante
 - Facilitar la **comunicación** entre profesionales y familias
-- Garantizar la **accesibilidad** con 7 perfiles visuales y 4 métodos de login adaptativo
+- Garantizar la **accesibilidad** con 7 perfiles visuales y métodos de login adaptativo (PIN y Asistido)
 
 ---
 
@@ -74,7 +74,7 @@ InclusiON.Documents/
 │
 ├── References/                  ← Documentación de capacidades transversales
 │   ├── REF-accesibilidad.md         7 perfiles visuales × 2 modos = 14 combinaciones
-│   └── REF-autenticacion.md         5 métodos de login + gestión de sesiones
+│   └── REF-autenticacion.md         Métodos de login adaptativo (PIN y Asistido) + gestión de sesiones
 │
 ├── Features/                    ← Especificaciones técnicas detalladas
 │   ├── InclusiON_HUs_BEyFE.md      HU técnicas con endpoints y criterios
@@ -273,7 +273,7 @@ Las funcionalidades del sistema están documentadas como **historias de usuario*
 La plataforma está diseñada para ser usada por personas con diferentes tipos de discapacidad:
 
 - **7 perfiles visuales** (estándar, alto contraste, dislexia, baja visión, deuteranopía, protanopía, tritanopía) con modo claro y oscuro = **14 combinaciones**
-- **4 métodos de login** adaptados al nivel de autonomía: contraseña visual, PIN numérico, login asistido por supervisor y login familiar
+- **Métodos de login adaptativo** para estudiantes: PIN numérico y login asistido por supervisor (junto a login administrativo y familiar)
 - **4 portales diferenciados** por rol: Admin, Profesional, Familia y AAC (persona con discapacidad)
 
 Más detalle en [REF-accesibilidad.md](./References/REF-accesibilidad.md) y [REF-autenticacion.md](./References/REF-autenticacion.md).

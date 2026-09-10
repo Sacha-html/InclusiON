@@ -224,13 +224,13 @@
 - [x] Toasts con colores de accesibilidad (--a11y-success, --a11y-danger, etc.)
 
 ### Autenticación
-> Ruta: `/login/*` (visual) · `/admin-login` (admin/profesional) · `/change-password` · IN-65, IN-66, IN-67, IN-68, IN-69, IN-70, IN-71, IN-72, IN-73, IN-74
+> Ruta: `/login` (portal unificado) · `/admin-login` (admin/profesional) · `/change-password` · IN-65, IN-67, IN-68, IN-69, IN-70, IN-71, IN-72, IN-73, IN-74, IN-310, IN-313
 
 - [x] Login estándar (email + contraseña)
-- [x] Login visual estándar (identificación por nombre + contraseña)
-- [x] Login por PIN (4 dígitos)
-- [x] Login asistido (supervisor autoriza)
-- [x] Login familiar
+- [x] ~~Login visual estándar (identificación por nombre + contraseña)~~ ⚠️ Discontinuado (IN-310: solo PIN y Asistido para PCD)
+- [x] Login por PIN (4 dígitos numéricos)
+- [x] Login asistido (supervisor autoriza o dispositivo de confianza)
+- [x] Login familiar (solapa Familiar solicita email + contraseña - IN-313)
 - [x] Identificación de usuario por nombre
 - [x] Refresh de token automático
 - [x] Cambio de contraseña obligatorio
@@ -338,6 +338,35 @@
 > IN-98
 
 - [ ] Consulta de actividad reciente del usuario
+
+## Gestión de Aulas y Registro Unificado
+> Ruta: `/pro/aulas` · `/pro/persons/new` · IN-301, IN-302, IN-303, IN-304
+
+- [x] Creación de aulas vacías sin alumnos obligatorios (`CreateClassroomCommand` / IN-301)
+- [x] Endpoint transaccional de alta unificada Alumno + Tutor + Aula (IN-302)
+- [x] Asistente de Registro (Wizard) de 3 Pasos (IN-303)
+- [x] Edición de denominación de aula (`UpdateClassroomCommand`)
+- [x] Reasignación de alumno entre aulas (`MovePersonToClassroomCommand`)
+- [x] Normalización de filtrado por nombre de aula (IN-304)
+
+## Agenda y Calendario
+> Ruta: `/pro/calendar` · IN-212, IN-217, IN-218, IN-219, IN-220
+
+- [x] Calendario mensual y semanal con turnos y eventos agendados (`CalendarEvents`)
+- [x] Creación de eventos con tipo (`Consulta`, `Tutoría`, `Clase`, `Tarea`), fecha y hora
+- [x] Prevención y validación de selección/guardado de fechas pasadas (IN-220)
+- [x] Alcance configurable: destinatario individual (`single`) o grupal (`all`)
+- [x] Segmentación de notificaciones de calendario por tipo de evento (IN-219)
+- [x] Bloqueo de rutas de calendario para rol Administrador (IN-217)
+
+## Analítica Pedagógica y KPIs (GAS)
+> Ruta: `/pro/analytics` · `AnalyticsController`
+
+- [x] Dashboard analítico de rendimiento y progreso pedagógico (`/api/analytics/professional`)
+- [x] Filtrado multidimensional por aula (`classroomId`) y rango de fechas
+- [x] Métrica Goal Attainment Scaling (GAS en escala [-2 a +2])
+- [x] Análisis de tasa de éxito, control de errores y tiempo invertido por actividad
+- [x] Identificación de estancamiento y eventos de frustración
 
 ---
 
