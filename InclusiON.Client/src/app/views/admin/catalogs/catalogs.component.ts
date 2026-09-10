@@ -15,7 +15,7 @@ import {
   FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
 } from '@coreui/angular';
 
-type CatalogType = 'disability-types' | 'autonomy-levels' | 'activity-categories' | 'skill-areas' | 'template-types' | 'login-methods';
+type CatalogType = 'disability-types' | 'specialties' | 'autonomy-levels' | 'activity-categories' | 'skill-areas' | 'template-types' | 'login-methods';
 
 interface FieldConfig {
   key: string;
@@ -36,6 +36,7 @@ interface CatalogConfig {
   create?: (v: any) => Observable<any>;
   update: (id: string, v: any) => Observable<any>;
   deactivate?: (id: string) => Observable<any>;
+  reactivate?: (id: string) => Observable<any>;
 }
 
 @Component({
@@ -91,6 +92,14 @@ export class CatalogsComponent implements OnInit {
         visible: (item: any) => item.isActive !== false,
       });
     }
+    if (this.config.reactivate) {
+      actions.push({
+        action: 'reactivate',
+        label: 'Reactivar',
+        icon: 'cilCheckCircle',
+        visible: (item: any) => item.isActive === false,
+      });
+    }
     return [
       ...this.config.columns,
       { key: '', label: 'Acciones', type: 'actions', actions },
@@ -104,9 +113,16 @@ export class CatalogsComponent implements OnInit {
   onRowAction(event: { action: string; item: any }): void {
     if (event.action === 'edit') this.openEdit(event.item);
     if (event.action === 'deactivate') this.openDeactivate(event.item);
+    if (event.action === 'reactivate') this.openReactivate(event.item);
   }
 
   private configs: Record<CatalogType, CatalogConfig> = {
+    'specialties': {
+      title: 'Especialidades', canCreate: true,
+      columns: [{ key: 'name', label: 'Nombre' }, { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: { 'true': { color: 'success', label: ActiveStatus.Activo }, 'false': { color: 'danger', label: ActiveStatus.Inactivo } } }],
+      fields: [{ key: 'name', label: 'Nombre', type: 'text', required: true }, { key: 'isActive', label: 'Activo', type: 'checkbox', default: true, editOnly: true }],
+      load: () => this.adminService.getAllSpecialties(), create: v => this.adminService.createSpecialty(v), update: (id, v) => this.adminService.updateSpecialty(id, v), deactivate: id => this.adminService.patchSpecialtyStatus(id, false), reactivate: id => this.adminService.patchSpecialtyStatus(id, true),
+    },
     'disability-types': {
       title: 'Tipos de discapacidad',
       canCreate: true,
@@ -282,7 +298,11 @@ export class CatalogsComponent implements OnInit {
   private buildForm(values?: any): void {
     const group: any = {};
     for (const field of this.config.fields) {
-      const value = values?.[field.key] ?? field.default ?? (field.type === 'checkbox' ? false : '');
+       const value = values && values[field.key] !== undefined
+         ? values[field.key]
+         : field.default !== undefined
+           ? field.default
+           : field.type === 'checkbox' ? false : '';
       group[field.key] = field.required ? [value, Validators.required] : [value];
     }
     this.form = this.fb.group(group);
@@ -322,7 +342,7 @@ export class CatalogsComponent implements OnInit {
         this.isSaving = false;
         this.toastService.success(this.editingId ? 'Actualizado' : 'Creado');
         this.closeModal();
-        this.catalogsService.clearCache();
+        if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
         this.loadData();
       },
       error: () => {
@@ -337,22 +357,30 @@ export class CatalogsComponent implements OnInit {
     this.showDeactivateModal = true;
   }
 
+  openReactivate(item: any): void {
+    this.deactivatingItem = item;
+    this.showDeactivateModal = true;
+  }
+
   cancelDeactivate(): void {
     this.showDeactivateModal = false;
     this.deactivatingItem = null;
   }
 
   confirmDeactivate(): void {
-    if (!this.deactivatingItem || !this.config.deactivate) return;
-    this.isDeactivating = true;
+     if (!this.deactivatingItem) return;
+     this.isDeactivating = true;
+     const isReactivating = this.deactivatingItem.isActive === false;
+     const statusChange = isReactivating ? this.config.reactivate : this.config.deactivate;
+     if (!statusChange) { this.isDeactivating = false; return; }
 
-    this.config.deactivate(this.deactivatingItem.id.toString()).subscribe({
+     statusChange(this.deactivatingItem.id.toString()).subscribe({
       next: () => {
         this.isDeactivating = false;
         this.showDeactivateModal = false;
         this.deactivatingItem = null;
-        this.toastService.success('Dado de baja exitosamente.');
-        this.catalogsService.clearCache();
+         this.toastService.success(isReactivating ? 'Reactivado exitosamente.' : 'Dado de baja exitosamente.');
+         if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
         this.loadData();
       },
       error: (err: any) => {

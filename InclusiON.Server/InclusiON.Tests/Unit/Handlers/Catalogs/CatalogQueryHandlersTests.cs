@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using Xunit;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Application.UseCases.Catalogs.Handlers;
@@ -47,6 +48,49 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
 
             result.Success.Should().BeTrue();
             result.Data.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetSpecialties_MapsStatusAndEncryptedId()
+        {
+            var repo = Substitute.For<IReadOnlyRepository<Specialty>>();
+            var encryption = Substitute.For<IEncryptionService>();
+            encryption.Encrypt("1").Returns("encrypted");
+            encryption.Encrypt("2").Returns("encrypted-2");
+            repo.GetAllActiveAsync(Arg.Any<CancellationToken>())
+                .Returns(new List<Specialty>
+                {
+                    new() { Id = 1, Name = "Educacion Especial", IsActive = true },
+                    new() { Id = 2, Name = "Psicologia", IsActive = false },
+                });
+
+            var result = await new GetSpecialtiesQueryHandler(repo, CreateCache(), encryption)
+                .HandleAsync(new GetSpecialtiesQuery(), default);
+
+            result.Data![0].IsActive.Should().BeTrue();
+            result.Data[0].EncryptedId.Should().Be("encrypted");
+            result.Data[1].IsActive.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task GetSpecialties_ReturnsReactivatedSpecialtyAfterCacheInvalidation()
+        {
+            var repo = Substitute.For<IReadOnlyRepository<Specialty>>();
+            var encryption = Substitute.For<IEncryptionService>();
+            encryption.Encrypt("13").Returns("pediatria");
+            var cache = CreateCache();
+            var calls = 0;
+            repo.GetAllActiveAsync(Arg.Any<CancellationToken>())
+                .Returns(_ => calls++ == 0
+                    ? new List<Specialty> { new() { Id = 13, Name = "Pediatría", IsActive = false } }
+                    : new List<Specialty> { new() { Id = 13, Name = "Pediatría", IsActive = true } });
+            var handler = new GetSpecialtiesQueryHandler(repo, cache, encryption);
+
+            await handler.HandleAsync(new GetSpecialtiesQuery(), default);
+            cache.Remove(CatalogCacheKeys.Specialties);
+            var result = await handler.HandleAsync(new GetSpecialtiesQuery(), default);
+
+            result.Data.Should().ContainSingle(x => x.Name == "Pediatría" && x.IsActive);
         }
 
         // ── AutonomyLevels ───────────────────────────────────────────────

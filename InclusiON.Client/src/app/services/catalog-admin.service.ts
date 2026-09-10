@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiResponse, CatalogItem, AutonomyLevelItem, ActivityCategoryItem, SkillAreaItem, ActivityTemplateTypeItem, LoginMethodItem } from '@models';
+import { ApiResponse, CatalogItem, AutonomyLevelItem, ActivityCategoryItem, SkillAreaItem, ActivityTemplateTypeItem, LoginMethodItem, SpecialtyItem } from '@models';
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
 
@@ -16,6 +16,10 @@ export class CatalogAdminService {
   }
 
   // Disability Types
+  getAllSpecialties(): Observable<SpecialtyItem[]> { return this.http.get<ApiResponse<SpecialtyItem[]>>(`${this.apiUrl}/specialties`).pipe(unwrapResponse()); }
+  createSpecialty(request: { name: string }): Observable<SpecialtyItem> { return this.http.post<ApiResponse<SpecialtyItem>>(`${this.apiUrl}/specialties`, request).pipe(unwrapResponse()); }
+  updateSpecialty(id: string, request: { name: string; isActive: boolean }): Observable<SpecialtyItem> { return this.http.put<ApiResponse<SpecialtyItem>>(`${this.apiUrl}/specialties/${id}`, request).pipe(unwrapResponse()); }
+  patchSpecialtyStatus(id: string, isActive: boolean): Observable<SpecialtyItem> { return this.http.patch<ApiResponse<SpecialtyItem>>(`${this.apiUrl}/specialties/${id}`, { isActive }).pipe(unwrapResponse()); }
   createDisabilityType(request: { name: string; description?: string }): Observable<CatalogItem> {
     return this.http.post<ApiResponse<CatalogItem>>(`${this.apiUrl}/disability-types`, request).pipe(unwrapResponse());
   }

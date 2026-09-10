@@ -1,8 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProfessionalsService } from '@services';
-import { AppRoutes, SPECIALTIES } from '@shared/constants';
+import { ProfessionalsService, CatalogsService } from '@services';
+import { AppRoutes } from '@shared/constants';
 import { ProfessionalResponse, UpdateProfessionalRequest } from '@models';
 import { validDate, notFutureDate, minAge, toIsoDate, toInputDate } from '@shared/utils';
 import { OnlyNumbersDirective } from '@shared/directives';
@@ -43,9 +44,10 @@ export class EditComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly defaultSpecialties = SPECIALTIES;
-  specialties: string[] = [...SPECIALTIES];
+  specialties: { id: number; name: string }[] = [];
 
   readonly minBirthDate: string = (() => {
     const today = new Date();
@@ -66,7 +68,7 @@ export class EditComponent implements OnInit {
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
     phone: ['', [Validators.maxLength(20)]],
-    specialty: ['', [Validators.maxLength(100)]],
+    specialtyId: ['', [Validators.required]],
     licenseNumber: ['', [Validators.required, Validators.maxLength(50)]],
     birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
   });
@@ -76,6 +78,11 @@ export class EditComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.catalogsService.getSpecialties()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => {
+        this.specialties = data.filter(specialty => specialty.isActive === true);
+      });
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.professionalsService.getProfessionalById(id).subscribe({
@@ -89,15 +96,15 @@ export class EditComponent implements OnInit {
   }
 
   private patchForm(p: ProfessionalResponse): void {
-    if (p.specialty && !this.specialties.includes(p.specialty)) {
-      this.specialties = [p.specialty, ...this.defaultSpecialties];
+    if (p.specialtyId && !this.specialties.some(x => x.id === p.specialtyId) && p.specialty) {
+      this.specialties = [{ id: p.specialtyId, name: `${p.specialty} (inactiva)` }, ...this.specialties];
     }
     this.form.patchValue({
       firstName: p.firstName,
       lastName: p.lastName,
       documentNumber: p.documentNumber ?? '',
       phone: p.phone ?? '',
-      specialty: p.specialty ?? '',
+      specialtyId: p.specialtyId ?? '',
       licenseNumber: p.licenseNumber ?? '',
       birthDate: toInputDate(p.birthDate),
     });
@@ -116,7 +123,7 @@ export class EditComponent implements OnInit {
       lastName: raw.lastName,
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       ...(raw.phone && { phone: raw.phone }),
-      ...(raw.specialty && { specialty: raw.specialty }),
+      ...(raw.specialtyId && { specialtyId: +raw.specialtyId, specialty: this.specialties.find(x => x.id === +raw.specialtyId)?.name }),
       ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
       ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
     };

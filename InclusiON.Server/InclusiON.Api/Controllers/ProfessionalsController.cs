@@ -196,7 +196,8 @@ namespace InclusiON.Api.Controllers
                 request.LicenseNumber,
                 request.BirthDate,
                 request.Email,
-                request.InstitutionId);
+                request.InstitutionId,
+                request.SpecialtyId);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -240,7 +241,8 @@ namespace InclusiON.Api.Controllers
                 request.Specialty,
                 request.LicenseNumber,
                 request.BirthDate,
-                request.InstitutionIds);
+                request.InstitutionIds,
+                request.SpecialtyId);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
@@ -285,7 +287,8 @@ namespace InclusiON.Api.Controllers
                 request.Specialty,
                 request.LicenseNumber,
                 request.BirthDate,
-                request.InstitutionIds);
+                request.InstitutionIds,
+                request.SpecialtyId);
 
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();

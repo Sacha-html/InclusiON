@@ -29,12 +29,14 @@ namespace InclusiON.Api.Controllers
         private readonly ICatalogAdminService _catalog;
         private readonly IOutputCacheStore _cacheStore;
         private readonly IMemoryCache _memoryCache;
+        private readonly IEncryptionService _encryption;
 
-        public CatalogAdminController(ICatalogAdminService catalog, IOutputCacheStore cacheStore, IMemoryCache memoryCache)
+        public CatalogAdminController(ICatalogAdminService catalog, IOutputCacheStore cacheStore, IMemoryCache memoryCache, IEncryptionService encryption)
         {
             _catalog = catalog;
             _cacheStore = cacheStore;
             _memoryCache = memoryCache;
+            _encryption = encryption;
         }
 
         // ── helpers de ciclo de vida ──────────────────────────────────────────────
@@ -63,6 +65,22 @@ namespace InclusiON.Api.Controllers
         }
 
         #region Disability Types
+
+        [HttpGet("specialties")]
+        public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetSpecialties(CancellationToken ct)
+            => Ok(await _catalog.GetAllAsync<Specialty, CatalogItemResponse>(MapSpecialty, ct));
+
+        [HttpPost("specialties")]
+        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> CreateSpecialty([FromBody] CreateDisabilityTypeRequest request, CancellationToken ct)
+            => await CreatedAsync(await _catalog.CreateAsync<Specialty, CatalogItemResponse>(x => x.Name == request.Name, () => new Specialty { Name = request.Name, IsActive = true }, MapSpecialty, "Especialidad", ct), ct);
+
+        [HttpPut("specialties/{id:int}")]
+        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> UpdateSpecialty(int id, [FromBody] UpdateDisabilityTypeRequest request, CancellationToken ct)
+            => await OkAsync(await _catalog.UpdateAsync<Specialty, CatalogItemResponse>(id, x => x.Name == request.Name && x.Id != id, x => { x.Name = request.Name; x.IsActive = request.IsActive; }, MapSpecialty, "Especialidad", ct), ct);
+
+        [HttpPatch("specialties/{id:int}")]
+        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> PatchSpecialtyStatus(int id, [FromBody] PatchStatusRequest request, CancellationToken ct)
+            => await OkAsync(await _catalog.PatchStatusAsync<Specialty, CatalogItemResponse>(id, request.IsActive, x => x.IsActive, (x, v) => x.IsActive = v, MapSpecialty, "Especialidad", ct, async (specialtyId, token) => await _catalog.AnyAsync<Professional>(x => x.SpecialtyId == specialtyId, token) ? "No se puede dar de baja la especialidad porque hay profesionales asociados." : null), ct);
 
         [HttpPost("disability-types")]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status201Created)]
@@ -130,6 +148,16 @@ namespace InclusiON.Api.Controllers
         }
 
         #endregion
+
+        private CatalogItemResponse MapSpecialty(Specialty x) => new()
+        {
+            Id = x.Id,
+            EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(x.Id.ToString())),
+            Name = x.Name,
+            IsActive = x.IsActive,
+        };
+
+        private static string ToUrlSafeBase64(string value) => value.Replace('+', '-').Replace('/', '_').TrimEnd('=');
 
         #region Autonomy Levels
 

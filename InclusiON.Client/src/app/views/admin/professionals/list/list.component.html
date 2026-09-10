@@ -31,8 +31,8 @@
         <label cLabel sizing="sm" class="mb-1 text-body-secondary small fw-medium" for="specialtyFilter">Especialidad</label>
         <select cSelect sizing="sm" id="specialtyFilter" [(ngModel)]="specialtyFilter" (ngModelChange)="onSpecialtyFilterChange($event)">
           <option value="">Todas</option>
-          @for (spec of specialties; track spec) {
-            <option [value]="spec">{{ spec }}</option>
+          @for (spec of specialties; track spec.id) {
+            <option [value]="spec.name">{{ spec.name }}</option>
           }
         </select>
       </div>
@@ -40,7 +40,12 @@
         <button cButton color="secondary" size="sm" variant="outline" (click)="clearFilters()">Limpiar filtros</button>
       </div>
     </div>
-  </fieldset>
+   @if (specialtiesLoadError) {
+     <c-alert color="danger" class="mb-2" role="alert">
+       No se pudieron cargar las especialidades. El filtro no está disponible; revisá el endpoint del catálogo.
+     </c-alert>
+   }
+   </fieldset>
   <app-data-table
     title="Gestionar Profesionales"
     [columns]="cols"

@@ -10,7 +10,7 @@
   (rowAction)="onRowAction($event)"
 />
 
-<!-- Modal confirmar baja -->
+<!-- Modal confirmar status change -->
 <c-modal [visible]="showDeactivateModal" (visibleChange)="showDeactivateModal = $event" alignment="center">
   <c-modal-header><h5 cModalTitle>Confirmar baja</h5></c-modal-header>
   <c-modal-body>
@@ -21,8 +21,8 @@
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="cancelDeactivate()" [disabled]="isDeactivating">Cancelar</button>
-    <button cButton color="danger" (click)="confirmDeactivate()" [disabled]="isDeactivating">
-      {{ isDeactivating ? 'Procesando...' : 'Dar de baja' }}
+     <button cButton [color]="deactivatingItem?.isActive === false ? 'success' : 'danger'" (click)="confirmDeactivate()" [disabled]="isDeactivating">
+       {{ isDeactivating ? 'Procesando...' : (deactivatingItem?.isActive === false ? 'Reactivar' : 'Dar de baja') }}
     </button>
   </c-modal-footer>
 </c-modal>
