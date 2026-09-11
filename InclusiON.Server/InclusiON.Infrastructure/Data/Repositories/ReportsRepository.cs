@@ -51,7 +51,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string? status,
             DateTime? dateFrom,
             DateTime? dateTo,
-            SortField? sortBy,
+            string? sortBy,
             string sortDirection,
             List<int>? institutionIds = null,
             List<string>? personIds = null,
@@ -116,16 +116,34 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(r => profIds.Contains(r.ProfessionalId));
             }
 
-            var sortMappings = new Dictionary<SortField, Expression<Func<Report, object>>>
-            {
-                [SortField.Id]         = r => r.Id,
-                [SortField.Title]      = r => r.Title,
-                [SortField.ReportDate] = r => r.ReportDate,
-                [SortField.CreatedAt]  = r => r.CreatedAt
-            };
+            var ordered = OrderReports(query, sortBy, sortDirection);
 
-            return await query.ToPagedAsync(page, pageSize, sortBy, sortDirection, sortMappings, cancellationToken);
+            return await ordered.ToPagedAsync(page, pageSize, cancellationToken);
         }
+
+        /// <summary>Ordena por la columna pedida por el cliente; las claves no reconocidas caen al orden por defecto.</summary>
+        private static IOrderedQueryable<Report> OrderReports(IQueryable<Report> query, string? sortBy, string sortDirection)
+        {
+            var descending = string.Equals(sortDirection, "DESC", StringComparison.OrdinalIgnoreCase);
+
+            return sortBy?.ToLowerInvariant() switch
+            {
+                "title"            => Order(query, r => r.Title, descending),
+                "reportdate"       => Order(query, r => r.ReportDate, descending),
+                "createdat"        => Order(query, r => r.CreatedAt, descending),
+                "status"           => Order(query, r => r.Status, descending),
+                "personname"       => Order(query, r => r.Person != null ? r.Person.FirstName + " " + r.Person.LastName : string.Empty, descending),
+                "professionalname" => Order(query, r => r.Professional != null ? r.Professional.FirstName + " " + r.Professional.LastName : string.Empty, descending),
+                "reporttypename"   => Order(query, r => r.ReportType != null ? r.ReportType.Name : string.Empty, descending),
+                _                  => query.OrderByDescending(r => r.CreatedAt),
+            };
+        }
+
+        private static IOrderedQueryable<Report> Order<TKey>(
+            IQueryable<Report> query,
+            Expression<Func<Report, TKey>> keySelector,
+            bool descending) =>
+            descending ? query.OrderByDescending(keySelector) : query.OrderBy(keySelector);
 
         public async Task<PagedResponse<Report>> GetFamilyPagedAsync(
             Guid familyRepresentativeId,
@@ -134,7 +152,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             string? reportTypeId,
             DateTime? dateFrom,
             DateTime? dateTo,
-            SortField? sortBy,
+            string? sortBy,
             string sortDirection,
             CancellationToken cancellationToken = default)
         {
@@ -158,15 +176,9 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (dateTo.HasValue)
                 query = query.Where(r => r.ReportDate <= dateTo.Value.AddDays(1).AddTicks(-1));
 
-            var sortMappings = new Dictionary<SortField, Expression<Func<Report, object>>>
-            {
-                [SortField.Id]         = r => r.Id,
-                [SortField.Title]      = r => r.Title,
-                [SortField.ReportDate] = r => r.ReportDate,
-                [SortField.CreatedAt]  = r => r.CreatedAt
-            };
+            var ordered = OrderReports(query, sortBy, sortDirection);
 
-            return await query.ToPagedAsync(page, pageSize, sortBy, sortDirection, sortMappings, cancellationToken);
+            return await ordered.ToPagedAsync(page, pageSize, cancellationToken);
         }
 
         public async Task<(int Count, Report? Latest)> GetApprovedReportsSummaryAsync(

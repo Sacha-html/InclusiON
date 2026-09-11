@@ -41,5 +41,13 @@ namespace InclusiON.DTOs.Requests.Reports
 
         [System.Text.Json.Serialization.JsonIgnore]
         public List<int>? InstitutionIds { get; set; }
+
+        // Las columnas de esta lista (persona, profesional, tipo) no forman parte del
+        // enum SortField compartido: bindear SortBy contra ese enum hacia fallar el
+        // model binding (400) apenas se ordenaba por cualquier columna que no fuera
+        // Title/ReportDate/CreatedAt. Se ocultan las propiedades de la base y se usan
+        // como texto libre (mismo criterio que GetActivitiesRequest, INCNEW-36).
+        public new string? SortBy { get; set; }
+        public new string SortDirection { get; set; } = "ASC";
     }
 }
