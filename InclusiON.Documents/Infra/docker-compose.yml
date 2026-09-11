@@ -10,7 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - inclusion_pgdata:/var/lib/postgresql/data
-      - ../../InclusiON.Server/InclusiON.Data/Scripts/db-dev-setup.sql:/docker-entrypoint-initdb.d/01-setup.sql:ro
+      # El script db-users-setup.sql no se usa como init automático: además de crear
+      # el rol/DB de dev, hace \c a inclusion_uat/inclusion_prod (que no existen en un
+      # Postgres local fresco), y como el entrypoint de la imagen corre los scripts con
+      # ON_ERROR_STOP=1, aborta el init a mitad de camino. El rol/DB de dev se crean
+      # a mano una sola vez (ver README de este compose).
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
