@@ -198,40 +198,34 @@
 
       <!-- ================= PASO 3: ASIGNACIÓN DE PROFESIONAL Y AULA ================= -->
       @if (currentStep === 3) {
-        <h3 class="h5 mb-3">Asignación de profesional y aula *</h3>
+        <h3 class="h5 mb-3">Asignación de profesional y aula (opcional)</h3>
 
         <p class="text-body-secondary mb-4">
-          Debe seleccionar un profesional responsable y asociar al alumno a una de sus aulas.
+          Puede seleccionar un profesional responsable y asociar al alumno a una de sus aulas.
         </p>
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="selectedProfessionalId">Profesional responsable *</label>
+            <label cLabel for="selectedProfessionalId">Profesional responsable (opcional)</label>
             <select cSelect id="selectedProfessionalId" formControlName="selectedProfessionalId"
                     (change)="onProfessionalChange()"
-                    [valid]="submitted && classroomF.selectedProfessionalId.invalid ? false : undefined">
+                    [valid]="undefined">
               <option [ngValue]="null">-- Seleccionar profesional --</option>
               @for (p of professionals; track p.id) {
                 <option [value]="p.id">{{ p.lastName }}, {{ p.firstName }} ({{ p.specialty }})</option>
               }
             </select>
-            @if (submitted && classroomF.selectedProfessionalId.invalid) {
-              <c-form-feedback [valid]="false">Debe seleccionar un profesional responsable.</c-form-feedback>
-            }
           </c-col>
 
           <c-col sm="6">
-            <label cLabel for="selectedClassroomId">Aula *</label>
+            <label cLabel for="selectedClassroomId">Aula (opcional)</label>
             <select cSelect id="selectedClassroomId" formControlName="selectedClassroomId"
-                    [valid]="submitted && classroomF.selectedClassroomId.invalid ? false : undefined">
+                    [valid]="undefined">
               <option [ngValue]="null">-- Seleccionar aula --</option>
               @for (c of classrooms; track c.id) {
                 <option [value]="c.id">{{ c.name }}</option>
               }
             </select>
-            @if (submitted && classroomF.selectedClassroomId.invalid) {
-              <c-form-feedback [valid]="false">Debe seleccionar un aula.</c-form-feedback>
-            }
           </c-col>
         </c-row>
 
