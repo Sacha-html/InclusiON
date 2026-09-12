@@ -69,12 +69,18 @@
       <c-row class="mb-3">
         <c-col sm="6">
            <label cLabel for="specialtyId">Especialidad *</label>
-           <select cSelect id="specialtyId" formControlName="specialtyId">
+           <select cSelect id="specialtyId" formControlName="specialtyId"
+                   [valid]="(submitted || f['specialtyId'].touched) ? f['specialtyId'].valid : undefined">
             <option value="">-- Seleccionar especialidad --</option>
              @for (spec of specialties; track spec.id) {
                <option [value]="spec.id">{{ spec.name }}</option>
             }
-          </select>
+           </select>
+           @if ((submitted || f['specialtyId'].touched) && f['specialtyId'].errors) {
+             <c-form-feedback [valid]="false">
+               @if (f['specialtyId'].errors['required']) { La especialidad es obligatoria. }
+             </c-form-feedback>
+           }
         </c-col>
         <c-col sm="6">
           <label cLabel for="licenseNumber">Matrícula *</label>

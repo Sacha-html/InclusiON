@@ -5,6 +5,7 @@ using Xunit;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
+using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Application.UseCases.Professionals.Commands;
 using InclusiON.Application.UseCases.Professionals.Handlers;
 using InclusiON.Domain.Enums;
@@ -20,14 +21,20 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
         private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
         private readonly IUnitOfWork              _uow       = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider        _dateTime  = Substitute.For<IDateTimeProvider>();
+        private readonly IReadOnlyRepository<Specialty> _specialties = Substitute.For<IReadOnlyRepository<Specialty>>();
 
-        private CreateProfessionalCommandHandler BuildSut() =>
-            new(_prosRepo, _identity, _backgroundJobs, _uow,
-                NullLogger<CreateProfessionalCommandHandler>.Instance, _dateTime);
+        private CreateProfessionalCommandHandler BuildSut()
+        {
+            _specialties.GetByIdAsync(1, Arg.Any<CancellationToken>())
+                .Returns(new Specialty { Id = 1, Name = "Psicología", IsActive = true });
 
-        private static CreateProfessionalCommand Cmd(string? doc = null) =>
+            return new(_prosRepo, _identity, _backgroundJobs, _uow,
+                NullLogger<CreateProfessionalCommandHandler>.Instance, _dateTime, _specialties);
+        }
+
+        private static CreateProfessionalCommand Cmd(string? doc = null, int? specialtyId = 1) =>
             new(FirstName: "Ana", LastName: "López",
-                Email: "ana@test.com", DocumentNumber: doc);
+                Email: "ana@test.com", DocumentNumber: doc, SpecialtyId: specialtyId);
 
         private void SetupSuccessfulTransaction()
         {
@@ -42,6 +49,56 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
         }
 
         // ── Documento ya existe ──────────────────────────────────────────────
+
+        [Fact]
+        public async Task HandleAsync_NullSpecialty_ReturnsValidationFailed()
+        {
+            var result = await BuildSut().HandleAsync(Cmd(specialtyId: null), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            result.Message.Should().Be("La especialidad es obligatoria.");
+        }
+
+        [Fact]
+        public async Task HandleAsync_NonexistentSpecialty_ReturnsValidationFailed()
+        {
+            _specialties.GetByIdAsync(999, Arg.Any<CancellationToken>()).Returns((Specialty?)null);
+
+            var result = await BuildSut().HandleAsync(Cmd(specialtyId: 999), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+        }
+
+        [Fact]
+        public async Task HandleAsync_InactiveSpecialty_ReturnsValidationFailed()
+        {
+            _specialties.GetByIdAsync(2, Arg.Any<CancellationToken>())
+                .Returns(new Specialty { Id = 2, Name = "Inactiva", IsActive = false });
+
+            var result = await BuildSut().HandleAsync(Cmd(specialtyId: 2), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+        }
+
+        [Fact]
+        public async Task HandleAsync_ValidSpecialty_PersistsCatalogNameAndId()
+        {
+            _specialties.GetByIdAsync(1, Arg.Any<CancellationToken>())
+                .Returns(new Specialty { Id = 1, Name = "Psicología", IsActive = true });
+            _identity.FindByEmailAsync(Arg.Any<string>()).Returns((User?)null);
+            SetupSuccessfulTransaction();
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
+
+            var result = await BuildSut().HandleAsync(Cmd(specialtyId: 1), default);
+
+            result.Success.Should().BeTrue();
+            await _prosRepo.Received(1).CreateAsync(
+                Arg.Is<Professional>(p => p.SpecialtyId == 1 && p.Specialty == "Psicología"),
+                Arg.Any<CancellationToken>());
+        }
 
         [Fact]
         public async Task HandleAsync_DuplicateDocument_ReturnsDocumentAlreadyExists()
