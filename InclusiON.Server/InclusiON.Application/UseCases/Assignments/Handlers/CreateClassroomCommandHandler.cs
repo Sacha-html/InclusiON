@@ -64,11 +64,20 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                     "El nombre del aula no puede estar vacío.");
             }
 
-            if (command.PersonIds == null || command.PersonIds.Count == 0)
+            // Validar y precargar todos los alumnos antes de agregar el aula al contexto.
+            var personIds = command.PersonIds ?? new List<Guid>();
+            var persons = new Dictionary<Guid, PersonWithDisability>();
+            foreach (var personId in personIds)
             {
-                return ApiResponse<List<ProfessionalPersonResponse>>.ErrorResult(
-                    ErrorCode.ValidationFailed,
-                    "Debe seleccionar al menos un alumno para crear el aula.");
+                var person = await _personsRepository.GetByIdAsync(personId, cancellationToken);
+                if (person == null)
+                {
+                    return ApiResponse<List<ProfessionalPersonResponse>>.ErrorResult(
+                        ErrorCode.PersonNotFound,
+                        $"El alumno con ID {personId} no existe.");
+                }
+
+                persons[personId] = person;
             }
 
             // Crear el Aula
@@ -86,16 +95,9 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             var resultList = new List<ProfessionalPerson>();
 
             // Procesar asignaciones de personas (si hay)
-            var personIds = command.PersonIds ?? new List<Guid>();
             foreach (var personId in personIds)
             {
-                var person = await _personsRepository.GetByIdAsync(personId, cancellationToken);
-                if (person == null)
-                {
-                    return ApiResponse<List<ProfessionalPersonResponse>>.ErrorResult(
-                        ErrorCode.PersonNotFound,
-                        $"El alumno con ID {personId} no existe.");
-                }
+                var person = persons[personId];
 
                 var existing = await _repository.GetAssignmentAsync(command.ProfessionalId, personId, cancellationToken);
 
