@@ -14,6 +14,52 @@ import { IconModule } from '@coreui/icons-angular';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
+const PROFESSIONAL_CSV_HEADERS = [
+  'Nombre',
+  'Apellido',
+  'Documento',
+  'Teléfono',
+  'Especialidad',
+  'Matrícula',
+  'Email',
+  'Estado',
+] as const;
+
+const PROFESSIONAL_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pendiente',
+  approved: 'Aprobado',
+  terminated: 'Dado de baja',
+  suspended: 'Suspendido',
+  rejected: 'Rechazado',
+};
+
+function csvEscape(value: unknown): string {
+  return `"${String(value ?? '').replaceAll('"', '""')}"`;
+}
+
+export function getProfessionalStatusLabel(status?: string): string {
+  const normalizedStatus = status?.trim().toLowerCase();
+  return normalizedStatus ? PROFESSIONAL_STATUS_LABELS[normalizedStatus] ?? status! : '';
+}
+
+export function buildProfessionalsCsv(data: ProfessionalListItemResponse[]): string {
+  const rows = data.map(professional => [
+    professional.firstName,
+    professional.lastName,
+    professional.documentNumber,
+    professional.phone,
+    professional.specialty,
+    professional.licenseNumber,
+    professional.email,
+    getProfessionalStatusLabel(professional.status),
+  ]);
+
+  return '\uFEFF' + [
+    PROFESSIONAL_CSV_HEADERS.map(csvEscape).join(';'),
+    ...rows.map(row => row.map(csvEscape).join(';')),
+  ].join('\r\n');
+}
+
 @Component({
   selector: 'app-list',
   standalone: true,
@@ -535,16 +581,7 @@ export class ListComponent implements OnInit {
   exportToCsv(): void {
     const data = this.activeTab === 'active' ? this.professionals : this.pendingProfessionals;
     if (!data.length) return;
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-      headers.join(','),
-      ...data.map(row =>
-        headers.map(h => {
-          const val = String((row as any)[h] ?? '');
-          return `"${val.replaceAll('"', '""')}"`;
-        }).join(',')
-      ),
-    ].join('\n');
+    const csvContent = buildProfessionalsCsv(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
