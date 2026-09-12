@@ -160,8 +160,23 @@ export class ProfessionalFunctionalProfileComponent {
     this.isEditing.set(false);
   }
 
+  /** Al menos uno de los 4 campos de texto libre tiene que estar completo. */
+  get hasAtLeastOneTextField(): boolean {
+    return !!(
+      this.editData.interestsAndMotivators.trim() ||
+      this.editData.learningStyle.trim() ||
+      this.editData.availableResources.trim() ||
+      this.editData.additionalTherapies.trim()
+    );
+  }
+
   save(): void {
     if (this.isSaving()) return;
+
+    if (!this.hasAtLeastOneTextField) {
+      this.toastService.error('Completá al menos uno de los campos de texto (intereses, estilo de aprendizaje, recursos o terapias) antes de guardar.');
+      return;
+    }
 
     this.isSaving.set(true);
     const request: UpdatePersonFunctionalProfileRequest = {
