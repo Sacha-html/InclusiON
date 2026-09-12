@@ -4,6 +4,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   selector: 'app-player-intro',
   standalone: true,
   templateUrl: './player-intro.component.html',
+  styleUrl: './player-intro.component.scss',
 })
 export class PlayerIntroComponent {
   @Input({ required: true }) title!: string;

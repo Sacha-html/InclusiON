@@ -19,33 +19,6 @@ namespace InclusiON.Data.Seeders
             await SeedAdminUserAsync(userManager);
             await SeedRolePermissionsAsync(context);
             await SeedSkillAreasAsync(context);
-            await SeedProfessionalsAsync(userManager, context);
-            await SeedVisualLoginTestUsersAsync(userManager, context);
-            await SeedFamilyAsync(userManager, context);
-            await SeedFiveAdditionalStudentsAndTutorsAsync(userManager, context);
-
-            // Asegurar las 10 actividades oficiales del Roadmap con sus títulos y contenidos definitivos
-            await RoadmapInitializerAccessor.EnsureStandardActivities(context, CancellationToken.None);
-
-            // Inicializar Roadmap Estándar para todos los alumnos existentes
-            // El RoadmapInitializer ya verifica si el alumno tiene roadmap y lo omite si existe
-            var students = await context.PersonsWithDisability.ToListAsync();
-            foreach (var student in students)
-            {
-                await RoadmapInitializerAccessor.InitializeStudentRoadmap(context, student.Id, student.SupervisorUserId, CancellationToken.None);
-            }
-
-            // Las plantillas del Roadmap ya no se siembran automáticamente.
-            // Los profesionales crean sus propias plantillas desde la Biblioteca de Plantillas.
-            // Script de limpieza manual: Scripts/cleanup_templates.sql
-
-            await SeedCustomClassroomsAndStudentsAsync(userManager, context);
-
-            // Semillado de métricas analíticas y sesiones de actividades para KPIs
-            await MetricsDataSeeder.SeedAsync(serviceProvider);
-
-            // Semillado relacional de reportes para flujos de aprobación y dashboards
-            await ReportsDataSeeder.SeedAsync(serviceProvider);
 
             // Normalización de parentescos para integridad de datos con el combo frontend
             await NormalizeRelationshipsAsync(context);
