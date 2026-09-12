@@ -101,23 +101,22 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                         "El email del tutor ya se encuentra registrado.");
                 }
 
-                // 4. Validar y verificar que el Aula exista y obtener el ProfessionalId
-                if (!command.ClassroomId.HasValue)
+                // 4. Validar el aula si se proporciona y obtener el ProfessionalId
+                Professional? professional = null;
+                Guid? professionalId = null;
+                if (command.ClassroomId.HasValue)
                 {
-                    return ApiResponse<PersonResponse>.ErrorResult(
-                        ErrorCode.ValidationFailed,
-                        "Debe seleccionar un profesional y aula para el alumno.");
-                }
+                    var classroom = await _assignmentsRepository.GetClassroomByIdAsync(command.ClassroomId.Value, cancellationToken);
+                    if (classroom == null)
+                    {
+                        return ApiResponse<PersonResponse>.ErrorResult(
+                            ErrorCode.NotFound,
+                            "El aula especificada no existe.");
+                    }
 
-                var classroom = await _assignmentsRepository.GetClassroomByIdAsync(command.ClassroomId.Value, cancellationToken);
-                if (classroom == null)
-                {
-                    return ApiResponse<PersonResponse>.ErrorResult(
-                        ErrorCode.NotFound,
-                        "El aula especificada no existe.");
+                    professionalId = classroom.ProfessionalId;
+                    professional = await _professionalsRepository.GetByIdAsync(professionalId.Value, cancellationToken);
                 }
-                Guid professionalId = classroom.ProfessionalId;
-                var professional = await _professionalsRepository.GetByIdAsync(professionalId, cancellationToken);
 
                 // 5. Preparar creación del alumno
                 var baseStudentUsername = GenerateUsername(command.FirstName, command.LastName);
@@ -211,18 +210,21 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     };
                     student.PersonRepresentatives.Add(relationshipLink);
 
-                    // D. Asignar Aula obligatoria
-                    var assignment = new ProfessionalPerson
+                    // D. Asignar Aula si se proporcionó una válida
+                    if (command.ClassroomId.HasValue)
                     {
-                        ProfessionalId = professionalId,
-                        PersonId = student.Id,
-                        ClassroomId = command.ClassroomId.Value,
-                        IsPrimaryProfessional = true,
-                        CanSuperviseLogin = true,
-                        IsActive = true,
-                        AssignedAt = _dateTime.UtcNow
-                    };
-                    student.ProfessionalPersons.Add(assignment);
+                        var assignment = new ProfessionalPerson
+                        {
+                            ProfessionalId = professionalId!.Value,
+                            PersonId = student.Id,
+                            ClassroomId = command.ClassroomId.Value,
+                            IsPrimaryProfessional = true,
+                            CanSuperviseLogin = true,
+                            IsActive = true,
+                            AssignedAt = _dateTime.UtcNow
+                        };
+                        student.ProfessionalPersons.Add(assignment);
+                    }
 
                     // E. Guardar perfiles y relaciones en base de datos en un solo SaveChangesAsync
                     await _repository.CreateAsync(student, ct);

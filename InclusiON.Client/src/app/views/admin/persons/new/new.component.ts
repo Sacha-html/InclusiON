@@ -97,9 +97,9 @@ export class NewComponent implements OnInit {
     tutorPhone: ['', [Validators.maxLength(20)]],
     tutorRelationship: ['', [Validators.required, Validators.maxLength(50)]],
 
-    // Asignación de Profesional y Aula (Obligatorio)
-    selectedProfessionalId: [null, [Validators.required]],
-    selectedClassroomId: [{ value: null, disabled: true }, [Validators.required]],
+    // Asignación opcional de Profesional y Aula
+    selectedProfessionalId: [null],
+    selectedClassroomId: [{ value: null, disabled: true }],
   });
 
   get f() {
@@ -215,7 +215,7 @@ export class NewComponent implements OnInit {
       ...(raw.tutorDocumentNumber && { tutorDocumentNumber: raw.tutorDocumentNumber }),
       ...(raw.tutorPhone && { tutorPhone: raw.tutorPhone }),
       tutorRelationship: raw.tutorRelationship,
-      classroomId: raw.selectedClassroomId
+      ...(raw.selectedClassroomId ? { classroomId: raw.selectedClassroomId } : {}),
     };
 
     this.personsService.createPersonWithTutor(request).subscribe({
