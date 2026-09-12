@@ -84,6 +84,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
 
+  // Perfil del usuario autenticado
+  {
+    path: 'my-profile',
+    loadComponent: () =>
+      import('./views/pages/my-profile/my-profile.component').then(
+        (m) => m.MyProfileComponent,
+      ),
+    canActivate: [authGuard],
+  },
+
   // Dashboard AAC - Persona con Discapacidad
   {
     path: 'app',

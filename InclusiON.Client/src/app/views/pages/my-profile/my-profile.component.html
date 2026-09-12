@@ -1,0 +1,39 @@
+<c-container class="py-4">
+  <c-row class="justify-content-center">
+    <c-col md="8" lg="6">
+      <c-card>
+        <c-card-header>
+          <strong style="color: var(--a11y-text)">Mi Perfil</strong>
+        </c-card-header>
+        <c-card-body>
+          @if (user; as u) {
+            <dl class="row g-3 mb-0">
+              <div class="col-sm-6">
+                <dt class="form-label text-body-secondary mb-1">Nombre completo</dt>
+                <dd class="mb-0 fw-medium" style="color: var(--a11y-text)">{{ u.name }} {{ u.surname }}</dd>
+              </div>
+              <div class="col-sm-6">
+                <dt class="form-label text-body-secondary mb-1">Rol</dt>
+                <dd class="mb-0">
+                  <c-badge color="info">{{ roleLabel(u.role) }}</c-badge>
+                </dd>
+              </div>
+              <div class="col-sm-6">
+                <dt class="form-label text-body-secondary mb-1">Email</dt>
+                <dd class="mb-0 fw-medium" style="color: var(--a11y-text)">{{ u.email }}</dd>
+              </div>
+              <div class="col-sm-6">
+                <dt class="form-label text-body-secondary mb-1">Estado</dt>
+                <dd class="mb-0">
+                  <c-badge [color]="u.isActive ? 'success' : 'danger'">{{ u.isActive ? 'Activo' : 'Inactivo' }}</c-badge>
+                </dd>
+              </div>
+            </dl>
+          } @else {
+            <p style="color: var(--a11y-text-muted)">No se pudo cargar tu perfil.</p>
+          }
+        </c-card-body>
+      </c-card>
+    </c-col>
+  </c-row>
+</c-container>
