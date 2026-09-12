@@ -80,6 +80,11 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
             var result = await BuildSut().HandleAsync(Cmd(), default);
 
             result.Success.Should().BeTrue();
+            await _personsRepo.Received(1).CreateAsync(
+                Arg.Is<PersonWithDisability>(person => person.ProfessionalPersons.Count == 1 &&
+                    person.ProfessionalPersons.Single().ProfessionalId == ProfessionalId &&
+                    person.ProfessionalPersons.Single().ClassroomId == ClassroomId),
+                Arg.Any<CancellationToken>());
             await _notifier.Received(1).NotifyUserAsync(
                 ProfessionalUserId.ToString(),
                 "🎓 Nuevo alumno asignado",
@@ -89,14 +94,20 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         }
 
         [Fact]
-        public async Task HandleAsync_NoClassroomId_ReturnsValidationError()
+        public async Task HandleAsync_NoClassroomId_CreatesPersonWithoutAssignmentOrNotification()
         {
             var cmd = Cmd(classroomId: Guid.Empty) with { ClassroomId = null };
+            SetupSuccess();
 
             var result = await BuildSut().HandleAsync(cmd, default);
 
-            result.Success.Should().BeFalse();
-            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            result.Success.Should().BeTrue();
+            await _personsRepo.Received(1).CreateAsync(
+                Arg.Is<PersonWithDisability>(person => !person.ProfessionalPersons.Any()),
+                Arg.Any<CancellationToken>());
+            await _notifier.DidNotReceiveWithAnyArgs().NotifyUserAsync(default!, default!, default!, default!, default);
+            await _assignRepo.DidNotReceiveWithAnyArgs().GetClassroomByIdAsync(default, default);
+            await _prosRepo.DidNotReceiveWithAnyArgs().GetByIdAsync(default, default);
         }
 
         [Fact]

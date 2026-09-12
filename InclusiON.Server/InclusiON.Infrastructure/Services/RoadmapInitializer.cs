@@ -42,7 +42,6 @@ namespace InclusiON.Infrastructure.Services
             }
 
             var profEntity = await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
-            var defaultProfId = profEntity?.Id ?? Guid.Parse("00000000-0000-0000-0000-000000000200");
 
             var standardActivities = new List<Activity>();
             var activitiesDefinitions = new[]
@@ -154,7 +153,7 @@ namespace InclusiON.Infrastructure.Services
                         Instructions = def.Instructions,
                         CategoryId = def.CatId,
                         SkillAreaId = skillArea.Id,
-                        ProfessionalId = defaultProfId,
+                        ProfessionalId = profEntity?.Id,
                         HasVisualSupport = true,
                         HasAudioSupport = true,
                         UsesEasyReading = true,
@@ -239,13 +238,16 @@ namespace InclusiON.Infrastructure.Services
             }
             profEntity ??= await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
 
-            var defaultProfId = profEntity?.Id ?? Guid.Parse("00000000-0000-0000-0000-000000000200");
+            // PersonRoadmap and ActivityAssignment require a real professional.
+            // Standard activities remain global when none exists, but the personalized
+            // roadmap must be deferred until a professional can own it.
+            if (profEntity == null) return;
 
             // 4. Crear el PersonRoadmap
             var roadmap = new PersonRoadmap
             {
                 PersonId = studentId,
-                CreatedByProfessionalId = defaultProfId,
+                CreatedByProfessionalId = profEntity.Id,
                 Notes = "Trayectoria anti-frustración preconfigurada.",
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")

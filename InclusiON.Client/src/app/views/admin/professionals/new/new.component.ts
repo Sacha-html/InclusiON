@@ -134,7 +134,7 @@ export class NewComponent implements OnInit {
       email: raw.email,
       ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
       ...(raw.phone && { phone: raw.phone }),
-      ...(raw.specialtyId && { specialtyId: +raw.specialtyId, specialty: this.specialties.find(x => x.id === +raw.specialtyId)?.name }),
+      specialtyId: +raw.specialtyId,
       ...(raw.licenseNumber && { licenseNumber: raw.licenseNumber }),
       ...(raw.birthDate && { birthDate: toIsoDate(raw.birthDate) }),
     };
