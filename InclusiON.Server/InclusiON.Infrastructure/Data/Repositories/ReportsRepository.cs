@@ -116,25 +116,37 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 query = query.Where(r => profIds.Contains(r.ProfessionalId));
             }
 
+            var ordered = OrderReports(query, sortBy, sortDirection);
+
+            return await ordered.ToPagedAsync(page, pageSize, cancellationToken);
+        }
+
+        /// <summary>Ordena por la columna pedida por el cliente; las claves no reconocidas caen al orden por defecto.</summary>
+        private static IOrderedQueryable<Report> OrderReports(IQueryable<Report> query, string? sortBy, string sortDirection)
+        {
             var descending = string.Equals(sortDirection, "DESC", StringComparison.OrdinalIgnoreCase);
 
-            var ordered = sortBy?.ToLowerInvariant() switch
+            return sortBy?.ToLowerInvariant() switch
             {
-                "title"            => descending ? query.OrderByDescending(r => r.Title) : query.OrderBy(r => r.Title),
-                "reportdate"       => descending ? query.OrderByDescending(r => r.ReportDate) : query.OrderBy(r => r.ReportDate),
-                "createdat"        => descending ? query.OrderByDescending(r => r.CreatedAt) : query.OrderBy(r => r.CreatedAt),
+                "title"            => Order(query, r => r.Title, descending),
+                "reportdate"       => Order(query, r => r.ReportDate, descending),
+                "createdat"        => Order(query, r => r.CreatedAt, descending),
+                "status"           => Order(query, r => r.Status, descending),
                 "personname"       => descending ? query.OrderByDescending(r => r.Person.FirstName).ThenByDescending(r => r.Person.LastName)
                                                  : query.OrderBy(r => r.Person.FirstName).ThenBy(r => r.Person.LastName),
                 "professionalname" => descending ? query.OrderByDescending(r => r.Professional.FirstName).ThenByDescending(r => r.Professional.LastName)
                                                  : query.OrderBy(r => r.Professional.FirstName).ThenBy(r => r.Professional.LastName),
-                "reporttypename"   => descending ? query.OrderByDescending(r => r.ReportType.Name) : query.OrderBy(r => r.ReportType.Name),
-                "status"           => descending ? query.OrderByDescending(r => r.Status) : query.OrderBy(r => r.Status),
-                "id"               => descending ? query.OrderByDescending(r => r.Id) : query.OrderBy(r => r.Id),
+                "reporttypename"   => Order(query, r => r.ReportType.Name, descending),
+                "id"               => Order(query, r => r.Id, descending),
                 _                  => query.OrderByDescending(r => r.CreatedAt),
             };
-
-            return await ordered.ToPagedAsync(page, pageSize, cancellationToken);
         }
+
+        private static IOrderedQueryable<Report> Order<TKey>(
+            IQueryable<Report> query,
+            Expression<Func<Report, TKey>> keySelector,
+            bool descending) =>
+            descending ? query.OrderByDescending(keySelector) : query.OrderBy(keySelector);
 
         public async Task<PagedResponse<Report>> GetFamilyPagedAsync(
             Guid familyRepresentativeId,
@@ -167,22 +179,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (dateTo.HasValue)
                 query = query.Where(r => r.ReportDate <= dateTo.Value.AddDays(1).AddTicks(-1));
 
-            var descending = string.Equals(sortDirection, "DESC", StringComparison.OrdinalIgnoreCase);
-
-            var ordered = sortBy?.ToLowerInvariant() switch
-            {
-                "title"            => descending ? query.OrderByDescending(r => r.Title) : query.OrderBy(r => r.Title),
-                "reportdate"       => descending ? query.OrderByDescending(r => r.ReportDate) : query.OrderBy(r => r.ReportDate),
-                "createdat"        => descending ? query.OrderByDescending(r => r.CreatedAt) : query.OrderBy(r => r.CreatedAt),
-                "personname"       => descending ? query.OrderByDescending(r => r.Person.FirstName).ThenByDescending(r => r.Person.LastName)
-                                                 : query.OrderBy(r => r.Person.FirstName).ThenBy(r => r.Person.LastName),
-                "professionalname" => descending ? query.OrderByDescending(r => r.Professional.FirstName).ThenByDescending(r => r.Professional.LastName)
-                                                 : query.OrderBy(r => r.Professional.FirstName).ThenBy(r => r.Professional.LastName),
-                "reporttypename"   => descending ? query.OrderByDescending(r => r.ReportType.Name) : query.OrderBy(r => r.ReportType.Name),
-                "status"           => descending ? query.OrderByDescending(r => r.Status) : query.OrderBy(r => r.Status),
-                "id"               => descending ? query.OrderByDescending(r => r.Id) : query.OrderBy(r => r.Id),
-                _                  => query.OrderByDescending(r => r.CreatedAt),
-            };
+            var ordered = OrderReports(query, sortBy, sortDirection);
 
             return await ordered.ToPagedAsync(page, pageSize, cancellationToken);
         }
