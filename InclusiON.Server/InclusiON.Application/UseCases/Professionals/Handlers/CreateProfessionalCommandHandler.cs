@@ -25,7 +25,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateProfessionalCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
-        private readonly IReadOnlyRepository<Specialty>? _specialties;
+        private readonly IReadOnlyRepository<Specialty> _specialties;
 
         public CreateProfessionalCommandHandler(
             IProfessionalsRepository repository,
@@ -34,7 +34,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             IUnitOfWork unitOfWork,
             ILogger<CreateProfessionalCommandHandler> logger,
             IDateTimeProvider dateTime,
-            IReadOnlyRepository<Specialty>? specialties = null)
+            IReadOnlyRepository<Specialty> specialties)
         {
             _repository = repository;
             _identityService = identityService;
@@ -49,7 +49,11 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         {
             try
             {
-                if (command.SpecialtyId.HasValue && _specialties is not null && (await _specialties.GetByIdAsync(command.SpecialtyId.Value, cancellationToken))?.IsActive != true)
+                if (!command.SpecialtyId.HasValue)
+                    return ApiResponse<ProfessionalResponse>.ErrorResult(ErrorCode.ValidationFailed, "La especialidad es obligatoria.");
+
+                var specialty = await _specialties.GetByIdAsync(command.SpecialtyId.Value, cancellationToken);
+                if (specialty?.IsActive != true)
                     return ApiResponse<ProfessionalResponse>.ErrorResult(ErrorCode.ValidationFailed, "La especialidad seleccionada no está activa.");
                 // Validar documento unico
                 if (!string.IsNullOrWhiteSpace(command.DocumentNumber))
@@ -96,7 +100,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     LastName = command.LastName,
                     DocumentNumber = command.DocumentNumber,
                     Phone = command.Phone,
-                    Specialty = command.Specialty,
+                    Specialty = specialty.Name,
                     SpecialtyId = command.SpecialtyId,
                     LicenseNumber = command.LicenseNumber,
                     BirthDate = command.BirthDate,
