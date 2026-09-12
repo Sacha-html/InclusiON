@@ -25,6 +25,9 @@ namespace InclusiON.DTOs.Requests.Professionals
 
         [StringLength(100, ErrorMessage = "La especialidad no puede exceder 100 caracteres")]
         public string? Specialty { get; set; }
+
+        [Required(ErrorMessage = "La especialidad es requerida")]
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una especialidad válida")]
         public int? SpecialtyId { get; set; }
 
         [StringLength(50, ErrorMessage = "El numero de licencia no puede exceder 50 caracteres")]
