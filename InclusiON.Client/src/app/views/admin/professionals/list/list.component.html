@@ -87,6 +87,8 @@
     [currentPage]="currentPage"
     [sortable]="true"
     [loading]="loading"
+    [headerButtons]="getHeaderButtons()"
+    (headerAction)="onHeaderAction($event)"
     [showSearch]="true"
     (pageChange)="onPageChange($event)"
     (searchAction)="onSearch($event)"
