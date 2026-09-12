@@ -25,9 +25,9 @@
         >
           <span class="step-number" aria-hidden="true">{{ i + 1 }}</span>
 
-          @if (item.pictogramId) {
+          @if (item.pictogramId && arasaac.getPictogramUrl(item.pictogramId); as imageUrl) {
             <img
-              [src]="arasaac.getPictogramUrl(item.pictogramId)"
+              [src]="imageUrl"
               [alt]="item.label"
               class="step-img"
               loading="lazy"

@@ -205,7 +205,7 @@ BEGIN
 
     UPDATE "ActivityContents" SET
         "TemplateTypeId" = 1, -- PICTOGRAM_SELECT
-        "ContentJson" = '{"instruction":"Si tienes hambre, ¿qué pictograma debes presionar para comunicarte?","correctItemId":"comer","items":[{"id":"comer","label":"Quiero comer","pictogramId":28667},{"id":"dormir","label":"Quiero dormir","pictogramId":32448},{"id":"jugar","label":"Quiero jugar","pictogramId":32449}]}',
+        "ContentJson" = '{"instruction":"Si tienes hambre, ¿qué pictograma debes presionar para comunicarte?","correctItemId":"comer","items":[{"id":"comer","label":"Quiero comer","pictogramId":28667},{"id":"dormir","label":"Quiero dormir","pictogramId":32448},{"id":"jugar","label":"Quiero jugar","pictogramId":23392}]}',
         "UpdatedAt" = NOW(),
         "UpdatedBy" = '00000000-0000-0000-0000-000000000001'::uuid
     WHERE "ActivityId" = 6;
