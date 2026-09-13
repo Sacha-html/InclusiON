@@ -45,4 +45,18 @@ describe('CatalogsService', () => {
 
     expect(skillAreas).toEqual([[1], [1, 2]]);
   });
+
+  it('refreshes activity template types after invalidation', () => {
+    const templates: number[][] = [];
+    service.getActivityTemplateTypes().subscribe(data => templates.push(data.map(template => template.id)));
+
+    const initialRequest = http.expectOne(`${environment.apiUrl}/Catalogs/activity-template-types`);
+    initialRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }] });
+
+    service.invalidateActivityTemplateTypes();
+    const refreshedRequest = http.expectOne(`${environment.apiUrl}/Catalogs/activity-template-types`);
+    refreshedRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }, { id: 2, name: 'Created' }] });
+
+    expect(templates).toEqual([[1], [1, 2]]);
+  });
 });

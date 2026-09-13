@@ -93,6 +93,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los tipos de plantilla de actividad activos.
         /// </summary>
         [HttpGet("activity-template-types")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<ActivityTemplateTypeResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<ActivityTemplateTypeResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<ActivityTemplateTypeResponse>>>> GetActivityTemplateTypes(

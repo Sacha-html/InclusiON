@@ -10,6 +10,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
         public string? Description { get; set; }
         public string Code { get; set; } = string.Empty;
         public int SkillAreaId { get; set; }
+        public string? SkillAreaName { get; set; }
         public string ContentSchema { get; set; } = string.Empty;
         public string ComponentName { get; set; } = string.Empty;
         public bool UsesPictograms { get; set; }
@@ -26,6 +27,7 @@ namespace InclusiON.DTOs.Responses.Catalogs
                 Description = x.Description,
                 Code = x.Code,
                 SkillAreaId = x.SkillAreaId,
+                SkillAreaName = x.SkillArea?.Name,
                 ContentSchema = x.ContentSchema,
                 ComponentName = x.ComponentName,
                 UsesPictograms = x.UsesPictograms,
