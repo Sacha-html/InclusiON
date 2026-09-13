@@ -60,6 +60,20 @@ describe('CatalogsService', () => {
     expect(disabilityTypes).toEqual([[1], [1, 2]]);
   });
 
+  it('refreshes autonomy levels after invalidation and emits the newly created record', () => {
+    const autonomyLevels: number[][] = [];
+    service.getAutonomyLevels().subscribe(data => autonomyLevels.push(data.map(level => level.id)));
+
+    const initialRequest = http.expectOne(`${environment.apiUrl}/Catalogs/autonomy-levels`);
+    initialRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }] });
+
+    service.invalidateAutonomyLevels();
+    const refreshedRequest = http.expectOne(`${environment.apiUrl}/Catalogs/autonomy-levels`);
+    refreshedRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }, { id: 2, name: 'Created' }] });
+
+    expect(autonomyLevels).toEqual([[1], [1, 2]]);
+  });
+
   it('refreshes activity template types after invalidation', () => {
     const templates: number[][] = [];
     service.getActivityTemplateTypes().subscribe(data => templates.push(data.map(template => template.id)));
