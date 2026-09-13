@@ -66,6 +66,7 @@ export const navItems: INavData[] = [
       { name: 'Tipos de discapacidad', url: AppRoutes.Admin.Catalogs.DisabilityTypes },
       { name: 'Especialidades', url: AppRoutes.Admin.Catalogs.Specialties },
       { name: 'Tipos de plantilla', url: AppRoutes.Admin.Catalogs.TemplateTypes },
+      { name: 'Tipos de reportes', url: AppRoutes.Admin.Catalogs.ReportTypes },
     ],
   },
   {
