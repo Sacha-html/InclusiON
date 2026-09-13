@@ -6,7 +6,7 @@ import { ButtonDirective, ColComponent, FormControlDirective, RowComponent, Spin
 import { ContentEditorBaseComponent } from '../content-editor-base.component';
 import { OrderSequenceContent } from '../../../../../aac/activities/player/player.models';
 
-interface DraftItem { id: string; label: string; pictogramId?: number; }
+interface DraftItem { id: string; label: string; pictogramId?: number | string; }
 
 @Component({
   selector: 'app-order-sequence-editor',
@@ -109,7 +109,7 @@ export class OrderSequenceEditorComponent extends ContentEditorBaseComponent imp
   onLabelChange(): void { this.emit(); }
   onInstructionChange(): void { this.emit(); }
 
-  pictogramUrl(id: number): string { return this.arasaacService.getPictogramUrl(id); }
+  pictogramUrl(id: number | string): string | null { return this.arasaacService.getPictogramUrl(id); }
 
   protected emit(): void {
     const arr = this.items();
