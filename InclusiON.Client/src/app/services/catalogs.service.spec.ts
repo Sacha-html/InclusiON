@@ -46,6 +46,20 @@ describe('CatalogsService', () => {
     expect(skillAreas).toEqual([[1], [1, 2]]);
   });
 
+  it('refreshes disability types after invalidation and emits the newly created record', () => {
+    const disabilityTypes: number[][] = [];
+    service.getDisabilityTypes().subscribe(data => disabilityTypes.push(data.map(type => type.id)));
+
+    const initialRequest = http.expectOne(`${environment.apiUrl}/Catalogs/disability-types`);
+    initialRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }] });
+
+    service.invalidateDisabilityTypes();
+    const refreshedRequest = http.expectOne(`${environment.apiUrl}/Catalogs/disability-types`);
+    refreshedRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }, { id: 2, name: 'Created' }] });
+
+    expect(disabilityTypes).toEqual([[1], [1, 2]]);
+  });
+
   it('refreshes activity template types after invalidation', () => {
     const templates: number[][] = [];
     service.getActivityTemplateTypes().subscribe(data => templates.push(data.map(template => template.id)));
