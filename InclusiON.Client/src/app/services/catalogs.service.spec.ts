@@ -87,4 +87,18 @@ describe('CatalogsService', () => {
 
     expect(templates).toEqual([[1], [1, 2]]);
   });
+
+  it('refreshes activity categories after invalidation and emits the newly created record', () => {
+    const categories: number[][] = [];
+    service.getActivityCategories().subscribe(data => categories.push(data.map(category => category.id)));
+
+    const initialRequest = http.expectOne(`${environment.apiUrl}/Catalogs/activity-categories`);
+    initialRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }] });
+
+    service.invalidateActivityCategories();
+    const refreshedRequest = http.expectOne(`${environment.apiUrl}/Catalogs/activity-categories`);
+    refreshedRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }, { id: 2, name: 'Created' }] });
+
+    expect(categories).toEqual([[1], [1, 2]]);
+  });
 });

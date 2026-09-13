@@ -67,6 +67,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene las categorias de actividades activas.
         /// </summary>
         [HttpGet("activity-categories")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetActivityCategories(
