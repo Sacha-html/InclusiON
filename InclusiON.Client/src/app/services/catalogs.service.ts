@@ -33,6 +33,7 @@ export class CatalogsService {
   private readonly activityCategoriesChangedSubject = new Subject<void>();
   private readonly skillAreasChangedSubject = new Subject<void>();
   private readonly activityTemplateTypesChangedSubject = new Subject<void>();
+  private readonly reportTypesChangedSubject = new Subject<void>();
   readonly specialtiesChanged$ = this.specialtiesChangedSubject.asObservable();
   private readonly disabilityTypes$ = this.disabilityTypesChangedSubject.pipe(
     startWith(void 0),
@@ -73,6 +74,13 @@ export class CatalogsService {
     startWith(void 0),
     switchMap(() => this.http
       .get<ApiResponse<ActivityTemplateTypeItem[]>>(`${this.apiUrl}/activity-template-types`)
+      .pipe(unwrapResponse())),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
+  private readonly reportTypes$ = this.reportTypesChangedSubject.pipe(
+    startWith(void 0),
+    switchMap(() => this.http
+      .get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/report-types`)
       .pipe(unwrapResponse())),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
@@ -132,7 +140,11 @@ export class CatalogsService {
   }
 
   getReportTypes(): Observable<CatalogItem[]> {
-    return this.cached('report-types');
+    return this.reportTypes$;
+  }
+
+  invalidateReportTypes(): void {
+    this.reportTypesChangedSubject.next();
   }
 
   clearCache(): void {
