@@ -24,7 +24,7 @@ export interface SelectFigureContent {
 export interface OrderSequenceItem {
   id: string;
   label: string;
-  pictogramId?: number;
+  pictogramId?: number | string;
   correctPosition: number; // 0-based
 }
 export interface OrderSequenceContent {
@@ -35,7 +35,7 @@ export interface OrderSequenceContent {
 export interface MatchPair {
   id: string;
   label: string;
-  pictogramId: number;
+  pictogramId: number | string;
 }
 export interface MatchImageWordContent {
   instruction: string;
