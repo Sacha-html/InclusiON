@@ -120,5 +120,42 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.NotFound);
         }
+
+        [Fact]
+        public async Task HandleAsync_WhenPostCommitStepFails_ReturnsSuccessAndRunsRemainingSteps()
+        {
+            SetupSuccess();
+            _roadmapInit
+                .When(x => x.InitializeStudentRoadmapAsync(
+                    Arg.Any<Guid>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()))
+                .Do(_ => throw new InvalidOperationException("roadmap unavailable"));
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            await _bgJobs.Received(2).CreateAsync(
+                Arg.Any<int>(), Arg.Any<string>(), Arg.Any<DateTime?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+            await _notifier.Received(1).NotifyUserAsync(
+                ProfessionalUserId.ToString(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_WhenSaveFails_ReturnsErrorAndDoesNotRunPostCommitSteps()
+        {
+            SetupSuccess();
+            _uow.SaveChangesAsync(Arg.Any<CancellationToken>())
+                .Returns(_ => Task.FromException<int>(new InvalidOperationException("save failed")));
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.InternalError);
+            await _roadmapInit.DidNotReceiveWithAnyArgs()
+                .InitializeStudentRoadmapAsync(default, default, default);
+            await _bgJobs.DidNotReceiveWithAnyArgs()
+                .CreateAsync(default, default!, default, default, default);
+            await _notifier.DidNotReceiveWithAnyArgs()
+                .NotifyUserAsync(default!, default!, default!, default!, default);
+        }
     }
 }
