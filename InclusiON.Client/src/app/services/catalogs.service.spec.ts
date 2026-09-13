@@ -101,4 +101,18 @@ describe('CatalogsService', () => {
 
     expect(categories).toEqual([[1], [1, 2]]);
   });
+
+  it('refreshes report types after invalidation', () => {
+    const reportTypes: number[][] = [];
+    service.getReportTypes().subscribe(data => reportTypes.push(data.map(type => type.id)));
+
+    const initialRequest = http.expectOne(`${environment.apiUrl}/Catalogs/report-types`);
+    initialRequest.flush({ success: true, data: [{ id: 1, name: 'Existing', isActive: true }] });
+
+    service.invalidateReportTypes();
+    const refreshedRequest = http.expectOne(`${environment.apiUrl}/Catalogs/report-types`);
+    refreshedRequest.flush({ success: true, data: [{ id: 1, name: 'Existing', isActive: true }, { id: 2, name: 'Created', isActive: true }] });
+
+    expect(reportTypes).toEqual([[1], [1, 2]]);
+  });
 });

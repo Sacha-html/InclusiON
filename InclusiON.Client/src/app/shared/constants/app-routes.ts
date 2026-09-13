@@ -40,6 +40,7 @@ export const AppRoutes = {
       DisabilityTypes: '/admin/catalogs/disability-types',
       Specialties: '/admin/catalogs/specialties',
       TemplateTypes: '/admin/catalogs/template-types',
+      ReportTypes: '/admin/catalogs/report-types',
     },
   },
 

@@ -15,7 +15,7 @@ import {
   FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective,
 } from '@coreui/angular';
 
-type CatalogType = 'disability-types' | 'specialties' | 'autonomy-levels' | 'activity-categories' | 'skill-areas' | 'template-types' | 'login-methods';
+type CatalogType = 'disability-types' | 'specialties' | 'autonomy-levels' | 'activity-categories' | 'skill-areas' | 'template-types' | 'report-types' | 'login-methods';
 
 interface FieldConfig {
   key: string;
@@ -251,6 +251,27 @@ export class CatalogsComponent implements OnInit {
       update: (id, v) => this.adminService.updateActivityTemplateType(id, v),
       deactivate: (id) => this.adminService.patchActivityTemplateTypeStatus(id, false),
     },
+    'report-types': {
+      title: 'Tipos de reportes', canCreate: true,
+      columns: [
+        { key: 'name', label: 'Nombre' },
+        { key: 'description', label: 'Descripción' },
+        { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: {
+          'true': { color: 'success', label: ActiveStatus.Activo },
+          'false': { color: 'danger', label: ActiveStatus.Inactivo },
+        }},
+      ],
+      fields: [
+        { key: 'name', label: 'Nombre', type: 'text', required: true },
+        { key: 'description', label: 'Descripción', type: 'text' },
+        { key: 'isActive', label: 'Activo', type: 'checkbox', default: true, editOnly: true },
+      ],
+      load: () => this.adminService.getAllReportTypes(),
+      create: (v) => this.adminService.createReportType(v),
+      update: (id, v) => this.adminService.updateReportType(id, v),
+      deactivate: (id) => this.adminService.patchReportTypeStatus(id, false),
+      reactivate: (id) => this.adminService.patchReportTypeStatus(id, true),
+    },
     'login-methods': {
       title: 'Métodos de login',
       canCreate: false,
@@ -355,6 +376,7 @@ export class CatalogsComponent implements OnInit {
         if (this.catalogType === 'activity-categories') this.catalogsService.invalidateActivityCategories();
         if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
         if (this.catalogType === 'template-types') this.catalogsService.invalidateActivityTemplateTypes();
+        if (this.catalogType === 'report-types') this.catalogsService.invalidateReportTypes();
         this.loadData();
       },
       error: () => {
@@ -398,6 +420,7 @@ export class CatalogsComponent implements OnInit {
         if (this.catalogType === 'activity-categories') this.catalogsService.invalidateActivityCategories();
         if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
         if (this.catalogType === 'template-types') this.catalogsService.invalidateActivityTemplateTypes();
+        if (this.catalogType === 'report-types') this.catalogsService.invalidateReportTypes();
         this.loadData();
       },
       error: (err: any) => {

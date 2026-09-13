@@ -99,4 +99,18 @@ public class CatalogsControllerCacheMetadataTests
         responseCache.Location.Should().Be(ResponseCacheLocation.None);
         outputCache.NoStore.Should().BeTrue();
     }
+
+    [Fact]
+    public void GetReportTypes_DisablesHttpAndOutputCaching()
+    {
+        var method = typeof(CatalogsController).GetMethod(nameof(CatalogsController.GetReportTypes));
+        var responseCache = method!.GetCustomAttributes(typeof(ResponseCacheAttribute), inherit: true)
+            .Cast<ResponseCacheAttribute>().Single();
+        var outputCache = method.GetCustomAttributes(typeof(OutputCacheAttribute), inherit: true)
+            .Cast<OutputCacheAttribute>().Single();
+
+        responseCache.NoStore.Should().BeTrue();
+        responseCache.Location.Should().Be(ResponseCacheLocation.None);
+        outputCache.NoStore.Should().BeTrue();
+    }
 }
