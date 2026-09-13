@@ -129,6 +129,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los tipos de reporte activos.
         /// </summary>
         [HttpGet("report-types")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetReportTypes(

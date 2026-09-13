@@ -116,6 +116,22 @@ export class CatalogAdminService {
   }
 
   // Patch status (state machine)
+  getAllReportTypes(): Observable<CatalogItem[]> {
+    return this.http.get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/report-types`).pipe(unwrapResponse());
+  }
+
+  createReportType(request: { name: string; description?: string }): Observable<CatalogItem> {
+    return this.http.post<ApiResponse<CatalogItem>>(`${this.apiUrl}/report-types`, request).pipe(unwrapResponse());
+  }
+
+  updateReportType(id: string, request: { name: string; description?: string; isActive: boolean }): Observable<CatalogItem> {
+    return this.http.put<ApiResponse<CatalogItem>>(`${this.apiUrl}/report-types/${id}`, request).pipe(unwrapResponse());
+  }
+
+  patchReportTypeStatus(id: string, isActive: boolean): Observable<CatalogItem> {
+    return this.http.patch<ApiResponse<CatalogItem>>(`${this.apiUrl}/report-types/${id}`, { isActive }).pipe(unwrapResponse());
+  }
+
   patchDisabilityTypeStatus(id: string, isActive: boolean): Observable<CatalogItem> {
     return this.http.patch<ApiResponse<CatalogItem>>(`${this.apiUrl}/disability-types/${id}`, { isActive }).pipe(unwrapResponse());
   }

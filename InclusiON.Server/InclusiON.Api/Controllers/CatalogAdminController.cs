@@ -6,6 +6,7 @@ using InclusiON.Api.Extensions;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Domain.Models;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Catalogs;
 using InclusiON.DTOs.Requests.Common;
 using InclusiON.DTOs.Responses;
@@ -492,6 +493,53 @@ namespace InclusiON.Api.Controllers
 
         #region Report Types
 
+        [HttpGet("report-types")]
+        public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetReportTypes(CancellationToken cancellationToken)
+            => Ok(await _catalog.GetAllAsync<ReportType, CatalogItemResponse>(
+                x => new CatalogItemResponse { Id = x.Id, Name = x.Name, Description = x.Description, IsActive = x.IsActive },
+                cancellationToken));
+
+        [HttpPost("report-types")]
+        [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> CreateReportType(
+            [FromBody] CreateReportTypeRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _catalog.CreateAsync<ReportType, CatalogItemResponse>(
+                x => x.Name == request.Name,
+                () => new ReportType { Name = request.Name, Description = request.Description, IsActive = true },
+                x => new CatalogItemResponse { Id = x.Id, Name = x.Name, Description = x.Description, IsActive = x.IsActive },
+                "Tipo de reporte", cancellationToken);
+
+            return await CreatedAsync(result, cancellationToken);
+        }
+
+        [HttpPut("report-types/{id:int}")]
+        [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<ApiResponse<CatalogItemResponse>>> UpdateReportType(
+            int id, [FromBody] UpdateReportTypeRequest request, CancellationToken cancellationToken)
+        {
+            if (!request.IsActive && await _catalog.AnyAsync<Report>(
+                    x => x.ReportTypeId == id, cancellationToken))
+            {
+                return ApiResponse<CatalogItemResponse>.Conflict(
+                    ErrorCode.BusinessRuleViolation,
+                    "No se puede dar de baja el tipo de reporte porque tiene reportes asociados.")
+                    .ToActionResult();
+            }
+
+            var result = await _catalog.UpdateAsync<ReportType, CatalogItemResponse>(
+                id,
+                x => x.Name == request.Name && x.Id != id,
+                x => { x.Name = request.Name; x.Description = request.Description; x.IsActive = request.IsActive; },
+                x => new CatalogItemResponse { Id = x.Id, Name = x.Name, Description = x.Description, IsActive = x.IsActive },
+                "Tipo de reporte", cancellationToken);
+
+            return await OkAsync(result, cancellationToken);
+        }
+
         [HttpPatch("report-types/{id:int}")]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<CatalogItemResponse>), StatusCodes.Status404NotFound)]
@@ -503,7 +551,7 @@ namespace InclusiON.Api.Controllers
                 id, request.IsActive,
                 getIsActive: e => e.IsActive,
                 applyStatus: (e, v) => e.IsActive = v,
-                toResponse: e => new CatalogItemResponse { Id = e.Id, Name = e.Name, Description = e.Description },
+                toResponse: e => new CatalogItemResponse { Id = e.Id, Name = e.Name, Description = e.Description, IsActive = e.IsActive },
                 "Tipo de reporte", cancellationToken,
                 deactivationCheck: async (typeId, ct) =>
                 {
