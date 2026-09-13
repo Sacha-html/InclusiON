@@ -351,6 +351,7 @@ export class CatalogsComponent implements OnInit {
         this.closeModal();
         if (this.catalogType === 'disability-types') this.catalogsService.invalidateDisabilityTypes();
         if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
+        if (this.catalogType === 'autonomy-levels') this.catalogsService.invalidateAutonomyLevels();
         if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
         if (this.catalogType === 'template-types') this.catalogsService.invalidateActivityTemplateTypes();
         this.loadData();
@@ -392,6 +393,7 @@ export class CatalogsComponent implements OnInit {
         this.toastService.success(isReactivating ? 'Reactivado exitosamente.' : 'Dado de baja exitosamente.');
         if (this.catalogType === 'disability-types') this.catalogsService.invalidateDisabilityTypes();
         if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
+        if (this.catalogType === 'autonomy-levels') this.catalogsService.invalidateAutonomyLevels();
         if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
         if (this.catalogType === 'template-types') this.catalogsService.invalidateActivityTemplateTypes();
         this.loadData();
