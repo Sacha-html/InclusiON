@@ -2179,8 +2179,8 @@ namespace InclusiON.Data.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("LearningStyle")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<int?>("LoginMethodId")
                         .HasColumnType("integer");
