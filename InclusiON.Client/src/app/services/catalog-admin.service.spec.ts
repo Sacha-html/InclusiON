@@ -78,3 +78,35 @@ describe('CatalogAdminService activity template types', () => {
     expect(req.request.body.componentName).toBe('TemplateType');
   });
 });
+
+describe('CatalogAdminService report types', () => {
+  let service: CatalogAdminService;
+  let http: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [CatalogAdminService, provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(CatalogAdminService);
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => http.verify());
+
+  it('sends create, update, and status requests to the report types endpoints', () => {
+    service.createReportType({ name: 'Annual', description: 'Summary' }).subscribe();
+    const create = http.expectOne(`${environment.apiUrl}/admin/catalogs/report-types`);
+    expect(create.request.method).toBe('POST');
+
+    service.updateReportType('4', { name: 'Updated', isActive: false }).subscribe();
+    const update = http.expectOne(`${environment.apiUrl}/admin/catalogs/report-types/4`);
+    expect(update.request.method).toBe('PUT');
+
+    service.patchReportTypeStatus('4', true).subscribe();
+    const status = http.expectOne(`${environment.apiUrl}/admin/catalogs/report-types/4`);
+    expect(status.request.method).toBe('PATCH');
+    status.flush({ success: true, data: { id: 4, name: 'Updated', isActive: true } });
+    update.flush({ success: true, data: { id: 4, name: 'Updated', isActive: false } });
+    create.flush({ success: true, data: { id: 5, name: 'Annual', isActive: true } });
+  });
+});
