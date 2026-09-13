@@ -39,6 +39,13 @@ import {
   templateUrl: './professional-functional-profile.component.html',
 })
 export class ProfessionalFunctionalProfileComponent {
+  readonly textFieldLimits = {
+    interestsAndMotivators: 500,
+    learningStyle: 250,
+    availableResources: 255,
+    additionalTherapies: 500,
+  } as const;
+
   @Input({ required: true }) person!: PersonResponse;
   @Output() personChange = new EventEmitter<PersonResponse>();
 
@@ -175,6 +182,19 @@ export class ProfessionalFunctionalProfileComponent {
 
     if (!this.hasAtLeastOneTextField) {
       this.toastService.error('Completá al menos uno de los campos de texto (intereses, estilo de aprendizaje, recursos o terapias) antes de guardar.');
+      return;
+    }
+
+    const exceededField = Object.entries(this.textFieldLimits)
+      .find(([field, limit]) => (this.editData[field as keyof typeof this.editData] as string).length > limit);
+    if (exceededField) {
+      const labels: Record<string, string> = {
+        interestsAndMotivators: 'Intereses y motivadores',
+        learningStyle: 'Estilo de aprendizaje',
+        availableResources: 'Recursos disponibles',
+        additionalTherapies: 'Terapias adicionales',
+      };
+      this.toastService.error(`${labels[exceededField[0]]} no puede superar los ${exceededField[1]} caracteres.`);
       return;
     }
 
