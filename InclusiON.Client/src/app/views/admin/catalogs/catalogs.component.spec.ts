@@ -14,7 +14,7 @@ describe('CatalogsComponent template types form', () => {
       providers: [
         provideNoopAnimations(),
         { provide: ActivatedRoute, useValue: { paramMap: of({ get: () => 'template-types' }) } },
-        { provide: CatalogsService, useValue: { getSkillAreas: () => of([]), getActivityTemplateTypes: () => of([]) } },
+        { provide: CatalogsService, useValue: { getSkillAreas: () => of([]), getActivityTemplateTypes: () => of([]), invalidateAutonomyLevels: () => {} } },
         { provide: CatalogAdminService, useValue: {} },
         { provide: ToastService, useValue: {} },
       ],
