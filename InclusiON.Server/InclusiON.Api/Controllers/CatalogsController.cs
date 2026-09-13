@@ -51,6 +51,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los niveles de autonomia activos.
         /// </summary>
         [HttpGet("autonomy-levels")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<AutonomyLevelResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<AutonomyLevelResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<AutonomyLevelResponse>>>> GetAutonomyLevels(
