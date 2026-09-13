@@ -9,6 +9,7 @@ using InclusiON.Application.Constants;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Common;
+using InclusiON.DTOs.Requests.Catalogs;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Catalogs;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -316,6 +317,79 @@ namespace InclusiON.Tests.Controllers
             body.Data!.Id.Should().Be(1);
             var saved = await Db.AutonomyLevels.FindAsync(1);
             saved!.IsActive.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task CreateReportType_ReturnsCreatedAndInvalidatesCatalogCaches()
+        {
+            var result = await BuildSut().CreateReportType(
+                new CreateReportTypeRequest { Name = "Informe especial", Description = "Detalle" }, default);
+
+            result.Result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result.Result!).StatusCode.Should().Be(201);
+            Db.ReportTypes.Should().ContainSingle(x => x.Name == "Informe especial" && x.IsActive);
+            await _cacheStore.Received(1).EvictByTagAsync("catalogs", Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task UpdateReportType_UpdatesNameDescriptionAndStatus()
+        {
+            Db.ReportTypes.Add(new ReportType { Name = "Original", Description = "Viejo", IsActive = true });
+            await Db.SaveChangesAsync();
+
+            var result = await BuildSut().UpdateReportType(1,
+                new UpdateReportTypeRequest { Name = "Actualizado", Description = "Nuevo", IsActive = false }, default);
+
+            result.Result.Should().BeOfType<OkObjectResult>();
+            var saved = await Db.ReportTypes.FindAsync(1);
+            saved!.Name.Should().Be("Actualizado");
+            saved.Description.Should().Be("Nuevo");
+            saved.IsActive.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task UpdateReportType_WithReports_CannotDeactivate()
+        {
+            Db.ReportTypes.Add(new ReportType { Name = "Con uso", IsActive = true });
+            await Db.SaveChangesAsync();
+            Db.Reports.Add(new Report { ReportTypeId = 1 });
+            await Db.SaveChangesAsync();
+
+            var result = await BuildSut().UpdateReportType(1,
+                new UpdateReportTypeRequest { Name = "Con uso", IsActive = false }, default);
+
+            result.Result.Should().BeOfType<ConflictObjectResult>();
+            var body = ((ConflictObjectResult)result.Result!).Value as ApiResponse<CatalogItemResponse>;
+            body!.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
+            body.Message.Should().Be("No se puede dar de baja el tipo de reporte porque tiene reportes asociados.");
+
+            var saved = await Db.ReportTypes.FindAsync(1);
+            saved!.IsActive.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task PatchReportTypeStatus_WithReports_ReturnsConflict()
+        {
+            Db.ReportTypes.Add(new ReportType { Name = "Con uso", IsActive = true });
+            await Db.SaveChangesAsync();
+            Db.Reports.Add(new Report { ReportTypeId = 1 });
+            await Db.SaveChangesAsync();
+
+            var result = await BuildSut().PatchReportTypeStatus(1, new PatchStatusRequest(false), default);
+
+            result.Result.Should().BeOfType<ConflictObjectResult>();
+        }
+
+        [Fact]
+        public async Task PatchReportTypeStatus_WithoutReports_ReturnsInactiveStatus()
+        {
+            Db.ReportTypes.Add(new ReportType { Name = "Sin uso", IsActive = true });
+            await Db.SaveChangesAsync();
+
+            var result = await BuildSut().PatchReportTypeStatus(1, new PatchStatusRequest(false), default);
+
+            var body = ((OkObjectResult)result.Result!).Value as ApiResponse<CatalogItemResponse>;
+            body!.Data!.IsActive.Should().BeFalse();
         }
     }
 }

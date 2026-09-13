@@ -26,6 +26,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los tipos de discapacidad activos.
         /// </summary>
         [HttpGet("disability-types")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetDisabilityTypes(
@@ -49,6 +51,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los niveles de autonomia activos.
         /// </summary>
         [HttpGet("autonomy-levels")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<AutonomyLevelResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<AutonomyLevelResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<AutonomyLevelResponse>>>> GetAutonomyLevels(
@@ -63,6 +67,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene las categorias de actividades activas.
         /// </summary>
         [HttpGet("activity-categories")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetActivityCategories(
@@ -77,6 +83,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene las areas de habilidad activas.
         /// </summary>
         [HttpGet("skill-areas")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<SkillAreaResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<SkillAreaResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<SkillAreaResponse>>>> GetSkillAreas(
@@ -91,6 +99,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los tipos de plantilla de actividad activos.
         /// </summary>
         [HttpGet("activity-template-types")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<ActivityTemplateTypeResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<ActivityTemplateTypeResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<ActivityTemplateTypeResponse>>>> GetActivityTemplateTypes(
@@ -119,6 +129,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene los tipos de reporte activos.
         /// </summary>
         [HttpGet("report-types")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetReportTypes(

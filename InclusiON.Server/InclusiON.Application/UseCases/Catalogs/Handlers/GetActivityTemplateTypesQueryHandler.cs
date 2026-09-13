@@ -32,7 +32,7 @@ namespace InclusiON.Application.UseCases.Catalogs.Handlers
             if (_cache.TryGetValue(CatalogCacheKeys.ActivityTemplateTypes, out List<ActivityTemplateTypeResponse>? cached) && cached is not null)
                 return ApiResponse<List<ActivityTemplateTypeResponse>>.SuccessResult(cached);
 
-            var items = await _repository.GetAllActiveAsync(cancellationToken);
+            var items = await _repository.GetAllActiveAsync(cancellationToken, x => x.SkillArea);
             var response = items.Select(x =>
             {
                 var item = ActivityTemplateTypeResponse.MapToResponse(x);
