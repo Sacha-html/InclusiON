@@ -30,6 +30,7 @@ export class CatalogsService {
   private readonly specialtiesChangedSubject = new Subject<void>();
   private readonly disabilityTypesChangedSubject = new Subject<void>();
   private readonly autonomyLevelsChangedSubject = new Subject<void>();
+  private readonly activityCategoriesChangedSubject = new Subject<void>();
   private readonly skillAreasChangedSubject = new Subject<void>();
   private readonly activityTemplateTypesChangedSubject = new Subject<void>();
   readonly specialtiesChanged$ = this.specialtiesChangedSubject.asObservable();
@@ -44,6 +45,13 @@ export class CatalogsService {
     startWith(void 0),
     switchMap(() => this.http
       .get<ApiResponse<AutonomyLevelItem[]>>(`${this.apiUrl}/autonomy-levels`)
+      .pipe(unwrapResponse())),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
+  private readonly activityCategories$ = this.activityCategoriesChangedSubject.pipe(
+    startWith(void 0),
+    switchMap(() => this.http
+      .get<ApiResponse<ActivityCategoryItem[]>>(`${this.apiUrl}/activity-categories`)
       .pipe(unwrapResponse())),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
@@ -96,7 +104,11 @@ export class CatalogsService {
   }
 
   getActivityCategories(): Observable<ActivityCategoryItem[]> {
-    return this.cached('activity-categories');
+    return this.activityCategories$;
+  }
+
+  invalidateActivityCategories(): void {
+    this.activityCategoriesChangedSubject.next();
   }
 
   getSkillAreas(): Observable<SkillAreaItem[]> {
