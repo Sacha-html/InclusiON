@@ -77,6 +77,8 @@ namespace InclusiON.Api.Controllers
         /// Obtiene las areas de habilidad activas.
         /// </summary>
         [HttpGet("skill-areas")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
         [ProducesResponseType(typeof(ApiResponse<List<SkillAreaResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<List<SkillAreaResponse>>), StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<ApiResponse<List<SkillAreaResponse>>>> GetSkillAreas(

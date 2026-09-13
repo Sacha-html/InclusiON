@@ -31,4 +31,18 @@ describe('CatalogsService', () => {
     expect(initialRequest.cancelled).toBeTrue();
     expect(specialties).toEqual([[2]]);
   });
+
+  it('refreshes skill areas after invalidation and emits the newly created record', () => {
+    const skillAreas: number[][] = [];
+    service.getSkillAreas().subscribe(data => skillAreas.push(data.map(area => area.id)));
+
+    const initialRequest = http.expectOne(`${environment.apiUrl}/Catalogs/skill-areas`);
+    initialRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }] });
+
+    service.invalidateSkillAreas();
+    const refreshedRequest = http.expectOne(`${environment.apiUrl}/Catalogs/skill-areas`);
+    refreshedRequest.flush({ success: true, data: [{ id: 1, name: 'Existing' }, { id: 2, name: 'Created' }] });
+
+    expect(skillAreas).toEqual([[1], [1, 2]]);
+  });
 });

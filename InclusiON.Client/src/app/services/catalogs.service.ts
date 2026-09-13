@@ -28,7 +28,15 @@ export class CatalogsService {
   private cache = new Map<string, Observable<any>>();
   private clearCache$ = new Subject<void>();
   private readonly specialtiesChangedSubject = new Subject<void>();
+  private readonly skillAreasChangedSubject = new Subject<void>();
   readonly specialtiesChanged$ = this.specialtiesChangedSubject.asObservable();
+  private readonly skillAreas$ = this.skillAreasChangedSubject.pipe(
+    startWith(void 0),
+    switchMap(() => this.http
+      .get<ApiResponse<SkillAreaItem[]>>(`${this.apiUrl}/skill-areas`)
+      .pipe(unwrapResponse())),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
   private readonly specialties$ = this.specialtiesChangedSubject.pipe(
     startWith(void 0),
     switchMap(() => this.http
@@ -60,7 +68,11 @@ export class CatalogsService {
   }
 
   getSkillAreas(): Observable<SkillAreaItem[]> {
-    return this.cached('skill-areas');
+    return this.skillAreas$;
+  }
+
+  invalidateSkillAreas(): void {
+    this.skillAreasChangedSubject.next();
   }
 
   getActivityTemplateTypes(): Observable<ActivityTemplateTypeItem[]> {

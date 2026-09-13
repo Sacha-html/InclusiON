@@ -343,6 +343,7 @@ export class CatalogsComponent implements OnInit {
         this.toastService.success(this.editingId ? 'Actualizado' : 'Creado');
         this.closeModal();
         if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
+        if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
         this.loadData();
       },
       error: () => {
@@ -379,8 +380,9 @@ export class CatalogsComponent implements OnInit {
         this.isDeactivating = false;
         this.showDeactivateModal = false;
         this.deactivatingItem = null;
-         this.toastService.success(isReactivating ? 'Reactivado exitosamente.' : 'Dado de baja exitosamente.');
-         if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
+        this.toastService.success(isReactivating ? 'Reactivado exitosamente.' : 'Dado de baja exitosamente.');
+        if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
+        if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
         this.loadData();
       },
       error: (err: any) => {
