@@ -29,6 +29,7 @@ export class CatalogsService {
   private clearCache$ = new Subject<void>();
   private readonly specialtiesChangedSubject = new Subject<void>();
   private readonly skillAreasChangedSubject = new Subject<void>();
+  private readonly activityTemplateTypesChangedSubject = new Subject<void>();
   readonly specialtiesChanged$ = this.specialtiesChangedSubject.asObservable();
   private readonly skillAreas$ = this.skillAreasChangedSubject.pipe(
     startWith(void 0),
@@ -41,6 +42,13 @@ export class CatalogsService {
     startWith(void 0),
     switchMap(() => this.http
       .get<ApiResponse<SpecialtyItem[]>>(`${this.apiUrl}/specialties`)
+      .pipe(unwrapResponse())),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
+  private readonly activityTemplateTypes$ = this.activityTemplateTypesChangedSubject.pipe(
+    startWith(void 0),
+    switchMap(() => this.http
+      .get<ApiResponse<ActivityTemplateTypeItem[]>>(`${this.apiUrl}/activity-template-types`)
       .pipe(unwrapResponse())),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
@@ -76,7 +84,11 @@ export class CatalogsService {
   }
 
   getActivityTemplateTypes(): Observable<ActivityTemplateTypeItem[]> {
-    return this.cached('activity-template-types');
+    return this.activityTemplateTypes$;
+  }
+
+  invalidateActivityTemplateTypes(): void {
+    this.activityTemplateTypesChangedSubject.next();
   }
 
   getAvatarColors(): Observable<AvatarColorItem[]> {
