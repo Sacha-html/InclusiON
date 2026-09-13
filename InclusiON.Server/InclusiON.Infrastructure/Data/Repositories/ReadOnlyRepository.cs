@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using InclusiON.Application.Interfaces.Repositories.Base;
 using InclusiON.Data;
 using InclusiON.Domain.Models.BaseEntities;
+using System.Linq.Expressions;
 
 namespace InclusiON.Infrastructure.Data.Repositories
 {
@@ -15,9 +16,14 @@ namespace InclusiON.Infrastructure.Data.Repositories
             _context = context;
         }
 
-        public async Task<List<TEntity>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+        public async Task<List<TEntity>> GetAllActiveAsync(CancellationToken cancellationToken = default,
+            params Expression<Func<TEntity, object>>[] includes)
         {
-            return await _context.Set<TEntity>()
+            IQueryable<TEntity> query = _context.Set<TEntity>();
+            foreach (var include in includes)
+                query = query.Include(include);
+
+            return await query
                 .Where(x => x.IsActive)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
