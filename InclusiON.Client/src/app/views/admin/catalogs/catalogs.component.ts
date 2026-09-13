@@ -68,6 +68,7 @@ export class CatalogsComponent implements OnInit {
   showModal = false;
   modalTitle = '';
   editingId: string | null = null;
+  private editingTechnicalValues: { contentSchema?: string; componentName?: string; displayOrder?: number } | undefined;
   form: FormGroup | null = null;
 
   showDeactivateModal = false;
@@ -224,11 +225,11 @@ export class CatalogsComponent implements OnInit {
         { key: 'name',               label: 'Nombre' },
         { key: 'code',               label: 'Código',      type: 'code' },
         { key: 'skillAreaName',      label: 'Área' },
-        { key: 'supportsPictograms', label: 'Pictogramas', type: 'badge', badgeMap: {
+        { key: 'usesPictograms',     label: 'Pictogramas', type: 'badge', badgeMap: {
           'true':  { color: 'success',   label: 'Sí' },
           'false': { color: 'secondary', label: 'No' },
         }},
-        { key: 'supportsAudio',      label: 'Audio',       type: 'badge', badgeMap: {
+        { key: 'hasAudio',           label: 'Audio',       type: 'badge', badgeMap: {
           'true':  { color: 'success',   label: 'Sí' },
           'false': { color: 'secondary', label: 'No' },
         }},
@@ -240,9 +241,10 @@ export class CatalogsComponent implements OnInit {
       fields: [
         { key: 'name', label: 'Nombre', type: 'text', required: true },
         { key: 'code', label: 'Código', type: 'text', required: true },
-        { key: 'skillAreaId', label: 'Área de habilidad', type: 'select', options: () => this.skillAreasCache },
-        { key: 'supportsPictograms', label: 'Soporta pictogramas', type: 'checkbox', default: false },
-        { key: 'supportsAudio', label: 'Soporta audio', type: 'checkbox', default: false },
+        { key: 'skillAreaId', label: 'Área de habilidad', type: 'select', required: true, options: () => this.skillAreasCache },
+        { key: 'usesPictograms', label: 'Usa pictogramas', type: 'checkbox', default: false },
+        { key: 'hasAudio', label: 'Tiene audio', type: 'checkbox', default: false },
+        { key: 'isActive', label: 'Activo', type: 'checkbox', default: true, editOnly: true },
       ],
       load: () => this.catalogsService.getActivityTemplateTypes(),
       create: (v) => this.adminService.createActivityTemplateType(v),
@@ -310,6 +312,7 @@ export class CatalogsComponent implements OnInit {
 
   openNew(): void {
     this.editingId = null;
+    this.editingTechnicalValues = undefined;
     this.modalTitle = `Nuevo - ${this.config.title}`;
     this.buildForm();
     this.showModal = true;
@@ -317,6 +320,7 @@ export class CatalogsComponent implements OnInit {
 
   openEdit(item: any): void {
     this.editingId = item.id.toString();
+    this.editingTechnicalValues = item;
     this.modalTitle = `Editar - ${this.config.title}`;
     this.buildForm(item);
     this.showModal = true;
@@ -325,6 +329,7 @@ export class CatalogsComponent implements OnInit {
   closeModal(): void {
     this.showModal = false;
     this.editingId = null;
+    this.editingTechnicalValues = undefined;
   }
 
   save(): void {
@@ -332,7 +337,9 @@ export class CatalogsComponent implements OnInit {
     this.isSaving = true;
     const value = this.form.value;
     const obs = this.editingId
-      ? this.config.update(this.editingId, value)
+      ? this.catalogType === 'template-types'
+        ? this.adminService.updateActivityTemplateType(this.editingId, value, this.editingTechnicalValues)
+        : this.config.update(this.editingId, value)
       : this.config.create?.(value);
 
     if (!obs) { this.isSaving = false; return; }
@@ -344,6 +351,7 @@ export class CatalogsComponent implements OnInit {
         this.closeModal();
         if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
         if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
+        if (this.catalogType === 'template-types') this.catalogsService.invalidateActivityTemplateTypes();
         this.loadData();
       },
       error: () => {
@@ -383,6 +391,7 @@ export class CatalogsComponent implements OnInit {
         this.toastService.success(isReactivating ? 'Reactivado exitosamente.' : 'Dado de baja exitosamente.');
         if (this.catalogType === 'specialties') this.catalogsService.invalidateSpecialties();
         if (this.catalogType === 'skill-areas') this.catalogsService.invalidateSkillAreas();
+        if (this.catalogType === 'template-types') this.catalogsService.invalidateActivityTemplateTypes();
         this.loadData();
       },
       error: (err: any) => {

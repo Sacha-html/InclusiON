@@ -42,10 +42,13 @@ export interface ActivityTemplateTypeItem {
   encryptedId: string;
   name: string;
   code: string;
-  skillAreaId?: number;
+  skillAreaId: number;
   skillAreaName?: string;
-  supportsPictograms: boolean;
-  supportsAudio: boolean;
+  contentSchema: string;
+  componentName: string;
+  usesPictograms: boolean;
+  hasAudio: boolean;
+  displayOrder: number;
   isActive: boolean;
 }
 
