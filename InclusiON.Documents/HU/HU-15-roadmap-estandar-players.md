@@ -25,10 +25,12 @@
 
 Cuando el profesional registra a un alumno nuevo, el sistema ejecuta `RoadmapInitializer` que:
 
-1. Crea un `PersonRoadmap` con un área de Comunicación
+1. Usa el área `Trayectoria` previamente cargada mediante el ABM; no crea áreas automáticamente
 2. Agrega 10 `PersonRoadmapActivity` ordenadas secuencialmente
 3. Desbloquea el Nivel 1 automáticamente (`IsUnlocked = true`)
 4. Cada actividad ya tiene su `ContentJson` completo y listo para el player del frontend
+
+> **Prerequisito:** los roadmaps requieren que `SkillAreas` y `ActivityTemplateTypes` estén cargados manualmente. Si falta el área `Trayectoria`, el inicializador no crea catálogos ni genera actividades estándar.
 
 Al iniciar el servidor (arranque), `DatabaseSeeder.PatchStandardActivitiesContentAsync` verifica si alguna actividad existente tiene `ContentJson = '{}'` y la actualiza automáticamente, sin afectar actividades ya con contenido.
 
