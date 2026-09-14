@@ -63,11 +63,8 @@ export class ProfessionalPersonsComponent implements OnInit {
   private readonly toastService = inject(ToastService);
 
   // ── State ──────────────────────────────────────────────────────────────
-  showAssignPersonModal = signal(false);
-  showDeactivatePersonModal = signal(false);
   showTransferModal = signal(false);
   showMovePersonModal = signal(false);
-  personToDeactivate = signal<ProfessionalPersonResponse | null>(null);
   personToTransfer = signal<ProfessionalPersonResponse | null>(null);
   personToMove = signal<ProfessionalPersonResponse | null>(null);
   selectedTargetProfessionalId = signal<string>('');
@@ -126,22 +123,7 @@ export class ProfessionalPersonsComponent implements OnInit {
   showDeleteClassroomModal = signal(false);
   classroomToDelete = signal<ClassroomResponse | null>(null);
 
-  // ── Forms ──────────────────────────────────────────────────────────────
-  assignPersonForm: FormGroup = this.fb.group({
-    personId: [null],
-    classroomId: [null],
-    isPrimaryProfessional: [false],
-    canSuperviseLogin: [false],
-  });
-
   // ── Search fns ─────────────────────────────────────────────────────────
-  readonly searchPersonsFn = (query: string) => {
-    const assignedIds = new Set(this.persons.filter(p => p.isActive).map(p => p.personId));
-    return this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
-      map(r => r.data.filter(p => !assignedIds.has(p.id)))
-    );
-  };
-
   readonly searchPersonsForClassroomFn = (query: string) => {
     const assignedIds = new Set(this.persons.filter(p => p.isActive).map(p => p.personId));
     const alreadyAddedIds = new Set(this.selectedPersonsToAssign().map(p => p.id));
@@ -154,7 +136,6 @@ export class ProfessionalPersonsComponent implements OnInit {
   readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
   readonly subDisplayPerson = (p: PersonListItemResponse) =>
     p.documentNumber ? `${p.disabilityTypeName ?? 'Sin tipo'} (DNI: ${p.documentNumber})` : p.disabilityTypeName ?? '';
-  readonly valueFromPerson = (p: PersonListItemResponse) => p.id;
 
   // ── Table columns ──────────────────────────────────────────────────────
   columns: TableColumn[] = [
@@ -195,7 +176,6 @@ export class ProfessionalPersonsComponent implements OnInit {
       actions: [
         { action: 'move-classroom', label: 'Cambiar Aula', icon: 'cilPencil', visible: (item) => item.isActive },
         { action: 'transfer', label: 'Transferir', icon: 'cilSwapHorizontal', visible: (item) => item.isActive },
-        { action: 'deactivate', label: 'Desasignar', icon: 'cilUserUnfollow', visible: (item) => item.isActive },
       ],
     },
   ];
@@ -212,9 +192,7 @@ export class ProfessionalPersonsComponent implements OnInit {
 
   // ── Table actions ──────────────────────────────────────────────────────
   onRowAction(event: { action: string; item: ProfessionalPersonResponse }): void {
-    if (event.action === 'deactivate') {
-      this.openDeactivatePersonModal(event.item);
-    } else if (event.action === 'transfer') {
+    if (event.action === 'transfer') {
       this.openTransferModal(event.item);
     } else if (event.action === 'move-classroom') {
       this.openMovePersonModal(event.item);
@@ -259,43 +237,6 @@ export class ProfessionalPersonsComponent implements OnInit {
     this.personToTransfer.set(null);
   }
 
-  // ── Assign person ──────────────────────────────────────────────────────
-  openAssignPersonModal(): void {
-    this.assignPersonForm.reset({ personId: null, classroomId: null, isPrimaryProfessional: false, canSuperviseLogin: false });
-    this.showAssignPersonModal.set(true);
-  }
-
-  confirmAssignPerson(): void {
-    const val = this.assignPersonForm.value;
-    if (!val.personId) return;
-
-    this.isSubmitting.set(true);
-    this.assignmentsService
-      .assignPerson(this.professionalId, {
-        personId: val.personId,
-        classroomId: val.classroomId || null,
-        isPrimaryProfessional: val.isPrimaryProfessional ?? false,
-        canSuperviseLogin: val.canSuperviseLogin ?? false,
-      })
-      .subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.showAssignPersonModal.set(false);
-          this.toastService.success('Alumno asignado exitosamente');
-          this.loadAssignedPersons();
-          this.loadClassrooms();
-        },
-        error: () => {
-          this.isSubmitting.set(false);
-          this.toastService.error('Error al asignar alumno');
-        },
-      });
-  }
-
-  cancelAssignPerson(): void {
-    this.showAssignPersonModal.set(false);
-  }
-
   // ── Move person to classroom ────────────────────────────────────────────
   movePersonForm: FormGroup = this.fb.group({ classroomId: [null] });
 
@@ -332,37 +273,6 @@ export class ProfessionalPersonsComponent implements OnInit {
 
   cancelMovePersonModal(): void {
     this.showMovePersonModal.set(false);
-  }
-
-  // ── Deactivate person assignment ────────────────────────────────────────
-  openDeactivatePersonModal(person: ProfessionalPersonResponse): void {
-    this.personToDeactivate.set(person);
-    this.showDeactivatePersonModal.set(true);
-  }
-
-  confirmDeactivatePerson(): void {
-    if (!this.personToDeactivate()) return;
-
-    this.assignmentsService
-      .deactivatePersonAssignment(this.professionalId, this.personToDeactivate()!.personId)
-      .subscribe({
-        next: () => {
-          this.showDeactivatePersonModal.set(false);
-          this.personToDeactivate.set(null);
-          this.toastService.success('Asignacion desactivada exitosamente');
-          this.loadAssignedPersons();
-          this.loadClassrooms();
-        },
-        error: () => {
-          this.showDeactivatePersonModal.set(false);
-          this.toastService.error('Error al desactivar la asignacion');
-        },
-      });
-  }
-
-  cancelDeactivatePerson(): void {
-    this.showDeactivatePersonModal.set(false);
-    this.personToDeactivate.set(null);
   }
 
   // ── Create classroom ───────────────────────────────────────────────────
