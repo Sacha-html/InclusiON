@@ -81,7 +81,7 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  getAdjustmentHistory(personId: string, areaId: number, activityEntryId: number): Observable<AdaptiveAdjustmentLogResponse[]> {
+  getAdjustmentHistory(personId: string, areaId: string, activityEntryId: string): Observable<AdaptiveAdjustmentLogResponse[]> {
     return this.http
       .get<ApiResponse<AdaptiveAdjustmentLogResponse[]>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adjustments`
@@ -97,7 +97,7 @@ export class RoadmapService {
 
   // ── Adaptive Engine Config (IN-116) ──────────────────────────────────────
 
-  getAdaptiveConfig(personId: string, areaId: number, activityEntryId: number): Observable<AdaptiveEngineConfigResponse | null> {
+  getAdaptiveConfig(personId: string, areaId: string, activityEntryId: string): Observable<AdaptiveEngineConfigResponse | null> {
     return this.http
       .get<ApiResponse<AdaptiveEngineConfigResponse | null>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adaptive-config`
@@ -107,8 +107,8 @@ export class RoadmapService {
 
   upsertAdaptiveConfig(
     personId: string,
-    areaId: number,
-    activityEntryId: number,
+    areaId: string,
+    activityEntryId: string,
     payload: Partial<AdaptiveEngineConfigResponse>
   ): Observable<AdaptiveEngineConfigResponse> {
     return this.http
@@ -123,8 +123,8 @@ export class RoadmapService {
 
   assignFromRoadmap(
     personId: string,
-    areaId: number,
-    activityEntryId: number,
+    areaId: string,
+    activityEntryId: string,
     payload: { dueDate?: string; isEvaluationActivity: boolean; bypassDuplicateWarning?: boolean }
   ): Observable<ActivityAssignmentResponse> {
     return this.http
@@ -135,7 +135,7 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  deleteAdaptiveConfig(personId: string, areaId: number, activityEntryId: number): Observable<unknown> {
+  deleteAdaptiveConfig(personId: string, areaId: string, activityEntryId: string): Observable<unknown> {
     return this.http
       .delete<ApiResponse<unknown>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adaptive-config`
