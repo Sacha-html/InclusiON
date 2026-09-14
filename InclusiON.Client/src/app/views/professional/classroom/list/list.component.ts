@@ -8,7 +8,10 @@ import { ProfessionalPersonResponse, ClassroomResponse } from '@models';
 import {
   CardComponent, CardBodyComponent, CardHeaderComponent,
   ColComponent, RowComponent, SpinnerComponent, BadgeComponent,
+  ButtonDirective, ModalComponent, ModalHeaderComponent, ModalBodyComponent,
+  ModalFooterComponent, ModalTitleDirective, FormSelectDirective,
 } from '@coreui/angular';
+import { IconModule } from '@coreui/icons-angular';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avatar.component';
 
@@ -18,7 +21,9 @@ import { ActorAvatarComponent } from '@shared/components/actor-avatar/actor-avat
   imports: [
     CardComponent, CardBodyComponent, CardHeaderComponent,
     ColComponent, RowComponent, SpinnerComponent, BadgeComponent,
-    EmptyStateComponent, ActorAvatarComponent, FormsModule,
+    ButtonDirective, ModalComponent, ModalHeaderComponent, ModalBodyComponent,
+    ModalFooterComponent, ModalTitleDirective, FormSelectDirective,
+    IconModule, EmptyStateComponent, ActorAvatarComponent, FormsModule,
   ],
   templateUrl: './list.component.html',
   styleUrl: './list.component.scss',
@@ -29,10 +34,17 @@ export class ListComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
+  currentProfId = '';
   persons: ProfessionalPersonResponse[] = [];
   classrooms: ClassroomResponse[] = [];
   selectedClassroomId = '';
   isLoading = true;
+
+  // Modal Asignar / Cambiar aula
+  showAssignModal = false;
+  selectedPerson: ProfessionalPersonResponse | null = null;
+  targetClassroomId: string | null = null;
+  isSubmitting = false;
 
   get hasClassrooms(): boolean {
     return this.classrooms.length > 0;
@@ -82,6 +94,7 @@ export class ListComponent implements OnInit {
     this.isLoading = true;
     this.professionalsService.getMyProfile().pipe(
       switchMap(prof => {
+        this.currentProfId = prof.id;
         return forkJoin({
           persons: this.assignmentsService.getPersonsByProfessional(prof.id),
           classrooms: this.assignmentsService.getClassroomsByProfessional(prof.id)
@@ -112,5 +125,62 @@ export class ListComponent implements OnInit {
 
   goToDetail(person: ProfessionalPersonResponse): void {
     this.router.navigate([AppRoutes.Pro.Persons, person.personId]);
+  }
+
+  openAssignClassroomModal(person: ProfessionalPersonResponse, event?: Event): void {
+    event?.stopPropagation();
+    this.selectedPerson = person;
+    this.targetClassroomId = person.classroomId ?? null;
+    this.showAssignModal = true;
+  }
+
+  confirmAssignClassroom(): void {
+    if (!this.selectedPerson || !this.currentProfId) return;
+
+    const targetId = this.targetClassroomId || null;
+    const currentId = this.selectedPerson.classroomId || null;
+
+    if (targetId === currentId) {
+      this.showAssignModal = false;
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.assignmentsService
+      .movePersonToClassroom(this.currentProfId, this.selectedPerson.personId, targetId)
+      .subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.showAssignModal = false;
+          const targetRoom = this.classrooms.find(c => c.id === targetId);
+          if (targetRoom) {
+            this.toastService.success(`Alumno asignado a "${targetRoom.name}" exitosamente`);
+          } else {
+            this.toastService.success('Alumno asignado a asignación general (sin aula) exitosamente');
+          }
+          this.selectedPerson = null;
+          this.reloadClassroomsAndPersons();
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          this.toastService.error(err?.userMessage ?? 'Error al mover el alumno de aula');
+        }
+      });
+  }
+
+  reloadClassroomsAndPersons(): void {
+    if (!this.currentProfId) return;
+    forkJoin({
+      persons: this.assignmentsService.getPersonsByProfessional(this.currentProfId),
+      classrooms: this.assignmentsService.getClassroomsByProfessional(this.currentProfId)
+    }).subscribe({
+      next: (res) => {
+        this.persons = res.persons;
+        this.classrooms = res.classrooms;
+      },
+      error: () => {
+        this.toastService.error('Error al actualizar los datos');
+      }
+    });
   }
 }
