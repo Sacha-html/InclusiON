@@ -85,6 +85,7 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
 
             var actDto = RoadmapMapper.ToActivityResponse(entry);
             actDto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(entry.Id.ToString()));
+            actDto.EncryptedActivityId = ToUrlSafeBase64(_encryption.Encrypt(entry.ActivityId.ToString()));
             return ApiResponse<RoadmapActivityResponse>.SuccessResult(actDto,
                 "Actividad agregada al roadmap exitosamente.");
         }

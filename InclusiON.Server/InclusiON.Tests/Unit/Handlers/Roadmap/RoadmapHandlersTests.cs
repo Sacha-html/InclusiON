@@ -85,6 +85,32 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
             result.Data.Areas[0].DisplayOrder.Should().Be(1);
             result.Data.Areas[1].DisplayOrder.Should().Be(2);
         }
+
+        [Fact]
+        public async Task HandleAsync_MapsEncryptedCatalogActivityIdSeparatelyFromEntryId()
+        {
+            var roadmap = AFullRoadmap();
+            roadmap.Areas = new List<PersonRoadmapArea>
+            {
+                new()
+                {
+                    Id = 10,
+                    SkillArea = new SkillArea { Name = "Comunicación" },
+                    Activities = new List<PersonRoadmapActivity>
+                    {
+                        new() { Id = 20, ActivityId = 7, Activity = new Activity { Id = 7, Title = "AAC" } }
+                    }
+                }
+            };
+            _roadmaps.GetByPersonIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(roadmap);
+            _encryption.Encrypt(Arg.Any<string>()).Returns(call => $"encrypted-{call.Arg<string>()}");
+
+            var result = await BuildSut().HandleAsync(new GetPersonRoadmapQuery(PersonId), default);
+            var activity = result.Data!.Areas.Single().Activities.Single();
+
+            activity.EncryptedId.Should().Be("encrypted-20");
+            activity.EncryptedActivityId.Should().Be("encrypted-7");
+        }
     }
 
     // ════════════════════════════════════════════════════════════════════════════
@@ -415,11 +441,20 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
                      .Returns(new PersonRoadmapArea { Id = AreaId, SkillArea = new SkillArea() });
             _activities.GetByIdAsync(ActivityId, Arg.Any<CancellationToken>()).Returns(AnActivity());
             _roadmaps.ActivityExistsInAreaAsync(AreaId, ActivityId, Arg.Any<CancellationToken>()).Returns(false);
+            _encryption.Encrypt(Arg.Any<string>()).Returns(call => $"encrypted-{call.Arg<string>()}");
+            _roadmaps.AddActivityAsync(Arg.Any<PersonRoadmapActivity>(), Arg.Any<CancellationToken>())
+                     .Returns(call =>
+                     {
+                         call.Arg<PersonRoadmapActivity>().Id = 99;
+                         return Task.CompletedTask;
+                     });
 
             var result = await BuildSut().HandleAsync(ACmd(sequenceOrder: 2), default);
 
             result.Success.Should().BeTrue();
             result.Data!.ActivityId.Should().Be(ActivityId);
+            result.Data.EncryptedId.Should().Be("encrypted-99");
+            result.Data.EncryptedActivityId.Should().Be("encrypted-42");
             result.Data.ActivityTitle.Should().Be("Actividad Demo");
             result.Data.SequenceOrder.Should().Be(2);
             result.Data.IsUnlocked.Should().BeFalse();  // sequenceOrder != 1 → locked
@@ -537,11 +572,13 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
             var activity = new PersonRoadmapActivity
             {
                 Id         = 55,
+                ActivityId = 42,
                 IsUnlocked = false,
                 Activity   = new Activity { Title = "Demo" }
             };
             _roadmaps.GetActivityByIdAsync(55, Arg.Any<CancellationToken>()).Returns(activity);
             _dateTime.UtcNow.Returns(DateTime.UtcNow);
+            _encryption.Encrypt(Arg.Any<string>()).Returns(call => $"encrypted-{call.Arg<string>()}");
 
             var result = await BuildSut().HandleAsync(Cmd(55), default);
 
@@ -549,6 +586,8 @@ namespace InclusiON.Tests.Unit.Handlers.Roadmap
             activity.IsUnlocked.Should().BeTrue();
             activity.UnlockedAt.Should().NotBeNull();
             result.Data!.IsUnlocked.Should().BeTrue();
+            result.Data.EncryptedId.Should().Be("encrypted-55");
+            result.Data.EncryptedActivityId.Should().Be("encrypted-42");
             result.Data.UnlockedAt.Should().NotBeNull();
             await _assignments.Received(1).CreateAsync(Arg.Any<ActivityAssignment>(), Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
