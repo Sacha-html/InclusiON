@@ -44,7 +44,7 @@ export class NewComponent {
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email]],
     documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
-    phone: ['', [Validators.maxLength(20)]],
+    phone: ['', [Validators.maxLength(20), Validators.pattern(/^[0-9]+$/)]],
     relationship: ['', [Validators.required]],
     personId: [null, [Validators.required]],
   });

@@ -15,6 +15,7 @@ namespace InclusiON.DTOs.Requests.Institutions
         public string? Address { get; set; }
 
         [StringLength(20, ErrorMessage = "El telefono no puede exceder 20 caracteres")]
+        [RegularExpression(@"^[0-9]+$", ErrorMessage = "El teléfono solo puede contener números")]
         public string? Phone { get; set; }
 
         [Required(ErrorMessage = "El email es requerido")]

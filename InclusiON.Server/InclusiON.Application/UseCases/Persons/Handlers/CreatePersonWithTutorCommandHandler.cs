@@ -101,9 +101,22 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                         "El email del tutor ya se encuentra registrado.");
                 }
 
-                // 4. Validar el aula si se proporciona y obtener el ProfessionalId
-                Professional? professional = null;
-                Guid? professionalId = null;
+                // 4. Validar el profesional responsable y el aula (si se especifica)
+                if (command.ProfessionalId == Guid.Empty)
+                {
+                    return ApiResponse<PersonResponse>.ErrorResult(
+                        ErrorCode.ValidationFailed,
+                        "Debe seleccionar un profesional responsable para el alumno.");
+                }
+
+                var professional = await _professionalsRepository.GetByIdAsync(command.ProfessionalId, cancellationToken);
+                if (professional == null)
+                {
+                    return ApiResponse<PersonResponse>.ErrorResult(
+                        ErrorCode.NotFound,
+                        "El profesional especificado no existe.");
+                }
+
                 if (command.ClassroomId.HasValue)
                 {
                     var classroom = await _assignmentsRepository.GetClassroomByIdAsync(command.ClassroomId.Value, cancellationToken);
@@ -114,8 +127,12 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                             "El aula especificada no existe.");
                     }
 
-                    professionalId = classroom.ProfessionalId;
-                    professional = await _professionalsRepository.GetByIdAsync(professionalId.Value, cancellationToken);
+                    if (classroom.ProfessionalId != command.ProfessionalId)
+                    {
+                        return ApiResponse<PersonResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            "El aula especificada no pertenece al profesional seleccionado.");
+                    }
                 }
 
                 // 5. Preparar creación del alumno
@@ -210,21 +227,18 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     };
                     student.PersonRepresentatives.Add(relationshipLink);
 
-                    // D. Asignar Aula si se proporcionó una válida
-                    if (command.ClassroomId.HasValue)
+                    // D. Vincular al alumno con el profesional responsable (y aula opcional)
+                    var assignment = new ProfessionalPerson
                     {
-                        var assignment = new ProfessionalPerson
-                        {
-                            ProfessionalId = professionalId!.Value,
-                            PersonId = student.Id,
-                            ClassroomId = command.ClassroomId.Value,
-                            IsPrimaryProfessional = true,
-                            CanSuperviseLogin = true,
-                            IsActive = true,
-                            AssignedAt = _dateTime.UtcNow
-                        };
-                        student.ProfessionalPersons.Add(assignment);
-                    }
+                        ProfessionalId = command.ProfessionalId,
+                        PersonId = student.Id,
+                        ClassroomId = command.ClassroomId,
+                        IsPrimaryProfessional = true,
+                        CanSuperviseLogin = true,
+                        IsActive = true,
+                        AssignedAt = _dateTime.UtcNow
+                    };
+                    student.ProfessionalPersons.Add(assignment);
 
                     // E. Guardar perfiles y relaciones en base de datos en un solo SaveChangesAsync
                     await _repository.CreateAsync(student, ct);
