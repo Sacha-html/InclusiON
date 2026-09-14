@@ -12,6 +12,8 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roadmap;
 using System.Collections.Generic;
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace InclusiON.Tests.Controllers
 {
@@ -287,7 +289,38 @@ namespace InclusiON.Tests.Controllers
             // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<DeleteAdaptiveEngineConfigCommand>(c => c.PersonRoadmapActivityId == 55),
-                Arg.Any<CancellationToken>());
+                 Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public void RoadmapIdRoutes_AcceptEncryptedIdsWithTheExistingBinder()
+        {
+            var controller = typeof(RoadmapController);
+            var routeMethods = new[]
+            {
+                nameof(RoadmapController.RemoveArea),
+                nameof(RoadmapController.AddActivity),
+                nameof(RoadmapController.ReorderActivities),
+                nameof(RoadmapController.RemoveActivity),
+                nameof(RoadmapController.UnlockActivity),
+                nameof(RoadmapController.AssignFromRoadmap),
+                nameof(RoadmapController.GetAdaptiveConfig),
+                nameof(RoadmapController.UpsertAdaptiveConfig),
+                nameof(RoadmapController.DeleteAdaptiveConfig),
+                nameof(RoadmapController.GetAdjustmentHistory),
+            };
+
+            foreach (var methodName in routeMethods)
+            {
+                var method = controller.GetMethod(methodName)!;
+                var route = method.GetCustomAttributes().OfType<IRouteTemplateProvider>().Single().Template!;
+                route.Should().NotContain(":int");
+                foreach (var parameter in method.GetParameters().Where(p => p.Name is "areaId" or "activityEntryId"))
+                {
+                    parameter.GetCustomAttribute<ModelBinderAttribute>()!.BinderType
+                        .Should().Be(typeof(InclusiON.Api.ModelBinders.EncryptedIntModelBinder));
+                }
+            }
         }
     }
 }
