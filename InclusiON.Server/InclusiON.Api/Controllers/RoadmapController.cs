@@ -37,18 +37,22 @@ namespace InclusiON.Api.Controllers
 
         /// <summary>
         /// Obtiene el roadmap completo de una persona (areas y actividades).
+        /// La ausencia de roadmap es un estado valido y se representa como 200 con data=null;
+        /// los errores reales mantienen sus codigos HTTP.
         /// </summary>
         [HttpGet]
         [Authorize(Policy = Permissions.Roadmap.Read)]
         [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<RoadmapResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<RoadmapResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<RoadmapResponse>>> GetRoadmap(
             Guid personId,
             [FromServices] IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>> handler,
             CancellationToken cancellationToken = default)
         {
             var result = await handler.HandleAsync(new GetPersonRoadmapQuery(personId), cancellationToken);
+            // No roadmap assigned yet is a valid state — return 200 with null data instead of 404.
+            if (!result.Success && result.ErrorCode == ErrorCode.NotFound)
+                return Ok(ApiResponse<RoadmapResponse>.SuccessResult(null!));
             return result.ToActionResult();
         }
 
