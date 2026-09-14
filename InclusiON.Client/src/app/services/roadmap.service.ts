@@ -14,15 +14,16 @@ export class RoadmapService {
     return `${environment.apiUrl}/Persons/${personId}/roadmap`;
   }
 
-  getRoadmap(personId: string): Observable<RoadmapResponse> {
+  /** Returns null when the person does not have a roadmap yet. */
+  getRoadmap(personId: string): Observable<RoadmapResponse | null> {
     return this.http
-      .get<ApiResponse<RoadmapResponse>>(this.url(personId))
+      .get<ApiResponse<RoadmapResponse | null>>(this.url(personId))
       .pipe(unwrapResponse());
   }
 
-  getMyRoadmap(): Observable<RoadmapResponse> {
+  getMyRoadmap(): Observable<RoadmapResponse | null> {
     return this.http
-      .get<ApiResponse<RoadmapResponse>>(`${environment.apiUrl}/my/roadmap`)
+      .get<ApiResponse<RoadmapResponse | null>>(`${environment.apiUrl}/my/roadmap`)
       .pipe(unwrapResponse());
   }
 
