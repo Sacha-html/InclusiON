@@ -18,6 +18,7 @@ namespace InclusiON.DTOs.Requests.Professionals
         public string? DocumentNumber { get; set; }
 
         [StringLength(20, ErrorMessage = "El telefono no puede exceder 20 caracteres")]
+        [RegularExpression(@"^[0-9]+$", ErrorMessage = "El teléfono solo puede contener números")]
         public string? Phone { get; set; }
 
         [StringLength(100, ErrorMessage = "La especialidad no puede exceder 100 caracteres")]

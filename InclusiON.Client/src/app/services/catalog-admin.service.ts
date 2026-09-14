@@ -5,6 +5,50 @@ import { ApiResponse, CatalogItem, AutonomyLevelItem, ActivityCategoryItem, Skil
 import { environment } from '@env';
 import { unwrapResponse } from '@shared/utils';
 
+export interface ActivityTemplateTypeFormValue {
+  skillAreaId: number;
+  name: string;
+  code: string;
+  usesPictograms: boolean;
+  hasAudio: boolean;
+  isActive?: boolean;
+}
+
+export interface ActivityTemplateTypeTechnicalValues {
+  contentSchema?: string;
+  componentName?: string;
+  displayOrder?: number;
+}
+
+export interface CreateActivityTemplateTypeRequest extends ActivityTemplateTypeFormValue {
+  contentSchema: string;
+  componentName: string;
+  displayOrder: number;
+}
+
+export interface UpdateActivityTemplateTypeRequest extends CreateActivityTemplateTypeRequest {
+  isActive: boolean;
+}
+
+// These values are backend metadata, not administrator-editable Angular components.
+export function buildActivityTemplateTypePayload(
+  value: ActivityTemplateTypeFormValue,
+  technicalValues?: ActivityTemplateTypeTechnicalValues,
+): CreateActivityTemplateTypeRequest | UpdateActivityTemplateTypeRequest {
+  const code = value.code.trim();
+  const componentName = technicalValues?.componentName?.trim() || code || 'TemplateType';
+  const { isActive, ...formFields } = value;
+  const payload = {
+    ...formFields,
+    code,
+    contentSchema: technicalValues?.contentSchema ?? '{}',
+    componentName,
+    displayOrder: technicalValues?.displayOrder ?? 0,
+  };
+
+  return isActive === undefined ? payload : { ...payload, isActive };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -56,12 +100,14 @@ export class CatalogAdminService {
   }
 
   // Activity Template Types
-  createActivityTemplateType(request: Record<string, unknown>): Observable<ActivityTemplateTypeItem> {
-    return this.http.post<ApiResponse<ActivityTemplateTypeItem>>(`${this.apiUrl}/activity-template-types`, request).pipe(unwrapResponse());
+  createActivityTemplateType(request: ActivityTemplateTypeFormValue): Observable<ActivityTemplateTypeItem> {
+    const payload = buildActivityTemplateTypePayload(request);
+    return this.http.post<ApiResponse<ActivityTemplateTypeItem>>(`${this.apiUrl}/activity-template-types`, payload).pipe(unwrapResponse());
   }
 
-  updateActivityTemplateType(id: string, request: Record<string, unknown>): Observable<ActivityTemplateTypeItem> {
-    return this.http.put<ApiResponse<ActivityTemplateTypeItem>>(`${this.apiUrl}/activity-template-types/${id}`, request).pipe(unwrapResponse());
+  updateActivityTemplateType(id: string, request: ActivityTemplateTypeFormValue, technicalValues?: ActivityTemplateTypeTechnicalValues): Observable<ActivityTemplateTypeItem> {
+    const payload = buildActivityTemplateTypePayload(request, technicalValues) as UpdateActivityTemplateTypeRequest;
+    return this.http.put<ApiResponse<ActivityTemplateTypeItem>>(`${this.apiUrl}/activity-template-types/${id}`, payload).pipe(unwrapResponse());
   }
 
   // Login Methods
@@ -70,6 +116,22 @@ export class CatalogAdminService {
   }
 
   // Patch status (state machine)
+  getAllReportTypes(): Observable<CatalogItem[]> {
+    return this.http.get<ApiResponse<CatalogItem[]>>(`${this.apiUrl}/report-types`).pipe(unwrapResponse());
+  }
+
+  createReportType(request: { name: string; description?: string }): Observable<CatalogItem> {
+    return this.http.post<ApiResponse<CatalogItem>>(`${this.apiUrl}/report-types`, request).pipe(unwrapResponse());
+  }
+
+  updateReportType(id: string, request: { name: string; description?: string; isActive: boolean }): Observable<CatalogItem> {
+    return this.http.put<ApiResponse<CatalogItem>>(`${this.apiUrl}/report-types/${id}`, request).pipe(unwrapResponse());
+  }
+
+  patchReportTypeStatus(id: string, isActive: boolean): Observable<CatalogItem> {
+    return this.http.patch<ApiResponse<CatalogItem>>(`${this.apiUrl}/report-types/${id}`, { isActive }).pipe(unwrapResponse());
+  }
+
   patchDisabilityTypeStatus(id: string, isActive: boolean): Observable<CatalogItem> {
     return this.http.patch<ApiResponse<CatalogItem>>(`${this.apiUrl}/disability-types/${id}`, { isActive }).pipe(unwrapResponse());
   }

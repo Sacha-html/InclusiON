@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
 using InclusiON.Api.Filters;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Application.Authorization;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -36,20 +37,21 @@ namespace InclusiON.Api.Controllers
             [FromServices] IQueryHandler<GetDiagnosesQuery, ApiResponse<PagedResponse<DiagnosisListItemResponse>>> handler,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10,
+            [FromQuery] bool? isActive = null,
             CancellationToken cancellationToken = default)
         {
-            var query = new GetDiagnosesQuery(personId, page, pageSize);
+            var query = new GetDiagnosesQuery(personId, page, pageSize, isActive);
             var result = await handler.HandleAsync(query, cancellationToken);
             return Ok(result);
         }
 
-        [HttpGet("diagnoses/{id:int}")]
+        [HttpGet("diagnoses/{id}")]
         [Authorize(Policy = "diagnoses:read")]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
         [DiagnosisAccess(AccessMode.Read)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> GetDiagnosisById(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromServices] IQueryHandler<GetDiagnosisByIdQuery, ApiResponse<DiagnosisResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -90,7 +92,7 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPatch("diagnoses/{id:int}")]
+        [HttpPatch("diagnoses/{id}")]
         [Authorize(Policy = "diagnoses:update")]
         [DiagnosisAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
@@ -98,7 +100,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<ApiResponse<object>>> PatchDiagnosisStatus(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromBody] PatchStatusRequest request,
             [FromServices] ICommandHandler<PatchDiagnosisStatusCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
@@ -110,14 +112,14 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
-        [HttpPut("diagnoses/{id:int}")]
+        [HttpPut("diagnoses/{id}")]
         [Authorize(Policy = "diagnoses:update")]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status404NotFound)]
         [DiagnosisAccess(AccessMode.Write)]
         public async Task<ActionResult<ApiResponse<DiagnosisResponse>>> UpdateDiagnosis(
-            int id,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
             [FromBody] UpdateDiagnosisRequest request,
             [FromServices] ICommandHandler<UpdateDiagnosisCommand, ApiResponse<DiagnosisResponse>> handler,
             CancellationToken cancellationToken = default)

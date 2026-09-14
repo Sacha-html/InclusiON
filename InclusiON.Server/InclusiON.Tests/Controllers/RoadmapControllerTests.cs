@@ -8,9 +8,12 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Roadmap.Commands;
 using InclusiON.Application.UseCases.Roadmap.Queries;
 using InclusiON.DTOs.Requests.Roadmap;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roadmap;
 using System.Collections.Generic;
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace InclusiON.Tests.Controllers
 {
@@ -36,6 +39,14 @@ namespace InclusiON.Tests.Controllers
             var handler = Substitute.For<IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>>>();
             handler.HandleAsync(Arg.Any<GetPersonRoadmapQuery>(), Arg.Any<CancellationToken>())
                    .Returns(ApiResponse<RoadmapResponse>.SuccessResult(new RoadmapResponse()));
+            return handler;
+        }
+
+        private static IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>> MissingRoadmapHandler()
+        {
+            var handler = Substitute.For<IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>>>();
+            handler.HandleAsync(Arg.Any<GetPersonRoadmapQuery>(), Arg.Any<CancellationToken>())
+                   .Returns(ApiResponse<RoadmapResponse>.NotFound("Roadmap"));
             return handler;
         }
 
@@ -85,6 +96,32 @@ namespace InclusiON.Tests.Controllers
             await handler.Received(1).HandleAsync(
                 Arg.Is<GetPersonRoadmapQuery>(q => q.PersonId == entityId),
                 Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetRoadmap_MissingRoadmap_ReturnsSuccessfulEmptyResponse()
+        {
+            var result = await BuildSut(Guid.NewGuid()).GetRoadmap(
+                Guid.NewGuid(), MissingRoadmapHandler());
+
+            var response = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            var body = response.Value.Should().BeOfType<ApiResponse<RoadmapResponse>>().Subject;
+
+            body.Success.Should().BeTrue();
+            body.Data.Should().BeNull();
+            body.ErrorCode.Should().Be(ErrorCode.None);
+        }
+
+        [Fact]
+        public async Task GetRoadmap_RealError_PreservesErrorResponse()
+        {
+            var handler = Substitute.For<IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>>>();
+            handler.HandleAsync(Arg.Any<GetPersonRoadmapQuery>(), Arg.Any<CancellationToken>())
+                   .Returns(ApiResponse<RoadmapResponse>.ErrorResult("Database unavailable"));
+
+            var result = await BuildSut(Guid.NewGuid()).GetRoadmap(Guid.NewGuid(), handler);
+
+            result.Result.Should().BeOfType<ObjectResult>().Which.StatusCode.Should().Be(500);
         }
 
         // ── CreateRoadmap ─────────────────────────────────────────────────────
@@ -252,7 +289,38 @@ namespace InclusiON.Tests.Controllers
             // Assert
             await handler.Received(1).HandleAsync(
                 Arg.Is<DeleteAdaptiveEngineConfigCommand>(c => c.PersonRoadmapActivityId == 55),
-                Arg.Any<CancellationToken>());
+                 Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public void RoadmapIdRoutes_AcceptEncryptedIdsWithTheExistingBinder()
+        {
+            var controller = typeof(RoadmapController);
+            var routeMethods = new[]
+            {
+                nameof(RoadmapController.RemoveArea),
+                nameof(RoadmapController.AddActivity),
+                nameof(RoadmapController.ReorderActivities),
+                nameof(RoadmapController.RemoveActivity),
+                nameof(RoadmapController.UnlockActivity),
+                nameof(RoadmapController.AssignFromRoadmap),
+                nameof(RoadmapController.GetAdaptiveConfig),
+                nameof(RoadmapController.UpsertAdaptiveConfig),
+                nameof(RoadmapController.DeleteAdaptiveConfig),
+                nameof(RoadmapController.GetAdjustmentHistory),
+            };
+
+            foreach (var methodName in routeMethods)
+            {
+                var method = controller.GetMethod(methodName)!;
+                var route = method.GetCustomAttributes().OfType<IRouteTemplateProvider>().Single().Template!;
+                route.Should().NotContain(":int");
+                foreach (var parameter in method.GetParameters().Where(p => p.Name is "areaId" or "activityEntryId"))
+                {
+                    parameter.GetCustomAttribute<ModelBinderAttribute>()!.BinderType
+                        .Should().Be(typeof(InclusiON.Api.ModelBinders.EncryptedIntModelBinder));
+                }
+            }
         }
     }
 }

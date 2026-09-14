@@ -31,7 +31,7 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
         [Fact]
         public async Task GetDiagnosisById_NotFound_ReturnsNotFound()
         {
-            _repo.GetByIdAsync(DiagnosisId, Arg.Any<CancellationToken>())
+             _repo.GetByIdIgnoreActiveAsync(DiagnosisId, Arg.Any<CancellationToken>())
                  .Returns((Diagnosis?)null);
 
             var handler = new GetDiagnosisByIdQueryHandler(_repo, _encryption);
@@ -44,14 +44,16 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
         [Fact]
         public async Task GetDiagnosisById_Found_ReturnsDiagnosis()
         {
-            _repo.GetByIdAsync(DiagnosisId, Arg.Any<CancellationToken>())
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:encrypted-diagnosis-id");
+             _repo.GetByIdIgnoreActiveAsync(DiagnosisId, Arg.Any<CancellationToken>())
                  .Returns(ADiagnosis());
 
             var handler = new GetDiagnosisByIdQueryHandler(_repo, _encryption);
             var result = await handler.HandleAsync(new GetDiagnosisByIdQuery(DiagnosisId), default);
 
             result.Success.Should().BeTrue();
-            result.Data!.Id.Should().Be(DiagnosisId);
+            result.Data!.EncryptedId.Should().Be("ENC:encrypted-diagnosis-id");
+            result.Data.ProfessionalName.Should().Be("Dr House");
         }
     }
 }

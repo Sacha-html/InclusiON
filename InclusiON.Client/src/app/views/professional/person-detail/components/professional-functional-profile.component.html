@@ -147,21 +147,25 @@
   <c-row class="mb-3">
     <c-col sm="6">
       <label cLabel for="edit-interests">Intereses y motivadores</label>
-      <textarea cFormControl id="edit-interests" [(ngModel)]="editData.interestsAndMotivators" rows="2"></textarea>
+      <textarea cFormControl id="edit-interests" [(ngModel)]="editData.interestsAndMotivators" rows="2" maxlength="500" aria-describedby="edit-interests-help"></textarea>
+      <div id="edit-interests-help" class="form-text">{{ editData.interestsAndMotivators.length }}/500 caracteres</div>
     </c-col>
     <c-col sm="6">
       <label cLabel for="edit-learningStyle">Estilo de aprendizaje</label>
-      <textarea cFormControl id="edit-learningStyle" [(ngModel)]="editData.learningStyle" rows="2"></textarea>
+      <textarea cFormControl id="edit-learningStyle" [(ngModel)]="editData.learningStyle" rows="2" maxlength="250" aria-describedby="edit-learningStyle-help"></textarea>
+      <div id="edit-learningStyle-help" class="form-text">{{ editData.learningStyle.length }}/250 caracteres</div>
     </c-col>
   </c-row>
   <c-row class="mb-3">
     <c-col sm="6">
       <label cLabel for="edit-resources">Recursos disponibles</label>
-      <textarea cFormControl id="edit-resources" [(ngModel)]="editData.availableResources" rows="2"></textarea>
+      <textarea cFormControl id="edit-resources" [(ngModel)]="editData.availableResources" rows="2" maxlength="255" aria-describedby="edit-resources-help"></textarea>
+      <div id="edit-resources-help" class="form-text">{{ editData.availableResources.length }}/255 caracteres</div>
     </c-col>
     <c-col sm="6">
       <label cLabel for="edit-therapies">Terapias adicionales</label>
-      <textarea cFormControl id="edit-therapies" [(ngModel)]="editData.additionalTherapies" rows="2"></textarea>
+      <textarea cFormControl id="edit-therapies" [(ngModel)]="editData.additionalTherapies" rows="2" maxlength="500" aria-describedby="edit-therapies-help"></textarea>
+      <div id="edit-therapies-help" class="form-text">{{ editData.additionalTherapies.length }}/500 caracteres</div>
     </c-col>
   </c-row>
 

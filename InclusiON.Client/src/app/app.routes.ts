@@ -104,6 +104,7 @@ export const routes: Routes = [
         (m) => m.AacLayoutComponent,
       ),
     canActivate: [authGuard, roleGuard],
+    canActivateChild: [authGuard, roleGuard],
     data: { roles: [UserRoles.PersonWithDisability] },
     loadChildren: () => import('./views/aac/routes').then((m) => m.aacRoutes),
   },
@@ -116,6 +117,7 @@ export const routes: Routes = [
         (m) => m.AacLayoutComponent,
       ),
     canActivate: [authGuard, roleGuard],
+    canActivateChild: [authGuard, roleGuard],
     data: { roles: [UserRoles.PersonWithDisability] },
     loadChildren: () => import('./views/aac/routes').then((m) => m.aacRoutes),
   },
@@ -128,7 +130,8 @@ export const routes: Routes = [
         (m) => m.ProfessionalLayoutComponent,
       ),
     canActivate: [authGuard, roleGuard],
-    data: { roles: [UserRoles.Professional, UserRoles.Admin] },
+    canActivateChild: [authGuard, roleGuard],
+    data: { roles: [UserRoles.Professional] },
     loadChildren: () =>
       import('./views/professional/routes').then((m) => m.professionalRoutes),
   },
@@ -141,7 +144,8 @@ export const routes: Routes = [
         (m) => m.FamilyLayoutComponent,
       ),
     canActivate: [authGuard, roleGuard],
-    data: { roles: [UserRoles.FamilyRepresentative, UserRoles.Admin] },
+    canActivateChild: [authGuard, roleGuard],
+    data: { roles: [UserRoles.FamilyRepresentative] },
     loadChildren: () =>
       import('./views/family/routes').then((m) => m.familyRoutes),
   },
@@ -152,6 +156,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./layout').then((m) => m.DefaultLayoutComponent),
     canActivate: [authGuard, roleGuard],
+    canActivateChild: [authGuard, roleGuard],
     data: { roles: [UserRoles.Admin] },
     children: [
       {
