@@ -18,7 +18,8 @@ namespace InclusiON.Application.UseCases.Persons.Commands
         string? TutorPhone,
         string TutorRelationship,
 
-        // Asignación de Aula
+        // Asignación de Profesional y Aula
+        Guid ProfessionalId,
         Guid? ClassroomId
     );
 }

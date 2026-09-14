@@ -46,6 +46,7 @@ namespace InclusiON.DTOs.Requests.Persons
         /// Teléfono del tutor.
         /// </summary>
         [StringLength(20, ErrorMessage = "El teléfono del tutor no puede superar los 20 caracteres")]
+        [RegularExpression(@"^[0-9]+$", ErrorMessage = "El teléfono solo puede contener números")]
         public string? TutorPhone { get; set; }
 
         /// <summary>
@@ -54,6 +55,12 @@ namespace InclusiON.DTOs.Requests.Persons
         [Required(ErrorMessage = "El parentesco o relación es obligatorio")]
         [StringLength(50, ErrorMessage = "La relación no puede superar los 50 caracteres")]
         public string TutorRelationship { get; set; } = string.Empty;
+
+        /// <summary>
+        /// ID del profesional responsable asignado al alumno (obligatorio).
+        /// </summary>
+        [Required(ErrorMessage = "El profesional responsable es obligatorio")]
+        public Guid ProfessionalId { get; set; }
 
         /// <summary>
         /// ID del aula a la cual asignar opcionalmente al alumno al crearlo.
