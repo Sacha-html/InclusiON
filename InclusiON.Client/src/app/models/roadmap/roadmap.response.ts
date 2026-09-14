@@ -25,6 +25,7 @@ export interface RoadmapActivityResponse {
   id: number;
   encryptedId: string;
   activityId: number;
+  encryptedActivityId: string;
   activityTitle: string;
   sequenceOrder: number;
   isUnlocked: boolean;
