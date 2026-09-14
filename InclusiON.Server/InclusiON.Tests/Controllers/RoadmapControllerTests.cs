@@ -8,6 +8,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Roadmap.Commands;
 using InclusiON.Application.UseCases.Roadmap.Queries;
 using InclusiON.DTOs.Requests.Roadmap;
+using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Roadmap;
 using System.Collections.Generic;
@@ -36,6 +37,14 @@ namespace InclusiON.Tests.Controllers
             var handler = Substitute.For<IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>>>();
             handler.HandleAsync(Arg.Any<GetPersonRoadmapQuery>(), Arg.Any<CancellationToken>())
                    .Returns(ApiResponse<RoadmapResponse>.SuccessResult(new RoadmapResponse()));
+            return handler;
+        }
+
+        private static IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>> MissingRoadmapHandler()
+        {
+            var handler = Substitute.For<IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>>>();
+            handler.HandleAsync(Arg.Any<GetPersonRoadmapQuery>(), Arg.Any<CancellationToken>())
+                   .Returns(ApiResponse<RoadmapResponse>.NotFound("Roadmap"));
             return handler;
         }
 
@@ -85,6 +94,32 @@ namespace InclusiON.Tests.Controllers
             await handler.Received(1).HandleAsync(
                 Arg.Is<GetPersonRoadmapQuery>(q => q.PersonId == entityId),
                 Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetRoadmap_MissingRoadmap_ReturnsSuccessfulEmptyResponse()
+        {
+            var result = await BuildSut(Guid.NewGuid()).GetRoadmap(
+                Guid.NewGuid(), MissingRoadmapHandler());
+
+            var response = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            var body = response.Value.Should().BeOfType<ApiResponse<RoadmapResponse>>().Subject;
+
+            body.Success.Should().BeTrue();
+            body.Data.Should().BeNull();
+            body.ErrorCode.Should().Be(ErrorCode.None);
+        }
+
+        [Fact]
+        public async Task GetRoadmap_RealError_PreservesErrorResponse()
+        {
+            var handler = Substitute.For<IQueryHandler<GetPersonRoadmapQuery, ApiResponse<RoadmapResponse>>>();
+            handler.HandleAsync(Arg.Any<GetPersonRoadmapQuery>(), Arg.Any<CancellationToken>())
+                   .Returns(ApiResponse<RoadmapResponse>.ErrorResult("Database unavailable"));
+
+            var result = await BuildSut(Guid.NewGuid()).GetRoadmap(Guid.NewGuid(), handler);
+
+            result.Result.Should().BeOfType<ObjectResult>().Which.StatusCode.Should().Be(500);
         }
 
         // ── CreateRoadmap ─────────────────────────────────────────────────────
