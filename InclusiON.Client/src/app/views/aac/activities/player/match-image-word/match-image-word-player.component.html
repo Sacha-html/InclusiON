@@ -27,12 +27,14 @@
             [attr.aria-label]="pair.label"
             [attr.aria-pressed]="selectedImageId() === pair.id"
           >
-            <img
-              [src]="arasaac.getPictogramUrl(pair.pictogramId)"
-              [alt]="pair.label"
-              class="match-img"
-              loading="lazy"
-            />
+            @if (arasaac.getPictogramUrl(pair.pictogramId); as imageUrl) {
+              <img
+                [src]="imageUrl"
+                [alt]="pair.label"
+                class="match-img"
+                loading="lazy"
+              />
+            }
             @if (matchedImageIds().has(pair.id)) {
               <span class="match-badge" aria-hidden="true">
                 {{ imageState(pair.id) === 'matched-correct' ? '✅' : '❌' }}

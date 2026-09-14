@@ -26,18 +26,20 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
             ProfessionalId = ProfId,
             DiagnosisDate = new DateTime(2024, 1, 1),
             PrimaryDiagnosis = primary,
+            IsActive = true,
             Professional = new Professional { FirstName = "Dr", LastName = "House", UserId = ProfUserId }
         };
 
         [Fact]
         public async Task GetDiagnoses_ReturnsMappedList()
         {
+            _encryption.Encrypt(Arg.Any<string>()).Returns(callInfo => $"ENC:{callInfo.Arg<string>()}");
             var list = new List<Diagnosis>
             {
                 ADiagnosis(1, "TEA"),
                 ADiagnosis(2, "TDAH")
             };
-            _repo.GetPagedByPersonIdAsync(PersonId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            _repo.GetPagedByPersonIdAsync(PersonId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<bool?>(), Arg.Any<CancellationToken>())
                 .Returns(new PagedResponse<Diagnosis> { Data = list, TotalRecords = list.Count, TotalPages = 1, CurrentPage = 1, PageSize = 100 });
 
             var handler = new GetDiagnosesQueryHandler(_repo, _encryption);
@@ -48,12 +50,13 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
             result.Data!.Data[0].PrimaryDiagnosis.Should().Be("TEA");
             result.Data!.Data[1].PrimaryDiagnosis.Should().Be("TDAH");
             result.Data!.Data[0].ProfessionalName.Should().Be("Dr House");
+            result.Data!.Data.Should().OnlyContain(d => !string.IsNullOrWhiteSpace(d.EncryptedId));
         }
 
         [Fact]
         public async Task GetDiagnoses_EmptyList_ReturnsSuccess()
         {
-            _repo.GetPagedByPersonIdAsync(PersonId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>())
+            _repo.GetPagedByPersonIdAsync(PersonId, Arg.Any<int>(), Arg.Any<int>(), Arg.Any<bool?>(), Arg.Any<CancellationToken>())
                 .Returns(new PagedResponse<Diagnosis>());
 
             var result = await new GetDiagnosesQueryHandler(_repo, _encryption)
@@ -61,6 +64,22 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
 
             result.Success.Should().BeTrue();
             result.Data!.Data.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task GetDiagnoses_ForwardsStatusFilterAndMapsInactiveItems()
+        {
+            var inactive = ADiagnosis(3, "TDAH");
+            inactive.IsActive = false;
+            _encryption.Encrypt(Arg.Any<string>()).Returns("ENC:id");
+            _repo.GetPagedByPersonIdAsync(PersonId, 1, 10, false, Arg.Any<CancellationToken>())
+                .Returns(new PagedResponse<Diagnosis> { Data = [inactive] });
+
+            var result = await new GetDiagnosesQueryHandler(_repo, _encryption)
+                .HandleAsync(new GetDiagnosesQuery(PersonId, 1, 10, false), default);
+
+            result.Data!.Data.Single().IsActive.Should().BeFalse();
+            await _repo.Received(1).GetPagedByPersonIdAsync(PersonId, 1, 10, false, Arg.Any<CancellationToken>());
         }
     }
 }

@@ -101,9 +101,22 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                         "El email del tutor ya se encuentra registrado.");
                 }
 
-                // 4. Validar el aula si se proporciona y obtener el ProfessionalId
-                Professional? professional = null;
-                Guid? professionalId = null;
+                // 4. Validar el profesional responsable y el aula (si se especifica)
+                if (command.ProfessionalId == Guid.Empty)
+                {
+                    return ApiResponse<PersonResponse>.ErrorResult(
+                        ErrorCode.ValidationFailed,
+                        "Debe seleccionar un profesional responsable para el alumno.");
+                }
+
+                var professional = await _professionalsRepository.GetByIdAsync(command.ProfessionalId, cancellationToken);
+                if (professional == null)
+                {
+                    return ApiResponse<PersonResponse>.ErrorResult(
+                        ErrorCode.NotFound,
+                        "El profesional especificado no existe.");
+                }
+
                 if (command.ClassroomId.HasValue)
                 {
                     var classroom = await _assignmentsRepository.GetClassroomByIdAsync(command.ClassroomId.Value, cancellationToken);
@@ -114,8 +127,12 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                             "El aula especificada no existe.");
                     }
 
-                    professionalId = classroom.ProfessionalId;
-                    professional = await _professionalsRepository.GetByIdAsync(professionalId.Value, cancellationToken);
+                    if (classroom.ProfessionalId != command.ProfessionalId)
+                    {
+                        return ApiResponse<PersonResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            "El aula especificada no pertenece al profesional seleccionado.");
+                    }
                 }
 
                 // 5. Preparar creación del alumno
@@ -210,21 +227,18 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     };
                     student.PersonRepresentatives.Add(relationshipLink);
 
-                    // D. Asignar Aula si se proporcionó una válida
-                    if (command.ClassroomId.HasValue)
+                    // D. Vincular al alumno con el profesional responsable (y aula opcional)
+                    var assignment = new ProfessionalPerson
                     {
-                        var assignment = new ProfessionalPerson
-                        {
-                            ProfessionalId = professionalId!.Value,
-                            PersonId = student.Id,
-                            ClassroomId = command.ClassroomId.Value,
-                            IsPrimaryProfessional = true,
-                            CanSuperviseLogin = true,
-                            IsActive = true,
-                            AssignedAt = _dateTime.UtcNow
-                        };
-                        student.ProfessionalPersons.Add(assignment);
-                    }
+                        ProfessionalId = command.ProfessionalId,
+                        PersonId = student.Id,
+                        ClassroomId = command.ClassroomId,
+                        IsPrimaryProfessional = true,
+                        CanSuperviseLogin = true,
+                        IsActive = true,
+                        AssignedAt = _dateTime.UtcNow
+                    };
+                    student.ProfessionalPersons.Add(assignment);
 
                     // E. Guardar perfiles y relaciones en base de datos en un solo SaveChangesAsync
                     await _repository.CreateAsync(student, ct);
@@ -233,38 +247,51 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
-                // 8. Inicializar Roadmap Estándar
-                await _roadmapInitializer.InitializeStudentRoadmapAsync(student.Id, student.SupervisorUserId, cancellationToken);
+                // Todo lo que sigue al commit es best-effort. La persistencia ya fue
+                // confirmada y un fallo de infraestructura posterior no debe convertir
+                // una creación exitosa en un HTTP 500. Cada paso se aísla para que un
+                // fallo no impida ejecutar los restantes, y se registra para diagnóstico.
+                await RunPostCommitStepAsync(
+                    student.Id,
+                    "roadmap initialization",
+                    () => _roadmapInitializer.InitializeStudentRoadmapAsync(
+                        student.Id, student.SupervisorUserId, cancellationToken));
 
-                // 9. Crear Job de Embeddings para el Alumno
-                await _backgroundJobs.CreateAsync(
-                    JobTypes.Embedding,
-                    BuildEmbeddingPayload(student),
-                    maxRetries: 3,
-                    cancellationToken: cancellationToken);
+                await RunPostCommitStepAsync(
+                    student.Id,
+                    "student embedding job creation",
+                    () => _backgroundJobs.CreateAsync(
+                        JobTypes.Embedding,
+                        BuildEmbeddingPayload(student),
+                        maxRetries: 3,
+                        cancellationToken: cancellationToken));
 
-                // 10. Crear Job de Envío de Email con contraseña temporal para el Tutor
-                await _backgroundJobs.CreateAsync(
-                    JobTypes.Email,
-                    JsonSerializer.Serialize(new EmailPayload
-                    {
-                        To = command.TutorEmail,
-                        Subject = "Bienvenido a InclusiON — Tu cuenta ha sido creada",
-                        TemplateName = "PasswordReset",
-                        Replacements = new Dictionary<string, string?>
+                await RunPostCommitStepAsync(
+                    student.Id,
+                    "tutor email job creation",
+                    () => _backgroundJobs.CreateAsync(
+                        JobTypes.Email,
+                        JsonSerializer.Serialize(new EmailPayload
                         {
-                            { "UserName", command.TutorFirstName },
-                            { "TemporaryPassword", tutorPassword },
-                            { "Year", _dateTime.UtcNow.Year.ToString() }
-                        }
-                    }),
-                    maxRetries: 2,
-                    cancellationToken: cancellationToken);
+                            To = command.TutorEmail,
+                            Subject = "Bienvenido a InclusiON — Tu cuenta ha sido creada",
+                            TemplateName = "PasswordReset",
+                            Replacements = new Dictionary<string, string?>
+                            {
+                                { "UserName", command.TutorFirstName },
+                                { "TemporaryPassword", tutorPassword },
+                                { "Year", _dateTime.UtcNow.Year.ToString() }
+                            }
+                        }),
+                        maxRetries: 2,
+                        cancellationToken: cancellationToken));
 
-                // 11. Notificar en tiempo real al profesional asignado
                 if (professional != null && professional.UserId != Guid.Empty)
                 {
-                    await NotifyNewStudentAsync(professional.UserId, student, cancellationToken);
+                    await RunPostCommitStepAsync(
+                        student.Id,
+                        "professional notification",
+                        () => NotifyNewStudentAsync(professional.UserId, student, cancellationToken));
                 }
 
                 _logger.LogInformation("Alumno {StudentId} y Tutor {TutorId} creados exitosamente en transacción.", student.Id, tutor.Id);
@@ -277,6 +304,20 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             {
                 _logger.LogError(ex, "Error al registrar alumno con tutor");
                 return ApiResponse<PersonResponse>.ErrorResult(ErrorCode.InternalError, $"Error en el servidor: {ex.Message}");
+            }
+        }
+
+        private async Task RunPostCommitStepAsync(Guid studentId, string stepName, Func<Task> step)
+        {
+            try
+            {
+                await step();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Alumno {StudentId} persistido, pero falló el paso posterior {PostCommitStep}.",
+                    studentId, stepName);
             }
         }
 

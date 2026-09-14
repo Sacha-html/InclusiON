@@ -16,12 +16,13 @@ export class DiagnosesService {
     return environment.apiUrl;
   }
 
-  getByPerson(personId: string, page = 1, pageSize = 100): Observable<DiagnosisListItemResponse[]> {
+  getByPerson(personId: string, page = 1, pageSize = 100, isActive?: boolean): Observable<DiagnosisListItemResponse[]> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
+    const filteredParams = isActive === undefined ? params : params.set('isActive', isActive.toString());
     return this.http
-      .get<ApiResponse<PagedResponse<DiagnosisListItemResponse>>>(`${this.baseUrl}/persons/${personId}/diagnoses`, { params })
+      .get<ApiResponse<PagedResponse<DiagnosisListItemResponse>>>(`${this.baseUrl}/persons/${personId}/diagnoses`, { params: filteredParams })
       .pipe(unwrapResponse(), map((r) => r.data));
   }
 

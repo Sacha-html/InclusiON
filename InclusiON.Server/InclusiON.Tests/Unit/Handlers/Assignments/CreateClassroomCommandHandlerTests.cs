@@ -27,7 +27,7 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         private static readonly Guid PersonId1 = Guid.NewGuid();
         private static readonly Guid PersonId2 = Guid.NewGuid();
 
-        private static CreateClassroomCommand Cmd(string name, List<Guid> personIds) =>
+        private static CreateClassroomCommand Cmd(string name, List<Guid>? personIds) =>
             new(ProfId, name, personIds, IsPrimaryProfessional: true, CanSuperviseLogin: false);
 
         private static Professional ApprovedPro() => new()
@@ -85,18 +85,42 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
             result.Message.Should().Contain("nombre");
         }
 
-        // ── Lista de alumnos vacía ────────────────────────────────────────────
+        // ── Lista de alumnos opcional ──────────────────────────────────────────
 
         [Fact]
-        public async Task HandleAsync_EmptyPersonIds_ReturnsValidationFailed()
+        public async Task HandleAsync_EmptyPersonIds_CreatesClassroomWithoutAssignments()
         {
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
             _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(ApprovedPro());
 
             var result = await BuildSut().HandleAsync(Cmd("Aula A", new()), default);
 
-            result.Success.Should().BeFalse();
-            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
-            result.Message.Should().Contain("alumno");
+            result.Success.Should().BeTrue();
+            result.Data.Should().NotBeNull().And.BeEmpty();
+            await _assignRepo.Received(1).CreateClassroomAsync(
+                Arg.Is<Classroom>(c => c.Name == "Aula A" && c.ProfessionalId == ProfId && c.IsActive),
+                Arg.Any<CancellationToken>());
+            await _assignRepo.DidNotReceive().CreateAssignmentAsync(
+                Arg.Any<ProfessionalPerson>(), Arg.Any<CancellationToken>());
+            await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_NullPersonIds_CreatesClassroomWithoutAssignments()
+        {
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(ApprovedPro());
+
+            var result = await BuildSut().HandleAsync(Cmd("Aula A", null), default);
+
+            result.Success.Should().BeTrue();
+            result.Data.Should().NotBeNull().And.BeEmpty();
+            await _assignRepo.Received(1).CreateClassroomAsync(
+                Arg.Is<Classroom>(c => c.Name == "Aula A" && c.ProfessionalId == ProfId && c.IsActive),
+                Arg.Any<CancellationToken>());
+            await _assignRepo.DidNotReceive().CreateAssignmentAsync(
+                Arg.Any<ProfessionalPerson>(), Arg.Any<CancellationToken>());
+            await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         }
 
         // ── Alumno no encontrado ──────────────────────────────────────────────
@@ -105,12 +129,22 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         public async Task HandleAsync_PersonNotFound_ReturnsPersonNotFound()
         {
             _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(ApprovedPro());
-            _personsRepo.GetByIdAsync(PersonId1, Arg.Any<CancellationToken>()).Returns((PersonWithDisability?)null);
+            _personsRepo.GetByIdAsync(PersonId1, Arg.Any<CancellationToken>()).Returns(APerson(PersonId1));
+            _personsRepo.GetByIdAsync(PersonId2, Arg.Any<CancellationToken>()).Returns((PersonWithDisability?)null);
 
-            var result = await BuildSut().HandleAsync(Cmd("Aula A", new() { PersonId1 }), default);
+            var result = await BuildSut().HandleAsync(Cmd("Aula A", new() { PersonId1, PersonId2 }), default);
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.PersonNotFound);
+            await _personsRepo.Received(1).GetByIdAsync(PersonId1, Arg.Any<CancellationToken>());
+            await _personsRepo.Received(1).GetByIdAsync(PersonId2, Arg.Any<CancellationToken>());
+            await _assignRepo.DidNotReceive().CreateClassroomAsync(
+                Arg.Any<Classroom>(), Arg.Any<CancellationToken>());
+            await _assignRepo.DidNotReceive().CreateAssignmentAsync(
+                Arg.Any<ProfessionalPerson>(), Arg.Any<CancellationToken>());
+            await _assignRepo.DidNotReceive().GetAssignmentAsync(
+                Arg.Any<Guid>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+            await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         }
 
         // ── Happy path: crea aula y asigna alumnos ────────────────────────────

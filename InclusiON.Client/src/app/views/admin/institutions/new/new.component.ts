@@ -15,6 +15,7 @@ import {
   FormLabelDirective,
   RowComponent,
 } from '@coreui/angular';
+import { OnlyNumbersDirective } from '@shared/directives';
 
 @Component({
   selector: 'app-new',
@@ -29,6 +30,7 @@ import {
     FormLabelDirective,
     FormFeedbackComponent,
     ButtonDirective,
+    OnlyNumbersDirective,
   ],
   templateUrl: './new.component.html',
   styleUrl: './new.component.scss',
@@ -45,7 +47,7 @@ export class NewComponent {
   form: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
     address: ['', [Validators.maxLength(200)]],
-    phone: ['', [Validators.maxLength(20)]],
+    phone: ['', [Validators.maxLength(20), Validators.pattern(/^[0-9]+$/)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
   });
 

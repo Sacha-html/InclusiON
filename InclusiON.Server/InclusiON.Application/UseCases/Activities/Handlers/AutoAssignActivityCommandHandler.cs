@@ -13,6 +13,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         : ICommandHandler<AutoAssignActivityCommand, ApiResponse<ActivityAssignmentResponse>>
     {
         private readonly IActivityAssignmentRepository _repository;
+        private readonly IRoadmapRepository _roadmapRepository;
         private readonly IActivitiesRepository _activitiesRepository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IProfessionalsRepository _professionalsRepository;
@@ -22,6 +23,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
         public AutoAssignActivityCommandHandler(
             IActivityAssignmentRepository repository,
+            IRoadmapRepository roadmapRepository,
             IActivitiesRepository activitiesRepository,
             IPersonsRepository personsRepository,
             IProfessionalsRepository professionalsRepository,
@@ -30,6 +32,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             IEncryptionService encryption)
         {
             _repository = repository;
+            _roadmapRepository = roadmapRepository;
             _activitiesRepository = activitiesRepository;
             _personsRepository = personsRepository;
             _professionalsRepository = professionalsRepository;
@@ -41,6 +44,11 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
             AutoAssignActivityCommand command, CancellationToken cancellationToken)
         {
+            var roadmapEntry = await _roadmapRepository.GetByPersonAndActivityAsync(
+                command.PersonId, command.ActivityId, cancellationToken);
+            if (roadmapEntry is null || !roadmapEntry.IsUnlocked)
+                return ApiResponse<ActivityAssignmentResponse>.Forbidden();
+
             // 1. Verificar si ya existe una asignación para esta persona y actividad (no cancelada)
             var existingAssignments = await _repository.GetByPersonIdAsync(command.PersonId, cancellationToken);
             var existing = existingAssignments.FirstOrDefault(a => a.ActivityId == command.ActivityId && a.StatusId != AssignmentStatuses.Cancelada);

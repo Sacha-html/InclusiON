@@ -432,11 +432,17 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
             n.isRead = true;
           }
         });
+        const withoutDemoNotifications = parsed.filter(n => !n.id.startsWith('seed-'));
+        const removedDemoNotifications = withoutDemoNotifications.length !== parsed.length;
+        parsed = withoutDemoNotifications;
         const role = this.authService.getUserRole();
         if (role === UserRoles.Admin) {
           parsed = parsed.filter(n => n.type !== 'calendar' && !n.actionUrl?.includes('calendar'));
         }
         this.notifications.set(parsed);
+        if (removedDemoNotifications) {
+          this.saveToStorage();
+        }
         this.updateUnreadCount();
         return;
       } catch {
@@ -444,7 +450,8 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.seedInitialNotifications();
+    this.notifications.set([]);
+    this.updateUnreadCount();
   }
 
   private saveToStorage(): void {
@@ -455,127 +462,6 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   private updateUnreadCount(): void {
     const unread = this.notifications().filter(n => !n.isRead).length;
     this.unreadCount.set(unread);
-  }
-
-  private seedInitialNotifications(): void {
-    const role = this.authService.getUserRole();
-    const readIds = this.getReadIds();
-    const list: AppNotification[] = [];
-
-    if (role === UserRoles.Professional) {
-      list.push(
-        {
-          id: 'seed-msg',
-          title: 'Nuevo mensaje',
-          message: 'Tenés un nuevo mensaje de Miguel Fernández (Tutor).',
-          actionUrl: '/pro/messages',
-          type: 'message',
-          isRead: readIds.has('seed-msg') || false,
-          createdAt: new Date(Date.now() - 5 * 60000),
-          timeLabel: 'Hace 5 min'
-        },
-        {
-          id: 'seed-act',
-          title: 'Actividad completada',
-          message: 'Tomás Pérez completó la actividad \'¿Qué dice aquí?\' con 90% de éxito.',
-          actionUrl: '/pro/evaluations',
-          type: 'activity',
-          isRead: readIds.has('seed-act') || false,
-          createdAt: new Date(Date.now() - 15 * 60000),
-          timeLabel: 'Hace 15 min'
-        },
-        {
-          id: 'seed-cal',
-          title: 'Recordatorio del calendario',
-          message: 'Recordatorio: Sesión de terapia con Sofía Rodríguez mañana a las 10:00.',
-          actionUrl: '/pro/calendar',
-          type: 'calendar',
-          isRead: true,
-          createdAt: new Date(Date.now() - 60 * 60000),
-          timeLabel: 'Hace 1 hora'
-        }
-      );
-    } else if (role === UserRoles.FamilyRepresentative) {
-      list.push(
-        {
-          id: 'seed-msg',
-          title: 'Nuevo mensaje',
-          message: 'Tenés un nuevo mensaje de Pedro Martínez (Terapeuta).',
-          actionUrl: '/family/messages',
-          type: 'message',
-          isRead: readIds.has('seed-msg') || false,
-          createdAt: new Date(Date.now() - 5 * 60000),
-          timeLabel: 'Hace 5 min'
-        },
-        {
-          id: 'seed-act',
-          title: 'Actividad asignada',
-          message: 'Pedro Martínez asignó una nueva actividad a Tomás Pérez: \'¿Qué dice aquí?\'.',
-          actionUrl: '/family/activities',
-          type: 'activity',
-          isRead: readIds.has('seed-act') || false,
-          createdAt: new Date(Date.now() - 15 * 60000),
-          timeLabel: 'Hace 15 min'
-        },
-        {
-          id: 'seed-cal',
-          title: 'Recordatorio del calendario',
-          message: 'Recordatorio: Sesión de terapia para Tomás Pérez mañana a las 10:00.',
-          actionUrl: '/family/calendar',
-          type: 'calendar',
-          isRead: true,
-          createdAt: new Date(Date.now() - 60 * 60000),
-          timeLabel: 'Hace 1 hora'
-        }
-      );
-    } else if (role === UserRoles.Admin) {
-      list.push(
-        {
-          id: 'seed-admin-msg',
-          title: 'Nuevo mensaje',
-          message: 'Tenés un nuevo mensaje de Pedro Martínez (Profesional).',
-          actionUrl: '/admin/messages',
-          type: 'message',
-          isRead: readIds.has('seed-admin-msg') || false,
-          createdAt: new Date(Date.now() - 5 * 60000),
-          timeLabel: 'Hace 5 min'
-        },
-        {
-          id: 'seed-msg',
-          title: 'Nuevo profesional',
-          message: 'La profesional Laura González se ha registrado y está pendiente de aprobación.',
-          actionUrl: '/admin/professionals',
-          type: 'system',
-          isRead: readIds.has('seed-msg') || false,
-          createdAt: new Date(Date.now() - 10 * 60000),
-          timeLabel: 'Hace 10 min'
-        },
-        {
-          id: 'seed-act',
-          title: 'Reporte enviado',
-          message: 'Se ha presentado un reporte semanal para evaluación.',
-          actionUrl: '/admin/reports',
-          type: 'activity',
-          isRead: true,
-          createdAt: new Date(Date.now() - 30 * 60000),
-          timeLabel: 'Hace 30 min'
-        },
-        {
-          id: 'seed-sys',
-          title: 'Mantenimiento del servidor',
-          message: 'Recordatorio: Mantenimiento programado de la base de datos a las 23:00.',
-          actionUrl: '/admin/dashboard',
-          type: 'system',
-          isRead: true,
-          createdAt: new Date(Date.now() - 120 * 60000),
-          timeLabel: 'Hace 2 horas'
-        }
-      );
-    }
-
-    this.notifications.set(list);
-    this.saveToStorage();
-    this.updateUnreadCount();
   }
 
   private fetchCount(): void {

@@ -20,12 +20,13 @@
         <div role="listitem">
           <app-visual-card
             [title]="a.activityTitle"
-            icon="cilTask"
-            [variant]="statusVariant(a.status)"
-            [badge]="statusLabel(a.status)"
+            [subtitle]="getActivitySubtitle(a)"
+            [icon]="getActivityIcon(a)"
+            [variant]="statusVariant(a)"
+            [badge]="statusLabel(a)"
             [interactive]="isPlayable(a)"
-            [done]="!isPlayable(a)"
-            [ariaLabel]="a.activityTitle + ', estado: ' + statusLabel(a.status)"
+            [done]="isCompleted(a)"
+            [ariaLabel]="a.activityTitle + ', ' + statusLabel(a)"
             (cardClick)="openActivity(a)"
           />
         </div>

@@ -22,10 +22,24 @@ namespace InclusiON.Tests.Unit.Services
         }
 
         [Fact]
+        public async Task InitializeStudentRoadmapAsync_WithoutTrayectoria_DoesNotCreateSkillAreaOrActivities()
+        {
+            await using var context = CreateContext();
+
+            await new RoadmapInitializer(context).InitializeStudentRoadmapAsync(Guid.NewGuid());
+
+            context.SkillAreas.Should().BeEmpty();
+            context.Activities.Should().BeEmpty();
+            context.PersonRoadmaps.Should().BeEmpty();
+        }
+
+        [Fact]
         public async Task InitializeStudentRoadmapAsync_WithoutProfessionals_CreatesGlobalActivitiesWithoutRoadmap()
         {
             await using var context = CreateContext();
             var studentId = Guid.NewGuid();
+            context.SkillAreas.Add(new SkillArea { Id = 1, Name = "Trayectoria" });
+            await context.SaveChangesAsync();
 
             await new RoadmapInitializer(context).InitializeStudentRoadmapAsync(studentId);
 
@@ -41,6 +55,7 @@ namespace InclusiON.Tests.Unit.Services
             await using var context = CreateContext();
             var studentId = Guid.NewGuid();
             var professionalId = Guid.NewGuid();
+            context.SkillAreas.Add(new SkillArea { Id = 1, Name = "Trayectoria" });
             context.Professionals.Add(new Professional { Id = professionalId, UserId = Guid.NewGuid() });
             await context.SaveChangesAsync();
 

@@ -11,7 +11,7 @@ export class PictogramCardComponent {
   readonly arasaac = inject(ArasaacService);
 
   @Input({ required: true }) label!: string;
-  @Input() pictogramId?: number;
+  @Input() pictogramId?: number | string;
   @Input() disabled = false;
   @Input() selected = false;
   @Input() state: 'none' | 'correct' | 'wrong' | 'reveal' | 'dimmed' | 'matched' = 'none';
@@ -29,5 +29,9 @@ export class PictogramCardComponent {
       'picto-card--matched':  this.state === 'matched',
     };
     return Object.entries(states).filter(([,v]) => v).map(([k]) => k).join(' ');
+  }
+
+  get pictogramUrl(): string | null {
+    return this.arasaac.getPictogramUrl(this.pictogramId);
   }
 }

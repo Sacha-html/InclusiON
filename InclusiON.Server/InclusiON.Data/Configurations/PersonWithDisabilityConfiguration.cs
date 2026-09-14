@@ -33,7 +33,7 @@ namespace InclusiON.Data.Configurations
                 .HasMaxLength(500);
 
             builder.Property(p => p.LearningStyle)
-                .HasMaxLength(50);
+                .HasMaxLength(250);
 
             builder.Property(p => p.AvailableResources)
                 .HasMaxLength(255);

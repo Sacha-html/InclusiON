@@ -22,24 +22,9 @@ namespace InclusiON.Infrastructure.Services
 
         public async Task<List<Activity>> EnsureStandardActivitiesAsync(CancellationToken cancellationToken = default)
         {
-            // Obtener o crear el SkillArea "Trayectoria"
+            // "Trayectoria" debe existir porque las áreas se cargan manualmente desde el ABM.
             var skillArea = await _context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria", cancellationToken);
-            if (skillArea == null)
-            {
-                skillArea = new SkillArea
-                {
-                    Name = "Trayectoria",
-                    Description = "Camino de aprendizaje estándar anti-frustración.",
-                    Icon = "map",
-                    Color = "#673AB7",
-                    DisplayOrder = 4,
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
-                    CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
-                };
-                _context.SkillAreas.Add(skillArea);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
+            if (skillArea == null) return new List<Activity>();
 
             var profEntity = await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
 
@@ -98,7 +83,7 @@ namespace InclusiON.Infrastructure.Services
                     CatId = 4, // Comunicación y Lenguaje
                     TemplateCode = "PICTOGRAM_SELECT",
                     Instructions = "Si tienes hambre, ¿qué pictograma debes presionar para comunicarte?",
-                    ContentJson = """{"instruction":"Si tienes hambre, ¿qué pictograma debes presionar para comunicarte?","correctItemId":"comer","items":[{"id":"comer","label":"Quiero comer","pictogramId":28667},{"id":"dormir","label":"Quiero dormir","pictogramId":32448},{"id":"jugar","label":"Quiero jugar","pictogramId":32449}]}"""
+                    ContentJson = """{"instruction":"Si tienes hambre, ¿qué pictograma debes presionar para comunicarte?","correctItemId":"comer","items":[{"id":"comer","label":"Quiero comer","pictogramId":28667},{"id":"dormir","label":"Quiero dormir","pictogramId":32448},{"id":"jugar","label":"Quiero jugar","pictogramId":23392}]}"""
                 },
                 new {
                     Seq = 7,

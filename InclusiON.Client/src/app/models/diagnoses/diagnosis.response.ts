@@ -1,5 +1,4 @@
 export interface DiagnosisResponse {
-  id: number;
   encryptedId: string;
   personId: string;
   professionalId: string;
@@ -17,7 +16,6 @@ export interface DiagnosisResponse {
 }
 
 export interface DiagnosisListItemResponse {
-  id: number;
   encryptedId: string;
   diagnosisDate: string;
   primaryDiagnosis: string;
@@ -25,4 +23,5 @@ export interface DiagnosisListItemResponse {
   professionalId: string;
   createdByUserId: string;
   createdAt: string;
+  isActive: boolean;
 }

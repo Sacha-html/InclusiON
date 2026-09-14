@@ -49,13 +49,17 @@ export class AdminDiagnosesComponent implements OnInit {
     { key: 'diagnosisDate', label: 'Fecha', type: 'date' },
     { key: 'primaryDiagnosis', label: 'Diagnóstico principal' },
     { key: 'professionalName', label: 'Profesional' },
+    { key: 'isActive', label: 'Estado', type: 'badge', badgeMap: {
+      true: { color: 'success', label: 'Activo' }, false: { color: 'secondary', label: 'Inactivo' },
+    } },
     {
       key: 'actions',
       label: 'Acciones',
       type: 'actions',
       actions: [
         { action: 'view',       label: 'Ver',         icon: 'cilSearch' },
-        { action: 'deactivate', label: 'Dar de baja', icon: 'cilBan'    },
+        { action: 'deactivate', label: 'Dar de baja', icon: 'cilBan', visible: item => item.isActive },
+        { action: 'activate', label: 'Reactivar', icon: 'cilCheck', visible: item => !item.isActive },
       ],
     },
   ];
@@ -63,6 +67,7 @@ export class AdminDiagnosesComponent implements OnInit {
   onRowAction(event: { action: string; item: DiagnosisListItemResponse }): void {
     if (event.action === 'view')       this.openDetail(event.item.encryptedId);
     if (event.action === 'deactivate') this.openDeactivate(event.item);
+    if (event.action === 'activate') this.toggleStatus(event.item, true);
   }
 
   ngOnInit(): void {
@@ -112,7 +117,9 @@ export class AdminDiagnosesComponent implements OnInit {
     this.diagnosesService.patchStatus(this.deactivatingDiag.encryptedId, false).subscribe({
       next: () => {
         this.toastService.success('Diagnóstico dado de baja exitosamente.');
-        this.diagnoses = this.diagnoses.filter(d => d.encryptedId !== this.deactivatingDiag!.encryptedId);
+         this.diagnoses = this.diagnoses.map(d =>
+           d.encryptedId === this.deactivatingDiag!.encryptedId ? { ...d, isActive: false } : d
+         );
         this.showDeactivateModal = false;
         this.isDeactivating = false;
         this.deactivatingDiag = null;
@@ -129,6 +136,16 @@ export class AdminDiagnosesComponent implements OnInit {
   cancelDeactivate(): void {
     this.showDeactivateModal = false;
     this.deactivatingDiag = null;
+  }
+
+  private toggleStatus(diag: DiagnosisListItemResponse, isActive: boolean): void {
+    this.diagnosesService.patchStatus(diag.encryptedId, isActive).subscribe({
+      next: () => {
+        this.toastService.success(isActive ? 'Diagnóstico reactivado exitosamente.' : 'Diagnóstico dado de baja exitosamente.');
+        this.diagnoses = this.diagnoses.map(d => d.encryptedId === diag.encryptedId ? { ...d, isActive } : d);
+      },
+      error: (err) => this.toastService.error(err?.userMessage ?? 'Error al cambiar el estado del diagnóstico.'),
+    });
   }
 
   formatDate(date?: string): string {

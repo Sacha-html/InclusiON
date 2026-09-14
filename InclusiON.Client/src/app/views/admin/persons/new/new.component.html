@@ -22,7 +22,7 @@
         <span class="rounded-circle px-3 py-2 me-1 border d-inline-block" 
               [class.bg-primary]="currentStep === 3" 
               [class.text-white]="currentStep === 3">3</span>
-        Aula (opcional)
+        Profesional y aula
       </div>
     </div>
 
@@ -186,42 +186,55 @@
           <c-col sm="6">
             <label cLabel for="tutorPhone">Teléfono del tutor</label>
             <input cFormControl id="tutorPhone" formControlName="tutorPhone"
-                   placeholder="Ej: +54 9 11 1234-5678" />
+                   type="tel" inputmode="numeric" appOnlyNumbers maxlength="20"
+                   placeholder="Ej: 1112345678"
+                   [valid]="(submittedStep2 || tutorF.tutorPhone.touched) ? (tutorF.tutorPhone.errors ? false : (tutorF.tutorPhone.value ? true : undefined)) : undefined" />
+            @if ((submittedStep2 || tutorF.tutorPhone.touched) && tutorF.tutorPhone.errors) {
+              <c-form-feedback [valid]="false">
+                @if (tutorF.tutorPhone.errors['pattern']) { Solo se permiten números (sin letras, espacios ni símbolos). }
+                @else if (tutorF.tutorPhone.errors['maxlength']) { El teléfono no puede superar los 20 caracteres. }
+              </c-form-feedback>
+            }
           </c-col>
         </c-row>
 
         <div class="mt-4 d-flex gap-2">
           <button cButton color="secondary" type="button" (click)="prevStep()" aria-label="Volver al Paso 1">Atrás</button>
-          <button cButton color="primary" type="button" (click)="nextToStep3()" aria-label="Siguiente paso: Asignación de Aula">Siguiente</button>
+          <button cButton color="primary" type="button" (click)="nextToStep3()" aria-label="Siguiente paso: Asignación de Profesional y Aula">Siguiente</button>
         </div>
       }
 
       <!-- ================= PASO 3: ASIGNACIÓN DE PROFESIONAL Y AULA ================= -->
       @if (currentStep === 3) {
-        <h3 class="h5 mb-3">Asignación de profesional y aula (opcional)</h3>
+        <h3 class="h5 mb-3">Asignación de profesional y aula</h3>
 
         <p class="text-body-secondary mb-4">
-          Puede seleccionar un profesional responsable y asociar al alumno a una de sus aulas.
+          Seleccione el profesional responsable asignado al alumno y, opcionalmente, vincúlelo a una de sus aulas.
         </p>
 
         <c-row class="mb-3">
           <c-col sm="6">
-            <label cLabel for="selectedProfessionalId">Profesional responsable (opcional)</label>
+            <label cLabel for="selectedProfessionalId">Profesional responsable *</label>
             <select cSelect id="selectedProfessionalId" formControlName="selectedProfessionalId"
                     (change)="onProfessionalChange()"
-                    [valid]="undefined">
+                    [valid]="submitted ? classroomF.selectedProfessionalId.valid : undefined">
               <option [ngValue]="null">-- Seleccionar profesional --</option>
               @for (p of professionals; track p.id) {
                 <option [value]="p.id">{{ p.lastName }}, {{ p.firstName }} ({{ p.specialty }})</option>
               }
             </select>
+            @if (submitted && classroomF.selectedProfessionalId.errors) {
+              <c-form-feedback [valid]="false">
+                @if (classroomF.selectedProfessionalId.errors['required']) { Debe seleccionar un profesional responsable. }
+              </c-form-feedback>
+            }
           </c-col>
 
           <c-col sm="6">
             <label cLabel for="selectedClassroomId">Aula (opcional)</label>
             <select cSelect id="selectedClassroomId" formControlName="selectedClassroomId"
                     [valid]="undefined">
-              <option [ngValue]="null">-- Seleccionar aula --</option>
+              <option [ngValue]="null">-- Seleccionar aula (opcional) --</option>
               @for (c of classrooms; track c.id) {
                 <option [value]="c.id">{{ c.name }}</option>
               }

@@ -1,8 +1,7 @@
 @if (interactive) {
   <button
     type="button"
-    cButton
-    [class]="'visual-card interactive' + (done ? ' card--done' : '')"
+    [class]="'visual-card interactive' + (done ? ' card--done' : '') + (variant ? ' card--' + variant : '')"
     [style.--card-accent]="variant ? null : accentColor"
     [attr.aria-label]="ariaLabel || title"
     (click)="handleClick()">
@@ -10,7 +9,7 @@
   </button>
 } @else {
   <article
-    [class]="'visual-card' + (done ? ' card--done' : '')"
+    [class]="'visual-card' + (done ? ' card--done' : '') + (variant ? ' card--' + variant : '')"
     [style.--card-accent]="variant ? null : accentColor"
     [attr.aria-label]="ariaLabel || title">
     <ng-container *ngTemplateOutlet="cardContent" />
