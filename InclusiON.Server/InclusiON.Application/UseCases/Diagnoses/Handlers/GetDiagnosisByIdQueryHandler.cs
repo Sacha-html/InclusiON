@@ -22,7 +22,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         public async Task<ApiResponse<DiagnosisResponse>> HandleAsync(
             GetDiagnosisByIdQuery query, CancellationToken cancellationToken)
         {
-            var diagnosis = await _repository.GetByIdAsync(query.DiagnosisId, cancellationToken);
+            var diagnosis = await _repository.GetByIdIgnoreActiveAsync(query.DiagnosisId, cancellationToken);
 
             if (diagnosis is null)
                 return ApiResponse<DiagnosisResponse>.NotFound("Diagnóstico");
