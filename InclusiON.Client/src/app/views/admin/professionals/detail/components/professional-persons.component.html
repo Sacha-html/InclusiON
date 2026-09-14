@@ -1,107 +1,32 @@
 <!-- ═══════════════════════════════════════════════════
-     SECCIÓN: Aulas del profesional
-     ════════════════════════════════════════════════════ -->
-<div class="mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="text-body-secondary fw-semibold text-uppercase mb-0" style="letter-spacing:.04em; font-size:.75rem;">
-      <svg cIcon name="cilHome" class="me-1" aria-hidden="true"></svg>
-      Aulas del profesional
-    </h6>
-    <button cButton color="success" size="sm" (click)="openCreateClassroomModal()">
-      <svg cIcon name="cilPlus" class="me-1" aria-hidden="true"></svg>
-      Nueva aula
-    </button>
-  </div>
-
-  @if (isLoadingClassrooms()) {
-    <div class="text-center py-3">
-      <c-spinner size="sm" color="secondary"></c-spinner>
-    </div>
-  } @else if (classrooms().length === 0) {
-    <div class="alert alert-light border rounded py-3 text-center text-body-secondary small mb-0">
-      <svg cIcon name="cilHome" class="me-1" aria-hidden="true"></svg>
-      Este profesional no tiene aulas creadas.
-    </div>
-  } @else {
-    <div class="row g-2 mb-2">
-      @for (classroom of classrooms(); track classroom.id) {
-        <div class="col-12 col-sm-6 col-md-4">
-          <div
-            class="border rounded p-3 d-flex align-items-center gap-2 transition-all"
-            [class.border-primary]="selectedClassroomIdFilter() === classroom.id"
-            [class.bg-primary-subtle]="selectedClassroomIdFilter() === classroom.id"
-            [class.bg-body-tertiary]="selectedClassroomIdFilter() !== classroom.id"
-            style="cursor: pointer;"
-            (click)="toggleClassroomFilter(classroom.id)"
-            title="Hacé clic para filtrar los alumnos de este aula"
-          >
-            <!-- Icono + info -->
-            <div class="flex-grow-1 min-w-0">
-              <div class="fw-semibold text-truncate d-flex align-items-center gap-1">
-                {{ classroom.name }}
-                @if (selectedClassroomIdFilter() === classroom.id) {
-                  <span class="badge bg-primary rounded-pill text-white" style="font-size:0.65rem;">Filtrado</span>
-                }
-              </div>
-              <small class="text-body-secondary">
-                {{ classroom.studentCount }} alumno{{ classroom.studentCount !== 1 ? 's' : '' }}
-              </small>
-            </div>
-            <!-- Acciones (stopPropagation para no activar/desactivar filtro) -->
-            <div class="d-flex gap-1 flex-shrink-0" (click)="$event.stopPropagation()">
-              <button
-                type="button"
-                cButton
-                color="primary"
-                variant="ghost"
-                size="sm"
-                title="Renombrar aula"
-                (click)="openRenameClassroomModal(classroom)"
-              >
-                <svg cIcon name="cilPencil" size="sm"></svg>
-              </button>
-              <button
-                type="button"
-                cButton
-                color="warning"
-                variant="ghost"
-                size="sm"
-                title="Dar de baja aula"
-                (click)="openDeactivateClassroomModal(classroom)"
-              >
-                <svg cIcon name="cilBan" size="sm"></svg>
-              </button>
-              <button
-                type="button"
-                cButton
-                [color]="classroom.studentCount === 0 ? 'danger' : 'secondary'"
-                variant="ghost"
-                size="sm"
-                [title]="classroom.studentCount === 0 ? 'Eliminar aula' : 'Solo se puede eliminar si el aula está vacía'"
-                [disabled]="classroom.studentCount > 0"
-                (click)="openDeleteClassroomModal(classroom)"
-              >
-                <svg cIcon name="cilTrash" size="sm"></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-  }
-</div>
-
-<hr class="my-3">
-
-<!-- ═══════════════════════════════════════════════════
      SECCIÓN: Alumnos asignados
      ════════════════════════════════════════════════════ -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div class="d-flex align-items-center gap-2">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div class="d-flex flex-wrap align-items-center gap-3">
     <h6 class="text-body-secondary fw-semibold text-uppercase mb-0" style="letter-spacing:.04em; font-size:.75rem;">
       <svg cIcon name="cilPeople" class="me-1" aria-hidden="true"></svg>
       Alumnos asignados ({{ filteredPersons().length }})
     </h6>
+
+    <!-- Filtro por aula -->
+    <div class="d-flex align-items-center gap-2">
+      <label for="filter-classroom-select" class="small text-body-secondary mb-0 fw-medium">Filtrar por aula:</label>
+      <select
+        cSelect
+        id="filter-classroom-select"
+        sizing="sm"
+        style="min-width: 180px; width: auto;"
+        [ngModel]="selectedClassroomIdFilter()"
+        (ngModelChange)="selectedClassroomIdFilter.set($event)"
+      >
+        <option [ngValue]="null">Todas las aulas</option>
+        @for (c of classrooms(); track c.id) {
+          <option [value]="c.id">{{ c.name }} ({{ c.studentCount }})</option>
+        }
+        <option value="unassigned">Sin aula asignada</option>
+      </select>
+    </div>
+
     @if (selectedClassroomIdFilter()) {
       <button
         cButton
@@ -111,17 +36,18 @@
         class="py-0 px-2 small border"
         (click)="selectedClassroomIdFilter.set(null)"
       >
-        Limpiar filtro de aula
+        Limpiar filtro
       </button>
     }
   </div>
+
   <button cButton color="primary" size="sm" (click)="openAssignPersonModal()">
     <svg cIcon name="cilUserFollow" class="me-1" aria-hidden="true"></svg>
     Asignar alumno
   </button>
 </div>
 
-<!-- acciones: cambiar-aula / transferir / desasignar -->
+<!-- Tabla de alumnos asignados -->
 <app-data-table
   [columns]="columns"
   [items]="filteredPersons()"
@@ -269,7 +195,7 @@
     <p class="text-warning fw-semibold">Todas sus actividades en curso y reportes pendientes se reasignarán automáticamente.</p>
 
     <div class="mb-3">
-      <label cLabel for="transferTargetProfSelect" class="form-label fw-semibold">Seleccionar nuevo profesional</label>
+      <label class="form-label fw-semibold" for="transferTargetProfSelect">Seleccionar nuevo profesional</label>
       <select cSelect id="transferTargetProfSelect" [ngModel]="selectedTargetProfessionalId()" (ngModelChange)="selectedTargetProfessionalId.set($event)">
         <option value="" disabled>Seleccione un profesional...</option>
         @for (p of activeProfessionalsList(); track p.id) {
@@ -290,204 +216,3 @@
     </button>
   </c-modal-footer>
 </c-modal>
-
-<!-- ═══════════════════════════════════════════════════
-     MODAL: Crear aula
-     ════════════════════════════════════════════════════ -->
-<c-modal [visible]="showCreateClassroomModal()" (visibleChange)="showCreateClassroomModal.set($event)" alignment="center" size="lg">
-  <c-modal-header>
-    <h5 cModalTitle>
-      <svg cIcon name="cilHome" class="me-2" aria-hidden="true"></svg>
-      Crear aula y asignar alumnos
-    </h5>
-  </c-modal-header>
-  <c-modal-body>
-    <form [formGroup]="createClassroomForm">
-      <!-- Nombre del aula -->
-      <div class="mb-4">
-        <label class="form-label fw-semibold mb-1" for="classroom-name">Nombre del aula</label>
-        <input
-          cFormControl
-          id="classroom-name"
-          type="text"
-          formControlName="name"
-          placeholder="Ej: Aula Mañana, Aula Tarde, Grupo A..."
-          [autofocus]="true"
-        />
-        <div class="invalid-feedback d-block" *ngIf="createClassroomForm.get('name')?.touched && createClassroomForm.get('name')?.invalid">
-          El nombre del aula es requerido (máx. 150 caracteres).
-        </div>
-      </div>
-
-      <!-- Buscar y agregar alumno -->
-      <div class="mb-4">
-        <label class="form-label fw-semibold mb-1">Buscar alumnos para el aula <small class="text-body-secondary fw-normal">(opcional)</small></label>
-        <div class="d-flex gap-2 align-items-start">
-          <div class="flex-grow-1">
-            <app-searchable-select
-              [formControl]="tempPersonControl"
-              [searchFn]="searchPersonsForClassroomFn"
-              [displayFn]="displayPerson"
-              [subDisplayFn]="subDisplayPerson"
-              [valueFn]="fullPersonValue"
-              placeholder="Buscar por nombre o documento..."
-              hintText="Escriba al menos 2 caracteres para buscar"
-              noResultsText="No se encontraron alumnos disponibles"
-            />
-          </div>
-          <button
-            type="button"
-            cButton
-            color="success"
-            class="px-3"
-            style="height: 38px;"
-            [disabled]="!tempPersonControl.value"
-            (click)="addPersonToClassroom(tempPersonControl.value)"
-          >
-            Agregar
-          </button>
-        </div>
-      </div>
-
-      <!-- Alumnos agregados temporalmente -->
-      <div class="mb-4">
-        <label class="form-label fw-semibold mb-2">Alumnos en este aula ({{ selectedPersonsToAssign().length }})</label>
-        @if (selectedPersonsToAssign().length === 0) {
-          <div class="alert alert-info py-2 small mb-0">
-            El aula se creará sin alumnos asignados (podrá asignarlos más tarde).
-          </div>
-        } @else {
-          <div class="border rounded p-2 bg-body-tertiary" style="max-height: 200px; overflow-y: auto;">
-            <table class="table table-sm table-borderless mb-0 align-middle">
-              <tbody>
-                @for (p of selectedPersonsToAssign(); track p.id) {
-                  <tr>
-                    <td>
-                      <div class="fw-semibold">{{ p.fullName }}</div>
-                      <small class="text-body-secondary" *ngIf="p.documentNumber">DNI: {{ p.documentNumber }}</small>
-                    </td>
-                    <td class="text-end">
-                      <button
-                        type="button"
-                        cButton
-                        color="danger"
-                        variant="ghost"
-                        size="sm"
-                        (click)="removePersonFromClassroom(p.id)"
-                        aria-label="Quitar alumno"
-                      >
-                        <svg cIcon name="cilTrash" size="sm"></svg>
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      </div>
-
-      <!-- Permisos del aula -->
-      <div class="border rounded p-3 bg-body-tertiary permissions-box">
-        <p class="text-body-secondary small fw-semibold mb-2 text-uppercase" style="letter-spacing:.04em">Permisos aplicados a la asignación</p>
-        <c-form-check class="mb-2">
-          <input cFormCheckInput type="checkbox" id="classroomIsPrimary" formControlName="isPrimaryProfessional" />
-          <label cFormCheckLabel for="classroomIsPrimary" class="fw-medium">
-            Profesional principal
-            <small class="d-block text-body-secondary fw-normal">Este profesional aparece como referente principal de los alumnos en este aula</small>
-          </label>
-        </c-form-check>
-        <c-form-check>
-          <input cFormCheckInput type="checkbox" id="classroomCanSupervise" formControlName="canSuperviseLogin" />
-          <label cFormCheckLabel for="classroomCanSupervise" class="fw-medium">
-            Puede supervisar login
-            <small class="d-block text-body-secondary fw-normal">Este profesional puede asistir el inicio de sesión de los alumnos en este aula</small>
-          </label>
-        </c-form-check>
-      </div>
-    </form>
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="cancelCreateClassroom()" [disabled]="isSubmitting()">Cancelar</button>
-    <button
-      cButton
-      color="success"
-      (click)="confirmCreateClassroom()"
-      [disabled]="createClassroomForm.invalid || isSubmitting()"
-    >
-      @if (isSubmitting()) {
-        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
-        Creando...
-      } @else {
-        Crear aula
-      }
-    </button>
-  </c-modal-footer>
-</c-modal>
-
-<!-- ═══════════════════════════════════════════════════
-     MODAL: Renombrar aula
-     ════════════════════════════════════════════════════ -->
-<c-modal [visible]="showRenameClassroomModal()" (visibleChange)="showRenameClassroomModal.set($event)" alignment="center">
-  <c-modal-header>
-    <h5 cModalTitle>
-      <svg cIcon name="cilPencil" class="me-2" aria-hidden="true"></svg>
-      Renombrar aula
-    </h5>
-  </c-modal-header>
-  <c-modal-body>
-    <form [formGroup]="renameClassroomForm">
-      <div class="mb-3">
-        <label class="form-label fw-semibold mb-1" for="rename-classroom-name">Nuevo nombre</label>
-        <input
-          cFormControl
-          id="rename-classroom-name"
-          type="text"
-          formControlName="name"
-          placeholder="Ej: Aula Mañana, Grupo B..."
-          [autofocus]="true"
-        />
-        <div class="invalid-feedback d-block" *ngIf="renameClassroomForm.get('name')?.touched && renameClassroomForm.get('name')?.invalid">
-          El nombre es requerido (máx. 150 caracteres).
-        </div>
-      </div>
-    </form>
-  </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="cancelRenameClassroom()" [disabled]="isSubmitting()">Cancelar</button>
-    <button cButton color="primary" (click)="confirmRenameClassroom()" [disabled]="renameClassroomForm.invalid || isSubmitting()">
-      @if (isSubmitting()) {
-        <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
-        Guardando...
-      } @else {
-        Guardar
-      }
-    </button>
-  </c-modal-footer>
-</c-modal>
-
-<!-- Modal: Confirmar dar de baja aula -->
-<app-confirm-modal
-  [visible]="showDeactivateClassroomModal()"
-  title="Dar de baja el aula"
-  [itemName]="classroomToDeactivate()?.name ?? ''"
-  messagePrefix="¿Dar de baja el aula "
-  messageSuffix="? Los alumnos quedarán sin aula asignada pero seguirán vinculados al profesional."
-  confirmLabel="Dar de baja"
-  confirmColor="warning"
-  (confirm)="confirmDeactivateClassroom()"
-  (cancel)="cancelDeactivateClassroom()"
-/>
-
-<!-- Modal: Confirmar eliminar aula -->
-<app-confirm-modal
-  [visible]="showDeleteClassroomModal()"
-  title="Eliminar aula"
-  [itemName]="classroomToDelete()?.name ?? ''"
-  messagePrefix="¿Eliminar permanentemente el aula "
-  messageSuffix="? Esta acción no se puede deshacer."
-  confirmLabel="Eliminar"
-  confirmColor="danger"
-  (confirm)="confirmDeleteClassroom()"
-  (cancel)="cancelDeleteClassroom()"
-/>
