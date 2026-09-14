@@ -8,5 +8,6 @@ export interface CreatePersonWithTutorRequest {
   tutorDocumentNumber?: string;
   tutorPhone?: string;
   tutorRelationship: string;
+  professionalId: string;
   classroomId?: string;
 }

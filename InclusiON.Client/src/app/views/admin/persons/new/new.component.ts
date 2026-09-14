@@ -94,11 +94,11 @@ export class NewComponent implements OnInit {
     tutorLastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     tutorEmail: ['', [Validators.required, Validators.email]],
     tutorDocumentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
-    tutorPhone: ['', [Validators.maxLength(20)]],
+    tutorPhone: ['', [Validators.maxLength(20), Validators.pattern(/^[0-9]+$/)]],
     tutorRelationship: ['', [Validators.required, Validators.maxLength(50)]],
 
-    // Asignación opcional de Profesional y Aula
-    selectedProfessionalId: [null],
+    // Asignación obligatoria de Profesional y opcional de Aula
+    selectedProfessionalId: [null, [Validators.required]],
     selectedClassroomId: [{ value: null, disabled: true }],
   });
 
@@ -215,6 +215,7 @@ export class NewComponent implements OnInit {
       ...(raw.tutorDocumentNumber && { tutorDocumentNumber: raw.tutorDocumentNumber }),
       ...(raw.tutorPhone && { tutorPhone: raw.tutorPhone }),
       tutorRelationship: raw.tutorRelationship,
+      professionalId: raw.selectedProfessionalId,
       ...(raw.selectedClassroomId ? { classroomId: raw.selectedClassroomId } : {}),
     };
 
