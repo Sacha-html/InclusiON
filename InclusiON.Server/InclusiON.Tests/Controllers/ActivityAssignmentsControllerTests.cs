@@ -20,7 +20,7 @@ namespace InclusiON.Tests.Controllers
         {
             var httpCtx = Substitute.For<IHttpContextService>();
             httpCtx.GetCurrentEntityId().Returns(entityId);
-            return new ActivityAssignmentsController(httpCtx);
+            return new ActivityAssignmentsController(httpCtx, Substitute.For<IResourceAuthorizationService>());
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
@@ -53,6 +53,14 @@ namespace InclusiON.Tests.Controllers
         {
             var h = Substitute.For<ICommandHandler<StartActivityResponseCommand, ApiResponse<ActivityAssignmentResponse>>>();
             h.HandleAsync(Arg.Any<StartActivityResponseCommand>(), Arg.Any<CancellationToken>())
+             .Returns(ApiResponse<ActivityAssignmentResponse>.SuccessResult(new ActivityAssignmentResponse()));
+            return h;
+        }
+
+        private static ICommandHandler<AutoAssignActivityCommand, ApiResponse<ActivityAssignmentResponse>> OkAutoAssignHandler()
+        {
+            var h = Substitute.For<ICommandHandler<AutoAssignActivityCommand, ApiResponse<ActivityAssignmentResponse>>>();
+            h.HandleAsync(Arg.Any<AutoAssignActivityCommand>(), Arg.Any<CancellationToken>())
              .Returns(ApiResponse<ActivityAssignmentResponse>.SuccessResult(new ActivityAssignmentResponse()));
             return h;
         }
@@ -247,6 +255,28 @@ namespace InclusiON.Tests.Controllers
         }
 
         // ── CompleteResponse ─────────────────────────────────────────────────
+
+        [Fact]
+        public async Task AutoAssign_ValidEncryptedActivityId_UsesAuthenticatedPersonAndCatalogId()
+        {
+            var personId = Guid.NewGuid();
+            var handler = OkAutoAssignHandler();
+            var sut = BuildSut(personId);
+
+            await sut.AutoAssign(42, handler);
+
+            await handler.Received(1).HandleAsync(
+                Arg.Is<AutoAssignActivityCommand>(c => c.ActivityId == 42 && c.PersonId == personId),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task AutoAssign_NullEntityId_ReturnsNotFound()
+        {
+            var result = await BuildSut(null).AutoAssign(42, OkAutoAssignHandler());
+
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
+        }
 
         [Fact]
         public async Task CompleteResponse_NullEntityId_ReturnsNotFound()
