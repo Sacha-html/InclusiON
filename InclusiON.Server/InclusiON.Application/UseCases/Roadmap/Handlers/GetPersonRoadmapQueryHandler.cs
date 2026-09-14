@@ -34,7 +34,10 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
             {
                 area.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(area.Id.ToString()));
                 foreach (var activity in area.Activities)
+                {
                     activity.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(activity.Id.ToString()));
+                    activity.EncryptedActivityId = ToUrlSafeBase64(_encryption.Encrypt(activity.ActivityId.ToString()));
+                }
             }
             return ApiResponse<RoadmapResponse>.SuccessResult(dto);
         }

@@ -111,9 +111,7 @@ export class AacRoadmapComponent implements OnInit {
       if (!personId) return;
 
       this.loading.set(true);
-      this.roadmapService.assignFromRoadmap(personId, node.areaId, node.activity.encryptedId, {
-        isEvaluationActivity: false
-      }).subscribe({
+      this.activitiesService.autoAssign(node.activity.encryptedActivityId).subscribe({
         next: (asn) => {
           this.loading.set(false);
           this.router.navigate([AppRoutes.Aac.Activities, asn.encryptedId]);
