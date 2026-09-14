@@ -9,7 +9,16 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const toastService = inject(ToastService);
   const router = inject(Router);
 
-  const allowedRoles = route.data['roles'] as string[] | undefined;
+  let currentRoute: ActivatedRouteSnapshot | null = route;
+  let allowedRoles: string[] | undefined;
+
+  while (currentRoute) {
+    if (currentRoute.data && currentRoute.data['roles'] && (currentRoute.data['roles'] as string[]).length > 0) {
+      allowedRoles = currentRoute.data['roles'] as string[];
+      break;
+    }
+    currentRoute = currentRoute.parent;
+  }
 
   if (!allowedRoles || allowedRoles.length === 0) {
     return true;
@@ -22,7 +31,10 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
     return false;
   }
 
-  if (allowedRoles.includes(user.role)) {
+  const userRoleLower = user.role.toLowerCase();
+  const hasAccess = allowedRoles.some((r) => r.toLowerCase() === userRoleLower);
+
+  if (hasAccess) {
     return true;
   }
 

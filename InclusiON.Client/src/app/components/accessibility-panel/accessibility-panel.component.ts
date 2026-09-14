@@ -1,4 +1,4 @@
-import { Component, inject, HostListener, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect } from '@angular/core';
+import { Component, inject, HostListener, ElementRef, ViewChild, AfterViewInit, OnDestroy, effect, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IconModule } from '@coreui/icons-angular';
 import { ButtonModule, FormModule, TooltipModule } from '@coreui/angular';
@@ -23,6 +23,8 @@ import {
   styleUrl: './accessibility-panel.component.scss'
 })
 export class AccessibilityPanelComponent implements AfterViewInit, OnDestroy {
+  @Input() showTrigger: boolean = true;
+
   readonly a11y = inject(AccessibilityService);
   private readonly elementRef = inject(ElementRef);
   private readingGuideElement: HTMLElement | null = null;

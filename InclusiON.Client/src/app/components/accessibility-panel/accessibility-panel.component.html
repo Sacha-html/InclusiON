@@ -1,15 +1,17 @@
 <!-- Botón flotante para abrir el panel -->
-<button
-  type="button"
-  class="a11y-trigger-btn"
-  (click)="togglePanel()"
-  [attr.aria-expanded]="a11y.panelOpen()"
-  aria-controls="accessibility-panel"
-  aria-label="Abrir panel de accesibilidad (Alt + A)"
->
-  <svg cIcon name="cilContrast" size="xl" aria-hidden="true"></svg>
-  <span class="a11y-trigger-text">Accesibilidad</span>
-</button>
+@if (showTrigger) {
+  <button
+    type="button"
+    class="a11y-trigger-btn"
+    (click)="togglePanel()"
+    [attr.aria-expanded]="a11y.panelOpen()"
+    aria-controls="accessibility-panel"
+    aria-label="Abrir panel de accesibilidad (Alt + A)"
+  >
+    <svg cIcon name="cilContrast" size="xl" aria-hidden="true"></svg>
+    <span class="a11y-trigger-text">Accesibilidad</span>
+  </button>
+}
 
 <!-- Indicador flotante de lectura activa -->
 @if (a11y.isSpeaking()) {
