@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AssignmentsService, ProfessionalsService, ToastService } from '@services';
@@ -10,12 +10,16 @@ import {
   CardBodyComponent,
   CardComponent,
   CardHeaderComponent,
+  ModalBodyComponent,
+  ModalComponent,
+  ModalFooterComponent,
+  ModalHeaderComponent,
 } from '@coreui/angular';
 import { ProfessionalBasicInfoComponent } from './components/professional-basic-info.component';
+import { ProfessionalClassroomsComponent } from './components/professional-classrooms.component';
 import { ProfessionalPersonsComponent } from './components/professional-persons.component';
 import { ProfessionalUserComponent } from './components/professional-user.component';
 import { ProfessionalReportsComponent } from './components/professional-reports.component';
-import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderComponent } from '@coreui/angular';
 
 @Component({
   selector: 'app-detail',
@@ -31,6 +35,7 @@ import { ModalBodyComponent, ModalComponent, ModalFooterComponent, ModalHeaderCo
     ModalFooterComponent,
     FormsModule,
     ProfessionalBasicInfoComponent,
+    ProfessionalClassroomsComponent,
     ProfessionalPersonsComponent,
     ProfessionalUserComponent,
     ProfessionalReportsComponent,
@@ -45,7 +50,7 @@ export class DetailComponent implements OnInit {
   private readonly assignmentsService = inject(AssignmentsService);
   private readonly toastService = inject(ToastService);
 
-  activeTab: 'datos' | 'personas' | 'usuario' | 'reportes' = 'datos';
+  activeTab: 'datos' | 'usuario' | 'aulas' | 'personas' | 'reportes' = 'datos';
 
   professional: ProfessionalResponse | null = null;
   showConfirmModal = false;
@@ -58,11 +63,12 @@ export class DetailComponent implements OnInit {
   isValidating = false;
 
   assignedPersons: ProfessionalPersonResponse[] = [];
+  classroomsCount = 0;
 
   ngOnInit(): void {
     const tab = this.route.snapshot.queryParams['tab'];
-    if (tab && ['datos', 'personas', 'usuario', 'reportes'].includes(tab)) {
-      this.activeTab = tab as 'datos' | 'personas' | 'usuario' | 'reportes';
+    if (tab && ['datos', 'usuario', 'aulas', 'personas', 'reportes'].includes(tab)) {
+      this.activeTab = tab as 'datos' | 'usuario' | 'aulas' | 'personas' | 'reportes';
     }
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -72,6 +78,9 @@ export class DetailComponent implements OnInit {
           this.professional = data;
           this.assignmentsService.getPersonsByProfessional(id).subscribe({
             next: (persons: ProfessionalPersonResponse[]) => this.assignedPersons = persons,
+          });
+          this.assignmentsService.getClassroomsByProfessional(id).subscribe({
+            next: (classrooms) => this.classroomsCount = classrooms.length,
           });
         },
         error: () => this.router.navigate([AppRoutes.Admin.Professionals]),
@@ -85,6 +94,17 @@ export class DetailComponent implements OnInit {
 
   onPersonsChange(persons: ProfessionalPersonResponse[]): void {
     this.assignedPersons = persons;
+  }
+
+  onClassroomsCountChange(count: number): void {
+    this.classroomsCount = count;
+  }
+
+  refreshAssignedPersons(): void {
+    if (!this.professional) return;
+    this.assignmentsService.getPersonsByProfessional(this.professional.id).subscribe({
+      next: (persons: ProfessionalPersonResponse[]) => this.assignedPersons = persons,
+    });
   }
 
   deactivate(): void {
@@ -104,11 +124,6 @@ export class DetailComponent implements OnInit {
         this.showConfirmModal = false;
         if (err?.errorCode === 710 || err?.errorCode === 'HAS_PENDING_REPORTS') {
           this.toastService.error('Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.');
-          
-          /* TODO: Reemplazar este aviso por un Componente Modal interactivo que permita
-             seleccionar un nuevo profesional y transferir los reportes.
-             this.showTransferReportsModal = true;
-          */
         } else {
           this.toastService.error(err?.userMessage || 'Error al desactivar el profesional');
         }
