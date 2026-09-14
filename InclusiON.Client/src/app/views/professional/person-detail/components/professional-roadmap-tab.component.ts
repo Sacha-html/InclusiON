@@ -120,7 +120,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
 
   // ── Adjustment history ───────────────────────────────────────────────
   adjustmentHistory = signal<AdaptiveAdjustmentLogResponse[]>([]);
-  showingHistoryForActivityId = signal<number | null>(null);
+  showingHistoryForActivityId = signal<string | null>(null);
   loadingHistory = signal(false);
 
   // ── Adaptive engine config (IN-116) ──────────────────────────────────
@@ -416,7 +416,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
-  loadAdjustmentHistory(areaId: number, activityEntryId: number): void {
+  loadAdjustmentHistory(areaId: string, activityEntryId: string): void {
     if (this.showingHistoryForActivityId() === activityEntryId) {
       this.showingHistoryForActivityId.set(null);
       this.adjustmentHistory.set([]);
@@ -510,7 +510,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     this.assigning = true;
 
     this.roadmapService
-      .assignFromRoadmap(this.personId, area.id, activity.id, {
+      .assignFromRoadmap(this.personId, area.encryptedId, activity.encryptedId, {
         dueDate: this.assignForm.dueDate || undefined,
         isEvaluationActivity: this.assignForm.isEvaluationActivity,
         bypassDuplicateWarning: bypassDuplicateWarning
@@ -549,7 +549,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     this.showAdaptiveConfigModal = true;
     this.loadingAdaptiveConfig = true;
 
-    this.roadmapService.getAdaptiveConfig(this.personId, area.id, activity.id).subscribe({
+    this.roadmapService.getAdaptiveConfig(this.personId, area.encryptedId, activity.encryptedId).subscribe({
       next: (config) => {
         this.adaptiveConfig = config;
         if (config) {
@@ -597,7 +597,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     this.savingAdaptiveConfig = true;
 
     this.roadmapService
-      .upsertAdaptiveConfig(this.personId, area.id, activity.id, this.adaptiveForm)
+      .upsertAdaptiveConfig(this.personId, area.encryptedId, activity.encryptedId, this.adaptiveForm)
       .subscribe({
         next: (saved) => {
           this.adaptiveConfig = saved;
@@ -617,7 +617,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     const { area, activity } = this.adaptiveConfigTarget;
     this.deletingAdaptiveConfig = true;
 
-    this.roadmapService.deleteAdaptiveConfig(this.personId, area.id, activity.id).subscribe({
+    this.roadmapService.deleteAdaptiveConfig(this.personId, area.encryptedId, activity.encryptedId).subscribe({
       next: () => {
         this.adaptiveConfig = null;
         this.deletingAdaptiveConfig = false;

@@ -14,15 +14,16 @@ export class RoadmapService {
     return `${environment.apiUrl}/Persons/${personId}/roadmap`;
   }
 
-  getRoadmap(personId: string): Observable<RoadmapResponse> {
+  /** Returns null when the person does not have a roadmap yet. */
+  getRoadmap(personId: string): Observable<RoadmapResponse | null> {
     return this.http
-      .get<ApiResponse<RoadmapResponse>>(this.url(personId))
+      .get<ApiResponse<RoadmapResponse | null>>(this.url(personId))
       .pipe(unwrapResponse());
   }
 
-  getMyRoadmap(): Observable<RoadmapResponse> {
+  getMyRoadmap(): Observable<RoadmapResponse | null> {
     return this.http
-      .get<ApiResponse<RoadmapResponse>>(`${environment.apiUrl}/my/roadmap`)
+      .get<ApiResponse<RoadmapResponse | null>>(`${environment.apiUrl}/my/roadmap`)
       .pipe(unwrapResponse());
   }
 
@@ -80,7 +81,7 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  getAdjustmentHistory(personId: string, areaId: number, activityEntryId: number): Observable<AdaptiveAdjustmentLogResponse[]> {
+  getAdjustmentHistory(personId: string, areaId: string, activityEntryId: string): Observable<AdaptiveAdjustmentLogResponse[]> {
     return this.http
       .get<ApiResponse<AdaptiveAdjustmentLogResponse[]>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adjustments`
@@ -96,7 +97,7 @@ export class RoadmapService {
 
   // ── Adaptive Engine Config (IN-116) ──────────────────────────────────────
 
-  getAdaptiveConfig(personId: string, areaId: number, activityEntryId: number): Observable<AdaptiveEngineConfigResponse | null> {
+  getAdaptiveConfig(personId: string, areaId: string, activityEntryId: string): Observable<AdaptiveEngineConfigResponse | null> {
     return this.http
       .get<ApiResponse<AdaptiveEngineConfigResponse | null>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adaptive-config`
@@ -106,8 +107,8 @@ export class RoadmapService {
 
   upsertAdaptiveConfig(
     personId: string,
-    areaId: number,
-    activityEntryId: number,
+    areaId: string,
+    activityEntryId: string,
     payload: Partial<AdaptiveEngineConfigResponse>
   ): Observable<AdaptiveEngineConfigResponse> {
     return this.http
@@ -122,8 +123,8 @@ export class RoadmapService {
 
   assignFromRoadmap(
     personId: string,
-    areaId: number,
-    activityEntryId: number,
+    areaId: string,
+    activityEntryId: string,
     payload: { dueDate?: string; isEvaluationActivity: boolean; bypassDuplicateWarning?: boolean }
   ): Observable<ActivityAssignmentResponse> {
     return this.http
@@ -134,7 +135,7 @@ export class RoadmapService {
       .pipe(unwrapResponse());
   }
 
-  deleteAdaptiveConfig(personId: string, areaId: number, activityEntryId: number): Observable<unknown> {
+  deleteAdaptiveConfig(personId: string, areaId: string, activityEntryId: string): Observable<unknown> {
     return this.http
       .delete<ApiResponse<unknown>>(
         `${this.url(personId)}/areas/${areaId}/activities/${activityEntryId}/adaptive-config`

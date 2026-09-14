@@ -1,4 +1,5 @@
 using FluentAssertions;
+using System.Linq.Expressions;
 using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 using Xunit;
@@ -160,10 +161,12 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
         public async Task GetActivityTemplateTypes_ReturnsAll()
         {
             var repo = Substitute.For<IReadOnlyRepository<ActivityTemplateType>>();
-            repo.GetAllActiveAsync(Arg.Any<CancellationToken>())
+            repo.GetAllActiveAsync(
+                    Arg.Any<CancellationToken>(),
+                    Arg.Any<Expression<Func<ActivityTemplateType, object>>[]>())
                 .Returns(new List<ActivityTemplateType>
                 {
-                    new() { Id = 1, Name = "Selección", Code = "SELECTION", ContentSchema = "{}", ComponentName = "SelectionComponent" }
+                    new() { Id = 1, Name = "Selección", Code = "SELECTION", ContentSchema = "{}", ComponentName = "SelectionComponent", SkillArea = new SkillArea { Name = "Comunicación" } }
                 });
 
             var result = await new GetActivityTemplateTypesQueryHandler(repo, CreateCache(), Substitute.For<IEncryptionService>())
@@ -172,6 +175,7 @@ namespace InclusiON.Tests.Unit.Handlers.Catalogs
             result.Success.Should().BeTrue();
             result.Data.Should().HaveCount(1);
             result.Data![0].Code.Should().Be("SELECTION");
+            result.Data[0].SkillAreaName.Should().Be("Comunicación");
         }
 
         // ── AvatarColors ─────────────────────────────────────────────────

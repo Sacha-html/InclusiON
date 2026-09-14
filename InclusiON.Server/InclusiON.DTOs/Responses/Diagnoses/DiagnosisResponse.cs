@@ -4,7 +4,6 @@ namespace InclusiON.DTOs.Responses.Diagnoses
 {
     public class DiagnosisResponse
     {
-        public int Id { get; set; }
         public string EncryptedId { get; set; } = string.Empty;
         public Guid PersonId { get; set; }
         public Guid ProfessionalId { get; set; }
@@ -24,7 +23,6 @@ namespace InclusiON.DTOs.Responses.Diagnoses
         {
             return new DiagnosisResponse
             {
-                Id = d.Id,
                 PersonId = d.PersonId,
                 ProfessionalId = d.ProfessionalId,
                 ProfessionalName = $"{d.Professional.FirstName} {d.Professional.LastName}".Trim(),

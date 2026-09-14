@@ -37,7 +37,10 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
             new(_personsRepo, _familyRepo, _assignRepo, _prosRepo, _identity, _uow, _bgJobs,
                 NullLogger<CreatePersonWithTutorCommandHandler>.Instance, _dateTime, _roadmapInit, _notifier);
 
-        private static CreatePersonWithTutorCommand Cmd(string? doc = "12345678", Guid? classroomId = null) =>
+        private static CreatePersonWithTutorCommand Cmd(
+            string? doc = "12345678",
+            Guid? professionalId = null,
+            Guid? classroomId = null) =>
             new(
                 FirstName: "Lucas",
                 LastName: "Pérez",
@@ -50,6 +53,7 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
                 TutorDocumentNumber: "87654321",
                 TutorPhone: "123456789",
                 TutorRelationship: "Madre",
+                ProfessionalId: professionalId ?? ProfessionalId,
                 ClassroomId: classroomId ?? ClassroomId
             );
 
@@ -94,20 +98,53 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         }
 
         [Fact]
-        public async Task HandleAsync_NoClassroomId_CreatesPersonWithoutAssignmentOrNotification()
+        public async Task HandleAsync_NoClassroomId_CreatesPersonWithAssignmentAndNotifiesProfessional()
         {
-            var cmd = Cmd(classroomId: Guid.Empty) with { ClassroomId = null };
+            var cmd = Cmd() with { ClassroomId = null };
             SetupSuccess();
 
             var result = await BuildSut().HandleAsync(cmd, default);
 
             result.Success.Should().BeTrue();
             await _personsRepo.Received(1).CreateAsync(
-                Arg.Is<PersonWithDisability>(person => !person.ProfessionalPersons.Any()),
+                Arg.Is<PersonWithDisability>(person => person.ProfessionalPersons.Count == 1 &&
+                    person.ProfessionalPersons.Single().ProfessionalId == ProfessionalId &&
+                    person.ProfessionalPersons.Single().ClassroomId == null &&
+                    person.ProfessionalPersons.Single().IsPrimaryProfessional),
                 Arg.Any<CancellationToken>());
-            await _notifier.DidNotReceiveWithAnyArgs().NotifyUserAsync(default!, default!, default!, default!, default);
             await _assignRepo.DidNotReceiveWithAnyArgs().GetClassroomByIdAsync(default, default);
-            await _prosRepo.DidNotReceiveWithAnyArgs().GetByIdAsync(default, default);
+            await _prosRepo.Received(1).GetByIdAsync(ProfessionalId, Arg.Any<CancellationToken>());
+            await _notifier.Received(1).NotifyUserAsync(
+                ProfessionalUserId.ToString(),
+                "🎓 Nuevo alumno asignado",
+                Arg.Is<string>(msg => msg.Contains("Lucas Pérez")),
+                Arg.Is<string>(url => url.StartsWith("/#/pro/persons/")),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_ProfessionalNotFound_ReturnsNotFound()
+        {
+            _prosRepo.GetByIdAsync(ProfessionalId, Arg.Any<CancellationToken>()).Returns((Professional?)null);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.NotFound);
+        }
+
+        [Fact]
+        public async Task HandleAsync_ClassroomBelongsToAnotherProfessional_ReturnsValidationFailed()
+        {
+            SetupSuccess();
+            var anotherProfessionalId = Guid.NewGuid();
+            var classroom = new Classroom { Id = ClassroomId, ProfessionalId = anotherProfessionalId, Name = "Aula 1" };
+            _assignRepo.GetClassroomByIdAsync(ClassroomId, Arg.Any<CancellationToken>()).Returns(classroom);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
         }
 
         [Fact]
@@ -119,6 +156,43 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.NotFound);
+        }
+
+        [Fact]
+        public async Task HandleAsync_WhenPostCommitStepFails_ReturnsSuccessAndRunsRemainingSteps()
+        {
+            SetupSuccess();
+            _roadmapInit
+                .When(x => x.InitializeStudentRoadmapAsync(
+                    Arg.Any<Guid>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>()))
+                .Do(_ => throw new InvalidOperationException("roadmap unavailable"));
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            await _bgJobs.Received(2).CreateAsync(
+                Arg.Any<int>(), Arg.Any<string>(), Arg.Any<DateTime?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
+            await _notifier.Received(1).NotifyUserAsync(
+                ProfessionalUserId.ToString(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_WhenSaveFails_ReturnsErrorAndDoesNotRunPostCommitSteps()
+        {
+            SetupSuccess();
+            _uow.SaveChangesAsync(Arg.Any<CancellationToken>())
+                .Returns(_ => Task.FromException<int>(new InvalidOperationException("save failed")));
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.InternalError);
+            await _roadmapInit.DidNotReceiveWithAnyArgs()
+                .InitializeStudentRoadmapAsync(default, default, default);
+            await _bgJobs.DidNotReceiveWithAnyArgs()
+                .CreateAsync(default, default!, default, default, default);
+            await _notifier.DidNotReceiveWithAnyArgs()
+                .NotifyUserAsync(default!, default!, default!, default!, default);
         }
     }
 }

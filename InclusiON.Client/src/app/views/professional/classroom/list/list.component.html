@@ -11,7 +11,7 @@
     </c-card-header>
     <c-card-body>
 
-      @if (hasClassrooms) {
+      @if (hasClassrooms || persons.length > 0) {
         <div class="mb-4 row align-items-center">
           <div class="col-12 col-md-4">
             <label for="classroomSelect" class="form-label fw-semibold text-body-secondary small text-uppercase" style="letter-spacing: .04em;">Aula seleccionada</label>
@@ -25,24 +25,59 @@
         </div>
       }
 
-      @if (!hasClassrooms) {
+      @if (!hasClassrooms && persons.length === 0) {
         <app-empty-state
           icon="cil-school"
           message="No tenés aulas creadas"
           detail="Solicitá al administrador que te cree un aula."
         />
       } @else if (filteredPersons.length === 0) {
-        <app-empty-state
-          icon="cil-people"
-          message="Esta aula no tiene alumnos asignados"
-          detail="Solicitá al administrador que asigne alumnos a esta aula."
-        />
+        @if (selectedClassroomId === 'unassigned') {
+          <app-empty-state
+            icon="cil-check-circle"
+            message="No tenés alumnos pendientes de aula"
+            detail="Todos tus alumnos asignados ya cuentan con un aula designada."
+          />
+        } @else {
+          <app-empty-state
+            icon="cil-people"
+            message="Esta aula no tiene alumnos asignados"
+            detail="Solicitá al administrador que asigne alumnos a esta aula."
+          />
+        }
       }
 
       <c-row>
         @for (person of filteredPersons; track person.personId) {
           <c-col sm="6" md="4" lg="3" class="mb-4 d-flex">
-            <button type="button" class="person-card" (click)="goToDetail(person)" [attr.aria-label]="'Ver detalle de ' + person.personFullName" [style.--card-accent]="person.avatarColor || '#9E9E9E'">
+            <div
+              class="person-card position-relative"
+              role="button"
+              tabindex="0"
+              (click)="goToDetail(person)"
+              (keydown.enter)="goToDetail(person)"
+              [attr.aria-label]="'Ver detalle de ' + person.personFullName"
+              [style.--card-accent]="person.avatarColor || '#9E9E9E'"
+            >
+              <!-- Botón rápido arriba a la derecha: + (asignar aula) o dos flechas (cambiar aula) -->
+              <button
+                type="button"
+                cButton
+                [color]="person.classroomId ? 'primary' : 'success'"
+                variant="ghost"
+                size="sm"
+                class="position-absolute top-0 end-0 m-2 p-1 rounded-circle d-flex align-items-center justify-content-center action-classroom-btn"
+                [title]="person.classroomId ? 'Cambiar aula' : 'Asignar a aula'"
+                [attr.aria-label]="(person.classroomId ? 'Cambiar aula de ' : 'Asignar aula a ') + person.personFullName"
+                (click)="openAssignClassroomModal(person, $event)"
+              >
+                @if (person.classroomId) {
+                  <svg cIcon name="cilSwapHorizontal" size="lg"></svg>
+                } @else {
+                  <svg cIcon name="cilPlus" size="lg"></svg>
+                }
+              </button>
+
               <!-- Avatar -->
               <app-actor-avatar
                 [name]="person.personFullName"
@@ -68,13 +103,73 @@
                 @if (person.isPrimaryProfessional) {
                   <c-badge color="primary" class="me-1">Principal</c-badge>
                 }
+                @if (person.classroomName) {
+                  <c-badge color="info" class="me-1">{{ person.classroomName }}</c-badge>
+                }
               </div>
-            </button>
+            </div>
           </c-col>
         }
       </c-row>
 
     </c-card-body>
   </c-card>
+
+  <!-- ═══════════════════════════════════════════════════
+       MODAL: Asignar / Cambiar aula a alumno
+       ════════════════════════════════════════════════════ -->
+  <c-modal [visible]="showAssignModal" (visibleChange)="showAssignModal = $event" alignment="center">
+    <c-modal-header>
+      <h5 cModalTitle>
+        <svg cIcon name="cilHome" class="me-2" aria-hidden="true"></svg>
+        {{ selectedPerson?.classroomId ? 'Cambiar aula' : 'Asignar a aula' }}
+      </h5>
+    </c-modal-header>
+    <c-modal-body>
+      @if (selectedPerson; as p) {
+        <div class="mb-3 p-3 bg-body-tertiary rounded border small">
+          <div class="fw-semibold text-dark fs-6 mb-1">{{ p.personFullName }}</div>
+          @if (p.personDocumentNumber) {
+            <div class="text-body-secondary"><strong>DNI:</strong> {{ p.personDocumentNumber }}</div>
+          }
+          <div class="text-body-secondary mt-1">
+            <strong>Aula actual:</strong>
+            <span class="badge ms-1" [class.bg-secondary]="!p.classroomName" [class.bg-info]="p.classroomName">
+              {{ p.classroomName || 'Sin aula (asignación general)' }}
+            </span>
+          </div>
+        </div>
+      }
+
+      <div class="mb-3">
+        <label for="modalClassroomSelect" class="form-label fw-semibold">Seleccioná el aula de destino:</label>
+        <select
+          cSelect
+          id="modalClassroomSelect"
+          class="form-select"
+          [(ngModel)]="targetClassroomId"
+        >
+          <option [ngValue]="null">Sin aula (asignación general / atención individual)</option>
+          @for (c of classrooms; track c.id) {
+            <option [value]="c.id">{{ c.name }} ({{ c.studentCount }} alumno{{ c.studentCount !== 1 ? 's' : '' }})</option>
+          }
+        </select>
+        <div class="form-text small mt-1">
+          El alumno se reubicará inmediatamente en el aula seleccionada.
+        </div>
+      </div>
+    </c-modal-body>
+    <c-modal-footer>
+      <button cButton color="secondary" (click)="showAssignModal = false" [disabled]="isSubmitting">Cancelar</button>
+      <button cButton color="primary" (click)="confirmAssignClassroom()" [disabled]="isSubmitting">
+        @if (isSubmitting) {
+          <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner>
+          Guardando...
+        } @else {
+          Confirmar asignación
+        }
+      </button>
+    </c-modal-footer>
+  </c-modal>
 
 }

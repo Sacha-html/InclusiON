@@ -6,7 +6,7 @@ import { ButtonDirective, ColComponent, FormControlDirective, RowComponent, Spin
 import { ContentEditorBaseComponent } from '../content-editor-base.component';
 import { MatchImageWordContent } from '../../../../../aac/activities/player/player.models';
 
-interface DraftPair { id: string; label: string; pictogramId?: number; }
+interface DraftPair { id: string; label: string; pictogramId?: number | string; }
 
 @Component({
   selector: 'app-match-image-word-editor',
@@ -88,7 +88,7 @@ export class MatchImageWordEditorComponent extends ContentEditorBaseComponent im
   onLabelChange(): void { this.emit(); }
   onInstructionChange(): void { this.emit(); }
 
-  pictogramUrl(id: number): string { return this.arasaacService.getPictogramUrl(id); }
+  pictogramUrl(id: number | string): string | null { return this.arasaacService.getPictogramUrl(id); }
 
   protected emit(): void {
     const arr = this.pairs();
