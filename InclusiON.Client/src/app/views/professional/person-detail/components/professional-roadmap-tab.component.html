@@ -138,10 +138,10 @@
               <!-- Historial + config motor adaptativo + asignar -->
               <div class="w-100 d-flex align-items-center gap-3 mt-1">
                 <button type="button" cButton color="link" size="sm"
-                        (click)="loadAdjustmentHistory(area.id, activity.id)"
+                        (click)="loadAdjustmentHistory(area.encryptedId, activity.encryptedId)"
                         class="p-0"
                         [attr.aria-label]="'Historial de ajustes para ' + activity.activityTitle">
-                  <small>{{ showingHistoryForActivityId() === activity.id ? 'Ocultar historial' : 'Ver historial MDA' }}</small>
+                   <small>{{ showingHistoryForActivityId() === activity.encryptedId ? 'Ocultar historial' : 'Ver historial MDA' }}</small>
                 </button>
                 @if (canUpdate) {
                   <button type="button" cButton color="link" size="sm"
@@ -159,7 +159,7 @@
                 }
               </div>
 
-              @if (showingHistoryForActivityId() === activity.id) {
+              @if (showingHistoryForActivityId() === activity.encryptedId) {
                   <div class="adjustment-history mt-2" role="region" [attr.aria-label]="'Historial MDA: ' + activity.activityTitle">
                     @if (loadingHistory()) {
                       <c-spinner size="sm" />

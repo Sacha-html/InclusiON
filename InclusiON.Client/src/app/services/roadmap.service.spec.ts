@@ -54,4 +54,45 @@ describe('RoadmapService', () => {
 
     expect(errorStatus).toBe(500);
   });
+
+  it('uses encrypted area and activity-entry IDs for roadmap mutations', () => {
+    const areaId = 'ENC:area-token';
+    const activityEntryId = 'ENC:entry-token';
+
+    service.removeActivity(personId, areaId, activityEntryId).subscribe();
+    let request = http.expectOne(`${environment.apiUrl}/Persons/${personId}/roadmap/areas/${areaId}/activities/${activityEntryId}`);
+    expect(request.request.method).toBe('DELETE');
+    request.flush({ success: true, data: null });
+
+    service.unlockActivity(personId, areaId, activityEntryId).subscribe();
+    request = http.expectOne(`${environment.apiUrl}/Persons/${personId}/roadmap/areas/${areaId}/activities/${activityEntryId}/unlock`);
+    expect(request.request.method).toBe('PUT');
+    request.flush({ success: true, data: {} });
+  });
+
+  it('uses encrypted IDs consistently for adaptive configuration and history', () => {
+    const areaId = 'ENC:area-token';
+    const activityEntryId = 'ENC:entry-token';
+
+    service.getAdaptiveConfig(personId, areaId, activityEntryId).subscribe();
+    let request = http.expectOne(`${environment.apiUrl}/Persons/${personId}/roadmap/areas/${areaId}/activities/${activityEntryId}/adaptive-config`);
+    expect(request.request.method).toBe('GET');
+    request.flush({ success: true, data: null });
+
+    service.getAdjustmentHistory(personId, areaId, activityEntryId).subscribe();
+    request = http.expectOne(`${environment.apiUrl}/Persons/${personId}/roadmap/areas/${areaId}/activities/${activityEntryId}/adjustments`);
+    expect(request.request.method).toBe('GET');
+    request.flush({ success: true, data: [] });
+  });
+
+  it('sends encrypted IDs when assigning an unlocked roadmap activity', () => {
+    const areaId = 'ENC:area-token';
+    const activityEntryId = 'ENC:entry-token';
+    service.assignFromRoadmap(personId, areaId, activityEntryId, { isEvaluationActivity: false }).subscribe();
+
+    const request = http.expectOne(`${environment.apiUrl}/Persons/${personId}/roadmap/areas/${areaId}/activities/${activityEntryId}/assign`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ isEvaluationActivity: false });
+    request.flush({ success: true, data: {} });
+  });
 });
