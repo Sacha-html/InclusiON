@@ -2,10 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { RoadmapService } from './roadmap.service';
+import { ActivitiesService } from './activities.service';
 import { environment } from '@env';
 
 describe('RoadmapService', () => {
   let service: RoadmapService;
+  let activitiesService: ActivitiesService;
   let http: HttpTestingController;
   const personId = 'person-id';
 
@@ -14,6 +16,7 @@ describe('RoadmapService', () => {
       providers: [RoadmapService, provideHttpClient(), provideHttpClientTesting()],
     });
     service = TestBed.inject(RoadmapService);
+    activitiesService = TestBed.inject(ActivitiesService);
     http = TestBed.inject(HttpTestingController);
   });
 
@@ -93,6 +96,21 @@ describe('RoadmapService', () => {
     const request = http.expectOne(`${environment.apiUrl}/Persons/${personId}/roadmap/areas/${areaId}/activities/${activityEntryId}/assign`);
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ isEvaluationActivity: false });
+    request.flush({ success: true, data: {} });
+  });
+
+  it('keeps professional roadmap assignment separate from student auto-assignment', () => {
+    service.assignFromRoadmap(personId, 'ENC:area', 'ENC:entry', { isEvaluationActivity: false }).subscribe();
+    const request = http.expectOne(`${environment.apiUrl}/Persons/${personId}/roadmap/areas/ENC:area/activities/ENC:entry/assign`);
+    expect(request.request.method).toBe('POST');
+    request.flush({ success: true, data: {} });
+  });
+
+  it('uses the catalog activity encrypted ID for student auto-assignment', () => {
+    const catalogActivityId = 'ENC:catalog-activity';
+    activitiesService.autoAssign(catalogActivityId).subscribe();
+    const request = http.expectOne(`${environment.apiUrl}/activity-assignments/auto-assign/${catalogActivityId}`);
+    expect(request.request.method).toBe('POST');
     request.flush({ success: true, data: {} });
   });
 });
