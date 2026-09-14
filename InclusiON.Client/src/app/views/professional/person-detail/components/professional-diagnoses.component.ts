@@ -78,11 +78,14 @@ export class ProfessionalDiagnosesComponent implements OnInit {
 
   filterFrom = signal('');
   filterTo   = signal('');
+  statusFilter = signal('');
 
   filteredDiagnoses = computed(() => {
     const from = this.filterFrom();
-    const to   = this.filterTo();
-    return this.currentDiagnoses().filter(d => {
+      const to   = this.filterTo();
+      const status = this.statusFilter();
+      return this.currentDiagnoses().filter(d => {
+        if (status && d.isActive !== (status === 'true')) return false;
       const date = d.diagnosisDate.substring(0, 10);
       if (from && date < from) return false;
       if (to   && date > to)   return false;
@@ -125,7 +128,20 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   }
 
   openEdit(item: DiagnosisListItemResponse): void {
-    this.editingIsCreator.set(this.isCreator(item));
+    if (!item.isActive || !this.canUpdate || !this.isCreator(item)) {
+      this.openView(item);
+      return;
+    }
+
+    this.loadDiagnosis(item, true);
+  }
+
+  openView(item: DiagnosisListItemResponse): void {
+    this.loadDiagnosis(item, false);
+  }
+
+  private loadDiagnosis(item: DiagnosisListItemResponse, editable: boolean): void {
+    this.editingIsCreator.set(editable);
     this.diagnosesService.getById(item.encryptedId).subscribe({
       next: (d) => {
         this.editing.set(d);
@@ -206,6 +222,16 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   cancelDeactivate(): void {
     this.showDeactivateModal.set(false);
     this.deactivatingDiag.set(null);
+  }
+
+  reactivate(diag: DiagnosisListItemResponse): void {
+    this.diagnosesService.patchStatus(diag.encryptedId, true).subscribe({
+      next: () => {
+        this.toastService.success('Diagnóstico reactivado exitosamente.');
+        this.loadDiagnoses();
+      },
+      error: (err) => this.toastService.error(err?.userMessage ?? 'Error al reactivar el diagnóstico.'),
+    });
   }
 
   private emptyForm(): CreateDiagnosisRequest {

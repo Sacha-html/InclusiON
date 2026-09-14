@@ -1,5 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using System.Reflection;
 using NSubstitute;
 using Xunit;
 using InclusiON.Api.Controllers;
@@ -55,6 +57,28 @@ namespace InclusiON.Tests.Controllers
             DiagnosisDate    = DateTime.UtcNow,
             PrimaryDiagnosis = "TEA nivel 2"
         };
+
+        [Fact]
+        public void DiagnosisByIdRoutes_AcceptEncryptedIdsAndBindThem()
+        {
+            var methods = typeof(DiagnosesController).GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(m => m.Name is nameof(DiagnosesController.GetDiagnosisById)
+                    or nameof(DiagnosesController.UpdateDiagnosis)
+                    or nameof(DiagnosesController.PatchDiagnosisStatus));
+
+            methods.Should().HaveCount(3);
+            foreach (var method in methods)
+            {
+                method.GetCustomAttributes<HttpMethodAttribute>()
+                    .Select(attribute => attribute.Template)
+                    .Should().Contain("diagnoses/{id}");
+
+                method.GetParameters()
+                    .Single(parameter => parameter.Name == "id")
+                    .GetCustomAttribute<ModelBinderAttribute>()
+                    ?.BinderType.Should().Be(typeof(InclusiON.Api.ModelBinders.EncryptedIntModelBinder));
+            }
+        }
 
         // ── CreateDiagnosis ─────────────────────────────────────────────────
 

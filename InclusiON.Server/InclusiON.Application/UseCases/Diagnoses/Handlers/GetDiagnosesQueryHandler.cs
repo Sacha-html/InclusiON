@@ -22,7 +22,7 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
         public async Task<ApiResponse<PagedResponse<DiagnosisListItemResponse>>> HandleAsync(
             GetDiagnosesQuery query, CancellationToken cancellationToken)
         {
-            var paged = await _repository.GetPagedByPersonIdAsync(query.PersonId, query.Page, query.PageSize, cancellationToken);
+            var paged = await _repository.GetPagedByPersonIdAsync(query.PersonId, query.Page, query.PageSize, query.IsActive, cancellationToken);
 
             var response = new PagedResponse<DiagnosisListItemResponse>
             {
