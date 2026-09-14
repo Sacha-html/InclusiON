@@ -21,7 +21,7 @@ export type NodeStatus = 'locked' | 'available' | 'pending' | 'in-progress' | 'c
 
 export interface RoadmapNode {
   activity: RoadmapActivityResponse;
-  areaId: number;
+  areaId: string;
   assignment?: ActivityAssignmentResponse;
   status: NodeStatus;
   side: 'left' | 'right';
@@ -68,7 +68,7 @@ export class AacRoadmapComponent implements OnInit {
 
         return {
           activity: act,
-          areaId: area.id,
+          areaId: area.encryptedId,
           assignment,
           status: this.resolveStatus(act, assignment),
           side: (idx % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
@@ -111,7 +111,7 @@ export class AacRoadmapComponent implements OnInit {
       if (!personId) return;
 
       this.loading.set(true);
-      this.roadmapService.assignFromRoadmap(personId, node.areaId, node.activity.id, {
+      this.roadmapService.assignFromRoadmap(personId, node.areaId, node.activity.encryptedId, {
         isEvaluationActivity: false
       }).subscribe({
         next: (asn) => {
