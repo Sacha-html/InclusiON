@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using InclusiON.Api.Extensions;
 using InclusiON.Api.Filters;
+using InclusiON.Api.ModelBinders;
 using InclusiON.Application.Authorization;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
@@ -160,14 +161,14 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Elimina un area del roadmap de una persona (con sus actividades en cascada).
         /// </summary>
-        [HttpDelete("areas/{areaId:int}")]
+        [HttpDelete("areas/{areaId}")]
         [Authorize(Policy = Permissions.Roadmap.Delete)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<object>>> RemoveArea(
             Guid personId,
-            int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
             [FromServices] ICommandHandler<RemoveRoadmapAreaCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -182,7 +183,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Agrega una actividad a un area del roadmap.
         /// </summary>
-        [HttpPost("areas/{areaId:int}/activities")]
+        [HttpPost("areas/{areaId}/activities")]
         [Authorize(Policy = Permissions.Roadmap.Update)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<RoadmapActivityResponse>), StatusCodes.Status201Created)]
@@ -190,7 +191,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<RoadmapActivityResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<RoadmapActivityResponse>>> AddActivity(
             Guid personId,
-            int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
             [FromBody] AddRoadmapActivityRequest request,
             [FromServices] ICommandHandler<AddRoadmapActivityCommand, ApiResponse<RoadmapActivityResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -221,7 +222,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Reordena las actividades de un area del roadmap.
         /// </summary>
-        [HttpPut("areas/{areaId:int}/activities/reorder")]
+        [HttpPut("areas/{areaId}/activities/reorder")]
         [Authorize(Policy = Permissions.Roadmap.Update)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
@@ -229,7 +230,7 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<object>>> ReorderActivities(
             Guid personId,
-            int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
             [FromBody] ReorderRoadmapActivitiesRequest request,
             [FromServices] ICommandHandler<ReorderRoadmapActivitiesCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
@@ -247,15 +248,15 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Elimina una actividad del roadmap.
         /// </summary>
-        [HttpDelete("areas/{areaId:int}/activities/{activityEntryId:int}")]
+        [HttpDelete("areas/{areaId}/activities/{activityEntryId}")]
         [Authorize(Policy = Permissions.Roadmap.Delete)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<object>>> RemoveActivity(
             Guid personId,
-            int areaId,
-            int activityEntryId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityEntryId,
             [FromServices] ICommandHandler<RemoveRoadmapActivityCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -267,7 +268,7 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Desbloquea manualmente una actividad del roadmap.
         /// </summary>
-        [HttpPut("areas/{areaId:int}/activities/{activityEntryId:int}/unlock")]
+        [HttpPut("areas/{areaId}/activities/{activityEntryId}/unlock")]
         [Authorize(Policy = Permissions.Roadmap.Update)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<RoadmapActivityResponse>), StatusCodes.Status200OK)]
@@ -275,8 +276,8 @@ namespace InclusiON.Api.Controllers
         [ProducesResponseType(typeof(ApiResponse<RoadmapActivityResponse>), StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ApiResponse<RoadmapActivityResponse>>> UnlockActivity(
             Guid personId,
-            int areaId,
-            int activityEntryId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityEntryId,
             [FromServices] ICommandHandler<UnlockRoadmapActivityCommand, ApiResponse<RoadmapActivityResponse>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -293,15 +294,15 @@ namespace InclusiON.Api.Controllers
         /// Asigna la actividad referenciada por la entrada del roadmap al alumno (IN-150).
         /// Crea un ActivityAssignment directamente desde el contexto del roadmap, sin necesitar encryptedId.
         /// </summary>
-        [HttpPost("areas/{areaId:int}/activities/{activityEntryId:int}/assign")]
+        [HttpPost("areas/{areaId}/activities/{activityEntryId}/assign")]
         [Authorize(Policy = Permissions.Roadmap.Update)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> AssignFromRoadmap(
             Guid personId,
-            int areaId,
-            int activityEntryId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityEntryId,
             [FromBody] AssignFromRoadmapRequest request,
             [FromServices] ICommandHandler<AssignFromRoadmapCommand, ApiResponse<ActivityAssignmentResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -349,14 +350,14 @@ namespace InclusiON.Api.Controllers
         /// Obtiene la configuración del motor adaptativo para una actividad del roadmap.
         /// Devuelve null (data=null, success=true) si la actividad no tiene config aún (IN-116).
         /// </summary>
-        [HttpGet("areas/{areaId:int}/activities/{activityEntryId:int}/adaptive-config")]
+        [HttpGet("areas/{areaId}/activities/{activityEntryId}/adaptive-config")]
         [Authorize(Policy = Permissions.Roadmap.Read)]
         [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<AdaptiveEngineConfigResponse?>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<AdaptiveEngineConfigResponse?>>> GetAdaptiveConfig(
             Guid personId,
-            int areaId,
-            int activityEntryId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityEntryId,
             [FromServices] IQueryHandler<GetAdaptiveEngineConfigQuery, ApiResponse<AdaptiveEngineConfigResponse?>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -367,15 +368,15 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Crea o reemplaza la configuración del motor adaptativo para una actividad del roadmap (IN-116).
         /// </summary>
-        [HttpPut("areas/{areaId:int}/activities/{activityEntryId:int}/adaptive-config")]
+        [HttpPut("areas/{areaId}/activities/{activityEntryId}/adaptive-config")]
         [Authorize(Policy = Permissions.Roadmap.Update)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<AdaptiveEngineConfigResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<AdaptiveEngineConfigResponse>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<AdaptiveEngineConfigResponse>>> UpsertAdaptiveConfig(
             Guid personId,
-            int areaId,
-            int activityEntryId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityEntryId,
             [FromBody] UpsertAdaptiveEngineConfigRequest request,
             [FromServices] ICommandHandler<UpsertAdaptiveEngineConfigCommand, ApiResponse<AdaptiveEngineConfigResponse>> handler,
             CancellationToken cancellationToken = default)
@@ -399,14 +400,14 @@ namespace InclusiON.Api.Controllers
         /// <summary>
         /// Elimina la configuración del motor adaptativo (deshabilita el motor) para la actividad indicada (IN-116).
         /// </summary>
-        [HttpDelete("areas/{areaId:int}/activities/{activityEntryId:int}/adaptive-config")]
+        [HttpDelete("areas/{areaId}/activities/{activityEntryId}/adaptive-config")]
         [Authorize(Policy = Permissions.Roadmap.Delete)]
         [PersonAccess(AccessMode.Write)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<object>>> DeleteAdaptiveConfig(
             Guid personId,
-            int areaId,
-            int activityEntryId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityEntryId,
             [FromServices] ICommandHandler<DeleteAdaptiveEngineConfigCommand, ApiResponse<object>> handler,
             CancellationToken cancellationToken = default)
         {
@@ -415,15 +416,15 @@ namespace InclusiON.Api.Controllers
         }
 
         /// <summary>Consulta el historial de ajustes adaptativos de una actividad del roadmap (IN-134).</summary>
-        [HttpGet("areas/{areaId:int}/activities/{activityEntryId:int}/adjustments")]
+        [HttpGet("areas/{areaId}/activities/{activityEntryId}/adjustments")]
         [Authorize(Policy = Permissions.Roadmap.Read)]
         [PersonAccess(AccessMode.Read)]
         [ProducesResponseType(typeof(ApiResponse<List<AdaptiveAdjustmentLogResponse>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<List<AdaptiveAdjustmentLogResponse>>>> GetAdjustmentHistory(
             Guid personId,
-            int areaId,
-            int activityEntryId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int areaId,
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int activityEntryId,
             [FromServices] IQueryHandler<GetAdaptiveAdjustmentHistoryQuery, ApiResponse<List<AdaptiveAdjustmentLogResponse>>> handler,
             CancellationToken cancellationToken)
         {
