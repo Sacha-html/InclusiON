@@ -1,13 +1,12 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { ButtonDirective } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { contrastTextColor } from '@shared/utils';
 
 @Component({
   selector: 'app-visual-card',
   standalone: true,
-  imports: [ButtonDirective, IconDirective, NgTemplateOutlet],
+  imports: [IconDirective, NgTemplateOutlet],
   templateUrl: './visual-card.component.html',
   styleUrl: './visual-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

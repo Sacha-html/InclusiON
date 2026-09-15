@@ -35,6 +35,14 @@
           </button>
         </li>
         <li class="nav-item">
+          <button type="button" class="nav-link" [class.active]="activeTab === 'aulas'" (click)="activeTab = 'aulas'">
+            Aulas a cargo
+            @if (classroomsCount > 0) {
+              <c-badge color="primary" class="ms-1">{{ classroomsCount }}</c-badge>
+            }
+          </button>
+        </li>
+        <li class="nav-item">
           <button type="button" class="nav-link" [class.active]="activeTab === 'personas'" (click)="activeTab = 'personas'">
             Alumnos a cargo
             @if (assignedPersons.length > 0) {
@@ -57,14 +65,23 @@
         <app-professional-user [professional]="professional" />
       }
 
+      @if (activeTab === 'aulas') {
+        <app-professional-classrooms
+          [professionalId]="professional.id"
+          [persons]="assignedPersons"
+          (classroomsCountChange)="onClassroomsCountChange($event)"
+          (personsChange)="refreshAssignedPersons()"
+        />
+      }
+
       @if (activeTab === 'personas') {
         <app-professional-persons 
           [professionalId]="professional.id" 
           [persons]="assignedPersons"
-          (personsChange)="onPersonsChange($event)" 
+          (personsChange)="onPersonsChange($event)"
+          (classroomsCountChange)="onClassroomsCountChange($event)"
         />
       }
-
 
       @if (activeTab === 'reportes') {
         <app-professional-reports [professionalId]="professional.id" />

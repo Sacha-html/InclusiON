@@ -12,6 +12,9 @@ namespace InclusiON.DTOs.Responses.Roadmap
         /// <summary>ID de la actividad referenciada.</summary>
         public int ActivityId { get; set; }
 
+        /// <summary>ID cifrado de la actividad del catalogo.</summary>
+        public string EncryptedActivityId { get; set; } = string.Empty;
+
         /// <summary>Titulo de la actividad.</summary>
         public string ActivityTitle { get; set; } = string.Empty;
 

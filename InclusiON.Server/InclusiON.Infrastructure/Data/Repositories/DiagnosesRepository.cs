@@ -28,6 +28,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<Diagnosis?> GetByIdIgnoreActiveAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Set<Diagnosis>()
+                .Include(d => d.Professional)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
         }
@@ -42,13 +43,15 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<PagedResponse<Diagnosis>> GetPagedByPersonIdAsync(Guid personId, int page, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<PagedResponse<Diagnosis>> GetPagedByPersonIdAsync(Guid personId, int page, int pageSize, bool? isActive = null, CancellationToken cancellationToken = default)
         {
-            return await _context.Set<Diagnosis>()
+            var query = _context.Set<Diagnosis>()
                 .Include(d => d.Professional)
                 .AsNoTracking()
-                .Where(d => d.PersonId == personId && d.IsActive)
-                .OrderByDescending(d => d.DiagnosisDate)
+                .Where(d => d.PersonId == personId);
+            if (isActive.HasValue)
+                query = query.Where(d => d.IsActive == isActive.Value);
+            return await query.OrderByDescending(d => d.DiagnosisDate)
                 .ToPagedAsync(page, pageSize, cancellationToken);
         }
 

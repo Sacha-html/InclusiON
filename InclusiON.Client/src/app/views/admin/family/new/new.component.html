@@ -86,7 +86,16 @@
       <c-row class="mb-3">
         <c-col sm="6">
           <label cLabel for="phone">Teléfono</label>
-          <input cFormControl id="phone" formControlName="phone" />
+          <input cFormControl id="phone" formControlName="phone"
+                 type="tel" inputmode="numeric" appOnlyNumbers maxlength="20"
+                 placeholder="Ej: 1112345678"
+                 [valid]="(submitted || f['phone'].touched) ? (f['phone'].errors ? false : (f['phone'].value ? true : undefined)) : undefined" />
+          @if ((submitted || f['phone'].touched) && f['phone'].errors) {
+            <c-form-feedback [valid]="false">
+              @if (f['phone'].errors['pattern']) { Solo se permiten números (sin letras, espacios ni símbolos). }
+              @else if (f['phone'].errors['maxlength']) { El teléfono no puede superar los 20 caracteres. }
+            </c-form-feedback>
+          }
         </c-col>
         <c-col sm="6">
           <label cLabel for="relationship">Parentesco *</label>

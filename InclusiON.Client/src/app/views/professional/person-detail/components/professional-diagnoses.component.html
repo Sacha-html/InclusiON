@@ -44,6 +44,13 @@
         {{ filteredDiagnoses().length }} de {{ currentDiagnoses().length }}
       </small>
     }
+    <label for="diagnosis-status-filter" class="visually-hidden">Estado</label>
+    <select id="diagnosis-status-filter" class="form-select form-select-sm" style="width:140px"
+            [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)" aria-label="Estado">
+      <option value="">Todos los estados</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
   </div>
 }
 
@@ -71,7 +78,7 @@
 <!-- Timeline -->
 @else {
   <div class="diagnosis-timeline">
-    @for (diag of filteredDiagnoses(); track diag.id; let last = $last) {
+    @for (diag of filteredDiagnoses(); track diag.encryptedId; let last = $last) {
       <div class="timeline-item" [class.timeline-last]="last">
         <div class="timeline-marker"></div>
         <div class="timeline-content">
@@ -87,18 +94,30 @@
               <p class="mb-0">{{ diag.primaryDiagnosis }}</p>
             </div>
             <div class="d-flex gap-2 flex-shrink-0">
-              <button cButton color="link" size="sm" class="p-0"
-                      (click)="openEdit(diag)"
-                      [attr.aria-label]="(canUpdate && isCreator(diag)) ? 'Editar diagnóstico' : 'Ver diagnóstico'">
-                {{ (canUpdate && isCreator(diag)) ? 'Editar' : 'Ver' }}
-              </button>
-              @if (canUpdate && isCreator(diag)) {
+              @if (canUpdate && isCreator(diag) && diag.isActive) {
+                <button cButton color="link" size="sm" class="p-0"
+                        (click)="openEdit(diag)" aria-label="Editar diagnóstico">
+                  Editar
+                </button>
+              } @else {
+                <button cButton color="link" size="sm" class="p-0"
+                        (click)="openView(diag)" aria-label="Ver diagnóstico">
+                  Ver
+                </button>
+              }
+               @if (canUpdate && isCreator(diag) && diag.isActive) {
                 <button cButton color="link" size="sm" class="p-0 text-danger"
                         (click)="openDeactivate(diag)"
                         aria-label="Dar de baja diagnóstico">
                   Dar de baja
                 </button>
-              }
+               }
+               @if (canUpdate && isCreator(diag) && !diag.isActive) {
+                 <button cButton color="link" size="sm" class="p-0 text-success"
+                         (click)="reactivate(diag)" aria-label="Reactivar diagnóstico">
+                   Reactivar
+                 </button>
+               }
             </div>
           </div>
         </div>

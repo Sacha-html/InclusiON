@@ -20,6 +20,8 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
         private readonly IIdentityService _identity = Substitute.For<IIdentityService>();
         private readonly ILoginSessionService _sessions = Substitute.For<ILoginSessionService>();
         private readonly IPinHasher _pinHasher = Substitute.For<IPinHasher>();
+        private readonly IPersonsRepository _personsRepo = Substitute.For<IPersonsRepository>();
+        private readonly IRealTimeNotifier _notifier = Substitute.For<IRealTimeNotifier>();
 
         private static readonly Guid UserId = Guid.NewGuid();
 
@@ -53,7 +55,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
         // ════════════════════════════════════════════════════════════════
 
         private PinLoginCommandHandler BuildPin() =>
-            new(_repo, _identity, _pinHasher, _sessions);
+            new(_repo, _identity, _pinHasher, _sessions, _personsRepo, _notifier);
 
         private static PinLoginCommand PinCmd(string pin = "1234") =>
             new(UserId, pin, DeviceId: null, RememberDevice: false);
@@ -126,6 +128,48 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             result.Success.Should().BeTrue();
             result.Data!.Success.Should().BeFalse();
             result.Data.RemainingAttempts.Should().Be(3);
+
+            await _notifier.DidNotReceiveWithAnyArgs().NotifyUserAsync(default!, default!, default!, default, default);
+        }
+
+        [Fact]
+        public async Task Pin_WrongPin_ReachesLockout_NotifiesRepresentativesAndSupervisors()
+        {
+            var user = AUser();
+            var person = APerson(user);
+            person.PinCodeHash = "hash";
+            person.SupervisorUserId = Guid.NewGuid();
+
+            _repo.GetPersonByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(person);
+            _identity.FindByIdAsync(UserId).Returns(user);
+            _identity.IsLockedOutAsync(user).Returns(false, true);
+
+            bool needsRehash;
+            _pinHasher.Verify("hash", "0000", out needsRehash).Returns(false);
+
+            _identity.GetAccessFailedCountAsync(user).Returns(5);
+
+            var familyUser = Guid.NewGuid();
+            _personsRepo.GetActiveRepresentativesAsync(person.Id, Arg.Any<CancellationToken>())
+                .Returns(new List<PersonRepresentative>
+                {
+                    new() { Representative = new FamilyRepresentative { UserId = familyUser } }
+                });
+
+            var profUser = Guid.NewGuid();
+            _personsRepo.GetSupervisingProfessionalsAsync(person.Id, Arg.Any<CancellationToken>())
+                .Returns(new List<Professional> { new() { UserId = profUser } });
+
+            var result = await BuildPin().HandleAsync(PinCmd("0000"), default);
+
+            result.Data!.RemainingAttempts.Should().Be(0);
+
+            await _notifier.Received(1).NotifyUserAsync(
+                familyUser.ToString(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
+            await _notifier.Received(1).NotifyUserAsync(
+                profUser.ToString(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
+            await _notifier.Received(1).NotifyUserAsync(
+                person.SupervisorUserId.Value.ToString(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]

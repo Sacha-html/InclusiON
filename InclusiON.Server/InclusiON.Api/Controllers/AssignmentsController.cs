@@ -89,7 +89,7 @@ namespace InclusiON.Api.Controllers
         }
 
         [HttpPut("{professionalId}/persons/{personId}/classroom")]
-        [Authorize(Policy = "professionals:update")]
+        [Authorize(Policy = "persons:update")]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalPersonResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ApiResponse<ProfessionalPersonResponse>), StatusCodes.Status404NotFound)]
@@ -100,6 +100,13 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<MovePersonToClassroomCommand, ApiResponse<ProfessionalPersonResponse>> handler,
             CancellationToken cancellationToken = default)
         {
+            var entityId = _httpContextService.GetCurrentEntityId();
+            if (entityId.HasValue && entityId.Value != professionalId)
+                return ApiResponse<ProfessionalPersonResponse>.Forbidden().ToActionResult();
+
+            if (!await _resourceAuthz.CanAccessPersonAsync(personId, AccessMode.Write, cancellationToken))
+                return ApiResponse<ProfessionalPersonResponse>.Forbidden().ToActionResult();
+
             var command = new MovePersonToClassroomCommand(professionalId, personId, request.ClassroomId);
             var result = await handler.HandleAsync(command, cancellationToken);
             return result.ToActionResult();
