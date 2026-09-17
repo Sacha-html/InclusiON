@@ -121,6 +121,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         UserId = user.Id,
                         FirstName = invitation.FirstName ?? string.Empty,
                         LastName = invitation.LastName ?? string.Empty,
+                        DocumentNumber = command.DocumentNumber,
                         Relationship = invitation.Relationship
                     };
                     await _invitationsRepository.CreateFamilyRepresentativeAsync(familyRep, ct);
