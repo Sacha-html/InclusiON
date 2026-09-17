@@ -177,6 +177,7 @@ namespace InclusiON.Api.Controllers
             var command = new AcceptInvitationCommand(
                 code,
                 request.Email,
+                request.DocumentNumber,
                 request.Password,
                 request.ConfirmPassword);
 
