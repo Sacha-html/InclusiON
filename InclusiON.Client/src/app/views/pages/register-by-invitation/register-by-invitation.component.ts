@@ -9,6 +9,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { InvitationsService, ToastService, ErrorCodeService, AuthService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { InvitationValidationResponse, AcceptInvitationRequest } from '@models';
+import { OnlyNumbersDirective } from '@shared/directives';
 
 import {
   ContainerComponent,
@@ -44,6 +45,7 @@ import { IconDirective } from '@coreui/icons-angular';
     InputGroupTextDirective,
     SpinnerComponent,
     IconDirective,
+    OnlyNumbersDirective,
   ],
   templateUrl: './register-by-invitation.component.html',
   styleUrl: './register-by-invitation.component.scss',
@@ -98,6 +100,12 @@ export class RegisterByInvitationComponent implements OnInit {
       lastName: [{ value: data.lastName || '', disabled: true }],
       relationship: [{ value: data.relationship || '', disabled: true }],
       email: [data.email, [Validators.required, Validators.email]],
+      documentNumber: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]+$/),
+        Validators.minLength(7),
+        Validators.maxLength(8),
+      ]],
       password: ['', [
         Validators.required,
         Validators.minLength(8),
@@ -140,6 +148,7 @@ export class RegisterByInvitationComponent implements OnInit {
 
     const request: AcceptInvitationRequest = {
       email: values.email.trim(),
+      documentNumber: values.documentNumber.trim(),
       password: values.password,
       confirmPassword: values.confirmPassword,
     };
@@ -178,6 +187,11 @@ export class RegisterByInvitationComponent implements OnInit {
 
     if (field.hasError('required')) return 'Este campo es requerido';
     if (field.hasError('email')) return 'Ingresa un email válido';
+    if (fieldName === 'documentNumber') {
+      if (field.hasError('pattern')) return 'Solo se permiten números (sin puntos ni letras)';
+      if (field.hasError('minlength') || field.hasError('maxlength')) return 'El DNI debe tener entre 7 y 8 dígitos';
+      return '';
+    }
     if (field.hasError('minlength')) {
       const min = field.getError('minlength').requiredLength;
       return `Mínimo ${min} caracteres`;
