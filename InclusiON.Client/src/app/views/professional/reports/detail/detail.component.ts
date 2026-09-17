@@ -17,6 +17,7 @@ import {
   RowComponent,
   AlertComponent,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 
 @Component({
   selector: 'app-report-detail',
@@ -33,6 +34,7 @@ import {
     RowComponent,
     AlertComponent,
     ConfirmModalComponent,
+    IconDirective,
   ],
   templateUrl: './detail.component.html',
   styleUrl: './detail.component.scss',
