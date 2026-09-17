@@ -96,6 +96,14 @@ export class PersonLinksComponent implements OnChanges {
   selectedIsPrimary = false;
   unlinkObservation = '';
 
+  /** Representantes para la tabla, con el parentesco normalizado para mostrar. */
+  get tableRepresentatives(): PersonRepresentativeResponse[] {
+    return this.representatives.map(r => ({
+      ...r,
+      relationship: r.relationship?.trim() ? r.relationship : 'No especificado',
+    }));
+  }
+
   get tableColumns(): TableColumn[] {
     const cols: TableColumn[] = [
       { key: 'representativeFullName', label: 'Nombre' },
