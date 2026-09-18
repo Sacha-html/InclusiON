@@ -1,0 +1,24 @@
+Rol,Nombre,Apellido,Email,Contraseña,PIN,Metodo_Login,Detalle_O_Vinculo,URL_Login
+Administracion,Admin,Sistema,admin@test.com,Admin123!,,Estandar,Administrador de la Institucion,/admin-login
+Profesional,Pedro,Martinez,profesional@test.com,Prof123!,,Estandar,Terapia Ocupacional - Supervisor,/admin-login
+Profesional,Sofia,Gutierrez,profesional2@test.com,Password123!,,Estandar,Psicopedagogia - Co-supervisora,/admin-login
+Profesional,Sacha,Del Barrio,sacha.delbarrio@test.com,Sacha123!,,Estandar,Educacion Especial,/admin-login
+Profesional,Docente,Prueba,docente@test.com,Doc123!,,Estandar,Docente General,/admin-login
+Estudiante,Maria,Garcia,maria@test.com,Maria123!,1234,PIN,Hija de Rosa Sanchez,/login
+Estudiante,Juan,Lopez,juan@test.com,Juan123!,1234,PIN,Tutelado por Miguel Fernandez,/login
+Estudiante,Carlos,Rodriguez,carlos@test.com,Carlos123!,5678,PIN,Hijo de Roberto Rodriguez,/login
+Estudiante,Tomas,Perez,tomas@test.com,Student123!,1234,PIN,Hijo de Carlos Perez,/login
+Estudiante,Sofia,Rodriguez,sofia@test.com,Student123!,1234,PIN,Hija de Ana Rodriguez,/login
+Estudiante,Mateo,Diaz,mateo@test.com,Student123!,1234,PIN,Hijo de Luis Diaz,/login
+Estudiante,Valentina,Silva,valentina@test.com,Student123!,1234,PIN,Hija de Elena Silva,/login
+Estudiante,Ana,Martinez,ana@test.com,,,Asistido,Supervisada por Pedro Martinez,/login
+Estudiante,Benjamin,Castro,benjamin@test.com,Student123!,,Asistido,Supervisado por Pedro Martinez,/login
+Familia,Rosa,Sanchez,familia@test.com,Familia123!,,Estandar,Madre de Maria Garcia,/login
+Familia,Miguel,Fernandez,tutor@test.com,Tutor123!,,Estandar,Tutor de Juan Lopez,/login
+Familia,Patricia,Martinez,anatu@test.com,Tutor123!,,Estandar,Madre de Ana Martinez,/login
+Familia,Roberto,Rodriguez,carlostu@test.com,Tutor123!,,Estandar,Padre de Carlos Rodriguez,/login
+Familia,Carlos,Perez,carlostutor@test.com,Tutor123!,,Estandar,Padre de Tomas Perez,/login
+Familia,Ana,Rodriguez,anatutor@test.com,Tutor123!,,Estandar,Madre de Sofia Rodriguez,/login
+Familia,Luis,Diaz,luistutor@test.com,Tutor123!,,Estandar,Padre de Mateo Diaz,/login
+Familia,Elena,Silva,elenatutor@test.com,Tutor123!,,Estandar,Madre de Valentina Silva,/login
+Familia,Jorge,Castro,jorgetutor@test.com,Tutor123!,,Estandar,Tutor de Benjamin Castro,/login

@@ -2,67 +2,35 @@
 
 ---
 
-## CU-05: Auto-registrarse como profesional
+## CU-05: Auto-registrarse como profesional [DEPRECADO / ELIMINADO]
+
+> [!WARNING]
+> **CASO DE USO DEPRECADO Y ELIMINADO (2026-09-17)**  
+> **Justificación Arquitectónica:** Por motivos de gobernanza institucional y seguridad de la información médica/pedagógica, se eliminó la superficie de auto-registro público (`/register-professional` y `POST /api/professionals/register`). El alta de docentes y profesionales ahora es **100% centralizada y provista por el Administrador/Directivo** (`POST /api/professionals`), naciendo directamente en estado `Approved` con contraseña temporal. Por ende, el caso de borde **CB-10 (Docente que se anota solo e intenta auto-habilitarse)** queda formalmente deprecado y eliminado por diseño.
 
 | Campo | Detalle |
 |-------|---------|
 | **Actor principal** | Profesional (no autenticado) |
 | **Actores secundarios** | Sistema (envío de notificación al admin) |
 | **HU de referencia** | HU-IN-149 |
-| **Prioridad** | Alta |
-
-**Precondiciones**
-- El formulario de registro está disponible públicamente en `/register-professional`.
-
-**Flujo principal**
-1. El Profesional accede a la página pública de registro.
-2. Completa el formulario: nombre, apellido, email, DNI, especialidad, fecha de nacimiento (obligatorios); teléfono, matrícula, institución (opcionales).
-3. El sistema valida en tiempo real que el email y la matrícula no estén en uso (debounce 800 ms).
-4. El Profesional envía el formulario.
-5. El sistema crea el `User` con `IsActive = false` y el `Professional` con `Status = Pending`.
-6. Si seleccionó institución, el sistema crea `ProfessionalInstitution`.
-7. El sistema muestra un modal de confirmación con botón "Aceptar" que redirige al login.
-
-**Flujos alternativos**
-- **3a. Email ya registrado:** El sistema muestra error inline y bloquea el envío.
-- **3b. Matrícula ya registrada:** El sistema muestra error inline y bloquea el envío.
-- **2a. Menor de 18 años:** El sistema muestra error en el campo de fecha de nacimiento.
-
-**Postcondiciones**
-- El profesional queda en estado `Pending`, sin acceso al sistema.
-- El Admin puede ver la solicitud en el tab "Validaciones".
+| **Estado** | **Deprecado / Eliminado** |
+| **Prioridad** | Baja (Histórico) |
 
 ---
 
-## CU-06: Validar solicitud de registro de profesional
+## CU-06: Validar solicitud de registro de profesional [DEPRECADO / ELIMINADO]
+
+> [!WARNING]
+> **CASO DE USO DEPRECADO Y ELIMINADO (2026-09-17)**  
+> Al eliminarse el auto-registro abierto de profesionales, no se generan solicitudes en estado `Pending` desde la web. Todo profesional es validado institucionalmente de antemano por la Dirección antes de su creación en la plataforma.
 
 | Campo | Detalle |
 |-------|---------|
 | **Actor principal** | Admin Global / Admin Institucional |
 | **Actores secundarios** | Sistema (envío de email), Profesional (receptor) |
 | **HU de referencia** | HU-IN-150 |
-| **Prioridad** | Alta |
-
-**Precondiciones**
-- Existe al menos una solicitud en estado `Pending`.
-- Admin Institucional: solo ve solicitudes de su institución.
-- Admin Global: ve todas las solicitudes.
-
-**Flujo principal — Aprobar**
-1. El Admin accede al tab "Validaciones" en la sección Profesionales.
-2. Selecciona una solicitud pendiente y revisa los datos.
-3. Selecciona "Aprobar".
-4. El sistema activa el `User` (`IsActive = true`), genera contraseña temporal y activa `MustChangePassword`.
-5. El sistema envía email al profesional con credenciales en segundo plano.
-6. La solicitud desaparece del tab "Validaciones" y aparece en "Activos".
-
-**Flujo alternativo — Rechazar**
-3a. El Admin selecciona "Rechazar" e ingresa el motivo (obligatorio).
-4a. El sistema desactiva la relación `ProfessionalInstitution` si existía.
-5a. El sistema envía email al profesional con el motivo del rechazo.
-
-**Postcondiciones (aprobación)**
-- El Profesional puede iniciar sesión con las credenciales temporales.
+| **Estado** | **Deprecado / Eliminado** |
+| **Prioridad** | Baja (Histórico) |
 - En el primer login es forzado a cambiar la contraseña.
 
 ---

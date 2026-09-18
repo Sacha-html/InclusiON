@@ -5,10 +5,14 @@
 | ID | HU-IN-150 |
 | Épica | Gestión de Usuarios |
 | Título | Validación de Profesionales por Administrador |
-| Prioridad | Alta |
+| Prioridad | Baja (Histórica) |
 | Estimación | 3 puntos de historia |
 | Sprint asignado | Sprint 2 |
-| Estado | Completada |
+| Estado | **Deprecada / Reemplazada por Alta Institucional Admin** |
+
+> [!WARNING]
+> **HISTORIA DEPRECADA (2026-09-17):**  
+> Al eliminarse el auto-registro abierto de profesionales, no existen solicitudes en estado `Pending` pendientes de validación desde la web. Todo profesional es creado directamente por la Dirección ya validado (`Status = Approved`).
 
 **Proceso relacionado:** 05
 

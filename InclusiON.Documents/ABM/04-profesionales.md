@@ -56,16 +56,29 @@ Transiciones válidas:
 
 Cada transición requiere una **observación** (texto libre) que se registra en `ProfessionalStatusHistory`.
 
-**Impacto de `Terminated`:**
+**Condiciones previas para la Baja (`Terminated` — Bloqueo preventivo / Hard Stop):**
+La baja de un profesional **NO se permite** y el sistema emite un Alert informativo descriptivo si:
+1. **Tiene reportes pendientes de resolución:**
+   - Reportes en borrador (`Draft`): deben ser enviados o eliminados por el profesional.
+   - Reportes enviados en revisión (`Submitted`): deben ser aprobados o rechazados por el Administrador.
+   *(Nota: Los reportes con estado `Approved` o `Rejected` son históricos/cerrados y NO impiden la baja).*
+2. **Tiene alumnos a su cargo:**
+   - Posee asignaciones activas en `ProfessionalPerson` (`IsActive = true`), ya sea de forma individual o en aulas. Deben ser reasignadas previamente a otro profesional o desasignadas.
+   - Es el supervisor exclusivo de inicio de sesión asistido (`SupervisorUserId`). Debe reasignarse la supervisión a otro profesional activo.
+3. **Tiene aulas activas a su cargo (`Classroom`):** Debe reasignarse el profesional responsable o darse de baja el aula.
+
+**Impacto de `Terminated` (una vez cumplidas las condiciones previas):**
 - `IsActive = false` en `User`.
-- `Activo = false` en `Professional`.
-- Se desactivan las `ProfessionalPerson` del profesional (sus personas quedan sin profesional principal y deben ser reasignadas).
+- `Status = Terminated` e `IsActive = false` en `Professional`.
+- Desactivación de sus vinculaciones institucionales (`ProfessionalInstitution.IsActive = false`).
+- Revocación forzada de todos los refresh tokens activos.
+- Registro de auditoría en `ProfessionalStatusHistory` con observación obligatoria.
 
 ---
 
 ## Baja — Profesional
 
-Equivale al cambio de estado a `Terminated` (ver arriba). No existe eliminación física.
+Equivale al cambio de estado a `Terminated` previa validación estricta de las condiciones de integridad (ver arriba). No existe eliminación física.
 
 ---
 

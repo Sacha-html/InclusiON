@@ -8,21 +8,26 @@ Cada caso borde está justificado por una transición o condición documentada e
 
 **Origen:** [`professional.md`](professional.md) × [`report.md`](report.md)
 
-**Resolución:** Se implementó un bloqueo preventivo (*hard stop*). Cuando un profesional es dado de baja (`IsActive = false`) o su usuario es desactivado, el sistema valida si posee informes de progreso en estado pendiente o borrador. De ser así, se aborta la transacción y se retorna un error preventivo (`ErrorCode.HasPendingReports` / `710`), obligando al administrador a reasignarlos o finalizarlos manualmente en la plataforma.
+**Resolución:** Se implementa un bloqueo preventivo (*hard stop*). Cuando se solicita la baja de un profesional (`IsActive = false` / `Terminated`), el sistema valida si posee informes de progreso en estado borrador o en revisión. De ser así, se aborta la transacción y se retorna un error preventivo con un Alert informativo (`ErrorCode.HasPendingReports` / `710`), detallando la cantidad de borradores para que el profesional los finalice/elimine o el administrador los resuelva.
 
-| Estado del Report | Comportamiento del Sistema |
-|-------------------|---------------------------|
-| `Draft` u `Submitted` | Bloquean de forma automática la desactivación del profesional responsable. |
+| Estado del Report | ¿Bloquea la baja? | Comportamiento del Sistema |
+|-------------------|:-----------------:|---------------------------|
+| `Draft` (Borrador) | **SÍ** | Bloquea la baja. El borrador debe enviarse o descartarse previamente. |
+| `Submitted` (Enviado) | **SÍ** | Bloquea la baja. El administrador debe aprobarlo o rechazarlo antes del cese. |
+| `Approved` (Aprobado) | **NO** | Permite la baja. El reporte es histórico y permanece inalterable en el legajo. |
+| `Rejected` (Rechazado) | **NO** | Permite la baja. El reporte fue evaluado y cerrado; no impide el cese. |
 
 ---
 
-## CB-02 — Professional `Suspended` o `Terminated` como supervisor de login
+## CB-02 — Bloqueo preventivo de baja por alumnos a cargo y supervisión de acceso
 
-**Origen:** [`professional.md`](professional.md) + `ProfessionalPerson.CanSuperviseLogin`
+**Origen:** [`professional.md`](professional.md) + `ProfessionalPerson` + `PersonWithDisability.SupervisorUserId`
 
-`PersonWithDisability` con `LoginMethod = ASSISTED` requiere que su `SupervisorUserId` esté activo para poder iniciar sesión. Si el único profesional con `CanSuperviseLogin = true` llega a `Suspended` o `Terminated`, la persona **queda sin acceso al sistema** sin ninguna transición de recuperación documentada.
+**Resolución:** Se implementa un bloqueo preventivo (*hard stop*). No se permite dar de baja a un profesional si:
+1. **Tiene alumnos asignados activamente a su cargo (`ProfessionalPerson.IsActive == true`):** Ya sea en aulas o en seguimiento pedagógico/terapéutico individual. Deben ser reasignados a otro profesional activo previamente.
+2. **Es supervisor exclusivo de inicio de sesión asistido (`LoginMethod = ASSISTED` con `SupervisorUserId == professional.UserId`):** Si es el único docente que puede habilitar el ingreso al alumno en el aula, la persona quedaría sin acceso. Debe reasignarse la supervisión a otro profesional activo antes de la baja.
 
-**Brecha:** No existe una transición en `PersonWithDisability` que capture el estado "sin supervisor válido".
+Si alguna de estas condiciones no se cumple, el sistema aborta la operación y emite un Alert informativo indicando la cantidad de alumnos asignados que deben reasignarse.
 
 ---
 
