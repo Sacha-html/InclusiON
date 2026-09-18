@@ -106,8 +106,7 @@ La reactivación se realiza exclusivamente desde este ABM; la ruta genérica de 
 
 - Restaura `IsActive = true` en `FamilyRepresentative` y su `User`, y devuelve el estado a `Active`.
 - Genera una contraseña temporal, obliga el cambio en el próximo inicio de sesión, restablece intentos fallidos/bloqueo y notifica por email.
-- Registra la transición en `FamilyStatusHistory`.
-- No reactiva `PersonRepresentative`, no restaura alumnos suspendidos ni elimina el historial. Las responsabilidades se asignan explícitamente mediante un nuevo vínculo.
+- Restaura la vigencia de los vínculos en `PersonRepresentative` y reactiva automáticamente a los alumnos dependientes que hubieran sido suspendidos por la baja del tutor, garantizando que no se pierda la visibilidad ni la trazabilidad de la relación familiar.
 
 ---
 
