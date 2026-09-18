@@ -95,3 +95,56 @@
 
 **Postcondiciones**
 - El estado del roadmap queda actualizado para la Persona y el Profesional.
+
+---
+
+## Diagrama de Secuencia del Sistema (SSD)
+
+> Diagrama de caja negra que modela la interacción entre la **Persona (PCD)** y el **:Sistema** durante la ejecución interactiva, el registro de métricas y el desbloqueo del roadmap.
+> - Archivo PlantUML oficial: [SSD-04-ejecucion-actividad-aac.puml](../../Diagrams/SSD-04-ejecucion-actividad-aac.puml)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Persona as Persona con Discapacidad (PCD)
+    box White Límite del Sistema
+        participant Sys as :Sistema
+    end
+
+    Note over Persona, Sys: 1. Carga del Player AAC (CU-29)
+    Persona ->> Sys: seleccionarNodoRoadmap(actividadId)
+    activate Sys
+    Sys -->> Persona: presentarPlayerAAC(tipoPlantilla, consignaAudio, itemsARASAAC, perfilAccesibilidad)
+    deactivate Sys
+
+    Note over Persona, Sys: 2. Interacción y Feedback Reactivo
+    loop Por cada ejercicio o paso de la plantilla
+        Persona ->> Sys: responderInteraccion(ejercicioId, seleccion, tiempoRespuestaMs)
+        activate Sys
+        alt Acierto
+            Sys -->> Persona: reproducirAudioExito(), animarAcierto(), avanzarSiguienteEjercicio()
+        else Error (1 a 3 fallos)
+            Sys -->> Persona: reproducirAudioReintento(), resaltarPistaVisual()
+        else > 3 fallos consecutivos
+            Sys -->> Persona: mostrarPausaEstimuloPositivo(), registrarNivelFrustracion(elevado)
+        end
+        deactivate Sys
+    end
+
+    Note over Persona, Sys: 3. Finalización y Registro de Resultados (CU-30)
+    Persona ->> Sys: completarActividad()
+    activate Sys
+    Sys -->> Persona: presentarPantallaResumen(porcentajeExito, tiempoTotal, medallaVisual)
+    deactivate Sys
+
+    Note over Persona, Sys: 4. Evaluación de Umbral y Desbloqueo (CU-31)
+    alt porcentajeExito >= umbralDesbloqueo
+        Sys -->> Persona: desbloquearSiguienteActividad(), lanzarCelebracionConfetti()
+        opt Es la última actividad de la secuencia del área
+            Sys -->> Persona: marcarAreaHabilidadCompletada()
+        end
+    else porcentajeExito < umbralDesbloqueo
+        Sys -->> Persona: mantenerSiguienteBloqueada(), habilitarOpcionReintentar()
+    end
+```
+

@@ -1,0 +1,74 @@
+@startuml SSD-04-ejecucion-actividad-aac
+skinparam shadowing false
+skinparam backgroundColor #FEFEFE
+skinparam roundcorner 8
+skinparam responseMessageBelowArrow true
+skinparam BoxPadding 10
+skinparam ParticipantPadding 15
+
+skinparam sequence {
+  ArrowColor #555555
+  ActorBorderColor #444444
+  ActorBackgroundColor #EEF4FF
+  ParticipantBorderColor #444444
+  ParticipantBackgroundColor #EEF4FF
+  LifeLineBorderColor #888888
+  LifeLineBackgroundColor #F4F7FB
+  GroupBorderColor #888888
+  GroupBackgroundColor #F9FAFC
+  GroupHeaderFontColor #333333
+  DividerBorderColor #AAAAAA
+  DividerBackgroundColor #F4F7FB
+}
+
+title SSD-04 — Ejecución de Actividades en Portal AAC (CU-29, CU-30, CU-31)
+
+autonumber 1 "<b>[00]</b>"
+
+actor "Persona con Discapacidad\n(PCD)" as Persona
+box "Límite del Sistema" #FFFFFF
+  participant ":Sistema" as Sys
+end box
+
+== 1. Carga e Inicialización del Player AAC (CU-29) ==
+
+Persona -> Sys: seleccionarNodoRoadmap(actividadId)
+activate Sys
+Sys --> Persona: presentarPlayerAAC(tipoPlantilla, consignaAudio, itemsARASAAC, perfilAccesibilidad)
+deactivate Sys
+
+== 2. Interacción con la Actividad y Registro Reactivo ==
+
+loop Por cada ejercicio o paso de la plantilla
+  Persona -> Sys: responderInteraccion(ejercicioId, seleccion, tiempoRespuestaMs)
+  activate Sys
+  
+  alt Acierto
+    Sys --> Persona: reproducirAudioExito(), animarAcierto(), avanzarSiguienteEjercicio()
+  else Error (1 a 3 fallos)
+    Sys --> Persona: reproducirAudioReintento(), resaltarPistaVisual()
+  else > 3 fallos consecutivos
+    Sys --> Persona: mostrarPausaEstimuloPositivo(), registrarNivelFrustracion(elevado)
+  end
+  deactivate Sys
+end
+
+== 3. Finalización y Registro de Resultados (CU-30) ==
+
+Persona -> Sys: completarActividad()
+activate Sys
+Sys --> Persona: presentarPantallaResumen(porcentajeExito, tiempoTotal, medallaVisual)
+deactivate Sys
+
+== 4. Evaluación de Umbral y Desbloqueo de Roadmap (CU-31) ==
+
+alt porcentajeExito >= umbralDesbloqueo
+  Sys --> Persona: desbloquearSiguienteActividad(), lanzarCelebracionConfetti()
+  opt Es la última actividad de la secuencia del área
+    Sys --> Persona: marcarAreaHabilidadCompletada()
+  end
+else porcentajeExito < umbralDesbloqueo
+  Sys --> Persona: mantenerSiguienteBloqueada(), habilitarOpcionReintentar()
+end
+
+@enduml

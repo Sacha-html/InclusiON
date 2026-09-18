@@ -5,10 +5,14 @@
 | ID | HU-IN-149 |
 | Épica | Gestión de Usuarios |
 | Título | Auto-registro de Profesionales |
-| Prioridad | Alta |
+| Prioridad | Baja (Histórica) |
 | Estimación | 3 puntos de historia |
 | Sprint asignado | Sprint 2 |
-| Estado | Completada |
+| Estado | **Deprecada / Reemplazada por Alta Institucional Admin** |
+
+> [!WARNING]
+> **HISTORIA DEPRECADA (2026-09-17):**  
+> El auto-registro público de profesionales fue eliminado por motivos de gobernanza y seguridad. El alta de profesionales ahora es 100% centralizada y provista por el Administrador de la institución (`POST /api/professionals`). El caso borde asociado (CB-10) queda sin efecto.
 
 **Proceso relacionado:** 05
 
