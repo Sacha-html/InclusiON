@@ -98,6 +98,23 @@
                 </div>
 
                 <div class="mb-3">
+                  <label cFormLabel for="invDocumentNumber">DNI</label>
+                  <input
+                    cFormControl
+                    id="invDocumentNumber"
+                    formControlName="documentNumber"
+                    appOnlyNumbers
+                    inputmode="numeric"
+                    maxlength="8"
+                    placeholder="Ej: 12345678"
+                    [valid]="f['documentNumber'].touched ? f['documentNumber'].valid : undefined"
+                  />
+                  @if (f['documentNumber'].touched && f['documentNumber'].invalid) {
+                    <div class="text-danger small mt-1">{{ getErrorMessage('documentNumber') }}</div>
+                  }
+                </div>
+
+                <div class="mb-3">
                   <label cFormLabel for="invPassword">Contraseña</label>
                   <c-input-group>
                     <input

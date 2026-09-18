@@ -28,9 +28,10 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
         private static AcceptInvitationCommand Cmd(
             string code            = "abc-code",
             string email           = "nuevo@test.com",
+            string documentNumber  = "30111222",
             string password        = "Passw0rd!",
             string confirmPassword = "Passw0rd!") =>
-            new(code, email, password, confirmPassword);
+            new(code, email, documentNumber, password, confirmPassword);
 
         private Invitation ValidInvitation() => new()
         {
@@ -152,6 +153,30 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
             inv.UsedAt.Should().Be(now);
             await _identity.Received(1).CreateUserAsync(Arg.Any<User>(), "Passw0rd!");
             await _identity.Received(1).AddToRoleAsync(Arg.Any<User>(), "FamilyRepresentative");
+        }
+
+        [Fact]
+        public async Task HandleAsync_ValidInvitation_SetsDocumentNumberOnFamilyRepresentative()
+        {
+            var now = DateTime.UtcNow;
+            _dateTime.UtcNow.Returns(now);
+            var inv = ValidInvitation();
+            inv.ExpiresAt = now.AddDays(7);
+            _invRepo.GetByCodeAsync("abc-code", Arg.Any<CancellationToken>()).Returns(inv);
+            _identity.FindByEmailAsync("nuevo@test.com").Returns((User?)null);
+            _identity.CreateUserAsync(Arg.Any<User>(), Arg.Any<string>())
+                     .Returns((true, Array.Empty<string>()));
+
+            FamilyRepresentative? createdFamilyRep = null;
+            _invRepo.CreateFamilyRepresentativeAsync(Arg.Do<FamilyRepresentative>(fr => createdFamilyRep = fr), Arg.Any<CancellationToken>())
+                    .Returns(ci => (FamilyRepresentative)ci[0]);
+            SetupTransaction();
+
+            var result = await BuildSut().HandleAsync(Cmd(documentNumber: "40555666"), default);
+
+            result.Success.Should().BeTrue();
+            createdFamilyRep.Should().NotBeNull();
+            createdFamilyRep!.DocumentNumber.Should().Be("40555666");
         }
 
         [Fact]
