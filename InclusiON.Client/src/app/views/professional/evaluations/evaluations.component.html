@@ -1,6 +1,6 @@
-<c-row>
+<c-row class="g-3">
   <!-- Alumnos Sidebar -->
-  <c-col lg="3" md="4" class="mb-4">
+  <c-col xxl="2" xl="3" lg="4" md="4" class="mb-4">
     <c-card class="shadow-sm border-0">
       <c-card-header class="bg-dark text-white py-3">
         <h5 class="mb-0 text-uppercase tracking-wider font-semibold">Alumnos asignados</h5>
@@ -64,7 +64,7 @@
   </c-col>
 
   <!-- Metrics & Evaluations Main Dashboard -->
-  <c-col lg="9" md="8">
+  <c-col xxl="10" xl="9" lg="8" md="8">
     @if (!selectedPerson()) {
     <c-card class="shadow-sm border-0 py-5 text-center bg-light">
       <c-card-body class="py-5">
@@ -111,7 +111,7 @@
     @if (hasFrustrationAlerts() || showAlertFromNotification()) {
       <c-alert color="warning" class="d-flex align-items-center justify-content-between gap-3 mb-4 shadow-sm border border-warning bg-warning-subtle flex-wrap">
         <div class="d-flex align-items-center gap-3">
-          <div class="fs-2 text-warning">⚠️</div>
+          <svg cIcon name="cilWarning" size="xl" class="text-warning flex-shrink-0"></svg>
           <div>
             <h6 class="alert-heading fw-bold mb-1 text-dark">
               @if (showAlertFromNotification()) {
@@ -242,9 +242,9 @@
                         <c-badge color="danger" class="px-2 py-0.5">Alerta actual</c-badge>
                       }
                       @if (isActivityStruggling(assignment)) {
-                        <c-badge color="warning" class="px-2 py-0.5 text-dark">⚠️ Requiere apoyo</c-badge>
+                        <c-badge color="warning" class="px-2 py-0.5 text-dark">Requiere apoyo</c-badge>
                       } @else if (assignment.alertAcknowledgedAt) {
-                        <c-badge color="success" class="px-2 py-0.5">✓ Atendida</c-badge>
+                        <c-badge color="success" class="px-2 py-0.5">Atendida</c-badge>
                       }
                     </div>
                     <span class="text-muted small">Código: {{ assignment.templateTypeCode }}</span>
@@ -405,7 +405,7 @@
 
         <!-- 1. Configuración de Tiempos y Duración -->
         <h6 class="fw-bold text-dark text-uppercase tracking-wider small mb-3 border-bottom pb-2">
-          ⏱️ Opciones de tiempo y duración
+          Opciones de tiempo y duración
         </h6>
         <c-row class="mb-4">
           <c-col md="6" class="mb-3 mb-md-0">
@@ -421,70 +421,60 @@
           </c-col>
         </c-row>
 
-        <!-- 2. Opciones y Filtros de Accesibilidad -->
+        <!-- 2. Opciones y adaptaciones de accesibilidad -->
         <h6 class="fw-bold text-dark text-uppercase tracking-wider small mb-3 border-bottom pb-2">
-          ♿ Opciones y adaptaciones de accesibilidad
+          Opciones y adaptaciones de accesibilidad
         </h6>
-        <c-row class="g-3 mb-4">
+        <c-row class="mb-4 g-3">
           <c-col sm="6" md="4">
-            <div class="a11y-option-card h-100" [class.active]="adaptationHasVisualSupport()" (click)="adaptationHasVisualSupport.set(!adaptationHasVisualSupport())">
-              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-visual"
-                [ngModel]="adaptationHasVisualSupport()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationHasVisualSupport.set($event)">
-              <div>
-                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-visual">Soporte visual</label>
-                <small class="text-muted" style="font-size: 0.75rem;">Imágenes, colores contrastados y apoyos gráficos</small>
-              </div>
-            </div>
+            <c-form-check>
+              <input cFormCheckInput type="checkbox" id="a11y-visual"
+                [ngModel]="adaptationHasVisualSupport()" (ngModelChange)="adaptationHasVisualSupport.set($event)" />
+              <label cFormCheckLabel for="a11y-visual" class="fw-medium text-dark">Soporte visual</label>
+            </c-form-check>
+            <div class="form-text small ps-4 mt-0">Imágenes y apoyos gráficos</div>
           </c-col>
 
           <c-col sm="6" md="4">
-            <div class="a11y-option-card h-100" [class.active]="adaptationHasAudioSupport()" (click)="adaptationHasAudioSupport.set(!adaptationHasAudioSupport())">
-              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-audio"
-                [ngModel]="adaptationHasAudioSupport()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationHasAudioSupport.set($event)">
-              <div>
-                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-audio">Soporte auditivo</label>
-                <small class="text-muted" style="font-size: 0.75rem;">Locución, retroalimentación por voz y efectos sonoros</small>
-              </div>
-            </div>
+            <c-form-check>
+              <input cFormCheckInput type="checkbox" id="a11y-audio"
+                [ngModel]="adaptationHasAudioSupport()" (ngModelChange)="adaptationHasAudioSupport.set($event)" />
+              <label cFormCheckLabel for="a11y-audio" class="fw-medium text-dark">Soporte auditivo</label>
+            </c-form-check>
+            <div class="form-text small ps-4 mt-0">Audio y lectura por voz</div>
           </c-col>
 
           <c-col sm="6" md="4">
-            <div class="a11y-option-card h-100" [class.active]="adaptationUsesEasyReading()" (click)="adaptationUsesEasyReading.set(!adaptationUsesEasyReading())">
-              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-easy"
-                [ngModel]="adaptationUsesEasyReading()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationUsesEasyReading.set($event)">
-              <div>
-                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-easy">Lectura fácil</label>
-                <small class="text-muted" style="font-size: 0.75rem;">Textos sencillos, vocabulario claro y frases breves</small>
-              </div>
-            </div>
+            <c-form-check>
+              <input cFormCheckInput type="checkbox" id="a11y-easy"
+                [ngModel]="adaptationUsesEasyReading()" (ngModelChange)="adaptationUsesEasyReading.set($event)" />
+              <label cFormCheckLabel for="a11y-easy" class="fw-medium text-dark">Lectura fácil</label>
+            </c-form-check>
+            <div class="form-text small ps-4 mt-0">Vocabulario y frases breves</div>
           </c-col>
 
-          <c-col sm="6" md="6">
-            <div class="a11y-option-card h-100" [class.active]="adaptationUsesPictograms()" (click)="adaptationUsesPictograms.set(!adaptationUsesPictograms())">
-              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-picto"
-                [ngModel]="adaptationUsesPictograms()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationUsesPictograms.set($event)">
-              <div>
-                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-picto">Usa pictogramas</label>
-                <small class="text-muted" style="font-size: 0.75rem;">Símbolos pictográficos ARASAAC integrados para comunicación aumentativa</small>
-              </div>
-            </div>
+          <c-col sm="6" md="4">
+            <c-form-check>
+              <input cFormCheckInput type="checkbox" id="a11y-picto"
+                [ngModel]="adaptationUsesPictograms()" (ngModelChange)="adaptationUsesPictograms.set($event)" />
+              <label cFormCheckLabel for="a11y-picto" class="fw-medium text-dark">Usa pictogramas</label>
+            </c-form-check>
+            <div class="form-text small ps-4 mt-0">Símbolos ARASAAC integrados</div>
           </c-col>
 
-          <c-col sm="12" md="6">
-            <div class="a11y-option-card h-100" [class.active]="adaptationRequiresSupervision()" (click)="adaptationRequiresSupervision.set(!adaptationRequiresSupervision())">
-              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-super"
-                [ngModel]="adaptationRequiresSupervision()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationRequiresSupervision.set($event)">
-              <div>
-                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-super">Requiere supervisión</label>
-                <small class="text-muted" style="font-size: 0.75rem;">Acompañamiento presencial requerido de profesional o tutor</small>
-              </div>
-            </div>
+          <c-col sm="6" md="4">
+            <c-form-check>
+              <input cFormCheckInput type="checkbox" id="a11y-super"
+                [ngModel]="adaptationRequiresSupervision()" (ngModelChange)="adaptationRequiresSupervision.set($event)" />
+              <label cFormCheckLabel for="a11y-super" class="fw-medium text-dark">Requiere supervisión</label>
+            </c-form-check>
+            <div class="form-text small ps-4 mt-0">Acompañamiento presencial</div>
           </c-col>
         </c-row>
 
         <!-- 3. Notas de Adaptación Pedagógica -->
         <h6 class="fw-bold text-dark text-uppercase tracking-wider small mb-2 border-bottom pb-2">
-          📝 Notas e indicaciones pedagógicas
+          Notas e indicaciones pedagógicas
         </h6>
         <div class="mb-3">
           <textarea cFormControl rows="3" [ngModel]="adaptationNotes()" (ngModelChange)="adaptationNotes.set($event)"
