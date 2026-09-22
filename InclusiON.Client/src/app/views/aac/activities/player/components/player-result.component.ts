@@ -12,6 +12,7 @@ export class PlayerResultComponent {
   @Input() message?: string;
   @Input() loading = false;
   @Input() canRetry = true;
+  @Input() attemptCount?: number;
   @Output() finish = new EventEmitter<void>();
   @Output() retry = new EventEmitter<void>();
 

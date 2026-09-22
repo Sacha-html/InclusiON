@@ -596,7 +596,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         [Fact]
-        public async Task Start_WithFourFailedAttempts_ReturnsConflict()
+        public async Task Start_WithFourFailedAttempts_DoesNotBlock_CreatesAttemptFive()
         {
             var assignment = AnAssignment(status: AssignmentStatuses.EnProgreso);
             assignment.Responses = new List<DomainActivityResponse>
@@ -607,15 +607,16 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
                 new() { CompletedAt = Now, SuccessPercentage = 50 },
             };
             _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
-                .Returns(assignment);
+                .Returns(assignment, AnAssignment(status: AssignmentStatuses.EnProgreso));
             _repo.CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(4);
 
             var result = await BuildSut().HandleAsync(
                 new StartActivityResponseCommand(AssignmentId, PersonId), default);
 
-            result.Success.Should().BeFalse();
-            result.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
-            result.Message.Should().Contain("bloqueada");
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateResponseAsync(
+                Arg.Is<DomainActivityResponse>(r => r.AttemptCount == 5),
+                Arg.Any<CancellationToken>());
         }
     }
 

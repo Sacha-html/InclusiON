@@ -108,14 +108,33 @@
     </div>
 
     <!-- ── Alerta de Frustración / Estancamiento ────────────────────────────── -->
-    @if (hasFrustrationAlerts()) {
-      <c-alert color="warning" class="d-flex align-items-center gap-3 mb-4 shadow-sm border border-warning bg-warning-subtle">
-        <div class="fs-3 text-warning">⚠️</div>
-        <div class="flex-grow-1">
-          <h6 class="alert-heading fw-bold mb-1 text-dark">Alerta de estancamiento / dificultades detectadas</h6>
-          <p class="small mb-0 text-dark">
-            Este alumno presenta <strong>{{ frustrationAlertCount() }} actividad(es)</strong> con dificultades recurrentes o bloqueos (ej. <em>{{ frustratedActivities().slice(0, 2).join(', ') }}</em>). Se recomienda evaluar asistencia o modular dificultad en su plan.
-          </p>
+    @if (hasFrustrationAlerts() || showAlertFromNotification()) {
+      <c-alert color="warning" class="d-flex align-items-center justify-content-between gap-3 mb-4 shadow-sm border border-warning bg-warning-subtle flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+          <div class="fs-2 text-warning">⚠️</div>
+          <div>
+            <h6 class="alert-heading fw-bold mb-1 text-dark">
+              @if (showAlertFromNotification()) {
+                Alerta de apoyo pedagógico requerida (notificación recibida)
+              } @else {
+                Alerta de dificultades / apoyo pedagógico detectado
+              }
+            </h6>
+            <p class="small mb-0 text-dark">
+              @if (frustratedActivities().length > 0) {
+                Este alumno presenta dificultades reiteradas o 4 intentos en: <strong>{{ frustratedActivities().join(', ') }}</strong>.
+                La actividad no se ha bloqueado y el alumno puede seguir practicando. Podés <strong>modificarla</strong> para ajustar tiempos y adaptaciones, o <strong>darla de baja</strong> desde la tabla.
+              } @else {
+                Se detectaron múltiples intentos o apoyo pedagógico requerido en sus actividades asignadas. Podés adaptar las condiciones de la actividad o darla de baja sin interrumpir el aprendizaje del alumno.
+              }
+            </p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button cButton color="outline-dark" size="sm" class="text-nowrap" (click)="dismissAlertBanner()">
+            <svg cIcon name="cilCheck" size="sm" class="me-1"></svg>
+            Marcar como atendida
+          </button>
         </div>
       </c-alert>
     }
@@ -208,16 +227,32 @@
                 <th>Intentos</th>
                 <th>Mejor acierto</th>
                 <th>Detalle</th>
+                <th class="text-end pe-4">Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (assignment of assignments(); track assignment.id) {
               <!-- Main Assignment Row -->
-              <tr class="align-middle">
+              <tr class="align-middle" [class.table-warning]="isTargetActivity(assignment) && (hasFrustrationAlerts() || showAlertFromNotification())">
                 <td class="ps-4 py-3">
                   <div class="d-flex flex-column">
-                    <span class="font-semibold text-dark">{{ assignment.activityTitle }}</span>
+                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                      <span class="font-semibold text-dark">{{ assignment.activityTitle }}</span>
+                      @if (isTargetActivity(assignment) && (hasFrustrationAlerts() || showAlertFromNotification())) {
+                        <c-badge color="danger" class="px-2 py-0.5">Alerta actual</c-badge>
+                      }
+                      @if (isActivityStruggling(assignment)) {
+                        <c-badge color="warning" class="px-2 py-0.5 text-dark">⚠️ Requiere apoyo</c-badge>
+                      } @else if (assignment.alertAcknowledgedAt) {
+                        <c-badge color="success" class="px-2 py-0.5">✓ Atendida</c-badge>
+                      }
+                    </div>
                     <span class="text-muted small">Código: {{ assignment.templateTypeCode }}</span>
+                    @if (assignment.customAdaptationNotes) {
+                      <div class="small text-muted mt-1 p-1 bg-light rounded border border-light-subtle">
+                        <span class="fw-semibold text-secondary">Adaptación:</span> {{ assignment.customAdaptationNotes }}
+                      </div>
+                    }
                   </div>
                 </td>
                 <td>
@@ -252,12 +287,28 @@
                   <span class="text-muted small" *ngIf="!assignment.responses || assignment.responses.length === 0">Sin
                     intentos</span>
                 </td>
+                <td class="text-end pe-4 text-nowrap">
+                  <div class="d-inline-flex align-items-center gap-2">
+                    <button type="button" class="btn-eval-edit" title="Modificar actividad y adaptaciones de accesibilidad"
+                      (click)="openAdaptationModal(assignment, $event)">
+                      <svg cIcon name="cilPencil" size="sm"></svg>
+                      <span>Modificar</span>
+                    </button>
+                    @if (assignment.status !== 'Completada' && assignment.status !== 'Cancelada') {
+                      <button type="button" class="btn-eval-delete" title="Dar de baja actividad para este alumno"
+                        (click)="openDeactivateModal(assignment, $event)">
+                        <svg cIcon name="cilTrash" size="sm"></svg>
+                        <span>Baja</span>
+                      </button>
+                    }
+                  </div>
+                </td>
               </tr>
 
               <!-- Collapsible Attempt Details Row -->
               @if (assignment.responses && assignment.responses.length > 0 && isExpanded(assignment.id)) {
               <tr>
-                <td colspan="6" class="bg-light p-3 border-top-0">
+                <td colspan="7" class="bg-light p-3 border-top-0">
                   <div class="rounded bg-white shadow-sm p-3">
                     <h6 class="font-semibold text-muted text-uppercase tracking-wider small mb-3">Intentos del Alumno
                     </h6>
@@ -335,6 +386,152 @@
         <button cButton color="primary" size="sm" [disabled]="!selectedTutorId || sendingShare()"
           (click)="sendSharedMetrics()">
           @if (sendingShare()) { Enviando… } @else { Enviar mensaje }
+        </button>
+      </c-modal-footer>
+    </c-modal>
+
+    <!-- ── Modal Modificar Asignación (Adaptación Pedagógica y Accesibilidad) ─── -->
+    <c-modal size="lg" [visible]="showAdaptationModal()" (visibleChange)="showAdaptationModal.set($event)">
+      <c-modal-header class="bg-primary text-white">
+        <h5 cModalTitle class="text-white">Modificar Actividad: {{ selectedAssignmentForAdaptation()?.activityTitle }}</h5>
+      </c-modal-header>
+      <c-modal-body class="p-4">
+        <div class="alert alert-info py-2 px-3 small mb-4 d-flex align-items-center gap-2">
+          <i class="cil-info fs-5"></i>
+          <div>
+            <strong>Personalización individual:</strong> Los ajustes de tiempo, accesibilidad y notas aplican exclusivamente para <strong>{{ selectedPerson()?.personFullName }}</strong> sin alterar la plantilla global de la actividad.
+          </div>
+        </div>
+
+        <!-- 1. Configuración de Tiempos y Duración -->
+        <h6 class="fw-bold text-dark text-uppercase tracking-wider small mb-3 border-bottom pb-2">
+          ⏱️ Opciones de tiempo y duración
+        </h6>
+        <c-row class="mb-4">
+          <c-col md="6" class="mb-3 mb-md-0">
+            <label class="form-label fw-semibold small text-muted text-uppercase mb-1">Fecha límite / Vencimiento</label>
+            <input cFormControl type="date" [ngModel]="adaptationDueDate()" (ngModelChange)="adaptationDueDate.set($event)" />
+            <div class="form-text small">Dejar en blanco para práctica libre sin fecha límite.</div>
+          </c-col>
+          <c-col md="6">
+            <label class="form-label fw-semibold small text-muted text-uppercase mb-1">Duración estimada (minutos)</label>
+            <input cFormControl type="number" min="1" max="600" placeholder="Ej: 15"
+              [ngModel]="adaptationEstimatedDuration()" (ngModelChange)="adaptationEstimatedDuration.set($event)" />
+            <div class="form-text small">Tiempo sugerido para resolución adaptado al ritmo del alumno.</div>
+          </c-col>
+        </c-row>
+
+        <!-- 2. Opciones y Filtros de Accesibilidad -->
+        <h6 class="fw-bold text-dark text-uppercase tracking-wider small mb-3 border-bottom pb-2">
+          ♿ Opciones y adaptaciones de accesibilidad
+        </h6>
+        <c-row class="g-3 mb-4">
+          <c-col sm="6" md="4">
+            <div class="a11y-option-card h-100" [class.active]="adaptationHasVisualSupport()" (click)="adaptationHasVisualSupport.set(!adaptationHasVisualSupport())">
+              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-visual"
+                [ngModel]="adaptationHasVisualSupport()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationHasVisualSupport.set($event)">
+              <div>
+                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-visual">Soporte visual</label>
+                <small class="text-muted" style="font-size: 0.75rem;">Imágenes, colores contrastados y apoyos gráficos</small>
+              </div>
+            </div>
+          </c-col>
+
+          <c-col sm="6" md="4">
+            <div class="a11y-option-card h-100" [class.active]="adaptationHasAudioSupport()" (click)="adaptationHasAudioSupport.set(!adaptationHasAudioSupport())">
+              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-audio"
+                [ngModel]="adaptationHasAudioSupport()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationHasAudioSupport.set($event)">
+              <div>
+                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-audio">Soporte auditivo</label>
+                <small class="text-muted" style="font-size: 0.75rem;">Locución, retroalimentación por voz y efectos sonoros</small>
+              </div>
+            </div>
+          </c-col>
+
+          <c-col sm="6" md="4">
+            <div class="a11y-option-card h-100" [class.active]="adaptationUsesEasyReading()" (click)="adaptationUsesEasyReading.set(!adaptationUsesEasyReading())">
+              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-easy"
+                [ngModel]="adaptationUsesEasyReading()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationUsesEasyReading.set($event)">
+              <div>
+                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-easy">Lectura fácil</label>
+                <small class="text-muted" style="font-size: 0.75rem;">Textos sencillos, vocabulario claro y frases breves</small>
+              </div>
+            </div>
+          </c-col>
+
+          <c-col sm="6" md="6">
+            <div class="a11y-option-card h-100" [class.active]="adaptationUsesPictograms()" (click)="adaptationUsesPictograms.set(!adaptationUsesPictograms())">
+              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-picto"
+                [ngModel]="adaptationUsesPictograms()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationUsesPictograms.set($event)">
+              <div>
+                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-picto">Usa pictogramas</label>
+                <small class="text-muted" style="font-size: 0.75rem;">Símbolos pictográficos ARASAAC integrados para comunicación aumentativa</small>
+              </div>
+            </div>
+          </c-col>
+
+          <c-col sm="12" md="6">
+            <div class="a11y-option-card h-100" [class.active]="adaptationRequiresSupervision()" (click)="adaptationRequiresSupervision.set(!adaptationRequiresSupervision())">
+              <input class="form-check-input mt-0 flex-shrink-0" type="checkbox" id="a11y-super"
+                [ngModel]="adaptationRequiresSupervision()" (click)="$event.stopPropagation()" (ngModelChange)="adaptationRequiresSupervision.set($event)">
+              <div>
+                <label class="form-check-label fw-semibold small d-block mb-0 cursor-pointer" for="a11y-super">Requiere supervisión</label>
+                <small class="text-muted" style="font-size: 0.75rem;">Acompañamiento presencial requerido de profesional o tutor</small>
+              </div>
+            </div>
+          </c-col>
+        </c-row>
+
+        <!-- 3. Notas de Adaptación Pedagógica -->
+        <h6 class="fw-bold text-dark text-uppercase tracking-wider small mb-2 border-bottom pb-2">
+          📝 Notas e indicaciones pedagógicas
+        </h6>
+        <div class="mb-3">
+          <textarea cFormControl rows="3" [ngModel]="adaptationNotes()" (ngModelChange)="adaptationNotes.set($event)"
+            placeholder="Ej: Se reduce la cantidad de distractores, se habilita lectura asistida o se brinda mayor tolerancia de tiempo..."></textarea>
+          <div class="form-text small">Estas indicaciones se registran en el historial y métricas del alumno.</div>
+        </div>
+
+        <!-- 4. Reconocimiento de Alerta -->
+        <div class="form-check mt-3 pt-3 border-top">
+          <input class="form-check-input" type="checkbox" id="ackAlertCheckbox" [ngModel]="adaptationAcknowledgeAlert()" (ngModelChange)="adaptationAcknowledgeAlert.set($event)">
+          <label class="form-check-label small text-dark cursor-pointer" for="ackAlertCheckbox">
+            <strong>Marcar alerta como atendida:</strong> cesar las advertencias de dificultad hasta que el alumno realice nuevos intentos.
+          </label>
+        </div>
+      </c-modal-body>
+      <c-modal-footer>
+        <button cButton color="secondary" size="sm" (click)="closeAdaptationModal()">Cancelar</button>
+        <button cButton color="primary" size="sm" [disabled]="isSavingAdaptation()" (click)="saveAdaptation()">
+          @if (isSavingAdaptation()) { Guardando… } @else { Guardar cambios }
+        </button>
+      </c-modal-footer>
+    </c-modal>
+
+    <!-- ── Modal Dar de Baja Actividad (Opción A) ────────────────────────── -->
+    <c-modal [visible]="showDeactivateModal()" (visibleChange)="showDeactivateModal.set($event)">
+      <c-modal-header class="bg-danger text-white">
+        <h5 cModalTitle class="text-white">Dar de baja actividad</h5>
+      </c-modal-header>
+      <c-modal-body>
+        <p class="mb-2">
+          ¿Estás seguro de que deseas dar de baja la actividad
+          <strong>"{{ assignmentToDeactivate()?.activityTitle }}"</strong> para el alumno
+          <strong>{{ selectedPerson()?.personFullName }}</strong>?
+        </p>
+        <div class="alert alert-warning py-2 small mb-0">
+          <strong>Efecto de la baja:</strong>
+          <ul class="mb-0 ps-3 mt-1">
+            <li>La asignación pasará al estado <strong>Cancelada</strong>.</li>
+            <li>No figurará como pendiente ni continuará emitiendo alertas de dificultad.</li>
+            <li>El historial de intentos ya realizados se conservará para el cómputo de métricas históricas.</li>
+          </ul>
+        </div>
+      </c-modal-body>
+      <c-modal-footer>
+        <button cButton color="secondary" size="sm" (click)="closeDeactivateModal()">Volver</button>
+        <button cButton color="danger" size="sm" [disabled]="isDeactivating()" (click)="confirmDeactivate()">
+          @if (isDeactivating()) { Procesando… } @else { Confirmar baja }
         </button>
       </c-modal-footer>
     </c-modal>

@@ -37,10 +37,10 @@ export abstract class PlayerBaseComponent implements OnInit {
 
   /**
    * Indica si se permite reintentar la actividad.
-   * Se permite si el intento actual no fue superado (< 60%) y no se han agotado los 4 intentos (HU-21).
+   * El aprendizaje no se detiene: se permite reintentar siempre que el intento actual no fue superado (< 60%).
    */
   get canRetry(): boolean {
-    return !this.isCorrect() && this.consecutiveFailures() < 3;
+    return !this.isCorrect();
   }
 
   ngOnInit(): void {

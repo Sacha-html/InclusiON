@@ -104,6 +104,7 @@
     [message]="resultMessage()"
     [loading]="isLoading()"
     [canRetry]="canRetry"
+    [attemptCount]="consecutiveFailures()"
     (finish)="onFinish()"
     (retry)="retry()"
   />

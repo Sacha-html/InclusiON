@@ -33,6 +33,9 @@ namespace InclusiON.Data.Configurations
             builder.Property(aa => aa.IsActive)
                 .HasDefaultValue(true);
 
+            builder.Property(aa => aa.CustomAdaptationNotes)
+                .HasMaxLength(1000);
+
             builder.HasIndex(aa => aa.ActivityId);
             builder.HasIndex(aa => aa.PersonId);
             builder.HasIndex(aa => aa.AssignedByProfessionalId);

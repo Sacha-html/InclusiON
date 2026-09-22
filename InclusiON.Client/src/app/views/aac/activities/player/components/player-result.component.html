@@ -33,9 +33,9 @@
   <p class="result-msg">{{ message }}</p>
   }
 
-  @if (!canRetry && !success) {
+  @if (!success && attemptCount && attemptCount >= 4) {
   <p class="result-limit-notice">
-    Has alcanzado el límite de 4 intentos permitidos. Tu profesional ha sido notificado para ayudarte.
+    ¡Buen intento! Podés seguir practicando o pedirle una mano a tu profe.
   </p>
   }
 

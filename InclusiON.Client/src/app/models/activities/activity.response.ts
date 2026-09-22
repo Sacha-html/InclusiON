@@ -87,6 +87,14 @@ export interface ActivityAssignmentResponse {
   isTemplate?: boolean;
   roadmapOrder?: number | null;
   assignedByProfessionalId?: string;
+  alertAcknowledgedAt?: string;
+  estimatedDurationMinutes?: number;
+  hasVisualSupport?: boolean;
+  hasAudioSupport?: boolean;
+  usesEasyReading?: boolean;
+  usesPictograms?: boolean;
+  requiresSupervision?: boolean;
+  customAdaptationNotes?: string;
   responses: ActivityAttemptResponse[];
 }
 

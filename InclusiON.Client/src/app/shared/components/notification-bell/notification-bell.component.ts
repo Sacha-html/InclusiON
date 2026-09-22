@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription, filter, switchMap } from 'rxjs';
+import { Subscription, filter, interval, switchMap } from 'rxjs';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   DropdownComponent,
@@ -237,6 +237,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
 
   private sub?: Subscription;
   private routerSub?: Subscription;
+  private pollSub?: Subscription;
 
   readonly unreadLabel = () => {
     const n = this.unreadCount();
@@ -248,6 +249,11 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadFromStorage();
     this.fetchCount();
+
+    // Sincronización periódica en segundo plano cada 20 segundos
+    this.pollSub = interval(20000).subscribe(() => {
+      this.fetchCount();
+    });
 
     // Auto-marcar como leídas según la ruta actual (ej: al estar o entrar al perfil de un alumno)
     this.routerSub = this.router.events.pipe(
@@ -794,5 +800,6 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
     this.routerSub?.unsubscribe();
+    this.pollSub?.unsubscribe();
   }
 }

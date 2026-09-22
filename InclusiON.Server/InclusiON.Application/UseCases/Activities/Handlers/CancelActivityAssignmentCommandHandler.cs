@@ -40,13 +40,14 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             if (assignment.AssignedByProfessionalId != command.RequestedByProfessionalId)
                 return ApiResponse<ActivityAssignmentResponse>.Forbidden();
 
-            if (assignment.StatusId != AssignmentStatuses.Pendiente)
+            if (assignment.StatusId != AssignmentStatuses.Pendiente && assignment.StatusId != AssignmentStatuses.EnProgreso)
                 return ApiResponse<ActivityAssignmentResponse>.Conflict(
                     ErrorCode.BusinessRuleViolation,
-                    $"Solo se puede cancelar una asignación en estado Pendiente. Estado actual: {assignment.Status?.Name ?? assignment.StatusId.ToString()}.");
+                    $"Solo se puede cancelar una asignación en estado Pendiente o En Progreso. Estado actual: {assignment.Status?.Name ?? assignment.StatusId.ToString()}.");
 
-            assignment.StatusId  = AssignmentStatuses.Cancelada;
-            assignment.UpdatedAt = _dateTime.UtcNow;
+            assignment.StatusId            = AssignmentStatuses.Cancelada;
+            assignment.AlertAcknowledgedAt = _dateTime.UtcNow;
+            assignment.UpdatedAt           = _dateTime.UtcNow;
 
             await _repository.UpdateAsync(assignment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
