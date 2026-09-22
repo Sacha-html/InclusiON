@@ -30,5 +30,19 @@ namespace InclusiON.DTOs.Responses.Family
 
         /// <summary>Indica si el alumno presenta alerta de frustración activa (4 fallas consecutivas).</summary>
         public bool HasFrustrationAlert { get; set; }
+
+        /// <summary>Detalle de los 10 niveles de Mi Camino con su estado cromático (completed, struggling, active, locked).</summary>
+        public List<RoadmapLevelStepResponse> RoadmapLevels { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Nivel individual del Stepper del Roadmap en el panel familiar.
+    /// </summary>
+    public class RoadmapLevelStepResponse
+    {
+        public int Level { get; set; }
+        public string Title { get; set; } = string.Empty;
+        /// <summary>"completed" (verde), "struggling" (naranja), "active" (azul), "locked" (gris)</summary>
+        public string Status { get; set; } = "locked";
     }
 }

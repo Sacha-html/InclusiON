@@ -43,7 +43,11 @@
   height: 100%;
   background: linear-gradient(90deg, #198754, #0d6efd);
   border-radius: 2px;
-  transition: width 0.4s ease;
+  transition: width 0.4s ease, background 0.4s ease;
+
+  &.has-alert {
+    background: linear-gradient(90deg, #198754, #fd7e14);
+  }
 }
 
 .stepper-steps {
@@ -59,6 +63,22 @@
   flex-direction: column;
   align-items: center;
   user-select: none;
+  cursor: pointer;
+  outline: none;
+
+  &:focus-visible .step-circle {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+  }
+
+  &:hover .step-circle {
+    transform: translateY(-2px);
+  }
+
+  &.active:hover .step-circle,
+  &.struggling:hover .step-circle {
+    transform: scale(1.24) translateY(-1px);
+  }
 
   .step-circle {
     width: 32px;
@@ -91,6 +111,22 @@
     }
   }
 
+  // Estado: Struggling / Naranja (>= 4 fallas consecutivas / alerta de apoyo)
+  &.struggling {
+    .step-circle {
+      background-color: #fd7e14;
+      color: #ffffff;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.45);
+      transform: scale(1.18);
+      animation: pulse-struggling 2s infinite ease-in-out;
+    }
+    .step-label {
+      color: #fd7e14;
+      font-weight: 700;
+    }
+  }
+
   // Estado: Activo (nivel actual del alumno)
   &.active {
     .step-circle {
@@ -117,6 +153,18 @@
     .step-label {
       color: var(--cui-secondary-color, #adb5bd);
     }
+  }
+}
+
+@keyframes pulse-struggling {
+  0% {
+    box-shadow: 0 0 0 0 rgba(253, 126, 20, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(253, 126, 20, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(253, 126, 20, 0);
   }
 }
 

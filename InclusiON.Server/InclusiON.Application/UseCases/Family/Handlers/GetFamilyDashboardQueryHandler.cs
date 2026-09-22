@@ -69,7 +69,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     roadmapLevelName:     roadmapProgress?.LevelName ?? "Nivel 1",
                     gasStatusLabel:       roadmapProgress?.GasStatusLabel ?? "Iniciando camino",
                     averageSuccessRate:   roadmapProgress?.AverageSuccessRate ?? 0m,
-                    hasFrustrationAlert:  roadmapProgress?.HasFrustrationAlert ?? false);
+                    hasFrustrationAlert:  roadmapProgress?.HasFrustrationAlert ?? false,
+                    roadmapLevels:        roadmapProgress?.Levels);
             }).ToList();
 
             return ApiResponse<FamilyDashboardResponse>.SuccessResult(new FamilyDashboardResponse

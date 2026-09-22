@@ -44,3 +44,4 @@ Para ver información ampliada sobre aulas asignadas, métodos de supervisión a
 4. [4-familias.md](file:///d:/git/login/4-familias.md) - Representantes Familiares, teléfonos y alumnos vinculados.
 5. [5-cuentas-aulas.md](file:///d:/git/login/5-cuentas-aulas.md) - Cuentas masivas de prueba (`student1..39` / `tutor1..39`).
 6. [credenciales.csv](file:///d:/git/login/credenciales.csv) - Planilla para abrir en Excel / Google Sheets o importar.
+7. [6-sprint-1-relevamiento-backlog-der.md](file:///d:/git/login/6-sprint-1-relevamiento-backlog-der.md) - Relevamiento de negocio, procesos P01 a P19, DER de 11 entidades y Backlog oficial del Sprint 1.

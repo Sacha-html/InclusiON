@@ -41,6 +41,14 @@ namespace InclusiON.Application.Interfaces.Repositories
     }
 
     /// <summary>
+    /// Paso o nivel individual del Roadmap para la visualización del tutor (Mi Camino).
+    /// </summary>
+    public record RoadmapLevelStep(
+        int Level,
+        string Title,
+        string Status); // "completed" | "struggling" | "active" | "locked"
+
+    /// <summary>
     /// Resumen de avance del Roadmap y estado GAS para el panel familiar.
     /// </summary>
     public record PersonRoadmapProgress(
@@ -48,5 +56,6 @@ namespace InclusiON.Application.Interfaces.Repositories
         string LevelName,
         string GasStatusLabel,
         decimal AverageSuccessRate,
-        bool HasFrustrationAlert);
+        bool HasFrustrationAlert,
+        IReadOnlyList<RoadmapLevelStep>? Levels = null);
 }

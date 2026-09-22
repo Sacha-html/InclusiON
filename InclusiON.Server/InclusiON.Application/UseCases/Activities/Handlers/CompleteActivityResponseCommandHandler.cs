@@ -22,6 +22,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IDateTimeProvider _dateTime;
         private readonly IEncryptionService _encryption;
         private readonly IRealTimeNotifier? _realTimeNotifier;
+        private readonly IFamilyRepository? _familyRepository;
 
         public CompleteActivityResponseCommandHandler(
             IActivityAssignmentRepository repository,
@@ -31,7 +32,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
             IEncryptionService encryption,
-            IRealTimeNotifier? realTimeNotifier = null)
+            IRealTimeNotifier? realTimeNotifier = null,
+            IFamilyRepository? familyRepository = null)
         {
             _repository              = repository;
             _roadmapRepository       = roadmapRepository;
@@ -41,6 +43,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             _dateTime                = dateTime;
             _encryption              = encryption;
             _realTimeNotifier        = realTimeNotifier;
+            _familyRepository        = familyRepository;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -276,6 +279,72 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                         JsonSerializer.Serialize(payload),
                         maxRetries: 3,
                         cancellationToken: cancellationToken);
+                }
+
+                // Notificar a los tutores familiares vinculados al alumno
+                if (_familyRepository is not null)
+                {
+                    var studentName = assignment.Person != null ? $"{assignment.Person.FirstName} {assignment.Person.LastName}".Trim() : "El estudiante";
+                    var activityTitle = assignment.Activity != null ? assignment.Activity.Title : "la actividad";
+
+                    var reps = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(assignment.PersonId, cancellationToken);
+                    foreach (var rep in reps.Where(r => r.IsActive && r.Representative != null && r.Representative.UserId != Guid.Empty))
+                    {
+                        var tutorUserId = rep.Representative!.UserId.ToString();
+                        string tutorTitle;
+                        string tutorMessage;
+                        string notifType;
+
+                        if (command.SuccessPercentage >= 60m)
+                        {
+                            tutorTitle = "¡Felicitaciones! Nivel superado";
+                            tutorMessage = $"{studentName} completó la actividad '{activityTitle}' con éxito ({command.SuccessPercentage:F0}% de logro) en Mi Camino.";
+                            notifType = "ActivityCompleted";
+                        }
+                        else if (response.AttemptCount >= 4)
+                        {
+                            tutorTitle = "Alerta en Mi Camino: Apoyo requerido";
+                            tutorMessage = $"{studentName} registró varios intentos en la actividad '{activityTitle}'. Su profesional ha sido notificado para asistirlo.";
+                            notifType = "ActivityBlocked";
+                        }
+                        else
+                        {
+                            tutorTitle = "Nuevo intento registrado";
+                            tutorMessage = $"{studentName} realizó un intento en '{activityTitle}' ({command.SuccessPercentage:F0}% de logro).";
+                            notifType = "ActivityAttempt";
+                        }
+
+                        if (_realTimeNotifier != null)
+                        {
+                            try
+                            {
+                                await _realTimeNotifier.NotifyUserAsync(
+                                    tutorUserId,
+                                    tutorTitle,
+                                    tutorMessage,
+                                    "/family/dashboard",
+                                    cancellationToken);
+                            }
+                            catch
+                            {
+                                // Silencioso
+                            }
+                        }
+
+                        var tutorPayload = new NotificationPayload
+                        {
+                            UserId    = tutorUserId,
+                            Title     = tutorTitle,
+                            Message   = tutorMessage,
+                            ActionUrl = "/family/dashboard"
+                        };
+
+                        await _backgroundJobs.CreateAsync(
+                            JobTypes.Push,
+                            JsonSerializer.Serialize(tutorPayload),
+                            maxRetries: 3,
+                            cancellationToken: cancellationToken);
+                    }
                 }
             }
             catch (Exception)
