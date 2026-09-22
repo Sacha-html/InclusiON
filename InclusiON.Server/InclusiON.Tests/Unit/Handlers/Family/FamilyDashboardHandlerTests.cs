@@ -168,5 +168,77 @@ namespace InclusiON.Tests.Unit.Handlers.Family
 
             result.Data!.UnreadMessages.Should().Be(7);
         }
+
+        [Fact]
+        public async Task HandleAsync_WithRoadmapProgress_MapsRoadmapAndGasFieldsCorrectly()
+        {
+            var person = APerson(PersonId);
+            _family.GetLinkedPersonsAsync(FamilyUserId, Arg.Any<CancellationToken>())
+                   .Returns(new List<PersonWithDisability> { person });
+            _messages.GetUnreadCountAsync(FamilyUserId, Arg.Any<CancellationToken>())
+                     .Returns(0);
+            _assignments.GetRecentCompletedResponsesByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), 3, Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, List<ActivityResponse>> { [PersonId] = [] });
+            _reports.GetApprovedReportsSummaryByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, (int Count, Report? Latest)> { [PersonId] = (0, null) });
+            _assignments.GetRoadmapProgressByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, PersonRoadmapProgress>
+                {
+                    [PersonId] = new PersonRoadmapProgress(
+                        CurrentLevel: 4,
+                        LevelName: "Nivel 4 — Comunicación Aumentativa",
+                        AverageSuccessRate: 88.5m,
+                        GasStatusLabel: "Superando objetivos del nivel",
+                        HasFrustrationAlert: false)
+                });
+
+            var result = await BuildSut().HandleAsync(new GetFamilyDashboardQuery(FamilyUserId), default);
+
+            result.Success.Should().BeTrue();
+            var summary = result.Data!.Persons[0];
+            summary.CurrentRoadmapLevel.Should().Be(4);
+            summary.RoadmapLevelName.Should().Be("Nivel 4 — Comunicación Aumentativa");
+            summary.AverageSuccessRate.Should().Be(88.5m);
+            summary.GasStatusLabel.Should().Be("Superando objetivos del nivel");
+            summary.HasFrustrationAlert.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task HandleAsync_WithFrustrationAlert_MapsHasFrustrationAlertTrue()
+        {
+            var person = APerson(PersonId);
+            _family.GetLinkedPersonsAsync(FamilyUserId, Arg.Any<CancellationToken>())
+                   .Returns(new List<PersonWithDisability> { person });
+            _messages.GetUnreadCountAsync(FamilyUserId, Arg.Any<CancellationToken>())
+                     .Returns(0);
+            _assignments.GetRecentCompletedResponsesByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), 3, Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, List<ActivityResponse>> { [PersonId] = [] });
+            _reports.GetApprovedReportsSummaryByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, (int Count, Report? Latest)> { [PersonId] = (0, null) });
+            _assignments.GetRoadmapProgressByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, PersonRoadmapProgress>
+                {
+                    [PersonId] = new PersonRoadmapProgress(
+                        CurrentLevel: 2,
+                        LevelName: "Nivel 2 — Secuencias",
+                        AverageSuccessRate: 20.0m,
+                        GasStatusLabel: "Requiere apoyo pedagógico",
+                        HasFrustrationAlert: true)
+                });
+
+            var result = await BuildSut().HandleAsync(new GetFamilyDashboardQuery(FamilyUserId), default);
+
+            result.Success.Should().BeTrue();
+            var summary = result.Data!.Persons[0];
+            summary.HasFrustrationAlert.Should().BeTrue();
+            summary.GasStatusLabel.Should().Be("Requiere apoyo pedagógico");
+        }
     }
 }
+

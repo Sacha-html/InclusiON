@@ -16,6 +16,7 @@ using ActivityAssignment = InclusiON.Domain.Models.ActivityAssignment;
 using DomainActivityResponse = InclusiON.Domain.Models.ActivityResponse;
 using Professional = InclusiON.Domain.Models.Professional;
 using PersonRoadmapActivity = InclusiON.Domain.Models.PersonRoadmapActivity;
+using ActivitySession = InclusiON.Domain.Models.ActivitySession;
 
 namespace InclusiON.Tests.Unit.Handlers.Activities
 {
@@ -593,6 +594,29 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
                 Arg.Any<CancellationToken>());
             await _repo.DidNotReceive().UpdateAsync(Arg.Any<ActivityAssignment>(), Arg.Any<CancellationToken>());
         }
+
+        [Fact]
+        public async Task Start_WithFourFailedAttempts_ReturnsConflict()
+        {
+            var assignment = AnAssignment(status: AssignmentStatuses.EnProgreso);
+            assignment.Responses = new List<DomainActivityResponse>
+            {
+                new() { CompletedAt = Now.AddDays(-3), SuccessPercentage = 20 },
+                new() { CompletedAt = Now.AddDays(-2), SuccessPercentage = 30 },
+                new() { CompletedAt = Now.AddDays(-1), SuccessPercentage = 40 },
+                new() { CompletedAt = Now, SuccessPercentage = 50 },
+            };
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment);
+            _repo.CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(4);
+
+            var result = await BuildSut().HandleAsync(
+                new StartActivityResponseCommand(AssignmentId, PersonId), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
+            result.Message.Should().Contain("bloqueada");
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -729,7 +753,8 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             response.Result.Should().Be(expectedResult);
             response.CompletedAt.Should().Be(Now);
             response.SuccessPercentage.Should().Be(percentage);
-            assignment.StatusId.Should().Be(AssignmentStatuses.Completada);
+            var expectedStatus = percentage >= 60m ? AssignmentStatuses.Completada : AssignmentStatuses.EnProgreso;
+            assignment.StatusId.Should().Be(expectedStatus);
             await _repo.Received(1).UpdateResponseAsync(response, Arg.Any<CancellationToken>());
             await _repo.Received(1).UpdateAsync(assignment, Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -783,6 +808,114 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
                 a.PersonId == assignment.PersonId &&
                 a.StatusId == AssignmentStatuses.Pendiente
             ), Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData(95, 2)]
+        [InlineData(85, 2)]
+        [InlineData(80, 1)]
+        [InlineData(70, 1)]
+        [InlineData(65, 0)]
+        [InlineData(60, 0)]
+        [InlineData(50, -1)]
+        [InlineData(31, -1)]
+        [InlineData(30, -2)]
+        [InlineData(0, -2)]
+        public async Task CompleteResponse_CalculatesAndPersistsCorrectGasScoreInActivitySession(decimal success, int expectedGas)
+        {
+            var assignment = AnAssignment();
+            var response = AResponse();
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+
+            var result = await BuildSut().HandleAsync(Cmd(success: success), default);
+
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateSessionAsync(Arg.Is<ActivitySession>(s =>
+                s.StudentId == assignment.PersonId &&
+                s.ActivityId == assignment.ActivityId &&
+                s.GasScore == expectedGas &&
+                s.SuccessRate == success
+            ), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CompleteResponse_WithFourExhaustedAttempts_SetsGasScoreToMinusTwo()
+        {
+            var assignment = AnAssignment();
+            var response = new DomainActivityResponse
+            {
+                Id = ResponseId,
+                AssignmentId = AssignmentId,
+                StartedAt = new DateTime(2025, 6, 1, 10, 0, 0),
+                CompletedAt = null,
+                AttemptCount = 4 // 4th attempt exhausted
+            };
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+
+            // Even if success is 40% (which would normally be GAS -1), 4 attempts exhausted forces -2
+            var result = await BuildSut().HandleAsync(Cmd(success: 40m), default);
+
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateSessionAsync(Arg.Is<ActivitySession>(s =>
+                s.GasScore == -2 &&
+                s.ErrorCount == 4
+            ), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CompleteResponse_UnderSixtyPercent_KeepsStatusAsEnProgreso()
+        {
+            var assignment = AnAssignment();
+            var response = AResponse();
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+
+            var result = await BuildSut().HandleAsync(Cmd(success: 45m), default);
+
+            result.Success.Should().BeTrue();
+            assignment.StatusId.Should().Be(AssignmentStatuses.EnProgreso);
+        }
+
+        [Fact]
+        public async Task CompleteResponse_FourExhaustedAttempts_EnqueuesAlertNotificationForProfessional()
+        {
+            var assignment = AnAssignment();
+            var response = new DomainActivityResponse
+            {
+                Id = ResponseId,
+                AssignmentId = AssignmentId,
+                StartedAt = new DateTime(2025, 6, 1, 10, 0, 0),
+                CompletedAt = null,
+                AttemptCount = 4
+            };
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+            _profsRepo.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+                .Returns(new Professional { Id = Guid.NewGuid(), UserId = Guid.NewGuid() });
+
+            var result = await BuildSut().HandleAsync(Cmd(success: 30m), default);
+
+            result.Success.Should().BeTrue();
+            await _bgJobs.Received(1).CreateAsync(
+                JobTypes.Push,
+                Arg.Is<string>(payload => payload.Contains("bloqueada") || payload.Contains("Alerta")),
+                scheduledAt: Arg.Any<DateTime?>(),
+                maxRetries: Arg.Any<int>(),
+                cancellationToken: Arg.Any<CancellationToken>());
         }
     }
 }

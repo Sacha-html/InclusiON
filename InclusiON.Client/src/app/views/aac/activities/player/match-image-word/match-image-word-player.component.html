@@ -99,11 +99,11 @@
 
 @if (phase() === 'result') {
   <app-player-result
-    [success]="score() === 100"
+    [success]="score() >= 60"
     [score]="score()"
     [message]="resultMessage()"
     [loading]="isLoading()"
-    [canRetry]="score() < 100"
+    [canRetry]="canRetry"
     (finish)="onFinish()"
     (retry)="retry()"
   />

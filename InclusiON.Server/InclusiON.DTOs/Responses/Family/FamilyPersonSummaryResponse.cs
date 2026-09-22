@@ -15,5 +15,20 @@ namespace InclusiON.DTOs.Responses.Family
         public int    ApprovedReportsCount { get; set; }
         public string? LatestReportTitle   { get; set; }
         public DateTime? LatestReportDate  { get; set; }
+
+        /// <summary>Nivel actual alcanzado en el Roadmap curricular (1 al 10).</summary>
+        public int CurrentRoadmapLevel { get; set; } = 1;
+
+        /// <summary>Nombre de la actividad correspondiente al nivel del Roadmap.</summary>
+        public string RoadmapLevelName { get; set; } = string.Empty;
+
+        /// <summary>Semáforo cualitativo de logro pedagógico amigable basado en GAS.</summary>
+        public string GasStatusLabel { get; set; } = "Iniciando camino";
+
+        /// <summary>Porcentaje promedio general de éxito.</summary>
+        public decimal AverageSuccessRate { get; set; }
+
+        /// <summary>Indica si el alumno presenta alerta de frustración activa (4 fallas consecutivas).</summary>
+        public bool HasFrustrationAlert { get; set; }
     }
 }

@@ -103,7 +103,7 @@ export class MatchImageWordPlayerComponent extends PlayerBaseComponent {
 
   // ── Confirmar ────────────────────────────────────────────────────────────
   confirmMatches(): void {
-    this.isCorrect.set(this.score() === 100);
+    this.isCorrect.set(this.score() >= 60);
     this.phase.set('result');
   }
 

@@ -1,11 +1,164 @@
+// ── Pause Alert Card ────────────────────────────────────────────────────────
+.pause-alert-card {
+  background-color: var(--cui-warning-bg-subtle, #fff3cd);
+  border: 1px solid var(--cui-warning-border-subtle, #ffe69c);
+  color: var(--cui-body-color, #212529);
+
+  .pause-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    background-color: rgba(255, 193, 7, 0.2);
+  }
+}
+
+// ── Roadmap Stepper (10 Niveles) ─────────────────────────────────────────────
+.roadmap-section {
+  background-color: var(--cui-tertiary-bg, #f8f9fa);
+  border-color: var(--cui-border-color, #dee2e6) !important;
+
+  .roadmap-badge-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+}
+
+.stepper-container {
+  position: relative;
+  padding: 12px 0 6px;
+  width: 100%;
+}
+
+.stepper-track {
+  position: absolute;
+  top: 28px;
+  left: 20px;
+  right: 20px;
+  height: 4px;
+  background-color: var(--cui-border-color, #dee2e6);
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.stepper-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #198754, #0d6efd);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.stepper-steps {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+
+  .step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: all 0.25s ease-in-out;
+  }
+
+  .step-label {
+    margin-top: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--cui-secondary-color, #6c757d);
+  }
+
+  // Estado: Completado (pasos previos)
+  &.completed {
+    .step-circle {
+      background-color: #198754;
+      color: #ffffff;
+      border: 2px solid #198754;
+    }
+    .step-label {
+      color: #198754;
+    }
+  }
+
+  // Estado: Activo (nivel actual del alumno)
+  &.active {
+    .step-circle {
+      background-color: #0d6efd;
+      color: #ffffff;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.45);
+      transform: scale(1.18);
+      animation: pulse-active 2s infinite ease-in-out;
+    }
+    .step-label {
+      color: #0d6efd;
+      font-weight: 700;
+    }
+  }
+
+  // Estado: Bloqueado (niveles futuros)
+  &.locked {
+    .step-circle {
+      background-color: var(--cui-card-bg, #ffffff);
+      color: var(--cui-secondary-color, #adb5bd);
+      border: 2px solid var(--cui-border-color, #dee2e6);
+    }
+    .step-label {
+      color: var(--cui-secondary-color, #adb5bd);
+    }
+  }
+}
+
+@keyframes pulse-active {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(13, 110, 253, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
 :host-context([data-profile="high-contrast"]) {
   .stat-card { border: 2px solid var(--a11y-border, #fff); }
+  .pause-alert-card { border: 2px solid #ffc107 !important; }
+  .roadmap-section { border: 2px solid var(--a11y-border, #fff) !important; }
+  .step-circle { border-width: 3px !important; }
 }
 
 :host-context([data-color-mode="dark"]) {
   .stat-card { background: var(--a11y-surface, #2a2a3e); }
+  .pause-alert-card {
+    background-color: rgba(255, 193, 7, 0.15);
+    border-color: rgba(255, 193, 7, 0.3);
+  }
+  .roadmap-section {
+    background-color: var(--cui-dark-card-bg, rgba(255, 255, 255, 0.04));
+  }
+  .stepper-step.locked .step-circle {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+  .stepper-step.active .step-circle {
+    animation: none !important;
+  }
 }
+

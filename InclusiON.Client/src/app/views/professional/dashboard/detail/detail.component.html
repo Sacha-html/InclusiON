@@ -115,21 +115,45 @@
                   </button>
                 </div>
               </div>
-              <c-row class="g-3 text-center">
-                <c-col xs="6" md="3">
-                  <div class="weekly-stat">
+              <c-row class="g-3 text-center align-items-stretch">
+                <!-- Tarjeta Destacada: GAS Promedio -->
+                <c-col xs="12" sm="6" md="4" lg="auto" class="flex-fill">
+                  <div class="weekly-stat gas-stat-card border rounded p-2 h-100 d-flex flex-column justify-content-center"
+                       [class.border-success-subtle]="analytics && analytics.promedio_GAS > 0"
+                       [class.border-danger-subtle]="analytics && analytics.promedio_GAS < 0">
+                    <div class="weekly-stat__value fw-bold" [ngClass]="getGasColorClass(analytics?.promedio_GAS)">
+                      {{ getGasFormatted(analytics?.promedio_GAS) }}
+                    </div>
+                    <div class="weekly-stat__label fw-semibold">Escala Clínica GAS [-2, +2]</div>
+                    @if (analytics) {
+                      <div class="d-flex justify-content-center gap-1 mt-1 flex-wrap">
+                        <span class="badge bg-primary-subtle text-primary border" title="GAS promedio en niveles del Roadmap oficial" style="font-size: 0.65rem;">
+                          Roadmap: {{ getGasFormatted(analytics.promedio_GAS_Roadmap) }}
+                        </span>
+                        <span class="badge bg-secondary-subtle text-body border" title="GAS promedio en actividades adaptadas" style="font-size: 0.65rem;">
+                          A medida: {{ getGasFormatted(analytics.promedio_GAS_Personalizadas) }} ({{ analytics.totalActividadesPersonalizadas }})
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </c-col>
+
+                <c-col xs="6" sm="6" md="2" lg="auto" class="flex-fill">
+                  <div class="weekly-stat h-100 d-flex flex-column justify-content-center">
                     <div class="weekly-stat__value">{{ weeklyProgress.personCount }}</div>
                     <div class="weekly-stat__label">Alumnos activos</div>
                   </div>
                 </c-col>
-                <c-col xs="6" md="3">
-                  <div class="weekly-stat">
+
+                <c-col xs="6" sm="6" md="2" lg="auto" class="flex-fill">
+                  <div class="weekly-stat h-100 d-flex flex-column justify-content-center">
                     <div class="weekly-stat__value text-primary">{{ weeklyProgress.totalCompleted }}</div>
                     <div class="weekly-stat__label">Actividades completadas</div>
                   </div>
                 </c-col>
-                <c-col xs="6" md="3">
-                  <div class="weekly-stat">
+
+                <c-col xs="6" sm="6" md="2" lg="auto" class="flex-fill">
+                  <div class="weekly-stat h-100 d-flex flex-column justify-content-center">
                     <div class="weekly-stat__value"
                          [class.text-success]="weeklyProgress.avgSuccess >= 70"
                          [class.text-warning]="weeklyProgress.avgSuccess >= 40 && weeklyProgress.avgSuccess < 70"
@@ -139,8 +163,9 @@
                     <div class="weekly-stat__label">Promedio de éxito</div>
                   </div>
                 </c-col>
-                <c-col xs="6" md="3">
-                  <div class="weekly-stat clickable-card"
+
+                <c-col xs="6" sm="6" md="2" lg="auto" class="flex-fill">
+                  <div class="weekly-stat clickable-card h-100 d-flex flex-column justify-content-center"
                        (click)="openFrustrationDetails()"
                        title="Haz clic para ver el detalle de alumnos y actividades con alertas de frustración">
                     <div class="weekly-stat__value"

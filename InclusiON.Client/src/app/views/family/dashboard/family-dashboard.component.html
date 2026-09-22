@@ -91,6 +91,77 @@
           </c-card-header>
 
           <c-card-body>
+            <!-- Aviso empático de pausa si tiene alerta de frustración -->
+            @if (person.hasFrustrationAlert) {
+              <div class="pause-alert-card d-flex align-items-center gap-3 p-3 mb-4 rounded-3" role="status" aria-live="polite">
+                <div class="pause-icon-wrapper rounded-circle d-flex align-items-center justify-content-center text-warning flex-shrink-0">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="h6 mb-1 text-warning-emphasis fw-bold">Aviso de pausa sugerida</h4>
+                  <p class="mb-0 text-body-secondary small">
+                    Sugerimos un momento de descanso o realizar actividades recreativas antes de continuar para mantener el entusiasmo y bienestar.
+                  </p>
+                </div>
+              </div>
+            }
+
+            <!-- Roadmap Mi Camino: Progreso 10 Niveles -->
+            <div class="roadmap-section p-3 mb-4 rounded-3 border bg-light-subtle">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="roadmap-badge-icon" aria-hidden="true">🗺️</span>
+                  <div>
+                    <h3 class="h6 mb-0 fw-bold">Mi Camino (Nivel 1 al 10)</h3>
+                    <small class="text-body-secondary">
+                      Nivel actual: <strong>Nivel {{ person.currentRoadmapLevel }}</strong> — {{ person.roadmapLevelName || ('Nivel ' + person.currentRoadmapLevel) }}
+                    </small>
+                  </div>
+                </div>
+                <c-badge [color]="getGasBadgeColor(person.gasStatusLabel)" class="px-3 py-2 fs-7 fw-semibold">
+                  {{ person.gasStatusLabel }}
+                </c-badge>
+              </div>
+
+              <!-- Stepper visual de 10 pasos -->
+              <div class="stepper-container" role="progressbar" [attr.aria-valuenow]="person.currentRoadmapLevel" aria-valuemin="1" aria-valuemax="10" [attr.aria-valuetext]="'Nivel ' + person.currentRoadmapLevel + ' de 10'">
+                <div class="stepper-track">
+                  <div class="stepper-progress-fill" [style.width.%]="((person.currentRoadmapLevel - 1) / 9) * 100"></div>
+                </div>
+                <div class="stepper-steps">
+                  @for (lvl of roadmapLevels; track lvl) {
+                    <div class="stepper-step"
+                         [class.completed]="lvl < person.currentRoadmapLevel"
+                         [class.active]="lvl === person.currentRoadmapLevel"
+                         [class.locked]="lvl > person.currentRoadmapLevel"
+                         [attr.title]="'Nivel ' + lvl + (lvl < person.currentRoadmapLevel ? ' (Completado)' : (lvl === person.currentRoadmapLevel ? ' (Nivel Actual)' : ' (Por Desbloquear)'))">
+                      <div class="step-circle shadow-sm">
+                        @if (lvl < person.currentRoadmapLevel) {
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        } @else if (lvl === person.currentRoadmapLevel) {
+                          <span>{{ lvl }}</span>
+                        } @else {
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                          </svg>
+                        }
+                      </div>
+                      <span class="step-label d-none d-sm-inline">N{{ lvl }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+
             <c-row>
               <!-- Actividades recientes -->
               <c-col xs="12" md="7">

@@ -27,5 +27,26 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<Dictionary<Guid, List<ActivityResponse>>> GetRecentCompletedResponsesByPersonIdsAsync(
             IEnumerable<Guid> personIds, int limit, CancellationToken ct = default);
         Task<bool> HasActiveAssignmentAsync(Guid personId, int activityId, CancellationToken ct = default);
+
+        /// <summary>
+        /// Persiste una nueva sesión analítica de actividad finalizada.
+        /// </summary>
+        Task CreateSessionAsync(ActivitySession session, CancellationToken ct = default);
+
+        /// <summary>
+        /// Obtiene el progreso del Roadmap, nivel actual y estado GAS para un conjunto de alumnos.
+        /// </summary>
+        Task<Dictionary<Guid, PersonRoadmapProgress>> GetRoadmapProgressByPersonIdsAsync(
+            IEnumerable<Guid> personIds, CancellationToken ct = default);
     }
+
+    /// <summary>
+    /// Resumen de avance del Roadmap y estado GAS para el panel familiar.
+    /// </summary>
+    public record PersonRoadmapProgress(
+        int CurrentLevel,
+        string LevelName,
+        string GasStatusLabel,
+        decimal AverageSuccessRate,
+        bool HasFrustrationAlert);
 }

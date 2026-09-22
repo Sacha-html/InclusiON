@@ -117,5 +117,130 @@ namespace InclusiON.Infrastructure.Data.Repositories
                                 aa.StatusId != AssignmentStatuses.Cancelada,
                           ct);
         }
+
+        public async Task CreateSessionAsync(ActivitySession session, CancellationToken ct = default)
+        {
+            await _context.ActivitySessions.AddAsync(session, ct);
+        }
+
+        public async Task<Dictionary<Guid, PersonRoadmapProgress>> GetRoadmapProgressByPersonIdsAsync(
+            IEnumerable<Guid> personIds, CancellationToken ct = default)
+        {
+            var idList = personIds.ToList();
+            if (idList.Count == 0) return new();
+
+            // 1. Catálogo oficial de las 10 actividades del Roadmap ordenadas por nivel
+            var roadmapActivities = await _context.Activities
+                .AsNoTracking()
+                .Where(a => a.IsActive && a.RoadmapOrder != null)
+                .OrderBy(a => a.RoadmapOrder)
+                .ToListAsync(ct);
+
+            var roadmapMap = roadmapActivities.ToDictionary(a => a.RoadmapOrder!.Value, a => a.Title);
+
+            // 2. Asignaciones de los alumnos que pertenezcan al Roadmap
+            var assignments = await _context.ActivityAssignments
+                .Include(a => a.Activity)
+                .AsNoTracking()
+                .Where(a => idList.Contains(a.PersonId) && a.Activity.RoadmapOrder != null)
+                .ToListAsync(ct);
+
+            // 3. Sesiones analíticas de los alumnos
+            var sessions = await _context.ActivitySessions
+                .AsNoTracking()
+                .Where(s => idList.Contains(s.StudentId) && s.IsActive)
+                .ToListAsync(ct);
+
+            // 4. Respuestas registradas para verificar las 4 fallas consecutivas
+            var responses = await _context.ActivityResponses
+                .Include(r => r.Assignment)
+                .AsNoTracking()
+                .Where(r => idList.Contains(r.Assignment.PersonId))
+                .OrderByDescending(r => r.StartedAt)
+                .ToListAsync(ct);
+
+            var result = new Dictionary<Guid, PersonRoadmapProgress>();
+
+            foreach (var pid in idList)
+            {
+                var personAssignments = assignments.Where(a => a.PersonId == pid).ToList();
+                var personSessions = sessions.Where(s => s.StudentId == pid).ToList();
+                var personResponses = responses.Where(r => r.Assignment.PersonId == pid).ToList();
+
+                // Nivel actual: El nivel más alto que el alumno haya iniciado
+                int currentLevel = 1;
+                if (personAssignments.Count > 0)
+                {
+                    currentLevel = personAssignments.Max(a => a.Activity.RoadmapOrder ?? 1);
+                }
+                else if (personSessions.Count > 0)
+                {
+                    var maxSessionLevel = personSessions
+                        .Select(s => roadmapActivities.FirstOrDefault(ra => ra.Id == s.ActivityId)?.RoadmapOrder ?? 1)
+                        .DefaultIfEmpty(1)
+                        .Max();
+                    currentLevel = Math.Max(1, maxSessionLevel);
+                }
+
+                if (currentLevel < 1) currentLevel = 1;
+                if (currentLevel > 10) currentLevel = 10;
+
+                string levelName = roadmapMap.TryGetValue(currentLevel, out var title)
+                    ? title
+                    : $"Nivel {currentLevel}";
+
+                decimal avgSuccess = 0m;
+                string gasLabel;
+
+                if (personSessions.Count > 0)
+                {
+                    avgSuccess = Math.Round(personSessions.Average(s => s.SuccessRate), 1);
+                    var avgGas = (int)Math.Round(personSessions.Average(s => (decimal)s.GasScore), MidpointRounding.AwayFromZero);
+
+                    if (avgGas >= 1)
+                        gasLabel = "Superando objetivos con autonomía";
+                    else if (avgGas == 0)
+                        gasLabel = "En ritmo de progreso esperado";
+                    else
+                        gasLabel = "En desarrollo, requiere apoyos en casa";
+                }
+                else
+                {
+                    gasLabel = "Iniciando camino";
+                }
+
+                // Alerta de frustración (HU-21): Se activa exclusivamente si registra 4 fallas consecutivas en la misma actividad
+                bool hasFrustrationAlert = false;
+                var groupedByAssignment = personResponses.GroupBy(r => r.AssignmentId);
+                foreach (var group in groupedByAssignment)
+                {
+                    var sortedAttempts = group.OrderBy(r => r.StartedAt).ToList();
+                    int consecutiveFailures = 0;
+                    foreach (var attempt in sortedAttempts)
+                    {
+                        bool isFailure = (attempt.SuccessPercentage.HasValue && attempt.SuccessPercentage.Value < 60m)
+                                         || attempt.Result == ActivityResponseResult.Fallido;
+                        if (isFailure)
+                        {
+                            consecutiveFailures++;
+                            if (consecutiveFailures >= 4)
+                            {
+                                hasFrustrationAlert = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            consecutiveFailures = 0;
+                        }
+                    }
+                    if (hasFrustrationAlert) break;
+                }
+
+                result[pid] = new PersonRoadmapProgress(currentLevel, levelName, gasLabel, avgSuccess, hasFrustrationAlert);
+            }
+
+            return result;
+        }
     }
 }

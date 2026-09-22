@@ -19,7 +19,12 @@ namespace InclusiON.Application.Mappers
             List<RecentActivityResultResponse> recentActivities,
             int approvedReportsCount,
             string? latestReportTitle,
-            DateTime? latestReportDate) => new()
+            DateTime? latestReportDate,
+            int currentRoadmapLevel = 1,
+            string roadmapLevelName = "",
+            string gasStatusLabel = "Iniciando camino",
+            decimal averageSuccessRate = 0m,
+            bool hasFrustrationAlert = false) => new()
         {
             PersonId             = person.Id,
             FullName             = $"{person.FirstName} {person.LastName}".Trim(),
@@ -28,6 +33,11 @@ namespace InclusiON.Application.Mappers
             ApprovedReportsCount = approvedReportsCount,
             LatestReportTitle    = latestReportTitle,
             LatestReportDate     = latestReportDate,
+            CurrentRoadmapLevel  = currentRoadmapLevel,
+            RoadmapLevelName     = roadmapLevelName,
+            GasStatusLabel       = gasStatusLabel,
+            AverageSuccessRate   = averageSuccessRate,
+            HasFrustrationAlert  = hasFrustrationAlert,
         };
     }
 }
