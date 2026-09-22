@@ -48,6 +48,15 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             var attemptCount = await _repository.CountResponsesAsync(command.AssignmentId, cancellationToken);
 
+            var completedResponses = assignment.Responses?.Where(r => r.CompletedAt.HasValue).ToList() ?? [];
+            bool hasPassed = completedResponses.Any(r => (r.SuccessPercentage ?? 0) >= 60m);
+            if (!hasPassed && (attemptCount >= 4 || completedResponses.Count >= 4))
+            {
+                return ApiResponse<ActivityAssignmentResponse>.Conflict(
+                    ErrorCode.BusinessRuleViolation,
+                    "La actividad se encuentra bloqueada tras haber agotado los 4 intentos permitidos. Tu profesional ha sido notificado para asistirte.");
+            }
+
             var response = new ActivityResponse
             {
                 AssignmentId = command.AssignmentId,

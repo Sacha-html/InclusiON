@@ -12,6 +12,21 @@ namespace InclusiON.DTOs.Responses.Analytics
         public decimal Promedio_GAS { get; set; }
 
         /// <summary>
+        /// Promedio de la puntuación GAS exclusivo para los 10 niveles del Roadmap curricular ("Mi Camino").
+        /// </summary>
+        public decimal Promedio_GAS_Roadmap { get; set; }
+
+        /// <summary>
+        /// Promedio de la puntuación GAS para actividades personalizadas y adaptadas del docente.
+        /// </summary>
+        public decimal Promedio_GAS_Personalizadas { get; set; }
+
+        /// <summary>
+        /// Total de sesiones completadas en actividades personalizadas creadas por el docente.
+        /// </summary>
+        public int TotalActividadesPersonalizadas { get; set; }
+
+        /// <summary>
         /// Tiempo promedio dedicado a cada nivel en segundos.
         /// </summary>
         public double Tiempo_Promedio_Nivel { get; set; }
@@ -32,7 +47,7 @@ namespace InclusiON.DTOs.Responses.Analytics
         public decimal PromedioExito { get; set; }
 
         /// <summary>
-        /// Cantidad de alertas o situaciones de frustración detectadas (ej. éxito menor a 40% o estancamiento).
+        /// Cantidad de alertas o situaciones de frustración detectadas (ej. 4 o más fallas consecutivas o intentos agotados).
         /// </summary>
         public int AlertasFrustracion { get; set; }
         #endregion

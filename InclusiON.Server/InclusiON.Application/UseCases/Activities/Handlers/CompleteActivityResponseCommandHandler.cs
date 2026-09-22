@@ -21,6 +21,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
         private readonly IEncryptionService _encryption;
+        private readonly IRealTimeNotifier? _realTimeNotifier;
 
         public CompleteActivityResponseCommandHandler(
             IActivityAssignmentRepository repository,
@@ -29,7 +30,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
-            IEncryptionService encryption)
+            IEncryptionService encryption,
+            IRealTimeNotifier? realTimeNotifier = null)
         {
             _repository              = repository;
             _roadmapRepository       = roadmapRepository;
@@ -38,6 +40,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             _unitOfWork              = unitOfWork;
             _dateTime                = dateTime;
             _encryption              = encryption;
+            _realTimeNotifier        = realTimeNotifier;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -78,13 +81,36 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             var now = _dateTime.UtcNow;
 
+            // Calcular puntuación clínica Goal Attainment Scaling (GAS [-2, +2])
+            int gasScore;
+            if (command.SuccessPercentage >= 81m)
+                gasScore = 2;
+            else if (command.SuccessPercentage >= 70m)
+                gasScore = 1;
+            else if (command.SuccessPercentage >= 60m)
+                gasScore = 0;
+            else if (command.SuccessPercentage >= 31m)
+                gasScore = -1;
+            else
+                gasScore = -2;
+
+            if (response.AttemptCount >= 4 && command.SuccessPercentage < 60m)
+            {
+                gasScore = -2;
+                if (!command.FrustrationLevel.HasValue)
+                {
+                    response.FrustrationLevel = 4;
+                }
+            }
+
             // Read roadmap data before any mutations — both reads only need PersonId/ActivityId
             // which are available from the already-loaded assignment.
             var roadmapEntry = await _roadmapRepository.GetByPersonAndActivityAsync(
                 assignment.PersonId, assignment.ActivityId, cancellationToken);
 
             PersonRoadmapActivity? nextToUnlock = null;
-            if (roadmapEntry is not null && command.SuccessPercentage >= roadmapEntry.UnlockThresholdPercent)
+            // Desbloqueo del siguiente nivel: GAS >= 0 (éxito >= 60%) y cumple umbral configurado
+            if (roadmapEntry is not null && gasScore >= 0 && command.SuccessPercentage >= roadmapEntry.UnlockThresholdPercent)
             {
                 var next = await _roadmapRepository.GetNextInAreaAsync(
                     roadmapEntry.PersonRoadmapAreaId, roadmapEntry.SequenceOrder, cancellationToken);
@@ -99,16 +125,48 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             response.SuccessPercentage = command.SuccessPercentage;
             response.Result            = ResolveResult(command.SuccessPercentage);
             response.RequiredSupport   = command.RequiredSupport;
-            response.FrustrationLevel  = command.FrustrationLevel;
+            response.FrustrationLevel  = command.FrustrationLevel ?? response.FrustrationLevel;
             response.ResponsePattern   = command.ResponsePattern;
             response.Observations      = command.Observations;
             response.UpdatedAt         = now;
 
             await _repository.UpdateResponseAsync(response, cancellationToken);
 
-            assignment.StatusId  = AssignmentStatuses.Completada;
+            if (command.SuccessPercentage >= 60m)
+            {
+                assignment.StatusId  = AssignmentStatuses.Completada;
+            }
+            else
+            {
+                assignment.StatusId  = AssignmentStatuses.EnProgreso;
+            }
             assignment.UpdatedAt = now;
             await _repository.UpdateAsync(assignment, cancellationToken);
+
+            // Sincronizar persistencia en la entidad analítica ActivitySession
+            int errorCount = 0;
+            if (command.SuccessPercentage <= 30m || response.AttemptCount >= 4)
+                errorCount = Math.Max(4, response.AttemptCount);
+            else if (command.SuccessPercentage < 60m)
+                errorCount = Math.Max(2, response.AttemptCount);
+            else if (command.SuccessPercentage < 80m)
+                errorCount = 1;
+
+            var session = new ActivitySession
+            {
+                StudentId        = assignment.PersonId,
+                ProfessionalId   = assignment.AssignedByProfessionalId,
+                ActivityId       = assignment.ActivityId,
+                DateCompleted    = now,
+                TimeSpentSeconds = command.TimeSpentSeconds,
+                SuccessRate      = command.SuccessPercentage,
+                ErrorCount       = errorCount,
+                GasScore         = gasScore,
+                IsActive         = true,
+                CreatedAt        = now,
+            };
+
+            await _repository.CreateSessionAsync(session, cancellationToken);
 
             if (nextToUnlock is not null)
             {
@@ -159,15 +217,53 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     var studentName = assignment.Person != null ? $"{assignment.Person.FirstName} {assignment.Person.LastName}" : "Un alumno";
                     var activityTitle = assignment.Activity != null ? assignment.Activity.Title : "una actividad";
 
+                    string notifTitle;
+                    string notifMessage;
+
+                    if (command.SuccessPercentage >= 60m)
+                    {
+                        notifTitle = "Actividad completada";
+                        notifMessage = $"{studentName} completó la actividad '{activityTitle}' con éxito ({command.SuccessPercentage:F0}% de logro).";
+                    }
+                    else if (response.AttemptCount >= 4)
+                    {
+                        notifTitle = "Alerta: Actividad bloqueada por intentos agotados";
+                        notifMessage = $"{studentName} agotó los 4 intentos en la actividad '{activityTitle}' (último intento: {command.SuccessPercentage:F0}%). La actividad ha sido bloqueada y requiere tu apoyo.";
+                    }
+                    else
+                    {
+                        notifTitle = "Intento de actividad registrado";
+                        notifMessage = $"{studentName} realizó el intento {response.AttemptCount} de 4 en la actividad '{activityTitle}' ({command.SuccessPercentage:F0}% de éxito). El nivel continúa en proceso.";
+                    }
+
+                    var payload = new NotificationPayload
+                    {
+                        UserId    = professionalUserId,
+                        Title     = notifTitle,
+                        Message   = notifMessage,
+                        ActionUrl = "/#/pro/persons"
+                    };
+
+                    if (!string.IsNullOrEmpty(professionalUserId) && _realTimeNotifier != null)
+                    {
+                        try
+                        {
+                            await _realTimeNotifier.NotifyUserAsync(
+                                professionalUserId,
+                                notifTitle,
+                                notifMessage,
+                                payload.ActionUrl,
+                                cancellationToken);
+                        }
+                        catch
+                        {
+                            // Continuar con BackgroundJob
+                        }
+                    }
+
                     await _backgroundJobs.CreateAsync(
                         JobTypes.Push,
-                        JsonSerializer.Serialize(new NotificationPayload
-                        {
-                            UserId    = professionalUserId,
-                            Title     = "Actividad completada",
-                            Message   = $"{studentName} completó la actividad '{activityTitle}' ({command.SuccessPercentage:F0}% de éxito).",
-                            ActionUrl = "/#/pro/persons"
-                        }),
+                        JsonSerializer.Serialize(payload),
                         maxRetries: 3,
                         cancellationToken: cancellationToken);
                 }
@@ -183,7 +279,14 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(updated!.Id.ToString()));
             foreach (var attempt in dto.Responses)
                 attempt.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(attempt.Id.ToString()));
-            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(dto, "Actividad completada.");
+
+            string resultMessage = command.SuccessPercentage >= 60m
+                ? "Actividad completada."
+                : response.AttemptCount >= 4
+                    ? "Se han agotado los 4 intentos. Actividad bloqueada."
+                    : "Intento registrado. Nivel en proceso.";
+
+            return ApiResponse<ActivityAssignmentResponse>.SuccessResult(dto, resultMessage);
         }
 
         private static string ToUrlSafeBase64(string s) => s.Replace('+', '-').Replace('/', '_').TrimEnd('=');

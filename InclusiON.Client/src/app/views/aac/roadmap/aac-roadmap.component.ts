@@ -61,10 +61,16 @@ export class AacRoadmapComponent implements OnInit {
       nodes: (area.activities ?? []).map((act, idx) => {
         const matchingAssignments = asns.filter(a => a.activityId === act.activityId);
         const assignment = matchingAssignments.sort((a, b) => {
-          if (a.status !== ActivityAssignmentStatus.Completada && b.status === ActivityAssignmentStatus.Completada) return -1;
-          if (a.status === ActivityAssignmentStatus.Completada && b.status !== ActivityAssignmentStatus.Completada) return 1;
+          if (a.status === ActivityAssignmentStatus.Completada && b.status !== ActivityAssignmentStatus.Completada) return -1;
+          if (a.status !== ActivityAssignmentStatus.Completada && b.status === ActivityAssignmentStatus.Completada) return 1;
           return new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime();
         })[0];
+
+        const completedResponses = assignment?.responses?.filter(r => r.completedAt) ?? [];
+        const latestResponse = [...completedResponses].sort((a, b) =>
+          new Date(b.completedAt!).getTime() - new Date(a.completedAt!).getTime()
+        )[0];
+        const latestScore = latestResponse?.successPercentage;
 
         return {
           activity: act,
@@ -72,6 +78,7 @@ export class AacRoadmapComponent implements OnInit {
           assignment,
           status: this.resolveStatus(act, assignment),
           side: (idx % 2 === 0 ? 'left' : 'right') as 'left' | 'right',
+          score: latestScore,
         };
       }),
     }));
@@ -155,6 +162,14 @@ export class AacRoadmapComponent implements OnInit {
   private resolveStatus(act: RoadmapActivityResponse, assignment?: ActivityAssignmentResponse): NodeStatus {
     if (!act.isUnlocked) return 'locked';
     if (!assignment) return 'pending';
+
+    // Si tiene 4 o más intentos completados y ninguno aprobado (>= 60%), se bloquea
+    const completedResponses = assignment.responses?.filter(r => r.completedAt) ?? [];
+    const hasPassed = completedResponses.some(r => (r.successPercentage ?? 0) >= 60);
+    if (!hasPassed && completedResponses.length >= 4) {
+      return 'locked';
+    }
+
     switch (assignment.status) {
       case ActivityAssignmentStatus.Completada: return 'completed';
       case ActivityAssignmentStatus.EnProgreso: return 'in-progress';

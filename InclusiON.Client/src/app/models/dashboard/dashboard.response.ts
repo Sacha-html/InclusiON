@@ -16,6 +16,11 @@ export interface FamilyPersonSummaryResponse {
   approvedReportsCount: number;
   latestReportTitle?: string;
   latestReportDate?: string;
+  currentRoadmapLevel: number;
+  roadmapLevelName: string;
+  gasStatusLabel: string;
+  averageSuccessRate: number;
+  hasFrustrationAlert: boolean;
 }
 
 export interface FamilyDashboardResponse {

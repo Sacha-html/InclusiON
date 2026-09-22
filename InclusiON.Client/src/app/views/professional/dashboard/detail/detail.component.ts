@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -24,7 +24,7 @@ import {
 } from '@models';
 import { ReportListItemResponse, ReportStatus } from '@models';
 import { ReportStatus as ReportStatusLabels } from '@shared/constants/status-labels';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of, catchError } from 'rxjs';
 import { environment } from '@env';
 
 import { HighContrastPieChartComponent, LevelHistogramChartComponent, ClassroomRankingChartComponent } from '@shared/components';
@@ -36,6 +36,7 @@ import { ClassroomResponse, AnalyticsDashboardResponse, FrustrationDetailRespons
   standalone: true,
   imports: [
     FormsModule,
+    NgClass,
     CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent, ColComponent,
     SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent,
@@ -51,15 +52,15 @@ import { ClassroomResponse, AnalyticsDashboardResponse, FrustrationDetailRespons
 })
 export class DetailComponent implements OnInit, OnDestroy {
   private readonly professionalsService = inject(ProfessionalsService);
-  private readonly assignmentsService   = inject(AssignmentsService);
-  private readonly invitationsService   = inject(InvitationsService);
-  private readonly reportsService       = inject(ReportsService);
-  private readonly messagesService      = inject(MessagesService);
-  private readonly signalrService       = inject(SignalrService);
-  private readonly toastService         = inject(ToastService);
-  private readonly analyticsService     = inject(AnalyticsService);
-  private readonly router               = inject(Router);
-  private readonly http                 = inject(HttpClient);
+  private readonly assignmentsService = inject(AssignmentsService);
+  private readonly invitationsService = inject(InvitationsService);
+  private readonly reportsService = inject(ReportsService);
+  private readonly messagesService = inject(MessagesService);
+  private readonly signalrService = inject(SignalrService);
+  private readonly toastService = inject(ToastService);
+  private readonly analyticsService = inject(AnalyticsService);
+  private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
 
   #notifSub = Subscription.EMPTY;
 
@@ -76,9 +77,9 @@ export class DetailComponent implements OnInit, OnDestroy {
   selectedClassroomId = '';
   analytics: AnalyticsDashboardResponse | null = null;
 
-  draftReportsCount     = 0;
+  draftReportsCount = 0;
   submittedReportsCount = 0;
-  rejectedReportsCount  = 0;
+  rejectedReportsCount = 0;
 
   // Frustration Details Modal State
   showFrustrationModal = false;
@@ -113,13 +114,16 @@ export class DetailComponent implements OnInit, OnDestroy {
   }
 
   readonly reportBadgeMap: Partial<Record<string, { color: string; label: string }>> = {
-    [ReportStatus.Draft]:     { color: 'secondary', label: ReportStatusLabels.Borrador },
-    [ReportStatus.Submitted]: { color: 'warning',   label: ReportStatusLabels.Enviado  },
-    [ReportStatus.Approved]:  { color: 'success',   label: ReportStatusLabels.Aprobado },
-    [ReportStatus.Rejected]:  { color: 'danger',    label: ReportStatusLabels.Rechazado },
+    [ReportStatus.Draft]: { color: 'secondary', label: ReportStatusLabels.Borrador },
+    [ReportStatus.Submitted]: { color: 'warning', label: ReportStatusLabels.Enviado },
+    [ReportStatus.Approved]: { color: 'success', label: ReportStatusLabels.Aprobado },
+    [ReportStatus.Rejected]: { color: 'danger', label: ReportStatusLabels.Rechazado },
   };
 
   ngOnInit(): void {
+    // Cargar analítica de forma independiente para que los gráficos y KPIs carguen siempre
+    this.loadAnalytics();
+
     this.professionalsService.getMyProfile().subscribe({
       next: (prof) => {
         this.professional = prof;
@@ -155,38 +159,53 @@ export class DetailComponent implements OnInit, OnDestroy {
         .set('status', status);
 
     forkJoin({
-      persons:         this.assignmentsService.getPersonsByProfessional(professionalId),
+      persons: this.assignmentsService.getPersonsByProfessional(professionalId).pipe(catchError(() => of([]))),
       // pageSize alto: el contador de la portada necesita el total real de invitaciones,
       // no solo la primera página (con el tamaño por defecto quedaba subcontado).
-      invitations:     this.invitationsService.getAll(1, 1000),
-      classrooms:      this.assignmentsService.getClassroomsByProfessional(professionalId),
-      reports:         this.reportsService.getReports({
-                         page: 1,
-                         professionalId,
-                         pageSize: 5,
-                         sortBy: 'createdAt',
-                         sortDirection: 'DESC',
-                       }),
-      unread:          this.messagesService.getUnreadCount(),
-      weeklyProgress:  this.professionalsService.getWeeklyProgress(),
-      countDraft:      getCount(this.http, reportsUrl, countParams(ReportStatus.Draft)),
-      countSubmitted:  getCount(this.http, reportsUrl, countParams(ReportStatus.Submitted)),
-      countRejected:   getCount(this.http, reportsUrl, countParams(ReportStatus.Rejected)),
+      invitations: this.invitationsService.getAll(1, 1000).pipe(catchError(() => of({ data: [], totalCount: 0, page: 1, pageSize: 1000, totalPages: 0 } as any))),
+      classrooms: this.assignmentsService.getClassroomsByProfessional(professionalId).pipe(catchError(() => of([]))),
+      reports: this.reportsService.getReports({
+        page: 1,
+        professionalId,
+        pageSize: 5,
+        sortBy: 'createdAt',
+        sortDirection: 'DESC',
+      }).pipe(catchError(() => of({ data: [], totalCount: 0, page: 1, pageSize: 5, totalPages: 0 } as any))),
+      unread: this.messagesService.getUnreadCount().pipe(catchError(() => of(0))),
+      weeklyProgress: this.professionalsService.getWeeklyProgress().pipe(catchError(() => of({
+        periodStart: new Date().toISOString(),
+        periodEnd: new Date().toISOString(),
+        personCount: 0,
+        totalCompleted: 0,
+        avgSuccess: 0,
+        frustrationAlerts: 0,
+      } as any))),
+      countDraft: getCount(this.http, reportsUrl, countParams(ReportStatus.Draft)).pipe(catchError(() => of({ totalCount: 0 }))),
+      countSubmitted: getCount(this.http, reportsUrl, countParams(ReportStatus.Submitted)).pipe(catchError(() => of({ totalCount: 0 }))),
+      countRejected: getCount(this.http, reportsUrl, countParams(ReportStatus.Rejected)).pipe(catchError(() => of({ totalCount: 0 }))),
     }).subscribe({
       next: ({ persons, invitations, classrooms, reports, unread, weeklyProgress, countDraft, countSubmitted, countRejected }) => {
-        this.persons               = persons;
-        this.invitations           = invitations.data;
-        this.classrooms            = classrooms;
-        this.recentReports         = reports.data;
-        this.unreadMessages        = unread;
-        this.weeklyProgress        = weeklyProgress;
-        this.draftReportsCount     = countDraft.totalCount;
+        this.persons = persons;
+        this.invitations = invitations.data;
+        this.classrooms = classrooms;
+        this.recentReports = reports.data;
+        this.unreadMessages = unread;
+        this.weeklyProgress = weeklyProgress;
+        this.draftReportsCount = countDraft.totalCount;
         this.submittedReportsCount = countSubmitted.totalCount;
-        this.rejectedReportsCount  = countRejected.totalCount;
-        this.isLoading             = false;
+        this.rejectedReportsCount = countRejected.totalCount;
+        this.isLoading = false;
 
-        // Cargar métricas analíticas iniciales (todas las aulas)
-        this.loadAnalytics();
+        // Si las analíticas ya están cargadas, reflejar los datos más recientes en el resumen
+        if (this.analytics && this.weeklyProgress) {
+          this.weeklyProgress = {
+            ...this.weeklyProgress,
+            personCount: this.analytics.personasActivas,
+            totalCompleted: this.analytics.totalActividadesCompletadas,
+            avgSuccess: Math.round(this.analytics.promedioExito),
+            frustrationAlerts: this.analytics.alertasFrustracion,
+          };
+        }
       },
       error: () => {
         this.isLoading = false;
@@ -218,6 +237,16 @@ export class DetailComponent implements OnInit, OnDestroy {
         this.toastService.error('Error al actualizar las métricas analíticas.');
       }
     });
+  }
+
+  getGasFormatted(gas?: number): string {
+    if (gas === undefined || gas === null) return '0.0';
+    return (gas > 0 ? '+' : '') + gas.toFixed(1);
+  }
+
+  getGasColorClass(gas?: number): string {
+    if (gas === undefined || gas === null || gas === 0) return 'text-primary';
+    return gas > 0 ? 'text-success' : 'text-danger';
   }
 
   onChangeClassroom(event: Event): void {
