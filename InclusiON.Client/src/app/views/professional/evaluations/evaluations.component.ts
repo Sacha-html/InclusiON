@@ -34,6 +34,9 @@ import {
   ModalTitleDirective,
   FormSelectDirective,
   FormControlDirective,
+  FormCheckComponent,
+  FormCheckInputDirective,
+  FormCheckLabelDirective,
   AlertComponent
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
@@ -66,6 +69,9 @@ import { TimeFormatPipe } from '@shared/pipes';
     ModalTitleDirective,
     FormSelectDirective,
     FormControlDirective,
+    FormCheckComponent,
+    FormCheckInputDirective,
+    FormCheckLabelDirective,
     AlertComponent,
     IconDirective,
     ActorAvatarComponent,
