@@ -119,9 +119,20 @@
                   <span class="roadmap-badge-icon" aria-hidden="true">🗺️</span>
                   <div>
                     <h3 class="h6 mb-0 fw-bold">Mi Camino (Nivel 1 al 10)</h3>
-                    <small class="text-body-secondary">
-                      Nivel actual: <strong>Nivel {{ person.currentRoadmapLevel }}</strong> — {{ person.roadmapLevelName || ('Nivel ' + person.currentRoadmapLevel) }}
-                    </small>
+                    <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
+                      <small class="text-body-secondary">
+                        Nivel actual: <strong>Nivel {{ person.currentRoadmapLevel }}</strong> — {{ person.roadmapLevelName || ('Nivel ' + person.currentRoadmapLevel) }}
+                      </small>
+                      @if (person.hasFrustrationAlert) {
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2 rounded-pill fw-bold" style="font-size: 0.72rem;">
+                          ⚠️ Requiere apoyo pedagógico
+                        </span>
+                      } @else if (person.currentRoadmapLevel > 1) {
+                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle py-1 px-2 rounded-pill fw-semibold" style="font-size: 0.72rem;">
+                          ✓ En avance
+                        </span>
+                      }
+                    </div>
                   </div>
                 </div>
                 <c-badge [color]="getGasBadgeColor(person.gasStatusLabel)" class="px-3 py-2 fs-7 fw-semibold">
@@ -132,22 +143,27 @@
               <!-- Stepper visual de 10 pasos -->
               <div class="stepper-container" role="progressbar" [attr.aria-valuenow]="person.currentRoadmapLevel" aria-valuemin="1" aria-valuemax="10" [attr.aria-valuetext]="'Nivel ' + person.currentRoadmapLevel + ' de 10'">
                 <div class="stepper-track">
-                  <div class="stepper-progress-fill" [style.width.%]="((person.currentRoadmapLevel - 1) / 9) * 100"></div>
+                  <div class="stepper-progress-fill"
+                       [class.has-alert]="person.hasFrustrationAlert"
+                       [style.width.%]="((person.currentRoadmapLevel - 1) / 9) * 100"></div>
                 </div>
                 <div class="stepper-steps">
-                  @for (lvl of roadmapLevels; track lvl) {
+                  @for (step of getRoadmapSteps(person); track step.level) {
                     <div class="stepper-step"
-                         [class.completed]="lvl < person.currentRoadmapLevel"
-                         [class.active]="lvl === person.currentRoadmapLevel"
-                         [class.locked]="lvl > person.currentRoadmapLevel"
-                         [attr.title]="'Nivel ' + lvl + (lvl < person.currentRoadmapLevel ? ' (Completado)' : (lvl === person.currentRoadmapLevel ? ' (Nivel Actual)' : ' (Por Desbloquear)'))">
+                         [class.completed]="step.status === 'completed'"
+                         [class.struggling]="step.status === 'struggling'"
+                         [class.active]="step.status === 'active'"
+                         [class.locked]="step.status === 'locked'"
+                         [attr.title]="'Nivel ' + step.level + ': ' + step.title + ' (' + getStatusText(step.status) + ')'"
+                         [attr.aria-label]="'Nivel ' + step.level + ': ' + step.title + ', estado: ' + getStatusText(step.status)"
+                         tabindex="0">
                       <div class="step-circle shadow-sm">
-                        @if (lvl < person.currentRoadmapLevel) {
+                        @if (step.status === 'completed') {
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <polyline points="20 6 9 17 4 12"></polyline>
                           </svg>
-                        } @else if (lvl === person.currentRoadmapLevel) {
-                          <span>{{ lvl }}</span>
+                        } @else if (step.status === 'struggling' || step.status === 'active') {
+                          <span>{{ step.level }}</span>
                         } @else {
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -155,7 +171,7 @@
                           </svg>
                         }
                       </div>
-                      <span class="step-label d-none d-sm-inline">N{{ lvl }}</span>
+                      <span class="step-label d-none d-sm-inline">N{{ step.level }}</span>
                     </div>
                   }
                 </div>
