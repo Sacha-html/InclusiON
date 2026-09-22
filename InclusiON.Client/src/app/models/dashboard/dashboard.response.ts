@@ -8,6 +8,12 @@ export interface RecentActivityResultResponse {
   completedAt: string;
 }
 
+export interface RoadmapLevelStepResponse {
+  level: number;
+  title: string;
+  status: 'completed' | 'struggling' | 'active' | 'locked';
+}
+
 export interface FamilyPersonSummaryResponse {
   personId: string;
   fullName: string;
@@ -21,6 +27,7 @@ export interface FamilyPersonSummaryResponse {
   gasStatusLabel: string;
   averageSuccessRate: number;
   hasFrustrationAlert: boolean;
+  roadmapLevels?: RoadmapLevelStepResponse[];
 }
 
 export interface FamilyDashboardResponse {

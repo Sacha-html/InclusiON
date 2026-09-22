@@ -239,6 +239,51 @@ namespace InclusiON.Tests.Unit.Handlers.Family
             summary.HasFrustrationAlert.Should().BeTrue();
             summary.GasStatusLabel.Should().Be("Requiere apoyo pedagógico");
         }
+
+        [Fact]
+        public async Task HandleAsync_WithDynamicRoadmapLevels_MapsLevelsCorrectly()
+        {
+            var person = APerson(PersonId);
+            _family.GetLinkedPersonsAsync(FamilyUserId, Arg.Any<CancellationToken>())
+                   .Returns(new List<PersonWithDisability> { person });
+            _messages.GetUnreadCountAsync(FamilyUserId, Arg.Any<CancellationToken>())
+                     .Returns(0);
+            _assignments.GetRecentCompletedResponsesByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), 3, Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, List<ActivityResponse>> { [PersonId] = [] });
+            _reports.GetApprovedReportsSummaryByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, (int Count, Report? Latest)> { [PersonId] = (0, null) });
+
+            var expectedLevels = new List<RoadmapLevelStep>
+            {
+                new(1, "Nivel 1 — Reconocimiento", "completed"),
+                new(2, "Nivel 2 — Secuencias", "struggling"),
+                new(3, "Nivel 3 — Clasificación", "locked")
+            };
+
+            _assignments.GetRoadmapProgressByPersonIdsAsync(
+                    Arg.Any<IEnumerable<Guid>>(), Arg.Any<CancellationToken>())
+                .Returns(new Dictionary<Guid, PersonRoadmapProgress>
+                {
+                    [PersonId] = new PersonRoadmapProgress(
+                        CurrentLevel: 2,
+                        LevelName: "Nivel 2 — Secuencias",
+                        AverageSuccessRate: 20.0m,
+                        GasStatusLabel: "Requiere apoyo pedagógico",
+                        HasFrustrationAlert: true,
+                        Levels: expectedLevels)
+                });
+
+            var result = await BuildSut().HandleAsync(new GetFamilyDashboardQuery(FamilyUserId), default);
+
+            result.Success.Should().BeTrue();
+            var summary = result.Data!.Persons[0];
+            summary.RoadmapLevels.Should().HaveCount(3);
+            summary.RoadmapLevels[0].Status.Should().Be("completed");
+            summary.RoadmapLevels[1].Status.Should().Be("struggling");
+            summary.RoadmapLevels[2].Status.Should().Be("locked");
+        }
     }
 }
 

@@ -24,7 +24,8 @@ namespace InclusiON.Application.Mappers
             string roadmapLevelName = "",
             string gasStatusLabel = "Iniciando camino",
             decimal averageSuccessRate = 0m,
-            bool hasFrustrationAlert = false) => new()
+            bool hasFrustrationAlert = false,
+            IReadOnlyList<InclusiON.Application.Interfaces.Repositories.RoadmapLevelStep>? roadmapLevels = null) => new()
         {
             PersonId             = person.Id,
             FullName             = $"{person.FirstName} {person.LastName}".Trim(),
@@ -38,6 +39,12 @@ namespace InclusiON.Application.Mappers
             GasStatusLabel       = gasStatusLabel,
             AverageSuccessRate   = averageSuccessRate,
             HasFrustrationAlert  = hasFrustrationAlert,
+            RoadmapLevels        = (roadmapLevels ?? []).Select(l => new RoadmapLevelStepResponse
+            {
+                Level  = l.Level,
+                Title  = l.Title,
+                Status = l.Status
+            }).ToList()
         };
     }
 }
