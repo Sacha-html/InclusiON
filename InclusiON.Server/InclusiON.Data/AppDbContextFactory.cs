@@ -55,6 +55,7 @@ namespace InclusiON.Data
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             optionsBuilder.UseNpgsql(connectionString);
 
             return new AppDbContext(optionsBuilder.Options);

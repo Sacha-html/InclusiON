@@ -143,6 +143,37 @@ export class ActivitiesService {
       .pipe(unwrapResponse());
   }
 
+  updateAssignmentAdaptation(
+    assignmentId: number | string,
+    request: {
+      dueDate?: string | null;
+      estimatedDurationMinutes?: number | null;
+      hasVisualSupport?: boolean | null;
+      hasAudioSupport?: boolean | null;
+      usesEasyReading?: boolean | null;
+      usesPictograms?: boolean | null;
+      requiresSupervision?: boolean | null;
+      customAdaptationNotes?: string | null;
+      acknowledgeAlert?: boolean;
+    }
+  ): Observable<ActivityAssignmentResponse> {
+    return this.http
+      .put<ApiResponse<ActivityAssignmentResponse>>(
+        `${this.assignmentsUrl}/${assignmentId}/adaptation`,
+        request
+      )
+      .pipe(unwrapResponse());
+  }
+
+  cancelAssignment(assignmentId: number | string): Observable<ActivityAssignmentResponse> {
+    return this.http
+      .patch<ApiResponse<ActivityAssignmentResponse>>(
+        `${this.assignmentsUrl}/${assignmentId}/cancel`,
+        {}
+      )
+      .pipe(unwrapResponse());
+  }
+
   startResponse(assignmentId: string): Observable<ActivityAssignmentResponse> {
     return this.http
       .post<ApiResponse<ActivityAssignmentResponse>>(

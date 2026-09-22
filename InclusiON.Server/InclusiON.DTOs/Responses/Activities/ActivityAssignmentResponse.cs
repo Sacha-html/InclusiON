@@ -19,6 +19,14 @@ namespace InclusiON.DTOs.Responses.Activities
         public int? RoadmapOrder { get; set; }
         public Guid AssignedByProfessionalId { get; set; }
         public bool IsEvaluationActivity { get; set; }
+        public DateTime? AlertAcknowledgedAt { get; set; }
+        public int? EstimatedDurationMinutes { get; set; }
+        public bool HasVisualSupport { get; set; }
+        public bool HasAudioSupport { get; set; }
+        public bool UsesEasyReading { get; set; }
+        public bool UsesPictograms { get; set; }
+        public bool RequiresSupervision { get; set; }
+        public string? CustomAdaptationNotes { get; set; }
         public List<ActivityAttemptResponse> Responses { get; set; } = [];
 
         public static ActivityAssignmentResponse From(ActivityAssignment a) => new()
@@ -36,6 +44,14 @@ namespace InclusiON.DTOs.Responses.Activities
             RoadmapOrder        = a.Activity?.RoadmapOrder,
             AssignedByProfessionalId = a.AssignedByProfessionalId,
             IsEvaluationActivity = a.IsEvaluationActivity,
+            AlertAcknowledgedAt = a.AlertAcknowledgedAt,
+            EstimatedDurationMinutes = a.EstimatedDurationMinutes ?? a.Activity?.EstimatedDurationMinutes,
+            HasVisualSupport    = a.HasVisualSupport ?? a.Activity?.HasVisualSupport ?? false,
+            HasAudioSupport     = a.HasAudioSupport ?? a.Activity?.HasAudioSupport ?? false,
+            UsesEasyReading     = a.UsesEasyReading ?? a.Activity?.UsesEasyReading ?? false,
+            UsesPictograms      = a.UsesPictograms ?? a.Activity?.UsesPictograms ?? false,
+            RequiresSupervision = a.RequiresSupervision ?? a.Activity?.RequiresSupervision ?? false,
+            CustomAdaptationNotes = a.CustomAdaptationNotes,
             Responses           = a.Responses
                                     .Select(ActivityAttemptResponse.From)
                                     .OrderByDescending(r => r.StartedAt)

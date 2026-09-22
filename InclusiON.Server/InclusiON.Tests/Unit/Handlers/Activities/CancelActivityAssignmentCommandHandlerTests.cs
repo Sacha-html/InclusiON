@@ -63,10 +63,10 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         [Fact]
-        public async Task NotInPendienteStatus_ReturnsBusinessRuleViolation()
+        public async Task InCompletadaStatus_ReturnsBusinessRuleViolation()
         {
             var assignment = AnAssignment();
-            assignment.StatusId = AssignmentStatuses.EnProgreso;
+            assignment.StatusId = AssignmentStatuses.Completada;
             _repo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(assignment);
 
             var result = await BuildSut().HandleAsync(new CancelActivityAssignmentCommand(1, ProfId), default);
@@ -74,6 +74,23 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
             await _uow.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task ValidCancel_FromEnProgreso_SetsCanceladaAndAcknowledgesAlert()
+        {
+            var assignment = AnAssignment(1);
+            assignment.StatusId = AssignmentStatuses.EnProgreso;
+            var now = DateTime.UtcNow;
+            _dateTime.UtcNow.Returns(now);
+            _repo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(assignment);
+
+            var result = await BuildSut().HandleAsync(new CancelActivityAssignmentCommand(1, ProfId), default);
+
+            result.Success.Should().BeTrue();
+            assignment.StatusId.Should().Be(AssignmentStatuses.Cancelada);
+            assignment.AlertAcknowledgedAt.Should().Be(now);
+            await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
         }
 
         [Fact]

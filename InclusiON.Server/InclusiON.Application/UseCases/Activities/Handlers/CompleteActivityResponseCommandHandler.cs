@@ -227,13 +227,23 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     }
                     else if (response.AttemptCount >= 4)
                     {
-                        notifTitle = "Alerta: Actividad bloqueada por intentos agotados";
-                        notifMessage = $"{studentName} agotó los 4 intentos en la actividad '{activityTitle}' (último intento: {command.SuccessPercentage:F0}%). La actividad ha sido bloqueada y requiere tu apoyo.";
+                        notifTitle = "Alerta: Apoyo pedagógico requerido (4 intentos)";
+                        notifMessage = $"{studentName} alcanzó 4 intentos en la actividad '{activityTitle}' (último intento: {command.SuccessPercentage:F0}%). La actividad continúa disponible pero requiere tu intervención.";
                     }
                     else
                     {
                         notifTitle = "Intento de actividad registrado";
-                        notifMessage = $"{studentName} realizó el intento {response.AttemptCount} de 4 en la actividad '{activityTitle}' ({command.SuccessPercentage:F0}% de éxito). El nivel continúa en proceso.";
+                        notifMessage = $"{studentName} realizó el intento {response.AttemptCount} en la actividad '{activityTitle}' ({command.SuccessPercentage:F0}% de éxito). El nivel continúa en proceso.";
+                    }
+
+                    string actionUrl;
+                    if (response.AttemptCount >= 4 && command.SuccessPercentage < 60m)
+                    {
+                        actionUrl = $"/pro/evaluations?personId={assignment.PersonId}&activityId={assignment.ActivityId}&alert=attempts";
+                    }
+                    else
+                    {
+                        actionUrl = $"/pro/evaluations?personId={assignment.PersonId}";
                     }
 
                     var payload = new NotificationPayload
@@ -241,7 +251,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                         UserId    = professionalUserId,
                         Title     = notifTitle,
                         Message   = notifMessage,
-                        ActionUrl = "/#/pro/persons"
+                        ActionUrl = actionUrl
                     };
 
                     if (!string.IsNullOrEmpty(professionalUserId) && _realTimeNotifier != null)

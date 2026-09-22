@@ -1,7 +1,7 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { ProfessionalsService, AssignmentsService, ActivitiesService, FamilyService, ToastService } from '@services';
 import { MessagesService } from '@services/messages.service';
@@ -14,7 +14,7 @@ import {
   ActivityResponseResult,
   PersonRepresentativeResponse
 } from '@models';
-import { forkJoin, switchMap } from 'rxjs';
+import { forkJoin, Subscription, switchMap } from 'rxjs';
 import {
   CardComponent,
   CardBodyComponent,
@@ -74,7 +74,8 @@ import { TimeFormatPipe } from '@shared/pipes';
   templateUrl: './evaluations.component.html',
   styleUrl: './evaluations.component.scss'
 })
-export class EvaluationsComponent implements OnInit {
+export class EvaluationsComponent implements OnInit, OnDestroy {
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
@@ -82,6 +83,14 @@ export class EvaluationsComponent implements OnInit {
   private readonly familyService = inject(FamilyService);
   private readonly messagesService = inject(MessagesService);
   private readonly toastService = inject(ToastService);
+
+  private routeSub?: Subscription;
+
+  // Query Params & Notification Navigation
+  targetPersonId = signal<string | null>(null);
+  targetActivityId = signal<number | null>(null);
+  showAlertFromNotification = signal<boolean>(false);
+  dismissedAlertAssignmentIds = signal<Set<number>>(new Set());
 
   persons = signal<ProfessionalPersonResponse[]>([]);
   classrooms = signal<ClassroomResponse[]>([]);
@@ -110,12 +119,31 @@ export class EvaluationsComponent implements OnInit {
   frustrationAlertCount = signal<number>(0);
   frustratedActivities = signal<string[]>([]);
 
-  // Modal State
+  // Modal State - Share with tutor
   showShareModal = signal<boolean>(false);
   representativesList = signal<PersonRepresentativeResponse[]>([]);
   selectedTutorId = '';
   shareMessageBody = '';
   sendingShare = signal<boolean>(false);
+
+  // Modal State - Modificar / Adaptación Pedagógica
+  showAdaptationModal = signal<boolean>(false);
+  selectedAssignmentForAdaptation = signal<ActivityAssignmentResponse | null>(null);
+  adaptationDueDate = signal<string>('');
+  adaptationEstimatedDuration = signal<number | null>(null);
+  adaptationHasVisualSupport = signal<boolean>(false);
+  adaptationHasAudioSupport = signal<boolean>(false);
+  adaptationUsesEasyReading = signal<boolean>(false);
+  adaptationUsesPictograms = signal<boolean>(false);
+  adaptationRequiresSupervision = signal<boolean>(false);
+  adaptationNotes = signal<string>('');
+  adaptationAcknowledgeAlert = signal<boolean>(true);
+  isSavingAdaptation = signal<boolean>(false);
+
+  // Modal State - Dar de baja (Opción A)
+  showDeactivateModal = signal<boolean>(false);
+  assignmentToDeactivate = signal<ActivityAssignmentResponse | null>(null);
+  isDeactivating = signal<boolean>(false);
 
   // Computed signal to filter students by Classroom and search term
   filteredPersons = computed(() => {
@@ -157,7 +185,46 @@ export class EvaluationsComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.routeSub = this.route.queryParams.subscribe(params => {
+      const pId = params['personId'];
+      const aId = params['activityId'];
+      const alertType = params['alert'];
+
+      if (pId) {
+        this.targetPersonId.set(String(pId));
+      }
+      if (aId) {
+        this.targetActivityId.set(Number(aId));
+      }
+      if (alertType) {
+        this.showAlertFromNotification.set(true);
+      }
+
+      this.tryAutoSelectPerson();
+    });
+
     this.loadPersons();
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+  }
+
+  private tryAutoSelectPerson(): void {
+    const targetId = this.targetPersonId();
+    if (!targetId || this.persons().length === 0) return;
+
+    const targetIdRaw = targetId.replace(/^ENC:/i, '').toLowerCase().trim();
+    const found = this.persons().find(p => {
+      const pIdStr = String(p.personId);
+      const pIdRaw = pIdStr.replace(/^ENC:/i, '').toLowerCase().trim();
+      return pIdStr === targetId || pIdRaw === targetIdRaw;
+    });
+
+    if (found && this.selectedPerson()?.personId !== found.personId) {
+      this.selectedClassroomId.set('');
+      this.selectPerson(found);
+    }
   }
 
   loadPersons(): void {
@@ -172,6 +239,7 @@ export class EvaluationsComponent implements OnInit {
         this.persons.set(persons.filter(p => p.isActive));
         this.classrooms.set(classrooms);
         this.isLoadingPersons.set(false);
+        this.tryAutoSelectPerson();
       },
       error: () => {
         this.isLoadingPersons.set(false);
@@ -193,12 +261,54 @@ export class EvaluationsComponent implements OnInit {
         this.assignments.set(data);
         this.calculateMetrics(data);
         this.isLoadingAssignments.set(false);
+
+        const targetActId = this.targetActivityId();
+        if (targetActId) {
+          const match = data.find(a => a.activityId === targetActId || a.id === targetActId);
+          if (match) {
+            this.expandedAssignments.update(s => new Set(s).add(match.id));
+          }
+        }
       },
       error: () => {
         this.isLoadingAssignments.set(false);
         this.toastService.error('Error al cargar las evaluaciones del alumno');
       }
     });
+  }
+
+  isActivityStruggling(a: ActivityAssignmentResponse): boolean {
+    if (a.status === 'Completada' || a.status === 'Cancelada') return false;
+    if (this.dismissedAlertAssignmentIds().has(a.id)) return false;
+
+    if (!a.responses || a.responses.length === 0) return false;
+
+    let relevantResponses = a.responses;
+    if (a.alertAcknowledgedAt) {
+      const ackDate = new Date(a.alertAcknowledgedAt).getTime();
+      relevantResponses = a.responses.filter(r => {
+        if (!r.startedAt) return false;
+        return new Date(r.startedAt).getTime() > ackDate;
+      });
+    }
+
+    if (relevantResponses.length === 0) return false;
+
+    const failedAttempts = relevantResponses.filter(r => 
+      r.result === 'Fallido' || 
+      (r.successPercentage !== null && r.successPercentage !== undefined && Number(r.successPercentage) < 50)
+    );
+    const hasFrustrationAttempt = relevantResponses.some(r => 
+      (r.frustrationLevel !== undefined && r.frustrationLevel > 0) || 
+      (r.successPercentage !== null && r.successPercentage !== undefined && Number(r.successPercentage) <= 40)
+    );
+
+    return failedAttempts.length >= 2 || relevantResponses.length >= 4 || hasFrustrationAttempt;
+  }
+
+  isTargetActivity(a: ActivityAssignmentResponse): boolean {
+    const targetActId = this.targetActivityId();
+    return targetActId !== null && (a.activityId === targetActId || a.id === targetActId);
   }
 
   calculateMetrics(data: ActivityAssignmentResponse[]): void {
@@ -214,18 +324,9 @@ export class EvaluationsComponent implements OnInit {
     data.forEach(a => {
       if (a.status === 'Completada') completed++;
       else if (a.status === 'EnProgreso') inProgress++;
-      else pending++;
-
-      let hasActivityFrustration = false;
+      else if (a.status === 'Pendiente') pending++;
 
       if (a.responses && a.responses.length > 0) {
-        const failedAttempts = a.responses.filter(r => r.result === 'Fallido' || (r.successPercentage !== null && r.successPercentage !== undefined && Number(r.successPercentage) < 50));
-        const hasFrustrationAttempt = a.responses.some(r => (r.frustrationLevel !== undefined && r.frustrationLevel > 0) || (r.successPercentage !== null && r.successPercentage !== undefined && Number(r.successPercentage) <= 40));
-
-        if ((failedAttempts.length >= 2 && a.status !== 'Completada') || hasFrustrationAttempt) {
-          hasActivityFrustration = true;
-        }
-
         a.responses.forEach(r => {
           responseCount++;
           if (r.successPercentage !== undefined && r.successPercentage !== null) {
@@ -237,7 +338,7 @@ export class EvaluationsComponent implements OnInit {
         });
       }
 
-      if (hasActivityFrustration) {
+      if (this.isActivityStruggling(a)) {
         frustrationCount++;
         frustratedActivityNames.push(a.activityTitle);
       }
@@ -253,6 +354,140 @@ export class EvaluationsComponent implements OnInit {
     this.frustrationAlertCount.set(frustrationCount);
     this.hasFrustrationAlerts.set(frustrationCount > 0);
     this.frustratedActivities.set(frustratedActivityNames);
+  }
+
+  dismissAlertBanner(): void {
+    this.showAlertFromNotification.set(false);
+    const struggling = this.assignments().filter(a => this.isActivityStruggling(a));
+    struggling.forEach(a => {
+      this.dismissedAlertAssignmentIds.update(set => new Set(set).add(a.id));
+      this.activitiesService.updateAssignmentAdaptation(a.id, {
+        acknowledgeAlert: true
+      }).subscribe();
+    });
+
+    const targetActId = this.targetActivityId();
+    if (targetActId) {
+      const match = this.assignments().find(a => a.activityId === targetActId || a.id === targetActId);
+      if (match && !this.dismissedAlertAssignmentIds().has(match.id)) {
+        this.dismissedAlertAssignmentIds.update(set => new Set(set).add(match.id));
+        this.activitiesService.updateAssignmentAdaptation(match.id, {
+          acknowledgeAlert: true
+        }).subscribe();
+      }
+    }
+
+    this.calculateMetrics(this.assignments());
+    this.toastService.success('Alerta marcada como atendida hasta nuevo aviso.');
+  }
+
+  // ── Modal Modificar / Adaptación Pedagógica ────────────────────────────
+  openAdaptationModal(assignment: ActivityAssignmentResponse, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedAssignmentForAdaptation.set(assignment);
+    this.adaptationDueDate.set(assignment.dueDate ? assignment.dueDate.split('T')[0] : '');
+    this.adaptationEstimatedDuration.set(assignment.estimatedDurationMinutes ?? null);
+    this.adaptationHasVisualSupport.set(assignment.hasVisualSupport ?? false);
+    this.adaptationHasAudioSupport.set(assignment.hasAudioSupport ?? false);
+    this.adaptationUsesEasyReading.set(assignment.usesEasyReading ?? false);
+    this.adaptationUsesPictograms.set(assignment.usesPictograms ?? false);
+    this.adaptationRequiresSupervision.set(assignment.requiresSupervision ?? false);
+    this.adaptationNotes.set(assignment.customAdaptationNotes || '');
+    this.adaptationAcknowledgeAlert.set(true);
+    this.showAdaptationModal.set(true);
+  }
+
+  closeAdaptationModal(): void {
+    this.showAdaptationModal.set(false);
+    this.selectedAssignmentForAdaptation.set(null);
+  }
+
+  saveAdaptation(): void {
+    const assignment = this.selectedAssignmentForAdaptation();
+    if (!assignment) return;
+
+    this.isSavingAdaptation.set(true);
+    const dueDateVal = this.adaptationDueDate() ? new Date(this.adaptationDueDate() + 'T23:59:59').toISOString() : null;
+
+    this.activitiesService.updateAssignmentAdaptation(assignment.id, {
+      dueDate: dueDateVal,
+      estimatedDurationMinutes: this.adaptationEstimatedDuration(),
+      hasVisualSupport: this.adaptationHasVisualSupport(),
+      hasAudioSupport: this.adaptationHasAudioSupport(),
+      usesEasyReading: this.adaptationUsesEasyReading(),
+      usesPictograms: this.adaptationUsesPictograms(),
+      requiresSupervision: this.adaptationRequiresSupervision(),
+      customAdaptationNotes: this.adaptationNotes().trim() || null,
+      acknowledgeAlert: this.adaptationAcknowledgeAlert()
+    }).subscribe({
+      next: (updated) => {
+        this.isSavingAdaptation.set(false);
+        this.toastService.success('Actividad modificada y adaptada exitosamente.');
+        this.closeAdaptationModal();
+
+        this.assignments.update(list => list.map(a => a.id === assignment.id ? {
+          ...a,
+          dueDate: updated.dueDate !== undefined ? updated.dueDate : a.dueDate,
+          estimatedDurationMinutes: updated.estimatedDurationMinutes !== undefined ? updated.estimatedDurationMinutes : this.adaptationEstimatedDuration() ?? a.estimatedDurationMinutes,
+          hasVisualSupport: updated.hasVisualSupport !== undefined ? updated.hasVisualSupport : this.adaptationHasVisualSupport(),
+          hasAudioSupport: updated.hasAudioSupport !== undefined ? updated.hasAudioSupport : this.adaptationHasAudioSupport(),
+          usesEasyReading: updated.usesEasyReading !== undefined ? updated.usesEasyReading : this.adaptationUsesEasyReading(),
+          usesPictograms: updated.usesPictograms !== undefined ? updated.usesPictograms : this.adaptationUsesPictograms(),
+          requiresSupervision: updated.requiresSupervision !== undefined ? updated.requiresSupervision : this.adaptationRequiresSupervision(),
+          customAdaptationNotes: updated.customAdaptationNotes !== undefined ? updated.customAdaptationNotes : this.adaptationNotes().trim(),
+          alertAcknowledgedAt: updated.alertAcknowledgedAt !== undefined ? updated.alertAcknowledgedAt : new Date().toISOString()
+        } : a));
+
+        if (this.adaptationAcknowledgeAlert()) {
+          this.dismissedAlertAssignmentIds.update(s => new Set(s).add(assignment.id));
+          if (assignment.activityId === this.targetActivityId() || assignment.id === this.targetActivityId()) {
+            this.showAlertFromNotification.set(false);
+          }
+        }
+        this.calculateMetrics(this.assignments());
+      },
+      error: () => {
+        this.isSavingAdaptation.set(false);
+        this.toastService.error('Error al guardar las modificaciones de la actividad.');
+      }
+    });
+  }
+
+  // ── Modal Dar de baja actividad (Opción A) ─────────────────────────────
+  openDeactivateModal(assignment: ActivityAssignmentResponse, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.assignmentToDeactivate.set(assignment);
+    this.showDeactivateModal.set(true);
+  }
+
+  closeDeactivateModal(): void {
+    this.showDeactivateModal.set(false);
+    this.assignmentToDeactivate.set(null);
+  }
+
+  confirmDeactivate(): void {
+    const assignment = this.assignmentToDeactivate();
+    if (!assignment) return;
+
+    this.isDeactivating.set(true);
+    this.activitiesService.cancelAssignment(assignment.id).subscribe({
+      next: () => {
+        this.isDeactivating.set(false);
+        this.toastService.success(`La actividad "${assignment.activityTitle}" fue dada de baja.`);
+        this.dismissedAlertAssignmentIds.update(s => new Set(s).add(assignment.id));
+        if (assignment.activityId === this.targetActivityId() || assignment.id === this.targetActivityId()) {
+          this.showAlertFromNotification.set(false);
+        }
+        this.closeDeactivateModal();
+
+        this.assignments.update(list => list.map(a => a.id === assignment.id ? { ...a, status: ActivityAssignmentStatus.Cancelada } : a));
+        this.calculateMetrics(this.assignments());
+      },
+      error: () => {
+        this.isDeactivating.set(false);
+        this.toastService.error('Error al dar de baja la actividad.');
+      }
+    });
   }
 
   formatTime(seconds: number | undefined): string {
@@ -321,6 +556,7 @@ export class EvaluationsComponent implements OnInit {
       case 'Completada': return 'success';
       case 'EnProgreso': return 'warning';
       case 'Pendiente': return 'secondary';
+      case 'Cancelada': return 'danger';
       default: return 'info';
     }
   }
@@ -330,6 +566,7 @@ export class EvaluationsComponent implements OnInit {
       case 'Completada': return 'Completada';
       case 'EnProgreso': return 'En progreso';
       case 'Pendiente': return 'Pendiente';
+      case 'Cancelada': return 'Cancelada';
       default: return status.toString();
     }
   }
