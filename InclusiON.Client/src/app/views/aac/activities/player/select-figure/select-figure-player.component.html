@@ -35,10 +35,11 @@
 
 @if (phase() === 'result') {
   <app-player-result
-    [success]="!!isCorrect()"
+    [success]="(isCorrect() ? 100 : 0) >= 60"
+    [score]="isCorrect() ? 100 : 0"
     [message]="resultMessage"
     [loading]="isLoading()"
-    [canRetry]="!isCorrect()"
+    [canRetry]="canRetry"
     (finish)="onFinish()"
     (retry)="retry()"
   />

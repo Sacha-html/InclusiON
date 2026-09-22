@@ -124,7 +124,7 @@ export class CompleteLetterPlayerComponent extends PlayerBaseComponent {
   // ── Resultado ────────────────────────────────────────────────────────────
 
   confirmAnswer(): void {
-    this.isCorrect.set(this.score() === 100);
+    this.isCorrect.set(this.score() >= 60);
     this.phase.set('result');
   }
 

@@ -93,7 +93,7 @@ export class OrderSequencePlayerComponent extends PlayerBaseComponent {
   // ── Confirmar orden ──────────────────────────────────────────────────────
   confirmOrder(): void {
     const s = this.score();
-    this.isCorrect.set(s === 100);
+    this.isCorrect.set(s >= 60);
     this.phase.set('result');
   }
 

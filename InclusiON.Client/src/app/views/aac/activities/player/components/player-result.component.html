@@ -16,9 +16,11 @@
   </div>
 
   <h2 class="result-title result-title--success">¡Muy bien!</h2>
+  <span class="result-badge result-badge--success">Nivel Aprobado (≥ 60%)</span>
   } @else {
   <div class="result-icon result-icon--fail" aria-hidden="true">💪</div>
   <h2 class="result-title result-title--fail">¡Casi!</h2>
+  <span class="result-badge result-badge--fail">Nivel en Proceso (&lt; 60%)</span>
   }
 
   @if (score !== null) {
@@ -29,6 +31,12 @@
 
   @if (message) {
   <p class="result-msg">{{ message }}</p>
+  }
+
+  @if (!canRetry && !success) {
+  <p class="result-limit-notice">
+    Has alcanzado el límite de 4 intentos permitidos. Tu profesional ha sido notificado para ayudarte.
+  </p>
   }
 
   <div class="result-actions">

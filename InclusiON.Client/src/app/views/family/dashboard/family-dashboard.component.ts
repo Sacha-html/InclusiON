@@ -38,6 +38,8 @@ export class FamilyDashboardComponent implements OnInit {
   private readonly familyService = inject(FamilyService);
   readonly #el = inject(ElementRef<HTMLElement>);
 
+  readonly roadmapLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
   dashboard: FamilyDashboardResponse | null = null;
   loading = true;
   error = false;
@@ -64,4 +66,14 @@ export class FamilyDashboardComponent implements OnInit {
     if (pct >= 50) return 'warning';
     return 'danger';
   }
+
+  getGasBadgeColor(label?: string): string {
+    if (!label) return 'info';
+    const lower = label.toLowerCase();
+    if (lower.includes('superando')) return 'success';
+    if (lower.includes('ritmo')) return 'info';
+    if (lower.includes('desarrollo')) return 'warning';
+    return 'secondary';
+  }
 }
+

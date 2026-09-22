@@ -46,17 +46,30 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             var reportSummaryByPerson = await _reports
                 .GetApprovedReportsSummaryByPersonIdsAsync(personIds, cancellationToken);
 
+            var roadmapProgressByPerson = await _assignments
+                .GetRoadmapProgressByPersonIdsAsync(personIds, cancellationToken);
+
+            var responsesMap = recentResponsesByPerson ?? new();
+            var reportsMap = reportSummaryByPerson ?? new();
+            var progressMap = roadmapProgressByPerson ?? new();
+
             var summaries = persons.Select(person =>
             {
-                recentResponsesByPerson.TryGetValue(person.Id, out var responses);
-                reportSummaryByPerson.TryGetValue(person.Id, out var reportSummary);
+                responsesMap.TryGetValue(person.Id, out var responses);
+                reportsMap.TryGetValue(person.Id, out var reportSummary);
+                progressMap.TryGetValue(person.Id, out var roadmapProgress);
 
                 return FamilyMapper.ToPersonSummary(
                     person,
                     recentActivities:     (responses ?? []).Select(FamilyMapper.ToRecentActivityResult).ToList(),
                     approvedReportsCount: reportSummary.Count,
                     latestReportTitle:    reportSummary.Latest?.Title,
-                    latestReportDate:     reportSummary.Latest?.ReportDate);
+                    latestReportDate:     reportSummary.Latest?.ReportDate,
+                    currentRoadmapLevel:  roadmapProgress?.CurrentLevel ?? 1,
+                    roadmapLevelName:     roadmapProgress?.LevelName ?? "Nivel 1",
+                    gasStatusLabel:       roadmapProgress?.GasStatusLabel ?? "Iniciando camino",
+                    averageSuccessRate:   roadmapProgress?.AverageSuccessRate ?? 0m,
+                    hasFrustrationAlert:  roadmapProgress?.HasFrustrationAlert ?? false);
             }).ToList();
 
             return ApiResponse<FamilyDashboardResponse>.SuccessResult(new FamilyDashboardResponse

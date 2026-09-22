@@ -279,7 +279,10 @@ namespace InclusiON.Api.Controllers
             if (from.HasValue)
                 reportsQuery = reportsQuery.Where(r => r.ReportDate >= from.Value);
             if (to.HasValue)
-                reportsQuery = reportsQuery.Where(r => r.ReportDate <= to.Value);
+            {
+                var endOfDay = DateTime.SpecifyKind(to.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
+                reportsQuery = reportsQuery.Where(r => r.ReportDate <= endOfDay);
+            }
 
             var reports = await reportsQuery.ToListAsync(cancellationToken);
 
@@ -455,12 +458,28 @@ namespace InclusiON.Api.Controllers
                 return response;
             }
 
-            // 1. KPIs Globales
+            // 1. KPIs Globales y Segregación de Actividades
             response.TotalActividadesCompletadas = sessions.Count;
             response.Promedio_GAS = Math.Round((decimal)sessions.Average(s => (decimal)s.GasScore), 2);
             response.Tiempo_Promedio_Nivel = Math.Round(sessions.Average(s => s.TimeSpentSeconds), 1);
             response.PromedioExito = Math.Round(sessions.Average(s => s.SuccessRate), 1);
-            response.AlertasFrustracion = sessions.Count(s => s.SuccessRate < 40 || s.GasScore <= -1);
+
+            // Segregación: Roadmap ("Mi Camino", niveles 1-10) vs Actividades Personalizadas del Terapeuta
+            var roadmapSessions = sessions.Where(s => s.Activity?.RoadmapOrder != null).ToList();
+            var personalizedSessions = sessions.Where(s => s.Activity?.RoadmapOrder == null).ToList();
+
+            response.Promedio_GAS_Roadmap = roadmapSessions.Count > 0
+                ? Math.Round((decimal)roadmapSessions.Average(s => (decimal)s.GasScore), 2)
+                : 0m;
+
+            response.Promedio_GAS_Personalizadas = personalizedSessions.Count > 0
+                ? Math.Round((decimal)personalizedSessions.Average(s => (decimal)s.GasScore), 2)
+                : 0m;
+
+            response.TotalActividadesPersonalizadas = personalizedSessions.Count;
+
+            // Alertas de Frustración (HU-21): sesiones con fallas acumuladas o errorCount >= 4
+            response.AlertasFrustracion = sessions.Count(s => s.ErrorCount >= 4 || (s.GasScore <= -1 && s.SuccessRate <= 30));
 
             // 2. Distribución actual por nivel
             // Para cada alumno, encontrar cuál es el nivel más alto alcanzado y su estado
@@ -561,6 +580,9 @@ namespace InclusiON.Api.Controllers
             return new AnalyticsDashboardResponse
             {
                 Promedio_GAS = 0,
+                Promedio_GAS_Roadmap = 0,
+                Promedio_GAS_Personalizadas = 0,
+                TotalActividadesPersonalizadas = 0,
                 Tiempo_Promedio_Nivel = 0,
                 PersonasActivas = 0,
                 TotalActividadesCompletadas = 0,

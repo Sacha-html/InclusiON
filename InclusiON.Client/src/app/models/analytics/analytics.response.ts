@@ -51,6 +51,9 @@ export interface FrustrationDetailResponse {
 
 export interface AnalyticsDashboardResponse {
   promedio_GAS: number;
+  promedio_GAS_Roadmap: number;
+  promedio_GAS_Personalizadas: number;
+  totalActividadesPersonalizadas: number;
   tiempo_Promedio_Nivel: number;
   personasActivas: number;
   totalActividadesCompletadas: number;
