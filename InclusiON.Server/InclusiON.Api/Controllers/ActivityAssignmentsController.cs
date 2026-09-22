@@ -246,5 +246,42 @@ namespace InclusiON.Api.Controllers
 
             return Ok(result);
         }
+
+        /// <summary>Actualiza las adaptaciones personalizadas de una asignación (plazo, notas, apoyos) y reconoce la alerta.</summary>
+        [HttpPut("activity-assignments/{assignmentId}/adaptation")]
+        [Authorize(Policy = Permissions.Activities.Update)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<ActivityAssignmentResponse>), StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<ApiResponse<ActivityAssignmentResponse>>> UpdateAssignmentAdaptation(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int assignmentId,
+            [FromBody] UpdateAssignmentAdaptationRequest request,
+            [FromServices] ICommandHandler<UpdateAssignmentAdaptationCommand, ApiResponse<ActivityAssignmentResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var professionalId = _httpContextService.GetCurrentEntityId();
+            if (professionalId is null)
+                return NotFound(ApiResponse<ActivityAssignmentResponse>.NotFound("Profesional"));
+
+            var command = new UpdateAssignmentAdaptationCommand(
+                assignmentId,
+                professionalId.Value,
+                request.DueDate,
+                request.EstimatedDurationMinutes,
+                request.HasVisualSupport,
+                request.HasAudioSupport,
+                request.UsesEasyReading,
+                request.UsesPictograms,
+                request.RequiresSupervision,
+                request.CustomAdaptationNotes,
+                request.AcknowledgeAlert);
+
+            var result = await handler.HandleAsync(command, cancellationToken);
+
+            if (!result.Success)
+                return result.ToActionResult();
+
+            return Ok(result);
+        }
     }
 }

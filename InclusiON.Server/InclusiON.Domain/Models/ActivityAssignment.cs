@@ -59,6 +59,46 @@ namespace InclusiON.Domain.Models
         public bool IsEvaluationActivity { get; set; } = false;
 
         /// <summary>
+        /// Fecha y hora en la que el profesional reconoció/atendió la alerta de frustración/4 intentos.
+        /// </summary>
+        public DateTime? AlertAcknowledgedAt { get; set; }
+
+        /// <summary>
+        /// Duración estimada adaptada para el alumno en minutos (sobrescribe la de la plantilla si está definida).
+        /// </summary>
+        public int? EstimatedDurationMinutes { get; set; }
+
+        /// <summary>
+        /// Adaptación de soporte visual para este alumno (sobrescribe la de la plantilla si está definida).
+        /// </summary>
+        public bool? HasVisualSupport { get; set; }
+
+        /// <summary>
+        /// Adaptación de soporte auditivo para este alumno (sobrescribe la de la plantilla si está definida).
+        /// </summary>
+        public bool? HasAudioSupport { get; set; }
+
+        /// <summary>
+        /// Adaptación de lectura fácil para este alumno (sobrescribe la de la plantilla si está definida).
+        /// </summary>
+        public bool? UsesEasyReading { get; set; }
+
+        /// <summary>
+        /// Adaptación de pictogramas para este alumno (sobrescribe la de la plantilla si está definida).
+        /// </summary>
+        public bool? UsesPictograms { get; set; }
+
+        /// <summary>
+        /// Adaptación de requerimiento de supervisión para este alumno (sobrescribe la de la plantilla si está definida).
+        /// </summary>
+        public bool? RequiresSupervision { get; set; }
+
+        /// <summary>
+        /// Notas de adaptación personalizada o ajustes realizados por el profesional para este alumno.
+        /// </summary>
+        public string? CustomAdaptationNotes { get; set; }
+
+        /// <summary>
         /// Actividad asignada.
         /// </summary>
         public virtual Activity Activity { get; set; } = null!;
