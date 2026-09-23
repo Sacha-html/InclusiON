@@ -1,3 +1,5 @@
+@use '../_player-shared' as *;
+
 :host {
   display: block;
   padding: 1.5rem 1rem;
@@ -109,37 +111,6 @@
   }
 
   &:disabled { opacity: .35; cursor: default; }
-}
-
-// ── Confirmar ─────────────────────────────────────────────────────────────────
-.confirm-row {
-  display: flex;
-  justify-content: center;
-  margin-top: .5rem;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  padding: 1rem 2.5rem;
-  border-radius: 16px;
-  border: none;
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform .1s, box-shadow .1s;
-
-  &:focus-visible { outline: 4px solid var(--a11y-primary, #2196F3); outline-offset: 3px; }
-  &:disabled      { opacity: .6; cursor: not-allowed; }
-
-  &--primary {
-    background: var(--a11y-primary, #2196F3);
-    color: var(--a11y-primary-text, #fff);
-    box-shadow: 0 4px 12px rgba(33,150,243,.35);
-    &:not(:disabled):hover  { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(33,150,243,.4); }
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

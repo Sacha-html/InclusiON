@@ -1,3 +1,5 @@
+@use '../_player-shared' as *;
+
 :host {
   display: block;
   padding: 1.5rem 1rem;
@@ -83,6 +85,11 @@
     box-shadow: 0 0 0 3px rgba(33,150,243,.3);
     background: rgba(33,150,243,.06);
   }
+  &--matched {
+    border-color: var(--a11y-primary, #2196F3);
+    background: rgba(33,150,243,.08);
+    opacity: .85;
+  }
   &--matched-correct {
     border-color: var(--a11y-success, #4CAF50);
     background: rgba(76,175,80,.07);
@@ -113,43 +120,6 @@
   top: -.4rem;
   right: -.4rem;
   font-size: 1.3rem;
-}
-
-// ── Acciones ──────────────────────────────────────────────────────────────────
-.board-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .875rem 2rem;
-  border-radius: 14px;
-  border: none;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform .1s, box-shadow .1s;
-
-  &:focus-visible { outline: 4px solid var(--a11y-primary, #2196F3); outline-offset: 3px; }
-  &:disabled { opacity: .6; cursor: not-allowed; }
-
-  &--primary {
-    background: var(--a11y-primary, #2196F3);
-    color: var(--a11y-primary-text, #fff);
-    box-shadow: 0 4px 12px rgba(33,150,243,.35);
-    &:not(:disabled):hover { transform: translateY(-2px); }
-  }
-  &--secondary {
-    background: var(--a11y-surface, #fff);
-    color: var(--a11y-primary, #2196F3);
-    border: 2px solid var(--a11y-primary, #2196F3);
-    &:not(:disabled):hover { background: rgba(33,150,243,.06); }
-  }
 }
 
 @media (max-width: 480px) {

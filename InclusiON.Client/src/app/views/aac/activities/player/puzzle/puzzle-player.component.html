@@ -1,0 +1,160 @@
+@if (phase() === 'intro') {
+  <app-player-intro
+    [title]="assignment.activityTitle"
+    [instruction]="content.instruction || 'Arma el rompecabezas.'"
+    [hint]="hint"
+    [loading]="isLoading()"
+    [error]="errorMsg()"
+    (start)="startActivity()"
+  />
+}
+
+@if (phase() === 'playing') {
+  <div class="player-game" role="region" aria-labelledby="game-instruction">
+    <div class="instruction-header">
+      <h2 class="game-instruction" id="game-instruction" tabindex="-1">
+        {{ content.instruction }}
+      </h2>
+      <button
+        type="button"
+        class="audio-btn"
+        (click)="speakInstruction()"
+        aria-label="Escuchar consigna"
+        title="Escuchar consigna"
+      >
+        🔊
+      </button>
+    </div>
+
+    <!-- Área de Juego (Tablero + Banco) -->
+    <div class="puzzle-workspace">
+      <!-- Tablero del Rompecabezas -->
+      <div class="board-container">
+        <div
+          class="puzzle-board"
+          [class.puzzle-board--complete]="isBoardComplete()"
+          [style.--rows]="content.rows"
+          [style.--cols]="content.cols"
+          role="grid"
+          aria-label="Tablero del rompecabezas"
+        >
+          <!-- Imagen Guía / Silueta de fondo -->
+          @if (content.showGhostGuide && imageUrl) {
+            <img
+              [src]="imageUrl"
+              [alt]="content.label || 'Guía del rompecabezas'"
+              class="ghost-guide-img"
+              aria-hidden="true"
+            />
+          }
+
+          <!-- Casilleros del Tablero -->
+          @for (piece of boardSlots(); track $index) {
+            <div
+              class="puzzle-slot"
+              [class.puzzle-slot--empty]="!piece"
+              [class.puzzle-slot--filled]="!!piece"
+              [class.puzzle-slot--target]="selectedPieceId() !== null && !piece"
+              (click)="onSlotClick($index)"
+              (dragover)="onDragOver($event)"
+              (drop)="onDropSlot($event, $index)"
+              role="gridcell"
+              [attr.aria-label]="'Casillero ' + ($index + 1) + (piece ? ' (ocupado)' : ' (vacío)')"
+              tabindex="0"
+              (keydown.enter)="onSlotClick($index)"
+              (keydown.space)="onSlotClick($index)"
+            >
+              @if (piece) {
+                <div
+                  class="puzzle-piece placed-piece"
+                  [ngStyle]="getPieceBackgroundStyles(piece)"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, piece)"
+                  (dragend)="onDragEnd()"
+                >
+                </div>
+              } @else {
+                <div class="slot-placeholder">
+                  <span class="slot-number">{{ $index + 1 }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Banco de Piezas Disponibles -->
+      <div class="bank-container" (dragover)="onDragOver($event)" (drop)="onDropBank($event)">
+        <div class="bank-header">
+          <span class="bank-title">Piezas disponibles</span>
+          @if (bankPieces().length > 0) {
+            <span class="bank-badge">{{ bankPieces().length }}</span>
+          }
+        </div>
+
+        @if (bankPieces().length === 0) {
+          <div class="bank-empty-state">
+            <span class="empty-state-icon" aria-hidden="true">🧩</span>
+            <span class="empty-state-text">¡Todas las piezas están en el tablero!</span>
+          </div>
+        } @else {
+          <div
+            class="bank-pieces-grid"
+            role="list"
+            aria-label="Banco de piezas para colocar"
+          >
+            @for (piece of bankPieces(); track piece.id) {
+              <button
+                type="button"
+                class="puzzle-piece bank-piece"
+                [class.bank-piece--selected]="selectedPieceId() === piece.id"
+                [ngStyle]="getPieceBackgroundStyles(piece)"
+                draggable="true"
+                (dragstart)="onDragStart($event, piece)"
+                (dragend)="onDragEnd()"
+                (click)="onPieceBankClick(piece)"
+                [attr.aria-pressed]="selectedPieceId() === piece.id"
+                [attr.aria-label]="'Pieza del rompecabezas. ' + (selectedPieceId() === piece.id ? 'Seleccionada. Toca un casillero para colocarla.' : 'Toca para seleccionar.')"
+              >
+                @if (selectedPieceId() === piece.id) {
+                  <span class="piece-selected-ring" aria-hidden="true"></span>
+                }
+              </button>
+            }
+          </div>
+        }
+
+        <p class="a11y-hint">
+          💡 <strong>Tip:</strong> Puedes <em>arrastrar</em> las piezas o <em>tocarlas</em> para seleccionarlas y luego tocar el casillero.
+        </p>
+      </div>
+    </div>
+
+    <!-- Botón Principal de Confirmación al terminar de acomodar -->
+    <div class="confirm-row">
+      <button
+        type="button"
+        class="action-btn action-btn--primary"
+        [disabled]="!allPlaced()"
+        (click)="confirmPuzzle()"
+        aria-label="Finalizar"
+      >
+        ✓ Finalizar
+      </button>
+    </div>
+  </div>
+}
+
+
+@if (phase() === 'result') {
+  <app-player-result
+    [success]="score() >= 60"
+    [score]="score()"
+    [message]="resultMessage()"
+    [loading]="isLoading()"
+    [canRetry]="canRetry"
+    [attemptCount]="consecutiveFailures()"
+    (finish)="onFinish()"
+    (retry)="retry()"
+  />
+}

@@ -206,6 +206,8 @@ Los colores RGB corresponden respectivamente a:
 | Lógico-matemático | Clasificación | `CLASSIFY` | No | No |
 | Lógico-matemático | Ordenamiento | `ORDER_SEQUENCE` | No | No |
 | Lógico-matemático | Numeración | `NUMERATION` | No | No |
+| Lógico-matemático | Rompecabezas | `PUZZLE` | Sí | Sí |
+
 
 En el formulario actual deben completarse:
 

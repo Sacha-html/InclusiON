@@ -65,19 +65,20 @@
       </div>
     } @else if (allAnswered()) {
       <p class="options-label all-done" aria-live="polite">
-        ✅ Todos los huecos completados
+        Todos los huecos completados
       </p>
     }
 
     <!-- Confirmar -->
     <div class="confirm-row">
       <button
+        type="button"
         class="action-btn action-btn--primary"
         [disabled]="!allAnswered()"
         (click)="confirmAnswer()"
-        aria-label="Confirmar respuesta"
+        aria-label="Finalizar"
       >
-        ✓ Confirmar
+        ✓ Finalizar
       </button>
     </div>
   </div>

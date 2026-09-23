@@ -113,34 +113,27 @@ export class OptionSelectPlayerComponent extends PlayerBaseComponent {
   }
 
   selectOption(option: OptionSelectOption): void {
-    if (this.selectedOptionId() !== null) return;
-    const correct = option.id === this.content.correctOptionId;
     this.selectedOptionId.set(option.id);
+  }
+
+  confirmSelection(): void {
+    const sel = this.selectedOptionId();
+    if (!sel) return;
+    const correct = sel === this.content.correctOptionId;
     this.isCorrect.set(correct);
-    
     if (correct) {
       this.playSound('success');
-      this.dockedOptionId.set(option.id);
-      this.a11y.speak('¡Excelente!');
-      setTimeout(() => this.phase.set('result'), 1800);
+      this.dockedOptionId.set(sel);
     } else {
       this.playSound('wrong');
-      this.wrongOptionId.set(option.id);
-      setTimeout(() => {
-        this.wrongOptionId.set(null);
-        this.selectedOptionId.set(null);
-        this.isCorrect.set(null);
-      }, 700);
     }
+    this.phase.set('result');
   }
 
   optionState(option: OptionSelectOption): OptionState {
-    const sel = this.selectedOptionId();
-    if (!sel) return 'none';
-    if (option.id === sel) return this.isCorrect() ? 'correct' : 'wrong';
-    if (option.id === this.content.correctOptionId && !this.isCorrect()) return 'reveal';
-    return 'dimmed';
+    return 'none';
   }
+
 
   pictogramUrl(id: number): string { return this.arasaacService.getPictogramUrl(id); }
 

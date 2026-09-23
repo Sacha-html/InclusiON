@@ -1,3 +1,5 @@
+@use '../_player-shared' as *;
+
 :host {
   display: block;
   padding: 1.5rem 1rem;
@@ -60,7 +62,15 @@
 
   &--none { /* default */ }
 
+  &--selected {
+    border-color: var(--a11y-primary, #2196F3);
+    background: rgba(33, 150, 243, 0.08);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.35);
+    transform: translateY(-2px);
+  }
+
   &--correct {
+
     border-color: var(--a11y-success, #4CAF50);
     background: rgba(76,175,80,.1);
   }

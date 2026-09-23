@@ -63,7 +63,12 @@
   min-width: 180px;
 
   &:focus-visible { outline: 4px solid var(--a11y-primary, #2196F3); outline-offset: 3px; }
-  &:disabled      { opacity: .6; cursor: not-allowed; }
+  &:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+  }
 
   &--primary {
     background: var(--a11y-primary, #2196F3);
@@ -149,6 +154,23 @@
   justify-content: center;
   margin-top: .5rem;
 }
+
+.confirm-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding-bottom: 1rem;
+
+  .action-btn {
+    min-width: 260px;
+    font-size: 1.15rem;
+    padding: 0.9rem 2.2rem;
+  }
+}
+
 
 // ── Animations ───────────────────────────────────────────────────────────────
 @keyframes fade-in {
