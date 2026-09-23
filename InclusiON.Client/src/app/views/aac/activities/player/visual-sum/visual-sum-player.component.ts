@@ -49,20 +49,22 @@ export class VisualSumPlayerComponent extends PlayerBaseComponent {
 
   // ── Selección ────────────────────────────────────────────────────────────
   selectOption(option: VisualSumOption): void {
-    if (this.selectedOptionId() !== null) return;
-    const correct = option.value === this.correctValue;
     this.selectedOptionId.set(option.id);
+  }
+
+  confirmSelection(): void {
+    const sel = this.selectedOptionId();
+    if (!sel) return;
+    const opt = this.content.options.find(o => o.id === sel);
+    const correct = opt ? opt.value === this.correctValue : false;
     this.isCorrect.set(correct);
-    setTimeout(() => this.phase.set('result'), 800);
+    this.phase.set('result');
   }
 
   optionState(option: VisualSumOption): 'correct' | 'wrong' | 'reveal' | 'dimmed' | 'none' {
-    const sel = this.selectedOptionId();
-    if (!sel) return 'none';
-    if (option.id === sel)                                       return this.isCorrect() ? 'correct' : 'wrong';
-    if (option.value === this.correctValue && !this.isCorrect()) return 'reveal';
-    return 'dimmed';
+    return 'none';
   }
+
 
   get resultMessage(): string {
     return this.isCorrect()

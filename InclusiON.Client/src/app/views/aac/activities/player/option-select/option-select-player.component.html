@@ -54,14 +54,11 @@
     <!-- Opciones -->
     <div class="options-grid"
          role="group"
-         aria-label="Opciones de respuesta"
-         [attr.aria-disabled]="selectedOptionId() !== null">
+         aria-label="Opciones de respuesta">
       @for (option of options; track option.id) {
         <button
           class="option-btn"
-          [class]="'option-btn--' + optionState(option)"
-          [class.option-btn--wrong-shake]="wrongOptionId() === option.id"
-          [disabled]="selectedOptionId() !== null"
+          [class.option-btn--selected]="selectedOptionId() === option.id"
           (click)="selectOption(option)"
           [attr.aria-label]="option.text"
           [attr.aria-pressed]="selectedOptionId() === option.id"
@@ -75,18 +72,22 @@
             />
           }
           <span class="option-text">{{ option.text }}</span>
-          @if (optionState(option) === 'correct') {
-            <span class="option-badge" aria-hidden="true">✅</span>
-          }
-          @if (optionState(option) === 'wrong') {
-            <span class="option-badge" aria-hidden="true">❌</span>
-          }
-          @if (optionState(option) === 'reveal') {
-            <span class="option-badge" aria-hidden="true">⭐</span>
-          }
         </button>
       }
     </div>
+
+    <div class="confirm-row">
+      <button
+        type="button"
+        class="action-btn action-btn--primary"
+        [disabled]="selectedOptionId() === null"
+        (click)="confirmSelection()"
+        aria-label="Finalizar"
+      >
+        ✓ Finalizar
+      </button>
+    </div>
+
 
   </div>
 }

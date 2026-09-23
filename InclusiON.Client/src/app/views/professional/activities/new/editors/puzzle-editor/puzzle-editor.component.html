@@ -1,0 +1,120 @@
+<!-- Instrucción -->
+<div class="mb-3">
+  <label class="form-label" for="puzzle-instruction">Instrucción que verá el estudiante *</label>
+  <input
+    cFormControl
+    id="puzzle-instruction"
+    [(ngModel)]="content.instruction"
+    name="instruction"
+    placeholder="Ej: Arma el rompecabezas de la manzana"
+    (ngModelChange)="onInstructionChange()"
+    required
+  />
+</div>
+
+<!-- Pictograma Seleccionado -->
+<h6 class="mb-2">Pictograma de ARASAAC para el rompecabezas *</h6>
+
+@if (content.pictogramId > 0) {
+  <div class="selected-pic-banner mb-3 p-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="pic-preview-wrapper" [style.--p-rows]="content.rows" [style.--p-cols]="content.cols">
+        <img [src]="getPictogramUrl(content.pictogramId)" [alt]="content.label" class="pic-preview-img" />
+        <div class="grid-overlay">
+          @for (r of [].constructor(content.rows); track $index) {
+            <div class="grid-overlay-row">
+              @for (c of [].constructor(content.cols); track $index) {
+                <div class="grid-overlay-cell"></div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex-grow-1">
+        <div class="fw-bold fs-5 text-capitalize">{{ content.label }}</div>
+        <div class="text-body-secondary small mb-2">ID ARASAAC: #{{ content.pictogramId }}</div>
+        <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearPictogram()">
+          ✕ Cambiar pictograma
+        </button>
+      </div>
+    </div>
+  </div>
+} @else {
+  <p class="text-body-secondary small mb-2">Buscá y seleccioná un pictograma para generar el rompecabezas.</p>
+}
+
+<!-- Buscador ARASAAC (si no hay seleccionado o busca cambiar) -->
+@if (content.pictogramId === 0) {
+  <c-row class="mb-2">
+    <c-col xs="12" md="6">
+      <input
+        cFormControl
+        [(ngModel)]="arasaacSearch"
+        name="arasaacSearch"
+        placeholder="Buscar pictograma (ej: perro, casa, sol, manzana)..."
+        (ngModelChange)="onArasaacSearchChange($event)"
+      />
+    </c-col>
+    <c-col xs="auto" class="d-flex align-items-center">
+      @if (isSearching()) {
+        <c-spinner size="sm" />
+      }
+    </c-col>
+  </c-row>
+
+  @if (arasaacResults().length > 0) {
+    <div class="arasaac-grid mb-4">
+      @for (pic of arasaacResults(); track pic.id) {
+        <button type="button" class="arasaac-card" (click)="selectPictogram(pic)" [title]="pic.keyword">
+          <img [src]="pic.imageUrl" [alt]="pic.keyword" />
+          <span>{{ pic.keyword }}</span>
+        </button>
+      }
+    </div>
+  }
+}
+
+<!-- Configuración de Dificultad y Asistencia -->
+<h6 class="mt-4 mb-2">Configuración del Rompecabezas</h6>
+<c-row class="g-3 mb-3">
+  <c-col xs="12" md="6">
+    <label class="form-label" for="puzzle-difficulty">Cantidad de piezas / Dificultad</label>
+    <select
+      cSelect
+      id="puzzle-difficulty"
+      [(ngModel)]="selectedDifficultyKey"
+      name="puzzleDifficulty"
+      (ngModelChange)="onDifficultyChange($event)"
+    >
+      @for (opt of difficultyOptions; track opt.label) {
+        <option [value]="opt.rows + 'x' + opt.cols">
+          {{ opt.label }}
+        </option>
+      }
+    </select>
+    <div class="form-text">
+      Divide la imagen en {{ content.rows * content.cols }} piezas cuadradas o rectangulares.
+    </div>
+  </c-col>
+
+  <c-col xs="12" md="6" class="d-flex flex-column justify-content-center">
+    <c-form-check class="mt-md-3">
+      <input
+        cFormCheckInput
+        type="checkbox"
+        id="puzzle-ghost-guide"
+        [(ngModel)]="content.showGhostGuide"
+        name="showGhostGuide"
+        (ngModelChange)="onGuideChange()"
+      />
+      <label cFormCheckLabel for="puzzle-ghost-guide" class="fw-semibold">
+        Mostrar silueta guía de fondo
+      </label>
+    </c-form-check>
+
+    <div class="form-text ps-4">
+      Recomendado para estudiantes que requieren apoyo visual para reconocer dónde encaja cada pieza.
+    </div>
+  </c-col>
+</c-row>

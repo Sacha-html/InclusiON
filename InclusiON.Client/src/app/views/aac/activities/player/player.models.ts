@@ -86,7 +86,26 @@ export interface CompleteLetterContent {
   options: string[][];         // options[i] = [correcta, distractor1, distractor2, ...]
 }
 
+// PUZZLE: Rompecabezas con imagen ARASAAC dividida en piezas
+export interface PuzzleContent {
+  instruction: string;
+  pictogramId: number;
+  label?: string;
+  rows: number; // e.g., 2
+  cols: number; // e.g., 2
+  showGhostGuide?: boolean; // muestra imagen de fondo tenue como guía
+}
+
+export interface PuzzlePiece {
+  id: string;
+  originalIndex: number; // 0-based índice correcto de posición
+  row: number; // 0-based
+  col: number; // 0-based
+  currentSlotIndex: number | null; // null si está en el banco de piezas, o índice del casillero donde se colocó
+}
+
 // ── Registry: templateTypeCode → componente Angular ──────────────────────────
 // Importaciones lazy para evitar ciclos — se completan en player-registry.ts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PlayerRegistry = Record<string, Type<any>>;
+

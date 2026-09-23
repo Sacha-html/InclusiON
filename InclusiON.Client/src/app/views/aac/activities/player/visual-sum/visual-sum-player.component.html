@@ -79,17 +79,30 @@
       @for (opt of content.options; track opt.id) {
         <button
           class="option-btn"
-          [class]="'option-btn--' + optionState(opt)"
-          [disabled]="selectedOptionId() !== null"
+          [class.option-btn--selected]="selectedOptionId() === opt.id"
           (click)="selectOption(opt)"
           [attr.aria-label]="'Respuesta: ' + opt.value"
+          [attr.aria-pressed]="selectedOptionId() === opt.id"
         >
           {{ opt.value }}
         </button>
       }
     </div>
+
+    <div class="confirm-row">
+      <button
+        type="button"
+        class="action-btn action-btn--primary"
+        [disabled]="selectedOptionId() === null"
+        (click)="confirmSelection()"
+        aria-label="Finalizar"
+      >
+        ✓ Finalizar
+      </button>
+    </div>
   </div>
 }
+
 
 @if (phase() === 'result') {
   <app-player-result
