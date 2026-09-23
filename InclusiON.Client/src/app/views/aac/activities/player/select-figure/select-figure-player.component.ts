@@ -47,32 +47,28 @@ export class SelectFigurePlayerComponent extends PlayerBaseComponent {
 
   // ── Fase playing ─────────────────────────────────────────────────────────
   selectItem(item: SelectFigureItem): void {
-    if (this.selectedItemId() !== null) return;
     if (item.label) {
       this.a11y.speak(item.label);
     }
-    const correct = item.id === this.content.correctItemId;
     this.selectedItemId.set(item.id);
+  }
+
+  confirmSelection(): void {
+    const sel = this.selectedItemId();
+    if (!sel) return;
+    const correct = sel === this.content.correctItemId;
     this.isCorrect.set(correct);
-    setTimeout(() => this.phase.set('result'), 900);
+    this.phase.set('result');
   }
 
   itemState(item: SelectFigureItem): ItemState {
-    const sel = this.selectedItemId();
-    if (!sel) return 'none';
-    if (item.id === sel)                                               return this.isCorrect() ? 'correct' : 'wrong';
-    if (item.id === this.content.correctItemId && !this.isCorrect())  return 'reveal';
-    return 'dimmed';
+    return 'none';
   }
 
   itemBadge(item: SelectFigureItem): string | undefined {
-    const sel = this.selectedItemId();
-    if (!sel) return undefined;
-    if (item.id === sel && this.isCorrect())                          return '✅';
-    if (item.id === sel && !this.isCorrect())                         return '❌';
-    if (item.id === this.content.correctItemId && !this.isCorrect())  return '⭐';
     return undefined;
   }
+
 
   // ── Fase result ──────────────────────────────────────────────────────────
   onFinish(): void {

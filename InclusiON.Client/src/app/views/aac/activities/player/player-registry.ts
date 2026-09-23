@@ -6,6 +6,7 @@ import { VisualSumPlayerComponent }       from './visual-sum/visual-sum-player.c
 import { CompleteLetterPlayerComponent }  from './complete-letter/complete-letter-player.component';
 import { OptionSelectPlayerComponent }    from './option-select/option-select-player.component';
 import { GlobalReadingPlayerComponent }   from './global-reading/global-reading-player.component';
+import { PuzzlePlayerComponent }          from './puzzle/puzzle-player.component';
 
 // Claves = Code de ActivityTemplateType en DB
 // SOUND_RECOGNITION: sin player implementado aún (requiere MediaRecorder / audio API)
@@ -19,4 +20,6 @@ export const PLAYER_REGISTRY: Record<string, Type<any>> = {
   OPTION_SELECT:    OptionSelectPlayerComponent,    // opción múltiple con texto + pictograma opcional
   GLOBAL_READING:   GlobalReadingPlayerComponent,   // lectura global: leer palabra, elegir imagen
   SOUND_RECOGNITION: OptionSelectPlayerComponent,   // conciencia fonológica (usar opción múltiple)
+  PUZZLE:           PuzzlePlayerComponent,          // rompecabezas con ARASAAC
 };
+

@@ -36,12 +36,8 @@
               />
             }
             @if (matchedImageIds().has(pair.id)) {
-              <span class="match-badge" aria-hidden="true">
-                {{ imageState(pair.id) === 'matched-correct' ? '✅' : '❌' }}
-              </span>
-              <span class="visually-hidden">
-                {{ imageState(pair.id) === 'matched-correct' ? 'correcto' : 'incorrecto' }}
-              </span>
+              <span class="match-badge" aria-hidden="true">🔗</span>
+              <span class="visually-hidden">emparejado</span>
             }
           </button>
         }
@@ -69,12 +65,8 @@
           >
             <span class="word-label">{{ pair.label }}</span>
             @if (matchedWordIds().has(pair.id)) {
-              <span class="match-badge" aria-hidden="true">
-                {{ wordState(pair.id) === 'matched-correct' ? '✅' : '❌' }}
-              </span>
-              <span class="visually-hidden">
-                {{ wordState(pair.id) === 'matched-correct' ? 'correcto' : 'incorrecto' }}
-              </span>
+              <span class="match-badge" aria-hidden="true">🔗</span>
+              <span class="visually-hidden">emparejado</span>
             }
           </button>
         }
@@ -82,17 +74,26 @@
     </div>
 
     <!-- Acciones -->
-    <div class="board-actions">
+    <div class="confirm-row">
       @if (matches().length > 0) {
-        <button class="action-btn action-btn--secondary" (click)="undoLastMatch()" aria-label="Deshacer último emparejamiento">
+        <button
+          type="button"
+          class="action-btn action-btn--secondary"
+          (click)="undoLastMatch()"
+          aria-label="Deshacer último emparejamiento"
+        >
           ↩ Deshacer último
         </button>
       }
-      @if (allMatched()) {
-        <button class="action-btn action-btn--primary" (click)="confirmMatches()" aria-label="Ver resultado">
-          ✓ Ver resultado
-        </button>
-      }
+      <button
+        type="button"
+        class="action-btn action-btn--primary"
+        [disabled]="!allMatched()"
+        (click)="confirmMatches()"
+        aria-label="Finalizar"
+      >
+        ✓ Finalizar
+      </button>
     </div>
   </div>
 }

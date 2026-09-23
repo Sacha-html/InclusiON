@@ -132,16 +132,14 @@ export class MatchImageWordPlayerComponent extends PlayerBaseComponent {
   }
 
   // ── Helpers de estado visual ──────────────────────────────────────────────
-  imageState(id: string): 'matched-correct' | 'matched-wrong' | 'selected' | 'none' {
-    const match = this.matches().find(m => m.imageId === id);
-    if (match) return match.imageId === match.wordId ? 'matched-correct' : 'matched-wrong';
+  imageState(id: string): 'matched' | 'selected' | 'none' {
+    if (this.matchedImageIds().has(id)) return 'matched';
     if (this.selectedImageId() === id) return 'selected';
     return 'none';
   }
 
-  wordState(id: string): 'matched-correct' | 'matched-wrong' | 'selected' | 'none' {
-    const match = this.matches().find(m => m.wordId === id);
-    if (match) return match.imageId === match.wordId ? 'matched-correct' : 'matched-wrong';
+  wordState(id: string): 'matched' | 'selected' | 'none' {
+    if (this.matchedWordIds().has(id)) return 'matched';
     if (this.selectedWordId() === id) return 'selected';
     return 'none';
   }
