@@ -47,7 +47,7 @@
     [success]="!!isCorrect()"
     [message]="resultMessage"
     [loading]="isLoading()"
-    [canRetry]="!isCorrect()"
+    [canRetry]="canRetry() && !isCorrect()"
     (finish)="onFinish()"
     (retry)="retry()"
   />

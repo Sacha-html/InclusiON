@@ -118,6 +118,30 @@
               <c-row class="g-3 text-center">
                 <c-col xs="6" md="3">
                   <div class="weekly-stat">
+                    <div class="weekly-stat__value">{{ analytics?.promedio_GAS ?? 0 }}</div>
+                    <div class="weekly-stat__label">Promedio GAS</div>
+                  </div>
+                </c-col>
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat">
+                    <div class="weekly-stat__value">{{ analytics?.promedio_GAS_Roadmap ?? 0 }}</div>
+                    <div class="weekly-stat__label">Promedio GAS Roadmap</div>
+                  </div>
+                </c-col>
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat">
+                    <div class="weekly-stat__value">{{ analytics?.promedio_GAS_Personalizadas ?? 0 }}</div>
+                    <div class="weekly-stat__label">Promedio GAS personalizadas</div>
+                  </div>
+                </c-col>
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat">
+                    <div class="weekly-stat__value">{{ analytics?.totalActividadesPersonalizadas ?? 0 }}</div>
+                    <div class="weekly-stat__label">Actividades personalizadas</div>
+                  </div>
+                </c-col>
+                <c-col xs="6" md="3">
+                  <div class="weekly-stat">
                     <div class="weekly-stat__value">{{ weeklyProgress.personCount }}</div>
                     <div class="weekly-stat__label">Alumnos activos</div>
                   </div>

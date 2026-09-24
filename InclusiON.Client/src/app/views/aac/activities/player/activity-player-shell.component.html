@@ -14,6 +14,9 @@
     <button cButton class="back-btn" (click)="onCompleted()" aria-label="Volver a mis actividades">← Volver</button>
   </div>
 } @else {
+  <button cButton class="back-btn" (click)="onExit()" aria-label="Salir y volver al inicio">
+    ← Salir
+  </button>
   <!-- El player se monta dinámicamente aquí -->
   <div aria-live="polite" aria-label="Contenido de la actividad">
     <ng-container #playerHost></ng-container>

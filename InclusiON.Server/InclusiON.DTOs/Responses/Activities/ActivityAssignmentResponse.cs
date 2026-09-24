@@ -1,4 +1,5 @@
 using InclusiON.Domain.Models;
+using InclusiON.Domain.Enums;
 using DomainActivityResponse = InclusiON.Domain.Models.ActivityResponse;
 
 namespace InclusiON.DTOs.Responses.Activities
@@ -19,9 +20,12 @@ namespace InclusiON.DTOs.Responses.Activities
         public int? RoadmapOrder { get; set; }
         public Guid AssignedByProfessionalId { get; set; }
         public bool IsEvaluationActivity { get; set; }
+        public int AttemptsUsed { get; set; }
+        public int? MaxAttempts { get; set; }
+        public bool CanRetry { get; set; }
         public List<ActivityAttemptResponse> Responses { get; set; } = [];
 
-        public static ActivityAssignmentResponse From(ActivityAssignment a) => new()
+        public static ActivityAssignmentResponse From(ActivityAssignment a, int? maxAttempts = null) => new()
         {
             Id                  = a.Id,
             ActivityId          = a.ActivityId,
@@ -36,6 +40,10 @@ namespace InclusiON.DTOs.Responses.Activities
             RoadmapOrder        = a.Activity?.RoadmapOrder,
             AssignedByProfessionalId = a.AssignedByProfessionalId,
             IsEvaluationActivity = a.IsEvaluationActivity,
+            AttemptsUsed        = a.Responses.Count(r => r.CompletedAt != null),
+            MaxAttempts          = maxAttempts,
+            CanRetry             = a.StatusId != AssignmentStatuses.Completada &&
+                                   (!maxAttempts.HasValue || a.Responses.Count(r => r.CompletedAt != null) < maxAttempts.Value),
             Responses           = a.Responses
                                     .Select(ActivityAttemptResponse.From)
                                     .OrderByDescending(r => r.StartedAt)

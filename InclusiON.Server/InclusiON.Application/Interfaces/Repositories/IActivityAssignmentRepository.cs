@@ -12,6 +12,10 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<ActivityResponse?> GetResponseByIdAsync(int responseId, CancellationToken ct = default);
         Task<ActivityResponse> CreateResponseAsync(ActivityResponse response, CancellationToken ct = default);
         Task UpdateResponseAsync(ActivityResponse response, CancellationToken ct = default);
+        Task<ActivitySession> CreateSessionAsync(ActivitySession session, CancellationToken ct = default);
+        Task<List<ActivitySession>> GetSessionsByStudentIdsAsync(IEnumerable<Guid> studentIds, CancellationToken ct = default);
+        Task<Dictionary<Guid, List<ActivityResponse>>> GetCompletedResponsesByPersonIdsAsync(IEnumerable<Guid> personIds, CancellationToken ct = default);
+        Task<Dictionary<Guid, List<ActivityResponse>>> GetStartedResponsesByPersonIdsAsync(IEnumerable<Guid> personIds, CancellationToken ct = default);
         Task<int> CountResponsesAsync(int assignmentId, CancellationToken ct = default);
 
         /// <summary>

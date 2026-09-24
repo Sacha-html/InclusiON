@@ -15,5 +15,10 @@ namespace InclusiON.DTOs.Responses.Family
         public int    ApprovedReportsCount { get; set; }
         public string? LatestReportTitle   { get; set; }
         public DateTime? LatestReportDate  { get; set; }
+        public int? CurrentRoadmapLevel { get; set; }
+        public string? CurrentRoadmapLevelName { get; set; }
+        public string GasStatusLabel { get; set; } = "Sin datos";
+        public decimal AverageSuccessRate { get; set; }
+        public bool HasFrustrationAlert { get; set; }
     }
 }

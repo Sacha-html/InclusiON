@@ -87,6 +87,9 @@ export interface ActivityAssignmentResponse {
   isTemplate?: boolean;
   roadmapOrder?: number | null;
   assignedByProfessionalId?: string;
+  attemptsUsed: number;
+  maxAttempts?: number | null;
+  canRetry: boolean;
   responses: ActivityAttemptResponse[];
 }
 

@@ -10,6 +10,10 @@ namespace InclusiON.DTOs.Responses.Analytics
         public int ActivityId { get; set; }
         public string NombreActividad { get; set; } = string.Empty;
         public string CategoriaPedagogica { get; set; } = string.Empty;
+        /// <summary>
+        /// Per-response failure count supported by the current schema: 1 when this
+        /// completion is failed, otherwise 0. It is not the alert threshold count.
+        /// </summary>
         public int CantidadErrores { get; set; }
         public decimal SuccessRate { get; set; }
         public int TimeSpentSeconds { get; set; }

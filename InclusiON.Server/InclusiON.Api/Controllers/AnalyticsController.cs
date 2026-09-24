@@ -187,13 +187,12 @@ namespace InclusiON.Api.Controllers
             var defaultSinceDate = DateTime.UtcNow.AddDays(-30);
             var minDate = from ?? defaultSinceDate;
 
-            // Obtener sesiones con indicadores de frustración (éxito <= 60%, errores >= 4 o GAS <= -1)
+            // Frustration is only four consecutive failed responses in the same activity.
             var frustrationQuery = _context.ActivitySessions
                 .Include(s => s.Student)
                 .Include(s => s.Activity)
                     .ThenInclude(a => a.Category)
-                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive && s.DateCompleted >= minDate &&
-                           (s.SuccessRate <= 60 || s.ErrorCount >= 4 || s.GasScore <= -1));
+                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive && s.DateCompleted >= minDate);
 
             if (to.HasValue)
             {
@@ -204,12 +203,25 @@ namespace InclusiON.Api.Controllers
                 .OrderByDescending(s => s.DateCompleted)
                 .ToListAsync(cancellationToken);
 
+            var completedResponses = await _context.ActivityResponses
+                .Include(r => r.Assignment)
+                .Where(r => studentIds.Contains(r.Assignment.PersonId) && r.CompletedAt != null &&
+                            (!from.HasValue || r.CompletedAt >= from.Value) &&
+                            (!to.HasValue || r.CompletedAt <= to.Value))
+                .OrderBy(r => r.CompletedAt)
+                .ToListAsync(cancellationToken);
+            var alertKeys = completedResponses.GroupBy(r => r.AssignmentId)
+                 .Where(HasFourConsecutiveFailures)
+                 .Select(g => (g.First().Assignment.PersonId, g.First().Assignment.ActivityId))
+                 .ToHashSet();
+            frustrationSessions = frustrationSessions
+                .Where(s => alertKeys.Contains((s.StudentId, s.ActivityId)))
+                .ToList();
+
             var result = frustrationSessions.Select(s =>
             {
                 var motivos = new List<string>();
-                if (s.SuccessRate <= 60) motivos.Add($"Éxito bajo ({s.SuccessRate:F0}%)");
-                if (s.ErrorCount >= 4) motivos.Add($"{s.ErrorCount} errores cometidos");
-                if (s.GasScore <= -1) motivos.Add($"GAS {s.GasScore}");
+                motivos.Add("Cuatro fallas consecutivas en la actividad");
 
                 return new FrustrationDetailResponse
                 {
@@ -218,6 +230,8 @@ namespace InclusiON.Api.Controllers
                     ActivityId = s.ActivityId,
                     NombreActividad = s.Activity.Title,
                     CategoriaPedagogica = s.Activity.Category?.Name ?? "General",
+                    // This field reports the persisted per-session count (0 or 1);
+                    // it is not the four-failure alert trigger.
                     CantidadErrores = s.ErrorCount,
                     SuccessRate = s.SuccessRate,
                     TimeSpentSeconds = s.TimeSpentSeconds,
@@ -419,8 +433,7 @@ namespace InclusiON.Api.Controllers
             }
             if (to.HasValue)
             {
-                var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
-                sessionsQuery = sessionsQuery.Where(s => s.DateCompleted <= toDate);
+                sessionsQuery = sessionsQuery.Where(s => s.DateCompleted <= to.Value);
             }
 
             var sessions = await sessionsQuery.ToListAsync(cancellationToken);
@@ -458,9 +471,23 @@ namespace InclusiON.Api.Controllers
             // 1. KPIs Globales
             response.TotalActividadesCompletadas = sessions.Count;
             response.Promedio_GAS = Math.Round((decimal)sessions.Average(s => (decimal)s.GasScore), 2);
+            var roadmapSessions = sessions.Where(s => s.Activity.RoadmapOrder.HasValue).ToList();
+            var customSessions = sessions.Where(s => !s.Activity.RoadmapOrder.HasValue).ToList();
+            response.Promedio_GAS_Roadmap = roadmapSessions.Count == 0 ? 0 : Math.Round(roadmapSessions.Average(s => (decimal)s.GasScore), 2);
+            response.Promedio_GAS_Personalizadas = customSessions.Count == 0 ? 0 : Math.Round(customSessions.Average(s => (decimal)s.GasScore), 2);
+            response.TotalActividadesPersonalizadas = customSessions.Select(s => s.ActivityId).Distinct().Count();
             response.Tiempo_Promedio_Nivel = Math.Round(sessions.Average(s => s.TimeSpentSeconds), 1);
             response.PromedioExito = Math.Round(sessions.Average(s => s.SuccessRate), 1);
-            response.AlertasFrustracion = sessions.Count(s => s.SuccessRate < 40 || s.GasScore <= -1);
+            var completedResponses = await _context.ActivityResponses
+                .Include(r => r.Assignment)
+                .Where(r => studentIds.Contains(r.Assignment.PersonId) && r.CompletedAt != null &&
+                            (!from.HasValue || r.CompletedAt >= from.Value) &&
+                            (!to.HasValue || r.CompletedAt <= to.Value))
+                .OrderBy(r => r.CompletedAt)
+                .ToListAsync(cancellationToken);
+            response.AlertasFrustracion = completedResponses
+                .GroupBy(r => r.AssignmentId)
+                .Count(HasFourConsecutiveFailures);
 
             // 2. Distribución actual por nivel
             // Para cada alumno, encontrar cuál es el nivel más alto alcanzado y su estado
@@ -484,7 +511,7 @@ namespace InclusiON.Api.Controllers
                 var levelNum = act.RoadmapOrder ?? 0;
                 var sessionsForLevel = sessions.Where(s => s.ActivityId == act.Id || s.Activity.RoadmapOrder == levelNum).ToList();
 
-                var passedCount = sessionsForLevel.Count(s => s.SuccessRate > 60);
+                var passedCount = sessionsForLevel.Count(s => s.SuccessRate >= 60);
                 var stuckCount = studentLevelGroups.Count(sl => sl.MaxLevelPlayed == levelNum && sl.LastSession.SuccessRate <= 60);
                 var totalStudentsReached = sessionsForLevel.Select(s => s.StudentId).Distinct().Count();
 
@@ -561,6 +588,9 @@ namespace InclusiON.Api.Controllers
             return new AnalyticsDashboardResponse
             {
                 Promedio_GAS = 0,
+                Promedio_GAS_Roadmap = 0,
+                Promedio_GAS_Personalizadas = 0,
+                TotalActividadesPersonalizadas = 0,
                 Tiempo_Promedio_Nivel = 0,
                 PersonasActivas = 0,
                 TotalActividadesCompletadas = 0,
@@ -590,6 +620,19 @@ namespace InclusiON.Api.Controllers
                 },
                 Rendimiento_Por_Categoria = new List<CategoryPerformanceItem>()
             };
+        }
+
+        private static bool HasFourConsecutiveFailures(IEnumerable<Domain.Models.ActivityResponse> responses)
+        {
+            var failures = 0;
+            foreach (var response in responses.OrderBy(r => r.CompletedAt))
+            {
+                failures = response.SuccessPercentage.HasValue && response.SuccessPercentage.Value < 60m
+                    ? failures + 1
+                    : 0;
+                if (failures >= 4) return true;
+            }
+            return false;
         }
     }
 }

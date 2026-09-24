@@ -89,7 +89,7 @@
     [score]="score()"
     [message]="resultMessage()"
     [loading]="isLoading()"
-    [canRetry]="score() < 100"
+    [canRetry]="canRetry() && score() < 100"
     (finish)="onFinish()"
     (retry)="retry()"
   />

@@ -72,8 +72,11 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
               personId: '',
               status: ActivityAssignmentStatus.Pendiente,
               assignedAt: new Date().toISOString(),
-              isEvaluationActivity: false,
-              responses: []
+               isEvaluationActivity: false,
+               attemptsUsed: 0,
+               maxAttempts: null,
+               canRetry: true,
+               responses: []
             };
 
             this.assignment.set(directAssignment);
@@ -114,7 +117,11 @@ export class ActivityPlayerShellComponent implements OnInit, OnDestroy {
   }
 
   onCompleted(): void {
-    this.router.navigate(['/app/roadmap']);
+    this.router.navigate([AppRoutes.Aac.Root]);
+  }
+
+  onExit(): void {
+    this.router.navigate([AppRoutes.Aac.Root]);
   }
 
   ngOnDestroy(): void {

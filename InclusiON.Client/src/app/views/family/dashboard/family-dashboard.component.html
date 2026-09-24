@@ -1,8 +1,8 @@
 <div role="region" aria-labelledby="dashboard-title">
 <!-- Cargando -->
 @if (loading) {
-  <c-row>
-    <c-col xs="12" class="text-center py-5">
+             <c-row>
+               <c-col xs="12" class="text-center py-5">
       <c-spinner color="primary" role="status" />
       <p class="mt-2 text-body-secondary">Cargando panel familiar…</p>
     </c-col>
@@ -90,8 +90,31 @@
             </a>
           </c-card-header>
 
-          <c-card-body>
-            <c-row>
+           <c-card-body>
+             <c-row class="mb-4">
+               <c-col xs="12">
+                 <h3 class="h6 mb-3">Progreso del recorrido</h3>
+                 <div class="d-flex gap-1 flex-wrap" role="list" aria-label="Progreso de 10 pasos">
+                   @for (step of [1,2,3,4,5,6,7,8,9,10]; track step) {
+                     <span class="badge rounded-pill"
+                           [class.bg-success]="person.currentRoadmapLevel && step <= person.currentRoadmapLevel"
+                           [class.bg-secondary]="!person.currentRoadmapLevel || step > person.currentRoadmapLevel"
+                           role="listitem">{{ step }}</span>
+                   }
+                 </div>
+                 <p class="small text-body-secondary mb-0 mt-2">
+                   @if (person.currentRoadmapLevel) {
+                     Paso {{ person.currentRoadmapLevel }}{{ person.currentRoadmapLevelName ? ': ' + person.currentRoadmapLevelName : '' }}
+                   } @else { Todavía no hay un paso iniciado. }
+                 </p>
+                 <div class="small mt-2">Éxito promedio: {{ person.averageSuccessRate }}% · {{ person.gasStatusLabel }}</div>
+                 @if (person.hasFrustrationAlert) {
+                   <c-alert color="warning" class="mt-2 mb-0">Se detectaron cuatro fallas consecutivas en una actividad.</c-alert>
+                 }
+               </c-col>
+             </c-row>
+
+             <c-row>
               <!-- Actividades recientes -->
               <c-col xs="12" md="7">
                 <h3 class="h6 mb-3">Actividades recientes</h3>

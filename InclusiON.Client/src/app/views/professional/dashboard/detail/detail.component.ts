@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -145,6 +145,8 @@ export class DetailComponent implements OnInit, OnDestroy {
   }
 
   private loadDashboardData(professionalId: string): void {
+    // Analytics has its own failure boundary and must not wait for unrelated cards.
+    this.loadAnalytics();
     const reportsUrl = `${environment.apiUrl}/reports`;
 
     const countParams = (status: string | number) =>
@@ -155,23 +157,23 @@ export class DetailComponent implements OnInit, OnDestroy {
         .set('status', status);
 
     forkJoin({
-      persons:         this.assignmentsService.getPersonsByProfessional(professionalId),
+       persons:         this.assignmentsService.getPersonsByProfessional(professionalId).pipe(catchError(() => of([]))),
       // pageSize alto: el contador de la portada necesita el total real de invitaciones,
       // no solo la primera página (con el tamaño por defecto quedaba subcontado).
-      invitations:     this.invitationsService.getAll(1, 1000),
-      classrooms:      this.assignmentsService.getClassroomsByProfessional(professionalId),
+       invitations:     this.invitationsService.getAll(1, 1000).pipe(catchError(() => of({ data: [] }))),
+       classrooms:      this.assignmentsService.getClassroomsByProfessional(professionalId).pipe(catchError(() => of([]))),
       reports:         this.reportsService.getReports({
                          page: 1,
                          professionalId,
                          pageSize: 5,
                          sortBy: 'createdAt',
                          sortDirection: 'DESC',
-                       }),
-      unread:          this.messagesService.getUnreadCount(),
-      weeklyProgress:  this.professionalsService.getWeeklyProgress(),
-      countDraft:      getCount(this.http, reportsUrl, countParams(ReportStatus.Draft)),
-      countSubmitted:  getCount(this.http, reportsUrl, countParams(ReportStatus.Submitted)),
-      countRejected:   getCount(this.http, reportsUrl, countParams(ReportStatus.Rejected)),
+                        }).pipe(catchError(() => of({ data: [] }))),
+       unread:          this.messagesService.getUnreadCount().pipe(catchError(() => of(0))),
+       weeklyProgress:  this.professionalsService.getWeeklyProgress().pipe(catchError(() => of(null))),
+       countDraft:      getCount(this.http, reportsUrl, countParams(ReportStatus.Draft)).pipe(catchError(() => of({ totalCount: 0 }))),
+       countSubmitted:  getCount(this.http, reportsUrl, countParams(ReportStatus.Submitted)).pipe(catchError(() => of({ totalCount: 0 }))),
+       countRejected:   getCount(this.http, reportsUrl, countParams(ReportStatus.Rejected)).pipe(catchError(() => of({ totalCount: 0 }))),
     }).subscribe({
       next: ({ persons, invitations, classrooms, reports, unread, weeklyProgress, countDraft, countSubmitted, countRejected }) => {
         this.persons               = persons;
@@ -185,8 +187,6 @@ export class DetailComponent implements OnInit, OnDestroy {
         this.rejectedReportsCount  = countRejected.totalCount;
         this.isLoading             = false;
 
-        // Cargar métricas analíticas iniciales (todas las aulas)
-        this.loadAnalytics();
       },
       error: () => {
         this.isLoading = false;

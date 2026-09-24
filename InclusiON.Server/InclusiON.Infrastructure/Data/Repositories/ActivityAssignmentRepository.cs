@@ -70,10 +70,50 @@ namespace InclusiON.Infrastructure.Data.Repositories
             _context.ActivityResponses.Update(response);
         }
 
+        public async Task<ActivitySession> CreateSessionAsync(ActivitySession session, CancellationToken ct = default)
+        {
+            await _context.ActivitySessions.AddAsync(session, ct);
+            return session;
+        }
+
+        public async Task<List<ActivitySession>> GetSessionsByStudentIdsAsync(IEnumerable<Guid> studentIds, CancellationToken ct = default)
+        {
+            var ids = studentIds.ToList();
+            if (ids.Count == 0) return [];
+            return await _context.ActivitySessions.Include(s => s.Activity)
+                .Where(s => ids.Contains(s.StudentId) && s.IsActive).AsNoTracking().ToListAsync(ct);
+        }
+
+        public async Task<Dictionary<Guid, List<ActivityResponse>>> GetCompletedResponsesByPersonIdsAsync(IEnumerable<Guid> personIds, CancellationToken ct = default)
+        {
+            var ids = personIds.ToList();
+            if (ids.Count == 0) return new();
+            var responses = await _context.ActivityResponses.Include(r => r.Assignment)
+                .ThenInclude(a => a.Activity).AsNoTracking()
+                .Where(r => ids.Contains(r.Assignment.PersonId) && r.CompletedAt != null)
+                .OrderBy(r => r.CompletedAt).ToListAsync(ct);
+            return responses.GroupBy(r => r.Assignment.PersonId).ToDictionary(g => g.Key, g => g.ToList());
+        }
+
+        public async Task<Dictionary<Guid, List<ActivityResponse>>> GetStartedResponsesByPersonIdsAsync(IEnumerable<Guid> personIds, CancellationToken ct = default)
+        {
+            var ids = personIds.ToList();
+            if (ids.Count == 0) return new();
+
+            var responses = await _context.ActivityResponses
+                .Include(r => r.Assignment)
+                    .ThenInclude(a => a.Activity)
+                .AsNoTracking()
+                .Where(r => ids.Contains(r.Assignment.PersonId))
+                .OrderBy(r => r.StartedAt)
+                .ToListAsync(ct);
+            return responses.GroupBy(r => r.Assignment.PersonId).ToDictionary(g => g.Key, g => g.ToList());
+        }
+
         public async Task<int> CountResponsesAsync(int assignmentId, CancellationToken ct = default)
         {
             return await _context.ActivityResponses
-                .CountAsync(r => r.AssignmentId == assignmentId, ct);
+                .CountAsync(r => r.AssignmentId == assignmentId && r.CompletedAt != null, ct);
         }
 
         public async Task<List<ActivityResponse>> GetRecentCompletedResponsesAsync(

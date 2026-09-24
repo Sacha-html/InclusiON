@@ -77,14 +77,19 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                     "El nivel de frustración debe estar entre 1 y 5.");
 
             var now = _dateTime.UtcNow;
+            var gasScore = CalculateGasScore(command.SuccessPercentage);
 
             // Read roadmap data before any mutations — both reads only need PersonId/ActivityId
             // which are available from the already-loaded assignment.
             var roadmapEntry = await _roadmapRepository.GetByPersonAndActivityAsync(
                 assignment.PersonId, assignment.ActivityId, cancellationToken);
+            var completedAttemptsBeforeCurrent = await _repository.CountResponsesAsync(command.AssignmentId, cancellationToken);
+            var failed = gasScore < 0;
+            var exhausted = failed && roadmapEntry?.MaxAttempts is int maxAttempts &&
+                            completedAttemptsBeforeCurrent + 1 >= maxAttempts;
 
             PersonRoadmapActivity? nextToUnlock = null;
-            if (roadmapEntry is not null && command.SuccessPercentage >= roadmapEntry.UnlockThresholdPercent)
+            if (roadmapEntry is not null && !failed)
             {
                 var next = await _roadmapRepository.GetNextInAreaAsync(
                     roadmapEntry.PersonRoadmapAreaId, roadmapEntry.SequenceOrder, cancellationToken);
@@ -104,13 +109,31 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             response.Observations      = command.Observations;
             response.UpdatedAt         = now;
 
+            await _repository.CreateSessionAsync(new ActivitySession
+            {
+                StudentId = assignment.PersonId,
+                ProfessionalId = assignment.AssignedByProfessionalId,
+                ActivityId = assignment.ActivityId,
+                DateCompleted = now,
+                TimeSpentSeconds = command.TimeSpentSeconds,
+                SuccessRate = command.SuccessPercentage,
+                // ErrorCount is the truthful per-response value supported by the
+                // existing schema. It is descriptive only; alerts use response order.
+                ErrorCount = failed ? 1 : 0,
+                GasScore = gasScore,
+                CreatedAt = now,
+                UpdatedAt = now,
+            }, cancellationToken);
+
             await _repository.UpdateResponseAsync(response, cancellationToken);
 
-            assignment.StatusId  = AssignmentStatuses.Completada;
+            assignment.StatusId  = failed && !exhausted
+                ? AssignmentStatuses.EnProgreso
+                : AssignmentStatuses.Completada;
             assignment.UpdatedAt = now;
             await _repository.UpdateAsync(assignment, cancellationToken);
 
-            if (nextToUnlock is not null)
+            if (nextToUnlock is not null && !failed)
             {
                 nextToUnlock.IsUnlocked = true;
                 nextToUnlock.UnlockedAt = now;
@@ -179,7 +202,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
 
             var updated = await _repository.GetByIdAsync(command.AssignmentId, cancellationToken);
 
-            var dto = ActivityAssignmentResponse.From(updated!);
+            var dto = ActivityAssignmentResponse.From(updated!, roadmapEntry?.MaxAttempts);
             dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(updated!.Id.ToString()));
             foreach (var attempt in dto.Responses)
                 attempt.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(attempt.Id.ToString()));
@@ -192,5 +215,14 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             successPercentage >= 80 ? ActivityResponseResult.Exito
             : successPercentage >= 50 ? ActivityResponseResult.Parcial
             : ActivityResponseResult.Fallido;
+
+        private static int CalculateGasScore(decimal successPercentage) => successPercentage switch
+        {
+            <= 30m => -2,
+            <= 59m => -1,
+            <= 69m => 0,
+            <= 80m => 1,
+            _ => 2,
+        };
     }
 }

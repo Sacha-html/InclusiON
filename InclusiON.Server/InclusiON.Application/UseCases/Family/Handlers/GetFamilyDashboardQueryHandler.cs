@@ -45,18 +45,26 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
             var reportSummaryByPerson = await _reports
                 .GetApprovedReportsSummaryByPersonIdsAsync(personIds, cancellationToken);
+            var sessions = await _assignments.GetSessionsByStudentIdsAsync(personIds, cancellationToken);
+            var completedResponsesByPerson = await _assignments.GetCompletedResponsesByPersonIdsAsync(personIds, cancellationToken);
+            var startedResponsesByPerson = await _assignments.GetStartedResponsesByPersonIdsAsync(personIds, cancellationToken);
 
             var summaries = persons.Select(person =>
             {
                 recentResponsesByPerson.TryGetValue(person.Id, out var responses);
                 reportSummaryByPerson.TryGetValue(person.Id, out var reportSummary);
 
-                return FamilyMapper.ToPersonSummary(
+                var summary = FamilyMapper.ToPersonSummary(
                     person,
                     recentActivities:     (responses ?? []).Select(FamilyMapper.ToRecentActivityResult).ToList(),
                     approvedReportsCount: reportSummary.Count,
                     latestReportTitle:    reportSummary.Latest?.Title,
                     latestReportDate:     reportSummary.Latest?.ReportDate);
+                FamilyMapper.ApplyProgress(summary,
+                    (sessions ?? []).Where(s => s.StudentId == person.Id),
+                    completedResponsesByPerson is not null && completedResponsesByPerson.TryGetValue(person.Id, out var personResponses) ? personResponses : [],
+                    startedResponsesByPerson is not null && startedResponsesByPerson.TryGetValue(person.Id, out var startedResponses) ? startedResponses : []);
+                return summary;
             }).ToList();
 
             return ApiResponse<FamilyDashboardResponse>.SuccessResult(new FamilyDashboardResponse

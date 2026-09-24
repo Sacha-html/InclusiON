@@ -16,6 +16,7 @@ using ActivityAssignment = InclusiON.Domain.Models.ActivityAssignment;
 using DomainActivityResponse = InclusiON.Domain.Models.ActivityResponse;
 using Professional = InclusiON.Domain.Models.Professional;
 using PersonRoadmapActivity = InclusiON.Domain.Models.PersonRoadmapActivity;
+using ActivitySession = InclusiON.Domain.Models.ActivitySession;
 
 namespace InclusiON.Tests.Unit.Handlers.Activities
 {
@@ -490,6 +491,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
     public class StartActivityResponseCommandHandlerTests
     {
         private readonly IActivityAssignmentRepository _repo = Substitute.For<IActivityAssignmentRepository>();
+        private readonly IRoadmapRepository _roadmaps = Substitute.For<IRoadmapRepository>();
         private readonly IUnitOfWork _uow = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
         private readonly IEncryptionService _encryption = Substitute.For<IEncryptionService>();
@@ -505,7 +507,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         private StartActivityResponseCommandHandler BuildSut() =>
-            new(_repo, _uow, _dateTime, _encryption);
+            new(_repo, _roadmaps, _uow, _dateTime, _encryption);
 
         private static ActivityAssignment AnAssignment(int status = AssignmentStatuses.Pendiente, Guid? personId = null) => new()
         {
@@ -554,12 +556,30 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         [Fact]
+        public async Task CompletedStatus_CannotStartAnotherResponse()
+        {
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(AnAssignment(status: AssignmentStatuses.Completada));
+
+            var result = await BuildSut().HandleAsync(
+                new StartActivityResponseCommand(AssignmentId, PersonId), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
+            await _repo.DidNotReceive().CountResponsesAsync(
+                AssignmentId, Arg.Any<CancellationToken>());
+            await _repo.DidNotReceive().CreateResponseAsync(
+                Arg.Any<DomainActivityResponse>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public async Task ValidStart_Pending_CreatesResponseAndUpdatesStatus()
         {
             var assignment = AnAssignment(status: AssignmentStatuses.Pendiente);
             _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
                 .Returns(assignment, AnAssignment(status: AssignmentStatuses.EnProgreso));
             _repo.CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(0);
+            _roadmaps.GetByPersonAndActivityAsync(PersonId, 1, Arg.Any<CancellationToken>()).Returns((PersonRoadmapActivity?)null);
             _dateTime.UtcNow.Returns(Now);
 
             var result = await BuildSut().HandleAsync(
@@ -582,6 +602,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
                 .Returns(assignment, AnAssignment(status: AssignmentStatuses.EnProgreso));
             _repo.CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(1);
+            _roadmaps.GetByPersonAndActivityAsync(PersonId, 1, Arg.Any<CancellationToken>()).Returns((PersonRoadmapActivity?)null);
             _dateTime.UtcNow.Returns(Now);
 
             var result = await BuildSut().HandleAsync(
@@ -592,6 +613,79 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
                 Arg.Is<DomainActivityResponse>(r => r.AttemptCount == 2),
                 Arg.Any<CancellationToken>());
             await _repo.DidNotReceive().UpdateAsync(Arg.Any<ActivityAssignment>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Start_WithIncompleteResponses_ReusesNewestResponse()
+        {
+            var older = new DomainActivityResponse
+            {
+                Id = 10, AssignmentId = AssignmentId,
+                StartedAt = Now.AddMinutes(-10), AttemptCount = 1
+            };
+            var newest = new DomainActivityResponse
+            {
+                Id = 11, AssignmentId = AssignmentId,
+                StartedAt = Now.AddMinutes(-1), AttemptCount = 2
+            };
+            var assignment = AnAssignment(status: AssignmentStatuses.EnProgreso);
+            assignment.Responses.Add(older);
+            assignment.Responses.Add(newest);
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(assignment);
+            _roadmaps.GetByPersonAndActivityAsync(PersonId, 1, Arg.Any<CancellationToken>())
+                .Returns(new PersonRoadmapActivity { MaxAttempts = 2 });
+
+            var result = await BuildSut().HandleAsync(
+                new StartActivityResponseCommand(AssignmentId, PersonId), default);
+
+            result.Success.Should().BeTrue();
+            result.Data!.Responses.Should().Contain(r => r.Id == newest.Id);
+            await _repo.DidNotReceive().CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>());
+            await _repo.DidNotReceive().CreateResponseAsync(
+                Arg.Any<DomainActivityResponse>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Start_WithCompletedAttempts_UsesCompletedCountForNextAttempt()
+        {
+            var assignment = AnAssignment(status: AssignmentStatuses.EnProgreso);
+            assignment.Responses.Add(new DomainActivityResponse
+            {
+                Id = 10, AssignmentId = AssignmentId, StartedAt = Now.AddMinutes(-10),
+                CompletedAt = Now.AddMinutes(-5), AttemptCount = 1
+            });
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment(status: AssignmentStatuses.EnProgreso));
+            _repo.CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(2);
+            _roadmaps.GetByPersonAndActivityAsync(PersonId, 1, Arg.Any<CancellationToken>())
+                .Returns(new PersonRoadmapActivity { MaxAttempts = 3 });
+            _dateTime.UtcNow.Returns(Now);
+
+            var result = await BuildSut().HandleAsync(
+                new StartActivityResponseCommand(AssignmentId, PersonId), default);
+
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateResponseAsync(
+                Arg.Is<DomainActivityResponse>(r => r.AttemptCount == 3),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Start_WhenMaxAttemptsAreExhausted_ReturnsConflict()
+        {
+            var assignment = AnAssignment(status: AssignmentStatuses.EnProgreso);
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(assignment);
+            _repo.CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(4);
+            _roadmaps.GetByPersonAndActivityAsync(PersonId, 1, Arg.Any<CancellationToken>())
+                .Returns(new PersonRoadmapActivity { MaxAttempts = 4 });
+
+            var result = await BuildSut().HandleAsync(
+                new StartActivityResponseCommand(AssignmentId, PersonId), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.BusinessRuleViolation);
+            await _repo.DidNotReceive().CreateResponseAsync(
+                Arg.Any<DomainActivityResponse>(), Arg.Any<CancellationToken>());
         }
     }
 
@@ -729,7 +823,8 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
             response.Result.Should().Be(expectedResult);
             response.CompletedAt.Should().Be(Now);
             response.SuccessPercentage.Should().Be(percentage);
-            assignment.StatusId.Should().Be(AssignmentStatuses.Completada);
+            assignment.StatusId.Should().Be(
+                percentage >= 60 ? AssignmentStatuses.Completada : AssignmentStatuses.EnProgreso);
             await _repo.Received(1).UpdateResponseAsync(response, Arg.Any<CancellationToken>());
             await _repo.Received(1).UpdateAsync(assignment, Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
@@ -783,6 +878,127 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
                 a.PersonId == assignment.PersonId &&
                 a.StatusId == AssignmentStatuses.Pendiente
             ), Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData(30, -2, false)]
+        [InlineData(31, -1, false)]
+        [InlineData(59, -1, false)]
+        [InlineData(60, 0, true)]
+        [InlineData(69, 0, true)]
+        [InlineData(70, 1, true)]
+        [InlineData(80, 1, true)]
+        [InlineData(81, 2, true)]
+        [InlineData(100, 2, true)]
+        public async Task Completion_UsesApprovedGasBoundariesAndUnlocksAtZero(
+            decimal percentage, int expectedGas, bool shouldUnlock)
+        {
+            var assignment = AnAssignment();
+            var response = AResponse();
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+
+            var currentRoadmapAct = new PersonRoadmapActivity
+            {
+                Id = 10,
+                PersonRoadmapAreaId = 5,
+                ActivityId = assignment.ActivityId,
+                SequenceOrder = 1,
+                IsUnlocked = true
+            };
+            var nextRoadmapAct = new PersonRoadmapActivity
+            {
+                Id = 11,
+                PersonRoadmapAreaId = 5,
+                ActivityId = 99,
+                SequenceOrder = 2,
+                IsUnlocked = false
+            };
+            _roadmaps.GetByPersonAndActivityAsync(assignment.PersonId, assignment.ActivityId, Arg.Any<CancellationToken>())
+                .Returns(currentRoadmapAct);
+            _roadmaps.GetNextInAreaAsync(5, 1, Arg.Any<CancellationToken>())
+                .Returns(nextRoadmapAct);
+
+            var result = await BuildSut().HandleAsync(Cmd(success: percentage), default);
+
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateSessionAsync(
+                Arg.Is<ActivitySession>(session => session.GasScore == expectedGas && session.ErrorCount == (percentage < 60 ? 1 : 0)),
+                Arg.Any<CancellationToken>());
+            nextRoadmapAct.IsUnlocked.Should().Be(shouldUnlock);
+        }
+
+        [Fact]
+        public async Task Completion_ExhaustionCountsCurrentCompletedAttemptOnly()
+        {
+            var assignment = AnAssignment();
+            var response = AResponse();
+            assignment.Responses.Add(new DomainActivityResponse
+            {
+                Id = 20, AssignmentId = AssignmentId,
+                StartedAt = Now.AddMinutes(-20), CompletedAt = null
+            });
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>()).Returns(response);
+            _repo.CountResponsesAsync(AssignmentId, Arg.Any<CancellationToken>()).Returns(2);
+            _roadmaps.GetByPersonAndActivityAsync(PersonId, 1, Arg.Any<CancellationToken>())
+                .Returns(new PersonRoadmapActivity { MaxAttempts = 3 });
+            _dateTime.UtcNow.Returns(Now);
+
+            var result = await BuildSut().HandleAsync(Cmd(success: 30m), default);
+
+            result.Success.Should().BeTrue();
+            assignment.StatusId.Should().Be(AssignmentStatuses.Completada);
+        }
+    }
+
+    public class ActivityAssignmentResponseTests
+    {
+        [Fact]
+        public void From_CountsOnlyCompletedAttemptsAndKeepsIncompleteResponse()
+        {
+            var assignment = new ActivityAssignment
+            {
+                Id = 1,
+                StatusId = AssignmentStatuses.EnProgreso
+            };
+            assignment.Responses.Add(new DomainActivityResponse
+            {
+                Id = 1, StartedAt = DateTime.UtcNow.AddMinutes(-2), CompletedAt = DateTime.UtcNow
+            });
+            assignment.Responses.Add(new DomainActivityResponse
+            {
+                Id = 2, StartedAt = DateTime.UtcNow.AddMinutes(-1), CompletedAt = null
+            });
+
+            var result = InclusiON.DTOs.Responses.Activities.ActivityAssignmentResponse.From(assignment, 2);
+
+            result.AttemptsUsed.Should().Be(1);
+            result.CanRetry.Should().BeTrue();
+            result.Responses.Should().ContainSingle(r => r.Id == 2 && r.CompletedAt == null);
+        }
+
+        [Fact]
+        public void From_CompletedAssignmentCannotRetryEvenBelowMaximum()
+        {
+            var assignment = new ActivityAssignment
+            {
+                Id = 1,
+                StatusId = AssignmentStatuses.Completada
+            };
+            assignment.Responses.Add(new DomainActivityResponse
+            {
+                Id = 1, StartedAt = DateTime.UtcNow, CompletedAt = DateTime.UtcNow
+            });
+
+            var result = InclusiON.DTOs.Responses.Activities.ActivityAssignmentResponse.From(assignment, 4);
+
+            result.AttemptsUsed.Should().Be(1);
+            result.CanRetry.Should().BeFalse();
         }
     }
 }

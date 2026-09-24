@@ -10,6 +10,9 @@ namespace InclusiON.DTOs.Responses.Analytics
         /// Promedio global de la puntuación cualitativa Goal Attainment Scaling (-2 a +2).
         /// </summary>
         public decimal Promedio_GAS { get; set; }
+        public decimal Promedio_GAS_Roadmap { get; set; }
+        public decimal Promedio_GAS_Personalizadas { get; set; }
+        public int TotalActividadesPersonalizadas { get; set; }
 
         /// <summary>
         /// Tiempo promedio dedicado a cada nivel en segundos.

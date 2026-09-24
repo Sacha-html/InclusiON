@@ -127,9 +127,7 @@ export class OptionSelectPlayerComponent extends PlayerBaseComponent {
       this.playSound('wrong');
       this.wrongOptionId.set(option.id);
       setTimeout(() => {
-        this.wrongOptionId.set(null);
-        this.selectedOptionId.set(null);
-        this.isCorrect.set(null);
+        this.phase.set('result');
       }, 700);
     }
   }
