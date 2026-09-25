@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Assignments.Commands;
 using InclusiON.Application.UseCases.Assignments.Queries;
+using Microsoft.Extensions.Logging;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
@@ -21,6 +22,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
         private readonly IRealTimeNotifier _notifier;
+        private readonly IRoadmapInitializer _roadmapInitializer;
+        private readonly ILogger<AssignPersonCommandHandler> _logger;
 
         public AssignPersonCommandHandler(
             IAssignmentsRepository repository,
@@ -28,7 +31,9 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             IPersonsRepository personsRepository,
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
-            IRealTimeNotifier notifier)
+            IRealTimeNotifier notifier,
+            IRoadmapInitializer roadmapInitializer,
+            ILogger<AssignPersonCommandHandler> logger)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
@@ -36,6 +41,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             _unitOfWork = unitOfWork;
             _dateTime = dateTime;
             _notifier = notifier;
+            _roadmapInitializer = roadmapInitializer;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<ProfessionalPersonResponse>> HandleAsync(
@@ -92,6 +99,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                     existing.Classroom = await _repository.GetClassroomByIdAsync(existing.ClassroomId.Value, cancellationToken);
                 }
                 await NotifyNewStudentAsync(professional.UserId, person, cancellationToken);
+                await InitializeRoadmapPostCommitAsync(person.Id, professional.UserId, cancellationToken);
 
                 var reactivatedResponse = ProfessionalPersonResponse.MapToResponse(existing);
                 return ApiResponse<ProfessionalPersonResponse>.SuccessResult(reactivatedResponse, "Asignacion reactivada exitosamente.");
@@ -117,9 +125,24 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 assignment.Classroom = await _repository.GetClassroomByIdAsync(assignment.ClassroomId.Value, cancellationToken);
             }
             await NotifyNewStudentAsync(professional.UserId, person, cancellationToken);
+            await InitializeRoadmapPostCommitAsync(person.Id, professional.UserId, cancellationToken);
 
             var response = ProfessionalPersonResponse.MapToResponse(assignment);
             return ApiResponse<ProfessionalPersonResponse>.SuccessResult(response, "Persona asignada al profesional exitosamente.");
+        }
+
+        private async Task InitializeRoadmapPostCommitAsync(Guid studentId, Guid professionalUserId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _roadmapInitializer.InitializeStudentRoadmapAsync(studentId, professionalUserId, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Alumno {StudentId} asignado, pero falló la inicialización post-commit del roadmap.",
+                    studentId);
+            }
         }
 
         private Task NotifyNewStudentAsync(Guid professionalUserId, PersonWithDisability person, CancellationToken cancellationToken)

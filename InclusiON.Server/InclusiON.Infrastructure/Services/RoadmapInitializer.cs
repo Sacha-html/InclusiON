@@ -20,208 +20,110 @@ namespace InclusiON.Infrastructure.Services
             _context = context;
         }
 
+        private static readonly Guid SystemUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        private sealed record StandardActivityDefinition(
+            int Sequence, string Key, string Title, string Description, string Category,
+            string TemplateCode, string Instructions, string ContentJson);
+
+        private static readonly StandardActivityDefinition[] Definitions =
+        {
+            new(1, "ROADMAP_STANDARD_01_ARMANDO_EL_VASO", "Armando el vaso", "Rompecabezas básico de un vaso de agua.", "Motricidad y Coordinación", "PUZZLE", "Armá el vaso", "{\"instruction\":\"Armá el vaso\",\"pictogramId\":2610,\"label\":\"Vaso de agua\",\"rows\":2,\"cols\":1,\"showGhostGuide\":true}"),
+            new(2, "ROADMAP_STANDARD_02_NECESITO_IR_AL_BANO", "Necesito ir al baño", "Comunicación de una necesidad básica mediante pictogramas.", "Comunicación y Lenguaje", "PICTOGRAM_SELECT", "Elegí el pictograma del baño", "{\"instruction\":\"Elegí el pictograma del baño\",\"correctItemId\":\"bano\",\"items\":[{\"id\":\"bano\",\"label\":\"Baño\",\"pictogramId\":6929},{\"id\":\"pelota\",\"label\":\"Pelota\",\"pictogramId\":3241}]}"),
+            // SOUND_RECOGNITION currently falls back to OPTION_SELECT: no real audio is played,
+            // so this activity evaluates the association between laughter and emotion through visual options.
+            new(3, "ROADMAP_STANDARD_03_QUIEN_SE_RIE", "¿Quién se ríe?", "Discriminación auditiva de una emoción básica.", "Habilidades Socioemocionales", "SOUND_RECOGNITION", "Escuchá y elegí la cara alegre", "{\"instruction\":\"Escuchá el sonido y elegí la cara alegre\",\"question\":\"¿Quién se ríe?\",\"options\":[{\"id\":\"alegre\",\"text\":\"La cara alegre\",\"pictogramId\":8582},{\"id\":\"triste\",\"text\":\"La cara triste\",\"pictogramId\":16371}],\"correctOptionId\":\"alegre\"}"),
+            new(4, "ROADMAP_STANDARD_04_BUSCANDO_LA_MESA", "Buscando la MESA", "Lectura global de la palabra MESA.", "Lectoescritura", "GLOBAL_READING", "Leé MESA y elegí el pictograma correcto", "{\"instruction\":\"Leé MESA y elegí el pictograma correcto\",\"word\":\"MESA\",\"items\":[{\"id\":\"mesa\",\"pictogramId\":3129,\"label\":\"Mesa\"},{\"id\":\"silla\",\"pictogramId\":3155,\"label\":\"Silla\"},{\"id\":\"cama\",\"pictogramId\":25900,\"label\":\"Cama\"}],\"correctItemId\":\"mesa\"}"),
+            new(5, "ROADMAP_STANDARD_05_CONTANDO_GALLETAS", "Contando galletas", "Conteo visual de tres galletas.", "Numeración y Matemática", "NUMERATION", "Contá las galletas y elegí el número correcto", "{\"instruction\":\"Contá las galletas y elegí el número correcto\",\"operandA\":3,\"operandB\":0,\"pictogramId\":8312,\"options\":[{\"id\":\"dos\",\"value\":2},{\"id\":\"tres\",\"value\":3},{\"id\":\"cuatro\",\"value\":4}]}"),
+            new(6, "ROADMAP_STANDARD_06_ME_SIRVO_AGUA", "Me sirvo agua", "Secuencia de acciones para servirse agua.", "Autonomía y Vida Diaria", "ORDER_SEQUENCE", "Ordená los pasos para servirte agua", "{\"instruction\":\"Ordená los pasos para servirte agua\",\"items\":[{\"id\":\"1\",\"label\":\"Agarrar el vaso\",\"pictogramId\":2610,\"correctPosition\":0},{\"id\":\"2\",\"label\":\"Abrir la canilla\",\"pictogramId\":11737,\"correctPosition\":1},{\"id\":\"3\",\"label\":\"Tomar agua\",\"pictogramId\":6061,\"correctPosition\":2}]}"),
+            new(7, "ROADMAP_STANDARD_07_DONDE_HACEMOS_PIS", "¿Dónde hacemos pis?", "Comprensión del contexto de una necesidad básica.", "Habilidades Socioemocionales", "OPTION_SELECT", "Elegí dónde hacemos pis", "{\"instruction\":\"Si tenés ganas de hacer pis, ¿adónde vas?\",\"question\":\"¿Dónde hacemos pis?\",\"options\":[{\"id\":\"cama\",\"text\":\"La cama\",\"pictogramId\":25900},{\"id\":\"bano\",\"text\":\"El baño\",\"pictogramId\":6929},{\"id\":\"cocina\",\"text\":\"La cocina\",\"pictogramId\":10752}],\"correctOptionId\":\"bano\"}"),
+            new(8, "ROADMAP_STANDARD_08_ORDENAR_LA_COCINA", "A ordenar la cocina", "Clasificación de alimentos y utensilios.", "Numeración y Matemática", "CLASSIFY", "Uní cada imagen con su grupo", "{\"instruction\":\"Uní cada imagen con su grupo\",\"pairs\":[{\"id\":\"galleta\",\"label\":\"Alimentos: galleta\",\"pictogramId\":8312},{\"id\":\"manzana\",\"label\":\"Alimentos: manzana\",\"pictogramId\":2462},{\"id\":\"plato\",\"label\":\"Utensilios: plato\",\"pictogramId\":16857},{\"id\":\"cuchara\",\"label\":\"Utensilios: cuchara\",\"pictogramId\":2362}]}"),
+            new(9, "ROADMAP_STANDARD_09_LETRAS_DE_MESA", "Las letras de MESA", "Conciencia fonológica para completar M _ S _.", "Lectoescritura", "BUILD_WORD", "Completá las letras de MESA", "{\"instruction\":\"Completá las letras de MESA\",\"word\":\"MESA\",\"hiddenIndices\":[1,3],\"options\":[[\"E\",\"A\",\"O\"],[\"A\",\"E\",\"I\"]]}"),
+            new(10, "ROADMAP_STANDARD_10_RUTINA_DE_LA_MANANA", "La rutina de la mañana", "Secuencia de cuatro acciones de la rutina matutina.", "Autonomía y Vida Diaria", "ORDER_SEQUENCE", "Ordená la rutina de la mañana", "{\"instruction\":\"Ordená la rutina de la mañana\",\"items\":[{\"id\":\"1\",\"label\":\"Despertarse\",\"pictogramId\":8989,\"correctPosition\":0},{\"id\":\"2\",\"label\":\"Ir al baño\",\"pictogramId\":6929,\"correctPosition\":1},{\"id\":\"3\",\"label\":\"Lavarse los dientes\",\"pictogramId\":6971,\"correctPosition\":2},{\"id\":\"4\",\"label\":\"Desayunar\",\"pictogramId\":28667,\"correctPosition\":3}]}"),
+        };
+
         public async Task<List<Activity>> EnsureStandardActivitiesAsync(CancellationToken cancellationToken = default)
         {
-            // "Trayectoria" debe existir porque las áreas se cargan manualmente desde el ABM.
             var skillArea = await _context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria", cancellationToken);
             if (skillArea == null) return new List<Activity>();
 
-            var profEntity = await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
+            var templateTypes = await _context.ActivityTemplateTypes
+                .Where(t => Definitions.Select(d => d.TemplateCode).Contains(t.Code))
+                .ToDictionaryAsync(t => t.Code, cancellationToken);
+            var missingTemplate = Definitions.Select(d => d.TemplateCode).Distinct().FirstOrDefault(code => !templateTypes.ContainsKey(code));
+            if (missingTemplate != null)
+                throw new InvalidOperationException($"Missing activity template type with code '{missingTemplate}'.");
 
-            var standardActivities = new List<Activity>();
-            var activitiesDefinitions = new[]
+            var categoryNames = Definitions.Select(d => d.Category).Distinct().ToArray();
+            var categories = await _context.ActivityCategories
+                .Where(c => categoryNames.Contains(c.Name))
+                .ToDictionaryAsync(c => c.Name, cancellationToken);
+            var missingCategory = categoryNames.FirstOrDefault(name => !categories.ContainsKey(name));
+            if (missingCategory != null)
+                throw new InvalidOperationException($"Missing activity category '{missingCategory}'.");
+
+            var keys = Definitions.Select(d => d.Key).ToArray();
+            var activities = await _context.Activities.Where(a => a.StandardKey != null && keys.Contains(a.StandardKey)).ToListAsync(cancellationToken);
+            var result = new List<Activity>(Definitions.Length);
+            foreach (var def in Definitions)
             {
-                new {
-                    Seq = 1,
-                    Title = "¿Qué dice aquí?",
-                    Desc = "Lectura global de palabras cotidianas asociadas a su pictograma.",
-                    CatId = 1, // Lectoescritura
-                    TemplateCode = "GLOBAL_READING",
-                    Instructions = "Lee la palabra y elige el dibujo correcto",
-                    ContentJson = """{"instruction":"Lee la palabra y elige el dibujo correcto","word":"GATO","items":[{"id":"gato","pictogramId":9214,"label":"Gato"},{"id":"perro","pictogramId":9217,"label":"Perro"},{"id":"pajaro","pictogramId":9174,"label":"Pájaro"}],"correctItemId":"gato"}"""
-                },
-                new {
-                    Seq = 2,
-                    Title = "¿Cómo se siente el niño?",
-                    Desc = "Identificación de emociones básicas a partir de una situación visual.",
-                    CatId = 3, // Habilidades Socioemocionales
-                    TemplateCode = "OPTION_SELECT",
-                    Instructions = "Mira el dibujo del niño llorando. ¿Qué emoción está sintiendo?",
-                    ContentJson = """{"instruction":"Mira el dibujo del niño llorando. ¿Qué emoción está sintiendo?","question":"¿Qué emoción está sintiendo el niño?","questionPictogramId":24200,"options":[{"id":"triste","text":"Tristeza","pictogramId":24200},{"id":"alegre","text":"Alegría","pictogramId":24194},{"id":"enojado","text":"Enojo","pictogramId":24198}],"correctOptionId":"triste"}"""
-                },
-                new {
-                    Seq = 3,
-                    Title = "Armando la palabra Sol",
-                    Desc = "Construcción guiada de palabras simples letra por letra.",
-                    CatId = 1, // Lectoescritura
-                    TemplateCode = "BUILD_WORD",
-                    Instructions = "Completa las letras que faltan para formar la palabra SOL",
-                    ContentJson = """{"instruction":"Completa las letras que faltan para formar la palabra SOL","word":"SOL","hiddenIndices":[0,1,2],"options":[["S","M","P"],["O","A","E"],["L","R","T"]]}"""
-                },
-                new {
-                    Seq = 4,
-                    Title = "Contando las manzanas",
-                    Desc = "Conteo visual y numeración sumando elementos ilustrados.",
-                    CatId = 2, // Numeración y Matemática
-                    TemplateCode = "NUMERATION",
-                    Instructions = "¿Cuántas manzanas hay en total?",
-                    ContentJson = """{"instruction":"¿Cuántas manzanas hay en total?","operandA":3,"operandB":2,"pictogramId":2462,"options":[{"id":"opt1","value":4},{"id":"opt2","value":5},{"id":"opt3","value":6}]}"""
-                },
-                new {
-                    Seq = 5,
-                    Title = "Pasos para lavarse las manos",
-                    Desc = "Secuencia cronológica de hábitos de higiene personal paso a paso.",
-                    CatId = 7, // Autonomía y Vida Diaria
-                    TemplateCode = "ORDER_SEQUENCE",
-                    Instructions = "Ordena los pasos correctos para lavarse las manos",
-                    ContentJson = """{"instruction":"Ordena los pasos correctos para lavarse las manos","items":[{"id":"1","label":"Mojarse las manos","pictogramId":32442,"correctPosition":0},{"id":"2","label":"Ponerse jabón","pictogramId":32443,"correctPosition":1},{"id":"3","label":"Enjuagarse con agua","pictogramId":32444,"correctPosition":2},{"id":"4","label":"Secarse con toalla","pictogramId":32445,"correctPosition":3}]}"""
-                },
-                new {
-                    Seq = 6,
-                    Title = "Tengo hambre",
-                    Desc = "Selección de pictograma de necesidad básica de alimentación.",
-                    CatId = 4, // Comunicación y Lenguaje
-                    TemplateCode = "PICTOGRAM_SELECT",
-                    Instructions = "Si tienes hambre, ¿qué pictograma debes presionar para comunicarte?",
-                    ContentJson = """{"instruction":"Si tienes hambre, ¿qué pictograma debes presionar para comunicarte?","correctItemId":"comer","items":[{"id":"comer","label":"Quiero comer","pictogramId":28667},{"id":"dormir","label":"Quiero dormir","pictogramId":32448},{"id":"jugar","label":"Quiero jugar","pictogramId":23392}]}"""
-                },
-                new {
-                    Seq = 7,
-                    Title = "Armando la palabra Casa",
-                    Desc = "Construcción guiada de la palabra CASA completando las vocales faltantes.",
-                    CatId = 1, // Lectoescritura
-                    TemplateCode = "BUILD_WORD",
-                    Instructions = "Completa las letras que faltan para formar la palabra CASA",
-                    ContentJson = """{"instruction":"Completa las letras que faltan para formar la palabra CASA","word":"CASA","hiddenIndices":[1,3],"options":[["A","E","O"],["A","I","U"]]}"""
-                },
-                new {
-                    Seq = 8,
-                    Title = "¿Para qué sirve?",
-                    Desc = "Asociación funcional de objetos de la vida cotidiana.",
-                    CatId = 8, // Estimulación Cognitiva
-                    TemplateCode = "OPTION_SELECT",
-                    Instructions = "¿Para qué sirve una cuchara?",
-                    ContentJson = """{"instruction":"¿Para qué sirve una cuchara?","question":"¿Para qué usamos la cuchara?","questionPictogramId":2452,"options":[{"id":"comer","text":"Para comer sopa o yogur","pictogramId":28667},{"id":"dibujar","text":"Para pintar en la hoja","pictogramId":2600},{"id":"dormir","text":"Para acostarse en la cama","pictogramId":32448}],"correctOptionId":"comer"}"""
-                },
-                new {
-                    Seq = 9,
-                    Title = "Contando los lápices",
-                    Desc = "Conteo y suma visual de útiles escolares.",
-                    CatId = 2, // Numeración y Matemática
-                    TemplateCode = "NUMERATION",
-                    Instructions = "¿Cuántos lápices hay en la cartuchera?",
-                    ContentJson = """{"instruction":"¿Cuántos lápices hay en la cartuchera?","operandA":4,"operandB":2,"pictogramId":3028,"options":[{"id":"opt1","value":5},{"id":"opt2","value":6},{"id":"opt3","value":7}]}"""
-                },
-                new {
-                    Seq = 10,
-                    Title = "Ropa de verano e invierno",
-                    Desc = "Clasificación y emparejamiento de prendas de vestir según la estación climática.",
-                    CatId = 7, // Autonomía y Vida Diaria
-                    TemplateCode = "CLASSIFY",
-                    Instructions = "Empareja cada prenda con la estación del año correspondiente",
-                    ContentJson = """{"instruction":"Empareja cada prenda con la estación del año correspondiente","pairs":[{"id":"1","label":"Invierno (Gorro)","pictogramId":5992},{"id":"2","label":"Invierno (Bufanda)","pictogramId":5996},{"id":"3","label":"Verano (Malla)","pictogramId":6010},{"id":"4","label":"Verano (Gorra de sol)","pictogramId":6015}]}"""
-                }
-            };
-
-            foreach (var def in activitiesDefinitions)
-            {
-                var act = await _context.Activities.FirstOrDefaultAsync(a => a.Title == def.Title || a.RoadmapOrder == def.Seq, cancellationToken);
-                var templateType = await _context.Set<ActivityTemplateType>().FirstOrDefaultAsync(t => t.Code == def.TemplateCode, cancellationToken);
-                var templateTypeId = templateType?.Id ?? 1;
-
-                if (act == null)
+                var activity = activities.FirstOrDefault(a => a.StandardKey == def.Key);
+                if (activity == null)
                 {
-                    act = new Activity
-                    {
-                        Title = def.Title,
-                        Description = def.Desc,
-                        Instructions = def.Instructions,
-                        CategoryId = def.CatId,
-                        SkillAreaId = skillArea.Id,
-                        ProfessionalId = profEntity?.Id,
-                        HasVisualSupport = true,
-                        HasAudioSupport = true,
-                        UsesEasyReading = true,
-                        UsesPictograms = true,
-                        RequiresSupervision = false,
-                        IsStandardActivity = true,
-                        IsTemplate = true,
-                        RoadmapOrder = def.Seq,
-                        ComplexityLevel = 1,
-                        EstimatedDurationMinutes = 2,
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
-                    };
-
-                    _context.Activities.Add(act);
-                    await _context.SaveChangesAsync(cancellationToken);
-
-                    var content = new ActivityContent
-                    {
-                        ActivityId = act.Id,
-                        TemplateTypeId = templateTypeId,
-                        ContentJson = def.ContentJson,
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
-                    };
-                    _context.Set<ActivityContent>().Add(content);
-                    await _context.SaveChangesAsync(cancellationToken);
+                    activity = new Activity { StandardKey = def.Key, CreatedAt = DateTime.UtcNow, CreatedBy = SystemUserId };
+                    _context.Activities.Add(activity);
                 }
-                else
+
+                activity.Title = def.Title;
+                activity.Description = def.Description;
+                activity.Instructions = def.Instructions;
+                activity.CategoryId = categories[def.Category].Id;
+                activity.SkillAreaId = skillArea.Id;
+                activity.ProfessionalId = null;
+                activity.HasVisualSupport = true;
+                activity.HasAudioSupport = true;
+                activity.UsesEasyReading = true;
+                activity.UsesPictograms = true;
+                activity.RequiresSupervision = false;
+                activity.IsStandardActivity = true;
+                activity.IsTemplate = true;
+                activity.RoadmapOrder = def.Sequence;
+                activity.ComplexityLevel = 1;
+                activity.EstimatedDurationMinutes = 2;
+
+                var content = await _context.ActivityContents.FirstOrDefaultAsync(c => c.ActivityId == activity.Id, cancellationToken);
+                if (content == null)
                 {
-                    act.Title = def.Title;
-                    act.Description = def.Desc;
-                    act.Instructions = def.Instructions;
-                    act.CategoryId = def.CatId;
-                    act.SkillAreaId = skillArea.Id;
-                    act.IsStandardActivity = true;
-                    act.IsTemplate = true;
-                    act.RoadmapOrder = def.Seq;
-
-                    var existingContent = await _context.Set<ActivityContent>().FirstOrDefaultAsync(c => c.ActivityId == act.Id, cancellationToken);
-                    if (existingContent != null)
-                    {
-                        existingContent.ContentJson = def.ContentJson;
-                        existingContent.TemplateTypeId = templateTypeId;
-                    }
-                    else
-                    {
-                        var content = new ActivityContent
-                        {
-                            ActivityId = act.Id,
-                            TemplateTypeId = templateTypeId,
-                            ContentJson = def.ContentJson,
-                            CreatedAt = DateTime.UtcNow,
-                            CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
-                        };
-                        _context.Set<ActivityContent>().Add(content);
-                    }
-                    await _context.SaveChangesAsync(cancellationToken);
+                    content = new ActivityContent { Activity = activity, CreatedAt = DateTime.UtcNow, CreatedBy = SystemUserId };
+                    _context.ActivityContents.Add(content);
                 }
-                standardActivities.Add(act);
+                content.TemplateTypeId = templateTypes[def.TemplateCode].Id;
+                content.ContentJson = def.ContentJson;
+                result.Add(activity);
             }
 
-            return standardActivities;
+            await _context.SaveChangesAsync(cancellationToken);
+            return result.OrderBy(a => a.RoadmapOrder).ToList();
         }
 
         public async Task InitializeStudentRoadmapAsync(Guid studentId, Guid? supervisorUserId = null, CancellationToken cancellationToken = default)
         {
-            // 1. Asegurar o actualizar siempre las 10 actividades oficiales del Roadmap
-            var standardActivities = await EnsureStandardActivitiesAsync(cancellationToken);
-
-            // 2. Verificar si el alumno ya tiene un roadmap
+            // Do not even touch the global catalog for students who already have a roadmap.
             var hasRoadmap = await _context.PersonRoadmaps.AnyAsync(r => r.PersonId == studentId, cancellationToken);
             if (hasRoadmap) return;
+
+            var standardActivities = await EnsureStandardActivitiesAsync(cancellationToken);
 
             var skillArea = await _context.SkillAreas.FirstOrDefaultAsync(sa => sa.Name == "Trayectoria", cancellationToken);
             if (skillArea == null) return;
 
             Professional? profEntity = null;
-            if (supervisorUserId.HasValue)
+            if (supervisorUserId.HasValue && supervisorUserId.Value != Guid.Empty)
             {
-                profEntity = await _context.Professionals.FirstOrDefaultAsync(p => p.UserId == supervisorUserId.Value, cancellationToken);
+                profEntity = await _context.Professionals.FirstOrDefaultAsync(
+                    p => p.UserId == supervisorUserId.Value,
+                    cancellationToken);
             }
-            profEntity ??= await _context.Professionals.FirstOrDefaultAsync(cancellationToken);
 
             // PersonRoadmap and ActivityAssignment require a real professional.
             // Standard activities remain global when none exists, but the personalized
@@ -235,7 +137,7 @@ namespace InclusiON.Infrastructure.Services
                 CreatedByProfessionalId = profEntity.Id,
                 Notes = "Trayectoria anti-frustración preconfigurada.",
                 CreatedAt = DateTime.UtcNow,
-                CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                CreatedBy = SystemUserId
             };
             _context.PersonRoadmaps.Add(roadmap);
             await _context.SaveChangesAsync(cancellationToken);
@@ -247,7 +149,7 @@ namespace InclusiON.Infrastructure.Services
                 SkillAreaId = skillArea.Id,
                 DisplayOrder = 1,
                 CreatedAt = DateTime.UtcNow,
-                CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                CreatedBy = SystemUserId
             };
             _context.PersonRoadmapAreas.Add(roadmapArea);
             await _context.SaveChangesAsync(cancellationToken);
@@ -269,7 +171,7 @@ namespace InclusiON.Infrastructure.Services
                     ShowHints = true,
                     DifficultyLevel = 1,
                     CreatedAt = DateTime.UtcNow,
-                    CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                    CreatedBy = SystemUserId
                 };
                 _context.PersonRoadmapActivities.Add(roadmapActivity);
                 await _context.SaveChangesAsync(cancellationToken);
@@ -285,12 +187,42 @@ namespace InclusiON.Infrastructure.Services
                         AssignedAt = DateTime.UtcNow,
                         StatusId = AssignmentStatuses.Pendiente,
                         CreatedAt = DateTime.UtcNow,
-                        CreatedBy = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                        CreatedBy = SystemUserId
                     };
                     _context.ActivityAssignments.Add(assignment);
                     await _context.SaveChangesAsync(cancellationToken);
                 }
             }
+        }
+
+        public async Task<int> RepairAssignedStudentRoadmapsAsync(CancellationToken cancellationToken = default)
+        {
+            var assignments = await _context.ProfessionalPersons
+                .Where(pp => pp.IsActive && !_context.PersonRoadmaps.Any(r => r.PersonId == pp.PersonId))
+                .Select(pp => new
+                {
+                    pp.PersonId,
+                    ProfessionalUserId = pp.Professional.UserId,
+                    pp.IsPrimaryProfessional,
+                    pp.AssignedAt,
+                    pp.ProfessionalId
+                })
+                .OrderByDescending(pp => pp.IsPrimaryProfessional)
+                .ThenBy(pp => pp.AssignedAt)
+                .ThenBy(pp => pp.ProfessionalId)
+                .ToListAsync(cancellationToken);
+
+            var repaired = 0;
+            foreach (var assignment in assignments.GroupBy(a => a.PersonId).Select(g => g.First()))
+            {
+                await InitializeStudentRoadmapAsync(
+                    assignment.PersonId,
+                    assignment.ProfessionalUserId,
+                    cancellationToken);
+                repaired++;
+            }
+
+            return repaired;
         }
     }
 }
