@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
 using InclusiON.Application.Interfaces.Common;
@@ -19,9 +20,11 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         private readonly IPersonsRepository       _personsRepo = Substitute.For<IPersonsRepository>();
         private readonly IUnitOfWork              _uow         = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider        _dateTime    = Substitute.For<IDateTimeProvider>();
+        private readonly IRoadmapInitializer      _roadmapInit = Substitute.For<IRoadmapInitializer>();
 
         private CreateClassroomCommandHandler BuildSut() =>
-            new(_assignRepo, _prosRepo, _personsRepo, _uow, _dateTime);
+            new(_assignRepo, _prosRepo, _personsRepo, _uow, _dateTime,
+                _roadmapInit, NullLogger<CreateClassroomCommandHandler>.Instance);
 
         private static readonly Guid ProfId   = Guid.NewGuid();
         private static readonly Guid PersonId1 = Guid.NewGuid();
@@ -30,9 +33,10 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         private static CreateClassroomCommand Cmd(string name, List<Guid>? personIds) =>
             new(ProfId, name, personIds, IsPrimaryProfessional: true, CanSuperviseLogin: false);
 
-        private static Professional ApprovedPro() => new()
+    private static Professional ApprovedPro() => new()
         {
             Id = ProfId, Status = ProfessionalStatusEnum.Approved,
+            UserId = Guid.NewGuid(),
             User = new User { IsActive = true }, ProfessionalInstitutions = [],
         };
 
@@ -103,6 +107,21 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
             await _assignRepo.DidNotReceive().CreateAssignmentAsync(
                 Arg.Any<ProfessionalPerson>(), Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_HappyPath_InitializesEachRoadmapWithTheClassroomProfessionalUser()
+        {
+            var professional = ApprovedPro();
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(professional);
+            _personsRepo.GetByIdAsync(PersonId1, Arg.Any<CancellationToken>()).Returns(APerson(PersonId1));
+            _assignRepo.GetAssignmentAsync(ProfId, PersonId1, Arg.Any<CancellationToken>())
+                .Returns((ProfessionalPerson?)null);
+
+            await BuildSut().HandleAsync(Cmd("Aula", new() { PersonId1 }), default);
+
+            await _roadmapInit.Received(1).InitializeStudentRoadmapAsync(
+                PersonId1, professional.UserId, Arg.Any<CancellationToken>());
         }
 
         [Fact]

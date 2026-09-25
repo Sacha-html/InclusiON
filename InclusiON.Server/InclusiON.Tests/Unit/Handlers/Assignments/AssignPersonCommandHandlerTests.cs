@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
 using InclusiON.Application.Interfaces.Common;
@@ -20,9 +21,11 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         private readonly IUnitOfWork              _uow         = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider        _dateTime    = Substitute.For<IDateTimeProvider>();
         private readonly IRealTimeNotifier        _notifier    = Substitute.For<IRealTimeNotifier>();
+        private readonly IRoadmapInitializer      _roadmapInit = Substitute.For<IRoadmapInitializer>();
 
         private AssignPersonCommandHandler BuildSut() =>
-            new(_assignRepo, _prosRepo, _personsRepo, _uow, _dateTime, _notifier);
+            new(_assignRepo, _prosRepo, _personsRepo, _uow, _dateTime, _notifier,
+                _roadmapInit, NullLogger<AssignPersonCommandHandler>.Instance);
 
         private static readonly Guid ProfId   = Guid.NewGuid();
         private static readonly Guid PersonId = Guid.NewGuid();
@@ -30,9 +33,10 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         private static AssignPersonCommand Cmd() =>
             new(ProfId, PersonId, IsPrimaryProfessional: true, CanSuperviseLogin: false);
 
-        private static Professional ApprovedPro() => new()
+    private static Professional ApprovedPro() => new()
         {
             Id = ProfId, Status = ProfessionalStatusEnum.Approved,
+            UserId = Guid.NewGuid(),
             User = new User { IsActive = true }, ProfessionalInstitutions = [],
         };
 
@@ -121,6 +125,22 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
                 Arg.Is<ProfessionalPerson>(a => a.ProfessionalId == ProfId && a.IsActive),
                 Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_NewAssignment_InitializesRoadmapWithAssignedProfessionalUser()
+        {
+            var professional = ApprovedPro();
+            var person = APerson();
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(professional);
+            _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(person);
+            _assignRepo.GetAssignmentAsync(ProfId, PersonId, Arg.Any<CancellationToken>())
+                .Returns((ProfessionalPerson?)null);
+
+            await BuildSut().HandleAsync(Cmd(), default);
+
+            await _roadmapInit.Received(1).InitializeStudentRoadmapAsync(
+                PersonId, professional.UserId, Arg.Any<CancellationToken>());
         }
 
         // ── Notificación al profesional ──────────────────────────────────────
