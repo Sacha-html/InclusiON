@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
 using InclusiON.Application.Interfaces.Common;
@@ -24,9 +25,11 @@ namespace InclusiON.Tests.Unit.Handlers.Assignments
         private readonly IAccessAuditLogger _auditLogger = Substitute.For<IAccessAuditLogger>();
         private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
         private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+        private readonly IRoadmapInitializer _roadmapInitializer = Substitute.For<IRoadmapInitializer>();
 
         private TransferStudentCommandHandler BuildSut() =>
-            new(_assignmentsRepo, _professionalsRepo, _personsRepo, _activityAssignmentRepo, _reportsRepo, _auditLogger, _dateTime, _unitOfWork);
+            new(_assignmentsRepo, _professionalsRepo, _personsRepo, _activityAssignmentRepo, _reportsRepo, _auditLogger, _dateTime, _unitOfWork,
+                _roadmapInitializer, NullLogger<TransferStudentCommandHandler>.Instance);
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid FromProfId = Guid.NewGuid();
