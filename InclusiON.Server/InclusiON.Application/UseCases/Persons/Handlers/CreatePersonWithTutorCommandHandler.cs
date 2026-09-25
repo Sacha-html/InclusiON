@@ -255,7 +255,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     student.Id,
                     "roadmap initialization",
                     () => _roadmapInitializer.InitializeStudentRoadmapAsync(
-                        student.Id, student.SupervisorUserId, cancellationToken));
+                        student.Id, professional.UserId, cancellationToken));
 
                 await RunPostCommitStepAsync(
                     student.Id,

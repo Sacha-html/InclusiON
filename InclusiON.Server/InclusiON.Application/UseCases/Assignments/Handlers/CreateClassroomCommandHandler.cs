@@ -7,6 +7,7 @@ using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Assignments;
+using Microsoft.Extensions.Logging;
 
 namespace InclusiON.Application.UseCases.Assignments.Handlers
 {
@@ -21,19 +22,25 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IPersonsRepository _personsRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IRoadmapInitializer _roadmapInitializer;
+        private readonly ILogger<CreateClassroomCommandHandler> _logger;
 
         public CreateClassroomCommandHandler(
             IAssignmentsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IPersonsRepository personsRepository,
             IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IRoadmapInitializer roadmapInitializer,
+            ILogger<CreateClassroomCommandHandler> logger)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _personsRepository = personsRepository;
             _unitOfWork = unitOfWork;
             _dateTime = dateTime;
+            _roadmapInitializer = roadmapInitializer;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<List<ProfessionalPersonResponse>>> HandleAsync(
@@ -136,8 +143,30 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            foreach (var assignment in resultList)
+            {
+                await InitializeRoadmapPostCommitAsync(
+                    assignment.PersonId,
+                    professional.UserId,
+                    cancellationToken);
+            }
+
             var response = resultList.Select(ProfessionalPersonResponse.MapToResponse).ToList();
             return ApiResponse<List<ProfessionalPersonResponse>>.SuccessResult(response, "Aula creada y alumnos asignados exitosamente.");
+        }
+
+        private async Task InitializeRoadmapPostCommitAsync(Guid studentId, Guid professionalUserId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _roadmapInitializer.InitializeStudentRoadmapAsync(studentId, professionalUserId, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Alumno {StudentId} asignado al aula, pero falló la inicialización post-commit del roadmap.",
+                    studentId);
+            }
         }
     }
 }

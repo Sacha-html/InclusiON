@@ -8,6 +8,7 @@ using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Assignments;
 using InclusiON.Application.Auditing;
+using Microsoft.Extensions.Logging;
 
 namespace InclusiON.Application.UseCases.Assignments.Handlers
 {
@@ -22,6 +23,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IAccessAuditLogger _auditLogger;
         private readonly IDateTimeProvider _dateTime;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IRoadmapInitializer _roadmapInitializer;
+        private readonly ILogger<TransferStudentCommandHandler> _logger;
 
         public TransferStudentCommandHandler(
             IAssignmentsRepository assignmentsRepo,
@@ -31,7 +34,9 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             IReportsRepository reportsRepo,
             IAccessAuditLogger auditLogger,
             IDateTimeProvider dateTime,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IRoadmapInitializer roadmapInitializer,
+            ILogger<TransferStudentCommandHandler> logger)
         {
             _assignmentsRepo = assignmentsRepo;
             _professionalsRepo = professionalsRepo;
@@ -41,6 +46,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             _auditLogger = auditLogger;
             _dateTime = dateTime;
             _unitOfWork = unitOfWork;
+            _roadmapInitializer = roadmapInitializer;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<TransferStudentResponse>> HandleAsync(
@@ -159,6 +166,22 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
 
             // 9. Guardar cambios en UOW
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            try
+            {
+                // Existing roadmaps are untouched; this only repairs a missing roadmap
+                // left by a previous post-commit infrastructure failure.
+                await _roadmapInitializer.InitializeStudentRoadmapAsync(
+                    command.PersonId,
+                    toProf.UserId,
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Alumno {StudentId} transferido, pero falló la inicialización post-commit del roadmap.",
+                    command.PersonId);
+            }
 
             // 10. Registrar auditoría
             await _auditLogger.LogAsync(new AccessAuditEntry

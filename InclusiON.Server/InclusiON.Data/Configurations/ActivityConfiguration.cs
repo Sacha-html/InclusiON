@@ -19,6 +19,9 @@ namespace InclusiON.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(150);
 
+            builder.Property(a => a.StandardKey)
+                .HasMaxLength(100);
+
             builder.Property(a => a.Description);
 
             builder.Property(a => a.Instructions);
@@ -59,6 +62,8 @@ namespace InclusiON.Data.Configurations
             builder.HasIndex(a => a.ProfessionalId);
             builder.HasIndex(a => a.CategoryId);
             builder.HasIndex(a => a.RoadmapOrder);
+            builder.HasIndex(a => a.StandardKey)
+                .IsUnique();
 
             builder.HasOne(a => a.Professional)
                 .WithMany(p => p.Activities)

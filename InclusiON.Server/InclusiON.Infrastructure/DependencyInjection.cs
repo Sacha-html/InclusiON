@@ -75,6 +75,11 @@ namespace InclusiON.Infrastructure
                 {
                     var initializer = new RoadmapInitializer(context);
                     await initializer.EnsureStandardActivitiesAsync(ct);
+                },
+                async (context, ct) =>
+                {
+                    var initializer = new RoadmapInitializer(context);
+                    return await initializer.RepairAssignedStudentRoadmapsAsync(ct);
                 });
 
             var connectionString = configuration.GetConnectionString("PostgreSqlConn");
