@@ -21,6 +21,12 @@ namespace InclusiON.Data.Seeders
 
             // Normalización de parentescos para integridad de datos con el combo frontend
             await NormalizeRelationshipsAsync(context);
+
+            // Sincroniza el catálogo oficial, incluido el contenido visual actualizado.
+            await RoadmapInitializerAccessor.EnsureStandardActivities(context, CancellationToken.None);
+
+            // Repara asignaciones históricas que quedaron sin roadmap después del commit de asignación.
+            await RoadmapInitializerAccessor.RepairAssignedStudentRoadmaps(context, CancellationToken.None);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)

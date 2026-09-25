@@ -20,11 +20,9 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         private readonly IUnitOfWork             _uow           = Substitute.For<IUnitOfWork>();
         private readonly IBackgroundJobRepository _bgJobs       = Substitute.For<IBackgroundJobRepository>();
         private readonly IDateTimeProvider       _dateTime      = Substitute.For<IDateTimeProvider>();
-        private readonly IRoadmapInitializer    _roadmapInit   = Substitute.For<IRoadmapInitializer>();
-
         private CreatePersonCommandHandler BuildSut() =>
             new(_personsRepo, _identity, _pwdHasher, _uow, _bgJobs,
-                NullLogger<CreatePersonCommandHandler>.Instance, _dateTime, _roadmapInit);
+                NullLogger<CreatePersonCommandHandler>.Instance, _dateTime);
 
         private static CreatePersonCommand Cmd(string? doc = null) =>
             new("Lucas", "Pérez", doc,
@@ -87,6 +85,18 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
             await _personsRepo.Received(1).CreateAsync(
                 Arg.Is<PersonWithDisability>(p => p.FirstName == "Lucas"),
                 Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_ValidCommand_DoesNotInitializeRoadmapBeforeAssignment()
+        {
+            SetupTransaction();
+            _dateTime.UtcNow.Returns(DateTime.UtcNow);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeTrue();
+            // Roadmap initialization belongs to the assignment flow, not person creation.
         }
     }
 }

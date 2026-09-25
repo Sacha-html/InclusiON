@@ -95,6 +95,10 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
                 Arg.Is<string>(msg => msg.Contains("Lucas Pérez") && msg.Contains("perfil funcional")),
                 Arg.Is<string>(url => url.StartsWith("/#/pro/persons/")),
                 Arg.Any<CancellationToken>());
+            await _roadmapInit.Received(1).InitializeStudentRoadmapAsync(
+                Arg.Any<Guid>(), ProfessionalUserId, Arg.Any<CancellationToken>());
+            await _roadmapInit.DidNotReceive().InitializeStudentRoadmapAsync(
+                Arg.Any<Guid>(), Arg.Is<Guid?>(id => id == null || id == Guid.Empty), Arg.Any<CancellationToken>());
         }
 
         [Fact]
