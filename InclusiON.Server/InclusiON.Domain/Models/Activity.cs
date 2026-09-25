@@ -30,6 +30,11 @@ namespace InclusiON.Domain.Models
         public string Title { get; set; } = string.Empty;
 
         /// <summary>
+        /// Stable key for an official activity. Null for professional-created activities.
+        /// </summary>
+        public string? StandardKey { get; set; }
+
+        /// <summary>
         /// Descripcion detallada de la actividad y sus objetivos.
         /// </summary>
         public string? Description { get; set; }
