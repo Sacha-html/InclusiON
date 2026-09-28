@@ -60,6 +60,26 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        [HttpGet("diagnoses/{id}/export-pdf")]
+        [Authorize(Policy = "diagnoses:read")]
+        [DiagnosisAccess(AccessMode.Read)]
+        [Produces("application/pdf")]
+        [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ExportDiagnosisPdf(
+            [ModelBinder(typeof(EncryptedIntModelBinder))] int id,
+            [FromServices] IQueryHandler<ExportDiagnosisPdfQuery, ApiResponse<byte[]>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await handler.HandleAsync(new ExportDiagnosisPdfQuery(id), cancellationToken);
+
+            if (!result.Success)
+                return result.ToActionResult().Result!;
+
+            var filename = $"diagnostico-{id}-{DateTime.UtcNow:yyyyMMdd}.pdf";
+            return File(result.Data!, "application/pdf", filename);
+        }
+
         [HttpPost("persons/{personId}/diagnoses")]
         [Authorize(Policy = "diagnoses:create")]
         [ProducesResponseType(typeof(ApiResponse<DiagnosisResponse>), StatusCodes.Status200OK)]
