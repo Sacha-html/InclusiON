@@ -106,6 +106,24 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
         }
 
         [Fact]
+        public async Task FutureDiagnosisDate_ReturnsValidationFailed()
+        {
+            var now = new DateTime(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
+            _proRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(ApprovedPro());
+            var diagnosis = ADiagnosis(owner: ProfId);
+            _repo.GetByIdAsync(DiagnosisId, Arg.Any<CancellationToken>()).Returns(diagnosis);
+            _dateTime.UtcNow.Returns(now);
+
+            var command = Cmd() with { DiagnosisDate = now.Date.AddDays(1) };
+
+            var result = await BuildSut().HandleAsync(command, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _repo.DidNotReceiveWithAnyArgs().UpdateAsync(default!, default);
+        }
+
+        [Fact]
         public async Task ValidUpdate_UpdatesFieldsAndSaves()
         {
             var now = new DateTime(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc);
