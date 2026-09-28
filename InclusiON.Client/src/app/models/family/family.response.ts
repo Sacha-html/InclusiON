@@ -36,6 +36,7 @@ export interface LinkedPersonInfo {
   disabilityType?: string;
   isPrimary: boolean;
   relationship?: string;
+  isActive: boolean;
 }
 
 export interface PersonRepresentativeResponse {

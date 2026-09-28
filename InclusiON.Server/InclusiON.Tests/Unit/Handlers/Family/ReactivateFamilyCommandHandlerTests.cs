@@ -90,14 +90,15 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         }
 
         [Fact]
-        public async Task HandleAsync_InactiveFamily_ReactivatesOnlyFamilyAccountAndNotifies()
+        public async Task HandleAsync_InactiveFamily_ReactivatesFamilyAccountAndNotifies()
         {
             var family = InactiveFamily();
-            var inactiveLink = family.PersonRepresentatives.Single();
             var now = new DateTime(2026, 9, 6, 12, 0, 0, DateTimeKind.Utc);
             _familyRepo.GetByIdForUpdateAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
             _identity.ResetPasswordAsync(family.User, Arg.Any<string>()).Returns((true, Array.Empty<string>()));
             _dateTime.UtcNow.Returns(now);
+            _familyRepo.RestoreSystemSuspendedLinksAsync(FamilyId, now, Arg.Any<CancellationToken>())
+                .Returns(new List<string>());
 
             var result = await BuildSut().HandleAsync(new ReactivateFamilyCommand(FamilyId, AdminId), default);
 
@@ -110,9 +111,6 @@ namespace InclusiON.Tests.Unit.Handlers.Family
             family.User.LockoutEnd.Should().BeNull();
             family.User.AccessFailedCount.Should().Be(0);
             family.UpdatedAt.Should().Be(now);
-            inactiveLink.IsActive.Should().BeFalse();
-            inactiveLink.Person.IsActive.Should().BeFalse();
-            inactiveLink.Person.User!.IsActive.Should().BeFalse();
             await _identity.Received(1).UpdateUserAsync(family.User);
             await _familyRepo.Received(1).CreateFamilyStatusHistoryAsync(
                 Arg.Is<FamilyStatusHistory>(h => h.FamilyId == FamilyId
@@ -125,6 +123,39 @@ namespace InclusiON.Tests.Unit.Handlers.Family
             await _uow.Received(1).ExecuteInTransactionAsync(
                 Arg.Any<Func<CancellationToken, Task>>(), Arg.Any<CancellationToken>());
             await _uow.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_InactiveFamily_RestoresSystemSuspendedStudentLinks()
+        {
+            var family = InactiveFamily();
+            var now = new DateTime(2026, 9, 6, 12, 0, 0, DateTimeKind.Utc);
+            _familyRepo.GetByIdForUpdateAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
+            _identity.ResetPasswordAsync(family.User, Arg.Any<string>()).Returns((true, Array.Empty<string>()));
+            _dateTime.UtcNow.Returns(now);
+            _familyRepo.RestoreSystemSuspendedLinksAsync(FamilyId, now, Arg.Any<CancellationToken>())
+                .Returns(new List<string> { "Pedro Rodriguez" });
+
+            var result = await BuildSut().HandleAsync(new ReactivateFamilyCommand(FamilyId, AdminId), default);
+
+            result.Success.Should().BeTrue();
+            result.Message.Should().Contain("Pedro Rodriguez");
+            await _familyRepo.Received(1).RestoreSystemSuspendedLinksAsync(FamilyId, now, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_PasswordResetFails_DoesNotAttemptToRestoreLinks()
+        {
+            var family = InactiveFamily();
+            _familyRepo.GetByIdForUpdateAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
+            _identity.ResetPasswordAsync(family.User, Arg.Any<string>())
+                .Returns((false, new[] { "Error generando contraseña" }));
+
+            var result = await BuildSut().HandleAsync(new ReactivateFamilyCommand(FamilyId, AdminId), default);
+
+            result.Success.Should().BeFalse();
+            await _familyRepo.DidNotReceiveWithAnyArgs()
+                .RestoreSystemSuspendedLinksAsync(default, default, default);
         }
     }
 }

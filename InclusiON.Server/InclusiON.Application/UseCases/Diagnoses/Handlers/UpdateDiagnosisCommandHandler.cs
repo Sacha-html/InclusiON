@@ -67,6 +67,13 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
                     "Solo el profesional que creó el diagnóstico puede editarlo.");
             }
 
+            if (command.DiagnosisDate.Date > _dateTime.UtcNow.Date)
+            {
+                return ApiResponse<DiagnosisResponse>.ErrorResult(
+                    ErrorCode.ValidationFailed,
+                    "La fecha del diagnóstico no puede ser futura.");
+            }
+
             diagnosis.DiagnosisDate = command.DiagnosisDate;
             diagnosis.PrimaryDiagnosis = command.PrimaryDiagnosis;
             diagnosis.InitialObservations = command.InitialObservations;
