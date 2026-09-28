@@ -62,6 +62,21 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   canCreate = this.authService.hasPermission(Permissions.Diagnoses.Create);
   canUpdate = this.authService.hasPermission(Permissions.Diagnoses.Update);
   private readonly currentUserId = this.authService.getCurrentUser()?.id ?? '';
+  readonly currentTeacherName = this.authService.getCurrentUser()?.displayName ?? '—';
+
+  readonly subjectSuggestions = [
+    'Lengua y Comunicación',
+    'Matemática',
+    'Ciencias Naturales',
+    'Ciencias Sociales',
+    'Habilidades Sociales',
+    'Autonomía y Vida Diaria',
+    'Comunicación y Lenguaje',
+    'Estimulación Cognitiva',
+  ];
+
+  showDuaSection = false;
+  downloadingPdfId: string | null = null;
 
   loading = signal(false);
   saving = signal(false);
@@ -124,6 +139,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
     this.editingIsCreator.set(true);
     this.submitted = false;
     this.form = this.emptyForm();
+    this.showDuaSection = false;
     this.showModal.set(true);
   }
 
@@ -156,6 +172,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
           pedagogicalObjectives: d.pedagogicalObjectives ?? '',
           recommendedStrategies: d.recommendedStrategies ?? '',
         };
+        this.showDuaSection = !!(d.requiredSupports?.trim() || d.recommendedStrategies?.trim());
         this.showModal.set(true);
       },
       error: () => this.toastService.error('Error al cargar el diagnóstico'),
@@ -168,9 +185,16 @@ export class ProfessionalDiagnosesComponent implements OnInit {
     this.submitted = false;
   }
 
+  get maxDiagnosisDate(): string {
+    return new Date().toISOString().substring(0, 10);
+  }
+
   save(): void {
     this.submitted = true;
     if (!this.form.primaryDiagnosis?.trim()) return;
+    if (!this.form.identifiedCapabilities?.trim()) return;
+    if (!this.form.identifiedChallenges?.trim()) return;
+    if (this.form.diagnosisDate > this.maxDiagnosisDate) return;
     this.saving.set(true);
 
     const op = this.editing()
@@ -245,5 +269,24 @@ export class ProfessionalDiagnosesComponent implements OnInit {
       pedagogicalObjectives: '',
       recommendedStrategies: '',
     };
+  }
+
+  downloadPdf(diag: DiagnosisListItemResponse): void {
+    this.downloadingPdfId = diag.encryptedId;
+    this.diagnosesService.exportPdf(diag.encryptedId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `diagnostico-${diag.diagnosisDate.substring(0, 10)}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.downloadingPdfId = null;
+      },
+      error: () => {
+        this.downloadingPdfId = null;
+        this.toastService.error('Error al exportar el diagnóstico a PDF.');
+      },
+    });
   }
 }
