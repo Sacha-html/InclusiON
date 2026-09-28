@@ -96,6 +96,22 @@ namespace InclusiON.Tests.Unit.Handlers.Diagnoses
         }
 
         [Fact]
+        public async Task FutureDiagnosisDate_ReturnsValidationFailed()
+        {
+            _proRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(ApprovedPro());
+            _personRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(APerson());
+            _dateTime.UtcNow.Returns(Now);
+
+            var command = Cmd() with { DiagnosisDate = Now.Date.AddDays(1) };
+
+            var result = await BuildSut().HandleAsync(command, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _repo.DidNotReceiveWithAnyArgs().CreateAsync(default!, default);
+        }
+
+        [Fact]
         public async Task ValidCommand_CreatesDiagnosisAndReturnsResponse()
         {
             _proRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(ApprovedPro());

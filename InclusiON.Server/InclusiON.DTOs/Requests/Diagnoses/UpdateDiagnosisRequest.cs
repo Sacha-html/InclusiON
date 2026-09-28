@@ -14,11 +14,13 @@ namespace InclusiON.DTOs.Requests.Diagnoses
         [StringLength(2000)]
         public string? InitialObservations { get; set; }
 
-        [StringLength(2000)]
-        public string? IdentifiedCapabilities { get; set; }
+        [Required(ErrorMessage = "Las fortalezas del estudiante son requeridas")]
+        [StringLength(2000, MinimumLength = 5, ErrorMessage = "Debe tener entre 5 y 2000 caracteres")]
+        public string IdentifiedCapabilities { get; set; } = string.Empty;
 
-        [StringLength(2000)]
-        public string? IdentifiedChallenges { get; set; }
+        [Required(ErrorMessage = "Las debilidades / desafíos del estudiante son requeridos")]
+        [StringLength(2000, MinimumLength = 5, ErrorMessage = "Debe tener entre 5 y 2000 caracteres")]
+        public string IdentifiedChallenges { get; set; } = string.Empty;
 
         [StringLength(2000)]
         public string? RequiredSupports { get; set; }

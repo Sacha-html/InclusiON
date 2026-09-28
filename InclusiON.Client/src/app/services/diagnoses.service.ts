@@ -49,4 +49,9 @@ export class DiagnosesService {
       .patch<void>(`${this.baseUrl}/diagnoses/${id}`, { isActive })
       .pipe(handleApiError());
   }
+
+  exportPdf(id: string): Observable<Blob> {
+    return this.http
+      .get(`${this.baseUrl}/diagnoses/${id}/export-pdf`, { responseType: 'blob' });
+  }
 }
