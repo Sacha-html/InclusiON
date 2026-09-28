@@ -29,15 +29,20 @@ namespace InclusiON.DTOs.Responses.Family
                 Relationship = f.Relationship,
                 IsActive = f.User?.IsActive ?? false,
                 Email = f.User?.Email,
+                // Incluye tambien vinculos inactivos (p. ej. suspendidos al dar de baja al
+                // familiar) para no mostrar "0 alumnos a cargo" cuando en realidad los sigue
+                // teniendo, solo que la cuenta esta suspendida.
                 LinkedPersons = f.PersonRepresentatives
-                    .Where(pr => pr.IsActive && pr.Person != null)
+                    .Where(pr => pr.Person != null)
+                    .OrderByDescending(pr => pr.IsActive)
                     .Select(pr => new LinkedPersonInfo
                     {
                         PersonId = pr.PersonId,
                         FullName = $"{pr.Person.FirstName} {pr.Person.LastName}".Trim(),
                         DisabilityType = pr.Person.DisabilityType?.Name,
                         IsPrimary = pr.IsPrimary,
-                        Relationship = pr.Relationship
+                        Relationship = pr.Relationship,
+                        IsActive = pr.IsActive
                     }).ToList()
             };
         }

@@ -58,13 +58,20 @@ namespace InclusiON.DTOs.Responses.Persons
                 AutonomyLevelName = p.AutonomyLevel?.Name,
                 LoginMethodName = p.LoginMethod?.Name,
                 IsActive = p.User?.IsActive ?? false,
-                RepresentativeNames = p.PersonRepresentatives != null && p.PersonRepresentatives.Any(pr => pr.IsActive)
+                // Preferimos un vínculo activo (primario primero); si el alumno quedó sin
+                // representantes activos (p. ej. su tutor fue dado de baja), igual mostramos
+                // el último representante conocido en vez de dejar el dato vacío.
+                RepresentativeNames = p.PersonRepresentatives != null && p.PersonRepresentatives.Any()
                     ? (p.PersonRepresentatives
                         .Where(pr => pr.IsActive && pr.IsPrimary)
                         .Select(pr => $"{pr.Representative.LastName}, {pr.Representative.FirstName}".Trim())
                         .FirstOrDefault()
                       ?? p.PersonRepresentatives
                         .Where(pr => pr.IsActive)
+                        .Select(pr => $"{pr.Representative.LastName}, {pr.Representative.FirstName}".Trim())
+                        .FirstOrDefault()
+                      ?? p.PersonRepresentatives
+                        .OrderByDescending(pr => pr.UpdatedAt ?? pr.CreatedAt)
                         .Select(pr => $"{pr.Representative.LastName}, {pr.Representative.FirstName}".Trim())
                         .FirstOrDefault())
                     : null
