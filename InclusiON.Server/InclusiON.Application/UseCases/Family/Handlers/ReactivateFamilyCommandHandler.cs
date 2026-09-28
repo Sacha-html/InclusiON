@@ -58,6 +58,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             var oldStatus = family.Status;
             IEnumerable<string> errors = [];
             var passwordReset = false;
+            var restoredStudents = new List<string>();
 
             await _unitOfWork.ExecuteInTransactionAsync(async ct =>
             {
@@ -76,6 +77,11 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 family.User.AccessFailedCount = 0;
 
                 await _identityService.UpdateUserAsync(family.User);
+
+                // Restaura los vinculos con alumnos que se suspendieron automaticamente al
+                // dar de baja a este familiar (no las desvinculaciones manuales explicitas).
+                restoredStudents = await _repository.RestoreSystemSuspendedLinksAsync(family.Id, now, ct) ?? [];
+
                 await _repository.CreateFamilyStatusHistoryAsync(new FamilyStatusHistory
                 {
                     FamilyId = family.Id,
@@ -121,9 +127,11 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
             var response = FamilyResponse.MapToResponse(family);
             response.TemporaryPassword = temporaryPassword;
-            return ApiResponse<FamilyResponse>.SuccessResult(
-                response,
-                "Familiar reactivado exitosamente. Se enviaron las credenciales por email.");
+            var successMessage = restoredStudents.Count > 0
+                ? $"Familiar reactivado exitosamente. Se restauró el acceso de los alumnos: {string.Join(", ", restoredStudents)}. Se enviaron las credenciales por email."
+                : "Familiar reactivado exitosamente. Se enviaron las credenciales por email.";
+
+            return ApiResponse<FamilyResponse>.SuccessResult(response, successMessage);
         }
     }
 }

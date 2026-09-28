@@ -10,5 +10,7 @@ namespace InclusiON.DTOs.Responses.Family
         public string? DisabilityType { get; set; }
         public bool IsPrimary { get; set; }
         public string? Relationship { get; set; }
+        /// <summary>Si el vinculo esta activo. False cuando quedo suspendido (p. ej. al dar de baja al familiar).</summary>
+        public bool IsActive { get; set; } = true;
     }
 }

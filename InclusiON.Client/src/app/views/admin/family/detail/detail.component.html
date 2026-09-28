@@ -62,6 +62,7 @@
                     <th scope="col">Alumno</th>
                     <th scope="col">Parentesco</th>
                     <th scope="col">Familiar principal</th>
+                    <th scope="col">Vínculo</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -76,6 +77,11 @@
                       <td>
                         <c-badge [color]="person.isPrimary ? 'primary' : 'secondary'">
                           {{ person.isPrimary ? 'Sí' : 'No' }}
+                        </c-badge>
+                      </td>
+                      <td>
+                        <c-badge [color]="person.isActive ? 'success' : 'warning'">
+                          {{ person.isActive ? 'Activo' : 'Suspendido' }}
                         </c-badge>
                       </td>
                     </tr>
