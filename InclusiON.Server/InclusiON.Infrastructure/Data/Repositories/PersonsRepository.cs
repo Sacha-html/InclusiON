@@ -148,7 +148,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Include(p => p.DisabilityType)
                 .Include(p => p.AutonomyLevel)
                 .Include(p => p.LoginMethod)
-                .Include(p => p.PersonRepresentatives.Where(pr => pr.IsActive))
+                .Include(p => p.PersonRepresentatives)
                     .ThenInclude(pr => pr.Representative)
                 .AsSplitQuery()
                 .AsNoTracking()
