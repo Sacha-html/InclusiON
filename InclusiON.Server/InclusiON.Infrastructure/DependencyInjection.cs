@@ -127,6 +127,7 @@ namespace InclusiON.Infrastructure
 
             // Generación de PDF (QuestPDF)
             services.AddScoped<IReportPdfService, Services.ReportPdfService>();
+            services.AddScoped<IDiagnosisPdfService, Services.DiagnosisPdfService>();
 
             // Gestión de roles e Identity RoleClaims
             services.AddScoped<IRoleService, RoleService>();
