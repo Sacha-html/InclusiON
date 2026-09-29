@@ -61,7 +61,7 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global / Admin Institucional |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | Sistema, Usuario (receptor de respuesta) |
 | **HU de referencia** | HU-13 |
 | **Prioridad** | Media |
@@ -72,7 +72,7 @@
 
 **Flujo principal**
 1. El Admin accede a la sección de gestión de soporte.
-2. El sistema lista todos los tickets (Admin Global) o los de su institución (Admin Institucional), con filtros por estado.
+2. El sistema lista los tickets de su institución, con filtros por estado.
 3. El Admin abre un ticket, lee el contexto capturado automáticamente (sección, rol, navegador) y escribe la respuesta.
 4. El Admin cambia el estado del ticket: Abierto → En proceso → Resuelto / Cerrado.
 5. El sistema notifica al usuario con la respuesta.
@@ -89,13 +89,13 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | — |
 | **HU de referencia** | HU-13 |
 | **Prioridad** | Baja |
 
 **Precondiciones**
-- El Admin Global está autenticado.
+- El Administrador Institucional está autenticado.
 
 **Flujo principal**
 1. El Admin accede a la sección de gestión de FAQ.

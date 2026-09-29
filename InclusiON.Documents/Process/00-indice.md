@@ -7,7 +7,7 @@
 
 | # | Proceso | Área | BPMN |
 |---|---------|------|------|
-| [01](./01-gestion-instituciones.md) | Gestión de Instituciones Educativas | Configuración | [diagram](./BPMN/01-gestion-instituciones.drawio) |
+| [01](./01-gestion-instituciones.md) | Gestión de Administradores Institucionales | Administración | [diagram](./BPMN/01-gestion-instituciones.drawio) |
 | [02](./02-autenticacion-registro.md) | Autenticación y Registro | Seguridad | [diagram](./BPMN/02-autenticacion-registro.drawio) |
 | [03](./03-gestion-catalogos.md) | Gestión de Catálogos | Configuración | [diagram](./BPMN/03-gestion-catalogos.drawio) |
 | [04](./04-gestion-personas.md) | Gestión de Personas con Discapacidad | Personas | [diagram](./BPMN/04-gestion-personas.drawio) |
@@ -50,8 +50,7 @@ Profesional → revisa resultados → genera reporte
 
 | Rol | Código | Alcance |
 |-----|--------|---------|
-| Admin Global | `global-admin` | Todo el sistema |
-| Admin Institucional | `admin` | Su institución |
+| Admin Institucional | `admin` | Máxima autoridad; gestión integral de la institución escolar |
 | Profesional | `professional` | Sus personas asignadas |
 | Familiar | `family` | Sus personas a cargo |
 | Persona (PCD) | `person` | Sus propias actividades |

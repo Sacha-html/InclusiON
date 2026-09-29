@@ -1,0 +1,19 @@
+@startuml Ciclo del Informe Pedagógico de Evolución
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam state {
+  BackgroundColor #EEF4FF
+  BorderColor #2B579A
+}
+
+[*] --> Borrador : El profesional redacta las observaciones del estudiante
+
+Borrador --> EnviadoARevision : El profesional finaliza y solicita aprobación
+EnviadoARevision --> Aprobado : El directivo revisa y da el visto bueno formal
+EnviadoARevision --> RequiereCorreccion : El directivo solicita ajustes u observaciones
+
+RequiereCorreccion --> Borrador : El profesional realiza las correcciones solicitadas
+Aprobado --> [*] : Se publica para la familia y se habilita la descarga en PDF
+
+@enduml

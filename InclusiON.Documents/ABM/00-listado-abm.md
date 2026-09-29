@@ -10,8 +10,7 @@ Cada ABM está justificado por el actor del sistema que lo necesita para cumplir
 
 | Actor | Descripción |
 |-------|-------------|
-| **Administrador Global** | Gestiona la plataforma completa; no pertenece a ninguna institución específica |
-| **Administrador Institucional** | Gestiona profesionales y configuración de su institución |
+| **Administrador Institucional** | Máxima autoridad directiva; gestiona la sede, el personal, los alumnos y la configuración escolar |
 | **Profesional** | Docente, terapeuta o psicólogo que trabaja con personas con discapacidad |
 | **Representante Familiar** | Familiar o tutor que acompaña a la persona con discapacidad |
 | **Persona con Discapacidad** | Destinatario central del sistema; realiza actividades |
@@ -24,9 +23,9 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 
 | # | ABM | Actor principal | Entidades del DER | Estado |
 |---|-----|-----------------|-------------------|--------|
-| 01 | [Instituciones](./01-instituciones.md) | Admin Global | `EducationalInstitution`, `AdminInstitution` | ✅ |
-| 02 | [Administradores](./02-administradores.md) | Admin Global | `User` (rol admin) | ✅ |
-| 03 | [Catálogos](./03-catalogos.md) | Admin Global | `DisabilityType`, `AutonomyLevel`, `ActivityCategory`, `SkillArea`, `ActivityTemplateType`, `ReportType` | ✅ |
+| 01 | [Instituciones](./01-instituciones.md) | Admin Institucional | `EducationalInstitution` | ✅ |
+| 02 | [Administradores](./02-administradores.md) | Admin Institucional | `User` (rol directivo/supervisión) | ✅ |
+| 03 | [Catálogos](./03-catalogos.md) | Admin Institucional | `DisabilityType`, `AutonomyLevel`, `ActivityCategory`, `SkillArea`, `ActivityTemplateType`, `ReportType` | ✅ |
 | 04 | [Profesionales](./04-profesionales.md) | Admin Institucional | `Professional`, `ProfessionalStatusHistory`, `ProfessionalInstitution` | ✅ |
 | 05 | [Personas con Discapacidad](./05-personas.md) | Profesional | `PersonWithDisability`, `PersonSkillProfile` | ✅ |
 | 06 | [Representantes Familiares](./06-familiares.md) | Profesional | `FamilyRepresentative`, `FamilyStatusHistory`, `Invitation`, `PersonRepresentative`, `PersonRepresentativeHistory` | ✅ |

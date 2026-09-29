@@ -6,7 +6,7 @@
 Proceso de registro de usuarios y autenticación multi-método en la plataforma. El sistema soporta dos flujos principales: (1) registro y login estándar para administradores, profesionales y familiares; (2) login visual accesible para personas con discapacidad, consolidado en 2 métodos adaptativos: **PIN** numérico y login **asistido**.
 
 ## Participantes
-- **Admin Global** — Registra profesionales y admins institucionales
+- **Admin Institucional** — Registra profesionales y miembros de la comunidad escolar
 - **Profesional** — Se registra; inicia sesión con email/contraseña
 - **Familiar** — Se registra vía invitación; inicia sesión con método familiar
 - **Persona (PCD)** — Inicia sesión mediante método adaptativo: PIN numérico o login asistido
@@ -25,7 +25,7 @@ Proceso de registro de usuarios y autenticación multi-método en la plataforma.
 ## Pasos del proceso
 
 ### 1. Registro de Usuario
-El admin global o el sistema crea un usuario. Los familiares se registran vía invitación aceptada.
+El admin institucional o el sistema crea un usuario. Los familiares se registran vía invitación aceptada.
 - **Endpoint:** `POST /api/auth/register`
 - **Frontend:** `/register` (formulario público)
 - **Rate limiting:** `auth-sensitive`
@@ -37,7 +37,7 @@ Antes del login visual, el sistema identifica al usuario para determinar su mét
 
 ### 3. Login según Método
 Cada rol utiliza el endpoint correspondiente a su método configurado.
-- Los tokens JWT incluyen: `role`, `permissions`, `isGlobalAdmin`, `institutionId`, `entityId`
+- Los tokens JWT incluyen: `role`, `permissions`, `institutionId`, `entityId`
 - **Refresh token:** `POST /api/auth/refresh` — renueva el access token sin re-login
 - **Rate limiting por endpoint:** `auth-login`, `auth-pin`, `auth-refresh`
 

@@ -1,7 +1,7 @@
 # ABM — Catálogos de Referencia
 
-**Actor:** Administrador Global  
-**Justificación:** Los catálogos son los datos maestros que alimentan todos los formularios del sistema (tipos de discapacidad, niveles de autonomía, categorías de actividad, áreas de habilidad, templates, tipos de reporte). Si no existen o están desactualizados, ningún otro actor puede operar correctamente: los profesionales no pueden clasificar actividades, los familiares no pueden registrar a la persona, etc. El Admin Global es quien los mantiene actualizados.
+**Actor:** Administrador Institucional  
+**Justificación:** Los catálogos son los datos maestros estandarizados que alimentan todos los formularios del sistema (tipos de discapacidad, niveles de autonomía, categorías de actividad, áreas de habilidad, templates, tipos de reporte). Si no existen o están desactualizados, ningún otro actor puede operar correctamente: los profesionales no pueden clasificar actividades, los familiares no pueden registrar a la persona, etc. El Administrador Institucional es quien puede parametrizar y mantener actualizadas las opciones de referencia del establecimiento.
 
 **Entidades:** `DisabilityType`, `AutonomyLevel`, `ActivityCategory`, `SkillArea`, `ActivityTemplateType`, `ReportType`
 

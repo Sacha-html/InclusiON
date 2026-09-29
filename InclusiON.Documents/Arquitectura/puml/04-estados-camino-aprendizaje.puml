@@ -1,0 +1,33 @@
+@startuml Niveles del Camino de Aprendizaje y Prevención de Frustración
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam state {
+  BackgroundColor #EEF4FF
+  BorderColor #2B579A
+}
+
+[*] --> Bloqueado : Nuevos niveles del camino aún no alcanzados
+[*] --> Disponible : Primer nivel del camino de aprendizaje
+
+Bloqueado --> Disponible : El alumno aprueba el nivel anterior (logra 60% o más)
+
+Disponible --> EnJuego : El alumno ingresa al nivel
+
+state EnJuego {
+  [*] --> ResolviendoActividad
+  ResolviendoActividad --> EvaluandoResultado : Se contabilizan los aciertos
+}
+
+EvaluandoResultado --> Aprobado : Obtiene 60% o más (¡Nivel Superado!)
+EvaluandoResultado --> EnPractica : Obtiene menos del 60% (Menos de 4 intentos)
+EvaluandoResultado --> PausadoPorFrustracion : Obtiene menos del 60% en su 4to intento seguido
+
+EnPractica --> EnJuego : El alumno vuelve a intentarlo con entusiasmo
+Aprobado --> EnJuego : El alumno vuelve a jugar para reforzar lo aprendido
+
+PausadoPorFrustracion --> Disponible : El docente acompaña al alumno, ajusta la dificultad y reactiva el nivel
+
+Aprobado --> [*] : Camino de aprendizaje completado
+
+@enduml

@@ -56,7 +56,7 @@ Si la actividad tiene contenido interactivo (tipo template), se completa `Activi
 - **Validación:**
   - Solo se puede dar de baja una actividad cuyo `ProfesionalCreador` sea el profesional autenticado.
   - No se puede dar de baja si la actividad tiene `ActivityAssignment` con estado `Pendiente` o `EnProgreso`.
-  - Las actividades estándar (`EsActividadEstandar = true`) solo pueden darse de baja por el Admin Global.
+  - Las actividades estándar (`EsActividadEstandar = true`) son provistas por el sistema y solo pueden gestionarse por el Administrador Institucional.
 
 ---
 
@@ -89,7 +89,7 @@ Todos los campos del alta son editables.
 
 **Filtros disponibles:** título, categoría, área de habilidad, nivel de complejidad, tiene contenido interactivo, es estándar, estado.  
 **Persistencia:** Consulta a `Activity`. El Profesional ve sus propias actividades + las estándar activas.  
-**Admin Global:** ve todas las actividades del sistema.
+**Administrador Institucional:** ve todas las actividades registradas en la institución.
 
 ---
 

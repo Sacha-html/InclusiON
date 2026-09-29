@@ -1,0 +1,23 @@
+@startuml BPMN Configuración Institucional y Sedes
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Admin Global|
+start
+:Solicitar alta de institución;
+
+|#F7FAFC|Servidor Central InclusiON|
+:Persistir entidad y alcance multi-tenant;
+
+|Admin Global|
+:Designar Administrador Institucional;
+
+|Servidor Central InclusiON|
+:Vincular alcance de seguridad;
+:Inicializar catálogos base por defecto;
+
+|Admin Global|
+:Auditar instituciones activas;
+stop
+@enduml

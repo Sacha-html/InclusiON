@@ -1,0 +1,23 @@
+@startuml BPMN Vinculación de Profesionales y Aulas
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Administrador Institucional / Dirección|
+start
+:Seleccionar estudiante o aula;
+:Seleccionar equipo multidisciplinario;
+:Establecer nivel de acceso (titular o apoyo);
+
+|#F7FAFC|Servidor Central InclusiON|
+:Validar matrículas activas;
+
+|Administrador Institucional / Dirección|
+:Confirmar vinculación institucional;
+
+|Servidor Central InclusiON|
+:Registrar relación de tutela pedagógica;
+:Habilitar CanAccessPersonAsync;
+:Notificar al equipo profesional;
+stop
+@enduml

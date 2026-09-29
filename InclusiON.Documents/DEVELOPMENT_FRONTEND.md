@@ -227,7 +227,7 @@ Acciones en columna `actions` con `visible: (item) => boolean` para mostrar/ocul
 - `VisualCardComponent` — Tarjeta visual para login
 - `DataTableComponent` — Tabla paginada con sort, búsqueda, acciones y botones de header
 - `ConfirmModalComponent` — Modal de confirmación reutilizable
-- `InstitutionFilterComponent` — Selector de institución para admin global/institucional
+- `InstitutionFilterComponent` — Selector de sede institucional para la administración
 - `SearchableSelectComponent` — Combobox con búsqueda server-side y debounce. Acepta `searchFn`, `displayFn`, `valueFn`, `subDisplayFn`. Reemplaza el patrón `pageSize:1000 + filter` client-side.
 
 ### Servicios de datos

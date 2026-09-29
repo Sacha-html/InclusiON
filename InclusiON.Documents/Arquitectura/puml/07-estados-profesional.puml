@@ -1,0 +1,23 @@
+@startuml Ciclo de Vida de la Cuenta del Profesional
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam state {
+  BackgroundColor #EEF4FF
+  BorderColor #2B579A
+}
+
+[*] --> SolicitudPendiente : El profesional se registra en el portal de la institución
+[*] --> Activo : El administrador da de alta directamente al profesional
+
+SolicitudPendiente --> Activo : El directivo verifica la matrícula y valida el ingreso
+SolicitudPendiente --> NoAdmitido : La institución rechaza la solicitud (motivo informado)
+
+Activo --> EnPausaPorInactividad : No registra ingresos durante 90 días seguidos
+Activo --> Desactivado : Cese de funciones en la institución educativa
+
+EnPausaPorInactividad --> Activo : Se reactiva al volver a ingresar de forma segura
+Desactivado --> Activo : La institución reincorpora al profesional
+NoAdmitido --> [*]
+
+@enduml
