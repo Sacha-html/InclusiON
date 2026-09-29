@@ -118,6 +118,15 @@
                    Reactivar
                  </button>
                }
+              <button cButton color="link" size="sm" class="p-0"
+                      [disabled]="downloadingPdfId === diag.encryptedId"
+                      (click)="downloadPdf(diag)" aria-label="Descargar PDF institucional">
+                @if (downloadingPdfId === diag.encryptedId) {
+                  <c-spinner size="sm" aria-hidden="true"></c-spinner>
+                } @else {
+                  <svg cIcon name="cilCloudDownload" size="sm" aria-hidden="true"></svg>
+                }
+              </button>
             </div>
           </div>
         </div>
@@ -139,79 +148,109 @@
     </strong>
   </c-modal-header>
   <c-modal-body>
+    <!-- Cabecera institucional -->
     <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="diagnosisDate">Fecha del diagnóstico *</label>
+      <c-col sm="4">
+        <label cLabel>Docente</label>
+        <input cFormControl [value]="currentTeacherName" readonly disabled />
+      </c-col>
+      <c-col sm="4">
+        <label cLabel for="primaryDiagnosis">Asignatura / Área pedagógica *</label>
+        <input cFormControl id="primaryDiagnosis" list="subject-suggestions"
+               [(ngModel)]="form.primaryDiagnosis"
+               [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
+               [valid]="submitted && !form.primaryDiagnosis.trim() ? false : undefined" />
+        <datalist id="subject-suggestions">
+          @for (s of subjectSuggestions; track s) {
+            <option [value]="s"></option>
+          }
+        </datalist>
+        @if (submitted && !form.primaryDiagnosis.trim()) {
+          <c-form-feedback [valid]="false">La asignatura / área es obligatoria.</c-form-feedback>
+        }
+      </c-col>
+      <c-col sm="4">
+        <label cLabel for="diagnosisDate">Fecha *</label>
         <input cFormControl id="diagnosisDate" type="date"
                [(ngModel)]="form.diagnosisDate"
+               [max]="maxDiagnosisDate"
                [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
-               [valid]="submitted && !form.diagnosisDate ? false : undefined" />
+               [valid]="submitted && (!form.diagnosisDate || form.diagnosisDate > maxDiagnosisDate) ? false : undefined" />
         @if (submitted && !form.diagnosisDate) {
           <c-form-feedback [valid]="false">La fecha es obligatoria.</c-form-feedback>
         }
+        @if (submitted && form.diagnosisDate && form.diagnosisDate > maxDiagnosisDate) {
+          <c-form-feedback [valid]="false">La fecha no puede ser futura.</c-form-feedback>
+        }
       </c-col>
     </c-row>
 
     <c-row class="mb-3">
-      <c-col sm="12">
-        <label cLabel for="primaryDiagnosis">Diagnóstico principal *</label>
-        <textarea cFormControl id="primaryDiagnosis" rows="2"
-                  [(ngModel)]="form.primaryDiagnosis"
+      <c-col sm="6">
+        <label cLabel for="identifiedCapabilities">Fortalezas del estudiante *</label>
+        <textarea cFormControl id="identifiedCapabilities" rows="3"
+                  [(ngModel)]="form.identifiedCapabilities"
                   [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
-                  [valid]="submitted && !form.primaryDiagnosis.trim() ? false : undefined"></textarea>
-        @if (submitted && !form.primaryDiagnosis.trim()) {
-          <c-form-feedback [valid]="false">El diagnóstico principal es obligatorio.</c-form-feedback>
+                  [valid]="submitted && !form.identifiedCapabilities.trim() ? false : undefined"></textarea>
+        @if (submitted && !form.identifiedCapabilities.trim()) {
+          <c-form-feedback [valid]="false">Las fortalezas son obligatorias.</c-form-feedback>
+        }
+      </c-col>
+      <c-col sm="6">
+        <label cLabel for="identifiedChallenges">Debilidades / desafíos del estudiante *</label>
+        <textarea cFormControl id="identifiedChallenges" rows="3"
+                  [(ngModel)]="form.identifiedChallenges"
+                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
+                  [valid]="submitted && !form.identifiedChallenges.trim() ? false : undefined"></textarea>
+        @if (submitted && !form.identifiedChallenges.trim()) {
+          <c-form-feedback [valid]="false">Las debilidades / desafíos son obligatorios.</c-form-feedback>
         }
       </c-col>
     </c-row>
 
     <c-row class="mb-3">
       <c-col sm="12">
-        <label cLabel for="initialObservations">Observaciones iniciales</label>
+        <label cLabel for="initialObservations">Observaciones adicionales</label>
         <textarea cFormControl id="initialObservations" rows="2"
                   [(ngModel)]="form.initialObservations"
                   [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
       </c-col>
     </c-row>
 
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="identifiedCapabilities">Capacidades identificadas</label>
-        <textarea cFormControl id="identifiedCapabilities" rows="2"
-                  [(ngModel)]="form.identifiedCapabilities"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="identifiedChallenges">Desafíos identificados</label>
-        <textarea cFormControl id="identifiedChallenges" rows="2"
-                  [(ngModel)]="form.identifiedChallenges"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-      </c-col>
-    </c-row>
+    <!-- Sección DUA colapsable -->
+    <div class="mb-2">
+      <button cButton color="link" size="sm" class="p-0" type="button"
+              (click)="showDuaSection = !showDuaSection"
+              [attr.aria-expanded]="showDuaSection">
+        <svg cIcon [name]="showDuaSection ? 'cilChevronBottom' : 'cilChevronRight'" size="sm" class="me-1" aria-hidden="true"></svg>
+        Ver / Configurar Apoyos y Estrategias DUA
+      </button>
+    </div>
 
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="requiredSupports">Apoyos requeridos</label>
-        <textarea cFormControl id="requiredSupports" rows="2"
-                  [(ngModel)]="form.requiredSupports"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="pedagogicalObjectives">Objetivos pedagógicos</label>
-        <textarea cFormControl id="pedagogicalObjectives" rows="2"
-                  [(ngModel)]="form.pedagogicalObjectives"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-      </c-col>
-    </c-row>
-
-    <c-row class="mb-3">
-      <c-col sm="12">
-        <label cLabel for="recommendedStrategies">Estrategias recomendadas</label>
-        <textarea cFormControl id="recommendedStrategies" rows="2"
-                  [(ngModel)]="form.recommendedStrategies"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-      </c-col>
-    </c-row>
+    @if (showDuaSection) {
+      <c-row class="mb-3">
+        <c-col sm="6">
+          <label cLabel for="requiredSupports">Apoyos requeridos</label>
+          <textarea cFormControl id="requiredSupports" rows="2"
+                    [(ngModel)]="form.requiredSupports"
+                    [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+        </c-col>
+        <c-col sm="6">
+          <label cLabel for="recommendedStrategies">Estrategias recomendadas</label>
+          <textarea cFormControl id="recommendedStrategies" rows="2"
+                    [(ngModel)]="form.recommendedStrategies"
+                    [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+        </c-col>
+      </c-row>
+      <c-row class="mb-3">
+        <c-col sm="12">
+          <label cLabel for="pedagogicalObjectives">Objetivos pedagógicos</label>
+          <textarea cFormControl id="pedagogicalObjectives" rows="2"
+                    [(ngModel)]="form.pedagogicalObjectives"
+                    [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
+        </c-col>
+      </c-row>
+    }
   </c-modal-body>
   <c-modal-footer>
     <button cButton color="secondary" (click)="closeModal()">

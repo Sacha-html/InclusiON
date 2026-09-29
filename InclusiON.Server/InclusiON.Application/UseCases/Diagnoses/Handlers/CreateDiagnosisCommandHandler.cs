@@ -63,6 +63,13 @@ namespace InclusiON.Application.UseCases.Diagnoses.Handlers
             if (person is null)
                 return ApiResponse<DiagnosisResponse>.ErrorResult(ErrorCode.PersonNotFound, "Persona no encontrada.");
 
+            if (command.DiagnosisDate.Date > _dateTime.UtcNow.Date)
+            {
+                return ApiResponse<DiagnosisResponse>.ErrorResult(
+                    ErrorCode.ValidationFailed,
+                    "La fecha del diagnóstico no puede ser futura.");
+            }
+
             var diagnosis = new Diagnosis
             {
                 PersonId = command.PersonId,

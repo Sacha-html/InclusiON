@@ -37,14 +37,16 @@ namespace InclusiON.DTOs.Responses.Family
                 Email = f.User?.Email,
                 WasPreviouslyLinked = wasPreviouslyLinked,
                 LinkedPersons = f.PersonRepresentatives?
-                    .Where(pr => pr.IsActive && pr.Person != null)
+                    .Where(pr => pr.Person != null)
+                    .OrderByDescending(pr => pr.IsActive)
                     .Select(pr => new LinkedPersonInfo
                     {
                         PersonId = pr.PersonId,
                         FullName = $"{pr.Person!.FirstName} {pr.Person!.LastName}".Trim(),
                         DisabilityType = pr.Person.DisabilityType?.Name,
                         IsPrimary = pr.IsPrimary,
-                        Relationship = pr.Relationship
+                        Relationship = pr.Relationship,
+                        IsActive = pr.IsActive
                     })
                     .ToList()
             };

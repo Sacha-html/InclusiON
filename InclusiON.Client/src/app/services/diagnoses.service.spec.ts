@@ -28,7 +28,12 @@ describe('DiagnosesService', () => {
   });
 
   it('uses the encrypted id to edit a diagnosis', () => {
-    const requestBody = { diagnosisDate: '2026-01-10', primaryDiagnosis: 'TEA actualizado' };
+    const requestBody = {
+      diagnosisDate: '2026-01-10',
+      primaryDiagnosis: 'TEA actualizado',
+      identifiedCapabilities: 'Buena memoria visual',
+      identifiedChallenges: 'Dificultad en secuencias',
+    };
     service.update(encryptedId, requestBody).subscribe();
 
     const request = http.expectOne(`${environment.apiUrl}/diagnoses/${encryptedId}`);
