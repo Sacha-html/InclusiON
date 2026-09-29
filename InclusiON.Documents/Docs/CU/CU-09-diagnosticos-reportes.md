@@ -162,14 +162,14 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global / Admin Institucional |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | Sistema, Familiar (receptor) |
 | **HU de referencia** | HU-08 |
 | **Prioridad** | Alta |
 
 **Precondiciones**
 - El reporte existe en estado `Submitted`.
-- Admin Institucional: el reporte pertenece a una persona de su institución.
+- El reporte pertenece a un alumno de su institución escolar.
 
 **Flujo principal**
 1. El Admin accede a la cola de reportes pendientes.
@@ -188,7 +188,7 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global / Admin Institucional |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | Sistema, Profesional (receptor) |
 | **HU de referencia** | HU-08 |
 | **Prioridad** | Alta |

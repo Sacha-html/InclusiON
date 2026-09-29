@@ -57,7 +57,7 @@ flowchart TD
 
 | Actor | Tipo | Interacción con el sistema |
 |-------|------|---------------------------|
-| **Administrador** | Usuario | Configura el sistema completo: instituciones, roles, permisos, catálogos y usuarios. Gestiona cuentas de forma centralizada (reset password, desactivar, reactivar). Administra el centro de ayuda (FAQ) y atiende tickets de soporte. El admin global tiene acceso total; el institucional opera dentro de su alcance. |
+| **Administrador Institucional** | Usuario | Configura el espacio institucional: datos de la sede escolar, roles, permisos, catálogos pedagógicos y usuarios. Gestiona cuentas del establecimiento (reset password, desactivar, reactivar), administra el centro de ayuda (FAQ) y atiende consultas de soporte. |
 | **Profesional** | Usuario | Actor principal del flujo educativo. Evalúa personas, crea actividades con plantillas dinámicas, arma planes de trabajo, monitorea el progreso y genera reportes. Se comunica con la familia. |
 | **Persona con discapacidad** | Usuario | Destinatario del sistema. Accede a su portal AAC, ve su roadmap visual y realiza actividades interactivas. El sistema registra su progreso y ajusta la dificultad automáticamente. |
 | **Representante familiar** | Usuario | Se registra por invitación del profesional. Consulta el progreso de su familiar, lee reportes y se comunica con el profesional desde su portal. |

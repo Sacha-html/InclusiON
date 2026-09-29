@@ -202,4 +202,4 @@ flowchart TD
 |----------|---------|
 | `ReportStatus` como enum numérico | El backend serializa el enum como entero (0,1,2,3). El frontend define `enum ReportStatus { Draft=0, Submitted=1, Approved=2, Rejected=3 }` y mapea con `badgeMap` usando claves numéricas computed (`[ReportStatus.Draft]`). No se usa `JsonStringEnumConverter`. |
 | `IDateTimeProvider` | Abstracción del reloj del sistema. `ArgentinaDateTimeProvider` (UTC-3) inyectado en todos los handlers. `UtcNow` para timestamps de DB, `Now` para lógica de negocio local. |
-| Filtro de institución en reportes | `GetReportsRequest` implementa `IInstitutionFilterable`. Admin global ve todos los reportes. Admin institucional solo ve reportes de profesionales de sus instituciones. |
+| Filtro de institución en reportes | `GetReportsRequest` implementa `IInstitutionFilterable`. El Administrador Institucional ve los reportes emitidos por los profesionales del establecimiento escolar. |

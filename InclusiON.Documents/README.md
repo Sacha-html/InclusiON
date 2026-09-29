@@ -292,7 +292,8 @@ Orientada al equipo de desarrollo:
 
 | Documento | Para qué sirve |
 |-----------|-----------------|
-| [ARQUITECTURA.md](./ARQUITECTURA.md) | Entender cómo está construido el sistema |
+| [Arquitectura/](./Arquitectura/README.md) | **Dossier formal de Arquitectura**: Diagrama de Despliegue, Ambiente de Implementación y Diagramas de Estados |
+| [ARQUITECTURA.md](./ARQUITECTURA.md) | Visión general técnica del sistema (Backend, Frontend, DB) |
 | [HU_ESTADO.md](./HU_ESTADO.md) | Ver qué está hecho y qué falta por implementar (BE/FE) |
 | [State/checklist-procesos.md](./State/checklist-procesos.md) | Checklist de avance por proceso (MVP vs Post-MVP) |
 | [State/progreso-hu.md](./State/progreso-hu.md) | Progreso detallado por HU con código Jira y estado |

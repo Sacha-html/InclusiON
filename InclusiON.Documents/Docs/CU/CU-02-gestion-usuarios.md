@@ -26,7 +26,7 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global / Admin Institucional |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | Sistema (envío de email), Profesional (receptor) |
 | **HU de referencia** | HU-IN-150 |
 | **Estado** | **Deprecado / Eliminado** |
@@ -132,14 +132,14 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global / Admin Institucional |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | Sistema |
 | **HU de referencia** | HU-11 |
 | **Prioridad** | Alta |
 
 **Precondiciones**
 - Usuario autenticado con rol Admin.
-- Admin Institucional: solo gestiona usuarios de sus instituciones.
+- Solo gestiona usuarios de la institución escolar asignada.
 
 **Flujo principal — Resetear contraseña**
 1. El Admin accede a la lista centralizada de usuarios y aplica filtros (rol, estado, institución).

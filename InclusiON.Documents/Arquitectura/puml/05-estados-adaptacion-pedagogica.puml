@@ -1,0 +1,20 @@
+@startuml Motor de Adaptación Pedagógica Automática
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam state {
+  BackgroundColor #EEF4FF
+  BorderColor #2B579A
+}
+
+[*] --> RitmoEstable : El docente define los límites de dificultad para el alumno
+
+RitmoEstable --> DesafioEnAumento : El alumno encadena varios aciertos seguidos
+RitmoEstable --> MayorApoyo : El alumno presenta dificultades reiteradas
+RitmoEstable --> ProteccionFrustracion : El alumno se bloquea o agota los 4 intentos
+
+DesafioEnAumento --> RitmoEstable : Se incrementa el desafío y se continúa el seguimiento
+MayorApoyo --> RitmoEstable : Se agregan pistas y más tiempo para facilitar el logro
+ProteccionFrustracion --> RitmoEstable : El profesional interviene, brinda apoyo y reanuda el camino
+
+@enduml

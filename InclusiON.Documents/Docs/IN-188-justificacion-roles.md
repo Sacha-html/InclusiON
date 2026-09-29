@@ -2,8 +2,8 @@
 
 ## Contexto
 
-El análisis de actores de negocio (IN-187) identificó 5 actores que interactúan con InclusiON:
-Persona con Discapacidad, Profesional, Familia/Cuidador, Admin Institucional y Admin Global.
+El análisis de actores de negocio identificó los 4 actores funcionales que interactúan con InclusiON:
+Persona con Discapacidad (Alumno), Profesional (Docente / Terapeuta), Familia / Cuidador y Administrador Institucional (Equipo Directivo).
 Este documento justifica cómo y por qué cada actor se traduce en un rol técnico del sistema.
 
 ---
@@ -12,12 +12,11 @@ Este documento justifica cómo y por qué cada actor se traduce en un rol técni
 
 | Actor de Negocio | Rol técnico | Claim JWT |
 |---|---|---|
-| Persona con Discapacidad | `persona` | `role: persona` |
-| Profesional | `profesional` | `role: profesional` |
+| Persona con Discapacidad (Alumno) | `persona` | `role: persona` |
+| Profesional (Docente / Terapeuta) | `profesional` | `role: profesional` |
 | Familia / Cuidador | `familia` | `role: familia` |
-| Admin Institucional | `admin` | `role: admin`, `isGlobalAdmin: false`, `institutionId: <id>` |
-| Admin Global | `admin` | `role: admin`, `isGlobalAdmin: true` |
-| Institución | — (sin rol) | — |
+| Administrador Institucional (Equipo Directivo) | `admin` | `role: admin`, `institutionId: <id>` |
+| Institución Educativa | — (sin rol) | — |
 
 ---
 
@@ -25,7 +24,7 @@ Este documento justifica cómo y por qué cada actor se traduce en un rol técni
 
 ### Rol `persona`
 
-**Actor:** Persona con Discapacidad
+**Actor:** Persona con Discapacidad (Alumno)
 
 La persona es el destinatario principal del sistema. Necesita una interfaz radicalmente distinta al resto de los actores: portal AAC con pictogramas, navegación simplificada, feedback visual/sonoro y métodos de login accesibles (PIN, ASSISTED, FAMILY). Separar este rol garantiza que sus vistas, permisos y flujo de autenticación se puedan configurar de forma independiente sin afectar a los demás actores. Compartir rol con otro actor implicaría exponer datos clínicos o funcionalidades administrativas a usuarios que no deben verlos.
 
@@ -62,57 +61,36 @@ El familiar o cuidador acompaña a la persona desde afuera del sistema terapéut
 
 ---
 
-### Rol `admin` — Admin Institucional
+### Rol `admin` — Administrador Institucional (Equipo Directivo)
 
-**Actor:** Admin Institucional
+**Actor:** Administrador Institucional / Dirección Escolar
 
-Gestiona operativamente los usuarios de su institución: alta de profesionales y personas, asignación de profesionales, reset de contraseñas y desactivación de cuentas. Su alcance está limitado por `institutionId` en el JWT, por lo que no puede ver ni modificar datos de otras instituciones. Este límite es técnico, no solo de UI: los endpoints filtran por `institutionId` extraído del token.
-
-**Decisiones técnicas que dependen de este rol:**
-- `isGlobalAdmin: false` + `institutionId: <id>` en JWT
-- Todos los queries de gestión filtran por `institutionId`
-- No puede crear instituciones ni acceder a configuración global
-
----
-
-### Rol `admin` — Admin Global
-
-**Actor:** Admin Global
-
-Tiene acceso sistémico completo: crea y gestiona instituciones, configura roles y permisos, carga catálogos maestros y puede operar sobre cualquier usuario del sistema. Es el único actor que puede crear admins institucionales. Se diferencia del admin institucional por el flag `isGlobalAdmin: true` en el JWT, que bypasea los filtros por institución.
+Es la máxima autoridad operativa dentro del establecimiento educativo. Gestiona el personal escolar (alta de docentes y terapeutas, blanqueo de credenciales y revocación inmediata de accesos), matricula a los alumnos, vincula a los tutores legales y audita la trazabilidad integral de la institución para dar cumplimiento a la Ley 25.326 de Protección de Datos Personales.
 
 **Decisiones técnicas que dependen de este rol:**
-- `isGlobalAdmin: true` en JWT — sin filtro por institución
-- Acceso a endpoints de configuración global (`/admin/institutions`, `/admin/catalogs`, `/admin/roles`)
-- Puede ver y actuar sobre todas las instituciones simultáneamente
-
----
-
-### Por qué `admin` es un único rol técnico con dos alcances
-
-Unificar el rol técnico en `admin` con un flag `isGlobalAdmin` en lugar de crear dos roles separados (`admin-global` y `admin-inst`) responde a que:
-
-1. Las operaciones son las mismas, solo cambia el filtro de alcance.
-2. Un único rol simplifica la asignación de permisos: todas las políticas de `admin` aplican a ambos; el filtro por institución es responsabilidad del middleware, no de la capa de autorización.
-3. Escala mejor: si en el futuro se agregan sub-instituciones o jerarquías, el modelo de flag + claim es más flexible que multiplicar roles.
+- `institutionId: <id>` en JWT — todas las operaciones directivas se acotan a su ámbito escolar
+- Gestión de cuentas de usuario: reseteo de contraseñas, activación y revocación de accesos
+- Matriculación formal de alumnos y asignaciones de docentes a salas/alumnos
+- Consulta de catálogos estandarizados del sistema y aprobación formal de reportes de progreso
 
 ---
 
 ### Por qué Institución no tiene rol
 
-La institución es una entidad organizativa, no un usuario. No inicia sesión ni ejecuta acciones. Agrupa profesionales y personas, y define el alcance del admin institucional. Su presencia en el sistema es como dato (`institutionId` en JWT), no como actor con credenciales.
+La institución es una entidad organizativa, no un usuario. No inicia sesión ni ejecuta acciones. Agrupa profesionales y personas, y define el alcance del Administrador Institucional. Su presencia en el sistema es como dato (`institutionId` en JWT), no como actor con credenciales.
 
 ---
 
 ## Resumen de separación de responsabilidades
 
-| Responsabilidad | persona | profesional | familia | admin inst. | admin global |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Realizar actividades | ✓ | | | | |
-| Crear actividades y roadmap | | ✓ | | | |
-| Ver datos clínicos de persona | | ✓ (asignadas) | | | |
-| Ver progreso de familiar | | | ✓ | | |
-| Comunicación (mensajería) | | ✓ | ✓ | | |
-| Gestionar usuarios de institución | | | | ✓ | ✓ |
-| Gestionar instituciones | | | | | ✓ |
-| Configurar sistema global | | | | | ✓ |
+| Responsabilidad | persona | profesional | familia | admin inst. |
+|---|:---:|:---:|:---:|:---:|
+| Realizar actividades | ✓ | | | |
+| Crear actividades y roadmap | | ✓ | | |
+| Ver datos clínicos de persona | | ✓ (asignadas) | | |
+| Ver progreso de familiar | | | ✓ | |
+| Comunicación (mensajería) | | ✓ | ✓ | |
+| Gestionar usuarios de la institución | | | | ✓ |
+| Asignar profesionales a alumnos | | | | ✓ |
+| Aprobar reportes oficiales | | | | ✓ |
+| Configurar datos de la sede | | | | ✓ |

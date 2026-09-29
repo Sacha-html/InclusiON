@@ -1,0 +1,35 @@
+@startuml BPMN Onboarding e Invitación a Familias
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Institución / Secretaría|
+start
+:Matricular estudiante y cargar datos de filiación;
+:Ingresar correo del tutor legal;
+
+|#F7FAFC|Servidor Central InclusiON|
+:Generar token cifrado temporal (vigencia 7 días);
+:Despachar correo de invitación por SMTP;
+
+|#FFFDF0|Representante Familiar|
+:Recibir correo y abrir enlace seguro;
+
+|Servidor Central InclusiON|
+if (¿Token válido y vigente?) then (Sí)
+  |Representante Familiar|
+  :Establecer contraseña personal segura;
+  |Servidor Central InclusiON|
+  :Crear cuenta y vincular legajo del alumno;
+  :Invalidar token utilizado;
+  |Representante Familiar|
+  :Acceder al portal familiar;
+  stop
+else (No: expirado > 7 días)
+  |Servidor Central InclusiON|
+  :Marcar invitación como Vencida;
+  |Institución / Secretaría|
+  :Reenviar nueva invitación;
+  stop
+endif
+@enduml

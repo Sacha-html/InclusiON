@@ -6,8 +6,7 @@
 Proceso centralizado de administración de cuentas de usuario del sistema. Cubre las operaciones transversales que el administrador realiza sobre cualquier cuenta (profesional, familiar, persona): listar usuarios, resetear contraseñas, desactivar, reactivar y consultar actividad. Este proceso complementa los procesos de dominio (04, 05, 06) con una capa de gestión de cuentas.
 
 ## Participantes
-- **Admin Global** — Gestión completa de todas las cuentas del sistema
-- **Admin Institucional** — Gestión de cuentas dentro de sus instituciones asignadas
+- **Admin Institucional** — Gestión completa de las cuentas de usuario de la comunidad escolar (profesionales, estudiantes, familias)
 
 ## Pasos del proceso
 

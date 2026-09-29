@@ -1,0 +1,29 @@
+@startuml BPMN Canal de Mensajería Escuela-Familia
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Profesional / Docente|
+start
+:Redactar comunicado pedagógico;
+
+|#F7FAFC|Servidor Central InclusiON|
+:Registrar mensaje cifrado en BD;
+:Despachar notificación push y correo;
+
+|#FFFDF0|Representante Familiar|
+:Recibir notificación en móvil;
+:Lectura del comunicado;
+if (¿Requiere respuesta?) then (Sí)
+  :Responder al docente;
+  |Servidor Central InclusiON|
+  :Registrar respuesta familiar;
+  |Profesional / Docente|
+  :Leer respuesta y acordar pautas;
+  stop
+else (No)
+  |Representante Familiar|
+  :Firmar acuse de lectura digital;
+  stop
+endif
+@enduml

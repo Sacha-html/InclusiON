@@ -1,0 +1,52 @@
+@startuml Ambiente de Implementación - InclusiON
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "1. Capa de Presentación e Interfaz (Frontend)" {
+  [Angular 20 Standalone] as NG
+  [Capacitor 8 (Android APK)] as CAP
+  [Motor de Accesibilidad Universal] as A11Y
+}
+
+package "2. Lenguajes de Programación" {
+  [C# 13 (.NET 10)] as CS
+  [TypeScript 5.8] as TS
+  [SCSS Dinámico] as SCSS
+  [SQL Relacional] as SQL
+}
+
+package "3. Capa de Servicios y Procesamiento (Backend)" {
+  [ASP.NET Core 10 Web API] as API
+  [SignalR Core (Tiempo Real)] as SR
+  [QuestPDF (Reportes Clínicos)] as QPDF
+  [Motor Local de Inferencia ONNX] as ONNX
+}
+
+package "4. Capa de Persistencia y Base de Datos" {
+  database "PostgreSQL 17" as PG
+  [Extensión pgvector (Recomendación Local)] as VEC
+  [Módulo de Cifrado de Datos de Salud] as CRYPT
+}
+
+package "5. Infraestructura y Operación" {
+  [Contenedores Docker & Compose] as DOCKER
+  [Servidor Nginx Alpine] as NGINX
+}
+
+NG --> TS
+CAP --> TS
+A11Y --> SCSS
+API --> CS
+PG --> SQL
+
+API --> SR
+API --> QPDF
+API --> ONNX
+API --> PG
+PG --> VEC
+PG --> CRYPT
+
+@enduml

@@ -1,0 +1,25 @@
+@startuml BPMN Evaluación Diagnóstica Inicial
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Equipo Multidisciplinario|
+start
+:Solicitar apertura de legajo;
+
+|#F7FAFC|Servidor Central InclusiON|
+:Crear legajo digital cifrado;
+
+|Equipo Multidisciplinario|
+:Realizar evaluación funcional en 4 ejes;
+:Registrar ponderaciones en perfil de habilidades;
+
+|Servidor Central InclusiON|
+:Persistir diagnóstico y perfil relacional;
+:Generar embedding vectorial 384D (ONNX);
+:Sugerir actividades afines del catálogo;
+
+|Equipo Multidisciplinario|
+:Validar y prescribir Roadmap personalizado;
+stop
+@enduml

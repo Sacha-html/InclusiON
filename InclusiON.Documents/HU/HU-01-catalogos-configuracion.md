@@ -41,7 +41,7 @@ El administrador debe poder preparar el sistema antes de que comience el trabajo
 ### Catálogos
 - [x] El administrador puede consultar, crear y editar items en los 6 catálogos del sistema
 - [x] No se permiten nombres duplicados dentro del mismo catálogo
-- [x] Solo el administrador global puede modificar catálogos; el resto los consulta en modo lectura
+- [x] Solo el administrador institucional puede modificar catálogos; el resto los consulta en modo lectura
 - [x] Los catálogos se reflejan automáticamente en los dropdowns de todos los formularios
 
 ### Profesionales

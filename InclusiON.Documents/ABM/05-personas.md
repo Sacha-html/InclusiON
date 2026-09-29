@@ -116,4 +116,4 @@ Todos los campos del alta son editables excepto el Email de cuenta (requiere flu
 
 **Filtros disponibles:** nombre/DNI, tipo de discapacidad, nivel de autonomía, tiene roadmap, estado.  
 **Persistencia:** Consulta a `PersonWithDisability` filtrada por `ProfessionalPerson.ProfessionalId` del profesional autenticado.  
-**Admin Global/Institucional:** puede ver todas las personas de su institución sin filtro de asignación.
+**Administrador Institucional:** puede ver todas las personas de la institución sin filtro de asignación.

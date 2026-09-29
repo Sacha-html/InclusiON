@@ -28,14 +28,14 @@ Cada perfil tiene variante **Light** y **Dark** = **14 combinaciones** totales.
 
 ### Directivas Angular ✅ Implementado
 - `*appHasPermission="'permission:action'"` — Muestra elemento solo si el usuario tiene el permiso
-- `*appIfGlobalAdmin` — Muestra solo para admin global
-- `*appIfInstitutionalAdmin` — Muestra solo para admin institucional
+- `*appIfGlobalAdmin` — Muestra vistas de configuración administrativa de la plataforma
+- `*appIfInstitutionalAdmin` — Muestra vistas de administración institucional
 
 ### Guards de ruta ✅ Implementado
 - `authGuard` — Requiere autenticación
 - `roleGuard` — Verifica rol requerido por la ruta
 - `guestGuard` — Solo usuarios no autenticados (login pages)
-- `globalAdminGuard` — Solo admin global
+- `globalAdminGuard` — Protege rutas de configuración técnica administrativa
 - `permissionGuard` — Verifica permiso específico de la ruta
 
 ### Componentes UI reutilizables ✅ Implementado

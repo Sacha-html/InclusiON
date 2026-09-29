@@ -2,6 +2,17 @@
 
 Visión general de la arquitectura y decisiones técnicas del proyecto.
 
+> ⭐ **DOCUMENTO MAESTRO CONSOLIDADO (Entrega Oficial en un solo archivo):**  
+> Se encuentra disponible el informe completo unificado en lenguaje de cliente y con líneas rectas en:  
+> 📄 [**`Arquitectura/ARQUITECTURA-DEL-SISTEMA.md`**](./Arquitectura/ARQUITECTURA-DEL-SISTEMA.md)  
+>  
+> 📚 **Módulos individuales de consulta:**  
+> - 🚀 [**01 — Diagrama de Despliegue**](./Arquitectura/01-DIAGRAMA-DE-DESPLIEGUE.md)  
+> - 💻 [**02 — Ambiente de Implementación**](./Arquitectura/02-AMBIENTE-DE-IMPLEMENTACION.md)  
+> - 🔄 [**03 — Diagrama de Transición de Estados**](./Arquitectura/03-DIAGRAMA-TRANSICION-ESTADOS.md)  
+> - 📊 [**04 — Diagramas de Procesos de Negocio (BPMN 2.0)**](./Arquitectura/04-DIAGRAMAS-BPMN-PROCESOS.md)  
+
+
 ---
 
 ## Diagrama General

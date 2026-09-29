@@ -116,8 +116,8 @@ El email solo puede modificarse si el profesional aún no activó su cuenta (`St
 | Personas asignadas | Cantidad de personas activas bajo su cargo |
 | Institución | Institución a la que pertenece |
 
-**Filtros disponibles:** nombre/DNI/email, estado, institución (solo para Admin Global).  
-**Persistencia:** Consulta a `Professional` con join a `ProfessionalInstitution` filtrado por institución del admin que realiza la consulta.
+**Filtros disponibles:** nombre/DNI/email, estado y especialidad.  
+**Persistencia:** Consulta a `Professional` con join a `ProfessionalInstitution` filtrado por la institución del Administrador Institucional que realiza la consulta.
 
 ---
 

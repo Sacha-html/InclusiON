@@ -1,0 +1,37 @@
+@startuml BPMN Motor de Dificultad Adaptativa (MDA)
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#F7FAFC|Servidor Central (Motor MDA)|
+start
+:Recibir intento de actividad;
+:Cargar historial del alumno;
+if (¿Patrón de desempeño?) then (Racha de éxito >= 80%)
+  :Aumentar complejidad (Nivel +1);
+  :Reducir tiempo y retirar pistas;
+elseif (Racha de fallas < 50%) then (Fallas consecutivas)
+  if (¿Fallos iguales a 4?) then (Sí)
+    :Bloquear nivel preventivamente;
+    :Despachar alerta prioritaria por SignalR;
+    |#EBF3FB|Docente / Terapeuta|
+    :Recibir alerta urgente en pantalla;
+    :Intervención presencial y contención;
+    stop
+  else (No: 1 a 3 fallos)
+    |Servidor Central (Motor MDA)|
+    :Reducir complejidad (Nivel -1);
+    :Ampliar tiempo y activar pistas ARASAAC;
+  endif
+else (Estable)
+  :Mantener nivel de dificultad;
+endif
+
+|Servidor Central (Motor MDA)|
+:Registrar en AdaptiveAdjustmentLog;
+:Sincronizar 'Mi Camino';
+
+|#EDFDFD|Estudiante (Tablet AAC)|
+:Actualización visual de pantalla;
+stop
+@enduml

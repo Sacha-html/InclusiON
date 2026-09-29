@@ -1,0 +1,34 @@
+@startuml BPMN Circuito de Informes Oficiales de Evolución
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Profesional / Docente|
+start
+:Iniciar informe (Borrador);
+:Redactar conclusiones y metas;
+:Enviar a revisión directiva;
+
+|#EBF8FF|Directivo / Supervisor|
+repeat
+  :Auditar contenido pedagógico;
+  if (¿Cumple estándares institucionales?) then (Sí)
+    :Aprobar y firmar digitalmente;
+    break
+  else (No)
+    :Devolver con observaciones (Requiere Corrección);
+    |Profesional / Docente|
+    :Modificar y atender señalamientos;
+    :Reenviar a revisión;
+    |Directivo / Supervisor|
+  endif
+repeat while (En revisión)
+
+|#F7FAFC|Servidor Central InclusiON|
+:Compilar documento oficial en PDF (QuestPDF);
+:Despachar notificación por correo institucional;
+
+|#FFFDF0|Representante Familiar|
+:Consultar y descargar informe oficial desde el portal;
+stop
+@enduml

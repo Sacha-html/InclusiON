@@ -1,0 +1,33 @@
+@startuml BPMN Asignación de Actividades del Catálogo
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Docente / Terapeuta|
+start
+:Explorar catálogo con búsqueda semántica;
+
+|#F7FAFC|Servidor Central InclusiON|
+:Búsqueda por similitud de coseno;
+
+|Docente / Terapeuta|
+if (¿Existe actividad adecuada?) then (Sí)
+  :Seleccionar actividad existente;
+else (No)
+  :Crear nueva actividad pedagógica;
+  |#FFF0F5|API ARASAAC|
+  :Consultar y descargar pictogramas;
+  |Docente / Terapeuta|
+  :Configurar consignas y estímulos;
+  |Servidor Central InclusiON|
+  :Persistir actividad y generar embedding;
+endif
+
+|Docente / Terapeuta|
+:Configurar parámetros (fecha, reintentos, alumno);
+:Confirmar envío a tablets;
+
+|Servidor Central InclusiON|
+:Distribuir asignación en estado Pendiente;
+stop
+@enduml
