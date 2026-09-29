@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using InclusiON.Infrastructure.Extensions;
+using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
 using InclusiON.Domain.Models;
@@ -82,7 +83,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             var query = _context.FamilyRepresentatives
                 .Include(f => f.User)
-                .Include(f => f.PersonRepresentatives.Where(pr => pr.IsActive))
+                .Include(f => f.PersonRepresentatives)
                     .ThenInclude(pr => pr.Person)
                         .ThenInclude(p => p.DisabilityType)
                 .AsSplitQuery()
@@ -345,11 +346,44 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
                     link.IsActive = false;
                     link.EndedAt = endedAt;
-                    link.UnlinkObservation = "Representante familiar desactivado";
+                    link.UnlinkObservation = FamilyLinkSuspensionReasons.SystemSuspendedByFamilyDeactivation;
                 }
             }
 
             return suspendedStudents;
+        }
+
+        public async Task<List<string>> RestoreSystemSuspendedLinksAsync(Guid familyId, DateTime restoredAt, CancellationToken ct = default)
+        {
+            var restoredStudents = new List<string>();
+
+            var suspendedLinks = await _context.PersonRepresentatives
+                .Include(pr => pr.Person)
+                    .ThenInclude(p => p.User)
+                .Where(pr => pr.RepresentativeId == familyId
+                    && !pr.IsActive
+                    && pr.UnlinkObservation == FamilyLinkSuspensionReasons.SystemSuspendedByFamilyDeactivation)
+                .ToListAsync(ct);
+
+            foreach (var link in suspendedLinks)
+            {
+                link.IsActive = true;
+                link.EndedAt = null;
+                link.UnlinkObservation = null;
+                link.UpdatedAt = restoredAt;
+
+                if (link.Person != null && !link.Person.IsActive)
+                {
+                    link.Person.IsActive = true;
+                    if (link.Person.User != null)
+                    {
+                        link.Person.User.IsActive = true;
+                    }
+                    restoredStudents.Add($"{link.Person.FirstName} {link.Person.LastName}");
+                }
+            }
+
+            return restoredStudents;
         }
 
         public async Task<int> GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(Guid familyId, CancellationToken cancellationToken = default)
