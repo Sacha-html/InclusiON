@@ -1,0 +1,20 @@
+@startuml Ciclo de Vida del Acceso Familiar
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam state {
+  BackgroundColor #EEF4FF
+  BorderColor #2B579A
+}
+
+[*] --> InvitacionPendiente : El docente envía invitación al correo familiar
+
+InvitacionPendiente --> Activa : El familiar ingresa al enlace y crea su usuario
+InvitacionPendiente --> Vencida : Pasan 7 días sin utilizarse
+
+Activa --> Desactivada : El alumno egresa o se suspende el acceso
+Desactivada --> Activa : La institución reactiva el vínculo
+
+Vencida --> [*]
+
+@enduml

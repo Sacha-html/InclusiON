@@ -6,15 +6,15 @@ El sistema InclusiON organiza sus procesos en 8 áreas funcionales que cubren el
 
 ```mermaid
 flowchart TB
-    subgraph CONFIG["Configuración del Sistema"]
-        P01[01 Instituciones]
+    subgraph CONFIG["Configuración y Administración"]
+        P01[01 Adm Institución]
         P02[02 Roles y Permisos]
         P03[03 Catálogos]
     end
 
     subgraph USUARIOS["Gestión de Usuarios"]
-        P04[04 Profesionales]
-        P05[05 Personas con Discapacidad]
+        P04[04 Personas con Discapacidad]
+        P05[05 Profesionales]
         P06[06 Familiares]
         P07[07 Invitaciones]
     end
@@ -70,10 +70,11 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    P01[01 Instituciones] -->|Agrupa| P04[04 Profesionales]
-    P01 -->|Agrupa| P05[05 Personas]
+    P01[01 Adm Institución] -->|Gestiona| P05[05 Profesionales]
+    P01 -->|Gestiona| P04[04 Personas PCD]
+    P01 -->|Vincula| P06[06 Familiares]
     P02[02 Roles] -->|Controla acceso a| P01 & P03 & P04 & P05 & P06
-    P03[03 Catálogos] -->|Alimenta formularios de| P05 & P09 & P10
+    P03[03 Catálogos] -->|Alimenta formularios de| P04 & P09 & P10
 
     P04 -->|Se asigna vía| P08[08 Asignaciones]
     P05 -->|Se asigna vía| P08
@@ -113,8 +114,8 @@ El proyecto final define 4 fases secuenciales que agrupan los procesos:
 | 01 Instituciones | Crear instituciones educativas |
 | 02 Roles y Permisos | Configurar roles y crear admins institucionales |
 | 03 Catálogos | Cargar tablas de referencia |
-| 04 Profesionales | Alta de profesionales con credenciales |
-| 05 Personas | Alta de personas con discapacidad |
+| 04 Personas | Alta de personas con discapacidad |
+| 05 Profesionales | Alta de profesionales con credenciales |
 | 06 Familiares | Alta directa o por invitación |
 | 07 Invitaciones | Envío de email para registro de familiares |
 | 08 Asignaciones | Vincular profesionales a instituciones y personas |
@@ -202,8 +203,7 @@ El estado de avance de cada proceso se puede consultar en el [checklist de proce
 
 | Actor | Procesos en los que participa |
 |-------|------------------------------|
-| **Admin Global** | 01, 02, 03, 04, 05, 06, 08, 17, 19 |
-| **Admin Institucional** | 04, 05, 06, 08, 17, 19 |
+| **Admin Institucional** | 01, 02, 03, 04, 05, 06, 08, 17, 19 |
 | **Profesional** | 07, 08, 09, 10, 11, 14, 15, 16, 18, 19 |
 | **Persona con Discapacidad** | 12, 18 |
 | **Familia** | 07, 14, 15, 16, 18, 19 |

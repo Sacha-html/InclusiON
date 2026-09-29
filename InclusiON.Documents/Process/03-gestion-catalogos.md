@@ -3,11 +3,10 @@
 **Área:** Configuración del Sistema
 
 ## Descripción
-Proceso de administración de las tablas de referencia del sistema que alimentan formularios, dropdowns y configuraciones. Los catálogos son gestionados exclusivamente por el admin global y consultados por todos los roles autenticados.
+Proceso de administración de las tablas de referencia del sistema que alimentan formularios, dropdowns y configuraciones. Los catálogos son gestionados por el Administrador Institucional y consultados por todos los roles autenticados.
 
 ## Participantes
-- **Admin Global** — CRUD completo de catálogos (protegido por policy `global-admin`)
-- **Admin Institucional** — Solo lectura
+- **Admin Institucional** — Parametrización y mantenimiento de catálogos
 - **Profesional** — Solo lectura (usa los catálogos en formularios)
 
 ## Catálogos del sistema
@@ -29,14 +28,14 @@ Cualquier usuario autenticado consulta los catálogos para llenar dropdowns.
 - **6 endpoints GET** listados en la tabla anterior
 
 ### 2. Alta de Item
-El admin global crea nuevos items desde el panel admin.
+El admin institucional crea nuevos items desde el panel admin.
 - **Controlador:** `CatalogAdminController`
 - **Endpoint:** `POST /api/admin/catalogs/{tipo}`
 - **Validación:** Nombre único por tipo de catálogo
 - **Frontend:** `/admin/catalogs/{tipo}` (modal de creación)
 
 ### 3. Edición de Item
-El admin global edita items existentes. Se valida nombre único.
+El admin institucional edita items existentes. Se valida nombre único.
 - **Endpoint:** `PUT /api/admin/catalogs/{tipo}/{id}`
 - **Frontend:** `/admin/catalogs/{tipo}` (modal de edición)
 
@@ -56,7 +55,7 @@ Catálogos ▼
 
 ```mermaid
 flowchart TD
-    AG[Admin Global] -->|Accede a| SIDEBAR[Sidebar: Catálogos]
+    AI[Admin Institucional] -->|Accede a| SIDEBAR[Sidebar: Catálogos]
     SIDEBAR --> TIPO{Tipo de catálogo}
     TIPO --> LIST[DataTable: lista de items]
 

@@ -90,8 +90,8 @@ Intentos de operar sobre recursos fuera del alcance autorizado del actor autenti
 | # | Actor | Situación rechazada | Por qué |
 |---|-------|---------------------|---------|
 | E-38 | Profesional | Acceder o modificar datos de una persona a la que no está asignado | `ProfessionalPerson` activo es la condición de acceso |
-| E-39 | Profesional | Dar de baja una actividad estándar (`IsStandardActivity = true`) | Las actividades estándar solo puede darlas de baja el Admin Global |
+| E-39 | Profesional | Dar de baja una actividad estándar (`IsStandardActivity = true`) | Las actividades estándar solo puede gestionarlas el Administrador Institucional |
 | E-40 | Profesional | Dar de baja o editar una actividad cuyo `ProfessionalId` no le pertenece | Solo el creador puede modificar su actividad |
-| E-41 | Admin Institucional | Gestionar profesionales o personas de una institución a la que no está asignado | `AdminInstitution` define el scope del admin |
+| E-41 | Admin Institucional | Gestionar profesionales o personas fuera de su sede institucional asignada | `AdminInstitution` define el scope de la institución |
 | E-42 | Familiar | Acceder a un `Report` que no está en estado `Approved` | Familiares solo ven reportes aprobados |
 | E-43 | Familiar | Acceder a datos de una persona con la que no tiene `PersonRepresentative` activo | El vínculo activo define el scope del familiar |

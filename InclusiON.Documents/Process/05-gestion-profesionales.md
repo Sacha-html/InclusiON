@@ -6,8 +6,7 @@
 Proceso de alta, validación y administración de profesionales terapeutas dentro de la plataforma. Incluye validación en tiempo real de email y matrícula, asignación a instituciones y personas, y configuración de permisos de supervisión de login.
 
 ## Participantes
-- **Admin Global** — CRUD completo de profesionales; asigna a instituciones
-- **Admin Institucional** — Crea profesionales dentro de su institución; asigna a personas
+- **Admin Institucional** — CRUD de profesionales dentro del establecimiento escolar; asigna a personas y aulas
 
 ## Pasos del proceso
 
@@ -26,7 +25,7 @@ El admin registra al profesional con datos personales y profesionales.
 ### 3. Consulta y Búsqueda
 Lista paginada de profesionales con filtros por institución y estado.
 - **Endpoint:** `GET /api/professionals`
-- **Alcance:** Admin Global ve todos; Admin Institucional ve los de su institución
+- **Alcance:** Admin Institucional ve todos los profesionales del establecimiento
 
 ### 4. Detalle del Profesional
 Vista completa con datos personales, instituciones asignadas y personas a cargo.
@@ -93,12 +92,16 @@ stateDiagram-v2
     Rejected --> [*]
 ```
 
-## Dos caminos de alta
+## Modalidad de Alta y Gobernanza Institucional
 
-| Camino | Estado inicial | Descripción |
-|--------|---------------|-------------|
-| Auto-registro público | `Pending` | Profesional se registra desde `/register-professional`. Requiere validación del admin. |
-| Alta desde panel admin | `Approved` | Admin crea el profesional directamente. Acceso activo con contraseña temporal. |
+> [!IMPORTANT]
+> **Evolución de Seguridad y Gobernanza (2026-09-17):**
+> Conforme a las decisiones arquitectónicas consolidadas en `reglas-negocio.md`, `HU-IN-149`, `HU-IN-150`, `CU-02` y `CB-10`, **se eliminó formalmente el auto-registro público abierto (`POST /api/professionals/register`)**. El aprovisionamiento de profesionales es **100% centralizado e institucional** por parte de la Dirección Escolar o Administrador (`POST /api/professionals`). El profesional nace directamente en estado `Approved` con credenciales y contraseña temporal, eliminando solicitudes en estado `Pending` desde la web pública.
+
+| Modalidad | Estado inicial | Descripción |
+|---|---|---|
+| **Alta Institucional por Admin** *(Activa)* | `Approved` | La Dirección crea al profesional directamente tras validar matrícula y antecedentes. Acceso activo con contraseña temporal. |
+| ~**Auto-registro público**~ *(Deprecada / Eliminada)* | `Pending` | *(Desestimada por seguridad)* Reemplazada por alta directa administrativa para evitar solicitudes huérfanas o auto-validaciones. |
 
 ## Historial de estados
 

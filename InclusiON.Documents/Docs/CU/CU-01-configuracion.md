@@ -6,13 +6,13 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | — |
 | **HU de referencia** | HU-01 |
 | **Prioridad** | Crítica |
 
 **Precondiciones**
-- Usuario autenticado con rol Admin Global.
+- Usuario autenticado con rol Admin Institucional.
 
 **Flujo principal**
 1. El Admin accede a la sección Catálogos.
@@ -37,13 +37,13 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | — |
 | **HU de referencia** | HU-01 |
 | **Prioridad** | Crítica |
 
 **Precondiciones**
-- Usuario autenticado con rol Admin Global.
+- Usuario autenticado con rol Admin Institucional.
 
 **Flujo principal**
 1. El Admin accede a la sección Instituciones.
@@ -65,7 +65,7 @@
 
 | Campo | Detalle |
 |-------|---------|
-| **Actor principal** | Admin Global / Admin Institucional |
+| **Actor principal** | Admin Institucional |
 | **Actores secundarios** | Profesional (receptor) |
 | **HU de referencia** | HU-01 |
 | **Prioridad** | Crítica |
@@ -73,7 +73,7 @@
 **Precondiciones**
 - El profesional existe en el sistema con estado activo.
 - La institución existe en el sistema.
-- El Admin tiene acceso a la institución (Admin Global: todas; Admin Institucional: solo las suyas).
+- El Admin gestiona su institución escolar asignada.
 
 **Flujo principal**
 1. El Admin accede al perfil del profesional o a la vista de la institución.

@@ -1,0 +1,50 @@
+@startuml BPMN Proceso Core — Ejecución de Actividades Terapéuticas
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Profesional / Docente|
+start
+:Seleccionar o crear actividad;
+:Configurar y prescribir asignación;
+
+|#F7FAFC|Servidor Central InclusiON|
+:Registrar ActivityAssignment (Pendiente);
+
+|#EDFDFD|Estudiante (Portal AAC)|
+:Visualizar en 'Mi Camino';
+:Iniciar actividad lúdica;
+
+|Servidor Central InclusiON|
+:Registrar inicio (En Progreso);
+
+|Estudiante (Portal AAC)|
+:Resolver actividad en AAC Player;
+:Enviar respuestas y telemetría;
+
+|Servidor Central InclusiON|
+:Evaluar desempeño (% aciertos, tiempo, soporte);
+if (¿Supera umbral de aprobación?) then (Sí)
+  :Consolidar estado Completada;
+  :Actualizar Roadmap y Skill Radar;
+  |Profesional / Docente|
+  :Revisar desempeño en Dashboard;
+  |#FFFDF0|Representante Familiar|
+  :Consultar avances y logros;
+  stop
+else (No)
+  :Motor Adaptativo calibra dificultad;
+  if (¿Alcanzó 4 fallos consecutivos?) then (Sí)
+    :Disparar Alerta de Frustración;
+    |Profesional / Docente|
+    :Recibir alerta visual/sonora en vivo;
+    :Intervención pedagógica presencial;
+    stop
+  else (No)
+    :Habilitar nuevo intento adaptado;
+    |Estudiante (Portal AAC)|
+    :Reintentar con apoyos visuales;
+    stop
+  endif
+endif
+@enduml

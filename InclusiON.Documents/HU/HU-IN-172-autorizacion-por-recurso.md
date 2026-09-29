@@ -26,8 +26,7 @@
 
 - **Como Profesional**, quiero que el sistema me impida consultar el perfil, diagnósticos, reportes o respuestas de una persona que no tengo asignada — aun perteneciendo a mi misma institución — para no exponer datos clínicos de terceros.
 - **Como Familiar**, quiero que mi acceso (consulta y login asistido) quede limitado a la persona que tengo a cargo, para garantizar que no puedo ver datos de menores ajenos.
-- **Como Admin Institucional**, quiero que mi vista esté limitada a las instituciones que me fueron asignadas, tanto en listados como en accesos directos por ID, para operar solo dentro de mi alcance.
-- **Como Admin Global**, quiero que todos mis accesos queden auditados aunque no estén restringidos, para poder demostrar cumplimiento ante una auditoría.
+- **Como Admin Institucional**, quiero que mi vista esté delimitada a la institución escolar asignada, tanto en listados como en accesos directos por ID, y que todos los accesos a datos sensibles queden auditados para demostrar cumplimiento normativo.
 
 ---
 
@@ -43,8 +42,8 @@
 | CA-04 | Un Familiar que invoca endpoints de consulta (persona, reportes aprobados, roadmap lectura) sobre una persona sin `PersonRepresentative.IsActive = true` vinculado a su `FamilyRepresentative.UserId` recibe `404`. La relación es N:M: un Familiar puede tener varias personas a cargo y una persona puede tener varios representantes. |
 | CA-05 | Un Familiar solo puede invocar `/Auth/login/assisted` y `/Auth/login/family` para personas donde exista `PersonRepresentative` con **`IsActive = true` Y `CanSuperviseLogin = true`**. Intento sobre otro `personId` → `404`. |
 | CA-06 | Un Familiar **no** puede ver reportes en estado `Draft` o `Submitted`, solo `Approved`. |
-| CA-07 | Un Admin Institucional recibe `403` al intentar acceder a un recurso cuya `InstitutionId` no está en su lista `AdminInstitutions`. El filtro se aplica también a entidades transitivas (reportes, asignaciones, invitaciones). |
-| CA-08 | Un Admin Global puede acceder a todos los recursos (bypass de validación de vínculo) pero cada acceso queda registrado en `AccessAudit`. |
+| CA-07 | Un Admin Institucional recibe `403` al intentar acceder a un recurso cuya `InstitutionId` no coincide con su institución escolar. El filtro se aplica también a entidades transitivas (reportes, asignaciones, invitaciones). |
+| CA-08 | El Administrador Institucional accede a los recursos de su institución escolar y cada acceso a datos sensibles queda registrado en `AccessAudit`. |
 | CA-09 | Existe un servicio `IResourceAuthorizationService` con métodos tipados por entidad (`CanAccessPersonAsync`, `CanAccessReportAsync`, `CanAccessDiagnosisAsync`, `CanAccessResponseAsync`, `GetAccessiblePersonIdsAsync`, etc.) e inyectable en handlers. |
 | CA-10 | La verificación es **fail-closed**: si no se puede determinar el vínculo (falla DB, usuario sin rol válido, recurso inexistente) la respuesta es deny, no allow. |
 | CA-11 | Existe cache por request (scoped) que evita consultar la misma `ProfessionalAssignment` más de una vez dentro del mismo handler/pipeline. |

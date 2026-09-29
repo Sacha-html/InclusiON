@@ -6,8 +6,7 @@
 Proceso de vinculación de profesionales a instituciones educativas y a personas con discapacidad. Estas asignaciones determinan el alcance de trabajo del profesional: qué personas atiende y en qué instituciones opera. También se establece la vinculación familiar (vía invitación o directa) y el perfil de habilidades de cada persona.
 
 ## Participantes
-- **Admin Global** — Asigna profesionales a instituciones y a personas
-- **Admin Institucional** — Asigna profesionales a personas dentro de su institución
+- **Admin Institucional** — Asigna profesionales a personas y aulas de la institución
 - **Profesional** — Configura perfil de habilidades de sus personas asignadas
 
 ## Relaciones del sistema

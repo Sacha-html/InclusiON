@@ -107,7 +107,7 @@ La relación entre la tecnología y la discapacidad tiene raíces antiguas, pero
 
 | Actor | Función |
 |-------|---------|
-| **Administrador** | Configura el sistema completo: instituciones, roles, permisos, catálogos y usuarios. El admin global tiene acceso total; el institucional opera dentro del alcance de sus instituciones asignadas. Gestiona cuentas de usuario: reseteo de contraseñas, activación y desactivación. Administra el centro de ayuda y atiende tickets de soporte. |
+| **Administrador Institucional** | Configura el espacio institucional: datos de la sede escolar, roles, permisos, catálogos pedagógicos y usuarios. Gestiona cuentas del establecimiento: reseteo de contraseñas, activación y desactivación. Administra el centro de ayuda y atiende consultas de soporte. |
 | **Profesional** | Actor principal del flujo educativo. Evalúa personas, crea actividades con plantillas dinámicas, arma planes de trabajo (roadmap), monitorea el progreso mediante dashboards y radar charts, genera reportes formales y se comunica con la familia. |
 | **Persona con discapacidad** | Destinatario del sistema. Accede a su portal AAC (Comunicación Aumentativa y Alternativa), ve su roadmap visual estilo Duolingo y realiza actividades interactivas. El sistema registra su progreso y ajusta la dificultad automáticamente mediante el Motor de Dificultad Adaptativa. |
 | **Representante familiar** | Se registra por invitación del profesional. Consulta el progreso de su familiar, lee reportes de avance y se comunica con el profesional desde su portal dedicado. |
@@ -456,8 +456,7 @@ Persona realiza actividad → Sistema registra respuesta → MDA evalúa rendimi
 
 | Actor | Procesos en los que participa |
 |-------|------------------------------|
-| **Admin Global** | 01, 02, 03, 04, 05, 06, 08, 17, 19 |
-| **Admin Institucional** | 04, 05, 06, 08, 17, 19 |
+| **Administrador Institucional** | 01, 02, 03, 04, 05, 06, 08, 17, 19 |
 | **Profesional** | 07, 08, 09, 10, 11, 14, 15, 16, 18, 19 |
 | **Persona con Discapacidad** | 12, 18 |
 | **Familia** | 07, 14, 15, 16, 18, 19 |
@@ -696,7 +695,7 @@ flowchart TD
 | Sistema de login visual (7 componentes Angular) | Implementado |
 | Layouts por rol (AAC, Profesional, Familiar, Admin) | Implementado |
 | Accesibilidad (7 perfiles × 2 modos = 14 combinaciones) | Implementado |
-| Admin Global vs Institucional (JWT claims + filtrado) | Implementado |
+| Administración y Autorización basada en Claims (JWT claims + filtrado) | Implementado |
 
 ### Historias de usuario por sprint
 

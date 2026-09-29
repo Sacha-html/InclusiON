@@ -1,0 +1,33 @@
+@startuml BPMN Autenticación Multi-Método Adaptativa
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EBF3FB|Usuario|
+start
+:Ingresar a la plataforma;
+if (¿Tipo de usuario?) then (Docente / Admin)
+  :Ingresar email y contraseña;
+elseif (Familiar)
+  :Ingresar email de tutor y clave;
+else (Estudiante PCD)
+  :Identificar estudiante táctilmente;
+  if (¿Método adaptativo?) then (PIN Numérico)
+    :Ingresar PIN de 4 dígitos;
+  else (Asistido)
+    :Validación por supervisor presente;
+  endif
+endif
+
+|#F7FAFC|Servidor Central InclusiON|
+:Validar credenciales y hash en BD;
+if (¿Credenciales válidas?) then (Sí)
+  :Emitir JWT firmado y Refresh Token;
+  :Redireccionar al portal del rol con tema accesible;
+  stop
+else (No)
+  :Registrar intento fallido en auditoría;
+  :Aplicar rate limiting tras reintentos;
+  stop
+endif
+@enduml

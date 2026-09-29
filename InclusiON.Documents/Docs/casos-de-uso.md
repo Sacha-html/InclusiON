@@ -12,31 +12,28 @@
 | ID | Actor | Tipo | Descripción | Cómo accede |
 |----|-------|------|-------------|-------------|
 | A-01 | **Usuario** | Abstracto (base) | Actor base del que heredan todos los roles autenticados. No interactúa directamente con el sistema. | — |
-| A-02 | **Admin Global** | Primario | Gestiona el sistema completo: instituciones, catálogos, cuentas, reportes. Sin restricción de institución. | Email + contraseña |
-| A-03 | **Admin Institucional** | Primario | Igual que Admin Global pero limitado a las instituciones que tiene asignadas. | Email + contraseña |
-| A-04 | **Profesional** | Primario | Docente, terapeuta o psicólogo. Crea actividades, gestiona roadmaps y hace seguimiento de personas asignadas. | Email + contraseña |
-| A-05 | **Persona** | Primario | Persona con discapacidad. Ejecuta actividades de su roadmap. Interfaz AAC adaptada. | PIN / login asistido |
-| A-06 | **Familiar** | Primario | Representante o tutor. Acceso de solo lectura al progreso de su persona vinculada. | Email + contraseña (por invitación) |
-| A-07 | **Sistema** | Secundario | Componente automatizado que ejecuta acciones sin intervención humana (ajuste adaptativo, desbloqueos, auditoría). | — |
+| A-02 | **Admin Institucional** | Primario | Gestiona el espacio de la institución escolar: datos de la sede, catálogos pedagógicos, cuentas de usuarios y soporte. | Email + contraseña |
+| A-03 | **Profesional** | Primario | Docente, terapeuta o psicólogo. Crea actividades, gestiona roadmaps y hace seguimiento de personas asignadas. | Email + contraseña |
+| A-04 | **Persona** | Primario | Persona con discapacidad (Alumno). Ejecuta actividades de su roadmap. Interfaz AAC adaptada. | PIN / login asistido |
+| A-05 | **Familiar** | Primario | Representante o tutor. Acceso de solo lectura al progreso de su persona vinculada. | Email + contraseña (por invitación) |
+| A-06 | **Sistema** | Secundario | Componente automatizado que ejecuta acciones sin intervención humana (ajuste adaptativo, desbloqueos, auditoría). | — |
 
 ### Jerarquía de Actores
 
 ```
 Usuario (A-01)
-├── Admin Global (A-02)
-│   └── Admin Institucional (A-03)  [hereda permisos, restringido por institución]
-├── Profesional (A-04)
-├── Persona (A-05)
-└── Familiar (A-06)
+├── Admin Institucional (A-02)
+├── Profesional (A-03)
+├── Persona (A-04)
+└── Familiar (A-05)
 
-Sistema (A-07)  [actor secundario, sin herencia]
+Sistema (A-06)  [actor secundario, sin herencia]
 ```
 
 ### Relaciones entre Actores
 
 | Relación | Descripción |
 |----------|-------------|
-| Admin Global → Admin Institucional | Herencia. Admin Institucional tiene las mismas capacidades pero acotadas a sus instituciones. |
 | Profesional → Familiar | El Profesional genera la invitación que permite al Familiar registrarse. |
 | Profesional → Persona | El Profesional configura el método de login y accesibilidad de la Persona. |
 | Familiar ↔ Persona | Vínculo N:M. Un Familiar puede tener varias personas; una persona puede tener varios representantes. |
@@ -78,10 +75,10 @@ Sistema (A-07)  [actor secundario, sin herencia]
 
 | ID | Nombre | Actor principal | HU de referencia |
 |----|--------|----------------|------------------|
-| CU-01 | Gestionar catálogos del sistema | Admin Global | HU-IN-33–35 |
-| CU-02 | Registrar institución | Admin Global | HU-IN-21–23 |
-| CU-03 | Asignar profesional a institución | Admin | HU-IN-58–59 |
-| CU-04 | Asignar persona a profesional | Admin / Profesional | HU-IN-60–64 |
+| CU-01 | Gestionar catálogos del sistema | Admin Institucional | HU-IN-33–35 |
+| CU-02 | Registrar sede institucional | Admin Institucional | HU-IN-21–23 |
+| CU-03 | Asignar profesional a institución | Admin Institucional | HU-IN-58–59 |
+| CU-04 | Asignar persona a profesional | Admin Institucional / Profesional | HU-IN-60–64 |
 
 ---
 
@@ -240,7 +237,7 @@ Sistema (A-07)  [actor secundario, sin herencia]
 
 | Actor | CUs MVP | CUs Post-MVP |
 |-------|---------|--------------|
-| Admin Global / Institucional | CU-01, CU-02, CU-03, CU-04, CU-06, CU-10, CU-42, CU-43 | CU-56, CU-57 |
+| Admin Institucional | CU-01, CU-02, CU-03, CU-04, CU-06, CU-10, CU-42, CU-43 | CU-56, CU-57 |
 | Profesional | CU-05, CU-08, CU-11, CU-15, CU-16, CU-17, CU-18, CU-19, CU-20, CU-21, CU-22, CU-23, CU-24, CU-25, CU-26, CU-27, CU-32, CU-34, CU-36, CU-37, CU-38, CU-39, CU-40, CU-41, CU-45, CU-46, CU-47 | CU-33, CU-48, CU-49, CU-51, CU-52, CU-54, CU-55 |
 | Persona | CU-12, CU-13, CU-16, CU-28, CU-29 | CU-53 |
 | Familiar | CU-09, CU-14, CU-15, CU-35, CU-44, CU-45, CU-46, CU-47 | CU-53, CU-54, CU-55 |

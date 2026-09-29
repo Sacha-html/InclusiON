@@ -1,0 +1,30 @@
+@startuml BPMN Monitoreo en Tiempo Real y Alertas Docentes
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 5
+
+|#EDFDFD|Estudiante (Tablet Escolar)|
+start
+:Ejecutar actividades en clase;
+
+|#F7FAFC|Canal SignalR (WebSockets)|
+:Analizar telemetría de interacción;
+if (¿Criterio de alerta?) then (4 fallos o bloqueo)
+  :Disparar evento prioritario vía WebSocket;
+  |#EBF3FB|Docente de Aula|
+  :Alarma visual y sonora sutil en pantalla;
+  :Intervención pedagógica presencial;
+  |Estudiante (Tablet Escolar)|
+  :Recibir mediación pedagógica;
+  :Reanudar ejercicio con tranquilidad;
+  |Docente de Aula|
+  :Registrar intervención en sistema;
+  stop
+else (Avance regular)
+  |Canal SignalR (WebSockets)|
+  :Actualizar estado en tablero (Verde);
+  |Docente de Aula|
+  :Visualización normal en 'Mi Aula';
+  stop
+endif
+@enduml

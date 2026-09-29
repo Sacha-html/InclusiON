@@ -1,48 +1,45 @@
-# ABM — Administradores
+# ABM — Cuentas de Gestión y Supervisión Directiva
 
-**Actor:** Administrador Global  
-**Justificación:** El Administrador Global necesita delegar la gestión de instituciones específicas a Administradores Institucionales. Sin este ABM, toda la carga administrativa recae en el Admin Global; es inescalable para una plataforma con múltiples instituciones. También requiere gestionar su propio panel de admins globales.
+**Actor:** Administrador Institucional  
+**Justificación:** El Administrador Institucional (Equipo Directivo) requiere gestionar los accesos de supervisión y gestión escolar (vicedirección, secretaría académica, coordinación pedagógica) para la administración operativa y colaborativa de la plataforma dentro del establecimiento.
 
-**Entidades:** `User` (rol Admin Global y Admin Institucional), `AdminInstitution`
+**Entidades:** `User` (rol directivo/supervisión)
 
 ---
 
-## Alta — Administrador
+## Alta — Usuario Directivo / Coordinador
 
-**Actor:** Administrador Global
+**Actor:** Administrador Institucional
 
 | Campo | Tipo | Requerido | Validaciones |
 |-------|------|:---------:|--------------|
 | Nombre | Texto (100) | Sí | No vacío |
 | Apellido | Texto (100) | Sí | No vacío |
 | Email | Texto (255) | Sí | Formato válido; único en `User` |
-| Tipo de admin | Enumerado | Sí | `GlobalAdmin` o `InstitutionalAdmin` |
-| Institución (si institucional) | Referencia | Condicional | Obligatorio si tipo = `InstitutionalAdmin`; institución debe estar activa |
+| Rol / Función | Enumerado | Sí | Perfil directivo / administrativo escolar |
 
 **Validaciones de integridad:**
-- El email no puede existir ya en la tabla `User`.
-- Si es Admin Institucional, la institución de destino debe estar activa.
+- El email no puede existir previamente en la tabla `User`.
+- Se genera con estado activo.
 
 **Resultado:**
-- Se crea un `User` con `MustChangePassword = true` y contraseña temporal.
-- Si es Admin Institucional, se crea el registro en `AdminInstitution`.
-- Se envía email de bienvenida con contraseña temporal.
+- Se crea el usuario en `User` con `MustChangePassword = true` y contraseña temporal.
+- Se envía notificación con las credenciales de acceso inicial.
 
 ---
 
-## Baja — Administrador
+## Baja — Usuario Directivo
 
-**Actor:** Administrador Global
+**Actor:** Administrador Institucional
 
 - Se establece `IsActive = false` en `User` (baja lógica).
-- Si era Admin Institucional, se desactiva el registro en `AdminInstitution`.
-- **Validación:** No se puede dar de baja al propio usuario que realiza la operación.
+- **Validación defensiva:** No se permite que el propio usuario que realiza la operación desactive su propia cuenta activa.
 
 ---
 
-## Modificación — Administrador
+## Modificación — Usuario Directivo
 
-**Actor:** Administrador Global
+**Actor:** Administrador Institucional
 
 Campos editables:
 
@@ -52,22 +49,17 @@ Campos editables:
 | Apellido | No vacío |
 | Email | Formato válido; único (excluyendo registro actual) |
 
-**No se puede modificar:** el tipo de admin (Global → Institucional requiere recrear el usuario).
-
 ---
 
-## Listado — Administradores
+## Listado — Cuentas de Gestión Directiva
 
-**Actor:** Administrador Global
+**Actor:** Administrador Institucional
 
 | Columna | Descripción |
 |---------|-------------|
-| Nombre y Apellido | Identidad del administrador |
-| Email | Email de la cuenta |
-| Tipo | Global / Institucional |
-| Institución | Institución asignada (solo admins institucionales) |
-| Último acceso | Fecha del último login |
+| Nombre y Apellido | Identidad del integrante del equipo directivo |
+| Email | Correo institucional |
+| Último acceso | Fecha y hora del último login registrado |
 | Estado | Activo / Inactivo |
 
-**Filtros disponibles:** nombre/email, tipo de admin, institución, estado.  
-**Persistencia:** Consulta a `User` filtrado por rol admin, con join a `AdminInstitution` para los institucionales.
+**Persistencia:** Consulta a `User` filtrado por cuentas directivas y de administración escolar.

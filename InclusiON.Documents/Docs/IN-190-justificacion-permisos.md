@@ -75,21 +75,9 @@ Cada rol accede únicamente a lo necesario para cumplir su función de negocio. 
 | Crear y gestionar usuarios de su institución | Es el responsable operativo de la institución. Nadie mejor que él conoce quiénes deben tener acceso. |
 | Asignar profesionales a personas | Define qué profesional trabaja con qué alumno, una decisión organizativa de la institución. |
 | Resetear contraseñas y desactivar cuentas | Gestión operativa de acceso. Necesario cuando un usuario se va de la institución o pierde sus credenciales. |
-| Sin acceso a otras instituciones | Cada institución es una unidad independiente. Un admin de una escuela no tiene ni la responsabilidad ni la autorización de tocar los datos de otra. El claim `institutionId` en el JWT hace este límite técnico, no solo visual. |
-| Sin acceso a configuración global (roles, catálogos) | La configuración global afecta a todo el sistema. Permitir que un admin institucional la modifique podría romper el funcionamiento de otras instituciones. |
-
----
-
-### Admin Global
-
-**Función de negocio:** configurar y mantener el sistema completo, crear instituciones y admins institucionales.
-
-| Permiso | Justificación de negocio |
-|---------|--------------------------|
-| Crear y configurar instituciones | Alguien debe poder dar de alta nuevas instituciones. Es una tarea de nivel sistémico que solo compete al operador de la plataforma. |
-| Asignar y revocar permisos por rol | La configuración de permisos es decisión del dueño del sistema, no de cada institución. |
-| Ver y actuar sobre cualquier usuario o institución | Necesario para soporte de nivel 2 y auditorías. No se puede brindar soporte efectivo sin visibilidad total. |
-| Todos los accesos auditados (`AccessAudit`) | Aunque tenga bypass total, cada acción queda registrada. Esto responde al principio de responsabilidad: el poder total va acompañado de trazabilidad total. Sin auditoría, no hay forma de demostrar cumplimiento ante un incidente. |
+| Delimitación estricta al ámbito escolar | La institución es una unidad independiente. El claim `institutionId` en el JWT asegura el aislamiento técnico de datos entre colegios. |
+| Catálogos estandarizados del sistema | Consulta las taxonomías normalizadas provistas por la plataforma (OMS / CIF) para garantizar consistencia pedagógica en toda la escuela. |
+| Todos los accesos auditados (`AccessAudit`) | Cada acción directiva queda registrada en auditoría para responder ante inspecciones y dar cumplimiento estricto a la Ley 25.326. |
 
 ---
 
@@ -103,7 +91,7 @@ Fundamento legal: Ley 25.326 Art. 8 — datos sensibles de salud requieren relac
 
 ### Por qué la familia solo ve reportes aprobados
 
-El flujo de aprobación (`Draft → Submitted → Approved`) existe para que el profesional valide el contenido antes de que llegue a la familia. Exponer borradores saltea ese proceso y puede causar alarma o confusión con información no verificada.
+El flujo de aprobación (`Draft → Submitted → Approved`) existe para que la Dirección valide el contenido antes de que llegue a la familia. Exponer borradores saltea ese proceso y puede causar alarma o confusión con información no verificada.
 
 ### Por qué el registro familiar es solo por invitación
 
@@ -120,20 +108,18 @@ Desde el negocio, un actor externo (familia, persona) no debe poder inferir la e
 
 ## Matriz de permisos por módulo
 
-| Módulo | Persona | Profesional | Familia | Admin Inst. | Admin Global |
-|--------|:-------:|:-----------:|:-------:|:-----------:|:------------:|
-| Portal AAC (ejecutar actividades) | ✓ | | | | |
-| Crear/editar actividades | | ✓ | | | |
-| Roadmap propio | ✓ | | | | |
-| Roadmap de persona asignada | | ✓ | | | |
-| Diagnósticos y perfil clínico | | ✓ (asignadas) | | | |
-| Reportes aprobados (propios) | | | ✓ (vinculadas) | | |
-| Reportes (todos los estados) | | ✓ (asignadas) | | | |
-| Dashboard y monitoreo | | ✓ | ✓ (lectura) | | |
-| Mensajería | | ✓ | ✓ | | |
-| Gestión de usuarios | | | | ✓ (institución) | ✓ (global) |
-| Gestión de instituciones | | | | | ✓ |
-| Configuración de roles/permisos | | | | | ✓ |
-| Catálogos (lectura) | | ✓ | | ✓ | ✓ |
-| Catálogos (edición) | | | | | ✓ |
-| Soporte (tickets) | | ✓ | ✓ | ✓ | ✓ |
+| Módulo | Persona | Profesional | Familia | Admin Inst. |
+|--------|:-------:|:-----------:|:-------:|:-----------:|
+| Portal AAC (ejecutar actividades) | ✓ | | | |
+| Crear/editar actividades | | ✓ | | |
+| Roadmap propio | ✓ | | | |
+| Roadmap de persona asignada | | ✓ | | |
+| Diagnósticos y perfil clínico | | ✓ (asignadas) | | |
+| Reportes aprobados (propios) | | | ✓ (vinculadas) | |
+| Reportes (todos los estados) | | ✓ (asignadas) | | ✓ (aprobación) |
+| Dashboard y monitoreo | | ✓ | ✓ (lectura) | ✓ (institucional) |
+| Mensajería | | ✓ | ✓ | |
+| Gestión de usuarios del colegio | | | | ✓ |
+| Configuración de sede escolar | | | | ✓ |
+| Catálogos del sistema (lectura) | | ✓ | | ✓ |
+| Soporte (tickets y ayuda) | | ✓ | ✓ | ✓ |

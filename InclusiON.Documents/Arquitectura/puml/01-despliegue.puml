@@ -1,0 +1,54 @@
+@startuml Diagrama de Despliegue - InclusiON
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam componentStyle uml2
+skinparam shadowing false
+
+node "Dispositivos de Usuarios (Clientes)" as CLIENTS {
+  node "Estación de Trabajo / Laptop" as DOCENTE {
+    artifact "Portal del Profesional y Administración" as APP_DOC
+  }
+  node "Tablet Escolar / Celular Alumno" as ALUMNO {
+    artifact "Portal Adaptativo del Alumno (AAC)" as APP_ALU
+  }
+  node "Smartphone / Tablet Familiar" as FAMILIA {
+    artifact "Portal de la Familia" as APP_FAM
+  }
+}
+
+node "Servidor Central InclusiON (Institución / Nube)" as SERVER {
+  node "Contenedor de Distribución Visual" as CONT_FE {
+    component "Servidor Web Nginx" as NGINX
+  }
+  node "Contenedor de Procesamiento Central" as CONT_BE {
+    component "Cerebro del Sistema (ASP.NET Core 10)" as CORE_API
+    component "Generador de Informes PDF" as PDF
+    component "Canal de Alertas en Tiempo Real" as SIGNALR
+    component "Asistente Inteligente Local" as AI_ENGINE
+  }
+  node "Contenedor de Almacenamiento Seguro" as CONT_DB {
+    database "Base de Datos Protegida (PostgreSQL 17)" as PG_DB
+  }
+}
+
+cloud "Servicios Externos de Apoyo" as EXT {
+  component "Banco de Pictogramas ARASAAC" as ARASAAC
+  component "Servidor de Correo Institucional" as MAIL
+}
+
+APP_DOC --> NGINX : Conexión Segura (HTTPS)
+APP_ALU --> NGINX : Conexión Segura (HTTPS)
+APP_FAM --> NGINX : Conexión Segura (HTTPS)
+
+APP_DOC --> CORE_API : Gestión y Alertas en Vivo
+APP_ALU --> CORE_API : Envío de Respuestas y Avances
+APP_FAM --> CORE_API : Consulta de Progreso Familiar
+
+APP_DOC ..> ARASAAC : Consulta de pictogramas
+APP_ALU ..> ARASAAC : Visualización de pictogramas
+
+CORE_API --> PG_DB : Almacenamiento seguro y cifrado
+CORE_API --> MAIL : Despacho de invitaciones
+
+@enduml

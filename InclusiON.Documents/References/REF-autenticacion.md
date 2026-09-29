@@ -69,8 +69,8 @@ Si el usuario tiene contraseña temporal (`MustChangePassword = true`), se redir
 | `userId` | ID del usuario |
 | `role` | Rol: Admin, Professional, FamilyRepresentative, PersonWithDisability |
 | `permission` | Permisos del rol (múltiples claims) |
-| `isGlobalAdmin` | true/false — determina acceso a funciones de admin global |
-| `institutionId` | IDs de instituciones asignadas (para admins institucionales) |
+| `isGlobalAdmin` | true/false — flag técnico interno de privilegios administrativos |
+| `institutionId` | ID de la institución educativa asignada |
 
 ## Autorización por Recurso — Política de Códigos de Respuesta (CA-17)
 

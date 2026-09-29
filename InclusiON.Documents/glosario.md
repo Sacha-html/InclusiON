@@ -8,8 +8,7 @@ Definición de términos utilizados en la documentación y en la plataforma.
 
 | Término | Definición |
 |---------|-----------|
-| **Administrador Global** | Usuario con acceso total al sistema. Crea instituciones, gestiona roles, configura catálogos y da de alta a todos los tipos de usuario. |
-| **Administrador Institucional** | Usuario administrador vinculado a una o más instituciones. Solo ve y gestiona datos dentro del alcance de sus instituciones asignadas. |
+| **Administrador Institucional** | Máxima autoridad directiva y pedagógica dentro del establecimiento educativo. Configura la sede escolar, gestiona el personal docente/terapéutico, matricula estudiantes y familias, parametriza catálogos estándar y supervisa reportes y métricas institucionales. |
 | **Profesional** | Docente, terapeuta, psicólogo u otro especialista que trabaja con personas con discapacidad. Evalúa, planifica, crea actividades y monitorea el progreso. |
 | **Persona con discapacidad** | Destinatario central del sistema. Realiza actividades educativas y su progreso es monitoreado por profesionales y familiares. En el DOCX original se lo denomina "alumno" o "paciente". |
 | **Representante familiar** | Familiar o tutor legal de una persona con discapacidad. Consulta el progreso, recibe reportes y se comunica con el profesional. |

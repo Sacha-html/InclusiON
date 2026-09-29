@@ -13,23 +13,23 @@ Al diseñar la plataforma, el equipo debía decidir cómo modelar el acceso de l
 
 1. Un sistema de permisos granulares sin roles fijos (solo claims)
 2. Roles fijos con permisos predeterminados no modificables
-3. Roles fijos con permisos configurables por el admin global ← **opción elegida**
+3. Roles fijos con permisos configurables para la institución directiva ← **opción elegida**
 4. Roles jerárquicos (admin > profesional > familia > persona)
 
 ---
 
 ## Decisión
 
-Se adoptó un esquema de **4 roles fijos con permisos configurables** y un mecanismo de alcance institucional para el rol admin:
+Se adoptó un esquema de **4 roles fijos con permisos configurables** y un mecanismo de alcance institucional para la gestión escolar:
 
 | Rol técnico | Actor de negocio que representa |
 |-------------|----------------------------------|
-| `PersonWithDisability` | Persona con Discapacidad |
+| `PersonWithDisability` | Persona con Discapacidad (Alumno) |
 | `Professional` | Profesional (docente, terapeuta, etc.) |
 | `FamilyRepresentative` | Familia / Cuidador |
-| `Admin` | Admin Institucional y Admin Global |
+| `Admin` | Administrador Institucional (Equipo Directivo) |
 
-El rol `Admin` se subdivide en práctica mediante el claim `isGlobalAdmin` (booleano) y `institutionId` (IDs asignadas), sin crear un quinto rol.
+El rol `Admin` modela a la autoridad escolar y directiva del establecimiento educativo, utilizando el claim `institutionId` para delimitar técnicamente todas las operaciones al ámbito del colegio.
 
 ---
 
@@ -65,17 +65,15 @@ El familiar tiene el alcance más acotado después de la persona: solo ve lo que
 
 ---
 
-### `Admin` con flag `isGlobalAdmin` — un rol, dos alcances
+### `Admin` — Administrador Institucional (Equipo Directivo)
 
-**Decisión:** un único rol técnico `admin`, diferenciado por claim, no por rol separado.
+**Decisión:** un rol administrativo centrado en la gobernanza escolar autónoma.
 
-Las operaciones de un admin institucional y un admin global son las mismas en naturaleza (gestionar usuarios, asignar profesionales, resetear contraseñas); lo que varía es el alcance (una institución vs todo el sistema). Modelar esto con un flag en el JWT en lugar de dos roles separados tiene tres ventajas:
+El administrador de la institución gestiona usuarios del establecimiento, asignaciones entre docentes y alumnos, datos de la sede y aprueba los reportes oficiales. En el backend técnico se implementa con el claim `institutionId` para acotar todas las operaciones al ámbito del colegio.
 
-1. **Simplicidad de autorización:** todas las políticas de `[Authorize(Policy="admin")]` aplican a ambos. El filtro de alcance es responsabilidad del middleware y del repositorio, no de la capa de autorización.
-2. **Escalabilidad:** si en el futuro se agregan jerarquías (por ejemplo, admin regional), el modelo de claims es extensible sin crear nuevos roles.
-3. **Sin duplicación de código:** los controllers, handlers y políticas no necesitan variantes por subtipo de admin.
-
-**Alternativa descartada:** roles `AdminGlobal` y `AdminInstitutional` separados. Descartado porque duplicaría todas las políticas de autorización y los tests de integración sin agregar valor diferencial.
+1. **Simplicidad de autorización:** las políticas de `[Authorize(Policy="admin")]` aplican a la gestión directiva escolar.
+2. **Aislamiento institucional:** el filtro de alcance por `institutionId` es responsabilidad del middleware y del repositorio, garantizando el cumplimiento de la Ley 25.326.
+3. **Sin duplicación de código:** los controllers, handlers y políticas operan de forma limpia y directa sobre el ámbito escolar.
 
 ---
 

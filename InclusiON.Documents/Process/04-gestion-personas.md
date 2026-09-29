@@ -6,9 +6,8 @@
 Proceso de alta, edición y administración de las personas con discapacidad (PCD) dentro de la plataforma. Incluye configuración del perfil de accesibilidad (método de login, nivel de autonomía), gestión de diagnósticos, perfil de habilidades y vinculación con representantes familiares.
 
 ## Participantes
-- **Admin Global** — CRUD completo de personas en cualquier institución
-- **Admin Institucional** — CRUD dentro de su institución
-- **Profesional** — Consulta y edición limitada de sus personas asignadas; configura perfil de habilidades
+- **Admin Institucional** — CRUD completo de personas dentro de la institución escolar
+- **Profesional** — Consulta y edición pedagógica de sus personas asignadas; configura perfil de habilidades
 
 ## Pasos del proceso
 
@@ -21,7 +20,7 @@ El admin registra la persona con datos personales, tipo de discapacidad, nivel d
 ### 2. Consulta y Búsqueda
 Lista paginada con filtros por tipo de discapacidad, nivel de autonomía, institución y estado.
 - **Endpoint:** `GET /api/persons` (paginado, con filtros)
-- **Alcance:** Admin Global ve todas; Admin Institucional ve las de su institución; Profesional ve sus asignadas
+- **Alcance:** Admin Institucional ve todas las de la institución; Profesional ve sus asignadas
 
 ### 3. Edición de Persona
 Modificación de datos personales y configuración de accesibilidad.
@@ -78,7 +77,6 @@ flowchart TD
     PROF -->|POST /api/persons/.../skill-profile| SKILL[Configurar Áreas de Habilidad]
 
     LIST -->|Filtra por rol| SCOPE{Alcance}
-    SCOPE -->|Admin Global| ALL[Todas las personas]
-    SCOPE -->|Admin Inst.| INST[Institución propia]
-    SCOPE -->|Profesional| ASSIGNED[Personas asignadas]
+    SCOPE -->|Admin Institucional| ALL[Alumnos de la institución]
+    SCOPE -->|Profesional| ASSIGNED[Alumnos del aula / asignados]
 ```

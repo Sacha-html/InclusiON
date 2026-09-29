@@ -1,0 +1,26 @@
+@startuml Ciclo de Vida de una Actividad Asignada
+skinparam backgroundColor #FEFEFE
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam state {
+  BackgroundColor #EEF4FF
+  BorderColor #2B579A
+}
+
+[*] --> Pendiente : El profesional prescribe la actividad
+
+Pendiente --> EnCurso : El alumno abre la actividad y empieza a jugar
+Pendiente --> Cancelada : El profesional cancela la asignación
+
+state EnCurso {
+  [*] --> Jugando : El alumno interactúa con los pictogramas o consignas
+  Jugando --> Practicando : Solicita un nuevo intento para mejorar
+  Practicando --> Jugando
+}
+
+EnCurso --> Completada : El alumno o supervisor pulsa 'Finalizar' y se guardan los logros
+
+Completada --> [*] : Queda registrada en el legajo del alumno
+Cancelada --> [*] : Se retira de la lista de tareas
+
+@enduml

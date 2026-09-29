@@ -67,7 +67,7 @@ Para cada validación: qué se verifica, la regla concreta, y la razón de domin
 | # | Campo / Condición | Regla | Justificación de negocio |
 |---|-------------------|-------|--------------------------|
 | V-19 | `ActivityContent.TemplateTypeId` | Inmutable si la actividad fue asignada al menos una vez | Los `ActivityResponse` almacenan datos estructurados según el template. Cambiar la estructura haría incomparables los resultados pasados y presentes, y potencialmente corrompería la lectura del historial clínico. |
-| V-20 | `IsStandardActivity` | Las actividades estándar solo pueden ser dadas de baja por el Admin Global | Las actividades estándar son contenido de plataforma compartido entre todas las instituciones. Un profesional individual no puede afectar el catálogo global que usan otros profesionales de otras instituciones. |
+| V-20 | `IsStandardActivity` | Las actividades estándar solo pueden ser gestionadas por el Administrador Institucional | Las actividades estándar son contenido curricular de referencia provisto con el sistema. Un profesional individual no puede dar de baja el catálogo estándar que usan otros colegas del establecimiento. |
 | V-21 | Baja de `Activity` | No permitida si hay `ActivityAssignment` con `Status = Pending` o `InProgress` | La persona tiene la actividad en su agenda activa. Desactivarla mid-proceso rompe su sesión y deja asignaciones vivas apuntando a contenido inactivo. |
 
 ### ActivityAssignment

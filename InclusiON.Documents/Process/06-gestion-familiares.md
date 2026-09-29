@@ -6,7 +6,7 @@
 Proceso de alta y administración de representantes familiares vinculados a personas con discapacidad. Los familiares acceden a un portal propio donde consultan actividades, progreso y reportes aprobados de sus personas a cargo. El alta puede darse por invitación (flujo profesional) o directa (flujo admin).
 
 ## Participantes
-- **Admin Global / Institucional** — Alta directa de familiar y vinculación a persona
+- **Admin Institucional** — Alta directa de familiar y vinculación a persona
 - **Profesional** — Genera invitaciones para familiares de sus personas asignadas
 - **Familiar** — Se registra vía invitación; accede al portal familiar
 
