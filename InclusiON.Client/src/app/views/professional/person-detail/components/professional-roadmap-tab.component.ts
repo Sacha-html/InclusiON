@@ -68,6 +68,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   canCreate = this.authService.hasPermission(Permissions.Roadmap.Create);
   canUpdate = this.authService.hasPermission(Permissions.Roadmap.Update);
   canDelete = this.authService.hasPermission(Permissions.Roadmap.Delete);
+  canAssign = this.authService.hasPermission(Permissions.Activities.Create);
   readonly assignToday = new Date().toISOString().split('T')[0];
 
   // ── Create roadmap ──────────────────────────────────────────────────
