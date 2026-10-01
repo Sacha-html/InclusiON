@@ -100,7 +100,7 @@
 
       @if (activeTab === 'diagnosticos') {
         <div role="tabpanel" id="panel-diagnosticos" aria-labelledby="tab-diagnosticos">
-          <app-professional-diagnoses [personId]="person.id" [diagnoses]="diagnoses()" (diagnosesChange)="onDiagnosesChange($event)" />
+          <app-professional-diagnoses [personId]="person.id" [studentName]="person.firstName + ' ' + person.lastName" [diagnoses]="diagnoses()" (diagnosesChange)="onDiagnosesChange($event)" />
         </div>
       }
 
