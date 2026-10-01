@@ -543,3 +543,12 @@
   }
 }
 
+// Modal de Alertas de Frustración expandido
+.frustration-modal-xl {
+  .modal-dialog {
+    max-width: 95vw !important;
+    width: 1280px !important;
+    --cui-modal-width: 1280px !important;
+  }
+}
+
