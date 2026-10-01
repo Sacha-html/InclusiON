@@ -420,7 +420,7 @@
   </c-modal>
 
   <!-- ── Modal Detalle de Alertas de Frustración ────────────────────────── -->
-  <c-modal [visible]="showFrustrationModal" (visibleChange)="showFrustrationModal = $event" size="lg" alignment="center">
+  <c-modal [visible]="showFrustrationModal" (visibleChange)="showFrustrationModal = $event" size="xl" alignment="center" class="frustration-modal-xl" scrollable>
     <c-modal-header class="border-bottom">
       <h5 cModalTitle class="d-flex align-items-center gap-2">
         <span class="fs-5">⚠️</span>
@@ -441,10 +441,10 @@
         <div class="mb-3 text-body-secondary small">
           Se identificaron <strong>{{ frustrationDetails.length }}</strong> partidas con indicadores de frustración (tasa de éxito ≤ 60%, 4+ errores consecutivos o GAS negativo).
         </div>
-        <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+        <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
           <table cTable hover small class="align-middle mb-0">
             <thead>
-              <tr class="table-light">
+              <tr class="table-light text-nowrap">
                 <th>Alumno</th>
                 <th>Actividad</th>
                 <th>Categoría</th>
@@ -457,17 +457,17 @@
             <tbody>
               @for (item of frustrationDetails; track item.studentId + item.activityId + item.fecha) {
                 <tr>
-                  <td class="fw-semibold">{{ item.nombreAlumno }}</td>
-                  <td>{{ item.nombreActividad }}</td>
-                  <td>
+                  <td class="fw-semibold text-nowrap">{{ item.nombreAlumno }}</td>
+                  <td class="text-nowrap">{{ item.nombreActividad }}</td>
+                  <td class="text-nowrap">
                     <span class="badge bg-light text-body border">{{ item.categoriaPedagogica }}</span>
                   </td>
-                  <td class="text-center">
+                  <td class="text-center text-nowrap">
                     <span class="badge bg-danger-subtle text-danger border fw-bold">
                       {{ item.cantidadErrores }}
                     </span>
                   </td>
-                  <td class="text-center">
+                  <td class="text-center text-nowrap">
                     <span class="badge" [class.bg-danger]="item.successRate < 40" [class.bg-warning-subtle]="item.successRate >= 40" [class.text-dark]="item.successRate >= 40">
                       {{ item.successRate | number:'1.0-0' }}%
                     </span>
@@ -475,7 +475,7 @@
                   <td>
                     <span class="small text-danger fw-medium">{{ item.motivoFrustracion }}</span>
                   </td>
-                  <td class="text-end text-body-secondary small font-monospace">
+                  <td class="text-end text-body-secondary small font-monospace text-nowrap">
                     {{ item.fecha | date:'dd/MM/yyyy HH:mm' }}
                   </td>
                 </tr>

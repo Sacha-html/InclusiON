@@ -150,6 +150,8 @@
                           [attr.aria-label]="'Configurar motor adaptativo para ' + activity.activityTitle">
                     <small>⚙ Motor MDA</small>
                   </button>
+                }
+                @if (canAssign) {
                   <button type="button" cButton color="link" size="sm"
                           (click)="openAssignModal(area, activity)"
                           class="p-0"

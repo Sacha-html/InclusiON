@@ -81,3 +81,15 @@
   min-width: 170px;
 }
 
+// ── Modal Alertas de Frustración (Ampliado) ──────────────────────────────────
+:host ::ng-deep .frustration-modal-xl {
+  .modal-dialog {
+    max-width: 95vw !important;
+    width: 1280px !important;
+  }
+
+  .table td, .table th {
+    vertical-align: middle;
+  }
+}
+

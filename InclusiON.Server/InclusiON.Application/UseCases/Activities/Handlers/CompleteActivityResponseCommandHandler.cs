@@ -362,7 +362,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             string resultMessage = command.SuccessPercentage >= 60m
                 ? "Actividad completada."
                 : response.AttemptCount >= 4
-                    ? "Se han agotado los 4 intentos. Actividad bloqueada."
+                    ? "Intento registrado. Tu profesional fue notificado para brindarte apoyo."
                     : "Intento registrado. Nivel en proceso.";
 
             return ApiResponse<ActivityAssignmentResponse>.SuccessResult(dto, resultMessage);

@@ -163,13 +163,6 @@ export class AacRoadmapComponent implements OnInit {
     if (!act.isUnlocked) return 'locked';
     if (!assignment) return 'pending';
 
-    // Si tiene 4 o más intentos completados y ninguno aprobado (>= 60%), se bloquea
-    const completedResponses = assignment.responses?.filter(r => r.completedAt) ?? [];
-    const hasPassed = completedResponses.some(r => (r.successPercentage ?? 0) >= 60);
-    if (!hasPassed && completedResponses.length >= 4) {
-      return 'locked';
-    }
-
     switch (assignment.status) {
       case ActivityAssignmentStatus.Completada: return 'completed';
       case ActivityAssignmentStatus.EnProgreso: return 'in-progress';

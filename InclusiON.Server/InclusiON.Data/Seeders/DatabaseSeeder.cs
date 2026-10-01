@@ -130,9 +130,6 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:create" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "activities:update" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:read" },
-                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:create" },
-                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:update" },
-                new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "roadmap:delete" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:read" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:create" },
                 new() { RoleId = professionalRoleId, ClaimType = "permission", ClaimValue = "diagnoses:update" },
@@ -167,6 +164,20 @@ namespace InclusiON.Data.Seeders
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "roadmap:read" },
                 new() { RoleId = personRoleId, ClaimType = "permission", ClaimValue = "messages:read" },
             };
+
+            // Eliminar claims obsoletos de modificación de roadmap para el rol profesional
+            var obsoleteProfClaims = await context.RoleClaims
+                .Where(c => c.RoleId == professionalRoleId &&
+                            (c.ClaimValue == "roadmap:create" ||
+                             c.ClaimValue == "roadmap:update" ||
+                             c.ClaimValue == "roadmap:delete"))
+                .ToListAsync();
+
+            if (obsoleteProfClaims.Count > 0)
+            {
+                context.RoleClaims.RemoveRange(obsoleteProfClaims);
+                await context.SaveChangesAsync();
+            }
 
             // Upsert: solo agregar los claims que no existen aun
             var existingClaims = await context.RoleClaims
