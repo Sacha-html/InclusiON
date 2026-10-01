@@ -135,137 +135,395 @@
   </div>
 }
 
-<!-- Modal -->
-<c-modal [visible]="showModal()" (visibleChange)="!$event && closeModal()" size="lg" [backdrop]="'static'">
-  <c-modal-header>
-    <strong>
-      @if (editing() && !editingIsCreator()) {
-        Ver diagnóstico
-        <c-badge color="secondary" class="ms-2">Solo lectura</c-badge>
-      } @else {
-        {{ editing() ? 'Editar diagnóstico' : 'Nuevo diagnóstico' }}
-      }
-    </strong>
-  </c-modal-header>
-  <c-modal-body>
-    <!-- Cabecera institucional -->
-    <c-row class="mb-3">
-      <c-col sm="4">
-        <label cLabel>Docente</label>
-        <input cFormControl [value]="currentTeacherName" readonly disabled />
-      </c-col>
-      <c-col sm="4">
-        <label cLabel for="primaryDiagnosis">Asignatura / Área pedagógica *</label>
-        <input cFormControl id="primaryDiagnosis" list="subject-suggestions"
-               [(ngModel)]="form.primaryDiagnosis"
-               [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
-               [valid]="submitted && !form.primaryDiagnosis.trim() ? false : undefined" />
-        <datalist id="subject-suggestions">
-          @for (s of subjectSuggestions; track s) {
-            <option [value]="s"></option>
+<!-- Modal Ficha de Diagnóstico e Inclusión Pedagógica (Tamaño XL) -->
+<c-modal [visible]="showModal()" (visibleChange)="!$event && closeModal()" size="xl" [scrollable]="true" class="modal-diagnosis-xl" [backdrop]="'static'">
+  <c-modal-header class="border-bottom py-3 px-4">
+    <div class="d-flex align-items-center justify-content-between w-100 pe-2">
+      <div class="d-flex align-items-center gap-2">
+        <div class="modal-icon-badge rounded-circle d-flex align-items-center justify-content-center me-1">
+          <svg cIcon name="cilDescription" size="lg" class="text-primary" aria-hidden="true"></svg>
+        </div>
+        <div>
+          <h5 class="mb-0 fw-bold text-dark">
+            @if (isReadOnly()) {
+              Ficha de Diagnóstico e Inclusión Pedagógica
+            } @else {
+              {{ editing() ? 'Editar Diagnóstico Pedagógico' : 'Nuevo Diagnóstico Pedagógico' }}
+            }
+          </h5>
+          @if (isReadOnly()) {
+            <small class="text-muted">Informe clínico-pedagógico y propuesta de ajustes DUA</small>
           }
-        </datalist>
-        @if (submitted && !form.primaryDiagnosis.trim()) {
-          <c-form-feedback [valid]="false">La asignatura / área es obligatoria.</c-form-feedback>
+        </div>
+        @if (isReadOnly()) {
+          <c-badge color="info" shape="rounded-pill" class="ms-2 px-2 py-1">Solo lectura</c-badge>
         }
-      </c-col>
-      <c-col sm="4">
-        <label cLabel for="diagnosisDate">Fecha *</label>
-        <input cFormControl id="diagnosisDate" type="date"
-               [(ngModel)]="form.diagnosisDate"
-               [max]="maxDiagnosisDate"
-               [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
-               [valid]="submitted && (!form.diagnosisDate || form.diagnosisDate > maxDiagnosisDate) ? false : undefined" />
-        @if (submitted && !form.diagnosisDate) {
-          <c-form-feedback [valid]="false">La fecha es obligatoria.</c-form-feedback>
-        }
-        @if (submitted && form.diagnosisDate && form.diagnosisDate > maxDiagnosisDate) {
-          <c-form-feedback [valid]="false">La fecha no puede ser futura.</c-form-feedback>
-        }
-      </c-col>
-    </c-row>
-
-    <c-row class="mb-3">
-      <c-col sm="6">
-        <label cLabel for="identifiedCapabilities">Fortalezas del estudiante *</label>
-        <textarea cFormControl id="identifiedCapabilities" rows="3"
-                  [(ngModel)]="form.identifiedCapabilities"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
-                  [valid]="submitted && !form.identifiedCapabilities.trim() ? false : undefined"></textarea>
-        @if (submitted && !form.identifiedCapabilities.trim()) {
-          <c-form-feedback [valid]="false">Las fortalezas son obligatorias.</c-form-feedback>
-        }
-      </c-col>
-      <c-col sm="6">
-        <label cLabel for="identifiedChallenges">Debilidades / desafíos del estudiante *</label>
-        <textarea cFormControl id="identifiedChallenges" rows="3"
-                  [(ngModel)]="form.identifiedChallenges"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"
-                  [valid]="submitted && !form.identifiedChallenges.trim() ? false : undefined"></textarea>
-        @if (submitted && !form.identifiedChallenges.trim()) {
-          <c-form-feedback [valid]="false">Las debilidades / desafíos son obligatorios.</c-form-feedback>
-        }
-      </c-col>
-    </c-row>
-
-    <c-row class="mb-3">
-      <c-col sm="12">
-        <label cLabel for="initialObservations">Observaciones adicionales</label>
-        <textarea cFormControl id="initialObservations" rows="2"
-                  [(ngModel)]="form.initialObservations"
-                  [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-      </c-col>
-    </c-row>
-
-    <!-- Sección DUA colapsable -->
-    <div class="mb-2">
-      <button cButton color="link" size="sm" class="p-0" type="button"
-              (click)="showDuaSection = !showDuaSection"
-              [attr.aria-expanded]="showDuaSection">
-        <svg cIcon [name]="showDuaSection ? 'cilChevronBottom' : 'cilChevronRight'" size="sm" class="me-1" aria-hidden="true"></svg>
-        Ver / Configurar Apoyos y Estrategias DUA
-      </button>
+      </div>
+      @if (isReadOnly() && editing()) {
+        <button cButton color="outline-primary" size="sm" class="d-flex align-items-center gap-2 shadow-sm px-3 py-1"
+                (click)="downloadCurrentPdf()"
+                [disabled]="downloadingPdfId === editing()?.encryptedId">
+          <svg cIcon name="cilCloudDownload" size="sm"></svg>
+          {{ downloadingPdfId === editing()?.encryptedId ? 'Generando PDF...' : 'Descargar PDF' }}
+        </button>
+      }
     </div>
+  </c-modal-header>
 
-    @if (showDuaSection) {
-      <c-row class="mb-3">
-        <c-col sm="6">
-          <label cLabel for="requiredSupports">Apoyos requeridos</label>
-          <textarea cFormControl id="requiredSupports" rows="2"
-                    [(ngModel)]="form.requiredSupports"
-                    [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-        </c-col>
-        <c-col sm="6">
-          <label cLabel for="recommendedStrategies">Estrategias recomendadas</label>
-          <textarea cFormControl id="recommendedStrategies" rows="2"
-                    [(ngModel)]="form.recommendedStrategies"
-                    [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-        </c-col>
-      </c-row>
-      <c-row class="mb-3">
-        <c-col sm="12">
-          <label cLabel for="pedagogicalObjectives">Objetivos pedagógicos</label>
-          <textarea cFormControl id="pedagogicalObjectives" rows="2"
-                    [(ngModel)]="form.pedagogicalObjectives"
-                    [attr.disabled]="(editing() && !editingIsCreator()) ? true : null"></textarea>
-        </c-col>
-      </c-row>
+  <c-modal-body class="p-4">
+    @if (isReadOnly()) {
+      <!-- VISTA EN MODO DOCUMENTO / INFORME CLÍNICO FORMAL (SIN INPUTS NI SCROLLBARS) -->
+      <div class="diagnosis-document-view">
+        <!-- 1. Banner Institucional y Metadatos -->
+        <div class="document-header-card p-3 rounded-3 mb-4 border shadow-sm bg-white">
+          <c-row class="g-3 align-items-center mb-2">
+            @if (studentName) {
+              <c-col sm="6" lg="4">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="header-icon-box bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                    <svg cIcon name="cilUser" size="lg"></svg>
+                  </div>
+                  <div class="min-w-0 flex-grow-1 overflow-hidden">
+                    <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Estudiante</small>
+                    <strong class="fs-6 text-dark d-block text-truncate" [title]="studentName">{{ studentName }}</strong>
+                  </div>
+                </div>
+              </c-col>
+            }
+            <c-col sm="6" [lg]="studentName ? 4 : 6">
+              <div class="d-flex align-items-center gap-3">
+                <div class="header-icon-box bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                  <svg cIcon name="cilBriefcase" size="lg"></svg>
+                </div>
+                <div class="min-w-0 flex-grow-1 overflow-hidden">
+                  <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Profesional Evaluador</small>
+                  <strong class="fs-6 text-dark d-block text-truncate" [title]="editing()?.professionalName || currentTeacherName">
+                    {{ editing()?.professionalName || currentTeacherName }}
+                  </strong>
+                </div>
+              </div>
+            </c-col>
+            <c-col sm="6" [lg]="studentName ? 4 : 6">
+              <div class="d-flex align-items-center gap-3">
+                <div class="header-icon-box bg-light text-dark border rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                  <svg cIcon name="cilCalendar" size="lg"></svg>
+                </div>
+                <div class="min-w-0 flex-grow-1 overflow-hidden">
+                  <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Fecha de Emisión</small>
+                  <strong class="fs-6 text-dark d-block text-nowrap">{{ editing()?.diagnosisDate | date:'dd/MM/yyyy' }}</strong>
+                </div>
+              </div>
+            </c-col>
+          </c-row>
+          <div class="pt-2 border-top d-flex align-items-center gap-3">
+            <div class="header-icon-box bg-info text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+              <svg cIcon name="cilSchool" size="lg"></svg>
+            </div>
+            <div class="min-w-0 flex-grow-1">
+              <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Eje / Asignatura / Diagnóstico</small>
+              <strong class="fs-6 text-dark d-block" style="word-break: break-word;">
+                {{ form.primaryDiagnosis || 'Sin especificar' }}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Perfil Integral del Estudiante: Fortalezas vs Desafíos (2 Columnas amplias) -->
+        <c-row class="g-4 mb-4">
+          <c-col md="6">
+            <div class="card h-100 border-success-subtle shadow-sm document-card card-strengths">
+              <div class="card-header bg-success-subtle border-success-subtle py-2 px-3">
+                <h6 class="mb-0 fw-bold text-success-emphasis">Fortalezas y Potencialidades</h6>
+              </div>
+              <div class="card-body p-3">
+                <p class="mb-0 text-dark document-text">
+                  {{ form.identifiedCapabilities || 'No se registraron fortalezas específicas.' }}
+                </p>
+              </div>
+            </div>
+          </c-col>
+
+          <c-col md="6">
+            <div class="card h-100 border-warning-subtle shadow-sm document-card card-challenges">
+              <div class="card-header bg-warning-subtle border-warning-subtle py-2 px-3">
+                <h6 class="mb-0 fw-bold text-warning-emphasis">Barreras y Desafíos del Entorno</h6>
+              </div>
+              <div class="card-body p-3">
+                <p class="mb-0 text-dark document-text">
+                  {{ form.identifiedChallenges || 'No se registraron barreras o desafíos específicos.' }}
+                </p>
+              </div>
+            </div>
+          </c-col>
+        </c-row>
+
+        <!-- 3. Observaciones Clínicas y Dinámica de Aula -->
+        @if (form.initialObservations) {
+          <div class="card border-0 bg-light mb-4 shadow-sm document-card">
+            <div class="card-header bg-transparent border-0 pt-3 pb-1 px-3">
+              <h6 class="mb-0 fw-bold text-dark">Observaciones Clínicas y de Dinámica Escolar</h6>
+            </div>
+            <div class="card-body pt-1 pb-3 px-3">
+              <p class="mb-0 text-secondary document-text">
+                {{ form.initialObservations }}
+              </p>
+            </div>
+          </div>
+        }
+
+        <!-- 4. Propuesta Pedagógica y Estrategias DUA -->
+        <div class="card border-primary-subtle shadow-sm mb-2 document-card">
+          <div class="card-header bg-primary-subtle border-primary-subtle py-2 px-3">
+            <h6 class="mb-0 fw-bold text-primary-emphasis">Propuesta Pedagógica y Estrategias DUA (Diseño Universal para el Aprendizaje)</h6>
+          </div>
+          <div class="card-body p-3">
+            <c-row class="g-3">
+              <c-col md="4">
+                <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                  <div class="mb-2 text-primary fw-semibold">
+                    <span>Apoyos Requeridos</span>
+                  </div>
+                  <p class="mb-0 text-secondary document-text small">
+                    {{ form.requiredSupports || 'Sin apoyos específicos adicionales.' }}
+                  </p>
+                </div>
+              </c-col>
+              <c-col md="4">
+                <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                  <div class="mb-2 text-success fw-semibold">
+                    <span>Estrategias Didácticas</span>
+                  </div>
+                  <p class="mb-0 text-secondary document-text small">
+                    {{ form.recommendedStrategies || 'Estrategias pedagógicas universales.' }}
+                  </p>
+                </div>
+              </c-col>
+              <c-col md="4">
+                <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                  <div class="mb-2 text-info fw-semibold">
+                    <span>Objetivos de Inclusión</span>
+                  </div>
+                  <p class="mb-0 text-secondary document-text small">
+                    {{ form.pedagogicalObjectives || 'Continuidad y progreso según el plan de inclusión.' }}
+                  </p>
+                </div>
+              </c-col>
+            </c-row>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- FORMULARIO DE EDICIÓN O CREACIÓN (MISMA LÍNEA Y ESTRUCTURA QUE LA FICHA DE LECTURA) -->
+      <div class="diagnosis-form-view">
+        <!-- 1. Banner Institucional y Metadatos con Inputs Integrados -->
+        <div class="document-header-card p-3 rounded-3 mb-4 border shadow-sm bg-white">
+          <c-row class="g-3 align-items-center mb-3">
+            @if (studentName) {
+              <c-col sm="6" lg="4">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="header-icon-box bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                    <svg cIcon name="cilUser" size="lg"></svg>
+                  </div>
+                  <div class="min-w-0 flex-grow-1 overflow-hidden">
+                    <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Estudiante</small>
+                    <strong class="fs-6 text-dark d-block text-truncate" [title]="studentName">{{ studentName }}</strong>
+                  </div>
+                </div>
+              </c-col>
+            }
+
+            <c-col sm="6" [lg]="studentName ? 4 : 6">
+              <div class="d-flex align-items-center gap-3">
+                <div class="header-icon-box bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                  <svg cIcon name="cilBriefcase" size="lg"></svg>
+                </div>
+                <div class="min-w-0 flex-grow-1 overflow-hidden">
+                  <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Profesional Evaluador</small>
+                  <strong class="fs-6 text-dark d-block text-truncate" [title]="editing()?.professionalName || currentTeacherName">
+                    {{ editing()?.professionalName || currentTeacherName }}
+                  </strong>
+                </div>
+              </div>
+            </c-col>
+
+            <c-col sm="6" [lg]="studentName ? 4 : 6">
+              <div class="d-flex align-items-center gap-3">
+                <div class="header-icon-box bg-light text-dark border rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                  <svg cIcon name="cilCalendar" size="lg"></svg>
+                </div>
+                <div class="min-w-0 flex-grow-1">
+                  <label for="diagnosisDate" class="text-muted text-uppercase fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.3px;">
+                    Fecha de Emisión *
+                  </label>
+                  <input cFormControl id="diagnosisDate" type="date" size="sm" class="form-control-sm"
+                         [(ngModel)]="form.diagnosisDate"
+                         [max]="maxDiagnosisDate"
+                         [valid]="submitted && (!form.diagnosisDate || form.diagnosisDate > maxDiagnosisDate) ? false : undefined" />
+                  @if (submitted && !form.diagnosisDate) {
+                    <c-form-feedback [valid]="false" class="d-block small">La fecha es obligatoria.</c-form-feedback>
+                  }
+                  @if (submitted && form.diagnosisDate && form.diagnosisDate > maxDiagnosisDate) {
+                    <c-form-feedback [valid]="false" class="d-block small">La fecha no puede ser futura.</c-form-feedback>
+                  }
+                </div>
+              </div>
+            </c-col>
+          </c-row>
+
+          <div class="pt-3 border-top">
+            <div class="d-flex align-items-start gap-3">
+              <div class="header-icon-box bg-info text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0 mt-1">
+                <svg cIcon name="cilSchool" size="lg"></svg>
+              </div>
+              <div class="min-w-0 flex-grow-1">
+                <label for="primaryDiagnosis" class="text-muted text-uppercase fw-semibold d-block mb-1" style="font-size: 0.75rem; letter-spacing: 0.3px;">
+                  Eje / Asignatura / Diagnóstico Pedagógico *
+                </label>
+                <input cFormControl id="primaryDiagnosis" list="subject-suggestions"
+                       [(ngModel)]="form.primaryDiagnosis"
+                       placeholder="Ej: Trastorno del Espectro Autista (TEA) / Lengua y Comunicación"
+                       [valid]="submitted && !form.primaryDiagnosis.trim() ? false : undefined" />
+                <datalist id="subject-suggestions">
+                  @for (s of subjectSuggestions; track s) {
+                    <option [value]="s"></option>
+                  }
+                </datalist>
+                @if (submitted && !form.primaryDiagnosis.trim()) {
+                  <c-form-feedback [valid]="false" class="d-block small">El diagnóstico o área pedagógica es obligatorio.</c-form-feedback>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Perfil Integral del Estudiante: Fortalezas vs Desafíos (Mismas Tarjetas) -->
+        <c-row class="g-4 mb-4">
+          <c-col md="6">
+            <div class="card h-100 border-success-subtle shadow-sm document-card card-strengths">
+              <div class="card-header bg-success-subtle border-success-subtle py-2 px-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-success-emphasis">Fortalezas y Potencialidades *</h6>
+                <small class="text-success-emphasis opacity-75">Habilidades e intereses</small>
+              </div>
+              <div class="card-body p-3">
+                <textarea cFormControl id="identifiedCapabilities" rows="4" class="form-control"
+                          [(ngModel)]="form.identifiedCapabilities"
+                          placeholder="Describí las habilidades, destrezas, áreas de interés y recursos cognitivos que potencian su aprendizaje..."
+                          [valid]="submitted && !form.identifiedCapabilities.trim() ? false : undefined"></textarea>
+                @if (submitted && !form.identifiedCapabilities.trim()) {
+                  <c-form-feedback [valid]="false" class="d-block small">Las fortalezas son obligatorias.</c-form-feedback>
+                }
+              </div>
+            </div>
+          </c-col>
+
+          <c-col md="6">
+            <div class="card h-100 border-warning-subtle shadow-sm document-card card-challenges">
+              <div class="card-header bg-warning-subtle border-warning-subtle py-2 px-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-warning-emphasis">Barreras y Desafíos del Entorno *</h6>
+                <small class="text-warning-emphasis opacity-75">Dificultades y barreras</small>
+              </div>
+              <div class="card-body p-3">
+                <textarea cFormControl id="identifiedChallenges" rows="4" class="form-control"
+                          [(ngModel)]="form.identifiedChallenges"
+                          placeholder="Describí las barreras del entorno escolar, dificultades de atención, autorregulación sensorial o comunicacional..."
+                          [valid]="submitted && !form.identifiedChallenges.trim() ? false : undefined"></textarea>
+                @if (submitted && !form.identifiedChallenges.trim()) {
+                  <c-form-feedback [valid]="false" class="d-block small">Las barreras o desafíos son obligatorios.</c-form-feedback>
+                }
+              </div>
+            </div>
+          </c-col>
+        </c-row>
+
+        <!-- 3. Observaciones Clínicas y Dinámica de Aula -->
+        <div class="card border-0 bg-light mb-4 shadow-sm document-card">
+          <div class="card-header bg-transparent border-0 pt-3 pb-1 px-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold text-dark">Observaciones Clínicas y de Dinámica Escolar</h6>
+            <small class="text-muted">Opcional</small>
+          </div>
+          <div class="card-body pt-1 pb-3 px-3">
+            <textarea cFormControl id="initialObservations" rows="3" class="form-control bg-white"
+                      [(ngModel)]="form.initialObservations"
+                      placeholder="Comentarios adicionales sobre su integración grupal, respuesta a consignas, rutinas y contexto familiar..."></textarea>
+          </div>
+        </div>
+
+        <!-- 4. Propuesta Pedagógica y Estrategias DUA (Misma Tarjeta) -->
+        <div class="card border-primary-subtle shadow-sm mb-2 document-card">
+          <div class="card-header bg-primary-subtle border-primary-subtle py-2 px-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold text-primary-emphasis">Propuesta Pedagógica y Estrategias DUA (Diseño Universal para el Aprendizaje)</h6>
+            <button cButton color="link" size="sm" class="p-0 text-primary-emphasis text-decoration-none fw-semibold d-flex align-items-center gap-1"
+                    type="button"
+                    (click)="showDuaSection = !showDuaSection"
+                    [attr.aria-expanded]="showDuaSection">
+              <svg cIcon [name]="showDuaSection ? 'cilChevronBottom' : 'cilChevronRight'" size="sm" aria-hidden="true"></svg>
+              {{ showDuaSection ? 'Ocultar campos DUA' : 'Configurar campos DUA (Opcional)' }}
+            </button>
+          </div>
+          @if (showDuaSection) {
+            <div class="card-body p-3">
+              <c-row class="g-3">
+                <c-col md="4">
+                  <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                    <div class="mb-2 text-primary fw-semibold">
+                      <label for="requiredSupports" class="mb-0">Apoyos Requeridos</label>
+                    </div>
+                    <textarea cFormControl id="requiredSupports" rows="3" class="form-control"
+                              [(ngModel)]="form.requiredSupports"
+                              placeholder="Ej: Agendas visuales, tableros CAA, adaptaciones de acceso curricular..."></textarea>
+                  </div>
+                </c-col>
+                <c-col md="4">
+                  <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                    <div class="mb-2 text-success fw-semibold">
+                      <label for="recommendedStrategies" class="mb-0">Estrategias Didácticas</label>
+                    </div>
+                    <textarea cFormControl id="recommendedStrategies" rows="3" class="form-control"
+                              [(ngModel)]="form.recommendedStrategies"
+                              placeholder="Ej: Anticipación de actividades, pausas activas, reforzadores visuales..."></textarea>
+                  </div>
+                </c-col>
+                <c-col md="4">
+                  <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                    <div class="mb-2 text-info fw-semibold">
+                      <label for="pedagogicalObjectives" class="mb-0">Objetivos de Inclusión</label>
+                    </div>
+                    <textarea cFormControl id="pedagogicalObjectives" rows="3" class="form-control"
+                              [(ngModel)]="form.pedagogicalObjectives"
+                              placeholder="Ej: Estimular autonomía comunicativa, metas curriculares del período..."></textarea>
+                  </div>
+                </c-col>
+              </c-row>
+            </div>
+          }
+        </div>
+      </div>
     }
   </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="closeModal()">
-      {{ editing() && !editingIsCreator() ? 'Cerrar' : 'Cancelar' }}
-    </button>
-    @if (!editing() || editingIsCreator()) {
-      <button cButton color="primary" (click)="save()"
-              [disabled]="saving()"
-              aria-label="Guardar diagnóstico">
-        @if (saving()) {
-          <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
-        }
-        {{ editing() ? 'Guardar cambios' : 'Crear diagnóstico' }}
+
+  <c-modal-footer class="border-top py-3 px-4 d-flex justify-content-between align-items-center">
+    <div>
+      @if (isReadOnly()) {
+        <span class="text-muted small">
+          Registro clínico-escolar oficial en la plataforma InclusiON.
+        </span>
+      }
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button cButton color="secondary" class="px-4" (click)="closeModal()">
+        {{ isReadOnly() ? 'Cerrar' : 'Cancelar' }}
       </button>
-    }
+      @if (!isReadOnly()) {
+        <button cButton color="primary" class="px-4" (click)="save()"
+                [disabled]="saving()"
+                aria-label="Guardar diagnóstico">
+          @if (saving()) {
+            <c-spinner size="sm" class="me-2" aria-hidden="true"></c-spinner>
+          }
+          {{ editing() ? 'Guardar cambios' : 'Crear diagnóstico' }}
+        </button>
+      }
+    </div>
   </c-modal-footer>
 </c-modal>
 

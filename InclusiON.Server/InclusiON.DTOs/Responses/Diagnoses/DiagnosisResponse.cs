@@ -18,6 +18,7 @@ namespace InclusiON.DTOs.Responses.Diagnoses
         public string? RecommendedStrategies { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool IsActive { get; set; }
 
         public static DiagnosisResponse MapToResponse(Diagnosis d)
         {
@@ -35,7 +36,8 @@ namespace InclusiON.DTOs.Responses.Diagnoses
                 PedagogicalObjectives = d.PedagogicalObjectives,
                 RecommendedStrategies = d.RecommendedStrategies,
                 CreatedAt = d.CreatedAt,
-                UpdatedAt = d.UpdatedAt
+                UpdatedAt = d.UpdatedAt,
+                IsActive = d.IsActive
             };
         }
     }
