@@ -1,71 +1,271 @@
 <h5 class="mb-3">Diagnósticos</h5>
 
+<!-- Filtro por fecha y estado -->
+@if (!loading && diagnoses.length > 0) {
+  <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+    <small class="text-body-secondary">Filtrar por fecha:</small>
+    <div class="d-flex align-items-center gap-1">
+      <label for="adminFilterFrom" class="visually-hidden">Desde</label>
+      <input type="date" id="adminFilterFrom" class="form-control form-control-sm"
+             style="width:160px"
+             [(ngModel)]="filterFrom"
+             [max]="filterTo || undefined"
+             aria-label="Desde" />
+    </div>
+    <small class="text-body-secondary">—</small>
+    <div class="d-flex align-items-center gap-1">
+      <label for="adminFilterTo" class="visually-hidden">Hasta</label>
+      <input type="date" id="adminFilterTo" class="form-control form-control-sm"
+             style="width:160px"
+             [(ngModel)]="filterTo"
+             [min]="filterFrom || undefined"
+             aria-label="Hasta" />
+    </div>
+    @if (filterFrom || filterTo || statusFilter) {
+      <button cButton color="link" size="sm" class="p-0 text-body-secondary"
+              (click)="clearFilters()"
+              aria-label="Limpiar filtros">
+        Limpiar
+      </button>
+    }
+    @if (filteredDiagnoses.length !== diagnoses.length) {
+      <small class="text-body-secondary">
+        {{ filteredDiagnoses.length }} de {{ diagnoses.length }}
+      </small>
+    }
+    <label for="admin-diagnosis-status-filter" class="visually-hidden">Estado</label>
+    <select id="admin-diagnosis-status-filter" class="form-select form-select-sm" style="width:140px"
+            [(ngModel)]="statusFilter" aria-label="Estado">
+      <option value="">Todos los estados</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
+  </div>
+}
+
 <app-data-table
   [columns]="columns"
-  [items]="diagnoses"
+  [items]="filteredDiagnoses"
   [loading]="loading"
   [showSearch]="false"
   [currentPage]="1"
-  [pageSize]="diagnoses.length || 1"
-  [totalItems]="diagnoses.length"
+  [pageSize]="filteredDiagnoses.length || 1"
+  [totalItems]="filteredDiagnoses.length"
   emptyMessage="No hay diagnósticos registrados para este alumno."
   emptyIcon="cil-description"
   (rowAction)="onRowAction($event)"
 />
 
-<!-- Modal detalle -->
+<!-- Modal Ficha de Diagnóstico e Inclusión Pedagógica (Tamaño XL) -->
 <c-modal [visible]="showModal" (visibleChange)="!$event && closeModal()"
-         aria-labelledby="diag-modal-title" size="lg">
-  <c-modal-header>
-    <strong id="diag-modal-title">Diagnóstico — {{ formatDate(selected?.diagnosisDate) }}</strong>
+         size="xl" [scrollable]="true" class="modal-diagnosis-xl" [backdrop]="'static'">
+  <c-modal-header class="border-bottom py-3 px-4 bg-white">
+    <div class="d-flex align-items-center justify-content-between w-100 pe-2">
+      <div class="d-flex align-items-center gap-2">
+        <div class="modal-icon-badge rounded-circle d-flex align-items-center justify-content-center me-1">
+          <svg cIcon name="cilDescription" size="lg" class="text-primary" aria-hidden="true"></svg>
+        </div>
+        <div>
+          <h5 class="mb-0 fw-bold text-dark">Ficha de Diagnóstico e Inclusión Pedagógica</h5>
+          <small class="text-muted">Informe clínico-pedagógico y propuesta de ajustes DUA</small>
+        </div>
+        <c-badge color="info" shape="rounded-pill" class="ms-2 px-2 py-1">Solo lectura</c-badge>
+        @if (selected) {
+          <c-badge [color]="isCurrentActive ? 'success' : 'secondary'" shape="rounded-pill" class="ms-1 px-2 py-1">
+            {{ isCurrentActive ? 'Activo' : 'Inactivo' }}
+          </c-badge>
+        }
+      </div>
+      @if (selected) {
+        <button cButton color="outline-primary" size="sm" class="d-flex align-items-center gap-2 shadow-sm px-3 py-1"
+                (click)="downloadPdf(selected.encryptedId, selected.diagnosisDate)"
+                [disabled]="downloadingPdfId === selected.encryptedId">
+          <svg cIcon name="cilCloudDownload" size="sm"></svg>
+          {{ downloadingPdfId === selected.encryptedId ? 'Generando PDF...' : 'Descargar PDF' }}
+        </button>
+      }
+    </div>
   </c-modal-header>
-  <c-modal-body>
+
+  <c-modal-body class="p-4">
     @if (loadingDetail) {
-      <div class="text-center py-3">
-        <c-spinner></c-spinner>
+      <div class="text-center py-4">
+        <c-spinner aria-label="Cargando diagnóstico"></c-spinner>
       </div>
     } @else if (selected) {
-      <dl class="row mb-0">
-        @if (person?.autonomyLevelName) {
-          <dt class="col-sm-4">Nivel de autonomía</dt>
-          <dd class="col-sm-8">{{ person!.autonomyLevelName }}</dd>
-        }
+      <div class="diagnosis-document-view">
+        <!-- 1. Banner Institucional y Metadatos -->
+        <div class="document-header-card p-3 rounded-3 mb-4 border shadow-sm bg-white">
+          <c-row class="g-3 align-items-center mb-2">
+            @if (studentName) {
+              <c-col sm="6" lg="4">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="header-icon-box bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                    <svg cIcon name="cilUser" size="lg"></svg>
+                  </div>
+                  <div class="min-w-0 flex-grow-1 overflow-hidden">
+                    <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Estudiante</small>
+                    <strong class="fs-6 text-dark d-block text-truncate" [title]="studentName">{{ studentName }}</strong>
+                  </div>
+                </div>
+              </c-col>
+            }
 
-        <dt class="col-sm-4">Profesional</dt>
-        <dd class="col-sm-8">{{ selected.professionalName }}</dd>
+            <c-col sm="6" [lg]="studentName ? 4 : 6">
+              <div class="d-flex align-items-center gap-3">
+                <div class="header-icon-box bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                  <svg cIcon name="cilBriefcase" size="lg"></svg>
+                </div>
+                <div class="min-w-0 flex-grow-1 overflow-hidden">
+                  <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Profesional Evaluador</small>
+                  <strong class="fs-6 text-dark d-block text-truncate" [title]="selected.professionalName">
+                    {{ selected.professionalName }}
+                  </strong>
+                </div>
+              </div>
+            </c-col>
 
-        <dt class="col-sm-4">Diagnóstico principal</dt>
-        <dd class="col-sm-8">{{ selected.primaryDiagnosis }}</dd>
+            <c-col sm="6" [lg]="studentName ? 4 : 6">
+              <div class="d-flex align-items-center gap-3">
+                <div class="header-icon-box bg-light text-dark border rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+                  <svg cIcon name="cilCalendar" size="lg"></svg>
+                </div>
+                <div class="min-w-0 flex-grow-1 overflow-hidden">
+                  <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Fecha de Emisión</small>
+                  <strong class="fs-6 text-dark d-block text-nowrap">{{ formatDate(selected.diagnosisDate) }}</strong>
+                </div>
+              </div>
+            </c-col>
+          </c-row>
 
+          <div class="pt-2 border-top d-flex align-items-center gap-3">
+            <div class="header-icon-box bg-info text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0">
+              <svg cIcon name="cilSchool" size="lg"></svg>
+            </div>
+            <div class="min-w-0 flex-grow-1">
+              <small class="text-muted text-uppercase fw-semibold d-block" style="font-size: 0.75rem; letter-spacing: 0.3px;">Eje / Asignatura / Diagnóstico</small>
+              <strong class="fs-6 text-dark d-block" style="word-break: break-word;">
+                {{ selected.primaryDiagnosis || 'Sin especificar' }}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Perfil Integral del Estudiante: Fortalezas vs Desafíos (2 Columnas amplias) -->
+        <c-row class="g-4 mb-4">
+          <c-col md="6">
+            <div class="card h-100 border-success-subtle shadow-sm document-card card-strengths">
+              <div class="card-header bg-success-subtle border-success-subtle py-2 px-3">
+                <h6 class="mb-0 fw-bold text-success-emphasis">Fortalezas y Potencialidades</h6>
+              </div>
+              <div class="card-body p-3">
+                <p class="mb-0 text-dark document-text">
+                  {{ selected.identifiedCapabilities || 'No se registraron fortalezas específicas.' }}
+                </p>
+              </div>
+            </div>
+          </c-col>
+
+          <c-col md="6">
+            <div class="card h-100 border-warning-subtle shadow-sm document-card card-challenges">
+              <div class="card-header bg-warning-subtle border-warning-subtle py-2 px-3">
+                <h6 class="mb-0 fw-bold text-warning-emphasis">Barreras y Desafíos del Entorno</h6>
+              </div>
+              <div class="card-body p-3">
+                <p class="mb-0 text-dark document-text">
+                  {{ selected.identifiedChallenges || 'No se registraron barreras o desafíos específicos.' }}
+                </p>
+              </div>
+            </div>
+          </c-col>
+        </c-row>
+
+        <!-- 3. Observaciones Clínicas y Dinámica de Aula -->
         @if (selected.initialObservations) {
-          <dt class="col-sm-4">Observaciones iniciales</dt>
-          <dd class="col-sm-8">{{ selected.initialObservations }}</dd>
+          <div class="card border-0 bg-light mb-4 shadow-sm document-card">
+            <div class="card-header bg-transparent border-0 pt-3 pb-1 px-3">
+              <h6 class="mb-0 fw-bold text-dark">Observaciones Clínicas y de Dinámica Escolar</h6>
+            </div>
+            <div class="card-body pt-1 pb-3 px-3">
+              <p class="mb-0 text-secondary document-text">
+                {{ selected.initialObservations }}
+              </p>
+            </div>
+          </div>
         }
-        @if (selected.identifiedCapabilities) {
-          <dt class="col-sm-4">Capacidades identificadas</dt>
-          <dd class="col-sm-8">{{ selected.identifiedCapabilities }}</dd>
-        }
-        @if (selected.identifiedChallenges) {
-          <dt class="col-sm-4">Desafíos identificados</dt>
-          <dd class="col-sm-8">{{ selected.identifiedChallenges }}</dd>
-        }
-        @if (selected.requiredSupports) {
-          <dt class="col-sm-4">Apoyos requeridos</dt>
-          <dd class="col-sm-8">{{ selected.requiredSupports }}</dd>
-        }
-        @if (selected.pedagogicalObjectives) {
-          <dt class="col-sm-4">Objetivos pedagógicos</dt>
-          <dd class="col-sm-8">{{ selected.pedagogicalObjectives }}</dd>
-        }
-        @if (selected.recommendedStrategies) {
-          <dt class="col-sm-4">Estrategias recomendadas</dt>
-          <dd class="col-sm-8">{{ selected.recommendedStrategies }}</dd>
-        }
-      </dl>
+
+        <!-- 4. Propuesta Pedagógica y Estrategias DUA -->
+        <div class="card border-primary-subtle shadow-sm mb-2 document-card">
+          <div class="card-header bg-primary-subtle border-primary-subtle py-2 px-3">
+            <h6 class="mb-0 fw-bold text-primary-emphasis">Propuesta Pedagógica y Estrategias DUA (Diseño Universal para el Aprendizaje)</h6>
+          </div>
+          <div class="card-body p-3">
+            <c-row class="g-3">
+              <c-col md="4">
+                <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                  <div class="mb-2 text-primary fw-semibold">
+                    <span>Apoyos Requeridos</span>
+                  </div>
+                  <p class="mb-0 text-secondary document-text small">
+                    {{ selected.requiredSupports || 'Sin apoyos específicos adicionales.' }}
+                  </p>
+                </div>
+              </c-col>
+              <c-col md="4">
+                <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                  <div class="mb-2 text-success fw-semibold">
+                    <span>Estrategias Didácticas</span>
+                  </div>
+                  <p class="mb-0 text-secondary document-text small">
+                    {{ selected.recommendedStrategies || 'Estrategias pedagógicas universales.' }}
+                  </p>
+                </div>
+              </c-col>
+              <c-col md="4">
+                <div class="dua-block p-3 rounded-3 h-100 bg-white border shadow-xs">
+                  <div class="mb-2 text-info fw-semibold">
+                    <span>Objetivos de Inclusión</span>
+                  </div>
+                  <p class="mb-0 text-secondary document-text small">
+                    {{ selected.pedagogicalObjectives || 'Continuidad y progreso según el plan de inclusión.' }}
+                  </p>
+                </div>
+              </c-col>
+            </c-row>
+          </div>
+        </div>
+      </div>
     }
   </c-modal-body>
-  <c-modal-footer>
-    <button cButton color="secondary" (click)="closeModal()">Cerrar</button>
+  <c-modal-footer class="border-top py-3 px-4 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      @if (selected) {
+        @if (isCurrentActive) {
+          <button cButton color="danger" variant="outline" class="px-3 d-flex align-items-center gap-2"
+                  (click)="openDeactivateFromModal()" [disabled]="isDeactivating">
+            <svg cIcon name="cilBan" size="sm"></svg>
+            Dar de baja
+          </button>
+        } @else {
+          <button cButton color="success" variant="outline" class="px-3 d-flex align-items-center gap-2"
+                  (click)="reactivateFromModal()">
+            <svg cIcon name="cilCheck" size="sm"></svg>
+            Reactivar
+          </button>
+        }
+      }
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      @if (selected) {
+        <button cButton color="primary" variant="outline" class="px-3 d-flex align-items-center gap-2"
+                (click)="downloadPdf(selected.encryptedId, selected.diagnosisDate)"
+                [disabled]="downloadingPdfId === selected.encryptedId">
+          <svg cIcon name="cilCloudDownload" size="sm"></svg>
+          {{ downloadingPdfId === selected.encryptedId ? 'Generando PDF...' : 'Descargar PDF' }}
+        </button>
+      }
+      <button cButton color="secondary" class="px-4" (click)="closeModal()">Cerrar</button>
+    </div>
   </c-modal-footer>
 </c-modal>
 

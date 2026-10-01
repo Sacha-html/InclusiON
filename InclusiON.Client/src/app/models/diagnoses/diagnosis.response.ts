@@ -13,6 +13,7 @@ export interface DiagnosisResponse {
   recommendedStrategies?: string;
   createdAt: string;
   updatedAt?: string;
+  isActive: boolean;
 }
 
 export interface DiagnosisListItemResponse {

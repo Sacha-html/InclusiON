@@ -8,12 +8,9 @@ import { CreateDiagnosisRequest, DiagnosisListItemResponse, DiagnosisResponse } 
 import {
   BadgeComponent,
   ButtonDirective,
-  CardBodyComponent,
-  CardComponent,
   ColComponent,
   FormControlDirective,
   FormFeedbackComponent,
-  FormLabelDirective,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
@@ -36,7 +33,6 @@ import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.
     ColComponent,
     FormControlDirective,
     FormFeedbackComponent,
-    FormLabelDirective,
     ModalBodyComponent,
     ModalComponent,
     ModalFooterComponent,
@@ -52,6 +48,7 @@ import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.
 })
 export class ProfessionalDiagnosesComponent implements OnInit {
   @Input({ required: true }) personId!: string;
+  @Input() studentName?: string;
   @Input() diagnoses: DiagnosisListItemResponse[] = [];
   @Output() diagnosesChange = new EventEmitter<DiagnosisListItemResponse[]>();
 
@@ -83,6 +80,7 @@ export class ProfessionalDiagnosesComponent implements OnInit {
   showModal = signal(false);
   editing = signal<DiagnosisResponse | null>(null);
   editingIsCreator = signal(false);
+  readonly isReadOnly = computed(() => !!(this.editing() && !this.editingIsCreator()));
   currentDiagnoses = signal<DiagnosisListItemResponse[]>([]);
   submitted = false;
   form: CreateDiagnosisRequest = this.emptyForm();
@@ -287,6 +285,21 @@ export class ProfessionalDiagnosesComponent implements OnInit {
         this.downloadingPdfId = null;
         this.toastService.error('Error al exportar el diagnóstico a PDF.');
       },
+    });
+  }
+
+  downloadCurrentPdf(): void {
+    const diag = this.editing();
+    if (!diag) return;
+    this.downloadPdf({
+      encryptedId: diag.encryptedId,
+      diagnosisDate: diag.diagnosisDate,
+      primaryDiagnosis: diag.primaryDiagnosis,
+      professionalName: diag.professionalName,
+      professionalId: diag.professionalId,
+      createdByUserId: '',
+      createdAt: diag.createdAt,
+      isActive: true,
     });
   }
 }
