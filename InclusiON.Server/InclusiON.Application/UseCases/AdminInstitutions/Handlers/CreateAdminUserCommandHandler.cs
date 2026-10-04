@@ -81,10 +81,11 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
 
             await _adminInstitutionRepository.AddAsync(new AdminInstitution
             {
-                AdminUserId   = user.Id,
-                InstitutionId = command.InstitutionId,
-                AssignedAt    = _dateTime.UtcNow,
-                IsActive      = true
+                AdminUserId         = user.Id,
+                InstitutionId       = command.InstitutionId,
+                InstitutionalRoleId = command.InstitutionalRoleId,
+                AssignedAt          = _dateTime.UtcNow,
+                IsActive            = true
             }, cancellationToken);
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);

@@ -7,12 +7,14 @@ export interface AdminUserResponse {
   isActive: boolean;
   createdAt: string;
   isGlobalAdmin: boolean;
+  roleName?: string;
   institutions: AdminInstitutionInfo[];
 }
 
 export interface AdminInstitutionInfo {
   institutionId: number;
   institutionName: string;
+  institutionalRoleName?: string;
 }
 
 export interface CreateAdminUserResponse {

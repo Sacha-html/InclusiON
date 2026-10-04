@@ -48,6 +48,18 @@ namespace InclusiON.Api.Controllers
             => Ok(await handler.HandleAsync(new GetSpecialtiesQuery(), cancellationToken));
 
         /// <summary>
+        /// Obtiene los roles o cargos institucionales activos para administradores.
+        /// </summary>
+        [HttpGet("institutional-roles")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        [OutputCache(NoStore = true)]
+        [ProducesResponseType(typeof(ApiResponse<List<CatalogItemResponse>>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ApiResponse<List<CatalogItemResponse>>>> GetInstitutionalRoles(
+            [FromServices] IQueryHandler<GetInstitutionalRolesQuery, ApiResponse<List<CatalogItemResponse>>> handler,
+            CancellationToken cancellationToken = default)
+            => Ok(await handler.HandleAsync(new GetInstitutionalRolesQuery(), cancellationToken));
+
+        /// <summary>
         /// Obtiene los niveles de autonomia activos.
         /// </summary>
         [HttpGet("autonomy-levels")]

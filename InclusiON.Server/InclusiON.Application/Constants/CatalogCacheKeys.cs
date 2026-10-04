@@ -14,11 +14,12 @@ public static class CatalogCacheKeys
     public const string ActivityTemplateTypes = "Catalog_ActivityTemplateTypes";
     public const string LoginMethods         = "LoginMethods_Active";
     public const string Specialties          = "Catalog_Specialties";
+    public const string InstitutionalRoles   = "Catalog_InstitutionalRoles";
 
     /// <summary>Todas las keys — usadas para invalidación en bloque.</summary>
     public static readonly IReadOnlyList<string> All =
     [
         SkillAreas, DisabilityTypes, ActivityCategories,
-         AutonomyLevels, ReportTypes, ActivityTemplateTypes, LoginMethods, Specialties
+         AutonomyLevels, ReportTypes, ActivityTemplateTypes, LoginMethods, Specialties, InstitutionalRoles
     ];
 }

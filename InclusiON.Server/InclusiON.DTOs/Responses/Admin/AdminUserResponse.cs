@@ -13,6 +13,7 @@ namespace InclusiON.DTOs.Responses.Admin
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsGlobalAdmin { get; set; }
+        public string RoleName { get; set; } = string.Empty;
         public List<AdminInstitutionInfo> Institutions { get; set; } = new();
     }
 
@@ -23,5 +24,6 @@ namespace InclusiON.DTOs.Responses.Admin
     {
         public int InstitutionId { get; set; }
         public string InstitutionName { get; set; } = string.Empty;
+        public string? InstitutionalRoleName { get; set; }
     }
 }

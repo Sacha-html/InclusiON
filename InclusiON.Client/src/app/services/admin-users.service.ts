@@ -51,6 +51,7 @@ export class AdminUsersService {
     firstName: string;
     lastName: string;
     institutionId: number;
+    institutionalRoleId?: number | null;
   }): Observable<CreateAdminUserResponse> {
     return this.http
       .post<ApiResponse<CreateAdminUserResponse>>(`${this.apiUrl}/users`, request)

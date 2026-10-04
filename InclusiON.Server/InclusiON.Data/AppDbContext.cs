@@ -40,6 +40,7 @@ namespace InclusiON.Data
         public DbSet<BackgroundJobStatus> BackgroundJobStatuses { get; set; }
         public DbSet<JobType> JobTypes { get; set; }
         public DbSet<Specialty> Specialties { get; set; }
+        public DbSet<InstitutionalRole> InstitutionalRoles { get; set; }
 
         // Nivel 2: Perfiles de usuario y autenticacion
         public DbSet<RefreshToken> RefreshTokens { get; set; }

@@ -36,10 +36,12 @@ namespace InclusiON.Application.Mappers
             IsActive      = u.IsActive,
             CreatedAt     = u.CreatedAt,
             IsGlobalAdmin = !u.AdminInstitutions.Any(),
+            RoleName      = u.AdminInstitutions.FirstOrDefault()?.InstitutionalRole?.Name ?? (!u.AdminInstitutions.Any() ? "Administrador Global" : "Administrador"),
             Institutions  = u.AdminInstitutions.Select(ai => new AdminInstitutionInfo
             {
-                InstitutionId   = ai.InstitutionId,
-                InstitutionName = ai.Institution.Name,
+                InstitutionId         = ai.InstitutionId,
+                InstitutionName       = ai.Institution.Name,
+                InstitutionalRoleName = ai.InstitutionalRole?.Name,
             }).ToList(),
         };
     }
