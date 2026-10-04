@@ -1,168 +1,185 @@
 # Módulo 2 — Gestión de Usuarios
 
----
-
-## CU-05: Auto-registrarse como profesional [DEPRECADO / ELIMINADO]
-
-> [!WARNING]
-> **CASO DE USO DEPRECADO Y ELIMINADO (2026-09-17)**  
-> **Justificación Arquitectónica:** Por motivos de gobernanza institucional y seguridad de la información médica/pedagógica, se eliminó la superficie de auto-registro público (`/register-professional` y `POST /api/professionals/register`). El alta de docentes y profesionales ahora es **100% centralizada y provista por el Administrador/Directivo** (`POST /api/professionals`), naciendo directamente en estado `Approved` con contraseña temporal. Por ende, el caso de borde **CB-10 (Docente que se anota solo e intenta auto-habilitarse)** queda formalmente deprecado y eliminado por diseño.
-
-| Campo | Detalle |
-|-------|---------|
-| **Actor principal** | Profesional (no autenticado) |
-| **Actores secundarios** | Sistema (envío de notificación al admin) |
-| **HU de referencia** | HU-IN-149 |
-| **Estado** | **Deprecado / Eliminado** |
-| **Prioridad** | Baja (Histórico) |
+Este módulo abarca los procesos institucionales y pedagógicos para la incorporación de docentes, estudiantes y familias al centro escolar, así como el gobierno de credenciales y accesos de la sede.
 
 ---
 
-## CU-06: Validar solicitud de registro de profesional [DEPRECADO / ELIMINADO]
-
-> [!WARNING]
-> **CASO DE USO DEPRECADO Y ELIMINADO (2026-09-17)**  
-> Al eliminarse el auto-registro abierto de profesionales, no se generan solicitudes en estado `Pending` desde la web. Todo profesional es validado institucionalmente de antemano por la Dirección antes de su creación en la plataforma.
+## CU-05: Registrar e Incorporar Profesional al Centro Escolar
 
 | Campo | Detalle |
-|-------|---------|
-| **Actor principal** | Admin Institucional |
-| **Actores secundarios** | Sistema (envío de email), Profesional (receptor) |
-| **HU de referencia** | HU-IN-150 |
-| **Estado** | **Deprecado / Eliminado** |
-| **Prioridad** | Baja (Histórico) |
-- En el primer login es forzado a cambiar la contraseña.
+|---|---|
+| **Actor principal** | Equipo Directivo (Director/a, Vicedirector/a o Secretaría) |
+| **Actores secundarios** | Sistema (generación de credenciales y envío de notificación), Profesional Docente (receptor) |
+| **HU de referencia** | HU-IN-148 / HU-IN-150 |
+| **Prioridad** | Crítica |
+| **Precondiciones** | La autoridad escolar se encuentra autenticada en el panel de gestión institucional. |
+
+**Flujo principal**
+1. La Dirección o Secretaría accede al módulo **Profesionales** y selecciona **"Nuevo Profesional"**.
+2. Completa la ficha oficial del docente o terapeuta:
+   - Nombre y Apellido.
+   - Correo electrónico oficial (con validación asíncrona de disponibilidad).
+   - DNI / Documento de identidad y teléfono de contacto.
+   - Especialidad pedagógica o terapéutica (seleccionada del catálogo institucional).
+   - Número de Matrícula profesional habilitante.
+   - Fecha de nacimiento (validando mayoría de edad, mínimo 18 años).
+3. El sistema valida en tiempo real que el correo, DNI y matrícula no se encuentren asignados previamente.
+4. El directivo confirma el registro.
+5. El sistema da de alta el usuario, crea el legajo del profesional vinculado automáticamente a la sede escolar en estado `Habilitado / Activo`, genera una contraseña temporal segura y activa el flag `MustChangePassword = true`.
+6. El sistema envía automáticamente las credenciales de acceso al correo del profesional en segundo plano.
+7. El sistema despliega un modal institucional con las credenciales temporales generadas para que la dirección pueda informarlas al profesional en mano si fuera necesario, y redirige al legajo del nuevo integrante.
+
+**Flujos alternativos**
+- **2a. Menor de edad:** El sistema advierte: *"La persona debe ser mayor de 18 años"* y bloquea el guardado.
+- **3a. Email institucional ya registrado:** El sistema muestra error inline y desactiva el botón de guardado.
+- **3b. Matrícula profesional duplicada:** El sistema advierte el conflicto registral de la matrícula.
+
+**Postcondiciones**
+- El profesional queda habilitado institucionalmente para recibir aulas, grupos y estudiantes asignados.
+- En su primer inicio de sesión, el sistema le exigirá de forma obligatoria cambiar la contraseña temporal por una personal.
 
 ---
 
-## CU-07: Registrar persona con discapacidad
+## CU-06: Asignar Aulas y Estudiantes a Profesional
 
 | Campo | Detalle |
-|-------|---------|
-| **Actor principal** | Admin / Profesional |
-| **Actores secundarios** | — |
+|---|---|
+| **Actor principal** | Equipo Directivo (Director/a, Vicedirector/a o Secretaría) |
+| **Actores secundarios** | Profesional Docente |
+| **HU de referencia** | HU-02 / HU-IN-151 |
+| **Prioridad** | Alta |
+| **Precondiciones** | El profesional se encuentra dado de alta y habilitado en la institución escolar. |
+
+**Flujo principal**
+1. La autoridad escolar accede al legajo de un Profesional o a la sección **Aulas**.
+2. Selecciona las aulas o grupos pedagógicos a los cuales se integrará el profesional.
+3. El sistema lista los estudiantes que conforman cada aula con sus perfiles de apoyo.
+4. La dirección confirma la asignación del profesional como docente titular o de apoyo.
+5. El sistema actualiza los permisos de acceso del profesional para que pueda consultar las historias pedagógicas, registrar sesiones y emitir informes únicamente de los estudiantes a su cargo.
+
+**Postcondiciones**
+- El profesional visualiza en su portal (`/pro`) a sus alumnos asignados y sus agendas de trabajo.
+
+---
+
+## CU-07: Registrar Estudiante (Persona con Discapacidad)
+
+| Campo | Detalle |
+|---|---|
+| **Actor principal** | Equipo Directivo o Profesional Titular Asignado |
+| **Actores secundarios** | Sistema (inicialización de Roadmap pedagógico) |
 | **HU de referencia** | HU-01 |
 | **Prioridad** | Crítica |
-
-**Precondiciones**
-- Usuario autenticado con rol Admin o Profesional.
+| **Precondiciones** | Usuario escolar autenticado con permisos de gestión de alumnos. |
 
 **Flujo principal**
-1. El Actor accede a la sección Personas y selecciona "Nueva persona".
-2. Completa los datos personales: nombre, apellido, fecha de nacimiento, tipo de discapacidad (del catálogo), nivel de autonomía (del catálogo).
-3. Configura el método de login: PIN, visual estándar o asistido.
-4. El sistema crea la `Person` y el `User` asociado.
-5. El sistema muestra el perfil de la persona recién creada.
+1. El responsable accede a la sección **Alumnos / Personas** y presiona **"Nuevo Alumno"**.
+2. Completa los datos personales y escolares: Nombre, Apellido, DNI y Fecha de nacimiento.
+3. Asigna los parámetros pedagógicos y de apoyo:
+   - Tipo de discapacidad (del catálogo oficial).
+   - Nivel de autonomía inicial (Alto, Medio, Con Asistencia Continua).
+4. Configura el método de interacción y login adaptativo del alumno:
+   - **Visual estándar:** acceso mediante avatar y selección gráfica guiada.
+   - **PIN numérico:** código numérico simplificado para uso asistido en tablet.
+   - **Asistido por docente/tutor:** sin requerimiento de autenticación individual autónoma.
+5. El sistema valida los datos y da de alta al estudiante en la institución.
+6. El sistema inicializa la estructura de su trayectoria formativa (Roadmap adaptativo).
+7. Se despliega la ficha pedagógica del alumno lista para que el equipo docente complete la evaluación funcional inicial (DUA).
 
 **Flujos alternativos**
-- **3a. Login por PIN:** El sistema solicita definir un PIN de 4 dígitos que se hashea con Argon2id antes de persistir.
+- **4a. Método por PIN:** El sistema solicita un código de 4 dígitos numéricos, el cual se encripta de forma segura (Argon2id) antes de persistir.
 
 **Postcondiciones**
-- La persona está registrada y disponible para ser asignada a profesionales.
-- El perfil de habilidades queda vacío hasta que el Profesional lo configure.
+- El estudiante queda registrado formalmente en la nómina escolar y disponible para asignación de aula, vinculación familiar y trabajo con actividades adaptadas.
 
 ---
 
-## CU-08: Invitar familiar al sistema
+## CU-08: Invitar y Vincular Familiar al Sistema
 
 | Campo | Detalle |
-|-------|---------|
-| **Actor principal** | Profesional |
-| **Actores secundarios** | Sistema (envío de email), Familiar (receptor) |
+|---|---|
+| **Actor principal** | Profesional Docente (a cargo del alumno) o Equipo Directivo |
+| **Actores secundarios** | Sistema (despacho de invitación), Familiar / Representante (destinatario) |
 | **HU de referencia** | HU-04 |
 | **Prioridad** | Alta |
-
-**Precondiciones**
-- El Profesional tiene al menos una persona asignada.
-- El Profesional está autenticado.
+| **Precondiciones** | El alumno ya se encuentra registrado y el profesional tiene asignada su atención pedagógica. |
 
 **Flujo principal**
-1. El Profesional accede al perfil de una persona asignada y selecciona "Invitar familiar".
-2. Completa: email, nombre, apellido y relación del familiar (padre, madre, tutor, etc.).
-3. El sistema verifica que no exista ya una invitación activa para ese email y persona.
-4. El sistema genera un link único de registro con token y TTL de 7 días.
-5. El sistema envía el email con el link al familiar.
-6. La invitación queda en estado `Enviada` en el listado del Profesional.
+1. El docente o directivo accede a la ficha del alumno asignado o al listado de **Invitaciones Familiares**.
+2. Selecciona la opción **"Invitar Familiar / Tutor"**.
+3. Completa los datos del tutor: Nombre, Apellido, Email de contacto y Relación de parentesco (Madre, Padre, Tutor/a Legal, etc.).
+4. El sistema valida que el profesional tenga atribución formal sobre el estudiante y verifica que no exista una invitación vigente para ese correo y alumno.
+5. El sistema genera un enlace de invitación seguro con token criptográfico único y validez de 7 días.
+6. El sistema envía automáticamente un correo formal de bienvenida con el enlace de registro al familiar.
+7. La invitación se registra con estado **`Enviada`** en el tablero del profesional, mostrando el código y permitiendo copiar el link directo si el centro requiere enviarlo por canal directo (WhatsApp institucional o cuaderno escolar).
 
 **Flujos alternativos**
-- **3a. Invitación activa ya existe:** El sistema informa al Profesional y ofrece reenviar.
-- **3b. Email ya registrado como Familiar vinculado a esa persona:** El sistema informa que el familiar ya tiene acceso.
+- **4a. Invitación previa existente y vigente:** El sistema informa la fecha de envío anterior y ofrece la opción de **"Reenviar invitación"**, renovando su vigencia.
+- **4b. Familiar ya registrado y vinculado:** El sistema advierte que el representante ya cuenta con credenciales activas vinculadas a dicho estudiante.
 
 **Postcondiciones**
-- La invitación existe en estado `Enviada`.
-- El familiar recibe el email con el link de registro.
+- La invitación queda registrada y a la espera de ser completada por la familia.
 
 ---
 
-## CU-09: Completar registro por invitación
+## CU-09: Completar Registro de Familiar por Invitación
 
 | Campo | Detalle |
-|-------|---------|
-| **Actor principal** | Familiar (no autenticado) |
+|---|---|
+| **Actor principal** | Familiar / Tutor Legal (no autenticado) |
 | **Actores secundarios** | Sistema |
 | **HU de referencia** | HU-04 |
 | **Prioridad** | Alta |
-
-**Precondiciones**
-- La invitación existe en estado `Enviada`.
-- El link no ha expirado (menos de 7 días desde el envío).
-- El link no fue usado previamente.
+| **Precondiciones** | El familiar cuenta con un enlace de invitación con vigencia inferior a 7 días y no utilizado previamente. |
 
 **Flujo principal**
-1. El Familiar abre el link de invitación.
-2. El sistema valida el token y muestra el formulario con datos pre-llenados en solo lectura: nombre, apellido, relación con la persona.
-3. El Familiar elige una contraseña (mínimo 8 caracteres, 1 mayúscula, 1 número).
-4. El Familiar confirma el registro.
-5. El sistema crea el `User` activo, el perfil `FamilyRepresentative` y la relación `PersonRepresentative`.
-6. La invitación pasa a estado `Aceptada`.
-7. El sistema redirige al Familiar al login.
+1. El familiar abre el enlace de invitación recibido en su navegador (`#/invite/{token}`).
+2. El sistema valida el token de seguridad y presenta el formulario de alta con los datos institucionales precargados y bloqueados para edición:
+   - Nombre y Apellido.
+   - Vínculo/Parentesco.
+   - Nombre del estudiante al que acompaña.
+3. El familiar completa su DNI y define una contraseña personal (mínimo 8 caracteres, mayúscula, minúscula, número y símbolo).
+4. El familiar confirma el registro.
+5. El sistema activa la cuenta de usuario, crea el legajo de `Representante Familiar` y formaliza el vínculo legal `PersonRepresentative` con su hijo/a o representado/a.
+6. La invitación pasa a estado **`Aceptada`**.
+7. El sistema muestra un mensaje de confirmación y redirige al familiar a la pantalla de ingreso para acceder inmediatamente a su portal (`/family`).
 
 **Flujos alternativos**
-- **1a. Link expirado:** El sistema muestra mensaje "Esta invitación ha expirado" y no permite el registro.
-- **1b. Link ya usado:** El sistema muestra mensaje "Esta invitación ya fue utilizada".
-- **3a. Contraseña no cumple requisitos:** El sistema muestra error inline.
+- **1a. Invitación vencida (más de 7 días):** El sistema muestra el mensaje: *"Este enlace de invitación ha expirado. Por favor, solicita a la institución escolar que te reenvíe una nueva invitación"*.
+- **1b. Invitación ya utilizada:** El sistema indica: *"Esta invitación ya fue completada previamente"* y ofrece botón para ir directo al inicio de sesión.
+- **3a. Contraseña débil o no coincidente:** El sistema señala los requisitos no cumplidos en tiempo real y bloquea el botón de confirmación.
 
 **Postcondiciones**
-- El Familiar puede iniciar sesión y acceder al portal con los datos de su persona vinculada.
-- La invitación queda en estado `Aceptada` y no puede reutilizarse.
+- El familiar dispone de cuenta activa y puede consultar el progreso, comunicados, reportes aprobados e interactuar con el equipo escolar.
 
 ---
 
-## CU-10: Gestionar cuentas de usuario
+## CU-10: Gestionar Cuentas y Credenciales Institucionales
 
 | Campo | Detalle |
-|-------|---------|
-| **Actor principal** | Admin Institucional |
+|---|---|
+| **Actor principal** | Equipo Directivo (Director/a, Vicedirector/a o Secretaría) |
 | **Actores secundarios** | Sistema |
 | **HU de referencia** | HU-11 |
 | **Prioridad** | Alta |
+| **Precondiciones** | Usuario directivo autenticado con atribución de gestión sobre su centro educativo. |
 
-**Precondiciones**
-- Usuario autenticado con rol Admin.
-- Solo gestiona usuarios de la institución escolar asignada.
+**Flujo principal — Restablecer Contraseña Olvidada del Personal**
+1. La autoridad escolar ingresa al módulo de **Gestión de Usuarios** de su institución.
+2. Filtra por rol (Docente, Familiar, Alumno) o busca por apellido/nombre.
+3. Selecciona al usuario y presiona **"Resetear Contraseña"**.
+4. El sistema revoca de forma inmediata todas las sesiones activas del usuario, genera una nueva clave temporal segura y activa el requerimiento `MustChangePassword`.
+5. El sistema exhibe la clave temporal una única vez para que la dirección pueda comunicársela de forma segura al usuario.
 
-**Flujo principal — Resetear contraseña**
-1. El Admin accede a la lista centralizada de usuarios y aplica filtros (rol, estado, institución).
-2. Selecciona un usuario y elige "Resetear contraseña".
-3. El sistema genera una contraseña temporal, activa `MustChangePassword` y revoca todas las sesiones activas del usuario.
-4. La contraseña temporal se muestra una sola vez con botón de copiar.
+**Flujo alternativo — Desactivación / Suspensión de Cuenta**
+- **2a.** La autoridad selecciona **"Desactivar Cuenta"** ante una baja laboral o desvinculación institucional.
+- **3a.** El sistema aplica soft-delete (`IsActive = false`), revoca de inmediato tokens de acceso vigentes y registra la auditoría institucional en `AccessAudit`.
 
-**Flujo alternativo — Desactivar cuenta**
-2a. El Admin selecciona "Desactivar cuenta".
-3a. El sistema aplica soft-delete, revoca tokens activos y corta el acceso inmediatamente.
-4a. El sistema registra la operación en `AccessAudit`.
-5a. Los representantes familiares se desactivan exclusivamente desde el ABM de Familiares; la gestión centralizada conserva únicamente el reseteo de contraseña.
+**Flujo alternativo — Reactivación de Cuenta**
+- **2b.** La dirección selecciona **"Reactivar Cuenta"**.
+- **3b.** El sistema rehabilita el usuario, genera una nueva credencial provisoria y exige cambio de clave en el próximo acceso.
 
-**Flujo alternativo — Reactivar cuenta**
-2b. El Admin selecciona "Reactivar cuenta".
-3b. El sistema reactiva el usuario, genera contraseña temporal y activa `MustChangePassword`.
-3c. Para un representante familiar, el Admin usa el ABM de Familiares: se reactiva cuenta y perfil, pero no vínculos previos ni alumnos suspendidos.
-
-**Restricciones**
-- El Admin no puede desactivar su propio usuario.
-- La gestión centralizada no permite desactivar ni reactivar representantes familiares; esas transiciones pertenecen al ABM de Familiares.
-- Todas las operaciones quedan registradas en `AccessAudit`.
-
-**Postcondiciones**
-- El estado del usuario queda actualizado inmediatamente.
-- El usuario afectado pierde o recupera el acceso según la operación realizada.
+**Restricciones de Negocio**
+- Ninguna autoridad puede desactivar su propia cuenta en sesión.
+- La gestión está estrictamente acotada al personal y familias pertenecientes a la propia sede escolar (sin visibilidad transversal de otras instituciones).
+- Toda acción de revocación, blanqueo o cambio de estado queda asentada en la bitácora de auditoría.
