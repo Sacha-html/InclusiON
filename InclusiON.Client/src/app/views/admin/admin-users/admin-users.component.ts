@@ -65,10 +65,7 @@ export class AdminUsersComponent implements OnInit {
     },
     { key: 'fullName',     label: 'Nombre',       sortable: true },
     { key: 'email',        label: 'Email',         sortable: true },
-    { key: 'isGlobalAdmin', label: 'Tipo',         type: 'badge', badgeMap: {
-        'true':  { color: 'primary', label: 'Global' },
-        'false': { color: 'info',    label: 'Institucional' },
-    }},
+    { key: 'roleName',     label: 'Cargo / Rol',   sortable: true },
     { key: 'isActive',     label: 'Estado',        type: 'badge', sortable: true },
     { key: 'createdAt',    label: 'Fecha',          type: 'date',  sortable: true },
   ];

@@ -41,6 +41,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(u => adminUserIds.Contains(u.Id))
                 .Include(u => u.AdminInstitutions.Where(ai => ai.IsActive))
                 .ThenInclude(ai => ai.Institution)
+                .Include(u => u.AdminInstitutions.Where(ai => ai.IsActive))
+                .ThenInclude(ai => ai.InstitutionalRole)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
@@ -60,6 +62,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(u => adminUserIds.Contains(u.Id))
                 .Include(u => u.AdminInstitutions.Where(ai => ai.IsActive))
                     .ThenInclude(ai => ai.Institution)
+                .Include(u => u.AdminInstitutions.Where(ai => ai.IsActive))
+                    .ThenInclude(ai => ai.InstitutionalRole)
                 .AsNoTracking()
                 .AsQueryable();
 

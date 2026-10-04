@@ -111,6 +111,10 @@ export class CatalogsService {
     return this.cached('login-methods');
   }
 
+  getInstitutionalRoles(): Observable<CatalogItem[]> {
+    return this.cached('institutional-roles');
+  }
+
   getActivityCategories(): Observable<ActivityCategoryItem[]> {
     return this.activityCategories$;
   }

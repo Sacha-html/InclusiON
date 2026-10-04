@@ -19,6 +19,11 @@ namespace InclusiON.Data.Configurations
                 .WithMany()
                 .HasForeignKey(ai => ai.InstitutionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(ai => ai.InstitutionalRole)
+                .WithMany(r => r.AdminInstitutions)
+                .HasForeignKey(ai => ai.InstitutionalRoleId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

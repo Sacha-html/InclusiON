@@ -1,5 +1,5 @@
 <c-card>
-  <c-card-header><strong>Registrar administrador</strong></c-card-header>
+  <c-card-header><strong>Registrar autoridad / administrador</strong></c-card-header>
   <c-card-body>
     @if (serverError) {
       <div class="alert alert-danger">{{ serverError }}</div>
@@ -35,7 +35,7 @@
 
       <c-row class="mb-3">
         <c-col sm="6">
-          <label cLabel for="email">Email *</label>
+          <label cLabel for="email">Email Oficial *</label>
           <input cFormControl id="email" formControlName="email" type="email"
                  [valid]="submitted ? f['email'].valid : undefined" />
           @if (submitted && f['email'].errors) {
@@ -46,16 +46,16 @@
           }
         </c-col>
         <c-col sm="6">
-          <label cLabel for="institutionId">Institución *</label>
-          <select cSelect id="institutionId" formControlName="institutionId"
-                  [valid]="submitted ? f['institutionId'].valid : undefined">
-            <option value="">-- Seleccionar --</option>
-            @for (inst of institutions; track inst.id) {
-              <option [value]="inst.id">{{ inst.name }}</option>
+          <label cLabel for="institutionalRoleId">Cargo / Función Escolar *</label>
+          <select cSelect id="institutionalRoleId" formControlName="institutionalRoleId"
+                  [valid]="submitted ? f['institutionalRoleId'].valid : undefined">
+            <option value="">-- Seleccionar Cargo --</option>
+            @for (role of institutionalRoles; track role.id) {
+              <option [value]="role.id">{{ role.name }}</option>
             }
           </select>
-          @if (submitted && f['institutionId'].errors) {
-            <c-form-feedback [valid]="false">La institución es obligatoria.</c-form-feedback>
+          @if (submitted && f['institutionalRoleId'].errors) {
+            <c-form-feedback [valid]="false">El cargo institucional es obligatorio.</c-form-feedback>
           }
         </c-col>
       </c-row>

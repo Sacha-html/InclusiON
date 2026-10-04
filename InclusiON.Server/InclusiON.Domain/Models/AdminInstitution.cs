@@ -7,7 +7,10 @@ namespace InclusiON.Domain.Models
         public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
 
+        public int? InstitutionalRoleId { get; set; }
+
         public virtual User AdminUser { get; set; } = null!;
         public virtual EducationalInstitution Institution { get; set; } = null!;
+        public virtual InstitutionalRole? InstitutionalRole { get; set; }
     }
 }

@@ -19,5 +19,7 @@ namespace InclusiON.DTOs.Requests.Admin
 
         [Required]
         public int InstitutionId { get; set; }
+
+        public int? InstitutionalRoleId { get; set; }
     }
 }

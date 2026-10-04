@@ -136,7 +136,7 @@ namespace InclusiON.Api.Controllers
             [FromServices] ICommandHandler<CreateAdminUserCommand, ApiResponse<CreateAdminUserResponse>> handler,
             CancellationToken cancellationToken)
         {
-            var command = new CreateAdminUserCommand(request.Email, request.FirstName, request.LastName, request.InstitutionId);
+            var command = new CreateAdminUserCommand(request.Email, request.FirstName, request.LastName, request.InstitutionId, request.InstitutionalRoleId);
             var result  = await handler.HandleAsync(command, cancellationToken);
             if (!result.Success) return result.ToActionResult();
             return StatusCode(StatusCodes.Status201Created, result);
