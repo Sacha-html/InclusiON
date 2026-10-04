@@ -2,95 +2,118 @@
 
 ## Contexto
 
-El análisis de actores de negocio identificó los 4 actores funcionales que interactúan con InclusiON:
-Persona con Discapacidad (Alumno), Profesional (Docente / Terapeuta), Familia / Cuidador y Administrador Institucional (Equipo Directivo).
-Este documento justifica cómo y por qué cada actor se traduce en un rol técnico del sistema.
+El análisis del dominio escolar y terapéutico identificó **4 actores canónicos de negocio** que interactúan operativamente en InclusiON:
+1. **Persona con Discapacidad (Estudiante / Alumno)**
+2. **Profesional (Docente / Terapeuta / Gabinete)**
+3. **Representante Familiar (Padres / Tutores Legales)**
+4. **Administrador de la Institución (Director / Equipo Directivo)**
+
+Este documento justifica cómo y por qué cada actor de negocio se traduce en un rol técnico del sistema, garantizando el principio de mínimo privilegio, la protección de datos médicos sensibles (Ley 25.326) y la gobernanza institucional.
+
+> **Nota sobre la exclusión de "Admin Global":**  
+> En el modelo de negocio de InclusiON, **no existe la figura operativa de un Admin Global**. La administración de servidores, bases de datos e infraestructura corresponde al soporte técnico / DevOps del proveedor del servicio, no a un usuario del sistema escolar. Cada institución educativa funciona como un tenant autónomo bajo la autoridad exclusiva de su Equipo Directivo. Otorgar un rol transversal con acceso a los legajos clínicos de alumnos de diferentes escuelas violaría de forma flagrante la confidencialidad médica y el secreto profesional.
 
 ---
 
 ## Mapeo actor → rol
 
-| Actor de Negocio | Rol técnico | Claim JWT |
+| Actor de Negocio | Rol técnico | Claim JWT / Contexto de Seguridad |
 |---|---|---|
-| Persona con Discapacidad (Alumno) | `persona` | `role: persona` |
-| Profesional (Docente / Terapeuta) | `profesional` | `role: profesional` |
-| Familia / Cuidador | `familia` | `role: familia` |
-| Administrador Institucional (Equipo Directivo) | `admin` | `role: admin`, `institutionId: <id>` |
-| Institución Educativa | — (sin rol) | — |
+| **Persona con Discapacidad (Alumno)** | `persona` | `role: persona` |
+| **Profesional (Docente / Terapeuta)** | `profesional` | `role: profesional` |
+| **Representante Familiar (Padres / Tutores)** | `familia` | `role: familia` |
+| **Administrador Institucional (Equipo Directivo)** | `admin` | `role: admin`, `institutionId: <id>`, `institutionalRoleId: <id>` |
+| **Institución Educativa** | — (sin rol) | — (entidad organizativa de alcance) |
 
 ---
 
 ## Justificación por rol
 
 ### Rol `persona`
+**Actor:** Persona con Discapacidad (Estudiante / Alumno)
 
-**Actor:** Persona con Discapacidad (Alumno)
+La persona es el destinatario central del aprendizaje. Requiere una interfaz radicalmente distinta a la de los adultos: portal adaptativo con Comunicación Aumentativa y Alternativa (CAA), pictogramas oficiales de ARASAAC, navegación simplificada por teclado/pulsador, síntesis de voz y estímulos audiovisuales anti-frustración.
 
-La persona es el destinatario principal del sistema. Necesita una interfaz radicalmente distinta al resto de los actores: portal AAC con pictogramas, navegación simplificada, feedback visual/sonoro y métodos de login accesibles (PIN, ASSISTED, FAMILY). Separar este rol garantiza que sus vistas, permisos y flujo de autenticación se puedan configurar de forma independiente sin afectar a los demás actores. Compartir rol con otro actor implicaría exponer datos clínicos o funcionalidades administrativas a usuarios que no deben verlos.
+Separar este rol técnico garantiza que su entorno de ejecución, accesibilidad y métodos de autenticación sean completamente independientes de los paneles de gestión y expedientes clínicos.
 
 **Decisiones técnicas que dependen de este rol:**
-- Métodos de login: `PIN`, `ASSISTED`, `FAMILY` (adicionales al `STANDARD`)
-- Vistas exclusivas: portal AAC, roadmap visual, players de actividad
-- Sin acceso a datos de otros usuarios ni a paneles de gestión
+- **Métodos de login accesibles:** PIN numérico visual de 4 dígitos, acceso Asistido (supervisado por docente en el aula) y acceso Familiar, además del estándar por correo/clave.
+- **Vistas exclusivas:** Portal del Alumno, recorrido del Roadmap ("Mi Camino"), reproductores de actividades interactivas adaptativas.
+- **Aislamiento absoluto:** Cero acceso a datos de otros alumnos, notas clínicas, informes o herramientas administrativas.
 
 ---
 
 ### Rol `profesional`
+**Actor:** Profesional (Docente de Educación Especial, Fonoaudiólogo/a, Psicopedagogo/a, Terapeuta Ocupacional)
 
-**Actor:** Profesional (docente, terapeuta, fonoaudiólogo, psicólogo)
+Es el agente pedagógico y clínico directo. Diseña actividades interactivas, supervisa la trayectoria curricular y elabora diagnósticos e informes. Requiere acceso a información de salud sensible y datos evolutivos.
 
-El profesional es el actor clínico/educativo del sistema. Crea contenido (actividades con templates dinámicos), define el plan de trabajo y accede a datos sensibles de personas bajo su cargo: diagnósticos funcionales, perfiles de habilidades, resultados de actividades. Separar este rol permite aplicar el principio de mínimo privilegio: el profesional solo ve personas que tiene asignadas, no a toda la institución.
+Separar este rol permite aplicar un estricto **control de acceso basado en recursos (`[PersonAccess]`)**: un docente no puede ver a todos los alumnos de la escuela de forma masiva, sino única y exclusivamente a aquellos que tiene formalmente asignados a su cargo.
 
 **Decisiones técnicas que dependen de este rol:**
-- Acceso restringido por asignación `profesional ↔ persona`
-- Vistas exclusivas: Mi Aula, detalle de persona, creación de actividades, roadmap, reportes
-- Puede invitar familiares (genera token de invitación vinculado a su persona asignada)
+- **Aislamiento por asignación:** Filtro forzoso en backend por relación activa `Professional ↔ Person`. Cualquier intento de consultar un alumno no asignado es rechazado con `403 Forbidden`.
+- **Vistas exclusivas:** Panel "Mi Aula", legajo pedagógico del alumno, editor dinámico de actividades DUA, configuración y calibración del Motor Adaptativo (MDA), registro de diagnósticos funcionales cifrados.
+- **Elaboración de informes:** Redacción de informes de progreso en estado borrador (`Draft`) y elevación a revisión directiva (`Submitted`).
+- **Vinculación familiar:** Generación de invitaciones con token criptográfico seguro (vigencia de 7 días) para vincular a los padres con su alumno a cargo.
 
 ---
 
 ### Rol `familia`
+**Actor:** Representante Familiar (Padres, Madres, Tutores Legales o Cuidadores)
 
-**Actor:** Familia / Cuidador
+Acompaña la trayectoria educativa y terapéutica del estudiante desde el hogar. Su rol es fundamentalmente de seguimiento, consulta y comunicación bidireccional protegida con la escuela. No interviene en la configuración curricular ni accede a notas clínicas en bruto.
 
-El familiar o cuidador acompaña a la persona desde afuera del sistema terapéutico. Su acceso es de lectura y seguimiento: ve el progreso de su familiar, lee reportes generados por el profesional y se comunica con él. No tiene acceso a datos clínicos ni a la gestión del sistema. Se registra únicamente por invitación del profesional (no hay auto-registro libre), lo que garantiza que solo accede quien fue habilitado explícitamente.
+El acceso de la familia está blindado por un mecanismo de alta controlada: **no existe auto-registro libre**. Solo pueden incorporarse mediante invitación formal validada por el equipo docente o directivo.
 
 **Decisiones técnicas que dependen de este rol:**
-- Registro exclusivamente por invitación (`token` + email)
-- Sin acceso a datos de diagnóstico ni de actividades en detalle clínico
-- Vistas exclusivas: dashboard familiar, progreso, reportes, mensajería
+- **Alta exclusivamente por invitación:** Registro condicionado a la posesión de un token de vinculación unívoco con el alumno.
+- **Acceso a informes validados:** Solo visualiza informes en estado `Approved` (aprobados previamente por la dirección escolar).
+- **Trazabilidad y acuse de lectura:** Al abrir un informe por primera vez, el sistema despacha asíncronamente `PATCH /api/reports/{id}/mark-read`, dejando constancia formal del acceso familiar para la escuela.
+- **Vistas exclusivas:** Dashboard familiar con resumen de logros, visualizador de informes con descarga oficial en PDF, y canal de mensajería interna acotado al legajo del menor.
 
 ---
 
 ### Rol `admin` — Administrador Institucional (Equipo Directivo)
+**Actor:** Administrador de la Institución (Director/a, Vicedirector/a, Secretaría de la escuela)
 
-**Actor:** Administrador Institucional / Dirección Escolar
+Representa la máxima autoridad legal, operativa y pedagógica del establecimiento. Su responsabilidad es garantizar la calidad del servicio educativo, auditar los procesos y salvaguardar la privacidad de los menores conforme a las normativas de educación y protección de datos personales.
 
-Es la máxima autoridad operativa dentro del establecimiento educativo. Gestiona el personal escolar (alta de docentes y terapeutas, blanqueo de credenciales y revocación inmediata de accesos), matricula a los alumnos, vincula a los tutores legales y audita la trazabilidad integral de la institución para dar cumplimiento a la Ley 25.326 de Protección de Datos Personales.
+Su alcance está delimitado de forma inviolable por el `institutionId` emitido en su token JWT: todas las consultas en la base de datos filtran automáticamente por la sede escolar correspondiente, impidiendo cualquier visibilidad interinstitucional cruzada.
+
+Para reflejar fielmente la estructura orgánica del centro educativo, este rol técnico se complementa con el catálogo canónico de **Roles Institucionales (`InstitutionalRoles`)**:
+- *Director / Directora*
+- *Vicedirector / Vicedirectora*
+- *Secretario / Secretaria*
+- *Preceptor / Preceptora*
 
 **Decisiones técnicas que dependen de este rol:**
-- `institutionId: <id>` en JWT — todas las operaciones directivas se acotan a su ámbito escolar
-- Gestión de cuentas de usuario: reseteo de contraseñas, activación y revocación de accesos
-- Matriculación formal de alumnos y asignaciones de docentes a salas/alumnos
-- Consulta de catálogos estandarizados del sistema y aprobación formal de reportes de progreso
+- **Gobierno del personal docente:** Alta directa de profesionales en la nómina institucional, fiscalización de matrículas y títulos habilitantes, reseteo de contraseñas olvidadas (`MustChangePassword = true`) y baja lógica inmediata de accesos ante desvinculaciones laborales.
+- **Gobierno de la matrícula estudiantil:** Alta de legajos de alumnos y asignación formal de estudiantes a docentes y salas/cursos ("Mi Aula").
+- **Control de calidad e intermediación obligatoria:** Auditoría de informes pedagógicos elevados por los docentes. La dirección es el único actor facultado para **Aprobar** (publicando a la familia con firma institucional) o **Rechazar** (con observaciones pedagógicas obligatorias para su corrección docente).
+- **Configuración institucional:** Mantenimiento de los datos de sede (nombre, CUE ministerial, dirección, membrete y logo oficial) y estandarización de los catálogos escolares (materias, diagnósticos, etc.).
 
 ---
 
-### Por qué Institución no tiene rol
+### Por qué la Institución no tiene rol
 
-La institución es una entidad organizativa, no un usuario. No inicia sesión ni ejecuta acciones. Agrupa profesionales y personas, y define el alcance del Administrador Institucional. Su presencia en el sistema es como dato (`institutionId` en JWT), no como actor con credenciales.
+La **Institución Educativa** es una entidad organizativa y un límite de aislamiento multi-tenant, no una persona ni un actor que inicie sesión. No posee credenciales ni ejecuta comandos. Su función técnica es suministrar el contexto de pertenencia (`institutionId`) que los middleware y políticas de autorización de .NET validan en cada petición para confinar la información dentro de los muros digitales de esa escuela.
 
 ---
 
 ## Resumen de separación de responsabilidades
 
-| Responsabilidad | persona | profesional | familia | admin inst. |
+| Responsabilidad / Acción | `persona` | `profesional` | `familia` | `admin` (Dirección) |
 |---|:---:|:---:|:---:|:---:|
-| Realizar actividades | ✓ | | | |
-| Crear actividades y roadmap | | ✓ | | |
-| Ver datos clínicos de persona | | ✓ (asignadas) | | |
-| Ver progreso de familiar | | | ✓ | |
-| Comunicación (mensajería) | | ✓ | ✓ | |
-| Gestionar usuarios de la institución | | | | ✓ |
-| Asignar profesionales a alumnos | | | | ✓ |
-| Aprobar reportes oficiales | | | | ✓ |
-| Configurar datos de la sede | | | | ✓ |
+| Ejecutar actividades didácticas interactivas | ✓ | | | |
+| Diseñar actividades con templates DUA y pictogramas | | ✓ | | |
+| Calibrar y supervisar el Roadmap del estudiante | | ✓ | | |
+| Registrar diagnósticos funcionales cifrados (AES-256-GCM) | | ✓ (asignados) | | |
+| Redactar informes de progreso preliminares (`Draft`) | | ✓ | | |
+| Auditar, aprobar o rechazar informes escolares oficiales | | | | ✓ |
+| Consultar informes aprobados y registrar acuse de lectura | | | ✓ | |
+| Descargar constancias e informes oficiales en PDF | | ✓ | ✓ | ✓ |
+| Canal de mensajería escolar interna | | ✓ | ✓ | ✓ |
+| Dar de alta a docentes y fiscalizar matrículas | | | | ✓ |
+| Gestionar credenciales y seguridad (reseteo, bloqueo, baja) | | | | ✓ |
+| Matricular alumnos y asignar docentes/salas | | | | ✓ |
+| Configurar datos de la sede (CUE, logo, membrete) y catálogos | | | | ✓ |

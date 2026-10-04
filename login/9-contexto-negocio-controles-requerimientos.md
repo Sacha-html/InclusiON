@@ -165,7 +165,7 @@ InclusiON explota las 5 dimensiones tecnológicas identificadas en el relevamien
 | :--- | :---: | :---: | :---: | :--- |
 | **Usuarios** | ✅ | ✅ | ✅ | `AdminUsersController` / Soft-delete con revocación inmediata de tokens JWT. |
 | **Roles** | ⚠️ | ✅ | ⚠️ | Roles estructurales fijos de dominio; la actualización es sobre sus **Permisos** (Claims). |
-| **Profesional** | ✅ | ✅ | ✅ | `ProfessionalsController` / Alta directiva o auto-registro con validación de matrícula. |
+| **Profesional** | ✅ | ✅ | ✅ | `ProfessionalsController` / Alta directiva centralizada con validación registral de matrícula y especialidad. |
 | **Institución Educativa** | ✅ | ✅ | ✅ | `InstitutionsController` y `AdminInstitutionsController`. |
 | **Persona con Discapacidad** | ✅ | ✅ | ✅ | `PersonsController` / Wizard de matrícula unificada en 3 pasos. |
 | **Representante Familiar** | ✅ | ✅ | ✅ | `FamilyController` e `InvitationsController` (invitación por correo). |

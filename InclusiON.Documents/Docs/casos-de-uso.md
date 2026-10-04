@@ -86,12 +86,12 @@ Sistema (A-06)  [actor secundario, sin herencia]
 
 | ID | Nombre | Actor principal | HU de referencia |
 |----|--------|----------------|------------------|
-| CU-05 | Auto-registrarse como profesional | Profesional (público) | HU-IN-149 |
-| CU-06 | Validar solicitud de registro de profesional | Admin | HU-IN-150 |
-| CU-07 | Registrar persona con discapacidad | Admin / Profesional | HU-IN-40–44 |
-| CU-08 | Invitar familiar al sistema | Profesional | HU-IN-53–57 |
-| CU-09 | Completar registro por invitación | Familiar | HU-IN-148 |
-| CU-10 | Gestionar cuentas de usuario (reset, baja, alta) | Admin | HU-IN-26–27 |
+| CU-05 | Registrar e incorporar profesional al centro escolar | Equipo Directivo | HU-IN-148 / HU-IN-150 |
+| CU-06 | Asignar aulas y estudiantes a profesional | Equipo Directivo | HU-02 / HU-IN-151 |
+| CU-07 | Registrar estudiante (persona con discapacidad) | Equipo Directivo / Profesional | HU-IN-40–44 |
+| CU-08 | Invitar y vincular familiar al sistema | Profesional / Equipo Directivo | HU-IN-53–57 |
+| CU-09 | Completar registro de familiar por invitación | Familiar (Tutor Legal) | HU-IN-148 |
+| CU-10 | Gestionar cuentas y credenciales institucionales | Equipo Directivo | HU-IN-26–27 |
 
 ---
 
@@ -132,12 +132,12 @@ Sistema (A-06)  [actor secundario, sin herencia]
 
 | ID | Nombre | Actor principal | HU de referencia |
 |----|--------|----------------|------------------|
-| CU-23 | Crear roadmap de una persona | Profesional | HU-IN-110–111 |
-| CU-24 | Agregar actividad al roadmap | Profesional | HU-IN-113–114 |
-| CU-25 | Reordenar actividades del roadmap | Profesional | HU-IN-115 |
-| CU-26 | Forzar desbloqueo manual de actividad | Profesional | HU-IN-112 |
-| CU-27 | Eliminar actividad del roadmap | Profesional | HU-IN-113 |
-| CU-28 | Consultar roadmap propio | Persona | HU-IN-117 |
+| CU-23 | Inicialización automática y supervisión de la trayectoria (Roadmap) | Sistema / Profesional | HU-IN-110–111 |
+| CU-24 | Incorporar o personalizar actividades en la trayectoria | Profesional | HU-IN-113–114 |
+| CU-25 | Reordenar secuencia pedagógica de actividades | Profesional | HU-IN-115 |
+| CU-26 | Desbloqueo pedagógico manual de actividad | Profesional | HU-IN-112 |
+| CU-27 | Excluir o desactivar actividad de la trayectoria | Profesional | HU-IN-113 |
+| CU-28 | Recorrer 'Mi Camino' e iniciar actividades (Portal del Alumno) | Persona (Estudiante) | HU-IN-117 |
 
 ---
 
@@ -171,8 +171,8 @@ Sistema (A-06)  [actor secundario, sin herencia]
 | CU-39 | Consultar historial de diagnósticos | Profesional | HU-IN-86 |
 | CU-40 | Crear reporte de progreso | Profesional | HU-IN-136 |
 | CU-41 | Enviar reporte para aprobación | Profesional | HU-IN-138 |
-| CU-42 | Aprobar reporte de progreso | Admin | HU-IN-164 |
-| CU-43 | Rechazar reporte de progreso (con comentario) | Admin | HU-IN-164 |
+| CU-42 | Aprobar reporte de progreso | Equipo Directivo / Admin Institucional | HU-IN-164 |
+| CU-43 | Rechazar reporte de progreso (con comentario) | Equipo Directivo / Admin Institucional | HU-IN-164 |
 | CU-44 | Consultar reportes aprobados | Familiar | HU-IN-138 |
 
 ---
@@ -237,8 +237,8 @@ Sistema (A-06)  [actor secundario, sin herencia]
 
 | Actor | CUs MVP | CUs Post-MVP |
 |-------|---------|--------------|
-| Admin Institucional | CU-01, CU-02, CU-03, CU-04, CU-06, CU-10, CU-42, CU-43 | CU-56, CU-57 |
-| Profesional | CU-05, CU-08, CU-11, CU-15, CU-16, CU-17, CU-18, CU-19, CU-20, CU-21, CU-22, CU-23, CU-24, CU-25, CU-26, CU-27, CU-32, CU-34, CU-36, CU-37, CU-38, CU-39, CU-40, CU-41, CU-45, CU-46, CU-47 | CU-33, CU-48, CU-49, CU-51, CU-52, CU-54, CU-55 |
+| Equipo Directivo / Admin Institucional | CU-01, CU-02, CU-03, CU-04, CU-05, CU-06, CU-10, CU-42, CU-43 | CU-56, CU-57 |
+| Profesional | CU-08, CU-11, CU-15, CU-16, CU-17, CU-18, CU-19, CU-20, CU-21, CU-22, CU-23, CU-24, CU-25, CU-26, CU-27, CU-32, CU-34, CU-36, CU-37, CU-38, CU-39, CU-40, CU-41, CU-45, CU-46, CU-47 | CU-33, CU-48, CU-49, CU-51, CU-52, CU-54, CU-55 |
 | Persona | CU-12, CU-13, CU-16, CU-28, CU-29 | CU-53 |
 | Familiar | CU-09, CU-14, CU-15, CU-35, CU-44, CU-45, CU-46, CU-47 | CU-53, CU-54, CU-55 |
 | Sistema (automático) | CU-30, CU-31 | CU-50 |
