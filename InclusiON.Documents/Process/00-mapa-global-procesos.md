@@ -152,19 +152,19 @@ flowchart LR
 ---
 
 ### Fase 3 — Intervención y Personalización
-**Objetivo:** Diseñar el plan de trabajo personalizado basado en la evaluación.
+**Objetivo:** Habilitar el sendero curricular preestablecido de 10 niveles del alumno, calibrar el Motor Adaptativo (MDA) y disponer del banco de actividades para ejercicios específicos de aula.
 
 | Proceso | Descripción |
 |---------|-------------|
-| 10 Actividades | Crear actividades con templates dinámicos |
-| 11 Roadmap | Armar secuencia de actividades por área |
-| 13 MDA config | Configurar parámetros del motor adaptativo |
+| 10 Actividades | Crear actividades con templates dinámicos (ARASAAC / IA) o asignar Tareas del Día |
+| 11 Roadmap | Plantilla curricular preestablecida de 10 niveles (inicializada automáticamente; el docente supervisa) |
+| 13 MDA config | Configurar parámetros y límites del motor adaptativo sobre la plantilla |
 
 ```mermaid
 flowchart LR
-    F3A[Profesional crea actividades] --> F3B[Profesional arma roadmap]
-    F3B --> F3C[Profesional configura MDA]
-    F3C --> PLAN[Plan de trabajo listo]
+    F3A[Sistema inicializa plantilla de 10 niveles] --> F3B[Profesional calibra MDA y supervisa roadmap]
+    F3C[Profesional crea actividades complementarias] -.-> F3B
+    F3B --> PLAN[Sendero preestablecido listo para jugar]
 ```
 
 ---
@@ -203,7 +203,7 @@ El estado de avance de cada proceso se puede consultar en el [checklist de proce
 
 | Actor | Procesos en los que participa |
 |-------|------------------------------|
-| **Admin Institucional** | 01, 02, 03, 04, 05, 06, 08, 17, 19 |
+| **Admin Institucional** | 01, 02, 03, 04, 05, 06, 08, 15, 17, 19 |
 | **Profesional** | 07, 08, 09, 10, 11, 14, 15, 16, 18, 19 |
 | **Persona con Discapacidad** | 12, 18 |
 | **Familia** | 07, 14, 15, 16, 18, 19 |

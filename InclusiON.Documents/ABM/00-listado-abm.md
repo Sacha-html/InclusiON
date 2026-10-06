@@ -119,5 +119,5 @@ Leyenda: ✅ Completo · 🔄 Parcial · ⏳ Pendiente
 - **Baja lógica:** ninguna entidad se elimina físicamente. Todas tienen campo `Activo` (o `IsActive`). La baja establece `Activo = false`.
 - **Listado con filtros:** todos los listados permiten filtrar por estado activo/inactivo y términos de búsqueda relevantes.
 - **Persistencia real:** cada operación se confirma en PostgreSQL vía `AppDbContext.SaveChangesAsync()`.
-- **Validaciones de integridad:** se validan unicidad, referencias existentes y reglas de negocio antes de pristir.
+- **Validaciones de integridad:** se validan unicidad, referencias existentes y reglas de negocio antes de persistir.
 - **Auditoría:** las operaciones de baja y cambios de estado generan registros en las tablas de historial correspondientes.

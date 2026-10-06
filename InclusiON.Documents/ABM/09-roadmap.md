@@ -1,26 +1,27 @@
 # ABM — Roadmap (Plan de Trabajo)
 
-**Actor:** Profesional  
-**Justificación:** El roadmap es el plan de trabajo personalizado de cada persona con discapacidad. El Profesional necesita crearlo y mantenerlo para organizar las actividades por área de habilidad, definir el orden de avance y configurar el motor de dificultad adaptativa. Sin el roadmap, la persona no tiene un recorrido pedagógico estructurado y no puede avanzar de forma secuencial.
+**Actor:** Profesional / Sistema  
+**Justificación:** El roadmap es la trayectoria pedagógica estructurada ("Mi Camino") de 10 niveles DUA. El sistema aprovisiona automáticamente una plantilla canónica preestablecida al asignar al alumno para garantizar la continuidad curricular inmediata sin obligar al docente a diagramar árboles complejos desde cero. El Profesional supervisa el avance, gestiona desbloqueos pedagógicos, añade notas y calibra el motor de dificultad adaptativa.
 
 **Entidades:** `PersonRoadmap`, `PersonRoadmapArea`, `PersonRoadmapActivity`, `AdaptiveEngineConfig`
 
 ---
 
-## Alta — Roadmap de la Persona
+## Alta — Inicialización del Roadmap (Plantilla Preestablecida)
 
-**Actor:** Profesional
+**Actor:** Sistema (Automático al asignar alumno en P08) / Profesional (Supervisión)
 
 | Campo | Tipo | Requerido | Validaciones |
 |-------|------|:---------:|--------------|
 | Persona con discapacidad | Referencia | Sí | Debe existir, estar activa y NO tener ya un roadmap activo |
-| Notas | Texto (2000) | No | — |
+| Notas | Texto (2000) | No | Observaciones pedagógicas iniciales |
 
 **Validaciones de integridad:**
-- Cada persona puede tener solo un `PersonRoadmap` activo (relación 1:1).
-- El profesional debe tener asignada a la persona.
+- Cada persona puede tener solo un `PersonRoadmap` activo (relación 1:1 estricta).
+- Se genera automáticamente la secuencia canónica de 10 estaciones universales DUA (`RoadmapInitializer.cs`).
+- El profesional a cargo queda asociado como supervisor de la trayectoria.
 
-**Resultado:** Se crea `PersonRoadmap` con `Activo = true`. El profesional creador queda registrado.
+**Resultado:** Se crea `PersonRoadmap` con `Activo = true` y sus 10 actividades estándar vinculadas.
 
 ---
 
