@@ -40,20 +40,18 @@ Este documento detalla todas las modificaciones arquitectónicas, de backend y f
 
 ---
 
-### C. Límite de Frustración y Bloqueo a los 4 Intentos (HU-21)
-1. **Detección**:
+### C. Límite de Frustración y Alerta Pedagógica a los 4 Intentos (HU-21) — Sin Bloqueo de Aprendizaje
+1. **Detección y Cuidado Emocional**:
    - Si el estudiante acumula **4 intentos fallidos consecutivos** ($\le 59\%$) en la misma actividad:
-     - El botón `Intentar de nuevo` se oculta automáticamente.
-     - Aparece el aviso: *"Has alcanzado el límite de 4 intentos permitidos. Tu profesional ha sido notificado para ayudarte."*
+     - El sistema muestra un mensaje cálido y motivador: *"Tu profesional ha sido notificado para acompañarte. Puedes seguir practicando cuando quieras."*
+     - **Principio de Inclusión y Aprendizaje Continuo:** La actividad **NO se bloquea**. El alumno **nunca detiene su aprendizaje** y mantiene la posibilidad de reintentar y seguir practicando libremente a su propio ritmo.
 2. **Notificación en Tiempo Real (SignalR)**:
-   - Al pulsar `Finalizar` tras agotar el 4to intento, el backend despacha un evento en tiempo real a través del hub de SignalR dirigido al terapeuta/profesional asignado:
-     - **Título**: *"Alerta: Actividad bloqueada por intentos agotados"*
-     - **Mensaje**: *"El estudiante ha alcanzado 4 intentos sin superar el nivel. La actividad ha sido bloqueada preventivamente."*
-   - Además, encola un registro de auditoría en la tabla `BackgroundJobs`.
-3. **Bloqueo en el Roadmap y Backend**:
-   - En **"Mi Camino"**, el nivel pasa a estado bloqueado con candado **`🔒`**.
-   - Si el cliente intentara invocar `startResponse`, el backend valida los intentos y retorna un error **`409 Conflict`**:
-     > *"La actividad se encuentra bloqueada tras haber agotado los 4 intentos permitidos. Tu profesional ha sido notificado para asistirte."*
+   - Al registrar el 4to intento, el backend despacha un evento en tiempo real a través del hub de SignalR dirigido al terapeuta/profesional asignado:
+     - **Título**: *"Alerta: Apoyo pedagógico requerido (4 intentos)"*
+     - **Mensaje**: *"El estudiante ha alcanzado 4 intentos en la actividad. La actividad continúa disponible pero requiere tu intervención."*
+   - Además, encola un registro de auditoría en la tabla `BackgroundJobs` para seguimiento del gabinete.
+3. **Continuidad en el Roadmap**:
+   - En **"Mi Camino"**, el nivel permanece en estado **`▶ En proceso`** (sin candados punitivos ni bloqueos HTTP), garantizando que el estudiante continúe interactuando mientras el docente coordina el apoyo presencial.
 
 ---
 
@@ -86,11 +84,13 @@ flowchart TD
     K2 --> N[Backend: Persiste Intento Fallido\nReinicia Actividad Inmediatamente]
     N --> B
 
-    %% 4 intentos agotados
-    I -->|No - 4to Intento Agotado| O[Pantalla: Límite de 4 Intentos Agotado]
-    O --> P[Botón único: ✓ Finalizar]
-    P --> Q[Backend: Bloquea Actividad\nDispara Alerta SignalR a Profesional\nBackgroundJob encolado]
-    Q --> R[Redirección a Mi Camino\nNodo muestra '🔒 Bloqueado']
+    %% 4 intentos alcanzados (Alerta sin bloqueo)
+    I -->|No - 4to Intento Alcanzado| O[Pantalla: Alerta de Apoyo Pedagógico]
+    O --> P1[Botón: ✓ Finalizar]
+    O --> P2[Botón: 🔄 Seguir Practicando]
+    P1 --> Q[Backend: Mantiene Status = EnProgreso\nDispara Alerta SignalR a Profesional\n'Actividad disponible - Requiere intervención']
+    P2 --> N
+    Q --> R[Redirección a Mi Camino\nNodo continúa '▶ En proceso'\nEl alumno nunca detiene su aprendizaje]
     R --> S[Dashboard Profesional recibe alerta en vivo]
 ```
 

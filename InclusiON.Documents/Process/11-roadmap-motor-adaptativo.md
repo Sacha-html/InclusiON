@@ -3,21 +3,22 @@
 **Área:** Progreso
 
 ## Descripción
-Proceso de construcción y gestión del plan terapéutico personalizado (roadmap) de cada persona con discapacidad. El profesional organiza el roadmap en áreas de habilidad con actividades secuenciadas. El motor adaptativo ajusta automáticamente la dificultad y el tiempo límite según el historial de desempeño de la persona.
+Proceso de gestión y supervisión del plan terapéutico personalizado (roadmap) de cada persona con discapacidad. El sistema inicializa automáticamente una **plantilla preestablecida de 10 niveles DUA** ("Mi Camino") al momento de matricular al alumno o asignarlo al aula (`RoadmapInitializer.cs`). El profesional no diseña la estructura desde cero: supervisa el sendero, calibra los parámetros del motor adaptativo (MDA), autoriza desbloqueos manuales y puede complementar con tareas del día.
 
 ## Participantes
-- **Profesional** — Crea el roadmap; agrega áreas y actividades; configura el motor adaptativo
-- **Sistema (Motor Adaptativo)** — Ajusta parámetros automáticamente tras cada intento completado
-- **Persona (PCD)** — Ejecuta actividades del roadmap; ve su progreso (vista simplificada)
+- **Sistema (Plantilla Canónica)** — Inicializa automáticamente la plantilla estándar de 10 niveles DUA (`StandardActivityDefinitions`) al asignar el alumno al aula
+- **Profesional** — Supervisa el roadmap; calibra el motor adaptativo por actividad; autoriza desbloqueos o asigna tareas del día
+- **Sistema (Motor Adaptativo)** — Ajusta parámetros automáticamente tras cada intento completado y previene frustración a los 4 fallos
+- **Persona (PCD)** — Ejecuta actividades del roadmap en el portal AAC; ve su progreso (vista simplificada)
 
 ## Estructura del roadmap
 
 ```
-Roadmap (1 por persona)
-  ├── RoadmapArea (n áreas de habilidad)
-  │     └── RoadmapActivity[] (actividades secuenciadas)
-  │           ├── sequenceOrder
-  │           ├── unlockThresholdPercent
+Roadmap (1 por persona — Plantilla Preestablecida de 10 Niveles)
+  ├── RoadmapArea (Área 'Trayectoria' DUA)
+  │     └── RoadmapActivity[1..10] (10 actividades estándar secuenciadas)
+  │           ├── sequenceOrder (1 al 10)
+  │           ├── unlockThresholdPercent (≥ 60%)
   │           ├── timeLimitSeconds
   │           ├── maxAttempts
   │           ├── showHints
@@ -28,10 +29,11 @@ Roadmap (1 por persona)
 
 ## Pasos del proceso
 
-### 1. Crear Roadmap
-El profesional inicializa el plan terapéutico de la persona. Solo puede existir un roadmap por persona.
-- **Endpoint:** `POST /api/persons/{personId}/roadmap`
-- **Conflict 409:** si ya existe un roadmap para esa persona
+### 1. Inicialización Automática del Roadmap (Plantilla Preestablecida)
+El sistema instancia la plantilla estándar de 10 niveles para la persona al momento de su matriculación o asignación de aula. Solo puede existir un roadmap activo por persona.
+- **Servicio:** `RoadmapInitializer.InitializeStudentRoadmapAsync`
+- **Endpoint manual / compatibilidad:** `POST /api/persons/{personId}/roadmap`
+- **Conflict 409:** si ya existe un roadmap activo para esa persona
 
 ### 2. Agregar Área de Habilidad
 El profesional agrega un área de trabajo al roadmap (ej: comunicación, motricidad, autonomía).
