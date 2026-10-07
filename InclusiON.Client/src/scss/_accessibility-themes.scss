@@ -2923,3 +2923,123 @@ body.a11y-tts-enabled {
     }
   }
 }
+
+// =========================================
+// CONTENIDO PRINCIPAL BAJO PERFILES DE ACCESIBILIDAD (ON-55)
+// =========================================
+// Los perfiles solo se notaban en el sidebar: el contenido central usaba
+// utilidades fijas (bg-white, border-0, border-success, text-bg-*) que
+// pisaban las variables del tema, y en alto contraste las cards no se
+// delimitaban del fondo.
+
+[data-profile]:not([data-profile="default"]) {
+  // Utilidades de fondo fijas -> superficie del tema
+  .bg-white,
+  .bg-body {
+    background-color: var(--a11y-surface) !important;
+    color: var(--a11y-text) !important;
+  }
+
+  // Cards sin borde / con sombra suave: conservan el perimetro del tema
+  .card.border-0,
+  .card.shadow-sm,
+  .card.shadow {
+    border: 2px solid var(--a11y-border) !important;
+  }
+
+  // Bordes semanticos -> variables de estado (daltonismo incluido)
+  .border-success { border-color: var(--a11y-success) !important; }
+  .border-danger  { border-color: var(--a11y-danger) !important; }
+  .border-warning { border-color: var(--a11y-warning) !important; }
+  .border-primary,
+  .border-info    { border-color: var(--a11y-primary) !important; }
+
+  .text-info { color: var(--a11y-link, var(--a11y-primary)) !important; }
+
+  // Variantes text-bg-* de Bootstrap/CoreUI
+  .text-bg-success { background-color: var(--a11y-success) !important; color: var(--a11y-success-text) !important; }
+  .text-bg-danger  { background-color: var(--a11y-danger) !important;  color: var(--a11y-danger-text) !important; }
+  .text-bg-warning { background-color: var(--a11y-warning) !important; color: var(--a11y-warning-text) !important; }
+  .text-bg-primary,
+  .text-bg-info    { background-color: var(--a11y-primary) !important; color: var(--a11y-primary-text) !important; }
+
+  // Tablas coloreadas por estado
+  .table-success > :not(caption) > * > * { background-color: var(--a11y-role-person-bg) !important; color: var(--a11y-text) !important; }
+  .table-danger  > :not(caption) > * > * { background-color: var(--a11y-bg-secondary) !important; color: var(--a11y-danger) !important; }
+  .table-warning > :not(caption) > * > * { background-color: var(--a11y-bg-secondary) !important; color: var(--a11y-warning) !important; }
+}
+
+// Alto contraste: delimitacion clara de componentes en el contenido central
+[data-profile="high-contrast"] {
+  .wrapper .body {
+    background-color: var(--a11y-bg-secondary) !important;
+
+    .card {
+      border: 3px solid var(--a11y-border) !important;
+      box-shadow: none !important;
+
+      .card-header {
+        border-bottom: 3px solid var(--a11y-border) !important;
+        font-weight: 700;
+      }
+
+      .card-footer {
+        border-top: 3px solid var(--a11y-border) !important;
+      }
+    }
+
+    .table {
+      border: 3px solid var(--a11y-border) !important;
+
+      > :not(caption) > * > * {
+        border: 2px solid var(--a11y-border) !important;
+      }
+
+      thead th {
+        border-bottom-width: 3px !important;
+        font-weight: 700;
+      }
+    }
+
+    .form-control,
+    .form-select,
+    .input-group-text {
+      border: 3px solid var(--a11y-border) !important;
+    }
+
+    .form-check-input {
+      border: 3px solid var(--a11y-border) !important;
+    }
+
+    .btn:not(.btn-link):not(.btn-close) {
+      border: 3px solid var(--a11y-border) !important;
+      font-weight: 700;
+    }
+
+    .badge {
+      border: 2px solid var(--a11y-border) !important;
+    }
+
+    .list-group-item {
+      border: 2px solid var(--a11y-border) !important;
+    }
+
+    .nav-tabs {
+      border-bottom: 3px solid var(--a11y-border) !important;
+
+      .nav-link {
+        border: 2px solid var(--a11y-border) !important;
+      }
+    }
+
+    .alert {
+      border: 3px solid var(--a11y-border) !important;
+    }
+  }
+
+  // Modales y dropdowns viven fuera de .body (se montan en <body>)
+  .modal-content,
+  .dropdown-menu {
+    border: 3px solid var(--a11y-border) !important;
+  }
+}
