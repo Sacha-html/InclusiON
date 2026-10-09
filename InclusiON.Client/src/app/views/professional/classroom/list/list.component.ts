@@ -127,6 +127,13 @@ export class ListComponent implements OnInit {
     this.router.navigate([AppRoutes.Pro.Persons, person.personId]);
   }
 
+  goToReports(person: ProfessionalPersonResponse, event?: Event): void {
+    event?.stopPropagation();
+    this.router.navigate([AppRoutes.Pro.Persons, person.personId], {
+      queryParams: { tab: 'reportes' }
+    });
+  }
+
   openAssignClassroomModal(person: ProfessionalPersonResponse, event?: Event): void {
     event?.stopPropagation();
     this.selectedPerson = person;

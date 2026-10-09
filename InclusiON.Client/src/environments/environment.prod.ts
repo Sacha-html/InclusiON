@@ -2,7 +2,7 @@ export const environment = {
   production: true,
 
   // URLs del Backend (IP local de la PC accesible tanto para emulador como para móvil físico)
-  apiUrl: 'http://192.168.0.10:5000/api',
+  apiUrl: 'http://192.168.0.50:5000/api',
 
   // Configuración de la Aplicación
   appName: 'InclusiON',

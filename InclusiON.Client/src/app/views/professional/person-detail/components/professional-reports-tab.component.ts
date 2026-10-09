@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReportsService } from '@services/reports.service';
@@ -10,6 +10,7 @@ import {
   ButtonDirective,
   SpinnerComponent,
 } from '@coreui/angular';
+import { IconDirective } from '@coreui/icons-angular';
 import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.component';
 
 @Component({
@@ -20,10 +21,11 @@ import { EmptyStateComponent } from '@shared/components/empty-state/empty-state.
     ButtonDirective,
     SpinnerComponent,
     EmptyStateComponent,
+    IconDirective,
   ],
   templateUrl: './professional-reports-tab.component.html',
 })
-export class ProfessionalReportsTabComponent implements OnInit {
+export class ProfessionalReportsTabComponent implements OnInit, OnChanges {
   @Input({ required: true }) personId!: string;
 
   private readonly reportsService = inject(ReportsService);
@@ -40,10 +42,30 @@ export class ProfessionalReportsTabComponent implements OnInit {
   readonly ReportStatus = ReportStatus;
 
   ngOnInit(): void {
-    this.loadReports();
+    if (this.personId) {
+      this.loadReports();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['personId'] && !changes['personId'].firstChange && this.personId) {
+      this.currentPage.set(1);
+      this.loadReports();
+    }
+  }
+
+  createReport(): void {
+    this.router.navigate([AppRoutes.Pro.Reports, 'new'], {
+      queryParams: { personId: this.personId }
+    });
   }
 
   loadReports(): void {
+    if (!this.personId) {
+      this.isLoading.set(false);
+      return;
+    }
+
     this.isLoading.set(true);
     this.reportsService.getReports({
       page: this.currentPage(),

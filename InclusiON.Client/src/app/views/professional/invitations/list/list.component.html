@@ -67,13 +67,16 @@
       <form [formGroup]="invitationForm" (ngSubmit)="onSubmit()">
 
         <div class="mb-3">
-          <label cFormLabel>Alumno (opcional)</label>
-          <select cSelect formControlName="personId">
-            <option value="">-- Seleccionar (opcional) --</option>
+          <label cFormLabel>Alumno *</label>
+          <select cSelect formControlName="personId" [class.is-invalid]="hasError('personId', 'required')">
+            <option value="">-- Seleccionar alumno --</option>
             @for (person of persons; track person.personId) {
               <option [value]="person.personId">{{ person.personFullName }}</option>
             }
           </select>
+          @if (hasError('personId', 'required')) {
+            <div class="text-danger small mt-1">El alumno es requerido</div>
+          }
         </div>
 
         <div class="mb-3">

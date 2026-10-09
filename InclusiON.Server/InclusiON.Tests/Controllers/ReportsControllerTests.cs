@@ -127,6 +127,59 @@ namespace InclusiON.Tests.Controllers
                 Arg.Any<CancellationToken>());
         }
 
+        private static IQueryHandler<GetReportsQuery, ApiResponse<PagedResponse<ReportsListItemReponse>>> OkGetReportsHandler()
+        {
+            var handler = Substitute.For<IQueryHandler<GetReportsQuery, ApiResponse<PagedResponse<ReportsListItemReponse>>>>();
+            handler.HandleAsync(Arg.Any<GetReportsQuery>(), Arg.Any<CancellationToken>())
+                   .Returns(ApiResponse<PagedResponse<ReportsListItemReponse>>.SuccessResult(
+                       new PagedResponse<ReportsListItemReponse>()));
+            return handler;
+        }
+
+        // ── GetReports ──────────────────────────────────────────────────────
+
+        [Fact]
+        public async Task GetReports_WithPersonId_PassesPersonIdToQuery()
+        {
+            // Arrange
+            var professionalId = Guid.NewGuid();
+            var targetPersonId = Guid.NewGuid();
+            var request = new GetReportsRequest { PersonId = targetPersonId };
+            var handler = OkGetReportsHandler();
+            var sut = BuildSut(entityId: professionalId);
+
+            // Act
+            await sut.GetReports(request, handler);
+
+            // Assert
+            await handler.Received(1).HandleAsync(
+                Arg.Is<GetReportsQuery>(q =>
+                    q.PersonId == targetPersonId.ToString() &&
+                    q.ProfessionalId == professionalId.ToString()),
+                Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task GetReports_WhenDeniedPersonAccess_ReturnsForbidden()
+        {
+            // Arrange
+            var professionalId = Guid.NewGuid();
+            var targetPersonId = Guid.NewGuid();
+            var authz = Substitute.For<IResourceAuthorizationService>();
+            authz.CanAccessPersonAsync(targetPersonId, AccessMode.Read, Arg.Any<CancellationToken>())
+                 .Returns(false);
+
+            var sut = BuildSut(entityId: professionalId, authz: authz);
+            var request = new GetReportsRequest { PersonId = targetPersonId };
+
+            // Act
+            var result = await sut.GetReports(request, OkGetReportsHandler());
+
+            // Assert
+            result.Result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result.Result!).StatusCode.Should().Be(403);
+        }
+
         // ── CreateReport ────────────────────────────────────────────────────
 
         [Fact]

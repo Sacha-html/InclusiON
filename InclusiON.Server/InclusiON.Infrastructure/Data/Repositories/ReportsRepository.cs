@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using InclusiON.Infrastructure.Extensions;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Data;
+using InclusiON.Data.Converters;
 using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
@@ -75,14 +76,44 @@ namespace InclusiON.Infrastructure.Data.Repositories
                     (r.AreasToReinforce != null && EF.Functions.ILike(r.AreasToReinforce, pattern)));
             }
 
-            if (!string.IsNullOrWhiteSpace(personId) && Guid.TryParse(personId, out var parsedPersonId))
-                query = query.Where(r => r.PersonId == parsedPersonId);
+            if (!string.IsNullOrWhiteSpace(personId))
+            {
+                if (Guid.TryParse(personId, out var parsedPersonId))
+                {
+                    query = query.Where(r => r.PersonId == parsedPersonId);
+                }
+                else
+                {
+                    try
+                    {
+                        var standard = ToStandardBase64(personId);
+                        var decrypted = EncryptionAccessor.Decrypt(standard);
+                        if (Guid.TryParse(decrypted, out var decPersonId))
+                            query = query.Where(r => r.PersonId == decPersonId);
+                    }
+                    catch
+                    {
+                        // Token no descifrable
+                    }
+                }
+            }
 
             if (personIds is { Count: > 0 })
             {
                 var parsedPersonIds = personIds
-                    .Where(id => Guid.TryParse(id, out _))
-                    .Select(id => Guid.Parse(id))
+                    .Select(id =>
+                    {
+                        if (Guid.TryParse(id, out var g)) return g;
+                        try
+                        {
+                            var standard = ToStandardBase64(id);
+                            var decrypted = EncryptionAccessor.Decrypt(standard);
+                            return Guid.TryParse(decrypted, out var decG) ? decG : (Guid?)null;
+                        }
+                        catch { return null; }
+                    })
+                    .Where(g => g.HasValue)
+                    .Select(g => g!.Value)
                     .ToList();
                 if (parsedPersonIds.Count > 0)
                     query = query.Where(r => parsedPersonIds.Contains(r.PersonId));
@@ -275,6 +306,17 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .CountAsync(r => r.ProfessionalId == professionalId
                               && r.IsActive
                               && r.Status != ReportStatus.Approved, cancellationToken);
+        }
+
+        private static string ToStandardBase64(string urlSafe)
+        {
+            var s = urlSafe.Replace('-', '+').Replace('_', '/');
+            return (s.Length % 4) switch
+            {
+                2 => s + "==",
+                3 => s + "=",
+                _ => s
+            };
         }
     }
 }

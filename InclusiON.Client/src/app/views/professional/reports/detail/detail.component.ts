@@ -74,7 +74,11 @@ export class DetailComponent implements OnInit {
   }
 
   onBack(): void {
-    this.router.navigate([AppRoutes.Pro.Reports]);
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      this.router.navigate([AppRoutes.Pro.Reports]);
+    }
   }
 
   onSubmitClick(): void {

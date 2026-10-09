@@ -7,7 +7,7 @@
               (change)="onPersonFilterChange($event)">
         @for (p of persons(); track p.personId) {
           <option [value]="p.personId"
-                  [selected]="selectedPersonIds.includes(p.personId)">
+                  [selected]="isPersonSelected(p.personId)">
             {{ p.personFullName }}
           </option>
         }

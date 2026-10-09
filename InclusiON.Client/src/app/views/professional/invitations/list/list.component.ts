@@ -109,7 +109,7 @@ export class ListComponent implements OnInit {
 
   private initForm(): void {
     this.invitationForm = this.fb.group({
-      personId:     [''],
+      personId:     ['', [Validators.required]],
       email:        ['', [Validators.required, Validators.email]],
       firstName:    ['', [Validators.required, Validators.maxLength(100)]],
       lastName:     ['', [Validators.required, Validators.maxLength(100)]],

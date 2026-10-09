@@ -4,12 +4,12 @@ import { Router } from '@angular/router';
 import { AuthService, ProfessionalsService, ToastService, UserManagementService, CatalogsService } from '@services';
 import { Permissions } from '@shared/constants/permissions';
 import { AppRoutes } from '@shared/constants';
-import { ProfessionalListItemResponse, ProfessionalResponse, ValidateProfessionalRequest } from '@models';
+import { ProfessionalListItemResponse, ProfessionalResponse } from '@models';
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn } from '@shared/components/data-table/data-table.models';
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { InstitutionFilterComponent } from '@shared/components/institution-filter/institution-filter.component';
-import { NavModule, ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormLabelDirective, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
+import { ModalModule, ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormLabelDirective, FormSelectDirective, ButtonDirective, SpinnerComponent, TableDirective, BadgeComponent, AlertComponent, GridModule } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -68,7 +68,6 @@ export function buildProfessionalsCsv(data: ProfessionalListItemResponse[]): str
     DataTableComponent,
     ConfirmModalComponent,
     InstitutionFilterComponent,
-    NavModule,
     ModalModule,
     ModalHeaderComponent,
     ModalBodyComponent,
@@ -97,21 +96,17 @@ export class ListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   canCreate = this.authService.hasPermission(Permissions.Professionals.Create);
-  canValidate = this.authService.hasPermission(Permissions.Professionals.Update) || this.authService.isGlobalAdmin();
 
   specialties: { id: number; name: string }[] = [];
   specialtiesLoadError = false;
 
   selectedInstitutionId: number | undefined;
-  activeTab: 'active' | 'validations' = 'active';
   private isInitialized = false;
   statusFilter = '';
   specialtyFilter = '';
 
   professionals: ProfessionalListItemResponse[] = [];
-  pendingProfessionals: ProfessionalListItemResponse[] = [];
   totalItems = 0;
-  pendingCount = 0;
   pageSize = 10;
   currentPage = 1;
   sortBy = 'lastName';
@@ -121,16 +116,12 @@ export class ListComponent implements OnInit {
   private searchTerm = '';
 
   showConfirmModal = false;
-  showValidateModal = false;
   showHistoryModal = false;
   showReactivateModal = false;
-  isValidationLoading = false;
   isReactivateLoading = false;
   isDeactivateLoading = false;
   itemToDeactivate: ProfessionalListItemResponse | null = null;
-  itemToValidate: ProfessionalListItemResponse | null = null;
   itemToReactivate: ProfessionalListItemResponse | null = null;
-  isApproveAction = true;
   statusHistory: any[] = [];
   statusHistoryLoading = false;
 
@@ -164,21 +155,6 @@ export class ListComponent implements OnInit {
     },
   ];
 
-  public pendingCols: TableColumn[] = [
-    { key: 'fullName', label: 'Nombre', sortable: true },
-    { key: 'email', label: 'Email', sortable: true },
-    { key: 'specialty', label: 'Especialidad', sortable: true },
-    { key: 'licenseNumber', label: 'Matrícula', sortable: true },
-    { key: 'createdAt', label: 'Fecha de solicitud', type: 'date', sortable: true },
-    {
-      key: 'actions', label: 'Acciones', type: 'actions',
-      actions: [
-        { action: 'approve', label: 'Aprobar', icon: 'cilCheck' },
-        { action: 'reject', label: 'Rechazar', icon: 'cilX' },
-      ],
-    },
-  ];
-
   ngOnInit(): void {
     this.catalogsService.getSpecialties()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -194,7 +170,6 @@ export class ListComponent implements OnInit {
           this.toastService.error('No se pudieron cargar las especialidades. Revisá el endpoint /Catalogs/specialties.');
         },
       });
-    this.loadPendingCount();
   }
 
   onFilterLoaded(): void {
@@ -204,22 +179,10 @@ export class ListComponent implements OnInit {
     }
   }
 
-  switchTab(tab: 'active' | 'validations'): void {
-    this.activeTab = tab;
-    this.currentPage = 1;
-    if (tab === 'active') {
-      this.loadProfessionals();
-    } else {
-      this.loadPendingProfessionals();
-    }
-  }
-
   onInstitutionFilterChange(institutionId: number | undefined): void {
     this.selectedInstitutionId = institutionId;
-    if (this.activeTab === 'active') {
-      this.currentPage = 1;
-      this.loadProfessionals();
-    }
+    this.currentPage = 1;
+    this.loadProfessionals();
   }
 
   onStatusFilterChange(status: string): void {
@@ -253,30 +216,18 @@ export class ListComponent implements OnInit {
     this.sortBy = sortMap[event.sortBy] ?? event.sortBy;
     this.sortDirection = event.sortDirection;
     this.currentPage = 1;
-    if (this.activeTab === 'active') {
-      this.loadProfessionals();
-    } else {
-      this.loadPendingProfessionals();
-    }
+    this.loadProfessionals();
   }
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    if (this.activeTab === 'active') {
-      this.loadProfessionals();
-    } else {
-      this.loadPendingProfessionals();
-    }
+    this.loadProfessionals();
   }
 
   onSearch(term: string): void {
     this.searchTerm = term;
     this.currentPage = 1;
-    if (this.activeTab === 'active') {
-      this.loadProfessionals(term);
-    } else {
-      this.loadPendingProfessionals(term);
-    }
+    this.loadProfessionals(term);
   }
 
   onHeaderAction(action: string): void {
@@ -315,16 +266,6 @@ export class ListComponent implements OnInit {
       case 'deactivate':
         this.itemToDeactivate = event.item;
         this.showConfirmModal = true;
-        break;
-      case 'approve':
-        this.itemToValidate = event.item;
-        this.isApproveAction = true;
-        this.showValidateModal = true;
-        break;
-      case 'reject':
-        this.itemToValidate = event.item;
-        this.isApproveAction = false;
-        this.showValidateModal = true;
         break;
       case 'history':
         this.loadStatusHistory(event.item.id);
@@ -372,41 +313,6 @@ export class ListComponent implements OnInit {
     this.itemToDeactivate = null;
   }
 
-  onValidationConfirm(observation: string): void {
-    if (!this.itemToValidate) return;
-
-    this.isValidationLoading = true;
-
-    const request: ValidateProfessionalRequest = {
-      isApproved: this.isApproveAction,
-      observation: this.isApproveAction ? undefined : observation,
-    };
-
-    this.professionalsService.validateProfessional(this.itemToValidate.id, request).subscribe({
-       next: () => {
-        this.isValidationLoading = false;
-        this.toastService.success(
-          this.isApproveAction
-            ? 'Profesional aprobado exitosamente. Se ha enviado un email con las credenciales.'
-            : 'Profesional rechazado exitosamente. Se ha notificado al solicitante.'
-        );
-        this.showValidateModal = false;
-        this.itemToValidate = null;
-        this.loadPendingProfessionals();
-        this.loadPendingCount();
-      },
-      error: (err) => {
-        this.isValidationLoading = false;
-        this.toastService.error(err?.userMessage || 'Error al procesar la validación');
-      },
-    });
-  }
-
-  cancelValidation(): void {
-    this.showValidateModal = false;
-    this.itemToValidate = null;
-  }
-
   loadProfessionals(search?: string): void {
     if (search !== undefined) this.searchTerm = search;
     const requestId = ++this.professionalsRequestId;
@@ -435,51 +341,6 @@ export class ListComponent implements OnInit {
           this.loading = false;
         },
       });
-  }
-
-  loadPendingProfessionals(search?: string): void {
-    this.loading = true;
-    this.professionalsService
-      .getPendingProfessionals({
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        search,
-        sortBy: this.sortBy,
-        sortDirection: this.sortDirection,
-      })
-      .subscribe({
-        next: (response) => {
-          this.pendingProfessionals = response.data;
-          this.pendingCount = response.totalRecords;
-          this.loading = false;
-        },
-        error: () => {
-          this.toastService.error('Error al obtener solicitudes pendientes');
-          this.loading = false;
-        },
-      });
-  }
-
-  loadPendingCount(): void {
-    this.professionalsService
-      .getPendingProfessionals({
-        page: 1,
-        pageSize: 1,
-      })
-      .subscribe({
-        next: (response) => {
-          this.pendingCount = response.totalRecords;
-        },
-        error: () => {
-          this.pendingCount = 0;
-        },
-      });
-  }
-
-  onModalVisibleChange(visible: boolean): void {
-    if (!visible) {
-      this.cancelValidation();
-    }
   }
 
   loadStatusHistory(professionalId: string): void {
@@ -579,14 +440,13 @@ export class ListComponent implements OnInit {
   }
 
   exportToCsv(): void {
-    const data = this.activeTab === 'active' ? this.professionals : this.pendingProfessionals;
-    if (!data.length) return;
-    const csvContent = buildProfessionalsCsv(data);
+    if (!this.professionals.length) return;
+    const csvContent = buildProfessionalsCsv(this.professionals);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `profesionales_${this.activeTab}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `profesionales_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }

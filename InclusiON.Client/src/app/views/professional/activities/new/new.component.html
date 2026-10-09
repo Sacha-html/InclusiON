@@ -5,9 +5,8 @@
     <div class="d-flex align-items-center gap-2 mb-1">
       <span class="text-body-secondary small">Paso {{ currentStep() }} de {{ totalSteps }}</span>
       <span class="fw-semibold">
-        @if (currentStep() === 1) { Identificación }
-        @else if (currentStep() === 2) { Detalles }
-        @else { Contenido de la actividad }
+        @if (currentStep() === 1) { Identificación y accesibilidad }
+        @else { Detalles y contenido }
       </span>
     </div>
     <c-progress [value]="(currentStep() / totalSteps) * 100" />
@@ -20,12 +19,10 @@
     <h5 cCardTitle>
       @if (savedActivity()) { Actividad creada }
       @else if (isTemplateMode()) {
-        @if (currentStep() === 1) { Nueva Plantilla del Roadmap — Identificación }
-        @else if (currentStep() === 2) { Nueva Plantilla del Roadmap — Detalles }
+        @if (currentStep() === 1) { Nueva Plantilla del Roadmap — Identificación y accesibilidad }
         @else { Nueva Plantilla del Roadmap — {{ selectedTemplateName }} }
       } @else {
-        @if (currentStep() === 1) { Nueva Actividad — Identificación }
-        @else if (currentStep() === 2) { Nueva Actividad — Detalles }
+        @if (currentStep() === 1) { Nueva Actividad — Identificación y accesibilidad }
         @else { Nueva Actividad — {{ selectedTemplateName }} }
       }
     </h5>
@@ -33,7 +30,7 @@
   <c-card-body>
 
     @if (!savedActivity()) {
-    <!-- ===== STEP 1: Identificación ===== -->
+    <!-- ===== STEP 1: Identificación y accesibilidad ===== -->
     @if (currentStep() === 1) {
       <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios.</p>
 
@@ -47,11 +44,11 @@
 
       <c-row class="mb-3">
         <c-col xs="12" md="6">
-          <label class="form-label" for="act-skill">Área de habilidad</label>
-          <select cSelect id="act-skill" [(ngModel)]="meta.skillAreaId" name="skillAreaId">
-            <option [value]="0">Sin especificar</option>
-            @for (s of skillAreas(); track s.id) {
-              <option [value]="s.id">{{ s.name }}</option>
+          <label class="form-label" for="act-template">Tipo de plantilla / actividad *</label>
+          <select cSelect id="act-template" [(ngModel)]="meta.templateTypeId" name="templateTypeId" required>
+            <option [value]="0">Seleccionar...</option>
+            @for (t of templateTypes(); track t.id) {
+              <option [value]="t.id">{{ t.name }}</option>
             }
           </select>
         </c-col>
@@ -68,58 +65,13 @@
 
       <c-row class="mb-3">
         <c-col xs="12" md="6">
-          <label class="form-label" for="act-template">Tipo de plantilla *</label>
-          <select cSelect id="act-template" [(ngModel)]="meta.templateTypeId" name="templateTypeId" required>
-            <option [value]="0">Seleccionar...</option>
-            @for (t of templateTypes(); track t.id) {
-              <option [value]="t.id">{{ t.name }}</option>
+          <label class="form-label" for="act-skill">Área de habilidad</label>
+          <select cSelect id="act-skill" [(ngModel)]="meta.skillAreaId" name="skillAreaId">
+            <option [value]="0">Sin especificar</option>
+            @for (s of skillAreas(); track s.id) {
+              <option [value]="s.id">{{ s.name }}</option>
             }
           </select>
-        </c-col>
-      </c-row>
-
-      <c-row>
-        <c-col xs="12">
-          <button cButton type="button" color="primary" [disabled]="!step1Valid" (click)="nextStep()">
-            Siguiente →
-          </button>
-          <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">
-            Cancelar
-          </button>
-        </c-col>
-      </c-row>
-    }
-
-    <!-- ===== STEP 2: Detalles ===== -->
-    @else if (currentStep() === 2) {
-      <c-row class="mb-3">
-        <c-col xs="12">
-          <label class="form-label" for="act-description">Descripción</label>
-          <textarea cFormControl id="act-description" [(ngModel)]="meta.description" name="description"
-                    rows="2" placeholder="Breve descripción de la actividad..."></textarea>
-        </c-col>
-      </c-row>
-
-      <c-row class="mb-3">
-        <c-col xs="12">
-          <label class="form-label" for="act-instructions">Instrucciones para el estudiante</label>
-          <textarea cFormControl id="act-instructions" [(ngModel)]="meta.instructions" name="instructions"
-                    rows="2" placeholder="Instrucciones que verá el estudiante..."></textarea>
-        </c-col>
-      </c-row>
-
-      <c-row class="mb-3">
-        <c-col xs="12" md="6">
-          <label class="form-label" for="act-complexity">
-            @if (isTemplateMode()) { Nivel del Roadmap (1–10) } @else { Complejidad (1–5) }
-          </label>
-          <input cFormControl id="act-complexity" type="number" [(ngModel)]="meta.complexityLevel"
-                 name="complexityLevel" min="1" [attr.max]="isTemplateMode() ? 10 : 5" />
-        </c-col>
-        <c-col xs="12" md="6">
-          <label class="form-label" for="act-duration">Duración estimada (min)</label>
-          <input cFormControl id="act-duration" type="number" [(ngModel)]="meta.estimatedDurationMinutes"
-                 name="estimatedDurationMinutes" min="1" max="600" />
         </c-col>
       </c-row>
 
@@ -167,10 +119,7 @@
 
       <c-row>
         <c-col xs="12">
-          <button cButton type="button" color="secondary" (click)="prevStep()">
-            ← Atrás
-          </button>
-          <button cButton type="button" color="primary" class="ms-2" [disabled]="!step2Valid" (click)="nextStep()">
+          <button cButton type="button" color="primary" [disabled]="!step1Valid" (click)="nextStep()">
             Siguiente →
           </button>
           <button cButton type="button" color="secondary" class="ms-2" (click)="cancel()">
@@ -180,8 +129,33 @@
       </c-row>
     }
 
-    <!-- ===== STEP 3: Contenido ===== -->
+    <!-- ===== STEP 2: Detalles y Contenido ===== -->
     @else {
+      <c-row class="mb-3">
+        <c-col xs="12">
+          <label class="form-label" for="act-description">Descripción</label>
+          <textarea cFormControl id="act-description" [(ngModel)]="meta.description" name="description"
+                    rows="2" placeholder="Breve descripción de la actividad..."></textarea>
+        </c-col>
+      </c-row>
+
+      <c-row class="mb-3">
+        <c-col xs="12" md="6">
+          <label class="form-label" for="act-complexity">
+            @if (isTemplateMode()) { Nivel del Roadmap (1–10) } @else { Complejidad (1–5) }
+          </label>
+          <input cFormControl id="act-complexity" type="number" [(ngModel)]="meta.complexityLevel"
+                 name="complexityLevel" min="1" [attr.max]="isTemplateMode() ? 10 : 5" />
+        </c-col>
+        <c-col xs="12" md="6">
+          <label class="form-label" for="act-duration">Duración estimada (min)</label>
+          <input cFormControl id="act-duration" type="number" [(ngModel)]="meta.estimatedDurationMinutes"
+                 name="estimatedDurationMinutes" min="1" max="600" />
+        </c-col>
+      </c-row>
+
+      <h6 class="mb-3 border-top pt-3">Contenido de la actividad: <span class="text-primary">{{ selectedTemplateName }}</span></h6>
+
       <ng-container #editorHost></ng-container>
       @if (editorUnavailable()) {
         <c-alert color="warning" class="mb-3">
@@ -195,7 +169,7 @@
             ← Atrás
           </button>
           <button cButton type="button" color="primary" class="ms-2"
-                  [disabled]="!step3Valid || isLoading()" (click)="submit()">
+                  [disabled]="!step2Valid || isLoading()" (click)="submit()">
             @if (isLoading()) { <c-spinner size="sm" class="me-1" aria-hidden="true"></c-spinner> }
             @if (isTemplateMode()) { Guardar plantilla } @else { Guardar actividad }
           </button>
