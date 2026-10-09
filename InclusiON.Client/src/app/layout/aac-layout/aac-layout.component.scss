@@ -64,6 +64,21 @@
   }
 }
 
+// Perfiles de daltonismo
+:host-context([data-profile="deuteranopia"]),
+:host-context([data-profile="protanopia"]),
+:host-context([data-profile="tritanopia"]) {
+  .aac-container {
+    background: var(--a11y-bg);
+  }
+
+  .aac-header,
+  .aac-nav {
+    background: var(--a11y-surface);
+    border: 1px solid var(--a11y-border);
+  }
+}
+
 // Reducir movimiento
 :host-context(.a11y-reduced-motion) {
   * {

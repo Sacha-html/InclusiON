@@ -10,19 +10,19 @@
       <app-big-button
         label="Mi camino"
         icon="cilMap"
-        color="#673AB7"
+        [color]="'var(--a11y-nav-roadmap, var(--a11y-nav-home))'"
         (buttonClick)="goTo('/app/roadmap')"
       />
       <app-big-button
         label="Actividades"
         icon="cilTask"
-        color="#2196F3"
+        [color]="'var(--a11y-nav-activities)'"
         (buttonClick)="goTo('/app/activities')"
       />
       <app-big-button
         label="Hablar"
         icon="cilChatBubble"
-        color="#9C27B0"
+        [color]="'var(--a11y-nav-talk)'"
         (buttonClick)="goTo('/app/talk')"
       />
     </div>

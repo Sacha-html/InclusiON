@@ -102,3 +102,23 @@
     color: var(--a11y-text, #f5f5f5);
   }
 }
+
+// Perfiles de daltonismo: resaltar bordes e iconos con alto contraste seguro
+:host-context([data-profile="deuteranopia"]) .big-button,
+:host-context([data-profile="protanopia"]) .big-button,
+:host-context([data-profile="tritanopia"]) .big-button {
+  border: 2.5px solid var(--btn-color);
+  background: var(--a11y-surface, #ffffff);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  .btn-label {
+    color: var(--a11y-text);
+    font-weight: 700;
+  }
+
+  .btn-icon {
+    background: var(--btn-color);
+    color: var(--a11y-primary-text, #ffffff);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}

@@ -79,6 +79,7 @@
 
   // AAC nav colors (color-blind safe defaults)
   --a11y-nav-home: #2E7D32;
+  --a11y-nav-roadmap: #673AB7;
   --a11y-nav-activities: #1565C0;
   --a11y-nav-calendar: #E65100;
   --a11y-nav-talk: #7B1FA2;
@@ -271,6 +272,7 @@
 
     // AAC nav colors
     --a11y-nav-home: #66BB6A;
+    --a11y-nav-roadmap: #CE93D8;
     --a11y-nav-activities: #64B5F6;
     --a11y-nav-calendar: #FFB74D;
     --a11y-nav-talk: #CE93D8;
@@ -343,6 +345,7 @@
   --a11y-scrollbar-thumb-hover: #000000;
 
   --a11y-nav-home: #006600;
+  --a11y-nav-roadmap: #0000CC;
   --a11y-nav-activities: #0000CC;
   --a11y-nav-calendar: #CC6600;
   --a11y-nav-talk: #660099;
@@ -411,6 +414,7 @@
   --a11y-scrollbar-thumb-hover: #FFFF00;
 
   --a11y-nav-home: #00FF00;
+  --a11y-nav-roadmap: #FFFF00;
   --a11y-nav-activities: #FFFF00;
   --a11y-nav-calendar: #FFA500;
   --a11y-nav-talk: #FF44FF;
@@ -482,6 +486,7 @@
   --a11y-scrollbar-thumb-hover: #657B83;
 
   --a11y-nav-home: #4C5900;               // WCAG 1.4.11 6.61:1 sobre fondo crema — era #859900 (2.76:1 ❌)
+  --a11y-nav-roadmap: #6C71C4;
   --a11y-nav-activities: #268BD2;
   --a11y-nav-calendar: #CB4B16;
   --a11y-nav-talk: #6C71C4;
@@ -550,6 +555,7 @@
   --a11y-scrollbar-thumb-hover: #93A1A1;
 
   --a11y-nav-home: #ACE600;               // Alineado con success AAA
+  --a11y-nav-roadmap: #9FA8DA;
   --a11y-nav-activities: #2AA198;
   --a11y-nav-calendar: #FF7043;           // Naranja brillante 3.80:1 sobre nav bg oscuro — era #CB4B16 (2.27:1 ❌)
   --a11y-nav-talk: #9FA8DA;               // Índigo claro 4.52:1 sobre nav bg oscuro — era #6C71C4 (2.97:1 ❌)
@@ -620,6 +626,7 @@
   --a11y-scrollbar-thumb-hover: #424242;
 
   --a11y-nav-home: #1B5E20;
+  --a11y-nav-roadmap: #6A1B9A;
   --a11y-nav-activities: #0D47A1;
   --a11y-nav-calendar: #E65100;
   --a11y-nav-talk: #6A1B9A;
@@ -687,6 +694,7 @@
   --a11y-scrollbar-thumb-hover: #9E9E9E;
 
   --a11y-nav-home: #69F0AE;
+  --a11y-nav-roadmap: #EA80FC;
   --a11y-nav-activities: #82B1FF;
   --a11y-nav-calendar: #FFAB40;
   --a11y-nav-talk: #EA80FC;
@@ -713,9 +721,9 @@
   --a11y-letter-spacing: 0.01em;
   --a11y-word-spacing: 0.05em;
 
-  --a11y-bg: #FFFFFF;
-  --a11y-bg-secondary: #F5F5F5;
-  --a11y-surface: #FAFAFA;
+  --a11y-bg: #EDF2F7;
+  --a11y-bg-secondary: #E2E8F0;
+  --a11y-surface: #FFFFFF;
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
   --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
@@ -760,9 +768,10 @@
 
   // Deuteranopia: avoid green, use blue + orange/yellow
   --a11y-nav-home: #0077B6;
-  --a11y-nav-activities: #023E8A;
+  --a11y-nav-roadmap: #023E8A;
+  --a11y-nav-activities: #0077B6;
   --a11y-nav-calendar: #FFA500;
-  --a11y-nav-talk: #9B2335;
+  --a11y-nav-talk: #D97706;
 
   --a11y-role-person: #005A8C;            // WCAG AA (6.3:1 sobre #E0F7FA) - antes #0077B6 (4.37:1)
   --a11y-role-person-bg: #E0F7FA;
@@ -827,6 +836,7 @@
   --a11y-scrollbar-thumb-hover: #9E9E9E;
 
   --a11y-nav-home: #48CAE4;
+  --a11y-nav-roadmap: #0077B6;
   --a11y-nav-activities: #0077B6;
   --a11y-nav-calendar: #FFB703;
   --a11y-nav-talk: #FB8500;
@@ -853,9 +863,9 @@
   --a11y-letter-spacing: 0.01em;
   --a11y-word-spacing: 0.05em;
 
-  --a11y-bg: #FFFFFF;
-  --a11y-bg-secondary: #F5F5F5;
-  --a11y-surface: #FAFAFA;
+  --a11y-bg: #EEF2F6;
+  --a11y-bg-secondary: #E1E7EE;
+  --a11y-surface: #FFFFFF;
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
   --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
@@ -900,9 +910,10 @@
 
   // Protanopia: avoid red, use blue + yellow
   --a11y-nav-home: #457B9D;
-  --a11y-nav-activities: #1D3557;
+  --a11y-nav-roadmap: #1D3557;
+  --a11y-nav-activities: #2B5C8F;
   --a11y-nav-calendar: #E9C46A;
-  --a11y-nav-talk: #F4A261;
+  --a11y-nav-talk: #D48B38;
 
   --a11y-role-person: #2E5370;            // WCAG AAA (8.1:1) — era #355E78 (6.96:1, fallaba AAA)
   --a11y-role-person-bg: rgba(53, 94, 120, 0.1);
@@ -967,6 +978,7 @@
   --a11y-scrollbar-thumb-hover: #A8DADC;
 
   --a11y-nav-home: #97D0EB;
+  --a11y-nav-roadmap: #A8DADC;
   --a11y-nav-activities: #A8DADC;
   --a11y-nav-calendar: #E9C46A;
   --a11y-nav-talk: #F4A261;
@@ -993,9 +1005,9 @@
   --a11y-letter-spacing: 0.01em;
   --a11y-word-spacing: 0.05em;
 
-  --a11y-bg: #FFFFFF;
-  --a11y-bg-secondary: #F5F5F5;
-  --a11y-surface: #FAFAFA;
+  --a11y-bg: #F5F2F4;
+  --a11y-bg-secondary: #EAE4E8;
+  --a11y-surface: #FFFFFF;
   --a11y-text: #1A1A1A;
   --a11y-text-secondary: #3D3D3D;
   --a11y-text-muted: #4B4B4B;              // WCAG AAA (8.35:1 sobre #FAFAFA) — era #595959 (6.71:1)
@@ -1040,9 +1052,10 @@
 
   // Tritanopia: avoid blue-yellow, use red/magenta + cyan
   --a11y-nav-home: #00838F;
-  --a11y-nav-activities: #9B2335;
+  --a11y-nav-roadmap: #4A148C;
+  --a11y-nav-activities: #00695C;
   --a11y-nav-calendar: #B5004D;            // Magenta oscuro 7.2:1 — era #E91E63 (3.99:1, fallaba AAA)
-  --a11y-nav-talk: #4A148C;
+  --a11y-nav-talk: #9B2335;
 
   --a11y-role-person: #005A62;            // WCAG AAA (7.1:1) - antes #00838F (4.52:1)
   --a11y-role-person-bg: rgba(0, 90, 98, 0.1);
@@ -1107,6 +1120,7 @@
   --a11y-scrollbar-thumb-hover: #E94560;
 
   --a11y-nav-home: #4DD0E1;
+  --a11y-nav-roadmap: #FF91A3;
   --a11y-nav-activities: #E94560;
   --a11y-nav-calendar: #F48FB1;
   --a11y-nav-talk: #7C4DFF;
@@ -3041,5 +3055,21 @@ body.a11y-tts-enabled {
   .modal-content,
   .dropdown-menu {
     border: 3px solid var(--a11y-border) !important;
+  }
+}
+
+// =========================================
+// PORTAL AAC (CAA) BAJO PERFILES DE DALTONISMO
+// =========================================
+[data-profile="deuteranopia"],
+[data-profile="protanopia"],
+[data-profile="tritanopia"] {
+  .aac-container {
+    background-color: var(--a11y-bg) !important;
+  }
+
+  .aac-header,
+  .aac-nav {
+    background-color: var(--a11y-surface) !important;
   }
 }
