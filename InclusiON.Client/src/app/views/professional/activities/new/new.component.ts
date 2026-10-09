@@ -44,7 +44,7 @@ export class NewComponent implements OnInit {
 
   // Wizard state
   currentStep = signal(1);
-  totalSteps  = 3;
+  totalSteps  = 2;
 
   // Catalogs
   categories    = signal<ActivityCategoryItem[]>([]);
@@ -95,10 +95,6 @@ export class NewComponent implements OnInit {
   }
 
   get step2Valid(): boolean {
-    return true;
-  }
-
-  get step3Valid(): boolean {
     return this.isEditorValid();
   }
 
@@ -138,7 +134,7 @@ export class NewComponent implements OnInit {
     if (this.currentStep() < this.totalSteps) {
       const nextStepNum = this.currentStep() + 1;
       this.currentStep.set(nextStepNum);
-      if (nextStepNum === 3) {
+      if (nextStepNum === 2) {
         afterNextRender(() => this.mountEditor(), { injector: this.injector });
       }
     }
@@ -146,19 +142,29 @@ export class NewComponent implements OnInit {
 
   prevStep(): void {
     if (this.currentStep() > 1) {
-      if (this.currentStep() === 3 && this.editorHost) this.editorHost.clear();
+      if (this.currentStep() === 2 && this.editorHost) this.editorHost.clear();
       this.currentStep.set(this.currentStep() - 1);
     }
   }
 
   submit(): void {
-    if (!this.step1Valid || !this.step3Valid) return;
+    if (!this.step1Valid || !this.step2Valid) return;
     this.isLoading.set(true);
+
+    let instructions = this.meta.instructions?.trim();
+    if (!instructions && this.editorContentJson()) {
+      try {
+        const parsed = JSON.parse(this.editorContentJson());
+        if (parsed.instruction) {
+          instructions = parsed.instruction.trim();
+        }
+      } catch { /* json parse error */ }
+    }
 
     const request: CreateActivityRequest = {
       title:                    this.meta.title.trim(),
       description:              this.meta.description.trim() || undefined,
-      instructions:             this.meta.instructions.trim() || undefined,
+      instructions:             instructions || undefined,
       categoryId:               +this.meta.categoryId,
       skillAreaId:              this.meta.skillAreaId ? +this.meta.skillAreaId : undefined,
       complexityLevel:          this.meta.complexityLevel,

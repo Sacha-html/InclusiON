@@ -1,19 +1,5 @@
 <app-institution-filter (filterChange)="onInstitutionFilterChange($event)" (loaded)="onFilterLoaded()"></app-institution-filter>
 
-<!-- Tabs: Activos y Pendientes -->
-<div class="mb-3">
-  <div class="nav nav-tabs" role="tablist">
-    <button class="nav-link" [class.active]="activeTab==='active'" (click)="switchTab('active')" type="button">Activos</button>
-    <button class="nav-link" [class.active]="activeTab==='validations'" (click)="switchTab('validations')" type="button">
-      Pendientes
-      @if (pendingCount > 0) {
-        <span class="badge bg-warning ms-2">{{ pendingCount }}</span>
-      }
-    </button>
-  </div>
-</div>
-
-@if (activeTab === 'active') {
 <div class="mb-3">
   <fieldset class="p-2 px-3 border rounded mb-3">
     <legend class="px-1 mb-1 fw-semibold text-body-secondary" style="font-size: 0.8rem; float: none; width: auto;">Filtros</legend>
@@ -74,35 +60,6 @@
     </div>
   }
 </div>
-}
-
-@if (activeTab === 'validations') {
-<div class="mb-3">
-  <app-data-table
-    title="Solicitudes Pendientes"
-    [columns]="pendingCols"
-    [items]="pendingProfessionals"
-    [totalItems]="pendingCount"
-    [pageSize]="pageSize"
-    [currentPage]="currentPage"
-    [sortable]="true"
-    [loading]="loading"
-    [headerButtons]="getHeaderButtons()"
-    (headerAction)="onHeaderAction($event)"
-    [showSearch]="true"
-    (pageChange)="onPageChange($event)"
-    (searchAction)="onSearch($event)"
-    (sortAction)="onSort($event)"
-    (rowAction)="onRowAction($event)">
-  </app-data-table>
-  @if (!pendingProfessionals.length) {
-    <div class="text-center text-body-secondary py-4">
-      <svg cIcon name="cilClock" size="3xl" class="mb-2"></svg>
-      <p class="mb-0">No hay solicitudes pendientes de validación.</p>
-    </div>
-  }
-</div>
-}
 
 <!-- Modal desactivar -->
 <app-confirm-modal
@@ -119,24 +76,6 @@
   confirmColor="danger"
   (confirm)="confirmDeactivate($event)"
   (cancel)="cancelDeactivate()">
-</app-confirm-modal>
-
-<!-- Modal aprobar/rechazar -->
-<app-confirm-modal
-  [visible]="showValidateModal"
-  [loading]="isValidationLoading"
-  [title]="isApproveAction ? 'Aprobar Solicitud' : 'Rechazar Solicitud'"
-  [messagePrefix]="isApproveAction ? '¿Desea aprobar la solicitud de ' : '¿Desea rechazar la solicitud de '"
-  [itemName]="itemToValidate?.fullName ?? ''"
-  messageSuffix="?"
-  [detail]="!isApproveAction ? 'Se notificará al solicitante con el motivo del rechazo.' : 'Se activará el usuario y se enviarán las credenciales por email.'"
-  [confirmLabel]="isApproveAction ? 'Aprobar' : 'Rechazar'"
-  [confirmColor]="isApproveAction ? 'success' : 'danger'"
-  [showObservation]="!isApproveAction"
-  observationLabel="Motivo de rechazo"
-  observationPlaceholder="Indique el motivo del rechazo..."
-  (confirm)="onValidationConfirm($event)"
-  (cancel)="cancelValidation()">
 </app-confirm-modal>
 
 <!-- Modal resetear contraseña -->

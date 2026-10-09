@@ -89,12 +89,33 @@ export class PersonDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    const tabParam = this.route.snapshot.queryParamMap.get('tab');
+    if (tabParam && this.tabs.includes(tabParam)) {
+      this.activeTab = tabParam as any;
+      if (this.activeTab === 'familiares') {
+        this.loadRepresentatives();
+      }
+    }
+
+    this.route.queryParamMap.subscribe(params => {
+      const tab = params.get('tab');
+      if (tab && this.tabs.includes(tab)) {
+        this.activeTab = tab as any;
+        if (this.activeTab === 'familiares') {
+          this.loadRepresentatives();
+        }
+      }
+    });
+
     if (id) {
       this.personsService.getPersonById(id).subscribe({
         next: (person) => {
           this.person = person;
           this.loadSkillProfile();
           this.loadDiagnoses();
+          if (this.activeTab === 'familiares') {
+            this.loadRepresentatives();
+          }
         },
         error: () => this.router.navigate([AppRoutes.Pro.Persons]),
       });

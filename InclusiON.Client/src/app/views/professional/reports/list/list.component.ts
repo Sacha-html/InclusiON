@@ -141,7 +141,8 @@ actions: [
       sortBy: this.sortBy(),
       sortDirection: this.sortDirection(),
       professionalId: this.professionalId,
-      personIds: this.selectedPersonIds.length ? this.selectedPersonIds : undefined,
+      personId: this.selectedPersonIds.length === 1 ? this.selectedPersonIds[0] : undefined,
+      personIds: this.selectedPersonIds.length > 1 ? this.selectedPersonIds : undefined,
       status: this.statusFilter || undefined,
       reportTypeId: this.typeFilter ? +this.typeFilter : undefined,
       dateFrom: this.dateFrom || undefined,
@@ -157,6 +158,10 @@ actions: [
       },
       error: () => { this.isLoading.set(false); this.toastService.error('Error al cargar los informes'); },
     });
+  }
+
+  isPersonSelected(id: string): boolean {
+    return this.selectedPersonIds.some(s => s.toLowerCase() === id.toLowerCase());
   }
 
   onPersonFilterChange(event: Event): void {

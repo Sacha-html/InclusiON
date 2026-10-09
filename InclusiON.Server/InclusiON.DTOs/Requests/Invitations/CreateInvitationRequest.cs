@@ -4,6 +4,7 @@ namespace InclusiON.DTOs.Requests.Invitations
 {
     public class CreateInvitationRequest
     {
+        [Required(ErrorMessage = "El alumno es requerido")]
         public Guid? PersonId { get; set; }
 
         [Required(ErrorMessage = "El email es requerido")]

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, switchMap } from 'rxjs';
 import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
@@ -54,6 +54,7 @@ export class NewComponent implements OnInit {
   private readonly toastService         = inject(ToastService);
   private readonly catalogsService      = inject(CatalogsService);
   private readonly router               = inject(Router);
+  private readonly route                = inject(ActivatedRoute);
 
   persons          = signal<ProfessionalPersonResponse[]>([]);
   reportTypes      = signal<CatalogItem[]>([]);
@@ -103,14 +104,15 @@ export class NewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadPersons();
+    const personIdParam = this.route.snapshot.queryParamMap.get('personId');
+    this.loadPersons(personIdParam);
     this.catalogsService.getReportTypes().subscribe(types => {
       const sorted = [...types].sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
       this.reportTypes.set(sorted);
     });
   }
 
-  loadPersons(): void {
+  loadPersons(preselectedPersonId?: string | null): void {
     this.professionalsService.getMyProfile().pipe(
       switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
     ).subscribe({
@@ -119,6 +121,12 @@ export class NewComponent implements OnInit {
           .filter(p => p.isActive)
           .sort((a, b) => a.personFullName.localeCompare(b.personFullName, 'es', { sensitivity: 'base' }));
         this.persons.set(sorted);
+        if (preselectedPersonId) {
+          const match = sorted.find(p => p.personId?.toLowerCase() === preselectedPersonId.toLowerCase());
+          if (match) {
+            this.personControl.setValue(match);
+          }
+        }
       },
       error: () => {},
     });

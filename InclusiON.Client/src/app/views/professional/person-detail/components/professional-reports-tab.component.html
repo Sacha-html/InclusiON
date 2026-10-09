@@ -1,3 +1,14 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h6 class="mb-0 fw-semibold">Reportes del alumno</h6>
+    <small class="text-body-secondary">Historial de seguimiento exclusivo de este alumno</small>
+  </div>
+  <button cButton color="primary" size="sm" (click)="createReport()">
+    <svg cIcon name="cilPlus" class="me-1"></svg>
+    Nuevo reporte
+  </button>
+</div>
+
 <!-- Loading -->
 @if (isLoading()) {
   <div class="text-center py-5">
@@ -21,6 +32,12 @@
     message="Sin reportes"
     detail="No hay reportes registrados para este alumno."
   />
+  <div class="text-center mt-3">
+    <button cButton color="primary" size="sm" (click)="createReport()">
+      <svg cIcon name="cilPlus" class="me-1"></svg>
+      Crear primer reporte
+    </button>
+  </div>
 }
 
 <!-- Tabla -->

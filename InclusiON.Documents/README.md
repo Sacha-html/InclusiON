@@ -89,6 +89,7 @@ InclusiON.Documents/
 ├── Templates/                   ← Plantillas para documentación
 │   └── InclusiON_HU_Plantilla.docx  Plantilla para nuevas HU
 │
+├── MANUAL_DE_USUARIO.md         ← Manual de usuario oficial consolidado (todos los roles)
 ├── diagrama-contexto.md         ← Diagrama de contexto: actores, flujos y límites del sistema
 ├── diccionario-datos.md         ← Diccionario de datos (31 entidades del sistema)
 ├── glosario.md                  ← Definición de todos los términos del dominio
@@ -105,6 +106,7 @@ InclusiON.Documents/
 | Necesito... | Ir a... |
 |-------------|---------|
 | Entender de qué se trata el proyecto | Este README |
+| Consultar el Manual de Usuario integral (todos los perfiles) | `MANUAL_DE_USUARIO.md` |
 | Ver el story map (backbone, tareas, HUs del MVP) | `Docs/story-map.md` |
 | Ver qué está hecho y qué falta (por proceso) | `State/checklist-procesos.md` |
 | Ver el detalle de avance por HU con código Jira | `State/progreso-hu.md` |

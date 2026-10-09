@@ -57,8 +57,8 @@ namespace InclusiON.Api.Controllers
             request.Validate();
 
             // Si el caller filtra por persona, verificar que tiene acceso a esa persona.
-            if (Guid.TryParse(request.PersonId, out var filteredPersonId)
-                && !await _resourceAuthz.CanAccessPersonAsync(filteredPersonId, AccessMode.Read, cancellationToken))
+            if (request.PersonId.HasValue
+                && !await _resourceAuthz.CanAccessPersonAsync(request.PersonId.Value, AccessMode.Read, cancellationToken))
             {
                 return BuildDeniedResponse<PagedResponse<ReportsListItemReponse>>("Persona").ToActionResult();
             }
@@ -69,16 +69,16 @@ namespace InclusiON.Api.Controllers
             // Profesionales solo ven sus propios reportes — forzar siempre, ignorar lo que mande el frontend.
             // Admins pueden filtrar por cualquier profesional (o ver todos si no filtran).
             if (role == nameof(IdentityRoles.Professional) && entityId.HasValue)
-                request.ProfessionalId = entityId.Value.ToString();
-            else if (entityId.HasValue && string.IsNullOrWhiteSpace(request.ProfessionalId))
-                request.ProfessionalId = entityId.Value.ToString();
+                request.ProfessionalId = entityId.Value;
+            else if (entityId.HasValue && !request.ProfessionalId.HasValue)
+                request.ProfessionalId = entityId.Value;
 
             var query = new GetReportsQuery(
                 request.Page,
                 request.PageSize,
                 request.Search,
-                request.PersonId,
-                request.ProfessionalId,
+                request.PersonId?.ToString(),
+                request.ProfessionalId?.ToString(),
                 request.ReportTypeId,
                 request.IsActive,
                 request.Status,
