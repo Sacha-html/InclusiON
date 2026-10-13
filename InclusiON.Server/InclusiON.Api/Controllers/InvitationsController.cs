@@ -185,6 +185,35 @@ namespace InclusiON.Api.Controllers
             return result.ToActionResult();
         }
 
+        /// <summary>
+        /// Cancela una invitacion activa (generada previamente).
+        /// </summary>
+        [HttpPost("{code}/cancel")]
+        [Authorize(Policy = Permissions.Invitations.Create)]
+        [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<InvitationResponse>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<InvitationResponse>>> CancelInvitation(
+            string code,
+            [FromServices] ICommandHandler<CancelInvitationCommand, ApiResponse<InvitationResponse>> handler,
+            CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _httpContextService.GetCurrentUserId();
+            var currentUserRole = _httpContextService.GetCurrentUserRole();
+            var currentEntityId = _httpContextService.GetCurrentEntityId();
+
+            if (currentUserId == null)
+            {
+                return Unauthorized();
+            }
+
+            var command = new CancelInvitationCommand(code, currentUserId.Value, currentUserRole ?? string.Empty, currentEntityId);
+            var result = await handler.HandleAsync(command, cancellationToken);
+            return result.ToActionResult();
+        }
+
         #endregion
 
     }

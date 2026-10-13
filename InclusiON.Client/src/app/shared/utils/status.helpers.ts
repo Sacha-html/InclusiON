@@ -3,6 +3,7 @@ export function getInvitationStatusColor(status: string): string {
     case 'Enviada': return 'info';
     case 'Aceptada': return 'success';
     case 'Expirada': return 'danger';
+    case 'Cancelada': return 'secondary';
     default: return 'secondary';
   }
 }

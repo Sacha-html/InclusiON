@@ -49,6 +49,12 @@ El profesional configura qué áreas de habilidad se trabajarán con la persona.
 Desactivación de la persona sin eliminar datos históricos ni asignaciones.
 - **Endpoint:** `DELETE /api/persons/{personId}` (soft delete)
 
+### 8. Suspensión Preventiva y Reactivación por Custodia Legal (CB-03)
+Si por situación administrativa o judicial se desvincula al único tutor legal activo del estudiante:
+- **Suspensión Automática:** El sistema pasa `IsActive = false` en `PersonWithDisability` y en su cuenta de `User` asociada, bloqueando temporalmente el ingreso a la plataforma AAC por resguardo de custodia escolar.
+- **Alerta Directiva:** Se emite una alerta destacada en la interfaz institucional y pedagógica advirtiendo que el menor quedó sin tutores activos en el establecimiento.
+- **Reactivación Automática:** Al vincular un nuevo tutor (vía alta directa de familiar o al ser aceptada una invitación vinculada al estudiante), el sistema reactiva automáticamente al alumno (`Person.IsActive = true`, `User.IsActive = true`).
+
 ## Relaciones clave
 
 ```

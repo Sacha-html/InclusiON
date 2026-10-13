@@ -10,6 +10,7 @@ import {
 import { DataTableComponent } from '@shared/components/data-table/data-table.component';
 import { TableColumn, HeaderButton } from '@shared/components/data-table/data-table.models';
 import { RELATIONSHIPS } from '@shared/constants';
+import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import {
   ModalComponent,
   ModalHeaderComponent,
@@ -30,6 +31,7 @@ import {
     FormsModule,
     ReactiveFormsModule,
     DataTableComponent,
+    ConfirmModalComponent,
     ModalComponent,
     ModalHeaderComponent,
     ModalBodyComponent,
@@ -68,6 +70,10 @@ export class ListComponent implements OnInit {
   searchTerm        = '';
   statusFilter      = '';
 
+  showCancelModal   = false;
+  invitationToCancel: InvitationResponse | null = null;
+  isCanceling       = false;
+
   readonly relationships = RELATIONSHIPS;
 
   readonly columns: TableColumn[] = [
@@ -78,9 +84,10 @@ export class ListComponent implements OnInit {
     {
       key: 'status', label: 'Estado', type: 'badge', sortable: true,
       badgeMap: {
-        'Enviada':  { color: 'info',    label: 'Enviada'  },
-        'Aceptada': { color: 'success', label: 'Aceptada' },
-        'Expirada': { color: 'danger',  label: 'Expirada' },
+        'Enviada':   { color: 'info',      label: 'Enviada'   },
+        'Aceptada':  { color: 'success',   label: 'Aceptada'  },
+        'Expirada':  { color: 'danger',    label: 'Expirada'  },
+        'Cancelada': { color: 'secondary', label: 'Cancelada' },
       },
     },
     { key: 'createdAtFmt', label: 'Fecha', sortable: true },
@@ -91,6 +98,12 @@ export class ListComponent implements OnInit {
           action: 'copy',
           label: 'Copiar link',
           color: 'light',
+          visible: (item) => item.status === 'Enviada',
+        },
+        {
+          action: 'cancel',
+          label: 'Cancelar',
+          color: 'danger',
           visible: (item) => item.status === 'Enviada',
         },
       ],
@@ -193,7 +206,39 @@ export class ListComponent implements OnInit {
   }
 
   onRowAction(event: { action: string; item: any }): void {
-    if (event.action === 'copy') this.copyToClipboard(event.item.code);
+    if (event.action === 'copy') {
+      this.copyToClipboard(event.item.code);
+    } else if (event.action === 'cancel') {
+      this.openCancelModal(event.item);
+    }
+  }
+
+  openCancelModal(item: InvitationResponse): void {
+    this.invitationToCancel = item;
+    this.showCancelModal = true;
+  }
+
+  cancelModalClosed(): void {
+    this.showCancelModal = false;
+    this.invitationToCancel = null;
+  }
+
+  confirmCancel(): void {
+    if (!this.invitationToCancel) return;
+    this.isCanceling = true;
+    this.invitationsService.cancel(this.invitationToCancel.code).subscribe({
+      next: () => {
+        this.toastService.success('Invitación cancelada exitosamente');
+        this.showCancelModal = false;
+        this.invitationToCancel = null;
+        this.isCanceling = false;
+        this.loadInvitations();
+      },
+      error: (error) => {
+        this.isCanceling = false;
+        this.toastService.error(error.userMessage || 'Error al cancelar la invitación');
+      },
+    });
   }
 
   private loadPersons(): void {

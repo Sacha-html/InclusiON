@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -60,6 +60,8 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         "El motivo de desvinculacion es requerido");
                 }
 
+                bool studentSuspended = false;
+
                 await _unitOfWork.ExecuteInTransactionAsync(async ct =>
                 {
                     link.IsActive = false;
@@ -83,12 +85,32 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     };
                     await _familyRepository.CreatePersonRepresentativeHistoryAsync(history, ct);
 
+                    // CB-03: Si era el único tutor activo registrado, dar de baja automáticamente al alumno
+                    var remainingActiveTutors = await _familyRepository.GetActiveRepresentativesCountForPersonAsync(
+                        command.PersonId, command.FamilyId, ct);
+
+                    if (remainingActiveTutors == 0 && link.Person != null)
+                    {
+                        link.Person.IsActive = false;
+                        link.Person.UpdatedAt = _dateTime.UtcNow;
+                        link.Person.UpdatedBy = command.ChangedByUserId;
+                        if (link.Person.User != null)
+                        {
+                            link.Person.User.IsActive = false;
+                        }
+                        studentSuspended = true;
+                    }
+
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
                 _logger.LogInformation(
-                    "Familiar {FamilyId} desvinculado de persona {PersonId} por usuario {UserId}. Motivo: {Observation}",
-                    command.FamilyId, command.PersonId, command.ChangedByUserId, command.Observation);
+                    "Familiar {FamilyId} desvinculado de persona {PersonId} por usuario {UserId}. Motivo: {Observation}. Alumno suspendido: {StudentSuspended}",
+                    command.FamilyId, command.PersonId, command.ChangedByUserId, command.Observation, studentSuspended);
+
+                var studentName = link.Person != null
+                    ? $"{link.Person.FirstName} {link.Person.LastName}".Trim()
+                    : string.Empty;
 
                 var response = PersonRepresentativeResponse.MapToResponse(
                     command.PersonId,
@@ -97,9 +119,15 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     link.IsPrimary,
                     false,
                     _dateTime.UtcNow,
-                    command.Observation);
+                    command.Observation,
+                    studentSuspended,
+                    studentName);
 
-                return ApiResponse<PersonRepresentativeResponse>.SuccessResult(response, "Familiar desvinculado exitosamente");
+                var successMessage = studentSuspended
+                    ? $"Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno {studentName} fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal"
+                    : "Familiar desvinculado exitosamente";
+
+                return ApiResponse<PersonRepresentativeResponse>.SuccessResult(response, successMessage);
             }
             catch (Exception ex)
             {

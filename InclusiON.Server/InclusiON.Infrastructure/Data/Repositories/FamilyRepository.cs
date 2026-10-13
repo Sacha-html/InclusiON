@@ -244,6 +244,8 @@ namespace InclusiON.Infrastructure.Data.Repositories
         public async Task<PersonRepresentative?> GetPersonRepresentativeAsync(Guid personId, Guid representativeId, CancellationToken cancellationToken = default)
         {
             return await _context.PersonRepresentatives
+                .Include(pr => pr.Person)
+                    .ThenInclude(p => p.User)
                 .FirstOrDefaultAsync(pr => pr.PersonId == personId && pr.RepresentativeId == representativeId, cancellationToken);
         }
 
@@ -415,6 +417,26 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .Where(f => f.User.IsActive)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<int> GetActiveRepresentativesCountForPersonAsync(Guid personId, Guid? excludeRepresentativeId = null, CancellationToken cancellationToken = default)
+        {
+            var query = _context.PersonRepresentatives
+                .Where(pr => pr.PersonId == personId && pr.IsActive);
+
+            if (excludeRepresentativeId.HasValue)
+            {
+                query = query.Where(pr => pr.RepresentativeId != excludeRepresentativeId.Value);
+            }
+
+            return await query.CountAsync(cancellationToken);
+        }
+
+        public async Task<PersonWithDisability?> GetPersonWithUserForUpdateAsync(Guid personId, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonsWithDisability
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == personId, cancellationToken);
         }
     }
 }

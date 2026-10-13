@@ -47,6 +47,7 @@ Para cada validación: qué se verifica, la regla concreta, y la razón de domin
 |---|-------------------|-------|--------------------------|
 | V-12 | `IsPrimary` | Solo un representante primario activo por persona | El representante primario es el punto de contacto principal de la familia. Tener dos primarios crea ambigüedad en notificaciones automáticas y comunicaciones urgentes. |
 | V-13 | `ConsentDate` | Obligatoria si `HasInformedConsent = true` | El consentimiento informado es un acto jurídico con fecha; sin fecha, no hay trazabilidad legal de cuándo se obtuvo el consentimiento. |
+| V-13b | `PersonRepresentative` al desvincular | Si el alumno queda sin tutores activos (`activeTutors == 0`), se suspende preventivamente | Protección de custodia escolar (CB-03). Un menor no puede quedar operando en la plataforma sin responsable legal activo. Se reactiva automáticamente al vincular un nuevo tutor. |
 
 ### Message
 
@@ -139,6 +140,7 @@ Para cada validación: qué se verifica, la regla concreta, y la razón de domin
 |---|-------------------|-------|--------------------------|
 | V-40 | Invitación activa por `Email + ForPersonId` | Solo puede existir una `Pending` a la vez | Si existen múltiples códigos válidos para el mismo destino, el familiar podría registrarse varias veces o compartir el enlace. La invitación única garantiza un único punto de entrada controlado por el profesional. |
 | V-41 | TTL de la invitación | 7 días desde la creación | Suficiente para que el familiar actúe. Un plazo mayor permite que se reutilice un link semanas después, cuando el contexto puede haber cambiado: la relación familiar puede haber terminado, la persona puede estar dada de baja, o el profesional puede haber sido reemplazado. |
+| V-41b | Cancelación de invitación | Solo por el profesional emisor y en estado `Enviada` (`IsActive = true`, `IsUsed = false`) | El profesional revoca el acceso si se cometió un error o se desestimó el ingreso. Una vez cancelada (`IsActive = false`), el código queda invalidado y retorna `ErrorCode.InvitationCancelled` (803) en cualquier intento de consulta o registro. |
 
 ---
 

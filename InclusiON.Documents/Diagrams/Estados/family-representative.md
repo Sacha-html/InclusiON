@@ -61,7 +61,7 @@ El estado de `FamilyRepresentative` es independiente del estado de cada vínculo
 
 | Evento | Impacto en PersonRepresentative |
 |--------|--------------------------------|
-| Alta del vínculo | `PersonRepresentative.IsActive = true`; entrada en `PersonRepresentativeHistory` (tipo: `Linked`) |
-| Baja del vínculo | `PersonRepresentative.IsActive = false`; entrada en `PersonRepresentativeHistory` (tipo: `Unlinked`) |
-| `Terminated` del familiar | Todos los `PersonRepresentative` activos pasan a `IsActive = false` |
-| Reactivación del familiar | No modifica `PersonRepresentative` ni el estado de alumnos; asignación futura explícita |
+| Alta del vínculo | `PersonRepresentative.IsActive = true`; entrada en `PersonRepresentativeHistory` (tipo: `Linked`). Si la persona estaba suspendida por falta de tutores, se reactiva automáticamente (`Person.IsActive = true`, `User.IsActive = true`). |
+| Baja del vínculo | `PersonRepresentative.IsActive = false`; entrada en `PersonRepresentativeHistory` (tipo: `Unlinked`). **Regla de Custodia (CB-03):** si era el único tutor legal activo (`activeTutors == 0`), la persona y su usuario se suspenden preventivamente (`IsActive = false`) y se emite alerta al equipo directivo. |
+| `Terminated` del familiar | Todos los `PersonRepresentative` activos pasan a `IsActive = false`. Aplica regla de custodia CB-03 sobre cada alumno que quede sin tutores activos. |
+| Reactivación del familiar | No modifica `PersonRepresentative` ni el estado de alumnos; asignación futura explícita requerida |

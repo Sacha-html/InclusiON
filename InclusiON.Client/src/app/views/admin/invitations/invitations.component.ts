@@ -35,9 +35,10 @@ export class InvitationsComponent implements OnInit {
     {
       key: 'status', label: 'Estado', type: 'badge', sortable: true,
       badgeMap: {
-        'Enviada':  { color: 'info',    label: 'Enviada'  },
-        'Aceptada': { color: 'success', label: 'Aceptada' },
-        'Expirada': { color: 'danger',  label: 'Expirada' },
+        'Enviada':   { color: 'info',      label: 'Enviada'   },
+        'Aceptada':  { color: 'success',   label: 'Aceptada'  },
+        'Expirada':  { color: 'danger',    label: 'Expirada'  },
+        'Cancelada': { color: 'secondary', label: 'Cancelada' },
       },
     },
     { key: 'createdAt',                 label: 'Fecha',        type: 'date',  sortable: true },

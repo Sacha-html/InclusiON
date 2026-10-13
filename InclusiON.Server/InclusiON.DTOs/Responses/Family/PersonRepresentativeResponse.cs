@@ -17,6 +17,8 @@ namespace InclusiON.DTOs.Responses.Family
 
         public string? RepresentativeDocumentNumber { get; set; }
         public string? RepresentativeEmail { get; set; }
+        public bool StudentSuspended { get; set; }
+        public string? StudentFullName { get; set; }
 
         public static PersonRepresentativeResponse MapToResponse(
             Guid personId,
@@ -25,13 +27,15 @@ namespace InclusiON.DTOs.Responses.Family
             bool isPrimary,
             bool isActive = true,
             DateTime? endedAt = null,
-            string? unlinkObservation = null)
+            string? unlinkObservation = null,
+            bool studentSuspended = false,
+            string? studentFullName = null)
         {
             return new PersonRepresentativeResponse
             {
                 PersonId = personId,
                 RepresentativeId = family.Id,
-                RepresentativeFullName = $"{family.FirstName} {family.LastName}",
+                RepresentativeFullName = $"{family.FirstName} {family.LastName}".Trim(),
                 RepresentativeDocumentNumber = family.DocumentNumber,
                 RepresentativeEmail = family.User?.Email,
                 Relationship = relationship,
@@ -39,7 +43,9 @@ namespace InclusiON.DTOs.Responses.Family
                 IsActive = isActive,
                 CreatedAt = DateTime.UtcNow,
                 EndedAt = endedAt,
-                UnlinkObservation = unlinkObservation
+                UnlinkObservation = unlinkObservation,
+                StudentSuspended = studentSuspended,
+                StudentFullName = studentFullName
             };
         }
     }

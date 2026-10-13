@@ -49,6 +49,11 @@ Todas las relaciones soportan desactivación sin eliminar datos históricos.
 - Profesional-Persona: `PUT /api/professionals/{profId}/persons/{personId}/deactivate`
 - Profesional-Institución: `DELETE /api/professionals/{profId}/institutions/{instId}`
 
+### 6. Transferencia de Alumnos y Reasignación de Reportes (CB-05)
+Cuando un profesional cesa en sus funciones o un alumno es transferido a otro docente/coordinador:
+- El historial pedagógico, tiempos y respuestas del alumno en actividades (`ActivityResponse`) son inmutables y se preservan en su totalidad.
+- La reasignación de informes en curso (`ReassignReportAsync`) y asignaciones activas opera de forma atómica en el Change Tracker de EF Core (verificando la colección `.Local`), transfiriendo la tutela pedagógica sin conflictos de seguimiento de entidades (`ProfessionalPerson`).
+
 ## Diagrama de flujo
 
 ```mermaid

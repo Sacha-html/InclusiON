@@ -64,6 +64,7 @@ namespace InclusiON.DTOs.Common
         // Invitaciones (8xx)
         InvitationNotFound = 800,
         InvitationExpired = 801,
-        InvitationAlreadyUsed = 802
+        InvitationAlreadyUsed = 802,
+        InvitationCancelled = 803
     }
 }

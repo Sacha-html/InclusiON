@@ -23,7 +23,9 @@ namespace InclusiON.DTOs.Responses.Invitations
             var now = DateTime.UtcNow;
             string status;
 
-            if (invitation.IsUsed)
+            if (!invitation.IsActive)
+                status = "Cancelada";
+            else if (invitation.IsUsed)
                 status = "Aceptada";
             else if (invitation.ExpiresAt < now)
                 status = "Expirada";

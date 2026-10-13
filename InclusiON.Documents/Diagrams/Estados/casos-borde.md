@@ -31,13 +31,22 @@ Si alguna de estas condiciones no se cumple, el sistema aborta la operación y e
 
 ---
 
-## CB-03 — FamilyRepresentative `Terminated` como supervisor de login
+## CB-03 — Familiar desvinculado siendo el único tutor registrado (Regla de Custodia y Protección Legal)
 
-**Origen:** [`family-representative.md`](family-representative.md) + `PersonRepresentative.CanSuperviseLogin`
+**Origen:** [`family-representative.md`](family-representative.md) + `PersonRepresentative` + `PersonWithDisability`
 
-Caso análogo al CB-02 pero para `LoginMethod = FAMILY`. Al llegar `FamilyRepresentative` a `Terminated`, todos sus `PersonRepresentative` se desactivan. Si era el **único supervisor familiar** de una persona, esa persona pierde acceso.
+**Escenario:** Por una situación judicial o administrativa se desvincula o desactiva al único tutor que tenía acceso a ver el progreso del estudiante en la plataforma y responder legalmente por él.
 
-**Brecha:** La baja del familiar en cascada no verifica si deja personas sin supervisor.
+**Resolución Implementada (Enfoque 1 — Suspensión Preventiva y Reactivación Automática):**
+1. **Verificación de Tutores Activos Restantes:** Al ejecutar la desvinculación de un tutor (`UnlinkFamilyFromPersonCommandHandler`) o la desactivación general del familiar (`DeactivateFamilyCommandHandler`), el sistema verifica la cantidad de representantes legales activos que le quedan a cada persona vinculada (`GetActiveRepresentativesCountForPersonAsync`).
+2. **Suspensión Preventiva del Alumno:** Si el alumno queda sin tutores activos restantes (contador = 0):
+   - Se suspende automáticamente la persona con discapacidad (`Person.IsActive = false`) y su cuenta de usuario asociada (`User.IsActive = false`).
+   - El endpoint retorna `studentSuspended: true` (o la lista `SuspendedStudents` en la desactivación del familiar).
+   - Se emite una **Alerta de Custodia Escolar** en la interfaz (Toast Warning extendido):
+     > *"Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno [Nombre Alumno] fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal"*
+3. **Reactivación Automática:**
+   - **Vía Alta/Vinculación Directa:** Al vincular un nuevo familiar activo (`LinkFamilyToPersonCommandHandler`), el sistema detecta si la persona estaba inactiva y la reactiva automáticamente junto a su cuenta de usuario (`Person.IsActive = true`, `User.IsActive = true`).
+   - **Vía Invitación:** Cuando un nuevo familiar acepta una invitación asociada al alumno (`AcceptInvitationCommandHandler`), el sistema también reactiva automáticamente a la persona y su usuario si se encontraban suspendidos.
 
 ---
 
@@ -53,13 +62,17 @@ Una asignación puede permanecer en `Pending` o `InProgress` indefinidamente des
 
 ---
 
-## CB-05 — ActivityAssignment `InProgress` al producirse la baja del Professional
+## CB-05 — Docente dado de baja o reasignación mientras el alumno está en actividad / Transferencia de reportes
 
-**Origen:** [`activity-assignment.md`](activity-assignment.md) × [`professional.md`](professional.md)
+**Origen:** [`activity-assignment.md`](activity-assignment.md) × [`professional.md`](professional.md) × [`report.md`](report.md)
 
-El ABM de profesionales documenta que al llegar a `Terminated` se desactivan los `ProfessionalPerson`. Sin embargo, las `ActivityAssignment` en estado `InProgress` **no tienen una transición de cancelación automática** documentada.
+**Escenario:** La dirección desactiva a un docente justo en el momento en que uno de sus alumnos está en el aula resolviendo un juego interactivo, o se transfieren alumnos y reportes pendientes a otro profesional.
 
-Una persona puede estar ejecutando una actividad asignada por un profesional que ya no existe en el sistema. El resultado (`ActivityResponse`) se registraría sin profesional asignador activo.
+**Resolución Implementada:**
+1. **Preservación del Esfuerzo del Alumno:** El esfuerzo del alumno no se pierde. Las respuestas y métricas (`ActivityResponse`) registradas por el alumno son inmutables y persisten en la base de datos con sus tiempos y aciertos.
+2. **Transferencia y Reasignación Sin Conflicto de Change Tracker (EF Core):** Al reasignar un alumno o transferir reportes de un profesional cesante a otro docente o coordinador pedagógico:
+   - Se resolvió el error `InvalidOperationException: The instance of entity type 'ProfessionalPerson' cannot be tracked because another instance with the key value '{ProfessionalId, PersonId}' is already being tracked` consultando primero la colección en memoria `_context.ProfessionalPersons.Local` antes de consultar la base de datos en `ReportsRepository.ReassignReportAsync`.
+   - Se removió `.AsNoTracking()` en `AssignmentsRepository.GetAssignmentAsync` para garantizar que la desactivación del vínculo anterior (`oldLink.IsActive = false`) y la creación/actualización del nuevo profesional sean rastreados y confirmados en la misma transacción atómica de persistencia.
 
 ---
 
@@ -112,16 +125,16 @@ Si `MinDifficultyLevel = MaxDifficultyLevel` (rango de un solo nivel), ambas con
 
 ---
 
-## CB-09 — Invitation `Cancelled` vs `Used` en ventana de concurrencia
+## CB-09 — Invitation `Cancelled` vs `Used` en ventana de concurrencia y Ciclo de Cancelación
 
 **Origen:** [`invitation.md`](invitation.md)
 
-El diagrama documenta las transiciones `Pending → Cancelled` (profesional cancela) y `Pending → Used` (familiar completa registro) como independientes. Si ambas ocurren simultáneamente:
-
-- El familiar envía el código en el mismo instante que el profesional cancela (`IsActive = false`).
-- Dependiendo del orden de ejecución, el familiar podría completar el registro antes de que la cancelación se persista.
-
-**Brecha:** No hay documentación de qué operación tiene precedencia ni si existe un lock de exclusión mutua.
+**Resolución Implementada:**
+1. **Cancelación por Profesional:** El profesional emisor puede cancelar invitaciones en estado `Enviada` mediante `POST /api/invitations/{code}/cancel`, marcando `IsActive = false`.
+2. **Validación Atómica y Bloqueo Inmediato:** Tanto `ValidateInvitationQueryHandler` como `AcceptInvitationCommandHandler` validan en tiempo real `invitation.IsActive`. Si la invitación fue cancelada:
+   - Se rechaza inmediatamente retornando `ErrorCode.InvitationCancelled` (803).
+   - Se previene cualquier consumo concurrente o registro tardío por parte del familiar.
+3. **Visibilidad y Auditoría Directiva:** El Administrador visualiza el emisor (`createdByProfessionalName`), el estado con badge gris (`Cancelada`) y puede filtrar por invitaciones canceladas en el panel administrativo.
 
 ---
 
@@ -149,16 +162,16 @@ Un profesional `Suspended` podría seguir autenticándose con tokens activos si 
 
 ## Resumen
 
-| ID | Entidades involucradas | Tipo de borde |
-|----|----------------------|---------------|
-| CB-01 | Professional + Report | Bloqueo preventivo (Hard Stop) por reportes pendientes |
-| CB-02 | Professional + PersonWithDisability | Estado terminal bloquea entidad dependiente |
-| CB-03 | FamilyRepresentative + PersonWithDisability | Estado terminal bloquea entidad dependiente |
-| CB-04 | ActivityAssignment | Condición temporal sin transición documentada |
-| CB-05 | ActivityAssignment + Professional | Estado activo sin dueño al llegar a terminal |
-| CB-06 | PersonRoadmapActivity + Activity | Bloqueo permanente por dependencia inactiva |
-| CB-07 | PersonRoadmapActivity | Estado sin salida por restricción de intentos |
-| CB-08 | AdaptiveEngineConfig | Configuración válida que produce comportamiento inútil |
-| CB-09 | Invitation | Condición de carrera entre dos transiciones |
-| CB-10 | Report | Acción con efecto secundario vacío sin error |
-| CB-11 | RefreshToken + Professional | Transición de estado que no propaga a entidad relacionada |
+| ID | Entidades involucradas | Tipo de borde | Estado de Resolución |
+|----|----------------------|---------------|----------------------|
+| CB-01 | Professional + Report | Bloqueo preventivo (Hard Stop) por reportes pendientes | Resuelto (Hard stop 710) |
+| CB-02 | Professional + PersonWithDisability | Estado terminal bloquea entidad dependiente | Resuelto (Hard stop con alerta) |
+| CB-03 | FamilyRepresentative + PersonWithDisability | Tutor único desvinculado (Custodia escolar) | Resuelto (Suspensión preventiva y reactivación automática) |
+| CB-04 | ActivityAssignment | Condición temporal sin transición documentada | Brecha analizada |
+| CB-05 | ActivityAssignment + Professional | Baja docente durante juego / reasignación con reportes | Resuelto (Inmutabilidad de respuestas + fix Change Tracker EF Core) |
+| CB-06 | PersonRoadmapActivity + Activity | Bloqueo permanente por dependencia inactiva | Brecha analizada |
+| CB-07 | PersonRoadmapActivity | Estado sin salida por restricción de intentos | Brecha analizada |
+| CB-08 | AdaptiveEngineConfig | Configuración válida que produce comportamiento inútil | Brecha analizada |
+| CB-09 | Invitation | Cancelación y concurrencia Cancelled vs Used | Resuelto (Cancelación POST, error 803 y auditoría) |
+| CB-10 | Report | Acción con efecto secundario vacío sin error | Brecha analizada |
+| CB-11 | RefreshToken + Professional | Transición de estado que no propaga a entidad relacionada | Brecha analizada |

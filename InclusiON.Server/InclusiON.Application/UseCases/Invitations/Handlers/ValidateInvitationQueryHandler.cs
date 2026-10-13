@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Invitations.Queries;
@@ -36,6 +36,13 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     return ApiResponse<InvitationValidationResponse>.ErrorResult(
                         ErrorCode.InvitationNotFound,
                         ErrorMessages.InvitationNotFound);
+                }
+
+                if (!invitation.IsActive)
+                {
+                    return ApiResponse<InvitationValidationResponse>.ErrorResult(
+                        ErrorCode.InvitationCancelled,
+                        ErrorMessages.InvitationCancelled);
                 }
 
                 if (invitation.IsUsed)

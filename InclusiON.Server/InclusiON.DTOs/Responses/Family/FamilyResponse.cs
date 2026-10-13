@@ -19,8 +19,9 @@ namespace InclusiON.DTOs.Responses.Family
         public string? Email { get; set; }
         public List<LinkedPersonInfo>? LinkedPersons { get; set; }
         public bool WasPreviouslyLinked { get; set; }
+        public List<string>? SuspendedStudents { get; set; }
 
-        public static FamilyResponse MapToResponse(FamilyRepresentative f, bool wasPreviouslyLinked = false)
+        public static FamilyResponse MapToResponse(FamilyRepresentative f, bool wasPreviouslyLinked = false, List<string>? suspendedStudents = null)
         {
             return new FamilyResponse
             {
@@ -36,6 +37,7 @@ namespace InclusiON.DTOs.Responses.Family
                 UpdatedAt = f.UpdatedAt,
                 Email = f.User?.Email,
                 WasPreviouslyLinked = wasPreviouslyLinked,
+                SuspendedStudents = suspendedStudents,
                 LinkedPersons = f.PersonRepresentatives?
                     .Where(pr => pr.Person != null)
                     .OrderByDescending(pr => pr.IsActive)

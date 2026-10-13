@@ -44,5 +44,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<List<string>> DeactivateRepresentativeAndSuspendDependentStudentsAsync(Guid familyUserId, DateTime endedAt, CancellationToken ct = default);
         Task<List<string>> RestoreSystemSuspendedLinksAsync(Guid familyId, DateTime restoredAt, CancellationToken ct = default);
         Task<int> GetDependentStudentsWithNoOtherActiveRepresentativeCountAsync(Guid familyId, CancellationToken cancellationToken = default);
+        Task<int> GetActiveRepresentativesCountForPersonAsync(Guid personId, Guid? excludeRepresentativeId = null, CancellationToken cancellationToken = default);
+        Task<PersonWithDisability?> GetPersonWithUserForUpdateAsync(Guid personId, CancellationToken cancellationToken = default);
     }
 }

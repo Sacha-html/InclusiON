@@ -20,6 +20,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.Invitations
                 .Include(i => i.ForPerson)
+                    .ThenInclude(p => p.User)
                 .Include(i => i.CreatedByProfessional)
                 .FirstOrDefaultAsync(i => i.Code == code, cancellationToken);
         }
@@ -122,10 +123,11 @@ namespace InclusiON.Infrastructure.Data.Repositories
             {
                 query = status switch
                 {
-                    "Aceptada" => query.Where(i => i.IsUsed),
-                    "Expirada" => query.Where(i => !i.IsUsed && i.ExpiresAt < now),
-                    "Enviada"  => query.Where(i => !i.IsUsed && i.ExpiresAt >= now),
-                    _          => query,
+                    "Cancelada" => query.Where(i => !i.IsActive),
+                    "Aceptada"  => query.Where(i => i.IsActive && i.IsUsed),
+                    "Expirada"  => query.Where(i => i.IsActive && !i.IsUsed && i.ExpiresAt < now),
+                    "Enviada"   => query.Where(i => i.IsActive && !i.IsUsed && i.ExpiresAt >= now),
+                    _           => query,
                 };
             }
 

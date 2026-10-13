@@ -29,13 +29,13 @@ export class ToastService {
     });
   }
 
-  warning(message: string, title: string = 'Advertencia') {
+  warning(message: string, title: string = 'Advertencia', delay: number = 7000) {
     this.show({
       title,
       message,
       color: 'warning',
       autohide: true,
-      delay: 4000,
+      delay,
     });
   }
 

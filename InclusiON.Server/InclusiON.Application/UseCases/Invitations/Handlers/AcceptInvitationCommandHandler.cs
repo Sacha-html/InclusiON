@@ -56,6 +56,13 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         ErrorMessages.InvitationNotFound);
                 }
 
+                if (!invitation.IsActive)
+                {
+                    return ApiResponse<AcceptInvitationResponse>.ErrorResult(
+                        ErrorCode.InvitationCancelled,
+                        ErrorMessages.InvitationCancelled);
+                }
+
                 if (invitation.IsUsed)
                 {
                     return ApiResponse<AcceptInvitationResponse>.ErrorResult(
@@ -143,6 +150,17 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                             CreatedAt = _dateTime.UtcNow
                         };
                         await _invitationsRepository.CreatePersonRepresentativeAsync(personRep, ct);
+
+                        // Si el alumno estaba suspendido por falta de tutor, reactivarlo
+                        if (invitation.ForPerson != null && !invitation.ForPerson.IsActive)
+                        {
+                            invitation.ForPerson.IsActive = true;
+                            invitation.ForPerson.UpdatedAt = _dateTime.UtcNow;
+                            if (invitation.ForPerson.User != null)
+                            {
+                                invitation.ForPerson.User.IsActive = true;
+                            }
+                        }
                     }
 
                     // Marcar invitacion como usada

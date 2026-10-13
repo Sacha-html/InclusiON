@@ -58,10 +58,17 @@ export class DetailComponent implements OnInit {
     if (!this.family) return;
 
     this.familyService.deactivateFamily(this.family.id).subscribe({
-      next: () => {
+      next: (family) => {
         this.family!.isActive = false;
         this.showConfirmModal = false;
-        this.toastService.success('Familiar desactivado exitosamente');
+        if (family?.suspendedStudents && family.suspendedStudents.length > 0) {
+          const studentNames = family.suspendedStudents.join(', ');
+          this.toastService.warning(
+            `Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno ${studentNames} fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal`
+          );
+        } else {
+          this.toastService.success('Familiar desactivado exitosamente');
+        }
       },
       error: (err) => {
         this.showConfirmModal = false;

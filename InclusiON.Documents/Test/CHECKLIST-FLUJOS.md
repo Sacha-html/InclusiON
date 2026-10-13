@@ -66,6 +66,8 @@
 - [ ] Email duplicado → error
 - [ ] Editar familiar → cambios persisten
 - [ ] Desvincular familiar de persona → vínculo inactivo
+- [ ] Desvinculación de único tutor activo (CB-03) → alumno y usuario suspendidos preventivamente (`studentSuspended: true`) con alerta de custodia escolar
+- [ ] Vinculación de nuevo tutor a alumno suspendido (CB-03) → alumno y usuario reactivados automáticamente
 - [ ] Desactivar familiar → inactivo
 
 ### 2.5 Usuarios (gestión centralizada)
@@ -155,7 +157,11 @@
 
 ### 3.8 Invitaciones
 - [ ] Crear invitación para nuevo familiar → email enviado
-- [ ] Ver estado de invitaciones (Pendiente / Usada / Expirada)
+- [ ] Ver estado de invitaciones (Enviada / Aceptada / Expirada / Cancelada)
+- [ ] Cancelar invitación en estado Enviada → modal interactivo de confirmación; estado pasa a Cancelada (badge gris)
+- [ ] Intento de abrir enlace o aceptar invitación cancelada → error 803 (`InvitationCancelled`)
+- [ ] Aceptar invitación vinculada a alumno suspendido por falta de tutor (CB-03) → alumno y usuario reactivados automáticamente
+- [ ] Vista Admin de invitaciones → muestra profesional creador y filtro por estado "Canceladas"
 
 ### 3.9 Mensajes
 - [ ] Bandeja de entrada con indicador read/unread

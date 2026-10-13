@@ -44,6 +44,7 @@ stateDiagram-v2
         UsedByUserId registrado
         FamilyRepresentative creado → Status Active
         PersonRepresentative creado si tenía ForPersonId
+        Reactivación automática del alumno si estaba suspendido (CB-03)
     end note
 ```
 
@@ -55,10 +56,13 @@ stateDiagram-v2
 - No puede existir más de una invitación `Pending` para el mismo par `Email + ForPersonId`.
 - Las invitaciones `Expired` y `Cancelled` no bloquean crear una nueva invitación para el mismo email.
 - El TTL de 7 días se evalúa comparando `ExpiresAt` con la fecha actual; no hay job que cambie el estado en base de datos.
+- **Cancelación:** El profesional emisor puede cancelar una invitación en estado `Pending` / `Enviada`. Al cancelarse, `IsActive` pasa a `false`.
+- **Bloqueo de Códigos Cancelados:** Cualquier intento de validar (`GET /api/invitations/{code}`) o aceptar (`POST /api/invitations/{code}/accept`) una invitación cancelada es rechazado inmediatamente con `ErrorCode.InvitationCancelled` (código 803).
+- **Custodia Escolar (CB-03):** Si el estudiante asociado a la invitación se encontraba suspendido preventivamente por haber quedado sin tutores legales activos, al completarse el registro del familiar el alumno y su cuenta de usuario son reactivados automáticamente (`Person.IsActive = true`, `User.IsActive = true`).
 
 | Transition | Actor | Endpoint |
 |------------|-------|----------|
 | → `Pending` | Profesional | `POST /api/invitations` |
-| `Pending` → `Used` | Sistema (auto al registrar el familiar) | `POST /api/auth/register-family` |
-| `Pending` → `Cancelled` | Profesional | `DELETE /api/invitations/{id}` |
+| `Pending` → `Used` | Familiar (registro completado) | `POST /api/invitations/{code}/accept` |
+| `Pending` → `Cancelled` | Profesional | `POST /api/invitations/{code}/cancel` |
 | `Pending` → `Expired` | Sistema (evaluación pasiva en lectura) | — |
