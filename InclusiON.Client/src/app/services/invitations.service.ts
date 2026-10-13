@@ -53,4 +53,10 @@ export class InvitationsService {
       .post<ApiResponse<AcceptInvitationResponse>>(`${this.apiUrl}/${code}/accept`, request)
       .pipe(unwrapResponse());
   }
+
+  cancel(code: string): Observable<InvitationResponse> {
+    return this.http
+      .post<ApiResponse<InvitationResponse>>(`${this.apiUrl}/${code}/cancel`, {})
+      .pipe(unwrapResponse());
+  }
 }

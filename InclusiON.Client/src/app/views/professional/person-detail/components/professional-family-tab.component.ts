@@ -222,8 +222,15 @@ export class ProfessionalFamilyTabComponent {
       this.personId,
       this.unlinkObservation.trim()
     ).subscribe({
-      next: () => {
-        this.toastService.success('Familiar desvinculado exitosamente');
+      next: (result) => {
+        if (result?.studentSuspended) {
+          const studentName = result?.studentFullName || 'el alumno';
+          this.toastService.warning(
+            `Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno ${studentName} fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal`
+          );
+        } else {
+          this.toastService.success('Familiar desvinculado exitosamente');
+        }
         this.unlinking = false;
         this.closeUnlinkModal();
         this.refresh.emit();

@@ -45,7 +45,6 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.ProfessionalPersons
                 .Include(pp => pp.Person)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(pp => pp.ProfessionalId == professionalId && pp.PersonId == personId, ct);
         }
 

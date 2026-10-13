@@ -166,10 +166,17 @@ export class ListComponent {
     if (!this.itemToDeactivate) return;
 
     this.familyService.deactivateFamily(this.itemToDeactivate.id).subscribe({
-      next: () => {
-        this.toastService.success('Familiar desactivado exitosamente');
+      next: (family) => {
         this.showConfirmModal = false;
         this.itemToDeactivate = null;
+        if (family?.suspendedStudents && family.suspendedStudents.length > 0) {
+          const studentNames = family.suspendedStudents.join(', ');
+          this.toastService.warning(
+            `Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno ${studentNames} fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal`
+          );
+        } else {
+          this.toastService.success('Familiar desactivado exitosamente');
+        }
         this.loadFamily();
       },
       error: (err) => {

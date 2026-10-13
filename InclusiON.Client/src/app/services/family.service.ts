@@ -67,10 +67,10 @@ export class FamilyService {
       .pipe(unwrapResponse());
   }
 
-  deactivateFamily(id: string): Observable<void> {
+  deactivateFamily(id: string): Observable<FamilyResponse> {
     return this.http
-      .put<void>(`${this.apiUrl}/${id}/deactivate`, {})
-      .pipe(handleApiError());
+      .put<ApiResponse<FamilyResponse>>(`${this.apiUrl}/${id}/deactivate`, {})
+      .pipe(unwrapResponse());
   }
 
   reactivateFamily(id: string): Observable<FamilyResponse> {

@@ -8,6 +8,7 @@
         <option value="Enviada">Enviadas</option>
         <option value="Aceptada">Aceptadas</option>
         <option value="Expirada">Expiradas</option>
+        <option value="Cancelada">Canceladas</option>
       </select>
     </c-col>
     <c-col sm="auto">
@@ -136,3 +137,17 @@
     }
   </c-modal-footer>
 </c-modal>
+
+<!-- Modal: Confirmar Cancelar Invitación -->
+<app-confirm-modal
+  [visible]="showCancelModal"
+  title="Cancelar invitación"
+  messagePrefix="¿Está seguro de que desea cancelar la invitación para "
+  [itemName]="invitationToCancel?.email ?? ''"
+  messageSuffix="? El enlace dejará de ser válido y el familiar no podrá registrarse."
+  confirmLabel="Cancelar invitación"
+  confirmColor="danger"
+  [loading]="isCanceling"
+  (confirm)="confirmCancel()"
+  (cancel)="cancelModalClosed()">
+</app-confirm-modal>

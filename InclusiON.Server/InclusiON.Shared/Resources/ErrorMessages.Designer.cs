@@ -380,6 +380,12 @@ namespace InclusiON.Shared.Resources {
             }
         }
 
+        public static string InvitationCancelled {
+            get {
+                return ResourceManager.GetString("InvitationCancelled", resourceCulture);
+            }
+        }
+
         public static string InternalErrorCreateInvitation {
             get {
                 return ResourceManager.GetString("InternalErrorCreateInvitation", resourceCulture);

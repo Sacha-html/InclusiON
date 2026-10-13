@@ -142,16 +142,25 @@ export class EditComponent implements OnInit {
     if (!this.unlinkingPerson || !this.family || this.isUnlinking) return;
 
     this.isUnlinking = true;
+    const personToUnlink = this.unlinkingPerson;
 
     this.familyService.unlinkFamilyFromPerson(
       this.family.id,
-      this.unlinkingPerson.personId,
+      personToUnlink.personId,
       observation,
     ).subscribe({
-      next: () => {
+      next: (result) => {
         this.isUnlinking = false;
         this.showUnlinkModal = false;
         this.unlinkingPerson = null;
+        if (result?.studentSuspended) {
+          const studentName = result?.studentFullName || personToUnlink.fullName || '';
+          this.toastService.warning(
+            `Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno ${studentName} fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal`
+          );
+        } else {
+          this.toastService.success('Familiar desvinculado exitosamente');
+        }
         this.refreshFamily();
       },
       error: () => {

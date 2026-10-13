@@ -219,6 +219,28 @@ export class ErrorCodeService {
       message: 'Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.',
       severity: 'error'
     }],
+
+    // Invitaciones (8xx)
+    [ErrorCode.InvitationNotFound, {
+      message: 'Invitación no encontrada',
+      userAction: 'El enlace de invitación no existe o es inválido',
+      severity: 'warning'
+    }],
+    [ErrorCode.InvitationExpired, {
+      message: 'Invitación expirada',
+      userAction: 'El plazo de esta invitación ha vencido. Solicita una nueva invitación',
+      severity: 'warning'
+    }],
+    [ErrorCode.InvitationAlreadyUsed, {
+      message: 'Invitación ya utilizada',
+      userAction: 'Este enlace ya fue utilizado para crear una cuenta',
+      severity: 'warning'
+    }],
+    [ErrorCode.InvitationCancelled, {
+      message: 'Invitación cancelada',
+      userAction: 'Esta invitación ha sido cancelada por quien la emitió',
+      severity: 'warning'
+    }],
   ]);
 
   /** Mensaje por defecto para códigos no mapeados */

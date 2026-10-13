@@ -102,15 +102,21 @@ export class DetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.personsService.getPersonById(id).subscribe({
-        next: (person) => {
-          this.person = person;
-          this.loadSkillProfile();
-          this.loadRepresentatives();
-        },
-        error: () => this.router.navigate([AppRoutes.Admin.Persons]),
-      });
+      this.loadPerson(id);
     }
+  }
+
+  loadPerson(id?: string): void {
+    const personId = id || this.person?.id || this.route.snapshot.paramMap.get('id');
+    if (!personId) return;
+    this.personsService.getPersonById(personId).subscribe({
+      next: (person) => {
+        this.person = person;
+        this.loadSkillProfile();
+        this.loadRepresentatives();
+      },
+      error: () => this.router.navigate([AppRoutes.Admin.Persons]),
+    });
   }
 
   loadSkillProfile(): void {
@@ -263,17 +269,27 @@ export class DetailComponent implements OnInit {
       this.person.id,
       this.unlinkObservation
     ).subscribe({
-      next: () => {
-        this.unlinking = false;
-        this.toastService.success('Familiar desvinculado exitosamente');
-        this.showUnlinkModal = false;
-        this.loadRepresentatives();
-      },
+      next: (result) => this.handleUnlinkSuccess(result),
       error: () => {
         this.unlinking = false;
         this.toastService.error('Error al desvincular el familiar');
       },
     });
+  }
+
+  private handleUnlinkSuccess(result: PersonRepresentativeResponse): void {
+    this.unlinking = false;
+    this.showUnlinkModal = false;
+    if (result?.studentSuspended) {
+      const studentName = result?.studentFullName || (this.person ? `${this.person.firstName} ${this.person.lastName}`.trim() : '');
+      this.toastService.warning(
+        `Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno ${studentName} fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal`
+      );
+      this.loadPerson();
+    } else {
+      this.toastService.success('Familiar desvinculado exitosamente');
+    }
+    this.loadRepresentatives();
   }
 
   // Child component handlers
@@ -339,12 +355,7 @@ export class DetailComponent implements OnInit {
       this.person.id,
       observation
     ).subscribe({
-      next: () => {
-        this.unlinking = false;
-        this.toastService.success('Familiar desvinculado exitosamente');
-        this.showUnlinkModal = false;
-        this.loadRepresentatives();
-      },
+      next: (result) => this.handleUnlinkSuccess(result),
       error: () => {
         this.unlinking = false;
         this.toastService.error('Error al desvincular el familiar');

@@ -88,7 +88,9 @@ namespace InclusiON.Tests.Unit.Handlers.Family
             var result = await BuildSut().HandleAsync(new DeactivateFamilyCommand(FamilyId), default);
  
             result.Success.Should().BeTrue();
-            result.Message.Should().Contain("Se ha suspendido el acceso de los alumnos: Juan Perez");
+            result.Message.Should().Contain("fue dado de baja automáticamente");
+            result.Data.Should().NotBeNull();
+            result.Data!.SuspendedStudents.Should().Contain("Juan Perez");
             family.IsActive.Should().BeFalse();
             family.User.IsActive.Should().BeFalse();
             await _familyRepo.Received(1).UpdateAsync(family, Arg.Any<CancellationToken>());

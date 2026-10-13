@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -123,6 +123,19 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         CreatedAt = _dateTime.UtcNow
                     };
                     await _familyRepository.CreatePersonRepresentativeHistoryAsync(history, ct);
+
+                    // Si el alumno estaba inactivo por falta de tutor, reactivarlo
+                    var person = await _familyRepository.GetPersonWithUserForUpdateAsync(command.PersonId, ct);
+                    if (person != null && !person.IsActive)
+                    {
+                        person.IsActive = true;
+                        person.UpdatedAt = _dateTime.UtcNow;
+                        person.UpdatedBy = command.ChangedByUserId;
+                        if (person.User != null)
+                        {
+                            person.User.IsActive = true;
+                        }
+                    }
 
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);

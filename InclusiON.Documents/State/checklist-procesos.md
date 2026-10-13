@@ -83,6 +83,8 @@
 - [x] Reactivación de vínculos desvinculados previamente (IN-148)
 - [x] Desvinculación con motivo obligatorio (IN-148)
 - [x] Historial de cambios de vinculación (IN-148)
+- [x] Regla de custodia escolar: desvinculación o baja de único tutor suspende preventivamente al alumno (CB-03)
+- [x] Reactivación automática del alumno al vincular un nuevo tutor o aceptar invitación (CB-03)
 
 ### 07 — Gestión de Invitaciones
 > Ruta admin: `/admin/invitations` · Ruta profesional: `/pro/invitations` · Registro: `/invite/:code` · IN-53, IN-54, IN-55, IN-56, IN-57
@@ -90,8 +92,10 @@
 - [x] Crear invitación y enviar email
 - [x] Validación de código
 - [x] Aceptación y registro automático (redirige a login post-registro)
+- [x] Cancelación de invitación en estado Enviada por el profesional emisor con modal de confirmación
+- [x] Bloqueo de códigos cancelados en validación y aceptación con ErrorCode 803
 - [x] Consulta de invitaciones por profesional (solo personas asignadas)
-- [x] Consulta de invitaciones por admin
+- [x] Consulta de invitaciones por admin con columna de profesional emisor y filtro de canceladas
 
 ---
 

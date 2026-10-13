@@ -14,6 +14,7 @@ export interface FamilyResponse {
   email?: string;
   linkedPersons?: LinkedPersonInfo[];
   wasPreviouslyLinked?: boolean;
+  suspendedStudents?: string[];
 }
 
 export interface FamilyListItemResponse {
@@ -52,6 +53,8 @@ export interface PersonRepresentativeResponse {
   updatedAt?: string;
   endedAt?: string;
   unlinkObservation?: string;
+  studentSuspended?: boolean;
+  studentFullName?: string;
 }
 
 export interface FamilyStatusHistoryResponse {

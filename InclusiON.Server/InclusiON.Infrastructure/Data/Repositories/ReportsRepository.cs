@@ -267,8 +267,10 @@ namespace InclusiON.Infrastructure.Data.Repositories
             if (newProfessional is null || !newProfessional.IsActive || !(newProfessional.User?.IsActive ?? false))
                 throw new InvalidOperationException("El profesional asignado no está activo o no existe.");
 
-            var link = await _context.ProfessionalPersons
-                .FirstOrDefaultAsync(pp => pp.ProfessionalId == newProfessional.Id && pp.PersonId == report.PersonId, cancellationToken);
+            var link = _context.ProfessionalPersons.Local
+                .FirstOrDefault(pp => pp.ProfessionalId == newProfessional.Id && pp.PersonId == report.PersonId)
+                ?? await _context.ProfessionalPersons
+                    .FirstOrDefaultAsync(pp => pp.ProfessionalId == newProfessional.Id && pp.PersonId == report.PersonId, cancellationToken);
 
             if (link is null)
             {

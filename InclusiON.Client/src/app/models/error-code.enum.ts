@@ -60,7 +60,8 @@ export enum ErrorCode {
   // Invitaciones (8xx)
   InvitationNotFound = 800,
   InvitationExpired = 801,
-  InvitationAlreadyUsed = 802
+  InvitationAlreadyUsed = 802,
+  InvitationCancelled = 803
 }
 
 /** Severidad del error para UI */

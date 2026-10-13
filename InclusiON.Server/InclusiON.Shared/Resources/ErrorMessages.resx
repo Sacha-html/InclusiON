@@ -212,6 +212,9 @@
 	<data name="InvitationAlreadyUsed" xml:space="preserve">
 		<value>La invitacion ya fue utilizada</value>
 	</data>
+	<data name="InvitationCancelled" xml:space="preserve">
+		<value>La invitacion ha sido cancelada</value>
+	</data>
 	<data name="InternalErrorCreateInvitation" xml:space="preserve">
 		<value>Error interno al crear invitacion</value>
 	</data>

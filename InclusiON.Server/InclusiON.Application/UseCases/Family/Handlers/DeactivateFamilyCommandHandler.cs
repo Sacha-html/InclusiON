@@ -69,9 +69,10 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
             _logger.LogInformation("Familiar desactivado: {FamilyId}", family.Id);
 
-            var response = FamilyResponse.MapToResponse(family);
+            var response = FamilyResponse.MapToResponse(family, false, suspendedStudents);
+            var studentNames = string.Join(", ", suspendedStudents);
             var successMessage = suspendedStudents.Count > 0
-                ? $"Familiar desactivado exitosamente. Se ha suspendido el acceso de los alumnos: {string.Join(", ", suspendedStudents)} por no contar con otro representante activo."
+                ? $"Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno {studentNames} fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal"
                 : "Familiar desactivado exitosamente";
 
             return ApiResponse<FamilyResponse>.SuccessResult(response, successMessage);

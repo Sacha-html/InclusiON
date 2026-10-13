@@ -46,6 +46,20 @@ El familiar accede a reportes aprobados y puede marcarlos como leídos.
 - **Listar:** `GET /api/reports/family`
 - **Marcar leído:** `PATCH /api/reports/{reportId}/mark-read`
 
+### 7. Desvinculación y Regla de Custodia Escolar (CB-03)
+El profesional o el administrador pueden desvincular a un tutor familiar con motivo obligatorio documentado en `PersonRepresentativeHistory`, o desactivar al familiar por completo.
+- **Endpoints:**
+  - `PUT /api/family/{representativeId}/unlink/{personId}` (desvinculación puntual)
+  - `PUT /api/family/{id}/deactivate` (desactivación general del familiar)
+- **Protección de Custodia (CB-03 — Enfoque 1):** Si el tutor desvinculado o desactivado era el **único tutor legal activo** del menor (`remainingActiveTutors == 0`):
+  - El sistema suspende automáticamente al estudiante (`Person.IsActive = false`) y a su cuenta de usuario (`User.IsActive = false`).
+  - La respuesta retorna `studentSuspended: true` (o `suspendedStudents` con los nombres de los alumnos afectados).
+  - El frontend emite una **Alerta de Custodia Escolar** notificando a la institución con el mensaje exacto:
+    > *"Familiar desvinculado exitosamente. Al ser el único tutor activo registrado, el alumno [Nombre Alumno] fue dado de baja automáticamente hasta que se registre o invite a un nuevo responsable legal"*
+
+### 8. Reactivación Automática del Alumno
+Cuando se incorpora un nuevo responsable legal (mediante alta/vinculación directa en `POST /api/family/link` o cuando un familiar acepta una invitación en `POST /api/invitations/{code}/accept`), si el estudiante se encontraba suspendido, el sistema reactiva automáticamente su ficha y su cuenta de usuario (`Person.IsActive = true`, `User.IsActive = true`).
+
 ## Relaciones del sistema
 
 ```
