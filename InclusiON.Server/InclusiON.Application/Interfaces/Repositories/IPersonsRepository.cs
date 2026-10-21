@@ -24,6 +24,11 @@ namespace InclusiON.Application.Interfaces.Repositories
         Task<bool> ExistsDocumentAsync(string documentNumber, Guid? excludePersonId = null, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Obtiene una persona por su número de documento con tracking para actualización o reactivación.
+        /// </summary>
+        Task<PersonWithDisability?> GetByDocumentNumberForUpdateAsync(string documentNumber, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Crea una nueva persona en la base de datos.
         /// </summary>
         Task<PersonWithDisability> CreateAsync(PersonWithDisability person, CancellationToken cancellationToken = default);

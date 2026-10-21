@@ -8,6 +8,7 @@ import { Subject } from 'rxjs';
 export class ToastService {
   toasts$ = new Subject<Toast>();
   private idCounter = 0;
+  private lastToast: { message: string; color?: string; timestamp: number } | null = null;
 
   success(message: string, title: string = '¡Éxito!') {
     this.show({
@@ -50,6 +51,17 @@ export class ToastService {
   }
 
   show(toast: Toast) {
+    const now = Date.now();
+    if (
+      this.lastToast &&
+      this.lastToast.message === toast.message &&
+      this.lastToast.color === toast.color &&
+      now - this.lastToast.timestamp < 1500
+    ) {
+      return;
+    }
+
+    this.lastToast = { message: toast.message, color: toast.color, timestamp: now };
     this.toasts$.next({
       id: this.idCounter++,
       ...toast,

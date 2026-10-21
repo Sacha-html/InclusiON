@@ -3,6 +3,8 @@ import { ApiResponse } from '../base/api.response';
 export interface UserMatchSummary {
   userId: string;
   displayName: string;
+  lastName?: string;
+  documentNumber?: string;
   initial: string;
   lastNameInitial?: string;
   avatarColor: string;

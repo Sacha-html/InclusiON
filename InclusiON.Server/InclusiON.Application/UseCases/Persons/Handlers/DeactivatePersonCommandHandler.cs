@@ -41,7 +41,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     ErrorMessages.PersonNotFound);
             }
 
-            // Desactivar usuario
+            // Desactivar persona y usuario
+            person.IsActive = false;
             person.User.IsActive = false;
 
             // Revocar refresh tokens activos

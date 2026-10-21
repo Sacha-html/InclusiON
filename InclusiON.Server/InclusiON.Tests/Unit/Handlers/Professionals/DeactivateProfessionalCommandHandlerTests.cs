@@ -26,6 +26,8 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
         {
             _reportsRepo.GetPendingReportsCountByProfessionalAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
                         .Returns(0);
+            _prosRepo.GetActiveStudentsCountAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+                     .Returns(0);
         }
 
         private DeactivateProfessionalCommandHandler BuildSut() =>
@@ -145,6 +147,24 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.HasPendingReports);
             result.Message.Should().Contain("informes pendientes");
+        }
+
+        // ── Con alumnos a cargo ──────────────────────────────────────────────
+
+        [Fact]
+        public async Task HandleAsync_WithActiveStudents_ReturnsHasActiveStudents()
+        {
+            var professional = AProfessional();
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(professional);
+            _httpCtx.GetCurrentUserId().Returns(AdminId);
+            _prosRepo.GetActiveStudentsCountAsync(professional.Id, Arg.Any<CancellationToken>())
+                     .Returns(3);
+
+            var result = await BuildSut().HandleAsync(Cmd(), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.HasActiveStudents);
+            result.Message.Should().Contain("alumnos a cargo");
         }
     }
 }

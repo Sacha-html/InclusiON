@@ -290,6 +290,12 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .CountAsync(p => p.IsActive && p.LoginMethodId == 3 && p.SupervisorUserId == professionalUserId, ct);
         }
 
+        public async Task<int> GetActiveStudentsCountAsync(Guid professionalId, CancellationToken ct = default)
+        {
+            return await _context.ProfessionalPersons
+                .CountAsync(pp => pp.ProfessionalId == professionalId && pp.IsActive && pp.Person.IsActive, ct);
+        }
+
         public async Task DeactivateAssignmentsAndCancelActivitiesAsync(Guid professionalUserId, CancellationToken ct = default)
         {
             var pro = await _context.Professionals

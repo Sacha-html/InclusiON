@@ -102,6 +102,7 @@ namespace InclusiON.Application.Interfaces.Repositories
         /// </summary>
         Task<List<Professional>> GetAllActiveAsync(CancellationToken cancellationToken = default);
         Task<int> GetDependentAssistedLoginPersonsCountAsync(Guid professionalUserId, CancellationToken ct = default);
+        Task<int> GetActiveStudentsCountAsync(Guid professionalId, CancellationToken ct = default);
         Task DeactivateAssignmentsAndCancelActivitiesAsync(Guid professionalUserId, CancellationToken ct = default);
     }
 }

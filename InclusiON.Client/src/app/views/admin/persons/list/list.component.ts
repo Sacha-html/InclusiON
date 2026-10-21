@@ -59,6 +59,7 @@ export class ListComponent {
   readonly #router = inject(Router);
 
   canCreate = this.#authService.hasPermission(Permissions.Persons.Create);
+  canUpdate = this.#authService.hasPermission(Permissions.Persons.Update);
 
   selectedInstitutionId: number | undefined;
   statusFilter = '';
@@ -70,6 +71,11 @@ export class ListComponent {
   currentPage = 1;
   sortBy = 'LastName';
   sortDirection: 'ASC' | 'DESC' = 'ASC';
+
+  // Reactivate modal
+  showReactivateConfirm = false;
+  personToReactivate: PersonListItemResponse | null = null;
+  isReactivating = false;
 
   // Modal login method
   showLoginMethodModal = false;
@@ -94,6 +100,7 @@ export class ListComponent {
 
   public cols: TableColumn[] = [
     { key: 'fullName', label: 'Nombre completo', sortable: true },
+    { key: 'documentNumber', label: 'DNI / Documento' },
     { key: 'representativeNames', label: 'Responsable' },
     { key: 'disabilityTypeName', label: 'Tipo de discapacidad' },
     { key: 'autonomyLevelName', label: 'Nivel de autonomía' },
@@ -109,6 +116,13 @@ export class ListComponent {
       key: 'actions', label: 'Acciones', type: 'actions',
       actions: [
         { action: 'view', label: 'Ver', icon: 'cilSearch' },
+        {
+          action: 'reactivate',
+          label: 'Activar',
+          icon: 'cilCheckCircle',
+          color: 'success',
+          visible: (item: PersonListItemResponse) => !item.isActive && this.canUpdate,
+        },
       ],
     },
   ];
@@ -171,10 +185,34 @@ export class ListComponent {
       case 'edit':
         this.#router.navigate([AppRoutes.Admin.Persons, event.item.id, 'edit']);
         break;
+      case 'reactivate':
+        this.personToReactivate = event.item;
+        this.showReactivateConfirm = true;
+        break;
       case 'login-method':
         this.openLoginMethodModal(event.item);
         break;
     }
+  }
+
+  confirmReactivate(): void {
+    if (!this.personToReactivate) return;
+    const person = this.personToReactivate;
+    this.isReactivating = true;
+    this.#personsService.reactivatePerson(person.id).subscribe({
+      next: () => {
+        this.#toastService.success(`El alumno ${person.fullName} fue reactivado exitosamente.`);
+        this.showReactivateConfirm = false;
+        this.personToReactivate = null;
+        this.isReactivating = false;
+        this.loadPersons();
+      },
+      error: (err) => {
+        this.isReactivating = false;
+        this.showReactivateConfirm = false;
+        this.#toastService.error(err?.userMessage ?? err?.message ?? 'No se pudo reactivar el alumno.');
+      }
+    });
   }
 
   openLoginMethodModal(person: PersonListItemResponse): void {

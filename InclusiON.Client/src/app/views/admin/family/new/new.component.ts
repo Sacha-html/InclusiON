@@ -50,11 +50,15 @@ export class NewComponent {
   });
 
   readonly searchPersonsFn = (query: string) =>
-    this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
+    this.personsService.getPersons({ search: query, pageSize: 20 }).pipe(
       map(r => r.data)
     );
   readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
-  readonly subDisplayPerson = (p: PersonListItemResponse) => p.documentNumber ? `${p.disabilityTypeName ?? 'Sin tipo'} (DNI: ${p.documentNumber})` : p.disabilityTypeName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => {
+    const dni = p.documentNumber ? `DNI: ${p.documentNumber}` : 'Sin DNI';
+    const status = !p.isActive ? ' · Inactivo/Suspendido' : '';
+    return `${p.disabilityTypeName ?? 'Sin tipo'} (${dni}${status})`;
+  };
   readonly valueFromPerson = (p: PersonListItemResponse) => p.id;
 
   get f() { return this.form.controls; }

@@ -3,15 +3,20 @@
     <button
       type="button"
       class="match-card"
-      [attr.aria-label]="'Soy ' + m.displayName + (m.lastNameInitial ? ' ' + m.lastNameInitial + '.' : '')"
+      [attr.aria-label]="'Soy ' + m.displayName + (m.lastName ? ' ' + m.lastName : (m.lastNameInitial ? ' ' + m.lastNameInitial + '.' : '')) + (m.documentNumber ? ' DNI ' + m.documentNumber : '')"
       (click)="select.emit(m)">
       <div class="avatar" [style.background-color]="m.avatarColor" aria-hidden="true">
         {{ m.initial }}
       </div>
       <div class="name">
         <span class="first-name">{{ m.displayName }}</span>
-        @if (m.lastNameInitial) {
+        @if (m.lastName) {
+          <span class="last-name">{{ m.lastName }}</span>
+        } @else if (m.lastNameInitial) {
           <span class="last-initial">{{ m.lastNameInitial }}.</span>
+        }
+        @if (m.documentNumber) {
+          <span class="document-badge">DNI: {{ m.documentNumber }}</span>
         }
       </div>
     </button>

@@ -293,17 +293,10 @@ export class ListComponent implements OnInit {
       },
       error: (err) => {
         this.isDeactivateLoading = false;
-        if (err?.errorCode === 710 || err?.errorCode === 'HAS_PENDING_REPORTS') {
-          this.toastService.error('Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.');
-          
-          /* TODO: Reemplazar este aviso por un Componente Modal interactivo que permita
-             seleccionar un nuevo profesional y transferir los reportes.
-             this.showTransferReportsModal = true;
-          */
-        } else {
+        this.showConfirmModal = false;
+        if (!err?.errorCode) {
           this.toastService.error(err?.userMessage || 'Error al desactivar el profesional');
         }
-        this.showConfirmModal = false;
       },
     });
   }

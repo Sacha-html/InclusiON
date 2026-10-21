@@ -142,7 +142,7 @@ export class PersonLinksComponent implements OnChanges {
 
   get repHeaderButtons(): HeaderButton[] {
     const buttons: HeaderButton[] = [];
-    if (this.person?.isActive && this.canLink) {
+    if (this.canLink) {
       buttons.push({ action: 'link', label: 'Vincular Familiar', color: 'primary' });
     }
     if (this.canViewHistory) {

@@ -71,7 +71,8 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.DocumentAlreadyExists or
                 ErrorCode.EmailAlreadyExists or
                 ErrorCode.UsernameAlreadyExists or
-                ErrorCode.HasPendingReports
+                ErrorCode.HasPendingReports or
+                ErrorCode.HasActiveStudents
                     => new ConflictObjectResult(response),
 
                 // 500 Internal Server Error - Errores internos

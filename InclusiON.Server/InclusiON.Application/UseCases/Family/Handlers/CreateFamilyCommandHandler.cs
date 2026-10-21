@@ -134,6 +134,19 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     });
 
                     await _repository.CreateAsync(family, ct);
+
+                    // Si el alumno estaba suspendido o inactivo (por ejemplo por falta de tutor legal), reactivarlo
+                    if (!person.IsActive || (person.User != null && !person.User.IsActive))
+                    {
+                        person.IsActive = true;
+                        person.UpdatedAt = _dateTime.UtcNow;
+                        if (person.User != null)
+                        {
+                            person.User.IsActive = true;
+                        }
+                        await _personsRepository.UpdateAsync(person, ct);
+                    }
+
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 

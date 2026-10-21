@@ -122,9 +122,7 @@ export class DetailComponent implements OnInit {
       },
       error: (err) => {
         this.showConfirmModal = false;
-        if (err?.errorCode === 710 || err?.errorCode === 'HAS_PENDING_REPORTS') {
-          this.toastService.error('Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.');
-        } else {
+        if (!err?.errorCode) {
           this.toastService.error(err?.userMessage || 'Error al desactivar el profesional');
         }
       },

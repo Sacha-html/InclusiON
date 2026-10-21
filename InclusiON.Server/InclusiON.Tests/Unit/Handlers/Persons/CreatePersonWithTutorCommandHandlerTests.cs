@@ -198,5 +198,73 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
             await _notifier.DidNotReceiveWithAnyArgs()
                 .NotifyUserAsync(default!, default!, default!, default!, default);
         }
+
+        [Fact]
+        public async Task HandleAsync_ActiveStudentWithSameDniExists_ReturnsConflict()
+        {
+            SetupSuccess();
+            var activeStudent = new PersonWithDisability
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Lucas",
+                LastName = "Pérez",
+                DocumentNumber = "12345678",
+                IsActive = true,
+                User = new User { IsActive = true }
+            };
+            _personsRepo.GetByDocumentNumberForUpdateAsync("12345678", Arg.Any<CancellationToken>())
+                .Returns(activeStudent);
+
+            var result = await BuildSut().HandleAsync(Cmd(doc: "12345678"), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.DocumentAlreadyExists);
+            await _personsRepo.DidNotReceive().CreateAsync(Arg.Any<PersonWithDisability>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_InactiveStudentWithSameDniExists_ReactivatesAndUpdatesExisting()
+        {
+            SetupSuccess();
+            var studentId = Guid.NewGuid();
+            var studentUserId = Guid.NewGuid();
+            var inactiveStudent = new PersonWithDisability
+            {
+                Id = studentId,
+                UserId = studentUserId,
+                FirstName = "Lucas",
+                LastName = "Pérez",
+                DocumentNumber = "12345678",
+                IsActive = false,
+                User = new User { Id = studentUserId, IsActive = false }
+            };
+            _personsRepo.GetByDocumentNumberForUpdateAsync("12345678", Arg.Any<CancellationToken>())
+                .Returns(inactiveStudent);
+
+            var result = await BuildSut().HandleAsync(Cmd(doc: "12345678"), default);
+
+            result.Success.Should().BeTrue();
+            inactiveStudent.IsActive.Should().BeTrue();
+            inactiveStudent.User.IsActive.Should().BeTrue();
+            // Verifies that existing record was updated and not created again
+            await _personsRepo.DidNotReceive().CreateAsync(Arg.Any<PersonWithDisability>(), Arg.Any<CancellationToken>());
+            await _personsRepo.Received(1).UpdateAsync(inactiveStudent, Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task HandleAsync_HomonymWithDifferentDni_CreatesNewStudent()
+        {
+            SetupSuccess();
+            // Homonym has same name but different DNI ("99999999"), so query for "12345678" returns null
+            _personsRepo.GetByDocumentNumberForUpdateAsync("12345678", Arg.Any<CancellationToken>())
+                .Returns((PersonWithDisability?)null);
+
+            var result = await BuildSut().HandleAsync(Cmd(doc: "12345678"), default);
+
+            result.Success.Should().BeTrue();
+            await _personsRepo.Received(1).CreateAsync(
+                Arg.Is<PersonWithDisability>(p => p.DocumentNumber == "12345678" && p.FirstName == "Lucas"),
+                Arg.Any<CancellationToken>());
+        }
     }
 }

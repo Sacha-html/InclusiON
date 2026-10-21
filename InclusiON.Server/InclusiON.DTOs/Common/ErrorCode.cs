@@ -60,6 +60,7 @@ namespace InclusiON.DTOs.Common
         UserAlreadyActive = 708,
         ProfessionalNotApproved = 709,
         HasPendingReports = 710,
+        HasActiveStudents = 711,
 
         // Invitaciones (8xx)
         InvitationNotFound = 800,

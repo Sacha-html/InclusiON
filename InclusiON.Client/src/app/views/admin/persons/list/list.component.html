@@ -156,3 +156,16 @@
   (confirm)="onLoginMethodSubmit(); showLoginMethodConfirm = false"
   (cancel)="showLoginMethodConfirm = false; showLoginMethodModal = true">
 </app-confirm-modal>
+
+<app-confirm-modal
+  [visible]="showReactivateConfirm"
+  title="Confirmar reactivación de alumno"
+  messagePrefix="¿Reactivar al alumno "
+  [itemName]="personToReactivate ? (personToReactivate.fullName + (personToReactivate.documentNumber ? ' (DNI: ' + personToReactivate.documentNumber + ')' : '')) : ''"
+  messageSuffix="?"
+  detail="El alumno y su usuario volverán a estar activos en el sistema."
+  confirmLabel="Reactivar alumno"
+  confirmColor="success"
+  (confirm)="confirmReactivate()"
+  (cancel)="showReactivateConfirm = false; personToReactivate = null">
+</app-confirm-modal>

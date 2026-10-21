@@ -54,6 +54,15 @@ namespace InclusiON.Infrastructure.Data.Repositories
             return await query.AnyAsync(cancellationToken);
         }
 
+        public async Task<PersonWithDisability?> GetByDocumentNumberForUpdateAsync(string documentNumber, CancellationToken cancellationToken = default)
+        {
+            return await _context.PersonsWithDisability
+                .Include(p => p.User)
+                .Include(p => p.PersonRepresentatives)
+                .Include(p => p.ProfessionalPersons)
+                .FirstOrDefaultAsync(p => p.DocumentNumber == documentNumber, cancellationToken);
+        }
+
         public async Task<PersonWithDisability> CreateAsync(PersonWithDisability person, CancellationToken cancellationToken = default)
         {
             await _context.PersonsWithDisability.AddAsync(person, cancellationToken);

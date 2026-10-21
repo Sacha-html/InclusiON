@@ -67,6 +67,14 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     "Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.");
             }
 
+            var activeStudentsCount = await _repository.GetActiveStudentsCountAsync(professional.Id, cancellationToken);
+            if (activeStudentsCount > 0)
+            {
+                return ApiResponse<ProfessionalResponse>.Conflict(
+                    ErrorCode.HasActiveStudents,
+                    "Este profesional tiene alumnos a cargo. Debe reasignarlos antes de proceder con la baja.");
+            }
+
             var dependentPersonsCount = await _repository.GetDependentAssistedLoginPersonsCountAsync(professional.UserId, cancellationToken);
             if (dependentPersonsCount > 0)
             {

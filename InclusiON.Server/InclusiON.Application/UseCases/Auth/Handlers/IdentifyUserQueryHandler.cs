@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Repositories;
@@ -113,6 +113,8 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 {
                     UserId = p.UserId,
                     DisplayName = p.FirstName,
+                    LastName = p.LastName,
+                    DocumentNumber = p.DocumentNumber,
                     Initial = p.FirstName.Length > 0 ? p.FirstName[0].ToString().ToUpper() : "?",
                     LastNameInitial = p.LastName.Length > 0 ? p.LastName[0].ToString().ToUpper() : null,
                     AvatarColor = p.AvatarColor ?? AvatarColors.DefaultPerson,

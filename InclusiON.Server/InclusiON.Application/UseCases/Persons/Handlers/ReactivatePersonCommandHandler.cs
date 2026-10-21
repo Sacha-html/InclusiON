@@ -38,14 +38,15 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     ErrorMessages.PersonNotFound);
             }
 
-            if (person.User.IsActive)
+            if (person.IsActive && person.User.IsActive)
             {
                 return ApiResponse<PersonResponse>.ErrorResult(
                     ErrorCode.BusinessRuleViolation,
                     "El alumno ya se encuentra activo");
             }
 
-            // Reactivar usuario asociado a la persona
+            // Reactivar persona y usuario
+            person.IsActive = true;
             person.User.IsActive = true;
 
             await _repository.UpdateAsync(person, cancellationToken);

@@ -116,10 +116,11 @@ export class IdentifyUserComponent implements OnInit {
   }
 
   onMatchSelected(match: UserMatchSummary): void {
+    const fullLastName = match.lastName ? ` ${match.lastName}` : (match.lastNameInitial ? ` ${match.lastNameInitial}.` : '');
     this.navigateToLoginMethod({
       userFound: true,
       userId: match.userId,
-      displayName: match.displayName + (match.lastNameInitial ? ' ' + match.lastNameInitial + '.' : ''),
+      displayName: `${match.displayName}${fullLastName}`.trim(),
       initial: match.initial,
       avatarColor: match.avatarColor,
       loginMethodCode: match.loginMethodCode,

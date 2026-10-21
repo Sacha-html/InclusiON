@@ -72,6 +72,49 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             result.Data.LoginMethodCode.Should().Be("STANDARD");
         }
 
+        [Fact]
+        public async Task UserType_Person_MultipleMatches_ReturnsMatchesWithLastNameAndDocumentNumber()
+        {
+            var p1 = new PersonWithDisability
+            {
+                Id = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                FirstName = "Bautista",
+                LastName = "Alvarez",
+                DocumentNumber = "45100209",
+                LoginMethod = new LoginMethod { Code = "STANDARD", Name = "Contraseña", IsActive = true }
+            };
+            var p2 = new PersonWithDisability
+            {
+                Id = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
+                FirstName = "Catalina",
+                LastName = "Alvarez",
+                DocumentNumber = "45100265",
+                LoginMethod = new LoginMethod { Code = "STANDARD", Name = "Contraseña", IsActive = true }
+            };
+
+            _repo.FindPersonsByIdentifierAsync("Alvarez", Arg.Any<int>(), Arg.Any<CancellationToken>())
+                .Returns(new List<PersonWithDisability> { p1, p2 });
+
+            var result = await BuildSut().HandleAsync(Query("Alvarez", "PERSON"), default);
+
+            result.Success.Should().BeTrue();
+            result.Data!.UserFound.Should().BeTrue();
+            result.Data.RequiresSelection.Should().BeTrue();
+            result.Data.Matches.Should().HaveCount(2);
+
+            var m1 = result.Data.Matches![0];
+            m1.DisplayName.Should().Be("Bautista");
+            m1.LastName.Should().Be("Alvarez");
+            m1.DocumentNumber.Should().Be("45100209");
+
+            var m2 = result.Data.Matches![1];
+            m2.DisplayName.Should().Be("Catalina");
+            m2.LastName.Should().Be("Alvarez");
+            m2.DocumentNumber.Should().Be("45100265");
+        }
+
         // ── UserType = PROFESSIONAL ──────────────────────────────────────
 
         [Fact]

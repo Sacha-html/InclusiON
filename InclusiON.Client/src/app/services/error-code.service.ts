@@ -219,6 +219,10 @@ export class ErrorCodeService {
       message: 'Este profesional tiene informes pendientes. Debe reasignarlos o finalizarlos antes de proceder con la baja.',
       severity: 'error'
     }],
+    [ErrorCode.HasActiveStudents, {
+      message: 'Este profesional tiene alumnos a cargo. Debe reasignarlos antes de proceder con la baja.',
+      severity: 'error'
+    }],
 
     // Invitaciones (8xx)
     [ErrorCode.InvitationNotFound, {

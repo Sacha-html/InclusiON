@@ -126,7 +126,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
                     // Si el alumno estaba inactivo por falta de tutor, reactivarlo
                     var person = await _familyRepository.GetPersonWithUserForUpdateAsync(command.PersonId, ct);
-                    if (person != null && !person.IsActive)
+                    if (person != null && (!person.IsActive || (person.User != null && !person.User.IsActive)))
                     {
                         person.IsActive = true;
                         person.UpdatedAt = _dateTime.UtcNow;

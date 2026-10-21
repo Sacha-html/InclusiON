@@ -16,7 +16,17 @@ namespace InclusiON.DTOs.Responses.Auth
         public bool IsTrustedDevice { get; set; }
 
         /// <summary>
-        /// Inicial del apellido (privacidad: no exponemos el apellido completo en la lista).
+        /// Apellido del usuario para diferenciar homónimos o coincidencias de búsqueda.
+        /// </summary>
+        public string? LastName { get; set; }
+
+        /// <summary>
+        /// Documento de identidad del alumno para distinguir unívocamente entre homónimos.
+        /// </summary>
+        public string? DocumentNumber { get; set; }
+
+        /// <summary>
+        /// Inicial del apellido.
         /// </summary>
         public string? LastNameInitial { get; set; }
     }

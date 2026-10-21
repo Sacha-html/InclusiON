@@ -55,12 +55,16 @@ export class EditComponent implements OnInit {
 
   readonly searchPersonsFn = (query: string) => {
     const linkedIds = new Set(this.family?.linkedPersons?.map(lp => lp.personId) ?? []);
-    return this.personsService.getPersons({ search: query, pageSize: 20, isActive: true }).pipe(
+    return this.personsService.getPersons({ search: query, pageSize: 20 }).pipe(
       map(r => r.data.filter((p: PersonListItemResponse) => !linkedIds.has(p.id)))
     );
   };
   readonly displayPerson = (p: PersonListItemResponse) => p.fullName ?? '';
-  readonly subDisplayPerson = (p: PersonListItemResponse) => p.documentNumber ? `${p.disabilityTypeName ?? 'Sin tipo'} (DNI: ${p.documentNumber})` : p.disabilityTypeName ?? '';
+  readonly subDisplayPerson = (p: PersonListItemResponse) => {
+    const dni = p.documentNumber ? `DNI: ${p.documentNumber}` : 'Sin DNI';
+    const status = !p.isActive ? ' · Inactivo/Suspendido' : '';
+    return `${p.disabilityTypeName ?? 'Sin tipo'} (${dni}${status})`;
+  };
 
   readonly relationships = RELATIONSHIPS;
   readonly PARENT_RELATIONSHIPS = ['Madre', 'Padre'];
