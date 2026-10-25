@@ -872,6 +872,64 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         [Fact]
+        public async Task CompleteResponse_WhenApprovedWithHighAttemptCount_DoesNotFlagFrustrationErrorCount()
+        {
+            // Regla CB-07: Una partida aprobada (100% de éxito) en el intento 5 nunca debe tener ErrorCount >= 4
+            var assignment = AnAssignment();
+            var response = new DomainActivityResponse
+            {
+                Id = ResponseId,
+                AssignmentId = AssignmentId,
+                StartedAt = new DateTime(2025, 6, 1, 10, 0, 0),
+                CompletedAt = null,
+                AttemptCount = 5
+            };
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+
+            var result = await BuildSut().HandleAsync(Cmd(success: 100m), default);
+
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateSessionAsync(Arg.Is<ActivitySession>(s =>
+                s.SuccessRate == 100m &&
+                s.ErrorCount == 0 &&
+                s.GasScore == 2
+            ), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task CompleteResponse_WhenFirstAttemptUnderSixty_SetsErrorCountToOneNotFour()
+        {
+            // Regla CB-07: El primer intento fallido registra ErrorCount = 1 y NO dispara la alerta (que requiere 4)
+            var assignment = AnAssignment();
+            var response = new DomainActivityResponse
+            {
+                Id = ResponseId,
+                AssignmentId = AssignmentId,
+                StartedAt = new DateTime(2025, 6, 1, 10, 0, 0),
+                CompletedAt = null,
+                AttemptCount = 1
+            };
+            _repo.GetByIdAsync(AssignmentId, Arg.Any<CancellationToken>())
+                .Returns(assignment, AnAssignment());
+            _repo.GetResponseByIdAsync(ResponseId, Arg.Any<CancellationToken>())
+                .Returns(response);
+            _dateTime.UtcNow.Returns(Now);
+
+            var result = await BuildSut().HandleAsync(Cmd(success: 20m), default);
+
+            result.Success.Should().BeTrue();
+            await _repo.Received(1).CreateSessionAsync(Arg.Is<ActivitySession>(s =>
+                s.SuccessRate == 20m &&
+                s.ErrorCount == 1 &&
+                s.GasScore == -2
+            ), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public async Task CompleteResponse_UnderSixtyPercent_KeepsStatusAsEnProgreso()
         {
             var assignment = AnAssignment();

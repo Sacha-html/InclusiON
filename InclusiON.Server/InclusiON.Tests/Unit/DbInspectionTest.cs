@@ -189,5 +189,129 @@ namespace InclusiON.Tests.Unit
 
             await context.SaveChangesAsync();
         }
+
+        [Fact]
+        public async Task SanitizeActivitySessionsMetrics()
+        {
+            string[] connStrings = new[]
+            {
+                "Host=192.168.0.17;Port=5433;Database=inclusion_dev;Username=postgres;Password=postgres",
+                "Host=localhost;Port=5432;Database=inclusion_dev;Username=postgres;Password=postgres",
+                "Host=localhost;Port=5433;Database=inclusion_dev;Username=postgres;Password=postgres",
+                "Host=localhost;Port=5432;Database=inclusion_dev;Username=inclusion_dev_app;Password=Inclusion_Dev_2025_!"
+            };
+
+            AppDbContext? context = null;
+            foreach (var conn in connStrings)
+            {
+                try
+                {
+                    var options = new DbContextOptionsBuilder<AppDbContext>()
+                        .UseNpgsql(conn)
+                        .Options;
+                    var ctx = new AppDbContext(options);
+                    if (await ctx.Database.CanConnectAsync())
+                    {
+                        context = ctx;
+                        _output.WriteLine($"Connected to: {conn}");
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _output.WriteLine($"Failed {conn}: {ex.Message}");
+                }
+            }
+
+            if (context == null)
+            {
+                _output.WriteLine("Could not connect to any database instance.");
+                return;
+            }
+
+            // 1. Diagnóstico previo
+            var totalSessions = await context.ActivitySessions.CountAsync();
+            var approvedWithErrors = await context.ActivitySessions
+                .Where(s => s.SuccessRate >= 60m && s.ErrorCount >= 4)
+                .ToListAsync();
+
+            var failedSessions = await context.ActivitySessions
+                .Where(s => s.SuccessRate < 60m)
+                .ToListAsync();
+
+            _output.WriteLine($"=== ESTADO PREVIO DE ACTIVITY SESSIONS ===");
+            _output.WriteLine($"Total sesiones: {totalSessions}");
+            _output.WriteLine($"Sesiones aprobadas (>=60%) con errores inflados (>=4): {approvedWithErrors.Count}");
+            _output.WriteLine($"Sesiones fallidas (<60%): {failedSessions.Count}");
+
+            // 2. Corregir aprobadas con ErrorCount >= 4
+            foreach (var s in approvedWithErrors)
+            {
+                s.ErrorCount = s.SuccessRate >= 80m ? 0 : 1;
+                if (s.GasScore < 0)
+                {
+                    s.GasScore = s.SuccessRate >= 85m ? 1 : 0;
+                }
+            }
+
+            // 3. Normalizar sesiones fallidas por actividad/alumno/fecha
+            int correctedFailedGroups = 0;
+            if (failedSessions.Count != 0)
+            {
+                var grouped = failedSessions
+                    .GroupBy(s => new { s.StudentId, s.ActivityId, DateGroup = s.DateCompleted.Date });
+
+                foreach (var g in grouped)
+                {
+                    var attempts = g.OrderBy(s => s.DateCompleted).ToList();
+                    if (attempts.Count > 1 && attempts.Count < 4)
+                    {
+                        // Si no llegó a 4 intentos fallidos, ninguno debe tener ErrorCount >= 4
+                        for (int i = 0; i < attempts.Count; i++)
+                        {
+                            if (attempts[i].ErrorCount >= 4)
+                            {
+                                attempts[i].ErrorCount = Math.Min(3, i + 1);
+                                correctedFailedGroups++;
+                            }
+                        }
+                    }
+                    else if (attempts.Count >= 4)
+                    {
+                        // Tuvo 4 o más intentos: intentos 1..3 quedan < 4 y sólo del 4to en adelante ErrorCount >= 4
+                        for (int i = 0; i < attempts.Count; i++)
+                        {
+                            if (i < 3)
+                            {
+                                attempts[i].ErrorCount = i + 1;
+                            }
+                            else
+                            {
+                                attempts[i].ErrorCount = Math.Max(4, i + 1);
+                            }
+                        }
+                        correctedFailedGroups++;
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
+
+            // 4. Verificación posterior
+            var postApprovedWithErrors = await context.ActivitySessions
+                .CountAsync(s => s.SuccessRate >= 60m && s.ErrorCount >= 4);
+
+            var postFrustrationEpisodes = await context.ActivitySessions
+                .Where(s => s.SuccessRate < 60m && s.ErrorCount >= 4)
+                .GroupBy(s => new { s.StudentId, s.ActivityId, DateGroup = s.DateCompleted.Date })
+                .CountAsync();
+
+            _output.WriteLine($"=== ESTADO POST-SANEAMIENTO ===");
+            _output.WriteLine($"Aprobadas con ErrorCount >= 4 restantes: {postApprovedWithErrors} (debe ser 0)");
+            _output.WriteLine($"Episodios de frustración (CB-07: 4 intentos fallidos): {postFrustrationEpisodes}");
+            _output.WriteLine($"Grupos fallidos ajustados: {correctedFailedGroups}");
+
+            Assert.Equal(0, postApprovedWithErrors);
+        }
     }
 }

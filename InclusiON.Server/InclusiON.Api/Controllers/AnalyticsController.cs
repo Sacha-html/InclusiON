@@ -107,13 +107,17 @@ namespace InclusiON.Api.Controllers
                         .Distinct()
                         .ToListAsync(cancellationToken);
 
-                    var classroomSessionsQuery = _context.ActivitySessions
-                        .Where(s => classroomStudentIds.Contains(s.StudentId) && s.IsActive);
+                    var defaultClassroomSinceDate = DateTime.UtcNow.AddDays(-30);
+                    var minClassroomDate = from ?? defaultClassroomSinceDate;
 
-                    if (from.HasValue)
-                        classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted >= from.Value);
+                    var classroomSessionsQuery = _context.ActivitySessions
+                        .Where(s => classroomStudentIds.Contains(s.StudentId) && s.IsActive && s.DateCompleted >= minClassroomDate);
+
                     if (to.HasValue)
-                        classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted <= to.Value);
+                    {
+                        var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
+                        classroomSessionsQuery = classroomSessionsQuery.Where(s => s.DateCompleted <= toDate);
+                    }
 
                     var classroomSessions = await classroomSessionsQuery.ToListAsync(cancellationToken);
 
@@ -187,28 +191,37 @@ namespace InclusiON.Api.Controllers
             var defaultSinceDate = DateTime.UtcNow.AddDays(-30);
             var minDate = from ?? defaultSinceDate;
 
-            // Obtener sesiones con indicadores de frustración (éxito <= 60%, errores >= 4 o GAS <= -1)
+            // Regla CB-07 / HU-21: Partidas fallidas (< 60%) con 4 o más intentos/errores acumulados
             var frustrationQuery = _context.ActivitySessions
                 .Include(s => s.Student)
                 .Include(s => s.Activity)
                     .ThenInclude(a => a.Category)
                 .Where(s => studentIds.Contains(s.StudentId) && s.IsActive && s.DateCompleted >= minDate &&
-                           (s.SuccessRate <= 60 || s.ErrorCount >= 4 || s.GasScore <= -1));
+                            s.SuccessRate < 60 && s.ErrorCount >= 4);
 
             if (to.HasValue)
             {
-                frustrationQuery = frustrationQuery.Where(s => s.DateCompleted <= to.Value);
+                var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
+                frustrationQuery = frustrationQuery.Where(s => s.DateCompleted <= toDate);
             }
 
             var frustrationSessions = await frustrationQuery
                 .OrderByDescending(s => s.DateCompleted)
                 .ToListAsync(cancellationToken);
 
-            var result = frustrationSessions.Select(s =>
+            // Regla CB-07 / HU-21: 4 intentos fallidos en la misma actividad = 1 alerta pedagógica
+            // Agrupar por Alumno, Actividad y Fecha para que múltiples reintentos en el mismo juego colapsen en 1 alerta
+            var groupedSessions = frustrationSessions
+                .GroupBy(s => new { s.StudentId, s.ActivityId, DateGroup = s.DateCompleted.Date })
+                .Select(g => g.OrderByDescending(s => s.DateCompleted).First())
+                .OrderByDescending(s => s.DateCompleted)
+                .ToList();
+
+            var result = groupedSessions.Select(s =>
             {
                 var motivos = new List<string>();
-                if (s.SuccessRate <= 60) motivos.Add($"Éxito bajo ({s.SuccessRate:F0}%)");
-                if (s.ErrorCount >= 4) motivos.Add($"{s.ErrorCount} errores cometidos");
+                motivos.Add($"{s.ErrorCount} intentos fallidos sin superar umbral (CB-07)");
+                if (s.SuccessRate <= 30) motivos.Add($"Éxito bajo ({s.SuccessRate:F0}%)");
                 if (s.GasScore <= -1) motivos.Add($"GAS {s.GasScore}");
 
                 return new FrustrationDetailResponse
@@ -223,7 +236,7 @@ namespace InclusiON.Api.Controllers
                     TimeSpentSeconds = s.TimeSpentSeconds,
                     GasScore = s.GasScore,
                     Fecha = s.DateCompleted,
-                    MotivoFrustracion = motivos.Count > 0 ? string.Join(" • ", motivos) : "Bloqueo en nivel"
+                    MotivoFrustracion = motivos.Count > 0 ? string.Join(" • ", motivos) : "Agotamiento de intentos sin alcanzar puntaje mínimo (CB-07)"
                 };
             }).ToList();
 
@@ -410,16 +423,15 @@ namespace InclusiON.Api.Controllers
                 return BuildEmptyAnalyticsResponse();
             }
 
+            var defaultSinceDate = DateTime.UtcNow.AddDays(-30);
+            var minDate = from ?? defaultSinceDate;
+
             // Obtener sesiones de estos alumnos
             var sessionsQuery = _context.ActivitySessions
                 .Include(s => s.Activity)
                     .ThenInclude(a => a.Category)
-                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive);
+                .Where(s => studentIds.Contains(s.StudentId) && s.IsActive && s.DateCompleted >= minDate);
 
-            if (from.HasValue)
-            {
-                sessionsQuery = sessionsQuery.Where(s => s.DateCompleted >= from.Value);
-            }
             if (to.HasValue)
             {
                 var toDate = to.Value.Date.AddDays(1).AddTicks(-1);
@@ -478,8 +490,13 @@ namespace InclusiON.Api.Controllers
 
             response.TotalActividadesPersonalizadas = personalizedSessions.Count;
 
-            // Alertas de Frustración (HU-21): sesiones con fallas acumuladas o errorCount >= 4
-            response.AlertasFrustracion = sessions.Count(s => s.ErrorCount >= 4 || (s.GasScore <= -1 && s.SuccessRate <= 30));
+            // Alertas de Frustración (Regla CB-07 / HU-21):
+            // 4 intentos fallidos en la misma actividad sin superar el 60% = 1 alerta pedagógica
+            // Se agrupa por alumno, actividad y fecha para que múltiples reintentos de una misma actividad cuenten como 1 sola alerta
+            response.AlertasFrustracion = sessions
+                .Where(s => s.SuccessRate < 60 && s.ErrorCount >= 4)
+                .GroupBy(s => new { s.StudentId, s.ActivityId, DateGroup = s.DateCompleted.Date })
+                .Count();
 
             // 2. Distribución actual por nivel
             // Para cada alumno, encontrar cuál es el nivel más alto alcanzado y su estado

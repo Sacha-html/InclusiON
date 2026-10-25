@@ -27,6 +27,9 @@ namespace InclusiON.Data.Seeders
 
             // Repara asignaciones históricas que quedaron sin roadmap después del commit de asignación.
             await RoadmapInitializerAccessor.RepairAssignedStudentRoadmaps(context, CancellationToken.None);
+
+            // Saneamiento y corrección de métricas analíticas de sesiones históricas (Regla CB-07 / HU-21)
+            await SanitizeActivitySessionsAsync(context);
         }
 
         private static async Task SeedAdminUserAsync(UserManager<User> userManager)
@@ -1013,6 +1016,82 @@ namespace InclusiON.Data.Seeders
             foreach (var i in invOtros)
             {
                 i.Relationship = "Tutor/a";
+            }
+
+            if (context.ChangeTracker.HasChanges())
+            {
+                await context.SaveChangesAsync();
+            }
+        }
+
+        /// <summary>
+        /// Sanea y normaliza las sesiones de actividades históricas (ActivitySessions) para que no rompan las métricas analíticas.
+        /// Aplica la regla pedagógica CB-07 / HU-21:
+        /// 1. Corrige sesiones aprobadas (éxito >= 60%) que tenían ErrorCount >= 4 por acumulación de reintentos previos.
+        /// 2. Ajusta sesiones fallidas (< 60%) para que intentos aislados (1 a 3) no disparen falsas alertas de frustración,
+        ///    y que solo al alcanzar 4 intentos fallidos en la misma actividad se registre la alerta de frustración.
+        /// </summary>
+        private static async Task SanitizeActivitySessionsAsync(AppDbContext context)
+        {
+            // 1. Corregir sesiones aprobadas con ErrorCount inflado
+            var approvedWithErrors = await context.ActivitySessions
+                .Where(s => s.SuccessRate >= 60m && s.ErrorCount >= 4)
+                .ToListAsync();
+
+            foreach (var session in approvedWithErrors)
+            {
+                session.ErrorCount = session.SuccessRate >= 80m ? 0 : 1;
+                if (session.GasScore < 0)
+                {
+                    session.GasScore = session.SuccessRate >= 85m ? 1 : 0;
+                }
+            }
+
+            // 2. Normalizar sesiones fallidas (< 60%) para coherencia con la regla de 4 intentos = 1 alerta
+            var failedSessions = await context.ActivitySessions
+                .Where(s => s.SuccessRate < 60m && s.IsActive)
+                .ToListAsync();
+
+            if (failedSessions.Count != 0)
+            {
+                var groupedByActivity = failedSessions
+                    .GroupBy(s => new { s.StudentId, s.ActivityId, DateGroup = s.DateCompleted.Date });
+
+                foreach (var group in groupedByActivity)
+                {
+                    var orderedAttempts = group.OrderBy(s => s.DateCompleted).ToList();
+                    var totalAttempts = orderedAttempts.Count;
+
+                    if (totalAttempts > 1 && totalAttempts < 4)
+                    {
+                        // Si el alumno no llegó a 4 intentos fallidos, ninguno debe superar 3 errores
+                        // para evitar falsas alertas de frustración (CB-07 exige 4 intentos).
+                        for (int i = 0; i < totalAttempts; i++)
+                        {
+                            if (orderedAttempts[i].ErrorCount >= 4)
+                            {
+                                orderedAttempts[i].ErrorCount = Math.Min(3, i + 1);
+                            }
+                        }
+                    }
+                    else if (totalAttempts >= 4)
+                    {
+                        // Tuvo 4 o más intentos fallidos en el mismo día y actividad:
+                        // Los primeros 3 son intentos previos sin alcanzar el umbral de alerta (1, 2, 3)
+                        // A partir del 4to intento se fija la alerta de frustración (ErrorCount >= 4).
+                        for (int i = 0; i < totalAttempts; i++)
+                        {
+                            if (i < 3)
+                            {
+                                orderedAttempts[i].ErrorCount = i + 1;
+                            }
+                            else
+                            {
+                                orderedAttempts[i].ErrorCount = Math.Max(4, i + 1);
+                            }
+                        }
+                    }
+                }
             }
 
             if (context.ChangeTracker.HasChanges())

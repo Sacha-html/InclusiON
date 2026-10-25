@@ -147,13 +147,19 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             await _repository.UpdateAsync(assignment, cancellationToken);
 
             // Sincronizar persistencia en la entidad analítica ActivitySession
-            int errorCount = 0;
-            if (command.SuccessPercentage <= 30m || response.AttemptCount >= 4)
-                errorCount = Math.Max(4, response.AttemptCount);
-            else if (command.SuccessPercentage < 60m)
-                errorCount = Math.Max(2, response.AttemptCount);
-            else if (command.SuccessPercentage < 80m)
-                errorCount = 1;
+            // Regla CB-07 / HU-21: 4 intentos fallidos en la misma actividad = 1 alerta de frustración
+            int errorCount;
+            if (command.SuccessPercentage >= 60m)
+            {
+                // Aprobado: No es frustración. Errores mínimos del intento exitoso (0 si >= 80%, 1 si 60-79%)
+                errorCount = command.SuccessPercentage >= 80m ? 0 : 1;
+            }
+            else
+            {
+                // Fallido (< 60%): Registra el número de intento alcanzado.
+                // Si response.AttemptCount >= 4, errorCount >= 4 activará la alerta pedagógica de frustración (CB-07).
+                errorCount = Math.Max(1, response.AttemptCount);
+            }
 
             var session = new ActivitySession
             {
