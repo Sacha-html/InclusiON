@@ -96,6 +96,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
 
+  // Ruta aislada para herramientas de desarrollo (ABM Instituciones)
+  {
+    path: 'dev',
+    loadComponent: () =>
+      import('./views/dev/dev-institutions.component').then(
+        (m) => m.DevInstitutionsComponent,
+      ),
+    data: { title: 'Dev — ABM Instituciones' },
+  },
+
   // Dashboard AAC - Persona con Discapacidad
   {
     path: 'app',

@@ -69,33 +69,29 @@ stateDiagram-v2
 
 ## Entidad: Professional (Profesional)
 
-Controla el ciclo de vida del profesional terapeuta dentro del sistema. Hay dos caminos de alta con estados iniciales distintos.
+Controla el ciclo de vida del profesional terapeuta dentro del sistema. El alta es 100% centralizada y provista por la Dirección o Administración Institucional con matrícula verificada; no existe auto-registro público.
 
 ### Tabla de estados
 
 | Estado | Puede ir a → | Quién genera la transición | Condición necesaria | Transiciones NO permitidas |
 |--------|-------------|--------------------------|--------------------|-----------------------------|
 | ⬤ INICIO ↓ | | | | |
-| **PENDING** | APPROVED, REJECTED | Admin (no puede ser el propio profesional) | Profesional se registró por auto-registro público | No puede operar el sistema. No puede validarse a sí mismo. |
-| **APPROVED** | SUSPENDED, TERMINATED | Sistema (inactividad) / Admin | Sin login por ≥ 90 días (→ SUSPENDED) o desactivación manual (→ TERMINATED) | No puede volver a PENDING. Un aprobado nunca necesita re-validación. |
-| **REJECTED** | *(estado final)* | Admin | El auto-registro no cumple los requisitos | No puede reactivarse. Si el profesional insiste, debe hacer un nuevo auto-registro. |
-| **SUSPENDED** | APPROVED | Admin reactiva | El admin considera que la suspensión ya no aplica | No puede ir a TERMINATED directamente desde SUSPENDED. |
-| **TERMINATED** | APPROVED | Admin reactiva | El admin decide reincorporar al profesional | No puede ir a SUSPENDED. La reincorporación es directa a APPROVED. |
+| **APPROVED** | SUSPENDED, TERMINATED | Sistema (inactividad) / Admin | Alta directa por admin con matrícula verificada (→ APPROVED). Sin login por ≥ 90 días (→ SUSPENDED) o cese laboral (→ TERMINATED) | No requiere validaciones públicas intermedias. |
+| **SUSPENDED** | APPROVED, TERMINATED | Admin reactiva o da de baja | El admin considera que la suspensión ya no aplica (→ APPROVED) o confirma cese definitivo | No puede operar mientras esté suspendido. |
+| **TERMINATED** | APPROVED | Admin reactiva | El admin decide reincorporar al profesional con nuevo contrato | No puede ir a SUSPENDED. La reincorporación es directa a APPROVED. |
 
 ### Diagrama
 
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> PENDING : Auto-registro público\n(POST /api/professionals/register)
     [*] --> APPROVED : Alta directa por admin\n(POST /api/professionals)
-    PENDING --> APPROVED : Admin aprueba\n(PUT .../validate)
-    PENDING --> REJECTED : Admin rechaza\n(PUT .../validate)
     APPROVED --> SUSPENDED : Sin login 90 días\n(job: POST .../suspend-inactive)
-    APPROVED --> TERMINATED : Admin desactiva\n(PUT .../deactivate)
+    APPROVED --> TERMINATED : Admin desactiva / cese\n(PUT .../deactivate)
     SUSPENDED --> APPROVED : Admin reactiva\n(PUT .../reactivate)
-    TERMINATED --> APPROVED : Admin reactiva\n(PUT .../reactivate)
-    REJECTED --> [*]
+    SUSPENDED --> TERMINATED : Admin cese definitivo
+    TERMINATED --> APPROVED : Admin reincorpora\n(PUT .../reactivate)
+    TERMINATED --> [*]
 ```
 
 ---

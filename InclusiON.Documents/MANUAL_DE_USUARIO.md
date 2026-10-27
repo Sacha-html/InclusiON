@@ -350,12 +350,11 @@ El sistema cuenta con dos puntos de acceso claramente diferenciados según el pe
 
 ---
 
-### 3.3. Registro Público y Validación de Profesionales
-Los docentes y terapeutas que deseen incorporarse a la institución sin una cuenta previa pueden autoregistrarse:
-1. En la pantalla `/admin-login`, haga clic en **`¿Eres profesional? Solicita tu cuenta aquí`** (o acceda directamente a `/register-professional`).
-2. Complete sus datos personales, correo, teléfono, especialidad y **número de matrícula habilitante**.
-3. Al enviar el formulario, su solicitud pasará al estado **`Pendiente`**.
-4. La dirección de la escuela auditará su legajo y matrícula desde el portal directivo. Al ser aprobado, recibirá una notificación por correo con sus credenciales de ingreso habilitadas.
+### 3.3. Alta y Habilitación Centralizada de Profesionales
+Para garantizar la máxima seguridad y trazabilidad legal en el cuidado de los alumnos, la plataforma no admite auto-registro público. El acceso del equipo docente y terapéutico es gestionado de manera 100% centralizada por la Dirección o Administración Institucional:
+1. La Dirección accede al panel de gestión en `/admin/professionals` y registra al profesional indicando nombre, correo institucional, especialidad y número de matrícula profesional verificado.
+2. El sistema da de alta la cuenta directamente en estado **`Habilitado`** (`Approved`) y emite una contraseña provisoria de primer acceso.
+3. El profesional recibe sus credenciales por correo electrónico e inicia sesión en `/admin-login`, donde el sistema le solicita redefinir su contraseña personal antes de comenzar a operar.
 
 ---
 

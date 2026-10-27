@@ -81,27 +81,24 @@ flowchart TD
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> Pending : Auto-registro público
-    [*] --> Approved : Alta desde panel admin
-    Pending --> Approved : Admin aprueba
-    Pending --> Rejected : Admin rechaza
+    [*] --> Approved : Alta desde panel directivo / admin
     Approved --> Suspended : Inactividad (90 días sin login)
-    Approved --> Terminated : Admin desactiva
+    Approved --> Terminated : Admin desactiva / cese
     Suspended --> Approved : Admin reactiva
-    Terminated --> Approved : Admin reactiva
-    Rejected --> [*]
+    Suspended --> Terminated : Admin cese definitivo
+    Terminated --> Approved : Admin reactiva / reincorporación
+    Terminated --> [*]
 ```
 
 ## Modalidad de Alta y Gobernanza Institucional
 
 > [!IMPORTANT]
-> **Evolución de Seguridad y Gobernanza (2026-09-17):**
-> Conforme a las decisiones arquitectónicas consolidadas en `reglas-negocio.md`, `HU-IN-149`, `HU-IN-150`, `CU-02` y `CB-10`, **se eliminó formalmente el auto-registro público abierto (`POST /api/professionals/register`)**. El aprovisionamiento de profesionales es **100% centralizado e institucional** por parte de la Dirección Escolar o Administrador (`POST /api/professionals`). El profesional nace directamente en estado `Approved` con credenciales y contraseña temporal, eliminando solicitudes en estado `Pending` desde la web pública.
+> **Aprovisionamiento Centralizado Exclusivo:**
+> El aprovisionamiento de profesionales es **100% centralizado e institucional** por parte de la Dirección Escolar o Administrador (`POST /api/professionals`). El profesional nace directamente en estado `Approved` con credenciales y contraseña temporal, previa verificación de su matrícula y especialidad. No existe registro público abierto.
 
 | Modalidad | Estado inicial | Descripción |
 |---|---|---|
-| **Alta Institucional por Admin** *(Activa)* | `Approved` | La Dirección crea al profesional directamente tras validar matrícula y antecedentes. Acceso activo con contraseña temporal. |
-| ~**Auto-registro público**~ *(Deprecada / Eliminada)* | `Pending` | *(Desestimada por seguridad)* Reemplazada por alta directa administrativa para evitar solicitudes huérfanas o auto-validaciones. |
+| **Alta Institucional por Admin** | `Approved` | La Dirección crea al profesional directamente tras validar matrícula y antecedentes. Acceso activo con contraseña temporal. |
 
 ## Historial de estados
 
@@ -115,7 +112,6 @@ Cada cambio se registra en `ProfessionalStatusHistory`:
 | Método | Endpoint | Auth | Descripción |
 |--------|----------|------|-------------|
 | POST | `/api/professionals` | `professionals:create` | Alta directa (admin) |
-| POST | `/api/professionals/register` | Público | Auto-registro |
 | GET | `/api/professionals` | `professionals:read` | Listado activos |
 | GET | `/api/professionals/pending` | `professionals:read` | Listado pendientes |
 | GET | `/api/professionals/{id}` | `professionals:read` | Detalle |
