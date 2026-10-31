@@ -9,7 +9,6 @@
 - 📊 **Monitoreo de Progreso y Dashboards Analíticos**: Paneles interactivos con métricas clave (KPIs), gráficos de evolución por aula y alertas tempranas de estancamiento o frustración.
 - 📄 **Exportación Dinámica a PDF en Formato A4**: Descarga instantánea de reportes y dashboards en formato estándar A4 (portrait/landscape) con sanitización de estilos y alta resolución.
 - 💬 **Mensajería Multirrol en Tiempo Real**: Sistema de chat directo entre Administradores, Profesionales y Familias con notificaciones push (SignalR), ordenamiento dinámico por actividad reciente, insignias numéricas de no leídos y redirección contextual desde la campana de notificaciones.
-- 🧠 **Búsqueda Semántica**: Implementación de inteligencia artificial local mediante modelos ONNX para búsquedas semánticas de actividades pedagógicas.
 - 🤝 **Gestión Unificada de Aulas y Tutores**: Asistente de registro transaccional unificado (Alumno + Tutor + Aula) y vinculación familiar directa.
 ---
 ## 📂 Estructura del Monorepo
