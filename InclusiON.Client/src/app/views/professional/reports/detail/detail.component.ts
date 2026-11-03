@@ -87,7 +87,7 @@ export class DetailComponent implements OnInit {
 
   confirmSubmit(): void {
     const r = this.report();
-    if (!r) return;
+    if (!r || r.status !== ReportStatus.Draft) return;
     this.isSubmitting = true;
     this.reportsService.submitReport(r.encryptedId).subscribe({
       next: (updated) => {
@@ -113,12 +113,14 @@ export class DetailComponent implements OnInit {
   }
 
   onDeactivateClick(): void {
+    const r = this.report();
+    if (!r || (r.status !== ReportStatus.Draft && r.status !== ReportStatus.Rejected)) return;
     this.showDeactivateModal = true;
   }
 
   confirmDeactivate(): void {
     const r = this.report();
-    if (!r) return;
+    if (!r || (r.status !== ReportStatus.Draft && r.status !== ReportStatus.Rejected)) return;
     this.isDeactivating = true;
     this.reportsService.deactivate(r.encryptedId).subscribe({
       next: () => {

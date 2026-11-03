@@ -23,7 +23,7 @@
               Editar
             </button>
           }
-          @if (report()!.status !== ReportStatus.Submitted) {
+          @if (report()!.status === ReportStatus.Draft || report()!.status === ReportStatus.Rejected) {
             <button cButton color="danger" size="sm" (click)="onDeactivateClick()">
               <svg cIcon name="cilTrash" class="me-1" size="sm" aria-hidden="true"></svg>
               Dar de baja
