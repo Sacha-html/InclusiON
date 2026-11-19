@@ -633,6 +633,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         private readonly IUnitOfWork                   _uow            = Substitute.For<IUnitOfWork>();
         private readonly IDateTimeProvider             _dateTime       = Substitute.For<IDateTimeProvider>();
         private readonly IEncryptionService            _encryption     = Substitute.For<IEncryptionService>();
+        private readonly INotificationService          _notificationService = Substitute.For<INotificationService>();
 
         private static readonly Guid PersonId = Guid.NewGuid();
         private static readonly Guid OtherPersonId = Guid.NewGuid();
@@ -646,7 +647,8 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         }
 
         private CompleteActivityResponseCommandHandler BuildSut() =>
-            new(_repo, _roadmaps, _profsRepo, _bgJobs, _uow, _dateTime, _encryption);
+            new(_repo, _roadmaps, _profsRepo, _bgJobs, _uow, _dateTime, _encryption,
+                notificationService: _notificationService);
 
         private static CompleteActivityResponseCommand Cmd(
             Guid? personId = null, decimal success = 85m) => new(
@@ -949,6 +951,7 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
         [Fact]
         public async Task CompleteResponse_FourExhaustedAttempts_EnqueuesAlertNotificationForProfessional()
         {
+            var profUserId = Guid.NewGuid();
             var assignment = AnAssignment();
             var response = new DomainActivityResponse
             {
@@ -964,14 +967,20 @@ namespace InclusiON.Tests.Unit.Handlers.Activities
                 .Returns(response);
             _dateTime.UtcNow.Returns(Now);
             _profsRepo.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-                .Returns(new Professional { Id = Guid.NewGuid(), UserId = Guid.NewGuid() });
+                .Returns(new Professional { Id = Guid.NewGuid(), UserId = profUserId });
 
             var result = await BuildSut().HandleAsync(Cmd(success: 30m), default);
 
             result.Success.Should().BeTrue();
-            await _bgJobs.Received(1).CreateAsync(
+            await _notificationService.Received(1).NotifyManyAsync(
+                Arg.Is<IEnumerable<NotificationMessage>>(list => list.Any(n =>
+                    n.UserId == profUserId &&
+                    n.EventCode == NotificationEventCodes.ActivityAttemptAlert &&
+                    (n.Title.Contains("Alerta") || n.Message.Contains("intentos")))),
+                Arg.Any<CancellationToken>());
+            await _bgJobs.DidNotReceive().CreateAsync(
                 JobTypes.Push,
-                Arg.Is<string>(payload => payload.Contains("bloqueada") || payload.Contains("Alerta")),
+                Arg.Any<string>(),
                 scheduledAt: Arg.Any<DateTime?>(),
                 maxRetries: Arg.Any<int>(),
                 cancellationToken: Arg.Any<CancellationToken>());

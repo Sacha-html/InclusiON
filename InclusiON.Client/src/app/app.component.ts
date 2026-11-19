@@ -36,9 +36,15 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.#authService.isAuthenticated$
+    this.#authService.currentUser$
       .pipe(takeUntilDestroyed(this.#destroyRef))
-      .subscribe(authed => authed ? this.#signalr.start() : this.#signalr.stop());
+      .subscribe(user => {
+        if (user && this.#authService.isAuthenticated()) {
+          this.#signalr.start();
+        } else {
+          this.#signalr.stop();
+        }
+      });
 
     this.#router.events.pipe(
         takeUntilDestroyed(this.#destroyRef)

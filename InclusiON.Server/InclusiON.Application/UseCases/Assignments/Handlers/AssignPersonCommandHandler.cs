@@ -24,6 +24,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IRealTimeNotifier _notifier;
         private readonly IRoadmapInitializer _roadmapInitializer;
         private readonly ILogger<AssignPersonCommandHandler> _logger;
+        private readonly IFamilyRepository? _familyRepository;
+        private readonly INotificationService? _notificationService;
 
         public AssignPersonCommandHandler(
             IAssignmentsRepository repository,
@@ -33,7 +35,9 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             IDateTimeProvider dateTime,
             IRealTimeNotifier notifier,
             IRoadmapInitializer roadmapInitializer,
-            ILogger<AssignPersonCommandHandler> logger)
+            ILogger<AssignPersonCommandHandler> logger,
+            IFamilyRepository? familyRepository = null,
+            INotificationService? notificationService = null)
         {
             _repository = repository;
             _professionalsRepository = professionalsRepository;
@@ -43,6 +47,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             _notifier = notifier;
             _roadmapInitializer = roadmapInitializer;
             _logger = logger;
+            _familyRepository = familyRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<ProfessionalPersonResponse>> HandleAsync(
@@ -98,7 +104,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 {
                     existing.Classroom = await _repository.GetClassroomByIdAsync(existing.ClassroomId.Value, cancellationToken);
                 }
-                await NotifyNewStudentAsync(professional.UserId, person, cancellationToken);
+                await NotifyNewStudentAsync(professional, person, cancellationToken);
                 await InitializeRoadmapPostCommitAsync(person.Id, professional.UserId, cancellationToken);
 
                 var reactivatedResponse = ProfessionalPersonResponse.MapToResponse(existing);
@@ -124,7 +130,7 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             {
                 assignment.Classroom = await _repository.GetClassroomByIdAsync(assignment.ClassroomId.Value, cancellationToken);
             }
-            await NotifyNewStudentAsync(professional.UserId, person, cancellationToken);
+            await NotifyNewStudentAsync(professional, person, cancellationToken);
             await InitializeRoadmapPostCommitAsync(person.Id, professional.UserId, cancellationToken);
 
             var response = ProfessionalPersonResponse.MapToResponse(assignment);
@@ -145,15 +151,51 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             }
         }
 
-        private Task NotifyNewStudentAsync(Guid professionalUserId, PersonWithDisability person, CancellationToken cancellationToken)
+        private async Task NotifyNewStudentAsync(Professional professional, PersonWithDisability person, CancellationToken cancellationToken)
         {
-            var personName = $"{person.FirstName} {person.LastName}";
-            return _notifier.NotifyUserAsync(
-                professionalUserId.ToString(),
-                "🎓 Nuevo alumno asignado",
-                $"Tienes un nuevo alumno, {personName}. Llená el perfil funcional.",
-                actionUrl: $"/#/pro/persons/{person.Id}",
-                cancellationToken: cancellationToken);
+            var personName = $"{person.FirstName} {person.LastName}".Trim();
+            var profName = $"{professional.FirstName} {professional.LastName}".Trim();
+
+            if (_notificationService is null)
+            {
+                await _notifier.NotifyUserAsync(
+                    professional.UserId.ToString(),
+                    "🎓 Nuevo alumno asignado",
+                    $"Tienes un nuevo alumno, {personName}. Llená el perfil funcional.",
+                    actionUrl: $"/pro/persons/{person.Id}",
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            var notifications = new List<NotificationMessage>();
+            if (professional.UserId != Guid.Empty)
+            {
+                var encryptedPersonId = _notificationService.EncryptId(person.Id);
+                notifications.Add(new NotificationMessage(
+                    UserId: professional.UserId,
+                    Type: NotificationTypes.Assignment,
+                    EventCode: NotificationEventCodes.StudentAssigned,
+                    Title: "Nuevo alumno asignado",
+                    Message: $"Tenés un nuevo alumno asignado: {personName}. Completá su perfil funcional.",
+                    ActionUrl: $"/pro/persons/{encryptedPersonId}"));
+            }
+
+            if (_familyRepository is not null)
+            {
+                var reps = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(person.Id, cancellationToken);
+                foreach (var rep in reps.Where(r => r.IsActive && r.Representative is not null && r.Representative.IsActive && r.Representative.UserId != Guid.Empty))
+                {
+                    notifications.Add(new NotificationMessage(
+                        UserId: rep.Representative.UserId,
+                        Type: NotificationTypes.Assignment,
+                        EventCode: NotificationEventCodes.StudentAssigned,
+                        Title: "Profesional asignado",
+                        Message: $"{profName} fue asignado como profesional de {personName}.",
+                        ActionUrl: "/family"));
+                }
+            }
+
+            await _notificationService.NotifyManyAsync(notifications, cancellationToken);
         }
     }
 }

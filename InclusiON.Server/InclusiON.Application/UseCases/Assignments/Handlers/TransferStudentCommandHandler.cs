@@ -25,6 +25,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRoadmapInitializer _roadmapInitializer;
         private readonly ILogger<TransferStudentCommandHandler> _logger;
+        private readonly IFamilyRepository? _familyRepository;
+        private readonly INotificationService? _notificationService;
 
         public TransferStudentCommandHandler(
             IAssignmentsRepository assignmentsRepo,
@@ -36,7 +38,9 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             IDateTimeProvider dateTime,
             IUnitOfWork unitOfWork,
             IRoadmapInitializer roadmapInitializer,
-            ILogger<TransferStudentCommandHandler> logger)
+            ILogger<TransferStudentCommandHandler> logger,
+            IFamilyRepository? familyRepository = null,
+            INotificationService? notificationService = null)
         {
             _assignmentsRepo = assignmentsRepo;
             _professionalsRepo = professionalsRepo;
@@ -48,6 +52,8 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
             _unitOfWork = unitOfWork;
             _roadmapInitializer = roadmapInitializer;
             _logger = logger;
+            _familyRepository = familyRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<TransferStudentResponse>> HandleAsync(
@@ -195,6 +201,55 @@ namespace InclusiON.Application.UseCases.Assignments.Handlers
                 AffectedRecordId = oldLink.PersonId.ToString(),
                 Details = $"Transferencia de alumno {person.FirstName} {person.LastName} ({command.PersonId}) del profesional {fromProf.FirstName} {fromProf.LastName} ({command.FromProfessionalId}) al profesional {toProf.FirstName} {toProf.LastName} ({command.ToProfessionalId}). Actividades reasignadas: {activeAssignments.Count}, Reportes reasignados: {pendingReports.Count}."
             }, cancellationToken);
+
+            // 11. Notificar a ambos profesionales y a todos los tutores activos del alumno
+            if (_notificationService is not null)
+            {
+                var notifications = new List<NotificationMessage>();
+                var studentName = $"{person.FirstName} {person.LastName}".Trim();
+                var fromProfName = $"{fromProf.FirstName} {fromProf.LastName}".Trim();
+                var toProfName = $"{toProf.FirstName} {toProf.LastName}".Trim();
+                var encryptedPersonId = _notificationService.EncryptId(person.Id);
+
+                if (fromProf.UserId != Guid.Empty)
+                {
+                    notifications.Add(new NotificationMessage(
+                        UserId: fromProf.UserId,
+                        Type: NotificationTypes.Assignment,
+                        EventCode: NotificationEventCodes.StudentTransferred,
+                        Title: "Alumno transferido",
+                        Message: $"El alumno {studentName} fue transferido a {toProfName}.",
+                        ActionUrl: "/pro/persons"));
+                }
+
+                if (toProf.UserId != Guid.Empty)
+                {
+                    notifications.Add(new NotificationMessage(
+                        UserId: toProf.UserId,
+                        Type: NotificationTypes.Assignment,
+                        EventCode: NotificationEventCodes.StudentTransferred,
+                        Title: "Nuevo alumno transferido",
+                        Message: $"{studentName} fue transferido a tu aula (desde {fromProfName}). Se reasignaron {activeAssignments.Count} actividad(es) y {pendingReports.Count} reporte(s).",
+                        ActionUrl: $"/pro/persons/{encryptedPersonId}"));
+                }
+
+                if (_familyRepository is not null)
+                {
+                    var reps = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(person.Id, cancellationToken);
+                    foreach (var rep in reps.Where(r => r.IsActive && r.Representative is not null && r.Representative.IsActive && r.Representative.UserId != Guid.Empty))
+                    {
+                        notifications.Add(new NotificationMessage(
+                            UserId: rep.Representative.UserId,
+                            Type: NotificationTypes.Assignment,
+                            EventCode: NotificationEventCodes.StudentTransferred,
+                            Title: "Cambio de profesional a cargo",
+                            Message: $"{toProfName} es ahora el profesional a cargo de {studentName}.",
+                            ActionUrl: "/family"));
+                    }
+                }
+
+                await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+            }
 
             var response = new TransferStudentResponse
             {

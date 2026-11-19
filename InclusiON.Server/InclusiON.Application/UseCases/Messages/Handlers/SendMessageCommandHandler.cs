@@ -21,6 +21,7 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
         private readonly IUnitOfWork            _uow;
         private readonly IEncryptionService     _encryption;
         private readonly IBackgroundJobRepository _bgJobs;
+        private readonly INotificationService?  _notificationService;
 
         public SendMessageCommandHandler(
             IMessagesRepository messages,
@@ -28,14 +29,16 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             IAssignmentsRepository assignments,
             IUnitOfWork uow,
             IEncryptionService encryption,
-            IBackgroundJobRepository bgJobs)
+            IBackgroundJobRepository bgJobs,
+            INotificationService? notificationService = null)
         {
-            _messages    = messages;
-            _users       = users;
-            _assignments = assignments;
-            _uow         = uow;
-            _encryption  = encryption;
-            _bgJobs      = bgJobs;
+            _messages            = messages;
+            _users               = users;
+            _assignments         = assignments;
+            _uow                 = uow;
+            _encryption          = encryption;
+            _bgJobs              = bgJobs;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<MessageResponse>> HandleAsync(
@@ -132,26 +135,23 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             message.Sender   = sender;
             message.Receiver = receiver;
 
-            // Push SignalR al destinatario — fire and forget
-            var senderName    = $"{sender!.Name} {sender.Surname}".Trim();
-            var receiverIdStr = receiver!.Id.ToString();
-            var routePrefix   = receiverIsProfessional ? "pro" : (receiverIsFamily ? "family" : "admin");
-            var actionUrl     = $"/{routePrefix}/messages?contactId={sender.Id}";
+            // Notificación persistente + SignalR con contactId encriptado Base64Url (IN-218)
+            var senderName        = $"{sender!.Name} {sender.Surname}".Trim();
+            var routePrefix       = receiverIsProfessional ? "pro" : (receiverIsFamily ? "family" : "admin");
+            var encryptedSenderId = ToUrlSafeBase64(_encryption.Encrypt(sender.Id.ToString()));
+            var actionUrl         = $"/{routePrefix}/messages?contactId={encryptedSenderId}";
 
-            _ = Task.Run(async () =>
+            if (_notificationService is not null)
             {
-                await _bgJobs.CreateAsync(
-                    JobTypes.Push,
-                    JsonSerializer.Serialize(new NotificationPayload
-                    {
-                        UserId            = receiverIdStr,
-                        Title             = "Nuevo mensaje",
-                        Message           = $"Tenés un nuevo mensaje de {senderName}.",
-                        ActionUrl         = actionUrl,
-                        SendEmailFallback = false
-                    }),
-                    maxRetries: 3);
-            });
+                await _notificationService.NotifyAsync(new NotificationMessage(
+                    UserId: receiver!.Id,
+                    Type: NotificationTypes.Message,
+                    EventCode: NotificationEventCodes.MessageReceived,
+                    Title: "Nuevo mensaje",
+                    Message: $"Tenés un nuevo mensaje de {senderName}.",
+                    ActionUrl: actionUrl),
+                    cancellationToken);
+            }
 
             var dto = MessageMapper.ToDetail(message);
             dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(message.Id.ToString()));

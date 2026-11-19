@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserRoles } from '@shared/constants/roles';
-import { AuthService, ToastService, ProfessionalsService, AssignmentsService, FamilyService, CalendarService, CalendarEvent } from '@services';
-import { switchMap } from 'rxjs';
+import { AuthService, ToastService, ProfessionalsService, AssignmentsService, FamilyService, CalendarService, CalendarEvent, SignalrService } from '@services';
+import { Subscription, switchMap } from 'rxjs';
 import {
   CardBodyComponent, CardComponent,
   ButtonDirective, FormControlDirective, FormSelectDirective,
@@ -28,13 +28,16 @@ import { IconDirective } from '@coreui/icons-angular';
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
 })
-export class CalendarComponent implements OnInit {
+export class CalendarComponent implements OnInit, OnDestroy {
   private readonly authService         = inject(AuthService);
   private readonly toastService        = inject(ToastService);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService   = inject(AssignmentsService);
   private readonly familyService        = inject(FamilyService);
   private readonly calendarService      = inject(CalendarService);
+  private readonly signalrService       = inject(SignalrService);
+
+  private notifSub?: Subscription;
 
   // ── State ──────────────────────────────────────────────────────────────
   currentDate = new Date();
@@ -83,7 +86,10 @@ export class CalendarComponent implements OnInit {
 
   selectedEvent = signal<CalendarEvent | null>(null);
 
-  private readonly STORAGE_KEY = 'inclusion_calendar_events';
+  private get storageKey(): string {
+    const userId = this.authService.getCurrentUser()?.id ?? this.authService.getUserFromToken()?.id ?? 'anon';
+    return `inclusion_calendar_events_${userId}`;
+  }
 
   ngOnInit(): void {
     const role = this.authService.getCurrentUser()?.role;
@@ -93,6 +99,22 @@ export class CalendarComponent implements OnInit {
     if (this.isProfessional) {
       this.loadAssignedStudents();
     }
+
+    // Refrescar el calendario automáticamente si llega una notificación de calendario en tiempo real
+    this.notifSub = this.signalrService.notification$.subscribe((notif) => {
+      const isCalendar =
+        notif.type?.toLowerCase() === 'calendar' ||
+        notif.actionUrl?.toLowerCase().includes('calendar') ||
+        notif.title?.toLowerCase().includes('calendario') ||
+        notif.title?.toLowerCase().includes('evento');
+      if (isCalendar) {
+        this.loadEvents();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.notifSub?.unsubscribe();
   }
 
   loadAssignedStudents(): void {
@@ -189,13 +211,13 @@ export class CalendarComponent implements OnInit {
     this.calendarService.getEvents().subscribe({
       next: (eventsList) => {
         this.events.set(eventsList);
-        // Cache to localStorage for offline robustness
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(eventsList));
+        // Cache aislado por usuario para resiliencia offline
+        localStorage.setItem(this.storageKey, JSON.stringify(eventsList));
         this.generateCalendarGrid();
       },
       error: () => {
         this.toastService.error('Error al cargar eventos del servidor. Usando datos locales.');
-        const stored = localStorage.getItem(this.STORAGE_KEY);
+        const stored = localStorage.getItem(this.storageKey);
         if (stored) {
           this.events.set(JSON.parse(stored));
         }

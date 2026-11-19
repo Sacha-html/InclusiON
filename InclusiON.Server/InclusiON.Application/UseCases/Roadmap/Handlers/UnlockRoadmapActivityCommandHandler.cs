@@ -19,19 +19,28 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
         private readonly IUnitOfWork                   _uow;
         private readonly IDateTimeProvider             _dateTime;
         private readonly IEncryptionService            _encryption;
+        private readonly IPersonsRepository?           _personsRepository;
+        private readonly IFamilyRepository?            _familyRepository;
+        private readonly INotificationService?         _notificationService;
 
         public UnlockRoadmapActivityCommandHandler(
             IRoadmapRepository            roadmaps,
             IActivityAssignmentRepository assignments,
             IUnitOfWork                   uow,
             IDateTimeProvider             dateTime,
-            IEncryptionService            encryption)
+            IEncryptionService            encryption,
+            IPersonsRepository?           personsRepository = null,
+            IFamilyRepository?            familyRepository = null,
+            INotificationService?         notificationService = null)
         {
-            _roadmaps   = roadmaps;
-            _assignments = assignments;
-            _uow        = uow;
-            _dateTime   = dateTime;
-            _encryption = encryption;
+            _roadmaps            = roadmaps;
+            _assignments         = assignments;
+            _uow                 = uow;
+            _dateTime            = dateTime;
+            _encryption          = encryption;
+            _personsRepository   = personsRepository;
+            _familyRepository    = familyRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<RoadmapActivityResponse>> HandleAsync(
@@ -63,6 +72,28 @@ namespace InclusiON.Application.UseCases.Roadmap.Handlers
             await _assignments.CreateAsync(assignment, cancellationToken);
 
             await _uow.SaveChangesAsync(cancellationToken);
+
+            // Notificar a todos los tutores activos del alumno sobre el nuevo nivel desbloqueado
+            if (_notificationService is not null && _familyRepository is not null)
+            {
+                var person = _personsRepository is not null
+                    ? await _personsRepository.GetByIdAsync(command.PersonId, cancellationToken)
+                    : null;
+                var studentName = person is not null ? $"{person.FirstName} {person.LastName}".Trim() : "tu alumno a cargo";
+                var activityTitle = entry.Activity?.Title ?? "una nueva estación";
+                var reps = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(command.PersonId, cancellationToken);
+                var tutorNotifications = reps
+                    .Where(r => r.IsActive && r.Representative is not null && r.Representative.IsActive && r.Representative.UserId != Guid.Empty)
+                    .Select(r => new NotificationMessage(
+                        UserId: r.Representative.UserId,
+                        Type: NotificationTypes.Activity,
+                        EventCode: NotificationEventCodes.RoadmapUnlocked,
+                        Title: "Nuevo nivel desbloqueado",
+                        Message: $"Se desbloqueó \"{activityTitle}\" en Mi Camino para {studentName}.",
+                        ActionUrl: "/family"));
+
+                await _notificationService.NotifyManyAsync(tutorNotifications, cancellationToken);
+            }
 
             var actDto = RoadmapMapper.ToActivityResponse(entry);
             actDto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(entry.Id.ToString()));

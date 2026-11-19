@@ -23,6 +23,8 @@ export { ActivitiesService } from './activities.service';
 export { ArasaacService } from './arasaac.service';
 export { RoadmapService } from './roadmap.service';
 export { MessagesService } from './messages.service';
+export { NotificationsService } from './notifications.service';
+export type { NotificationDto, NotificationType } from './notifications.service';
 export { SignalrService } from './signalr.service';
 export { CalendarService } from './calendar.service';
 export type { CalendarEvent } from './calendar.service';

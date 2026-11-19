@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription, filter, interval, switchMap } from 'rxjs';
+import { Subscription, filter, interval } from 'rxjs';
 import { IconDirective } from '@coreui/icons-angular';
 import {
   DropdownComponent,
@@ -9,12 +9,9 @@ import {
   DropdownItemDirective,
   TooltipDirective
 } from '@coreui/angular';
-import { MessagesService } from '@services/messages.service';
+import { NotificationsService, NotificationDto, NotificationType } from '@services/notifications.service';
 import { SignalrService, SignalRNotification } from '@services/signalr.service';
 import { AuthService } from '@services/auth.service';
-import { ToastService } from '@services/toast.service';
-import { ProfessionalsService } from '@services/professionals.service';
-import { AssignmentsService } from '@services/assignments.service';
 import { UserRoles } from '@shared/constants/roles';
 
 export interface AppNotification {
@@ -22,7 +19,7 @@ export interface AppNotification {
   title: string;
   message: string;
   actionUrl?: string;
-  type: 'message' | 'activity' | 'calendar' | 'system';
+  type: NotificationType;
   isRead: boolean;
   createdAt: Date;
   timeLabel: string;
@@ -32,11 +29,11 @@ export interface AppNotification {
   selector: 'app-notification-bell',
   standalone: true,
   imports: [
-    IconDirective, 
-    TooltipDirective, 
-    DropdownComponent, 
-    DropdownToggleDirective, 
-    DropdownMenuDirective, 
+    IconDirective,
+    TooltipDirective,
+    DropdownComponent,
+    DropdownToggleDirective,
+    DropdownMenuDirective,
     DropdownItemDirective
   ],
   template: `
@@ -75,7 +72,7 @@ export interface AppNotification {
             }
           </div>
         </div>
-        
+
         <div style="max-height: 340px; overflow-y: auto;">
           @if (notifications().length === 0) {
             <div class="text-center py-4 text-body-secondary">
@@ -84,8 +81,8 @@ export interface AppNotification {
             </div>
           } @else {
             @for (notif of notifications(); track notif.id) {
-              <button cDropdownItem 
-                      class="d-flex align-items-start border-bottom py-2 px-3 text-wrap notification-item" 
+              <button cDropdownItem
+                      class="d-flex align-items-start border-bottom py-2 px-3 text-wrap notification-item"
                       [class.notification-unread]="!notif.isRead"
                       [class.notification-read]="notif.isRead"
                       (click)="onNotificationClick(notif)"
@@ -102,9 +99,9 @@ export interface AppNotification {
                       @if (!notif.isRead) {
                         <span class="unread-dot" title="No leído"></span>
                       }
-                      <span role="button" tabindex="0" 
-                            class="notif-dismiss-btn" 
-                            (click)="dismissNotification(notif.id, $event)" 
+                      <span role="button" tabindex="0"
+                            class="notif-dismiss-btn"
+                            (click)="dismissNotification(notif.id, $event)"
                             (keydown.enter)="dismissNotification(notif.id, $event)"
                             title="Descartar"
                             aria-label="Descartar notificación">&times;</span>
@@ -224,20 +221,19 @@ export interface AppNotification {
   `],
 })
 export class NotificationBellComponent implements OnInit, OnDestroy {
-  private readonly messagesService      = inject(MessagesService);
+  private readonly notificationsService = inject(NotificationsService);
   private readonly signalrService       = inject(SignalrService);
   private readonly authService          = inject(AuthService);
   private readonly router               = inject(Router);
-  private readonly toastService         = inject(ToastService);
-  private readonly professionalsService = inject(ProfessionalsService);
-  private readonly assignmentsService   = inject(AssignmentsService);
 
   readonly notifications = signal<AppNotification[]>([]);
-  readonly unreadCount = signal(0);
+  readonly unreadCount   = signal(0);
 
-  private sub?: Subscription;
+  private notifSub?: Subscription;
   private routerSub?: Subscription;
-  private pollSub?: Subscription;
+  private userSub?: Subscription;
+  private tickSub?: Subscription;
+  private activeUserId: string | null = null;
 
   readonly unreadLabel = () => {
     const n = this.unreadCount();
@@ -247,279 +243,225 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    this.loadFromStorage();
-    this.fetchCount();
+    // Sanear cualquier clave legacy de localStorage que pudiera causar fugas entre cuentas
+    this.notificationsService.purgeLegacyStorage();
 
-    // Sincronización periódica en segundo plano cada 20 segundos
-    this.pollSub = interval(20000).subscribe(() => {
-      this.fetchCount();
+    // Reaccionar a cambios de usuario autenticado (garantiza aislamiento hermético en memoria)
+    this.userSub = this.authService.currentUser$.subscribe((user) => {
+      const nextUserId = user?.id ?? null;
+      if (nextUserId !== this.activeUserId) {
+        this.activeUserId = nextUserId;
+        this.notifications.set([]);
+        this.unreadCount.set(0);
+        if (nextUserId && this.authService.isAuthenticated()) {
+          this.loadFromServer();
+        }
+      }
     });
 
-    // Auto-marcar como leídas según la ruta actual (ej: al estar o entrar al perfil de un alumno)
+    // Auto-marcar como leídas según la ruta visitada (sincronizado contra backend)
     this.routerSub = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.checkAutoReadByUrl(event.urlAfterRedirects || event.url);
     });
-    this.checkAutoReadByUrl(this.router.url);
 
-    // Increment badge and append notification on each real-time push notification
-    this.sub = this.signalrService.notification$.subscribe((data: SignalRNotification) => {
+    // Actualizar etiquetas relativas de tiempo cada 60 segundos sin llamadas HTTP
+    this.tickSub = interval(60000).subscribe(() => {
+      this.notifications.update(arr =>
+        arr.map(n => ({ ...n, timeLabel: this.formatRelativeTime(n.createdAt) }))
+      );
+    });
+
+    // Escuchar notificaciones push en tiempo real (deduplicando por ID persistido en DB)
+    this.notifSub = this.signalrService.notification$.subscribe((data: SignalRNotification) => {
       const role = this.authService.getUserRole();
-      // Bloquear notificaciones de calendario para el Administrador
-      if (role === UserRoles.Admin) {
-        const titleLower = data.title?.toLowerCase() ?? '';
-        const urlLower = data.actionUrl?.toLowerCase() ?? '';
-        if (titleLower.includes('calendario') || urlLower.includes('calendar')) {
-          return; // Ignorar notificación de calendario para Admin
-        }
+      const type = this.normalizeType(data.type, data.title, data.actionUrl);
+
+      // Bloqueo IN-217 para rol Administrador
+      if (role === UserRoles.Admin && (type === 'calendar' || data.actionUrl?.toLowerCase().includes('calendar'))) {
+        return;
       }
 
-      const type = this.detectNotificationType(data.title, data.actionUrl);
-      const newNotif: AppNotification = {
-        id: Date.now().toString() + '-' + Math.floor(Math.random() * 1000),
+      const id = data.id || `rt-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
+
+      const incoming: AppNotification = {
+        id,
         title: data.title,
         message: data.message,
         actionUrl: data.actionUrl,
-        type: type,
-        isRead: false,
-        createdAt: new Date(),
-        timeLabel: 'Ahora'
+        type,
+        isRead: Boolean(data.isRead),
+        createdAt,
+        timeLabel: this.formatRelativeTime(createdAt),
       };
 
-      this.notifications.update(arr => [newNotif, ...arr]);
-      this.saveToStorage();
+      this.notifications.update(arr => {
+        if (data.id && arr.some(existing => existing.id === data.id)) {
+          return arr;
+        }
+        return [incoming, ...arr].slice(0, 50);
+      });
       this.updateUnreadCount();
       this.checkAutoReadByUrl(this.router.url);
     });
   }
 
-  private extractStudentKeyFromMessage(message?: string): string | null {
-    if (!message) return null;
-    const match = message.match(/alumno,\s*([^.]+)\./i);
-    if (match && match[1]) {
-      return match[1]
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .trim()
-        .replace(/[^a-z0-9]/g, '-');
-    }
-    return null;
-  }
+  private loadFromServer(): void {
+    this.notificationsService.getNotifications(1, 30, false).subscribe({
+      next: (items: NotificationDto[]) => {
+        const role = this.authService.getUserRole();
+        const mapped: AppNotification[] = items
+          .map(dto => {
+            const createdAt = new Date(dto.createdAt);
+            const type = this.normalizeType(dto.type, dto.title, dto.actionUrl ?? undefined);
+            return {
+              id: dto.id,
+              title: dto.title,
+              message: dto.message,
+              actionUrl: dto.actionUrl ?? undefined,
+              type,
+              isRead: dto.isRead,
+              createdAt,
+              timeLabel: this.formatRelativeTime(createdAt),
+            };
+          })
+          .filter(n => !(role === UserRoles.Admin && (n.type === 'calendar' || n.actionUrl?.toLowerCase().includes('calendar'))));
 
-  private recordReadNotification(notif: AppNotification): void {
-    this.recordReadId(notif.id);
-    const studentKey = this.extractStudentKeyFromMessage(notif.message);
-    if (studentKey) {
-      this.recordReadId(`assign-${studentKey}`);
-    }
-  }
-
-  private recordDismissedNotification(notif: AppNotification): void {
-    this.recordDismissedId(notif.id);
-    this.recordReadNotification(notif);
-    const studentKey = this.extractStudentKeyFromMessage(notif.message);
-    if (studentKey) {
-      this.recordDismissedId(`assign-${studentKey}`);
-    }
+        this.notifications.set(mapped);
+        this.updateUnreadCount();
+        this.checkAutoReadByUrl(this.router.url);
+      },
+      error: () => {
+        // No bloquear UI si el servidor está temporalmente inaccesible
+      },
+    });
   }
 
   onNotificationClick(notif: AppNotification): void {
     if (!notif.isRead) {
-      this.recordReadNotification(notif);
-      this.notifications.update(arr => arr.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
-      this.saveToStorage();
-      this.updateUnreadCount();
+      this.markSingleAsRead(notif.id);
     }
 
     if (notif.actionUrl) {
-      let path = notif.actionUrl;
+      let path = notif.actionUrl.trim();
       if (path.startsWith('/#')) {
         path = path.substring(2);
       } else if (path.startsWith('#')) {
         path = path.substring(1);
       }
+
       const role = this.authService.getUserRole();
-      
-      // Si el Administrador recibe por error una notificación de calendario, llevarlo a dashboard
-      if (role === UserRoles.Admin && (notif.type === 'calendar' || path.includes('calendar'))) {
+      if (role === UserRoles.Admin && (notif.type === 'calendar' || path.toLowerCase().includes('calendar'))) {
         path = '/admin/dashboard';
       } else if (!path.startsWith('/') && !path.startsWith('http')) {
-        const prefix = role === UserRoles.Professional ? '/pro/' : (role === UserRoles.FamilyRepresentative ? '/family/' : '/admin/');
+        const prefix =
+          role === UserRoles.Professional
+            ? '/pro/'
+            : role === UserRoles.FamilyRepresentative
+              ? '/family/'
+              : '/admin/';
         path = prefix + path;
       }
+
       this.router.navigateByUrl(path);
     }
   }
 
   markAllAsRead(event?: Event): void {
     event?.stopPropagation();
-    this.notifications.update(arr => arr.map(n => {
-      this.recordReadNotification(n);
-      return { ...n, isRead: true };
-    }));
-    this.saveToStorage();
+    if (this.unreadCount() === 0) return;
+
+    this.notifications.update(arr => arr.map(n => ({ ...n, isRead: true })));
     this.updateUnreadCount();
+
+    this.notificationsService.markAllAsRead().subscribe({
+      error: () => this.loadFromServer(),
+    });
   }
 
   clearAll(event: Event): void {
     event.stopPropagation();
-    const dismissed = this.getDismissedIds();
-    this.notifications().forEach(n => {
-      this.recordDismissedNotification(n);
-      dismissed.add(n.id);
-    });
-    try {
-      localStorage.setItem(this.getDismissedIdsKey(), JSON.stringify(Array.from(dismissed)));
-    } catch {
-      // ignore
-    }
+    if (this.notifications().length === 0) return;
+
     this.notifications.set([]);
-    this.saveToStorage();
     this.updateUnreadCount();
+
+    this.notificationsService.dismissAll().subscribe({
+      error: () => this.loadFromServer(),
+    });
   }
 
   dismissNotification(notifId: string, event: Event): void {
     event.stopPropagation();
-    const target = this.notifications().find(n => n.id === notifId);
-    if (target) {
-      this.recordDismissedNotification(target);
-    } else {
-      this.recordReadId(notifId);
-      this.recordDismissedId(notifId);
-    }
+
     this.notifications.update(arr => arr.filter(n => n.id !== notifId));
-    this.saveToStorage();
     this.updateUnreadCount();
+
+    if (!notifId.startsWith('rt-')) {
+      this.notificationsService.dismiss(notifId).subscribe({
+        error: () => this.loadFromServer(),
+      });
+    }
   }
 
   getNotificationIcon(notif: AppNotification): string {
     switch (notif.type) {
-      case 'message':  return 'cilEnvelopeClosed';
-      case 'activity': return 'cilCheckCircle';
-      case 'calendar': return 'cilCalendar';
-      default:         return 'cilInfo';
+      case 'message':    return 'cilEnvelopeClosed';
+      case 'activity':   return 'cilCheckCircle';
+      case 'calendar':   return 'cilCalendar';
+      case 'report':     return 'cilNotes';
+      case 'assignment': return 'cilUserFollow';
+      case 'alert':      return 'cilWarning';
+      default:           return 'cilInfo';
     }
   }
 
   getNotificationColorClass(notif: AppNotification): string {
     switch (notif.type) {
-      case 'message':  return 'text-primary';
-      case 'activity': return 'text-success';
-      case 'calendar': return 'text-warning';
-      default:         return 'text-info';
+      case 'message':    return 'text-primary';
+      case 'activity':   return 'text-success';
+      case 'calendar':   return 'text-warning';
+      case 'report':     return 'text-info';
+      case 'assignment': return 'text-primary';
+      case 'alert':      return 'text-danger';
+      default:           return 'text-secondary';
     }
   }
 
-  private detectNotificationType(title: string, actionUrl?: string): 'message' | 'activity' | 'calendar' | 'system' {
-    const t = title.toLowerCase();
-    const url = actionUrl?.toLowerCase() ?? '';
-    if (t.includes('mensaje') || url.includes('messages')) return 'message';
-    if (t.includes('actividad') || url.includes('persons') || url.includes('classroom') || url.includes('evaluations') || url.includes('activities')) return 'activity';
-    if (t.includes('calendario') || url.includes('calendar')) return 'calendar';
+  private markSingleAsRead(notifId: string): void {
+    this.notifications.update(arr =>
+      arr.map(n => (n.id === notifId ? { ...n, isRead: true } : n))
+    );
+    this.updateUnreadCount();
+
+    if (!notifId.startsWith('rt-')) {
+      this.notificationsService.markAsRead(notifId).subscribe({
+        error: () => { /* non-critical */ },
+      });
+    }
+  }
+
+  private normalizeType(rawType?: string, title?: string, actionUrl?: string): NotificationType {
+    const valid: NotificationType[] = ['calendar', 'activity', 'report', 'message', 'assignment', 'alert', 'system'];
+    const normalized = rawType?.trim().toLowerCase() as NotificationType | undefined;
+    if (normalized && valid.includes(normalized)) {
+      return normalized;
+    }
+
+    const t = (title ?? '').toLowerCase();
+    const u = (actionUrl ?? '').toLowerCase();
+    if (t.includes('calendario') || t.includes('tutoría') || t.includes('reprogramado') || u.includes('calendar')) return 'calendar';
+    if (t.includes('mensaje') || t.includes('respuesta') || u.includes('messages')) return 'message';
+    if (t.includes('reporte') || u.includes('reports')) return 'report';
+    if (t.includes('alerta') || t.includes('frustraci') || t.includes('bloqueada') || t.includes('suspendid')) return 'alert';
+    if (t.includes('alumno asignado') || t.includes('transferid') || t.includes('desvinculad') || t.includes('vinculad')) return 'assignment';
+    if (t.includes('actividad') || t.includes('nivel') || u.includes('activities') || u.includes('evaluations')) return 'activity';
     return 'system';
   }
 
-  private getEffectiveUserId(): string {
-    const user = this.authService.getCurrentUser();
-    if (user?.email) return user.email.toLowerCase().trim();
-    const tokenUser = this.authService.getUserFromToken();
-    if (tokenUser?.email) return tokenUser.email.toLowerCase().trim();
-    return this.authService.getUserRole() ?? 'default_user';
-  }
-
-  private getStorageKey(): string {
-    return `app_notifications_${this.getEffectiveUserId()}`;
-  }
-
-  private getReadIdsKey(): string {
-    return `app_notifications_read_${this.getEffectiveUserId()}`;
-  }
-
-  private getDismissedIdsKey(): string {
-    return `app_notifications_dismissed_${this.getEffectiveUserId()}`;
-  }
-
-  private getLastAssignmentSyncKey(): string {
-    return `app_last_assignment_sync_${this.getEffectiveUserId()}`;
-  }
-
-  private getReadIds(): Set<string> {
-    try {
-      const stored = localStorage.getItem(this.getReadIdsKey());
-      if (stored) {
-        return new Set<string>(JSON.parse(stored));
-      }
-      // Buscar en keys previas para migración automática transparente
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith('app_notifications_read_')) {
-          const oldData = localStorage.getItem(k);
-          if (oldData) {
-            const arr = JSON.parse(oldData);
-            if (Array.isArray(arr) && arr.length > 0) {
-              const s = new Set<string>(arr);
-              localStorage.setItem(this.getReadIdsKey(), JSON.stringify(arr));
-              return s;
-            }
-          }
-        }
-      }
-    } catch {
-      // ignore
-    }
-    return new Set<string>();
-  }
-
-  private recordReadId(id: string): void {
-    const set = this.getReadIds();
-    set.add(id);
-    try {
-      localStorage.setItem(this.getReadIdsKey(), JSON.stringify(Array.from(set)));
-    } catch {
-      // ignore
-    }
-  }
-
-  private getDismissedIds(): Set<string> {
-    try {
-      const stored = localStorage.getItem(this.getDismissedIdsKey());
-      if (stored) {
-        return new Set<string>(JSON.parse(stored));
-      }
-      // Buscar en keys previas para migración automática transparente
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith('app_notifications_dismissed_')) {
-          const oldData = localStorage.getItem(k);
-          if (oldData) {
-            const arr = JSON.parse(oldData);
-            if (Array.isArray(arr) && arr.length > 0) {
-              const s = new Set<string>(arr);
-              localStorage.setItem(this.getDismissedIdsKey(), JSON.stringify(arr));
-              return s;
-            }
-          }
-        }
-      }
-    } catch {
-      // ignore
-    }
-    return new Set<string>();
-  }
-
-  private recordDismissedId(id: string): void {
-    const set = this.getDismissedIds();
-    set.add(id);
-    try {
-      localStorage.setItem(this.getDismissedIdsKey(), JSON.stringify(Array.from(set)));
-    } catch {
-      // ignore
-    }
-  }
-
-  private normalizeUrl(url: string | undefined): string {
+  private normalizeUrl(url?: string): string {
     if (!url) return '';
     let normalized = url.trim();
     if (normalized.startsWith('/#')) {
@@ -538,139 +480,21 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   }
 
   private checkAutoReadByUrl(url: string): void {
-    if (!url) return;
     const currentPath = this.normalizeUrl(url);
     if (!currentPath) return;
 
-    // Detectar si estamos en el detalle de un alumno (/pro/persons/:id)
-    const personMatch = currentPath.match(/\/persons\/([a-z0-9-]+)/);
-    const personId = personMatch ? personMatch[1] : null;
-
-    // Detectar si estamos en la lista de alumnos / perfiles (/pro/persons)
-    const isPersonsList = currentPath === '/pro/persons' || currentPath.endsWith('/persons');
-
-    // Detectar si estamos en mensajes
-    const isMessages = currentPath.includes('/messages');
-
-    let changed = false;
-    this.notifications.update(arr =>
-      arr.map(n => {
-        if (n.isRead) return n;
-
-        const notifPath = this.normalizeUrl(n.actionUrl);
-        let shouldMarkRead = false;
-
-        // 1. Coincidencia de ruta exacta
-        if (notifPath && currentPath === notifPath) {
-          shouldMarkRead = true;
-        }
-
-        // 2. Detalle de alumno específico
-        if (personId && (n.id.includes(personId) || notifPath.includes(personId))) {
-          shouldMarkRead = true;
-        }
-
-        // 3. Vista de lista de perfiles / aula
-        if (isPersonsList && (notifPath === '/pro/persons' || notifPath.endsWith('/persons') || n.id.startsWith('assign-'))) {
-          shouldMarkRead = true;
-        }
-
-        // 4. Vista de mensajes
-        if (isMessages && (n.type === 'message' || notifPath.includes('messages') || n.id === 'unread-messages-summary')) {
-          shouldMarkRead = true;
-        }
-
-        if (shouldMarkRead) {
-          changed = true;
-          this.recordReadNotification(n);
-          return { ...n, isRead: true };
-        }
-
-        return n;
-      })
-    );
-
-    if (changed) {
-      this.saveToStorage();
-      this.updateUnreadCount();
-    }
-  }
-
-  private loadFromStorage(): void {
-    const storageKey = this.getStorageKey();
-    let stored = localStorage.getItem(storageKey);
-    if (!stored) {
-      const roleKey = `app_notifications_${this.authService.getUserRole() ?? 'guest'}`;
-      stored = localStorage.getItem(roleKey) || localStorage.getItem('app_notifications');
-      if (!stored) {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('app_notifications_') && !k.includes('_read_') && !k.includes('_dismissed_') && !k.includes('_sync_')) {
-            stored = localStorage.getItem(k);
-            if (stored) break;
-          }
-        }
-      }
-    }
-    const readIds = this.getReadIds();
-    const dismissedIds = this.getDismissedIds();
-    if (stored) {
-      try {
-        let parsed = JSON.parse(stored) as AppNotification[];
-        // Filtrar notificaciones descartadas y seed demos
-        parsed = parsed.filter(n => {
-          if (dismissedIds.has(n.id) || n.id.startsWith('seed-')) return false;
-          const studentKey = this.extractStudentKeyFromMessage(n.message);
-          if (studentKey && dismissedIds.has(`assign-${studentKey}`)) return false;
-          return true;
-        });
-
-        // Deduplicar agresivamente cualquier acumulación previa por título/mensaje
-        const seen = new Set<string>();
-        const deduplicated: AppNotification[] = [];
-        for (const n of parsed) {
-          const studentKey = this.extractStudentKeyFromMessage(n.message);
-          const dedupKey = studentKey 
-            ? `assign:${studentKey}` 
-            : `${n.type || 'sys'}:${(n.title || '').trim().toLowerCase()}:${(n.message || '').trim().toLowerCase()}`;
-
-          if (!seen.has(dedupKey)) {
-            seen.add(dedupKey);
-            n.createdAt = new Date(n.createdAt);
-            if (readIds.has(n.id) || (studentKey && readIds.has(`assign-${studentKey}`))) {
-              n.isRead = true;
-            }
-            deduplicated.push(n);
-          } else if (n.isRead) {
-            const first = deduplicated.find(x => {
-              const k = this.extractStudentKeyFromMessage(x.message);
-              return k ? `assign:${k}` === dedupKey : `${x.type || 'sys'}:${(x.title || '').trim().toLowerCase()}:${(x.message || '').trim().toLowerCase()}` === dedupKey;
-            });
-            if (first) first.isRead = true;
-          }
-        }
-
-        const role = this.authService.getUserRole();
-        let filtered = deduplicated;
-        if (role === UserRoles.Admin) {
-          filtered = filtered.filter(n => n.type !== 'calendar' && !n.actionUrl?.includes('calendar'));
-        }
-        this.notifications.set(filtered);
-        this.saveToStorage();
-        this.updateUnreadCount();
-        return;
-      } catch {
-        // Fallback
+    const toMark: string[] = [];
+    for (const n of this.notifications()) {
+      if (n.isRead) continue;
+      const notifPath = this.normalizeUrl(n.actionUrl);
+      if (notifPath && notifPath === currentPath) {
+        toMark.push(n.id);
       }
     }
 
-    this.notifications.set([]);
-    this.updateUnreadCount();
-  }
-
-  private saveToStorage(): void {
-    const list = this.notifications().slice(0, 30);
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(list));
+    if (toMark.length > 0) {
+      toMark.forEach(id => this.markSingleAsRead(id));
+    }
   }
 
   private updateUnreadCount(): void {
@@ -678,128 +502,23 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     this.unreadCount.set(unread);
   }
 
-  private fetchCount(): void {
-    this.messagesService.getUnreadCount().subscribe({
-      next: (n) => {
-        const readIds = this.getReadIds();
-        const dismissedIds = this.getDismissedIds();
-        if (n > 0) {
-          const list = this.notifications();
-          const hasMsgNotif = list.some(notif => notif.id === 'unread-messages-summary' && !notif.isRead);
-          const isAlreadyRead = readIds.has('unread-messages-summary');
-          const isDismissed = dismissedIds.has('unread-messages-summary');
-
-          if (!hasMsgNotif && !isAlreadyRead && !isDismissed) {
-            const role = this.authService.getUserRole();
-            const actionUrl = role === UserRoles.Professional ? '/pro/messages' : role === UserRoles.FamilyRepresentative ? '/family/messages' : '/admin/messages';
-            const msgNotif: AppNotification = {
-              id: 'unread-messages-summary',
-              title: 'Mensajes sin leer',
-              message: `Tenés ${n} mensaje(s) sin leer en tu bandeja de entrada.`,
-              actionUrl: actionUrl,
-              type: 'message',
-              isRead: false,
-              createdAt: new Date(),
-              timeLabel: 'Ahora'
-            };
-            this.notifications.update(arr => [msgNotif, ...arr.filter(x => x.id !== 'unread-messages-summary')]);
-            this.saveToStorage();
-          }
-        } else {
-          this.notifications.update(arr => arr.map(x => x.id === 'unread-messages-summary' ? { ...x, isRead: true } : x));
-          this.saveToStorage();
-        }
-        this.updateUnreadCount();
-        this.checkAutoReadByUrl(this.router.url);
-      },
-      error: ()  => { /* non-critical, skip */ },
-    });
-
-    // Para el rol Profesional: sincronizar asignaciones recientes si estaba desconectado
-    if (this.authService.getUserRole() === UserRoles.Professional) {
-      this.professionalsService.getMyProfile().pipe(
-        switchMap(prof => this.assignmentsService.getPersonsByProfessional(prof.id))
-      ).subscribe({
-        next: (persons) => {
-          if (!persons || persons.length === 0) return;
-          const current = this.notifications();
-          const readIds = this.getReadIds();
-          const dismissedIds = this.getDismissedIds();
-          const syncKey = this.getLastAssignmentSyncKey();
-          const lastSyncStr = localStorage.getItem(syncKey);
-
-          // Si es la primera vez que carga (ej: inicio con base de datos ya poblada o seeded),
-          // fijamos la marca de tiempo a 'ahora' para no inundar con 40 notificaciones viejas.
-          if (!lastSyncStr) {
-            localStorage.setItem(syncKey, new Date().toISOString());
-            return;
-          }
-
-          const lastSyncDate = new Date(lastSyncStr);
-          let changed = false;
-          const newNotifications: AppNotification[] = [];
-
-          for (const p of persons) {
-            const assignedDate = new Date(p.assignedAt);
-            // Solo considerar asignaciones posteriores a la última sincronización
-            if (assignedDate > lastSyncDate) {
-              const studentKey = (p.personFullName || p.personFirstName || 'alumno')
-                .toLowerCase()
-                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                .trim()
-                .replace(/[^a-z0-9]/g, '-');
-              const notifId = `assign-${studentKey}`;
-
-              if (dismissedIds.has(notifId) || dismissedIds.has(p.personId) || dismissedIds.has(`assign-${p.personId}`)) {
-                continue;
-              }
-
-              const isAlreadyRead = readIds.has(notifId) || readIds.has(p.personId) || readIds.has(`assign-${p.personId}`);
-              const existingNotif = current.find(n =>
-                n.id === notifId ||
-                n.id === `assign-${p.personId}` ||
-                (n.message && n.message.toLowerCase().includes(p.personFullName.toLowerCase()))
-              );
-
-              if (existingNotif) {
-                existingNotif.actionUrl = `/pro/persons/${p.personId}`;
-                if (isAlreadyRead && !existingNotif.isRead) {
-                  existingNotif.isRead = true;
-                  changed = true;
-                }
-              } else if (!isAlreadyRead) {
-                newNotifications.push({
-                  id: notifId,
-                  title: '🎓 Nuevo alumno asignado',
-                  message: `Tienes un nuevo alumno, ${p.personFullName}. Llená el perfil funcional.`,
-                  actionUrl: `/pro/persons/${p.personId}`,
-                  type: 'activity',
-                  isRead: false,
-                  createdAt: assignedDate,
-                  timeLabel: 'Reciente'
-                });
-                changed = true;
-              }
-            }
-          }
-
-          localStorage.setItem(syncKey, new Date().toISOString());
-
-          if (changed) {
-            this.notifications.update(list => [...newNotifications, ...list]);
-            this.saveToStorage();
-            this.updateUnreadCount();
-          }
-          this.checkAutoReadByUrl(this.router.url);
-        },
-        error: () => { /* non-critical, skip */ }
-      });
-    }
+  private formatRelativeTime(date: Date): string {
+    const diffMs = Date.now() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Ahora';
+    if (diffMin < 60) return `Hace ${diffMin} min`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `Hace ${diffHours} h`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 7) return `Hace ${diffDays} días`;
+    return date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.notifSub?.unsubscribe();
     this.routerSub?.unsubscribe();
-    this.pollSub?.unsubscribe();
+    this.userSub?.unsubscribe();
+    this.tickSub?.unsubscribe();
   }
 }

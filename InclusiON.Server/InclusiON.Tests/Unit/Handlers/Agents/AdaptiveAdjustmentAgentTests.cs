@@ -16,12 +16,13 @@ namespace InclusiON.Tests.Unit.Handlers.Agents;
 /// </summary>
 public class AdaptiveAdjustmentAgentTests
 {
-    private readonly IAdaptiveEngineRepository _repo    = Substitute.For<IAdaptiveEngineRepository>();
-    private readonly IUnitOfWork               _uow     = Substitute.For<IUnitOfWork>();
-    private readonly IBackgroundJobRepository  _jobs    = Substitute.For<IBackgroundJobRepository>();
+    private readonly IAdaptiveEngineRepository _repo                = Substitute.For<IAdaptiveEngineRepository>();
+    private readonly IUnitOfWork               _uow                 = Substitute.For<IUnitOfWork>();
+    private readonly IBackgroundJobRepository  _jobs                = Substitute.For<IBackgroundJobRepository>();
+    private readonly INotificationService      _notificationService = Substitute.For<INotificationService>();
 
     private AdaptiveAdjustmentAgent BuildSut() =>
-        new(_repo, _uow, _jobs, NullLogger<AdaptiveAdjustmentAgent>.Instance);
+        new(_repo, _uow, _jobs, NullLogger<AdaptiveAdjustmentAgent>.Instance, _notificationService);
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -230,8 +231,9 @@ public class AdaptiveAdjustmentAgentTests
     [Fact]
     public async Task HandleAsync_FrustrationAtThreshold_TriggersIntervention()
     {
-        var config   = DefaultConfig();     // FrustrationThreshold = 4
-        var activity = MakeActivity(config: config, difficulty: 3);
+        var profUserId = Guid.NewGuid();
+        var config     = DefaultConfig();     // FrustrationThreshold = 4
+        var activity   = MakeActivity(config: config, difficulty: 3);
         _repo.GetWithConfigAsync(1, Arg.Any<CancellationToken>()).Returns(activity);
         _repo.GetRecentResponsesByAssignmentAsync(5, Arg.Any<int>(), Arg.Any<CancellationToken>())
              .Returns(new List<ActivityResponse>
@@ -239,18 +241,18 @@ public class AdaptiveAdjustmentAgentTests
                  MakeResponse(ActivityResponseResult.Exito, pct: 75m, frustration: 4),
              });
 
-        await BuildSut().HandleAsync(MakeJob(profId: "prof-abc"), default);
+        await BuildSut().HandleAsync(MakeJob(profId: profUserId.ToString()), default);
 
         activity.DifficultyLevel.Should().Be(2);   // 3 → 2
         await _repo.Received(1).AddAdjustmentLogAsync(
             Arg.Is<AdaptiveAdjustmentLog>(l => l.AdjustmentType == "FrustrationIntervention"),
             Arg.Any<CancellationToken>());
-        // Should enqueue a push notification for the professional
-        await _jobs.Received(1).CreateAsync(
-            JobTypes.Push,
-            Arg.Any<string>(),
-            Arg.Any<DateTime?>(),
-            Arg.Any<int>(),
+        // Should persist and push an alert notification for the professional
+        await _notificationService.Received(1).NotifyAsync(
+            Arg.Is<NotificationMessage>(m =>
+                m.UserId == profUserId &&
+                m.EventCode == NotificationEventCodes.FrustrationAlert &&
+                m.Title.Contains("frustración")),
             Arg.Any<CancellationToken>());
     }
 
@@ -288,6 +290,8 @@ public class AdaptiveAdjustmentAgentTests
         // Adjustment still applied
         activity.DifficultyLevel.Should().Be(2);
         // But no push notification
+        await _notificationService.DidNotReceive().NotifyAsync(
+            Arg.Any<NotificationMessage>(), Arg.Any<CancellationToken>());
         await _jobs.DidNotReceive().CreateAsync(
             JobTypes.Push, Arg.Any<string>(), Arg.Any<DateTime?>(), Arg.Any<int>(), Arg.Any<CancellationToken>());
     }

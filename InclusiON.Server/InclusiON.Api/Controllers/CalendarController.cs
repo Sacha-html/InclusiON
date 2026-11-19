@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
-using InclusiON.Domain.Models;
 using InclusiON.Domain.Enums;
+using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Requests.Calendar;
 using InclusiON.DTOs.Responses;
@@ -30,8 +31,10 @@ namespace InclusiON.Api.Controllers
         private readonly IPersonsRepository _personsRepository;
         private readonly IAssignmentsRepository _assignmentsRepository;
         private readonly IHttpContextService _httpContextService;
-        private readonly IBackgroundJobRepository _backgroundJobs;
+        private readonly INotificationService _notificationService;
+        private readonly IDateTimeProvider _dateTime;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<CalendarController> _logger;
 
         public CalendarController(
             ICalendarEventsRepository calendarEventsRepository,
@@ -40,17 +43,21 @@ namespace InclusiON.Api.Controllers
             IPersonsRepository personsRepository,
             IAssignmentsRepository assignmentsRepository,
             IHttpContextService httpContextService,
-            IBackgroundJobRepository backgroundJobs,
-            IUnitOfWork unitOfWork)
+            INotificationService notificationService,
+            IDateTimeProvider dateTime,
+            IUnitOfWork unitOfWork,
+            ILogger<CalendarController> logger)
         {
             _calendarEventsRepository = calendarEventsRepository;
-            _professionalsRepository = professionalsRepository;
-            _familyRepository = familyRepository;
-            _personsRepository = personsRepository;
-            _assignmentsRepository = assignmentsRepository;
-            _httpContextService = httpContextService;
-            _backgroundJobs = backgroundJobs;
-            _unitOfWork = unitOfWork;
+            _professionalsRepository  = professionalsRepository;
+            _familyRepository         = familyRepository;
+            _personsRepository        = personsRepository;
+            _assignmentsRepository    = assignmentsRepository;
+            _httpContextService       = httpContextService;
+            _notificationService      = notificationService;
+            _dateTime                 = dateTime;
+            _unitOfWork               = unitOfWork;
+            _logger                   = logger;
         }
 
         [HttpGet]
@@ -101,171 +108,113 @@ namespace InclusiON.Api.Controllers
                     return BadRequest(ApiResponse<CalendarEventResponse>.ErrorResult(ErrorCode.ValidationFailed, "El título es obligatorio."));
                 }
 
-                if (!DateTime.TryParse(request.Date, out var dateVal))
+                if (!DateTime.TryParseExact(request.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateVal)
+                    && !DateTime.TryParse(request.Date, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateVal))
                 {
                     return BadRequest(ApiResponse<CalendarEventResponse>.ErrorResult(ErrorCode.ValidationFailed, "Fecha inválida. Formato esperado: YYYY-MM-DD"));
+                }
+
+                if (DateOnly.FromDateTime(dateVal) < _dateTime.Today)
+                {
+                    return BadRequest(ApiResponse<CalendarEventResponse>.ErrorResult(ErrorCode.ValidationFailed, "No se pueden agendar eventos en fechas pasadas."));
+                }
+
+                var targetScope = (request.TargetScope ?? "all").Trim().ToLowerInvariant();
+                if (targetScope != "all" && targetScope != "single")
+                {
+                    return BadRequest(ApiResponse<CalendarEventResponse>.ErrorResult(ErrorCode.ValidationFailed, "Alcance de destinatario inválido."));
                 }
 
                 // Garantizar UTC para PostgreSQL
                 var utcDate = DateTime.SpecifyKind(dateVal.Date, DateTimeKind.Utc);
 
                 CalendarEvent? ev = null;
-                if (!string.IsNullOrEmpty(request.Id) && Guid.TryParse(request.Id, out var eventId))
+                bool isEdit = false;
+                string? previousScope = null;
+                Guid? previousStudentId = null;
+
+                if (request.Id.HasValue && request.Id.Value != Guid.Empty)
                 {
-                    ev = await _calendarEventsRepository.GetByIdAsync(eventId, cancellationToken);
+                    ev = await _calendarEventsRepository.GetByIdAsync(request.Id.Value, cancellationToken);
                     if (ev == null) return NotFound();
                     if (ev.CreatedByProfessionalId != professional.Id) return Forbid();
+
+                    isEdit = true;
+                    previousScope = ev.TargetScope;
+                    previousStudentId = ev.StudentId;
                 }
 
                 Guid? studentId = null;
                 string? studentName = "Todos los alumnos a cargo";
 
-                if (request.TargetScope == "single" && !string.IsNullOrEmpty(request.StudentId))
+                if (targetScope == "single")
                 {
-                    if (Guid.TryParse(request.StudentId, out var parsedStudentId))
+                    if (!request.StudentId.HasValue || request.StudentId.Value == Guid.Empty)
                     {
-                        studentId = parsedStudentId;
-                        var student = await _personsRepository.GetByIdAsync(parsedStudentId, cancellationToken);
-                        if (student != null)
-                        {
-                            studentName = $"{student.FirstName} {student.LastName}";
-                        }
+                        return BadRequest(ApiResponse<CalendarEventResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            "Debe seleccionar un alumno para una actividad individual."));
                     }
+
+                    var assignment = await _assignmentsRepository.GetAssignmentAsync(professional.Id, request.StudentId.Value, cancellationToken);
+                    if (assignment == null || !assignment.IsActive)
+                    {
+                        return Forbid();
+                    }
+
+                    var student = await _personsRepository.GetByIdAsync(request.StudentId.Value, cancellationToken);
+                    if (student == null || !student.IsActive)
+                    {
+                        return NotFound(ApiResponse<CalendarEventResponse>.NotFound("Alumno"));
+                    }
+
+                    studentId = student.Id;
+                    studentName = $"{student.FirstName} {student.LastName}".Trim();
                 }
 
                 if (ev == null)
                 {
-                    // New Event
                     ev = new CalendarEvent
                     {
-                        Title = request.Title.Trim(),
-                        Type = request.Type,
-                        Date = utcDate,
-                        Time = request.Time,
-                        Description = request.Description?.Trim(),
-                        StudentId = studentId,
-                        StudentName = studentName,
+                        Title                   = request.Title.Trim(),
+                        Type                    = request.Type.Trim(),
+                        Date                    = utcDate,
+                        Time                    = request.Time.Trim(),
+                        Description             = request.Description?.Trim(),
+                        StudentId               = studentId,
+                        StudentName             = studentName,
                         CreatedByProfessionalId = professional.Id,
-                        TargetScope = request.TargetScope ?? "all"
+                        TargetScope             = targetScope
                     };
                     await _calendarEventsRepository.CreateAsync(ev, cancellationToken);
                 }
                 else
                 {
-                    // Edit Event
-                    ev.Title = request.Title.Trim();
-                    ev.Type = request.Type;
-                    ev.Date = utcDate;
-                    ev.Time = request.Time;
+                    ev.Title       = request.Title.Trim();
+                    ev.Type        = request.Type.Trim();
+                    ev.Date        = utcDate;
+                    ev.Time        = request.Time.Trim();
                     ev.Description = request.Description?.Trim();
-                    ev.StudentId = studentId;
+                    ev.StudentId   = studentId;
                     ev.StudentName = studentName;
-                    ev.TargetScope = request.TargetScope ?? "all";
-                    ev.UpdatedAt = DateTime.UtcNow;
+                    ev.TargetScope = targetScope;
+                    ev.UpdatedAt   = _dateTime.UtcNow;
                     await _calendarEventsRepository.UpdateAsync(ev, cancellationToken);
                 }
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                // Notificaciones de calendario segmentadas
-                await SendCalendarNotificationsAsync(professional, request, ev, studentId, studentName, cancellationToken);
+                // Notificaciones persistentes + tiempo real a todos los tutores activos alcanzados
+                await NotifyCalendarEventSavedAsync(
+                    professional, ev, isEdit, previousScope, previousStudentId, cancellationToken);
 
+                ev.CreatedByProfessional = professional;
                 return Ok(ApiResponse<CalendarEventResponse>.SuccessResult(CalendarEventResponse.From(ev)));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al guardar evento de calendario");
                 return BadRequest(ApiResponse<CalendarEventResponse>.ErrorResult(ErrorCode.InternalError, $"Error al procesar el evento: {ex.Message}"));
-            }
-        }
-
-        private async Task SendCalendarNotificationsAsync(
-            Professional professional,
-            SaveCalendarEventRequest request,
-            CalendarEvent ev,
-            Guid? studentId,
-            string? studentName,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                var professionalName = $"{professional.FirstName} {professional.LastName}";
-
-                if (request.TargetScope == "single" && studentId.HasValue)
-                {
-                    var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(studentId.Value, cancellationToken);
-                    var activeReps = representatives.Where(r => r.IsActive && r.Representative.IsActive).ToList();
-
-                    if (!activeReps.Any()) return;
-
-                    List<PersonRepresentative> targetReps;
-
-                    // Regla de Negocio:
-                    // 1. Si el tipo es "Tutoría" (Tutoría / Tutoría Personalizada): Solo al tutor principal (IsPrimary)
-                    // 2. Si el tipo es "Clase" o "Tarea": A todos los tutores asignados
-                    if (request.Type.Equals("Tutoría", StringComparison.OrdinalIgnoreCase))
-                    {
-                        var primary = activeReps.FirstOrDefault(r => r.IsPrimary) ?? activeReps.First();
-                        targetReps = new List<PersonRepresentative> { primary };
-                    }
-                    else
-                    {
-                        targetReps = activeReps;
-                    }
-
-                    foreach (var rep in targetReps)
-                    {
-                        var tutorUserId = rep.Representative.UserId.ToString();
-
-                        await _backgroundJobs.CreateAsync(
-                            JobTypes.Push,
-                            System.Text.Json.JsonSerializer.Serialize(new NotificationPayload
-                            {
-                                UserId = tutorUserId,
-                                Title = $"Nuevo evento de calendario: {request.Type}",
-                                Message = $"{professionalName} agendó una {request.Type} '{request.Title}' para {studentName}.",
-                                ActionUrl = "calendar",
-                                SendEmailFallback = false
-                            }),
-                            maxRetries: 3,
-                            cancellationToken: cancellationToken);
-                    }
-                }
-                else if (request.TargetScope == "all")
-                {
-                    // Notificación general (Clase / Tarea general) a todos los tutores de los alumnos asignados
-                    var assignments = await _assignmentsRepository.GetPersonsByProfessionalIdAsync(professional.Id, cancellationToken);
-                    var activePersonIds = assignments.Where(a => a.IsActive).Select(a => a.PersonId).Distinct().ToList();
-
-                    var notifiedTutorIds = new HashSet<Guid>();
-
-                    foreach (var personId in activePersonIds)
-                    {
-                        var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(personId, cancellationToken);
-                        foreach (var rep in representatives.Where(r => r.IsActive && r.Representative.IsActive))
-                        {
-                            if (notifiedTutorIds.Add(rep.Representative.UserId))
-                            {
-                                var tutorUserId = rep.Representative.UserId.ToString();
-                                await _backgroundJobs.CreateAsync(
-                                    JobTypes.Push,
-                                    System.Text.Json.JsonSerializer.Serialize(new NotificationPayload
-                                    {
-                                        UserId = tutorUserId,
-                                        Title = $"Nuevo evento general: {request.Type}",
-                                        Message = $"{professionalName} agendó una {request.Type} general '{request.Title}'.",
-                                        ActionUrl = "calendar",
-                                        SendEmailFallback = false
-                                    }),
-                                    maxRetries: 3,
-                                    cancellationToken: cancellationToken);
-                            }
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // No romper la respuesta HTTP si la encolación de notificaciones falla
             }
         }
 
@@ -287,7 +236,169 @@ namespace InclusiON.Api.Controllers
             await _calendarEventsRepository.DeleteAsync(ev, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            await NotifyCalendarEventDeletedAsync(professional, ev, cancellationToken);
+
             return Ok(ApiResponse<object>.SuccessResult("Evento eliminado exitosamente."));
+        }
+
+        private async Task NotifyCalendarEventSavedAsync(
+            Professional professional,
+            CalendarEvent ev,
+            bool isEdit,
+            string? previousScope,
+            Guid? previousStudentId,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var professionalName = $"{professional.FirstName} {professional.LastName}".Trim();
+                var formattedDate = ev.Date.ToString("dd/MM/yyyy");
+                var notifications = new List<NotificationMessage>();
+
+                // Si al editar cambió el alumno objetivo de un evento individual, avisar cancelación a los tutores anteriores
+                if (isEdit && previousScope == "single" && previousStudentId.HasValue && previousStudentId != ev.StudentId)
+                {
+                    var oldTutorIds = await GetActiveTutorUserIdsForStudentAsync(previousStudentId.Value, cancellationToken);
+                    foreach (var tutorUserId in oldTutorIds)
+                    {
+                        notifications.Add(new NotificationMessage(
+                            UserId: tutorUserId,
+                            Type: NotificationTypes.Calendar,
+                            EventCode: NotificationEventCodes.CalendarEventDeleted,
+                            Title: $"Evento cancelado: {ev.Type}",
+                            Message: $"{professionalName} retiró la {ev.Type} \"{ev.Title}\" del calendario de tu alumno a cargo.",
+                            ActionUrl: "/family/calendar"));
+                    }
+                }
+
+                var isNewForCurrentTarget = !isEdit || (previousScope == "single" && previousStudentId != ev.StudentId);
+                var eventCode = isNewForCurrentTarget
+                    ? NotificationEventCodes.CalendarEventCreated
+                    : NotificationEventCodes.CalendarEventUpdated;
+
+                if (ev.TargetScope == "single" && ev.StudentId.HasValue)
+                {
+                    // Todos los tutores activos del alumno reciben notificación en Tutoría, Clase y Tarea
+                    var tutorIds = await GetActiveTutorUserIdsForStudentAsync(ev.StudentId.Value, cancellationToken);
+                    var title = isNewForCurrentTarget
+                        ? $"Nuevo evento en calendario: {ev.Type}"
+                        : $"Evento reprogramado: {ev.Type}";
+                    var verb = isNewForCurrentTarget ? "agendó" : "modificó";
+                    var message = $"{professionalName} {verb} una {ev.Type} \"{ev.Title}\" para {ev.StudentName} el {formattedDate} a las {ev.Time} hs.";
+
+                    foreach (var tutorUserId in tutorIds)
+                    {
+                        notifications.Add(new NotificationMessage(
+                            UserId: tutorUserId,
+                            Type: NotificationTypes.Calendar,
+                            EventCode: eventCode,
+                            Title: title,
+                            Message: message,
+                            ActionUrl: "/family/calendar"));
+                    }
+                }
+                else if (ev.TargetScope == "all")
+                {
+                    var tutorIds = await GetActiveTutorUserIdsForProfessionalAsync(professional.Id, cancellationToken);
+                    var title = isNewForCurrentTarget
+                        ? $"Nuevo evento general: {ev.Type}"
+                        : $"Evento general reprogramado: {ev.Type}";
+                    var verb = isNewForCurrentTarget ? "agendó" : "modificó";
+                    var message = $"{professionalName} {verb} una {ev.Type} general \"{ev.Title}\" el {formattedDate} a las {ev.Time} hs.";
+
+                    foreach (var tutorUserId in tutorIds)
+                    {
+                        notifications.Add(new NotificationMessage(
+                            UserId: tutorUserId,
+                            Type: NotificationTypes.Calendar,
+                            EventCode: eventCode,
+                            Title: title,
+                            Message: message,
+                            ActionUrl: "/family/calendar"));
+                    }
+                }
+
+                await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error enviando notificaciones de calendario para evento {EventId}", ev.Id);
+            }
+        }
+
+        private async Task NotifyCalendarEventDeletedAsync(
+            Professional professional,
+            CalendarEvent ev,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var professionalName = $"{professional.FirstName} {professional.LastName}".Trim();
+                var formattedDate = ev.Date.ToString("dd/MM/yyyy");
+                HashSet<Guid> tutorIds;
+
+                if (ev.TargetScope == "single" && ev.StudentId.HasValue)
+                {
+                    tutorIds = await GetActiveTutorUserIdsForStudentAsync(ev.StudentId.Value, cancellationToken);
+                }
+                else if (ev.TargetScope == "all")
+                {
+                    tutorIds = await GetActiveTutorUserIdsForProfessionalAsync(professional.Id, cancellationToken);
+                }
+                else
+                {
+                    return;
+                }
+
+                var targetLabel = ev.TargetScope == "single" && !string.IsNullOrWhiteSpace(ev.StudentName)
+                    ? $" para {ev.StudentName}"
+                    : " general";
+
+                var notifications = tutorIds.Select(tutorUserId => new NotificationMessage(
+                    UserId: tutorUserId,
+                    Type: NotificationTypes.Calendar,
+                    EventCode: NotificationEventCodes.CalendarEventDeleted,
+                    Title: $"Evento cancelado: {ev.Type}",
+                    Message: $"{professionalName} canceló la {ev.Type}{targetLabel} \"{ev.Title}\" programada para el {formattedDate} a las {ev.Time} hs.",
+                    ActionUrl: "/family/calendar"));
+
+                await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error enviando notificaciones de cancelación para evento {EventId}", ev.Id);
+            }
+        }
+
+        private async Task<HashSet<Guid>> GetActiveTutorUserIdsForStudentAsync(Guid studentId, CancellationToken cancellationToken)
+        {
+            var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(studentId, cancellationToken);
+            return representatives
+                .Where(r => r.IsActive
+                            && r.Representative != null
+                            && r.Representative.IsActive
+                            && (r.Representative.User == null || r.Representative.User.IsActive)
+                            && r.Representative.UserId != Guid.Empty)
+                .Select(r => r.Representative.UserId)
+                .ToHashSet();
+        }
+
+        private async Task<HashSet<Guid>> GetActiveTutorUserIdsForProfessionalAsync(Guid professionalId, CancellationToken cancellationToken)
+        {
+            var assignments = await _assignmentsRepository.GetPersonsByProfessionalIdAsync(professionalId, cancellationToken);
+            var activePersonIds = assignments.Where(a => a.IsActive).Select(a => a.PersonId).Distinct().ToList();
+            var tutorUserIds = new HashSet<Guid>();
+
+            foreach (var personId in activePersonIds)
+            {
+                var ids = await GetActiveTutorUserIdsForStudentAsync(personId, cancellationToken);
+                foreach (var id in ids)
+                {
+                    tutorUserIds.Add(id);
+                }
+            }
+
+            return tutorUserIds;
         }
     }
 }

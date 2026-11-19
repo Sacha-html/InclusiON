@@ -171,6 +171,26 @@ export class LocalStorageService {
       STORAGE_KEYS.REFRESH_TOKEN,
       STORAGE_KEYS.CURRENT_USER
     ]);
+
+    if (this.isAvailable) {
+      try {
+        const legacyKeys: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (
+            k === 'app_notifications' ||
+            k.startsWith('app_notifications_') ||
+            k.startsWith('app_last_assignment_sync_') ||
+            k === 'inclusion_calendar_events'
+          )) {
+            legacyKeys.push(k);
+          }
+        }
+        legacyKeys.forEach(k => localStorage.removeItem(k));
+      } catch {
+        // Ignorar errores de storage
+      }
+    }
   }
 
   /**

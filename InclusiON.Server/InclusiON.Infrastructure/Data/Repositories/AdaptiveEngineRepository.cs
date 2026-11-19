@@ -11,6 +11,9 @@ public class AdaptiveEngineRepository(AppDbContext context) : IAdaptiveEngineRep
     public async Task<PersonRoadmapActivity?> GetWithConfigAsync(int personRoadmapActivityId, CancellationToken ct = default)
         => await context.PersonRoadmapActivities
             .Include(a => a.AdaptiveConfig)
+            .Include(a => a.PersonRoadmapArea)
+                .ThenInclude(area => area.PersonRoadmap)
+                    .ThenInclude(rm => rm.Person)
             .FirstOrDefaultAsync(a => a.Id == personRoadmapActivityId, ct);
 
     public async Task<List<ActivityResponse>> GetRecentResponsesByAssignmentAsync(int assignmentId, int count, CancellationToken ct = default)

@@ -22,4 +22,19 @@ public class SignalRNotifier : IRealTimeNotifier
             actionUrl
         }, cancellationToken);
     }
+
+    public async Task SendNotificationAsync(string userId, NotificationPushPayload payload, CancellationToken cancellationToken = default)
+    {
+        await _hubContext.Clients.Group(userId).SendAsync("Notification", new
+        {
+            id        = payload.Id,
+            type      = payload.Type,
+            eventCode = payload.EventCode,
+            title     = payload.Title,
+            message   = payload.Message,
+            actionUrl = payload.ActionUrl,
+            isRead    = payload.IsRead,
+            createdAt = payload.CreatedAt
+        }, cancellationToken);
+    }
 }

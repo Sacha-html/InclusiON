@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -22,6 +22,8 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IDateTimeProvider _dateTime;
         private readonly IEncryptionService _encryption;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IAdminInstitutionRepository? _adminInstitutionRepository;
+        private readonly INotificationService? _notificationService;
 
         public SubmitReportCommandHandler(
             IReportsRepository repository,
@@ -30,15 +32,19 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             ILogger<SubmitReportCommandHandler> logger,
             IDateTimeProvider dateTime,
             IEncryptionService encryption,
-            IServiceScopeFactory scopeFactory)
+            IServiceScopeFactory scopeFactory,
+            IAdminInstitutionRepository? adminInstitutionRepository = null,
+            INotificationService? notificationService = null)
         {
-            _repository = repository;
-            _professionalsRepository = professionalsRepository;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
-            _encryption = encryption;
-            _scopeFactory = scopeFactory;
+            _repository                 = repository;
+            _professionalsRepository    = professionalsRepository;
+            _unitOfWork                 = unitOfWork;
+            _logger                     = logger;
+            _dateTime                   = dateTime;
+            _encryption                 = encryption;
+            _scopeFactory               = scopeFactory;
+            _adminInstitutionRepository = adminInstitutionRepository;
+            _notificationService        = notificationService;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -65,45 +71,30 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _logger.LogInformation("Report {ReportId} submitted by professional {ProfessionalId}", report.Id, command.ProfessionalId);
 
-            // Notificar a admins de la institución del profesional — fire and forget
-            var reportTitle      = report.Title;
-            var profFirstName    = professional.FirstName;
-            var profLastName     = professional.LastName;
-            var professionalId   = professional.Id;
-
-            _ = Task.Run(async () =>
+            // Notificar a admins de la institución del profesional y admins globales (persistente + tiempo real)
+            if (_notificationService is not null && _adminInstitutionRepository is not null)
             {
-                using var scope = _scopeFactory.CreateScope();
                 try
                 {
-                    var profRepo  = scope.ServiceProvider.GetRequiredService<IProfessionalsRepository>();
-                    var adminRepo = scope.ServiceProvider.GetRequiredService<IAdminInstitutionRepository>();
-                    var bgJobRepo = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
+                    var institutionIds = await _professionalsRepository.GetInstitutionIdsAsync(professional.Id, cancellationToken);
+                    var admins = await _adminInstitutionRepository.GetAdminsForInstitutionsIncludingGlobalAsync(institutionIds, cancellationToken);
+                    var notifications = admins
+                        .Where(a => a.IsActive)
+                        .Select(admin => new NotificationMessage(
+                            UserId: admin.Id,
+                            Type: NotificationTypes.Report,
+                            EventCode: NotificationEventCodes.ReportSubmitted,
+                            Title: "Reporte pendiente de revisión",
+                            Message: $"{professional.FirstName} {professional.LastName} envió el reporte \"{report.Title}\" para revisión.",
+                            ActionUrl: "/admin/reports"));
 
-                    var institutionIds = await profRepo.GetInstitutionIdsAsync(professionalId);
-                    if (institutionIds.Count == 0) return;
-
-                    var admins = await adminRepo.GetAdminsByInstitutionIdsAsync(institutionIds);
-                    foreach (var admin in admins.Where(a => a.IsActive))
-                    {
-                        await bgJobRepo.CreateAsync(
-                            JobTypes.Push,
-                            JsonSerializer.Serialize(new NotificationPayload
-                            {
-                                UserId           = admin.Id.ToString(),
-                                Title            = "Reporte pendiente de revisión",
-                                Message          = $"{profFirstName} {profLastName} envió el reporte \"{reportTitle}\" para revisión.",
-                                ActionUrl        = "/#/admin/reports",
-                                SendEmailFallback = false
-                            }),
-                            maxRetries: 3);
-                    }
+                    await _notificationService.NotifyManyAsync(notifications, cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error notificando admins al enviar reporte {ReportTitle}", reportTitle);
+                    _logger.LogError(ex, "Error notificando admins al enviar reporte {ReportId}", report.Id);
                 }
-            });
+            }
 
             var response = ReportResponse.MapToResponse(report);
             response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));

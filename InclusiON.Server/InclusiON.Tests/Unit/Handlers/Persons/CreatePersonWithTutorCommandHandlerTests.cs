@@ -93,7 +93,7 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
                 ProfessionalUserId.ToString(),
                 "🎓 Nuevo alumno asignado",
                 Arg.Is<string>(msg => msg.Contains("Lucas Pérez") && msg.Contains("perfil funcional")),
-                Arg.Is<string>(url => url.StartsWith("/#/pro/persons/")),
+                Arg.Is<string>(url => url.StartsWith("/pro/persons/")),
                 Arg.Any<CancellationToken>());
             await _roadmapInit.Received(1).InitializeStudentRoadmapAsync(
                 Arg.Any<Guid>(), ProfessionalUserId, Arg.Any<CancellationToken>());
@@ -122,7 +122,7 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
                 ProfessionalUserId.ToString(),
                 "🎓 Nuevo alumno asignado",
                 Arg.Is<string>(msg => msg.Contains("Lucas Pérez")),
-                Arg.Is<string>(url => url.StartsWith("/#/pro/persons/")),
+                Arg.Is<string>(url => url.StartsWith("/pro/persons/")),
                 Arg.Any<CancellationToken>());
         }
 

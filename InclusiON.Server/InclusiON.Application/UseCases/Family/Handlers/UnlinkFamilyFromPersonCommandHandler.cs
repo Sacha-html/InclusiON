@@ -3,6 +3,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Family.Commands;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Family;
@@ -17,17 +18,29 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UnlinkFamilyFromPersonCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IAssignmentsRepository? _assignmentsRepository;
+        private readonly IProfessionalsRepository? _professionalsRepository;
+        private readonly IAdminInstitutionRepository? _adminInstitutionRepository;
+        private readonly INotificationService? _notificationService;
 
         public UnlinkFamilyFromPersonCommandHandler(
             IFamilyRepository familyRepository,
             IUnitOfWork unitOfWork,
             ILogger<UnlinkFamilyFromPersonCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IAssignmentsRepository? assignmentsRepository = null,
+            IProfessionalsRepository? professionalsRepository = null,
+            IAdminInstitutionRepository? adminInstitutionRepository = null,
+            INotificationService? notificationService = null)
         {
-            _familyRepository = familyRepository;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
+            _familyRepository           = familyRepository;
+            _unitOfWork                 = unitOfWork;
+            _logger                     = logger;
+            _dateTime                   = dateTime;
+            _assignmentsRepository      = assignmentsRepository;
+            _professionalsRepository    = professionalsRepository;
+            _adminInstitutionRepository = adminInstitutionRepository;
+            _notificationService        = notificationService;
         }
 
         public async Task<ApiResponse<PersonRepresentativeResponse>> HandleAsync(UnlinkFamilyFromPersonCommand command, CancellationToken cancellationToken)
@@ -111,6 +124,69 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 var studentName = link.Person != null
                     ? $"{link.Person.FirstName} {link.Person.LastName}".Trim()
                     : string.Empty;
+
+                if (_notificationService is not null)
+                {
+                    var notifications = new List<NotificationMessage>();
+                    var familyName = $"{family.FirstName} {family.LastName}".Trim();
+                    var encryptedPersonId = _notificationService.EncryptId(command.PersonId);
+                    var displayStudent = string.IsNullOrWhiteSpace(studentName) ? "el alumno" : studentName;
+
+                    if (family.UserId != Guid.Empty)
+                    {
+                        notifications.Add(new NotificationMessage(
+                            UserId: family.UserId,
+                            Type: NotificationTypes.Alert,
+                            EventCode: NotificationEventCodes.FamilyUnlinked,
+                            Title: "Vínculo familiar finalizado",
+                            Message: $"Se finalizó tu vinculación como representante familiar de {displayStudent}.",
+                            ActionUrl: "/family"));
+                    }
+
+                    var profInstitutionIds = new HashSet<int>();
+                    if (_assignmentsRepository is not null)
+                    {
+                        var profs = await _assignmentsRepository.GetProfessionalsByPersonIdAsync(command.PersonId, cancellationToken);
+                        foreach (var pp in profs.Where(p => p.IsActive && p.Professional is not null && p.Professional.UserId != Guid.Empty))
+                        {
+                            if (_professionalsRepository is not null)
+                            {
+                                var instIds = await _professionalsRepository.GetInstitutionIdsAsync(pp.ProfessionalId, cancellationToken);
+                                foreach (var instId in instIds) profInstitutionIds.Add(instId);
+                            }
+
+                            if (pp.Professional.UserId == command.ChangedByUserId) continue;
+
+                            notifications.Add(new NotificationMessage(
+                                UserId: pp.Professional.UserId,
+                                Type: studentSuspended ? NotificationTypes.Alert : NotificationTypes.Assignment,
+                                EventCode: studentSuspended ? NotificationEventCodes.StudentSuspendedCb03 : NotificationEventCodes.FamilyUnlinked,
+                                Title: studentSuspended ? "Alerta: Alumno suspendido sin tutor activo" : "Familiar desvinculado",
+                                Message: studentSuspended
+                                    ? $"{familyName} fue desvinculado de {displayStudent}. Al quedar sin tutor activo, el alumno fue suspendido automáticamente."
+                                    : $"{familyName} fue desvinculado como representante de {displayStudent}.",
+                                ActionUrl: $"/pro/persons/{encryptedPersonId}"));
+                        }
+                    }
+
+                    if (studentSuspended && _adminInstitutionRepository is not null)
+                    {
+                        var admins = await _adminInstitutionRepository.GetAdminsForInstitutionsIncludingGlobalAsync(
+                            profInstitutionIds.ToList(), cancellationToken);
+                        foreach (var admin in admins.Where(a => a.IsActive && a.Id != command.ChangedByUserId))
+                        {
+                            notifications.Add(new NotificationMessage(
+                                UserId: admin.Id,
+                                Type: NotificationTypes.Alert,
+                                EventCode: NotificationEventCodes.StudentSuspendedCb03,
+                                Title: "Alumno suspendido por falta de tutor (CB-03)",
+                                Message: $"El alumno {displayStudent} fue suspendido automáticamente tras desvincular a su único tutor activo ({familyName}).",
+                                ActionUrl: $"/admin/persons/{encryptedPersonId}"));
+                        }
+                    }
+
+                    await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+                }
 
                 var response = PersonRepresentativeResponse.MapToResponse(
                     command.PersonId,

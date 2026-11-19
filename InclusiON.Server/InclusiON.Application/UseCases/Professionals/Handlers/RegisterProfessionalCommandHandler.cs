@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Helpers;
 using InclusiON.Application.Interfaces.Common;
@@ -30,6 +30,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly ILogger<RegisterProfessionalCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
         private readonly IReadOnlyRepository<Specialty>? _specialties;
+        private readonly IAdminInstitutionRepository? _adminInstitutionRepository;
+        private readonly INotificationService? _notificationService;
 
         public RegisterProfessionalCommandHandler(
             IProfessionalsRepository repository,
@@ -38,15 +40,19 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             IUnitOfWork unitOfWork,
             ILogger<RegisterProfessionalCommandHandler> logger,
             IDateTimeProvider dateTime,
-            IReadOnlyRepository<Specialty>? specialties = null)
+            IReadOnlyRepository<Specialty>? specialties = null,
+            IAdminInstitutionRepository? adminInstitutionRepository = null,
+            INotificationService? notificationService = null)
         {
-            _repository = repository;
-            _identityService = identityService;
-            _backgroundJobs = backgroundJobs;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
-            _specialties = specialties;
+            _repository                 = repository;
+            _identityService            = identityService;
+            _backgroundJobs             = backgroundJobs;
+            _unitOfWork                 = unitOfWork;
+            _logger                     = logger;
+            _dateTime                   = dateTime;
+            _specialties                = specialties;
+            _adminInstitutionRepository = adminInstitutionRepository;
+            _notificationService        = notificationService;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(RegisterProfessionalCommand command, CancellationToken cancellationToken)
@@ -152,6 +158,24 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     }),
                     maxRetries: 2,
                     cancellationToken: cancellationToken);
+
+                // Notificar a los administradores de la institución y admins globales
+                if (_notificationService is not null && _adminInstitutionRepository is not null)
+                {
+                    var instIds = command.InstitutionId.HasValue ? new List<int> { command.InstitutionId.Value } : null;
+                    var admins = await _adminInstitutionRepository.GetAdminsForInstitutionsIncludingGlobalAsync(instIds, cancellationToken);
+                    var notifications = admins
+                        .Where(a => a.IsActive)
+                        .Select(admin => new NotificationMessage(
+                            UserId: admin.Id,
+                            Type: NotificationTypes.System,
+                            EventCode: NotificationEventCodes.ProfessionalRegistered,
+                            Title: "Nuevo profesional pendiente de validación",
+                            Message: $"{command.FirstName} {command.LastName} ({command.Email}) se registró y aguarda validación.",
+                            ActionUrl: "/admin/professionals"));
+
+                    await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+                }
 
                 var response = ProfessionalResponse.MapToResponse(professional);
                 return ApiResponse<ProfessionalResponse>.SuccessResult(response, SuccessMessages.ProfessionalPendingApproval);

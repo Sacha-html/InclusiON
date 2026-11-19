@@ -18,17 +18,26 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<LinkFamilyToPersonCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly IAssignmentsRepository? _assignmentsRepository;
+        private readonly IPersonsRepository? _personsRepository;
+        private readonly INotificationService? _notificationService;
 
         public LinkFamilyToPersonCommandHandler(
             IFamilyRepository familyRepository,
             IUnitOfWork unitOfWork,
             ILogger<LinkFamilyToPersonCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            IAssignmentsRepository? assignmentsRepository = null,
+            IPersonsRepository? personsRepository = null,
+            INotificationService? notificationService = null)
         {
-            _familyRepository = familyRepository;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
+            _familyRepository      = familyRepository;
+            _unitOfWork            = unitOfWork;
+            _logger                = logger;
+            _dateTime              = dateTime;
+            _assignmentsRepository = assignmentsRepository;
+            _personsRepository     = personsRepository;
+            _notificationService   = notificationService;
         }
 
         public async Task<ApiResponse<PersonRepresentativeResponse>> HandleAsync(LinkFamilyToPersonCommand command, CancellationToken cancellationToken)
@@ -143,6 +152,45 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 _logger.LogInformation(
                     "Familiar {FamilyId} vinculado a persona {PersonId} por usuario {UserId}",
                     command.FamilyId, command.PersonId, command.ChangedByUserId);
+
+                if (_notificationService is not null)
+                {
+                    var notifications = new List<NotificationMessage>();
+                    var person = _personsRepository is not null
+                        ? await _personsRepository.GetByIdAsync(command.PersonId, cancellationToken)
+                        : null;
+                    var studentName = person is not null ? $"{person.FirstName} {person.LastName}".Trim() : "un alumno";
+                    var familyName = $"{family.FirstName} {family.LastName}".Trim();
+
+                    if (family.UserId != Guid.Empty)
+                    {
+                        notifications.Add(new NotificationMessage(
+                            UserId: family.UserId,
+                            Type: NotificationTypes.Assignment,
+                            EventCode: NotificationEventCodes.FamilyLinked,
+                            Title: "Nuevo alumno vinculado",
+                            Message: $"Fuiste vinculado como representante familiar de {studentName}.",
+                            ActionUrl: "/family"));
+                    }
+
+                    if (_assignmentsRepository is not null)
+                    {
+                        var encryptedPersonId = _notificationService.EncryptId(command.PersonId);
+                        var profs = await _assignmentsRepository.GetProfessionalsByPersonIdAsync(command.PersonId, cancellationToken);
+                        foreach (var pp in profs.Where(p => p.IsActive && p.Professional is not null && p.Professional.UserId != Guid.Empty && p.Professional.UserId != command.ChangedByUserId))
+                        {
+                            notifications.Add(new NotificationMessage(
+                                UserId: pp.Professional.UserId,
+                                Type: NotificationTypes.Assignment,
+                                EventCode: NotificationEventCodes.FamilyLinked,
+                                Title: "Familiar vinculado",
+                                Message: $"{familyName} fue vinculado como representante familiar de {studentName}.",
+                                ActionUrl: $"/pro/persons/{encryptedPersonId}?tab=familiares"));
+                        }
+                    }
+
+                    await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+                }
 
                 var response = PersonRepresentativeResponse.MapToResponse(
                     command.PersonId,

@@ -23,6 +23,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.CalendarEvents
                 .Include(c => c.Student)
+                .Include(c => c.CreatedByProfessional)
                 .Where(c => c.CreatedByProfessionalId == professionalId && c.IsActive)
                 .OrderBy(c => c.Date)
                 .ThenBy(c => c.Time)
@@ -32,9 +33,25 @@ namespace InclusiON.Infrastructure.Data.Repositories
 
         public async Task<List<CalendarEvent>> GetByStudentIdsAsync(List<Guid> studentIds, CancellationToken cancellationToken = default)
         {
+            if (studentIds == null || studentIds.Count == 0)
+            {
+                return new List<CalendarEvent>();
+            }
+
+            // Solo incluir eventos grupales ("all") creados por profesionales activamente asignados a estos alumnos
+            var assignedProfessionalIds = await _context.ProfessionalPersons
+                .AsNoTracking()
+                .Where(pp => pp.IsActive && studentIds.Contains(pp.PersonId))
+                .Select(pp => pp.ProfessionalId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
             return await _context.CalendarEvents
                 .Include(c => c.Student)
-                .Where(c => c.IsActive && (c.TargetScope == "all" || (c.StudentId != null && studentIds.Contains(c.StudentId.Value))))
+                .Include(c => c.CreatedByProfessional)
+                .Where(c => c.IsActive && (
+                    (c.TargetScope == "all" && assignedProfessionalIds.Contains(c.CreatedByProfessionalId)) ||
+                    (c.StudentId != null && studentIds.Contains(c.StudentId.Value))))
                 .OrderBy(c => c.Date)
                 .ThenBy(c => c.Time)
                 .AsNoTracking()
@@ -45,6 +62,7 @@ namespace InclusiON.Infrastructure.Data.Repositories
         {
             return await _context.CalendarEvents
                 .Include(c => c.Student)
+                .Include(c => c.CreatedByProfessional)
                 .FirstOrDefaultAsync(c => c.Id == id && c.IsActive, cancellationToken);
         }
 

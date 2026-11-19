@@ -11,7 +11,8 @@ public class AdaptiveAdjustmentAgent(
     IAdaptiveEngineRepository adaptiveRepo,
     IUnitOfWork unitOfWork,
     IBackgroundJobRepository backgroundJobs,
-    ILogger<AdaptiveAdjustmentAgent> logger)
+    ILogger<AdaptiveAdjustmentAgent> logger,
+    INotificationService? notificationService = null)
     : IJobHandler
 {
     public int JobTypeId => JobTypes.AdaptiveAdjustment;
@@ -124,26 +125,47 @@ public class AdaptiveAdjustmentAgent(
             "AdaptiveAdjustmentAgent: {AdjustmentType} applied to PersonRoadmapActivity {Id}. {PreviousValue} -> {NewValue}. Reason: {Reason}",
             adjustmentType, payload.PersonRoadmapActivityId, previousValue, newValue, reason);
 
-        if (adjustmentType == "FrustrationIntervention" && !string.IsNullOrEmpty(payload.ProfessionalUserId))
+        if (adjustmentType == "FrustrationIntervention" && Guid.TryParse(payload.ProfessionalUserId, out var profUserGuid))
         {
             try
             {
-                await backgroundJobs.CreateAsync(
-                    JobTypes.Push,
-                    JsonSerializer.Serialize(new NotificationPayload
-                    {
-                        UserId            = payload.ProfessionalUserId,
-                        Title             = "Alerta de frustracion",
-                        Message           = $"Una persona presento nivel de frustracion elevado ({latestResponse.FrustrationLevel}/5). Se redujo la dificultad automaticamente.",
-                        ActionUrl         = "/#/pro/persons",
-                        SendEmailFallback = false
-                    }),
-                    maxRetries: 3,
-                    cancellationToken: cancellationToken);
+                var person = roadmapActivity.PersonRoadmapArea?.PersonRoadmap?.Person;
+                var studentName = person is not null ? $"{person.FirstName} {person.LastName}".Trim() : "Un alumno";
+                var actionUrl = person is not null && notificationService is not null
+                    ? $"/pro/persons/{notificationService.EncryptId(person.Id)}?tab=roadmap"
+                    : "/pro/persons";
+                var message = $"{studentName} presentó un nivel de frustración elevado ({latestResponse.FrustrationLevel}/5). Se redujo la dificultad automáticamente.";
+
+                if (notificationService is not null)
+                {
+                    await notificationService.NotifyAsync(new NotificationMessage(
+                        UserId: profUserGuid,
+                        Type: NotificationTypes.Alert,
+                        EventCode: NotificationEventCodes.FrustrationAlert,
+                        Title: "Alerta de frustración",
+                        Message: message,
+                        ActionUrl: actionUrl),
+                        cancellationToken);
+                }
+                else
+                {
+                    await backgroundJobs.CreateAsync(
+                        JobTypes.Push,
+                        JsonSerializer.Serialize(new NotificationPayload
+                        {
+                            UserId            = payload.ProfessionalUserId,
+                            Title             = "Alerta de frustración",
+                            Message           = message,
+                            ActionUrl         = actionUrl,
+                            SendEmailFallback = false
+                        }),
+                        maxRetries: 3,
+                        cancellationToken: cancellationToken);
+                }
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "AdaptiveAdjustmentAgent: failed to enqueue frustration notification for professional {UserId}", payload.ProfessionalUserId);
+                logger.LogWarning(ex, "AdaptiveAdjustmentAgent: failed to notify frustration alert for professional {UserId}", payload.ProfessionalUserId);
             }
         }
     }

@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Auth.Commands;
+using InclusiON.Domain.Enums;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
 using InclusiON.DTOs.Responses.Auth;
@@ -42,7 +43,35 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.UserNotFound);
             }
 
-            var user = family.User;
+            if (family.Status != FamilyStatusEnum.Active)
+            {
+                return ApiResponse<VisualLoginResponse>.SuccessResult(
+                    new VisualLoginResponse
+                    {
+                        Success = false,
+                        ErrorMessage = ErrorMessages.AccountDeactivated
+                    });
+            }
+
+            // Cargar User vía IdentityService (trackeado) en lugar de family.User (AsNoTracking)
+            // para evitar InvalidOperationException de EF Core al registrar intentos fallidos / lockout.
+            var user = await _identityService.FindByIdAsync(command.UserId);
+            if (user == null)
+            {
+                return ApiResponse<VisualLoginResponse>.ErrorResult(
+                    ErrorCode.UserNotFound,
+                    ErrorMessages.UserNotFound);
+            }
+
+            if (!user.IsActive)
+            {
+                return ApiResponse<VisualLoginResponse>.SuccessResult(
+                    new VisualLoginResponse
+                    {
+                        Success = false,
+                        ErrorMessage = ErrorMessages.AccountDeactivated
+                    });
+            }
 
             if (await _identityService.IsLockedOutAsync(user))
             {

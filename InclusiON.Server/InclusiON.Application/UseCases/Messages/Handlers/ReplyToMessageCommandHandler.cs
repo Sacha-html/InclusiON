@@ -20,19 +20,22 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
         private readonly IUnitOfWork             _uow;
         private readonly IEncryptionService      _encryption;
         private readonly IBackgroundJobRepository _bgJobs;
+        private readonly INotificationService?   _notificationService;
 
         public ReplyToMessageCommandHandler(
             IMessagesRepository messages,
             IUsersRepository users,
             IUnitOfWork uow,
             IEncryptionService encryption,
-            IBackgroundJobRepository bgJobs)
+            IBackgroundJobRepository bgJobs,
+            INotificationService? notificationService = null)
         {
-            _messages   = messages;
-            _users      = users;
-            _uow        = uow;
-            _encryption = encryption;
-            _bgJobs     = bgJobs;
+            _messages            = messages;
+            _users               = users;
+            _uow                 = uow;
+            _encryption          = encryption;
+            _bgJobs              = bgJobs;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<MessageResponse>> HandleAsync(
@@ -56,8 +59,10 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
                 ? parent.ReceiverId
                 : parent.SenderId;
 
-            var sender   = await _users.GetByIdAsync(command.SenderId, cancellationToken);
-            var receiver = await _users.GetByIdAsync(receiverId, cancellationToken);
+            var sender   = await _users.GetByIdWithProfileAsync(command.SenderId, cancellationToken)
+                           ?? await _users.GetByIdAsync(command.SenderId, cancellationToken);
+            var receiver = await _users.GetByIdWithProfileAsync(receiverId, cancellationToken)
+                           ?? await _users.GetByIdAsync(receiverId, cancellationToken);
 
             if (sender is null || receiver is null)
                 return ApiResponse<MessageResponse>.NotFound("Usuario");
@@ -87,28 +92,25 @@ namespace InclusiON.Application.UseCases.Messages.Handlers
             reply.Sender   = sender;
             reply.Receiver = receiver;
 
-            // Push SignalR al destinatario — fire and forget
-            var senderName    = $"{sender!.Name} {sender.Surname}".Trim();
-            var receiverIdStr = receiver!.Id.ToString();
-            var receiverIsProfessional = receiver.Professional is not null;
+            // Notificación persistente + SignalR con rol correcto y contactId encriptado Base64Url (IN-218)
+            var senderName             = $"{sender!.Name} {sender.Surname}".Trim();
+            var receiverIsProfessional = receiver!.Professional is not null;
             var receiverIsFamily       = receiver.FamilyRepresentative is not null;
             var routePrefix            = receiverIsProfessional ? "pro" : (receiverIsFamily ? "family" : "admin");
-            var actionUrl              = $"/{routePrefix}/messages?contactId={sender.Id}";
+            var encryptedSenderId      = ToUrlSafeBase64(_encryption.Encrypt(sender.Id.ToString()));
+            var actionUrl              = $"/{routePrefix}/messages?contactId={encryptedSenderId}";
 
-            _ = Task.Run(async () =>
+            if (_notificationService is not null)
             {
-                await _bgJobs.CreateAsync(
-                    JobTypes.Push,
-                    JsonSerializer.Serialize(new NotificationPayload
-                    {
-                        UserId            = receiverIdStr,
-                        Title             = "Nueva respuesta",
-                        Message           = $"{senderName} respondió un mensaje.",
-                        ActionUrl         = actionUrl,
-                        SendEmailFallback = false
-                    }),
-                    maxRetries: 3);
-            });
+                await _notificationService.NotifyAsync(new NotificationMessage(
+                    UserId: receiver.Id,
+                    Type: NotificationTypes.Message,
+                    EventCode: NotificationEventCodes.MessageReplied,
+                    Title: "Nueva respuesta",
+                    Message: $"{senderName} respondió un mensaje.",
+                    ActionUrl: actionUrl),
+                    cancellationToken);
+            }
 
             var dto = MessageMapper.ToDetail(reply);
             dto.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(reply.Id.ToString()));

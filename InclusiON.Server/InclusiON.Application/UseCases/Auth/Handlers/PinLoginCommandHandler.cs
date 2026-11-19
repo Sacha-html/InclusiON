@@ -2,6 +2,7 @@ using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Auth.Commands;
+using InclusiON.Domain.Enums;
 using InclusiON.Domain.Models;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -18,6 +19,7 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         private readonly ILoginSessionService _loginSessionService;
         private readonly IPersonsRepository _personsRepository;
         private readonly IRealTimeNotifier _notifier;
+        private readonly INotificationService? _notificationService;
 
         private const int MaxFailedAttempts = 5;
 
@@ -27,14 +29,16 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
             IPinHasher pinHasher,
             ILoginSessionService loginSessionService,
             IPersonsRepository personsRepository,
-            IRealTimeNotifier notifier)
+            IRealTimeNotifier notifier,
+            INotificationService? notificationService = null)
         {
-            _repository = repository;
-            _identityService = identityService;
-            _pinHasher = pinHasher;
+            _repository          = repository;
+            _identityService     = identityService;
+            _pinHasher           = pinHasher;
             _loginSessionService = loginSessionService;
-            _personsRepository = personsRepository;
-            _notifier = notifier;
+            _personsRepository   = personsRepository;
+            _notifier            = notifier;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<VisualLoginResponse>> HandleAsync(
@@ -138,57 +142,64 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
         /// </summary>
         private async Task NotifyAccountLockedAsync(PersonWithDisability person, CancellationToken cancellationToken)
         {
-            var personName = $"{person.FirstName} {person.LastName}";
+            var personName = $"{person.FirstName} {person.LastName}".Trim();
             var message = $"{personName} superó los intentos de PIN permitidos y su cuenta quedó bloqueada temporalmente.";
-            var tasks = new List<Task>();
+            var notifications = new List<NotificationMessage>();
 
             var representatives = await _personsRepository.GetActiveRepresentativesAsync(person.Id, cancellationToken);
             foreach (var rep in representatives)
             {
                 if (rep.Representative != null && rep.Representative.UserId != Guid.Empty)
                 {
-                    tasks.Add(_notifier.NotifyUserAsync(
-                        rep.Representative.UserId.ToString(),
-                        "🔒 Cuenta bloqueada",
-                        message,
-                        actionUrl: "/#/family/dashboard",
-                        cancellationToken: cancellationToken));
+                    notifications.Add(new NotificationMessage(
+                        UserId: rep.Representative.UserId,
+                        Type: NotificationTypes.Alert,
+                        EventCode: NotificationEventCodes.PinAccountLocked,
+                        Title: "Cuenta bloqueada",
+                        Message: message,
+                        ActionUrl: "/family"));
                 }
             }
+
+            var profUrl = _notificationService is not null
+                ? $"/pro/persons/{_notificationService.EncryptId(person.Id)}"
+                : $"/pro/persons/{person.Id}";
 
             var supervisors = await _personsRepository.GetSupervisingProfessionalsAsync(person.Id, cancellationToken);
-            var notifiedProfUserIds = new HashSet<string>();
+            var notifiedProfUserIds = new HashSet<Guid>();
             foreach (var prof in supervisors)
             {
-                var profUserId = prof.UserId.ToString();
-                if (notifiedProfUserIds.Add(profUserId))
+                if (prof.UserId != Guid.Empty && notifiedProfUserIds.Add(prof.UserId))
                 {
-                    tasks.Add(_notifier.NotifyUserAsync(
-                        profUserId,
-                        "🔒 Cuenta bloqueada",
-                        message,
-                        actionUrl: $"/#/pro/persons/{person.Id}",
-                        cancellationToken: cancellationToken));
+                    notifications.Add(new NotificationMessage(
+                        UserId: prof.UserId,
+                        Type: NotificationTypes.Alert,
+                        EventCode: NotificationEventCodes.PinAccountLocked,
+                        Title: "Cuenta bloqueada",
+                        Message: message,
+                        ActionUrl: profUrl));
                 }
             }
 
-            if (person.SupervisorUserId.HasValue)
+            if (person.SupervisorUserId.HasValue && person.SupervisorUserId.Value != Guid.Empty && notifiedProfUserIds.Add(person.SupervisorUserId.Value))
             {
-                var specificSupervisorUserIdStr = person.SupervisorUserId.Value.ToString();
-                if (notifiedProfUserIds.Add(specificSupervisorUserIdStr))
-                {
-                    tasks.Add(_notifier.NotifyUserAsync(
-                        specificSupervisorUserIdStr,
-                        "🔒 Cuenta bloqueada",
-                        message,
-                        actionUrl: $"/#/pro/persons/{person.Id}",
-                        cancellationToken: cancellationToken));
-                }
+                notifications.Add(new NotificationMessage(
+                    UserId: person.SupervisorUserId.Value,
+                    Type: NotificationTypes.Alert,
+                    EventCode: NotificationEventCodes.PinAccountLocked,
+                    Title: "Cuenta bloqueada",
+                    Message: message,
+                    ActionUrl: profUrl));
             }
 
-            if (tasks.Count > 0)
+            if (_notificationService is not null)
             {
-                await Task.WhenAll(tasks);
+                await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+            }
+            else if (notifications.Count > 0)
+            {
+                await Task.WhenAll(notifications.Select(n =>
+                    _notifier.NotifyUserAsync(n.UserId.ToString(), n.Title, n.Message, n.ActionUrl, cancellationToken)));
             }
         }
     }

@@ -25,6 +25,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ValidateProfessionalCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly INotificationService? _notificationService;
 
         public ValidateProfessionalCommandHandler(
             IProfessionalsRepository repository,
@@ -34,7 +35,8 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             IHttpContextService httpContextService,
             IUnitOfWork unitOfWork,
             ILogger<ValidateProfessionalCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            INotificationService? notificationService = null)
         {
             _repository = repository;
             _identityService = identityService;
@@ -44,6 +46,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<ProfessionalResponse>> HandleAsync(ValidateProfessionalCommand command, CancellationToken cancellationToken)
@@ -169,6 +172,18 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                             }),
                             maxRetries: 2,
                             cancellationToken: cancellationToken);
+                    }
+
+                    if (_notificationService is not null && professional.UserId != Guid.Empty)
+                    {
+                        await _notificationService.NotifyAsync(new NotificationMessage(
+                            UserId: professional.UserId,
+                            Type: NotificationTypes.System,
+                            EventCode: NotificationEventCodes.ProfessionalApproved,
+                            Title: "Cuenta profesional validada",
+                            Message: "Tu cuenta profesional en InclusiON fue aprobada. ¡Bienvenido/a!",
+                            ActionUrl: "/pro"),
+                            cancellationToken);
                     }
                 }
                 else

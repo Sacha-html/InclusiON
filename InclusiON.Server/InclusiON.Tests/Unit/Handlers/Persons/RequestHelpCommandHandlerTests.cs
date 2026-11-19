@@ -92,7 +92,7 @@ public class RequestHelpCommandHandlerTests
             tutorUserId.ToString(),
             Arg.Is<string>(t => t.Contains("ayuda")),
             Arg.Is<string>(m => m.Contains("Ana García")),
-            Arg.Is<string>("/#/family/dashboard"),
+            Arg.Is<string>("/family"),
             Arg.Any<CancellationToken>());
     }
 
@@ -125,7 +125,7 @@ public class RequestHelpCommandHandlerTests
             tutorUserId.ToString(),
             Arg.Any<string>(),
             Arg.Any<string>(),
-            Arg.Is<string>("/#/family/dashboard"),
+            Arg.Is<string>("/family"),
             Arg.Any<CancellationToken>());
 
         // Verificamos que se notifica al profesional supervisor

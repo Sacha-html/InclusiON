@@ -37,6 +37,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IDateTimeProvider _dateTime;
         private readonly IRoadmapInitializer _roadmapInitializer;
         private readonly IRealTimeNotifier _notifier;
+        private readonly INotificationService? _notificationService;
 
         public CreatePersonWithTutorCommandHandler(
             IPersonsRepository repository,
@@ -49,7 +50,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             ILogger<CreatePersonWithTutorCommandHandler> logger,
             IDateTimeProvider dateTime,
             IRoadmapInitializer roadmapInitializer,
-            IRealTimeNotifier notifier)
+            IRealTimeNotifier notifier,
+            INotificationService? notificationService = null)
         {
             _repository = repository;
             _familyRepository = familyRepository;
@@ -62,6 +64,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             _dateTime = dateTime;
             _roadmapInitializer = roadmapInitializer;
             _notifier = notifier;
+            _notificationService = notificationService;
         }
 
         public async Task<ApiResponse<PersonResponse>> HandleAsync(CreatePersonWithTutorCommand command, CancellationToken cancellationToken)
@@ -414,8 +417,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 {
                     await RunPostCommitStepAsync(
                         student.Id,
-                        "professional notification",
-                        () => NotifyNewStudentAsync(professional.UserId, student, cancellationToken));
+                        "professional and tutor notifications",
+                        () => NotifyNewStudentAndTutorAsync(professional.UserId, tutor?.UserId, student, cancellationToken));
                 }
 
                 _logger.LogInformation(
@@ -453,15 +456,44 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             }
         }
 
-        private Task NotifyNewStudentAsync(Guid professionalUserId, PersonWithDisability person, CancellationToken cancellationToken)
+        private async Task NotifyNewStudentAndTutorAsync(Guid professionalUserId, Guid? tutorUserId, PersonWithDisability person, CancellationToken cancellationToken)
         {
-            var personName = $"{person.FirstName} {person.LastName}";
-            return _notifier.NotifyUserAsync(
-                professionalUserId.ToString(),
-                "🎓 Nuevo alumno asignado",
-                $"Tienes un nuevo alumno, {personName}. Llená el perfil funcional.",
-                actionUrl: $"/#/pro/persons/{person.Id}",
-                cancellationToken: cancellationToken);
+            var personName = $"{person.FirstName} {person.LastName}".Trim();
+
+            if (_notificationService is null)
+            {
+                await _notifier.NotifyUserAsync(
+                    professionalUserId.ToString(),
+                    "🎓 Nuevo alumno asignado",
+                    $"Tienes un nuevo alumno, {personName}. Llená el perfil funcional.",
+                    actionUrl: $"/pro/persons/{person.Id}",
+                    cancellationToken: cancellationToken);
+                return;
+            }
+
+            var notifications = new List<NotificationMessage>
+            {
+                new(
+                    UserId: professionalUserId,
+                    Type: NotificationTypes.Assignment,
+                    EventCode: NotificationEventCodes.StudentCreated,
+                    Title: "Nuevo alumno asignado",
+                    Message: $"Tenés un nuevo alumno asignado: {personName}. Completá su perfil funcional.",
+                    ActionUrl: $"/pro/persons/{_notificationService.EncryptId(person.Id)}")
+            };
+
+            if (tutorUserId.HasValue && tutorUserId.Value != Guid.Empty)
+            {
+                notifications.Add(new NotificationMessage(
+                    UserId: tutorUserId.Value,
+                    Type: NotificationTypes.System,
+                    EventCode: NotificationEventCodes.StudentCreated,
+                    Title: "Bienvenido a InclusiON",
+                    Message: $"Tu cuenta fue vinculada como representante de {personName}. Ya podés consultar su progreso, actividades y calendario.",
+                    ActionUrl: "/family"));
+            }
+
+            await _notificationService.NotifyManyAsync(notifications, cancellationToken);
         }
 
         private string GenerateUsername(string firstName, string lastName)

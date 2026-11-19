@@ -23,6 +23,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTime;
         private readonly IEncryptionService _encryption;
+        private readonly IFamilyRepository? _familyRepository;
+        private readonly INotificationService? _notificationService;
 
         public CreateActivityAssignmentCommandHandler(
             IActivityAssignmentRepository repository,
@@ -32,7 +34,9 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             IDateTimeProvider dateTime,
-            IEncryptionService encryption)
+            IEncryptionService encryption,
+            IFamilyRepository? familyRepository = null,
+            INotificationService? notificationService = null)
         {
             _repository              = repository;
             _activitiesRepository    = activitiesRepository;
@@ -42,6 +46,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             _unitOfWork              = unitOfWork;
             _dateTime                = dateTime;
             _encryption              = encryption;
+            _familyRepository        = familyRepository;
+            _notificationService     = notificationService;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -94,28 +100,24 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             await _repository.CreateAsync(assignment, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Notificar a la persona — fire and forget (job INSERT rápido)
-            _ = Task.Run(async () =>
+            // Notificar a todos los tutores activos del alumno (persistente + tiempo real, sin Task.Run sobre DbContext scoped)
+            if (_notificationService is not null && _familyRepository is not null)
             {
-                try
-                {
-                    var person = await _personsRepository.GetByIdAsync(command.PersonId, CancellationToken.None);
-                    if (person is not null)
-                    {
-                        await _backgroundJobs.CreateAsync(
-                            JobTypes.Push,
-                            JsonSerializer.Serialize(new NotificationPayload
-                            {
-                                UserId    = person.UserId.ToString(),
-                                Title     = "Nueva actividad asignada",
-                                Message   = $"Tenés una nueva actividad: {activity.Title}",
-                                ActionUrl = "/#/app/activities"
-                            }),
-                            maxRetries: 3);
-                    }
-                }
-                catch { /* fire and forget — no bloquea respuesta */ }
-            });
+                var person = await _personsRepository.GetByIdAsync(command.PersonId, cancellationToken);
+                var studentName = person is not null ? $"{person.FirstName} {person.LastName}".Trim() : "tu alumno a cargo";
+                var reps = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(command.PersonId, cancellationToken);
+                var tutorNotifications = reps
+                    .Where(r => r.IsActive && r.Representative is not null && r.Representative.IsActive && r.Representative.UserId != Guid.Empty)
+                    .Select(r => new NotificationMessage(
+                        UserId: r.Representative.UserId,
+                        Type: NotificationTypes.Activity,
+                        EventCode: NotificationEventCodes.ActivityAssigned,
+                        Title: "Nueva actividad asignada",
+                        Message: $"Se asignó la actividad \"{activity.Title}\" a {studentName}.",
+                        ActionUrl: "/family/activities"));
+
+                await _notificationService.NotifyManyAsync(tutorNotifications, cancellationToken);
+            }
 
             // Build response from in-memory data — avoids re-fetching after save
             var dto = new ActivityAssignmentResponse

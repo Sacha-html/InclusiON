@@ -243,6 +243,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
         {
             var user = AUser();
             _repo.GetFamilyByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(AFamily(user));
+            _identity.FindByIdAsync(UserId).Returns(user);
             _identity.IsLockedOutAsync(user).Returns(true);
             _identity.GetLockoutEndDateAsync(user).Returns(DateTimeOffset.UtcNow.AddMinutes(5));
 
@@ -252,10 +253,47 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
         }
 
         [Fact]
+        public async Task Family_WrongPassword_UsesTrackedUserFromFindByIdAsync_AndReturnsRemainingAttempts()
+        {
+            var untrackedUser = AUser();
+            var trackedUser = AUser();
+            _repo.GetFamilyByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(AFamily(untrackedUser));
+            _identity.FindByIdAsync(UserId).Returns(trackedUser);
+            _identity.IsLockedOutAsync(trackedUser).Returns(false);
+            _identity.CheckPasswordAsync(trackedUser, "wrong", lockoutOnFailure: true)
+                .Returns(SignInStatus.Failed);
+            _identity.GetAccessFailedCountAsync(trackedUser).Returns(2);
+
+            var result = await BuildFamily().HandleAsync(FamilyCmd("wrong"), default);
+
+            result.Success.Should().BeTrue();
+            result.Data!.Success.Should().BeFalse();
+            result.Data.RemainingAttempts.Should().Be(3);
+            await _identity.Received(1).CheckPasswordAsync(trackedUser, "wrong", lockoutOnFailure: true);
+            await _identity.DidNotReceive().CheckPasswordAsync(untrackedUser, Arg.Any<string>(), Arg.Any<bool>());
+        }
+
+        [Fact]
+        public async Task Family_InactiveUser_ReturnsAccountDeactivated()
+        {
+            var user = AUser();
+            user.IsActive = false;
+            _repo.GetFamilyByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(AFamily(user));
+            _identity.FindByIdAsync(UserId).Returns(user);
+
+            var result = await BuildFamily().HandleAsync(FamilyCmd(), default);
+
+            result.Success.Should().BeTrue();
+            result.Data!.Success.Should().BeFalse();
+            await _identity.DidNotReceive().CheckPasswordAsync(Arg.Any<User>(), Arg.Any<string>(), Arg.Any<bool>());
+        }
+
+        [Fact]
         public async Task Family_WrongPassword_LockoutAfterCheck_ReturnsLocked()
         {
             var user = AUser();
             _repo.GetFamilyByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(AFamily(user));
+            _identity.FindByIdAsync(UserId).Returns(user);
             _identity.IsLockedOutAsync(user).Returns(false);
             _identity.CheckPasswordAsync(user, "bad", lockoutOnFailure: true)
                 .Returns(SignInStatus.LockedOut);
@@ -264,6 +302,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             var result = await BuildFamily().HandleAsync(FamilyCmd("bad"), default);
 
             result.Data!.IsLocked.Should().BeTrue();
+            result.Data.LockoutSecondsRemaining.Should().BeGreaterThan(0);
         }
 
         [Fact]
@@ -272,6 +311,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
             var user = AUser();
             var family = AFamily(user);
             _repo.GetFamilyByUserIdAsync(UserId, Arg.Any<CancellationToken>()).Returns(family);
+            _identity.FindByIdAsync(UserId).Returns(user);
             _identity.IsLockedOutAsync(user).Returns(false);
             _identity.CheckPasswordAsync(user, "pass", lockoutOnFailure: true)
                 .Returns(SignInStatus.Success);

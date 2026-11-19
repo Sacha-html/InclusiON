@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -21,6 +21,10 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly IDateTimeProvider _dateTime;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IEncryptionService _encryption;
+        private readonly IFamilyRepository? _familyRepository;
+        private readonly IProfessionalsRepository? _professionalsRepository;
+        private readonly IBackgroundJobRepository? _backgroundJobs;
+        private readonly INotificationService? _notificationService;
 
         public ApproveReportCommandHandler(
             IReportsRepository repository,
@@ -28,14 +32,22 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             ILogger<ApproveReportCommandHandler> logger,
             IDateTimeProvider dateTime,
             IServiceScopeFactory scopeFactory,
-            IEncryptionService encryption)
+            IEncryptionService encryption,
+            IFamilyRepository? familyRepository = null,
+            IProfessionalsRepository? professionalsRepository = null,
+            IBackgroundJobRepository? backgroundJobs = null,
+            INotificationService? notificationService = null)
         {
-            _repository   = repository;
-            _unitOfWork   = unitOfWork;
-            _logger       = logger;
-            _dateTime     = dateTime;
-            _scopeFactory = scopeFactory;
-            _encryption   = encryption;
+            _repository              = repository;
+            _unitOfWork              = unitOfWork;
+            _logger                  = logger;
+            _dateTime                = dateTime;
+            _scopeFactory            = scopeFactory;
+            _encryption              = encryption;
+            _familyRepository        = familyRepository;
+            _professionalsRepository = professionalsRepository;
+            _backgroundJobs          = backgroundJobs;
+            _notificationService     = notificationService;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -59,32 +71,29 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _logger.LogInformation("Report {ReportId} approved by admin {AdminUserId}", report.Id, command.AdminUserId);
 
-            // TODO: Refactorizar usando Microsoft.Extensions.AI / Semantic Kernel Agent Framework
-            // para orquestar notificaciones de forma inteligente (reintentos, canales múltiples, prioridad).
-            // Notificar a todos los familiares activos vinculados a la persona — fire and forget
-            var personId = report.PersonId;
+            var encryptedReportId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
             var reportTitle = report.Title;
             var reportType = report.ReportType?.Name ?? string.Empty;
             var reportDate = report.ReportDate.ToString("dd/MM/yyyy");
             var professionalName = report.Professional != null
-                ? $"{report.Professional.FirstName} {report.Professional.LastName}"
+                ? $"{report.Professional.FirstName} {report.Professional.LastName}".Trim()
                 : string.Empty;
             var personName = report.Person != null
-                ? $"{report.Person.FirstName} {report.Person.LastName}"
+                ? $"{report.Person.FirstName} {report.Person.LastName}".Trim()
                 : string.Empty;
             var year = _dateTime.UtcNow.Year.ToString();
 
-            _ = Task.Run(async () =>
+            // Notificar a todos los tutores activos (in-app persistente + email) y al profesional autor (in-app)
+            try
             {
-                // Crear scope propio: el scope del request ya está dispuesto cuando Task.Run ejecuta
-                using var scope = _scopeFactory.CreateScope();
-                var familyRepository = scope.ServiceProvider.GetRequiredService<IFamilyRepository>();
-                var bgJobRepo        = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
+                var notifications = new List<NotificationMessage>();
 
-                try
+                if (_familyRepository is not null)
                 {
-                    var representatives = await familyRepository.GetPersonRepresentativesByPersonIdAsync(personId);
-                    var activeReps = representatives.Where(r => r.IsActive).ToList();
+                    var representatives = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(report.PersonId, cancellationToken);
+                    var activeReps = representatives
+                        .Where(r => r.IsActive && r.Representative is not null && r.Representative.IsActive)
+                        .ToList();
 
                     foreach (var rep in activeReps)
                     {
@@ -92,54 +101,76 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
                         var familyFirstName = rep.Representative?.FirstName ?? "Familiar";
                         var familyUserId    = rep.Representative?.UserId;
 
-                        if (string.IsNullOrWhiteSpace(familyEmail)) continue;
-
-                        // Email via job queue (retry automático)
-                        await bgJobRepo.CreateAsync(
-                            JobTypes.Email,
-                            JsonSerializer.Serialize(new EmailPayload
-                            {
-                                To           = familyEmail,
-                                Subject      = $"Nuevo reporte disponible sobre {personName}",
-                                TemplateName = "ReportApproved",
-                                Replacements = new Dictionary<string, string?>
-                                {
-                                    { "FamilyName", familyFirstName },
-                                    { "PersonName", personName },
-                                    { "ReportTitle", reportTitle },
-                                    { "ReportType", reportType },
-                                    { "ReportDate", reportDate },
-                                    { "ProfessionalName", professionalName },
-                                    { "Year", year }
-                                }
-                            }),
-                            maxRetries: 2);
-
-                        // SignalR in-app toast para el familiar
+                        // Notificación in-app persistente SIEMPRE, independientemente de si el familiar tiene email
                         if (familyUserId.HasValue && familyUserId.Value != Guid.Empty)
                         {
-                            await bgJobRepo.CreateAsync(
-                                JobTypes.Push,
-                                JsonSerializer.Serialize(new NotificationPayload
+                            notifications.Add(new NotificationMessage(
+                                UserId: familyUserId.Value,
+                                Type: NotificationTypes.Report,
+                                EventCode: NotificationEventCodes.ReportApproved,
+                                Title: $"Nuevo reporte de {personName}",
+                                Message: $"El reporte \"{reportTitle}\" ya está disponible.",
+                                ActionUrl: "/family/reports"));
+                        }
+
+                        // Email via job queue (solo si tiene email válido)
+                        if (_backgroundJobs is not null && !string.IsNullOrWhiteSpace(familyEmail))
+                        {
+                            await _backgroundJobs.CreateAsync(
+                                JobTypes.Email,
+                                JsonSerializer.Serialize(new EmailPayload
                                 {
-                                    UserId           = familyUserId.Value.ToString(),
-                                    Title            = $"Nuevo reporte de {personName}",
-                                    Message          = $"El reporte \"{reportTitle}\" ya está disponible.",
-                                    ActionUrl        = "/#/family/reports",
-                                    SendEmailFallback = false
+                                    To           = familyEmail,
+                                    Subject      = $"Nuevo reporte disponible sobre {personName}",
+                                    TemplateName = "ReportApproved",
+                                    Replacements = new Dictionary<string, string?>
+                                    {
+                                        { "FamilyName", familyFirstName },
+                                        { "PersonName", personName },
+                                        { "ReportTitle", reportTitle },
+                                        { "ReportType", reportType },
+                                        { "ReportDate", reportDate },
+                                        { "ProfessionalName", professionalName },
+                                        { "Year", year }
+                                    }
                                 }),
-                                maxRetries: 3);
+                                maxRetries: 2,
+                                cancellationToken: cancellationToken);
                         }
                     }
                 }
-                catch (Exception ex)
+
+                // Notificar también al profesional autor que su reporte fue aprobado
+                var profUserId = report.Professional?.UserId ?? Guid.Empty;
+                if (profUserId == Guid.Empty && _professionalsRepository is not null)
                 {
-                    _logger.LogError(ex, "Error encolando notificaciones de aprobación para reporte {ReportId}", command.ReportId);
+                    var prof = await _professionalsRepository.GetByIdAsync(report.ProfessionalId, cancellationToken);
+                    profUserId = prof?.UserId ?? Guid.Empty;
                 }
-            });
+
+                if (profUserId != Guid.Empty)
+                {
+                    notifications.Add(new NotificationMessage(
+                        UserId: profUserId,
+                        Type: NotificationTypes.Report,
+                        EventCode: NotificationEventCodes.ReportApproved,
+                        Title: "Reporte aprobado",
+                        Message: $"Tu reporte \"{reportTitle}\" sobre {personName} fue aprobado y ya está disponible para la familia.",
+                        ActionUrl: $"/pro/reports/{encryptedReportId}"));
+                }
+
+                if (_notificationService is not null)
+                {
+                    await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error encolando notificaciones de aprobación para reporte {ReportId}", command.ReportId);
+            }
 
             var response = ReportResponse.MapToResponse(report);
-            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+            response.EncryptedId = encryptedReportId;
             return ApiResponse<ReportResponse>.SuccessResult(response);
         }
 

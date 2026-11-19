@@ -901,12 +901,17 @@ namespace InclusiON.Data.Migrations
                     b.Property<DateTime>("AssignedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("InstitutionalRoleId")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
                     b.HasKey("AdminUserId", "InstitutionId");
 
                     b.HasIndex("InstitutionId");
+
+                    b.HasIndex("InstitutionalRoleId");
 
                     b.ToTable("AdminInstitutions");
                 });
@@ -1476,6 +1481,66 @@ namespace InclusiON.Data.Migrations
                     b.ToTable("FamilyStatusHistories", (string)null);
                 });
 
+            modelBuilder.Entity("InclusiON.Domain.Models.InstitutionalRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("InstitutionalRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Máxima autoridad de la institución escolar o centro",
+                            IsActive = true,
+                            Name = "Director / Directora"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Vicedirección y gestión académica/institucional",
+                            IsActive = true,
+                            Name = "Vicedirector / Vicedirectora"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Administración de legajos, expedientes y documentación escolar",
+                            IsActive = true,
+                            Name = "Secretario / Secretaria"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Acompañamiento, asistencia y coordinación de grupos escolares",
+                            IsActive = true,
+                            Name = "Preceptor / Preceptora"
+                        });
+                });
+
             modelBuilder.Entity("InclusiON.Domain.Models.Invitation", b =>
                 {
                     b.Property<int>("Id")
@@ -1758,6 +1823,66 @@ namespace InclusiON.Data.Migrations
                     b.HasIndex("SentAt");
 
                     b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActionUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("IsDismissed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IsDismissed", "CreatedAt")
+                        .HasDatabaseName("IX_Notifications_UserId_IsDismissed_CreatedAt");
+
+                    b.HasIndex("UserId", "IsRead", "IsDismissed")
+                        .HasDatabaseName("IX_Notifications_UserId_IsRead_IsDismissed");
+
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PasswordResetToken", b =>
@@ -3430,9 +3555,16 @@ namespace InclusiON.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("InclusiON.Domain.Models.InstitutionalRole", "InstitutionalRole")
+                        .WithMany("AdminInstitutions")
+                        .HasForeignKey("InstitutionalRoleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("AdminUser");
 
                     b.Navigation("Institution");
+
+                    b.Navigation("InstitutionalRole");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.BackgroundJob", b =>
@@ -3580,6 +3712,17 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("RelatedPerson");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.Notification", b =>
+                {
+                    b.HasOne("InclusiON.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.PasswordResetToken", b =>
@@ -4004,6 +4147,11 @@ namespace InclusiON.Data.Migrations
                     b.Navigation("PersonRepresentatives");
 
                     b.Navigation("StatusHistory");
+                });
+
+            modelBuilder.Entity("InclusiON.Domain.Models.InstitutionalRole", b =>
+                {
+                    b.Navigation("AdminInstitutions");
                 });
 
             modelBuilder.Entity("InclusiON.Domain.Models.JobType", b =>

@@ -164,6 +164,9 @@ namespace InclusiON.Infrastructure
             // Auditoria de accesos a datos sensibles (HU-IN-172)
             services.AddScoped<IAccessAuditLogger, AccessAuditLogger>();
 
+            // Servicio centralizado de notificaciones persistentes + SignalR
+            services.AddScoped<INotificationService, NotificationService>();
+
             // Autorizacion por recurso / row-level (HU-IN-172)
             services.AddScoped<InclusiON.Application.Authorization.IResourceAuthorizationService,
                                Authorization.ResourceAuthorizationService>();

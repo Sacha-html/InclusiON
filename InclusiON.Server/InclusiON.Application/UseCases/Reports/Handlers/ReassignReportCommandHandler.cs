@@ -21,19 +21,25 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
         private readonly ILogger<ReassignReportCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
         private readonly IEncryptionService _encryption;
+        private readonly IProfessionalsRepository? _professionalsRepository;
+        private readonly INotificationService? _notificationService;
 
         public ReassignReportCommandHandler(
             IReportsRepository reportsRepository,
             IUnitOfWork unitOfWork,
             ILogger<ReassignReportCommandHandler> logger,
             IDateTimeProvider dateTime,
-            IEncryptionService encryption)
+            IEncryptionService encryption,
+            IProfessionalsRepository? professionalsRepository = null,
+            INotificationService? notificationService = null)
         {
-            _reportsRepository = reportsRepository;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _dateTime = dateTime;
-            _encryption = encryption;
+            _reportsRepository       = reportsRepository;
+            _unitOfWork              = unitOfWork;
+            _logger                  = logger;
+            _dateTime                = dateTime;
+            _encryption              = encryption;
+            _professionalsRepository = professionalsRepository;
+            _notificationService     = notificationService;
         }
 
         public async Task<ApiResponse<ReportResponse>> HandleAsync(
@@ -43,6 +49,8 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             if (report is null)
                 return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.ReportNotFound, "Reporte no encontrado.");
+
+            var previousProfessionalId = report.ProfessionalId;
 
             try
             {
@@ -57,8 +65,43 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
 
             _logger.LogInformation("Report {ReportId} reassigned to professional {NewProfessionalId} by admin {AdminUserId}", report.Id, command.NewProfessionalId, command.AdminUserId);
 
+            var encryptedReportId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+
+            if (_notificationService is not null && _professionalsRepository is not null)
+            {
+                var notifications = new List<NotificationMessage>();
+                var newProf = await _professionalsRepository.GetByIdAsync(command.NewProfessionalId, cancellationToken);
+                if (newProf is not null && newProf.UserId != Guid.Empty)
+                {
+                    notifications.Add(new NotificationMessage(
+                        UserId: newProf.UserId,
+                        Type: NotificationTypes.Report,
+                        EventCode: NotificationEventCodes.ReportReassigned,
+                        Title: "Reporte reasignado",
+                        Message: $"Se te asignó el reporte \"{report.Title}\" para su seguimiento.",
+                        ActionUrl: $"/pro/reports/{encryptedReportId}"));
+                }
+
+                if (previousProfessionalId != command.NewProfessionalId)
+                {
+                    var oldProf = await _professionalsRepository.GetByIdAsync(previousProfessionalId, cancellationToken);
+                    if (oldProf is not null && oldProf.UserId != Guid.Empty)
+                    {
+                        notifications.Add(new NotificationMessage(
+                            UserId: oldProf.UserId,
+                            Type: NotificationTypes.Report,
+                            EventCode: NotificationEventCodes.ReportReassigned,
+                            Title: "Reporte reasignado",
+                            Message: $"El reporte \"{report.Title}\" fue reasignado a otro profesional.",
+                            ActionUrl: "/pro/reports"));
+                    }
+                }
+
+                await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+            }
+
             var response = ReportResponse.MapToResponse(report);
-            response.EncryptedId = ToUrlSafeBase64(_encryption.Encrypt(report.Id.ToString()));
+            response.EncryptedId = encryptedReportId;
             return ApiResponse<ReportResponse>.SuccessResult(response, "Reporte reasignado exitosamente.");
         }
 

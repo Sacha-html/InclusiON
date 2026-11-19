@@ -99,6 +99,62 @@ namespace InclusiON.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<List<User>> GetAdminsForInstitutionsIncludingGlobalAsync(List<int>? institutionIds, CancellationToken cancellationToken = default)
+        {
+            var adminRoleId = await _context.Roles
+                .AsNoTracking()
+                .Where(r => r.NormalizedName == "ADMIN")
+                .Select(r => (Guid?)r.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (!adminRoleId.HasValue) return new List<User>();
+
+            var adminUserIds = await _context.UserRoles
+                .AsNoTracking()
+                .Where(ur => ur.RoleId == adminRoleId.Value)
+                .Select(ur => ur.UserId)
+                .ToListAsync(cancellationToken);
+
+            if (adminUserIds.Count == 0) return new List<User>();
+
+            var activeAdminInstitutions = await _context.AdminInstitutions
+                .AsNoTracking()
+                .Where(ai => ai.IsActive && adminUserIds.Contains(ai.AdminUserId))
+                .Select(ai => new { ai.AdminUserId, ai.InstitutionId })
+                .ToListAsync(cancellationToken);
+
+            var instAdminsSet = activeAdminInstitutions.Select(x => x.AdminUserId).ToHashSet();
+            var targetIds = new HashSet<Guid>();
+
+            // Admins globales = usuarios con rol ADMIN sin instituciones asignadas
+            foreach (var adminId in adminUserIds)
+            {
+                if (!instAdminsSet.Contains(adminId))
+                {
+                    targetIds.Add(adminId);
+                }
+            }
+
+            // Admins institucionales que coincidan con las instituciones del recurso
+            if (institutionIds is { Count: > 0 })
+            {
+                foreach (var link in activeAdminInstitutions)
+                {
+                    if (institutionIds.Contains(link.InstitutionId))
+                    {
+                        targetIds.Add(link.AdminUserId);
+                    }
+                }
+            }
+
+            if (targetIds.Count == 0) return new List<User>();
+
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.IsActive && targetIds.Contains(u.Id))
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<AdminInstitution?> FindAssignmentAsync(Guid adminUserId, int institutionId, CancellationToken cancellationToken = default)
         {
             return await _context.AdminInstitutions

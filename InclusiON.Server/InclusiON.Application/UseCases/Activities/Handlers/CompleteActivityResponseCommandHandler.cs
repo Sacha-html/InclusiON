@@ -23,6 +23,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
         private readonly IEncryptionService _encryption;
         private readonly IRealTimeNotifier? _realTimeNotifier;
         private readonly IFamilyRepository? _familyRepository;
+        private readonly INotificationService? _notificationService;
 
         public CompleteActivityResponseCommandHandler(
             IActivityAssignmentRepository repository,
@@ -33,7 +34,8 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             IDateTimeProvider dateTime,
             IEncryptionService encryption,
             IRealTimeNotifier? realTimeNotifier = null,
-            IFamilyRepository? familyRepository = null)
+            IFamilyRepository? familyRepository = null,
+            INotificationService? notificationService = null)
         {
             _repository              = repository;
             _roadmapRepository       = roadmapRepository;
@@ -44,6 +46,7 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
             _encryption              = encryption;
             _realTimeNotifier        = realTimeNotifier;
             _familyRepository        = familyRepository;
+            _notificationService     = notificationService;
         }
 
         public async Task<ApiResponse<ActivityAssignmentResponse>> HandleAsync(
@@ -220,136 +223,77 @@ namespace InclusiON.Application.UseCases.Activities.Handlers
                         cancellationToken: cancellationToken);
                 }
 
-                // Notificar al profesional
-                if (prof is not null)
+                // Solo notificar en eventos Core: éxito (>= 60%) o alerta pedagógica CB-07 (4.° intento fallido)
+                var isSuccess = command.SuccessPercentage >= 60m;
+                var isAttemptAlert = !isSuccess && response.AttemptCount >= 4;
+
+                if (isSuccess || isAttemptAlert)
                 {
-                    var studentName = assignment.Person != null ? $"{assignment.Person.FirstName} {assignment.Person.LastName}" : "Un alumno";
-                    var activityTitle = assignment.Activity != null ? assignment.Activity.Title : "una actividad";
+                    var notifications = new List<NotificationMessage>();
+                    var studentName = assignment.Person != null
+                        ? $"{assignment.Person.FirstName} {assignment.Person.LastName}".Trim()
+                        : "Un alumno";
+                    var activityTitle = assignment.Activity != null
+                        ? assignment.Activity.Title
+                        : "una actividad";
+                    var encryptedPersonId = ToUrlSafeBase64(_encryption.Encrypt(assignment.PersonId.ToString()));
 
-                    string notifTitle;
-                    string notifMessage;
+                    // Notificar al profesional asignado
+                    if (prof is not null && prof.UserId != Guid.Empty)
+                    {
+                        var profTitle = isSuccess
+                            ? "Actividad completada"
+                            : "Alerta: Apoyo pedagógico requerido (4 intentos)";
+                        var profMessage = isSuccess
+                            ? $"{studentName} completó la actividad \"{activityTitle}\" con éxito ({command.SuccessPercentage:F0}% de logro)."
+                            : $"{studentName} alcanzó {response.AttemptCount} intentos en la actividad \"{activityTitle}\" (último intento: {command.SuccessPercentage:F0}%). Requiere tu intervención.";
+                        var profActionUrl = isAttemptAlert
+                            ? $"/pro/evaluations?personId={encryptedPersonId}&activityId={assignment.ActivityId}&alert=attempts"
+                            : $"/pro/evaluations?personId={encryptedPersonId}";
 
-                    if (command.SuccessPercentage >= 60m)
-                    {
-                        notifTitle = "Actividad completada";
-                        notifMessage = $"{studentName} completó la actividad '{activityTitle}' con éxito ({command.SuccessPercentage:F0}% de logro).";
-                    }
-                    else if (response.AttemptCount >= 4)
-                    {
-                        notifTitle = "Alerta: Apoyo pedagógico requerido (4 intentos)";
-                        notifMessage = $"{studentName} alcanzó 4 intentos en la actividad '{activityTitle}' (último intento: {command.SuccessPercentage:F0}%). La actividad continúa disponible pero requiere tu intervención.";
-                    }
-                    else
-                    {
-                        notifTitle = "Intento de actividad registrado";
-                        notifMessage = $"{studentName} realizó el intento {response.AttemptCount} en la actividad '{activityTitle}' ({command.SuccessPercentage:F0}% de éxito). El nivel continúa en proceso.";
-                    }
-
-                    string actionUrl;
-                    if (response.AttemptCount >= 4 && command.SuccessPercentage < 60m)
-                    {
-                        actionUrl = $"/pro/evaluations?personId={assignment.PersonId}&activityId={assignment.ActivityId}&alert=attempts";
-                    }
-                    else
-                    {
-                        actionUrl = $"/pro/evaluations?personId={assignment.PersonId}";
+                        notifications.Add(new NotificationMessage(
+                            UserId: prof.UserId,
+                            Type: isAttemptAlert ? NotificationTypes.Alert : NotificationTypes.Activity,
+                            EventCode: isAttemptAlert ? NotificationEventCodes.ActivityAttemptAlert : NotificationEventCodes.ActivityCompleted,
+                            Title: profTitle,
+                            Message: profMessage,
+                            ActionUrl: profActionUrl));
                     }
 
-                    var payload = new NotificationPayload
+                    // Notificar a todos los tutores familiares activos vinculados al alumno
+                    if (_familyRepository is not null)
                     {
-                        UserId    = professionalUserId,
-                        Title     = notifTitle,
-                        Message   = notifMessage,
-                        ActionUrl = actionUrl
-                    };
+                        var reps = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(assignment.PersonId, cancellationToken);
+                        var tutorTitle = isSuccess
+                            ? "¡Felicitaciones! Nivel superado"
+                            : "Alerta en Mi Camino: Apoyo requerido";
+                        var tutorMessage = isSuccess
+                            ? $"{studentName} completó la actividad \"{activityTitle}\" con éxito ({command.SuccessPercentage:F0}% de logro) en Mi Camino."
+                            : $"{studentName} registró varios intentos en la actividad \"{activityTitle}\". Su profesional fue notificado para asistirlo.";
 
-                    if (!string.IsNullOrEmpty(professionalUserId) && _realTimeNotifier != null)
+                        foreach (var rep in reps.Where(r => r.IsActive && r.Representative is not null && r.Representative.IsActive && r.Representative.UserId != Guid.Empty))
+                        {
+                            notifications.Add(new NotificationMessage(
+                                UserId: rep.Representative.UserId,
+                                Type: isAttemptAlert ? NotificationTypes.Alert : NotificationTypes.Activity,
+                                EventCode: isAttemptAlert ? NotificationEventCodes.ActivityAttemptAlert : NotificationEventCodes.ActivityCompleted,
+                                Title: tutorTitle,
+                                Message: tutorMessage,
+                                ActionUrl: "/family"));
+                        }
+                    }
+
+                    if (_notificationService is not null)
                     {
-                        try
+                        await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+                    }
+                    else if (_realTimeNotifier is not null)
+                    {
+                        foreach (var n in notifications)
                         {
                             await _realTimeNotifier.NotifyUserAsync(
-                                professionalUserId,
-                                notifTitle,
-                                notifMessage,
-                                payload.ActionUrl,
-                                cancellationToken);
+                                n.UserId.ToString(), n.Title, n.Message, n.ActionUrl, cancellationToken);
                         }
-                        catch
-                        {
-                            // Continuar con BackgroundJob
-                        }
-                    }
-
-                    await _backgroundJobs.CreateAsync(
-                        JobTypes.Push,
-                        JsonSerializer.Serialize(payload),
-                        maxRetries: 3,
-                        cancellationToken: cancellationToken);
-                }
-
-                // Notificar a los tutores familiares vinculados al alumno
-                if (_familyRepository is not null)
-                {
-                    var studentName = assignment.Person != null ? $"{assignment.Person.FirstName} {assignment.Person.LastName}".Trim() : "El estudiante";
-                    var activityTitle = assignment.Activity != null ? assignment.Activity.Title : "la actividad";
-
-                    var reps = await _familyRepository.GetPersonRepresentativesByPersonIdAsync(assignment.PersonId, cancellationToken);
-                    foreach (var rep in reps.Where(r => r.IsActive && r.Representative != null && r.Representative.UserId != Guid.Empty))
-                    {
-                        var tutorUserId = rep.Representative!.UserId.ToString();
-                        string tutorTitle;
-                        string tutorMessage;
-                        string notifType;
-
-                        if (command.SuccessPercentage >= 60m)
-                        {
-                            tutorTitle = "¡Felicitaciones! Nivel superado";
-                            tutorMessage = $"{studentName} completó la actividad '{activityTitle}' con éxito ({command.SuccessPercentage:F0}% de logro) en Mi Camino.";
-                            notifType = "ActivityCompleted";
-                        }
-                        else if (response.AttemptCount >= 4)
-                        {
-                            tutorTitle = "Alerta en Mi Camino: Apoyo requerido";
-                            tutorMessage = $"{studentName} registró varios intentos en la actividad '{activityTitle}'. Su profesional ha sido notificado para asistirlo.";
-                            notifType = "ActivityBlocked";
-                        }
-                        else
-                        {
-                            tutorTitle = "Nuevo intento registrado";
-                            tutorMessage = $"{studentName} realizó un intento en '{activityTitle}' ({command.SuccessPercentage:F0}% de logro).";
-                            notifType = "ActivityAttempt";
-                        }
-
-                        if (_realTimeNotifier != null)
-                        {
-                            try
-                            {
-                                await _realTimeNotifier.NotifyUserAsync(
-                                    tutorUserId,
-                                    tutorTitle,
-                                    tutorMessage,
-                                    "/family/dashboard",
-                                    cancellationToken);
-                            }
-                            catch
-                            {
-                                // Silencioso
-                            }
-                        }
-
-                        var tutorPayload = new NotificationPayload
-                        {
-                            UserId    = tutorUserId,
-                            Title     = tutorTitle,
-                            Message   = tutorMessage,
-                            ActionUrl = "/family/dashboard"
-                        };
-
-                        await _backgroundJobs.CreateAsync(
-                            JobTypes.Push,
-                            JsonSerializer.Serialize(tutorPayload),
-                            maxRetries: 3,
-                            cancellationToken: cancellationToken);
                     }
                 }
             }

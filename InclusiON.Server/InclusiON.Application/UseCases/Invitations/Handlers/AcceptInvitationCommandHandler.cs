@@ -23,6 +23,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AcceptInvitationCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
+        private readonly INotificationService? _notificationService;
 
         public AcceptInvitationCommandHandler(
             IInvitationsRepository invitationsRepository,
@@ -31,7 +32,8 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             IIdentityService identityService,
             IUnitOfWork unitOfWork,
             ILogger<AcceptInvitationCommandHandler> logger,
-            IDateTimeProvider dateTime)
+            IDateTimeProvider dateTime,
+            INotificationService? notificationService = null)
         {
             _invitationsRepository   = invitationsRepository;
             _professionalsRepository = professionalsRepository;
@@ -40,6 +42,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             _unitOfWork              = unitOfWork;
             _logger                  = logger;
             _dateTime                = dateTime;
+            _notificationService     = notificationService;
         }
 
         public async Task<ApiResponse<AcceptInvitationResponse>> HandleAsync(AcceptInvitationCommand command, CancellationToken cancellationToken)
@@ -176,31 +179,38 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     "Invitacion {InvitationId} aceptada. Usuario: {UserId}, Familiar: {FamilyRepId}",
                     invitation.Id, user.Id, familyRep?.Id);
 
-                // Notificar al profesional que creó la invitación — fire and forget
-                var invFirstName = invitation.FirstName ?? string.Empty;
-                var invLastName  = invitation.LastName  ?? string.Empty;
-                var createdById  = invitation.CreatedByProfessionalId;
-                _ = Task.Run(async () =>
+                // Notificar al profesional que creó la invitación y bienvenida al familiar (sin Task.Run sobre DbContext scoped)
+                if (_notificationService is not null)
                 {
-                    try
+                    var notifications = new List<NotificationMessage>();
+                    var invFullName = $"{invitation.FirstName} {invitation.LastName}".Trim();
+
+                    var prof = await _professionalsRepository.GetByIdAsync(invitation.CreatedByProfessionalId, cancellationToken);
+                    if (prof is not null && prof.UserId != Guid.Empty)
                     {
-                        var prof = await _professionalsRepository.GetByIdAsync(createdById, CancellationToken.None);
-                        if (prof is not null)
-                        {
-                            await _backgroundJobs.CreateAsync(
-                                JobTypes.Push,
-                                JsonSerializer.Serialize(new NotificationPayload
-                                {
-                                    UserId    = prof.UserId.ToString(),
-                                    Title     = "Invitación aceptada",
-                                    Message   = $"{invFirstName} {invLastName} aceptó tu invitación y se unió como familiar.",
-                                    ActionUrl = "/#/pro/family"
-                                }),
-                                maxRetries: 3);
-                        }
+                        var profActionUrl = invitation.ForPersonId.HasValue
+                            ? $"/pro/persons/{_notificationService.EncryptId(invitation.ForPersonId.Value)}?tab=familiares"
+                            : "/pro/invitations";
+
+                        notifications.Add(new NotificationMessage(
+                            UserId: prof.UserId,
+                            Type: NotificationTypes.System,
+                            EventCode: NotificationEventCodes.InvitationAccepted,
+                            Title: "Invitación aceptada",
+                            Message: $"{invFullName} aceptó tu invitación y se unió como familiar.",
+                            ActionUrl: profActionUrl));
                     }
-                    catch { /* fire and forget */ }
-                });
+
+                    notifications.Add(new NotificationMessage(
+                        UserId: user.Id,
+                        Type: NotificationTypes.System,
+                        EventCode: NotificationEventCodes.InvitationAccepted,
+                        Title: "Bienvenido a InclusiON",
+                        Message: "Tu cuenta familiar fue activada correctamente. Ya podés consultar actividades, reportes y calendario.",
+                        ActionUrl: "/family"));
+
+                    await _notificationService.NotifyManyAsync(notifications, cancellationToken);
+                }
 
                 var response = new AcceptInvitationResponse
                 {
