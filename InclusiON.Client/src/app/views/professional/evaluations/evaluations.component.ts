@@ -600,8 +600,7 @@ export class EvaluationsComponent implements OnInit, OnDestroy {
     const assignmentsHtml = this.assignments().map(a => `
       <tr>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px;">
-          <strong>${a.activityTitle}</strong><br>
-          <span style="font-size: 11px; color: #777;">Código: ${a.templateTypeCode}</span>
+          <strong>${a.activityTitle}</strong>
         </td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${this.getAssignmentStatusLabel(a.status)}</td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${new Date(a.assignedAt).toLocaleDateString('es-ES')}</td>

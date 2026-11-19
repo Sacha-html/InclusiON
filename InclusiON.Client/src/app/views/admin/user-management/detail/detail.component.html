@@ -267,7 +267,7 @@
                         </c-badge>
                       </td>
                       <td>{{ session.revokedAt ? (session.revokedAt | date:'dd/MM/yyyy HH:mm') : '—' }}</td>
-                      <td class="pe-4 text-body-secondary small">{{ session.revokedReason ?? '—' }}</td>
+                      <td class="pe-4 text-body-secondary small">{{ formatRevokedReason(session.revokedReason) }}</td>
                     </tr>
                   }
                 </tbody>

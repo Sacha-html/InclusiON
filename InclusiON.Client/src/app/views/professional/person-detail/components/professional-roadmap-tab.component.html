@@ -179,7 +179,7 @@
                         @for (log of adjustmentHistory(); track log.id) {
                           <li class="d-flex gap-2 align-items-start mb-1">
                             <c-badge [color]="log.adjustmentType === 'DifficultyUp' ? 'success' : log.adjustmentType === 'FrustrationIntervention' ? 'danger' : 'warning'" shape="rounded-pill">
-                              {{ log.adjustmentType }}
+                              {{ getAdjustmentTypeLabel(log.adjustmentType) }}
                             </c-badge>
                             <small class="text-muted">{{ log.reason }} — {{ log.adjustedAt | date:'dd/MM/yy HH:mm' }}</small>
                           </li>

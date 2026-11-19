@@ -50,6 +50,37 @@ export class PersonBasicInfoComponent {
     }
   }
 
+  formatAvatarColor(hex?: string | null): string {
+    if (!hex) return 'Sin especificar';
+    const colorMap: Record<string, string> = {
+      '#8B0000': 'Rojo',
+      '#880E4F': 'Rosa',
+      '#6A1B9A': 'Violeta',
+      '#4527A0': 'Púrpura',
+      '#283593': 'Índigo',
+      '#0D47A1': 'Azul',
+      '#004D40': 'Verde Azulado',
+      '#03A9F4': 'Celeste',
+      '#00BCD4': 'Cian',
+      '#4CAF50': 'Verde',
+      '#8BC34A': 'Verde Claro',
+      '#CDDC39': 'Lima',
+      '#FFEB3B': 'Amarillo',
+      '#FFC107': 'Ámbar',
+      '#FF9800': 'Naranja',
+      '#5D1F00': 'Naranja Oscuro',
+      '#667EEA': 'Azul Índigo',
+      '#4F46E5': 'Índigo',
+      '#3B82F6': 'Azul',
+      '#10B981': 'Verde',
+      '#EF4444': 'Rojo',
+      '#F59E0B': 'Ámbar',
+      '#8B5CF6': 'Violeta',
+      '#EC4899': 'Rosa',
+    };
+    return colorMap[hex.trim().toUpperCase()] ?? 'Personalizado';
+  }
+
   goBack(): void {
     this.router.navigate([AppRoutes.Admin.Persons]);
   }

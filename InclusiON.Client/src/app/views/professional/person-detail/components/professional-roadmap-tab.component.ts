@@ -400,7 +400,7 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
     const rows = logs.map(l =>
       [
         l.id,
-        l.adjustmentType,
+        this.getAdjustmentTypeLabel(l.adjustmentType),
         l.previousValue,
         l.newValue,
         `"${(l.reason ?? '').replace(/"/g, '""')}"`,
@@ -462,6 +462,19 @@ export class ProfessionalRoadmapTabComponent implements OnInit {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────
+
+  getAdjustmentTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      DifficultyUp: 'Aumento de dificultad',
+      DifficultyDown: 'Reducción de dificultad',
+      FrustrationIntervention: 'Intervención por frustración',
+      HintsEnabled: 'Pistas activadas',
+      HintsDisabled: 'Pistas desactivadas',
+      TimeExtended: 'Extensión de tiempo',
+      TimeReduced: 'Reducción de tiempo',
+    };
+    return labels[type] ?? type;
+  }
 
   difficultyLabel(level: number): string {
     return level === 1 ? 'Fácil' : level === 2 ? 'Medio' : 'Difícil';

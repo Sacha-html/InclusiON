@@ -34,7 +34,7 @@
                 <div class="mt-1">
                   @for (perm of role.permissions.slice(0, 5); track perm) {
                     <c-badge color="light" textColor="dark" class="me-1 mb-1" style="font-size: 0.7rem;">
-                      {{ perm }}
+                      {{ getPermissionLabel(perm) }}
                     </c-badge>
                   }
                   @if (role.permissions.length > 5) {
@@ -119,7 +119,6 @@
                 />
                 <label cFormCheckLabel [for]="'perm-' + perm">
                   {{ getActionLabel(perm) }}
-                  <small class="text-body-secondary ms-1">({{ perm }})</small>
                 </label>
               </c-form-check>
             }

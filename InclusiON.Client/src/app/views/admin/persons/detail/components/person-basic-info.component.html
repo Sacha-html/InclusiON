@@ -125,7 +125,7 @@
         <dt class="form-label text-body-secondary mb-1">Color de avatar</dt>
         <dd class="mb-0 d-flex align-items-center gap-2">
           <span class="avatar-color-preview" [style.background-color]="person.avatarColor ?? '#ccc'" aria-hidden="true"></span>
-          <span class="fw-medium">{{ person.avatarColor ?? 'Sin especificar' }}</span>
+          <span class="fw-medium">{{ formatAvatarColor(person.avatarColor) }}</span>
         </dd>
       </div>
     </dl>

@@ -109,6 +109,20 @@ export class UserManagementDetailComponent implements OnInit {
     return { color: 'success', label: 'Activa' };
   }
 
+  formatRevokedReason(reason?: string | null): string {
+    if (!reason) return '—';
+    const reasonsMap: Record<string, string> = {
+      'Token expired': 'Sesión expirada',
+      'Token revoked': 'Token revocado',
+      'All tokens revoked': 'Todas las sesiones revocadas',
+      'User inactive': 'Usuario inactivo',
+      'User not found': 'Usuario no encontrado',
+      'Replaced by new token': 'Reemplazado por nueva sesión',
+      'Logout': 'Cierre de sesión',
+    };
+    return reasonsMap[reason.trim()] ?? reason;
+  }
+
   formatUserAgent(ua: string | null): string {
     if (!ua) return '—';
     if (ua.includes('Chrome') && !ua.includes('Chromium')) return 'Chrome';

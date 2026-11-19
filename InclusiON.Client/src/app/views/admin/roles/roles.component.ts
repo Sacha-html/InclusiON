@@ -133,10 +133,11 @@ export class RolesComponent implements OnInit {
       activities: 'Actividades',
       diagnoses: 'Diagnósticos',
       reports: 'Reportes',
+      roadmap: 'Camino de aprendizaje',
       messages: 'Mensajes',
       invitations: 'Invitaciones',
-      settings: 'Configuracion',
-      audit: 'Auditoria',
+      settings: 'Configuración',
+      audit: 'Auditoría',
       institutions: 'Instituciones',
     };
     return labels[module] || module;
@@ -153,8 +154,18 @@ export class RolesComponent implements OnInit {
       respond: 'Responder',
       link: 'Vincular',
       unlink: 'Desvincular',
+      'link-family': 'Vincular familiar',
+      'unlink-family': 'Desvincular familiar',
+      submit: 'Enviar a revisión',
+      approve: 'Aprobar',
+      reject: 'Rechazar',
     };
     return labels[action] || action;
+  }
+
+  getPermissionLabel(permission: string): string {
+    const [module] = permission.split(':');
+    return `${this.getModuleLabel(module)}: ${this.getActionLabel(permission)}`;
   }
 
   openEditModal(role: RoleResponse): void {
@@ -226,7 +237,8 @@ export class RolesComponent implements OnInit {
         if (index >= 0) {
           this.roles[index] = updated;
         }
-        this.toastService.success(`Permisos de ${updated.name} actualizados. Los usuarios con este rol deberán iniciar sesión nuevamente.`);
+        const roleLabel = this.roleMap[updated.name]?.label ?? updated.name;
+        this.toastService.success(`Permisos de ${roleLabel} actualizados. Los usuarios con este rol deberán iniciar sesión nuevamente.`);
         this.closeModal();
       },
       error: () => {
