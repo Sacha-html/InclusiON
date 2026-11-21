@@ -21,6 +21,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
     {
         private readonly IPersonsRepository _repository;
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBackgroundJobRepository _backgroundJobs;
@@ -30,6 +31,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         public CreatePersonCommandHandler(
             IPersonsRepository repository,
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IPasswordHasher passwordHasher,
             IUnitOfWork unitOfWork,
             IBackgroundJobRepository backgroundJobs,
@@ -38,6 +40,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         {
             _repository = repository;
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _passwordHasher = passwordHasher;
             _unitOfWork = unitOfWork;
             _backgroundJobs = backgroundJobs;
@@ -49,15 +52,17 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         {
             try
             {
-                // Validar documento unico
-                if (!string.IsNullOrWhiteSpace(command.DocumentNumber))
+                var normalizedDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+
+                // Validar documento unico global
+                if (normalizedDoc is not null)
                 {
-                    var documentExists = await _repository.ExistsDocumentAsync(command.DocumentNumber, null, cancellationToken);
-                    if (documentExists)
+                    var docCheck = await _uniquenessValidation.CheckDocumentAsync(normalizedDoc, null, cancellationToken);
+                    if (!docCheck.IsAvailable)
                     {
                         return ApiResponse<PersonResponse>.Conflict(
                             ErrorCode.DocumentAlreadyExists,
-                            ErrorMessages.DocumentAlreadyExists);
+                            docCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
                     }
                 }
 
@@ -71,8 +76,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 {
                     UserName = baseUsername,
                     Email = email,
-                    Name = command.FirstName,
-                    Surname = command.LastName,
+                    Name = command.FirstName.Trim(),
+                    Surname = command.LastName.Trim(),
                     IsActive = true,
                     CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
@@ -82,9 +87,9 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                 // Crear persona
                 var person = new PersonWithDisability
                 {
-                    FirstName = command.FirstName,
-                    LastName = command.LastName,
-                    DocumentNumber = command.DocumentNumber,
+                    FirstName = command.FirstName.Trim(),
+                    LastName = command.LastName.Trim(),
+                    DocumentNumber = normalizedDoc,
                     BirthDate = command.BirthDate,
                     PhotoUrl = command.PhotoUrl,
                     // Valores iniciales del dominio; el perfil funcional se evalua despues.

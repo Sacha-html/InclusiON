@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
-import { switchMap } from 'rxjs';
-import { InvitationsService, ToastService, ProfessionalsService, AssignmentsService } from '@services';
+import { filter, switchMap, take } from 'rxjs';
+import { InvitationsService, ToastService, ProfessionalsService, AssignmentsService, ValidationService } from '@services';
+import { uniqueEmailValidator } from '@shared/utils';
 import {
   InvitationResponse,
   CreateInvitationRequest,
@@ -52,6 +53,7 @@ export class ListComponent implements OnInit {
   private readonly toastService       = inject(ToastService);
   private readonly professionalsService = inject(ProfessionalsService);
   private readonly assignmentsService = inject(AssignmentsService);
+  private readonly validationService  = inject(ValidationService);
   private readonly fb                 = inject(FormBuilder);
 
   invitations: InvitationResponse[] = [];
@@ -123,7 +125,11 @@ export class ListComponent implements OnInit {
   private initForm(): void {
     this.invitationForm = this.fb.group({
       personId:     ['', [Validators.required]],
-      email:        ['', [Validators.required, Validators.email]],
+      email:        [
+        '',
+        [Validators.required, Validators.email],
+        [uniqueEmailValidator(email => this.validationService.checkEmail(email, { checkInvitations: true }))],
+      ],
       firstName:    ['', [Validators.required, Validators.maxLength(100)]],
       lastName:     ['', [Validators.required, Validators.maxLength(100)]],
       relationship: [''],
@@ -263,12 +269,22 @@ export class ListComponent implements OnInit {
 
   onSubmit(): void {
     this.errorMessage = '';
-    if (this.invitationForm.invalid) {
-      Object.keys(this.invitationForm.controls).forEach(key =>
-        this.invitationForm.get(key)?.markAsTouched()
-      );
+    Object.keys(this.invitationForm.controls).forEach(key =>
+      this.invitationForm.get(key)?.markAsTouched()
+    );
+
+    if (this.invitationForm.pending) {
+      this.invitationForm.statusChanges.pipe(filter(s => s !== 'PENDING'), take(1)).subscribe(() => {
+        this.attemptSubmit();
+      });
       return;
     }
+
+    this.attemptSubmit();
+  }
+
+  private attemptSubmit(): void {
+    if (this.invitationForm.invalid) return;
 
     this.isSubmitting = true;
     const values = this.invitationForm.value;

@@ -4,8 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { ProfessionalsService, InstitutionsService, CatalogsService } from '@services';
 import { AppRoutes } from '@shared/constants';
-import { InstitutionResponse, RegisterProfessionalRequest } from '@models';
-import { validDate, notFutureDate, minAge, toIsoDate, toInputDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
+import { InstitutionResponse, RegisterProfessionalRequest, ErrorCode } from '@models';
+import { validDate, notFutureDate, minAge, toIsoDate, toInputDate } from '@shared/utils';
 
 import {
   ButtonDirective,
@@ -79,16 +79,15 @@ export class RegisterProfessionalComponent implements OnInit {
 
   constructor() {
     const fb = inject(FormBuilder);
-    const professionalsService = inject(ProfessionalsService);
 
     this.form = fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
+      email: ['', [Validators.required, Validators.email]],
       documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
       phone: ['', [Validators.maxLength(20), Validators.pattern(/^[0-9]+$/)]],
       specialtyId: ['', [Validators.required]],
-      licenseNumber: ['', [Validators.required, Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
+      licenseNumber: ['', [Validators.required, Validators.maxLength(50)]],
       birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
       institutionId: [''],
     });
@@ -102,7 +101,7 @@ export class RegisterProfessionalComponent implements OnInit {
     const control = this.form.get(fieldName);
     if (!control || !control.invalid) return false;
     if (this.submitted) return true;
-    if (control.errors?.['emailExists'] || control.errors?.['licenseExists']) return true;
+    if (control.errors?.['emailExists'] || control.errors?.['documentExists'] || control.errors?.['licenseExists']) return true;
     return control.touched;
   }
 
@@ -123,40 +122,24 @@ export class RegisterProfessionalComponent implements OnInit {
     this.submitted = true;
     this.serverError = '';
     this.form.markAllAsTouched();
-
-    // Esperar a que terminen las validaciones async antes de enviar
-    if (this.form.pending) {
-      this.form.statusChanges.subscribe(status => {
-        if (status !== 'PENDING') {
-          this.attemptSubmit();
-        }
-      });
-      return;
-    }
-
     this.attemptSubmit();
   }
 
   private attemptSubmit(): void {
     if (this.form.invalid) return;
 
-    // Verificar errores async explícitamente
-    if (this.f['email'].errors?.['emailExists'] || this.f['licenseNumber'].errors?.['licenseExists']) {
-      return;
-    }
-
     this.isLoading = true;
 
     const raw = this.form.value;
     const request: RegisterProfessionalRequest = {
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      email: raw.email,
-      documentNumber: raw.documentNumber || undefined,
-      phone: raw.phone || undefined,
+      firstName: raw.firstName.trim(),
+      lastName: raw.lastName.trim(),
+      email: raw.email.trim(),
+      documentNumber: raw.documentNumber ? raw.documentNumber.trim() : undefined,
+      phone: raw.phone ? raw.phone.trim() : undefined,
       specialtyId: +raw.specialtyId,
       specialty: this.specialties.find(x => x.id === +raw.specialtyId)?.name ?? '',
-      licenseNumber: raw.licenseNumber || undefined,
+      licenseNumber: raw.licenseNumber ? raw.licenseNumber.trim() : undefined,
       birthDate: raw.birthDate ? toIsoDate(raw.birthDate) : undefined,
       institutionId: raw.institutionId ? +raw.institutionId : undefined,
     };
@@ -171,6 +154,13 @@ export class RegisterProfessionalComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
         this.serverError = err?.userMessage || 'Error al enviar la solicitud de registro.';
+        if (err?.errorCode === ErrorCode.EmailAlreadyExists) {
+          this.f['email'].setErrors({ emailExists: true, message: this.serverError });
+        } else if (err?.errorCode === ErrorCode.DocumentAlreadyExists) {
+          this.f['documentNumber'].setErrors({ documentExists: true, message: this.serverError });
+        } else if (err?.errorCode === ErrorCode.LicenseNumberAlreadyExists) {
+          this.f['licenseNumber'].setErrors({ licenseExists: true, message: this.serverError });
+        }
       },
     });
   }

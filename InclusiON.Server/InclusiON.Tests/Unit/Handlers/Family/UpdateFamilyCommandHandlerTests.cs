@@ -14,13 +14,22 @@ namespace InclusiON.Tests.Unit.Handlers.Family
 {
     public class UpdateFamilyCommandHandlerTests
     {
-        private readonly IFamilyRepository _familyRepo = Substitute.For<IFamilyRepository>();
-        private readonly IIdentityService  _identity   = Substitute.For<IIdentityService>();
-        private readonly IUnitOfWork       _uow        = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider _dateTime   = Substitute.For<IDateTimeProvider>();
+        private readonly IFamilyRepository            _familyRepo = Substitute.For<IFamilyRepository>();
+        private readonly IIdentityService             _identity   = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness = Substitute.For<IUniquenessValidationService>();
+        private readonly IUnitOfWork                  _uow        = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider            _dateTime   = Substitute.For<IDateTimeProvider>();
+
+        public UpdateFamilyCommandHandlerTests()
+        {
+            _uniqueness.CheckDocumentAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(DocumentCheckResult.Available());
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+        }
 
         private UpdateFamilyCommandHandler BuildSut() =>
-            new(_familyRepo, _identity, _uow,
+            new(_familyRepo, _identity, _uniqueness, _uow,
                 NullLogger<UpdateFamilyCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid FamilyId = Guid.NewGuid();
@@ -57,8 +66,8 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         public async Task HandleAsync_DuplicateDocument_ReturnsDocumentAlreadyExists()
         {
             _familyRepo.GetByIdAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(AFamily());
-            _familyRepo.ExistsDocumentAsync("99999999", FamilyId, Arg.Any<CancellationToken>())
-                       .Returns(true);
+            _uniqueness.CheckDocumentAsync("99999999", FamilyId, Arg.Any<CancellationToken>())
+                       .Returns(DocumentCheckResult.Taken("Familiar", false, "El DNI 99999999 ya se encuentra registrado."));
 
             var result = await BuildSut().HandleAsync(Cmd(doc: "99999999"), default);
 
@@ -71,11 +80,10 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         [Fact]
         public async Task HandleAsync_EmailTakenByOther_ReturnsEmailAlreadyExists()
         {
-            var family  = AFamily();
-            var otherId = Guid.NewGuid();
+            var family = AFamily();
             _familyRepo.GetByIdAsync(FamilyId, Arg.Any<CancellationToken>()).Returns(family);
-            _identity.FindByEmailAsync("nueva@test.com")
-                     .Returns(new User { Id = otherId });
+            _uniqueness.CheckEmailAsync("nueva@test.com", family.UserId, family.Id, false, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             var result = await BuildSut().HandleAsync(Cmd(), default);
 

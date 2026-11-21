@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
@@ -18,6 +18,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
         private readonly IInvitationsRepository _repository;
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly ILogger<CreateInvitationCommandHandler> _logger;
@@ -27,6 +28,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             IInvitationsRepository repository,
             IProfessionalsRepository professionalsRepository,
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IUnitOfWork unitOfWork,
             IBackgroundJobRepository backgroundJobs,
             ILogger<CreateInvitationCommandHandler> logger,
@@ -35,6 +37,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             _repository = repository;
             _professionalsRepository = professionalsRepository;
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _unitOfWork = unitOfWork;
             _backgroundJobs = backgroundJobs;
             _logger = logger;
@@ -60,13 +63,18 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         ErrorMessages.ProfessionalNotApprovedForInvitationCreation);
                 }
 
-                // Validar que el email no este ya registrado
-                var existingUser = await _identityService.FindByEmailAsync(command.Email);
-                if (existingUser != null)
+                var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
+
+                // Validar que el email no este ya registrado ni con invitación pendiente activa
+                var emailCheck = await _uniquenessValidation.CheckEmailAsync(
+                    normalizedEmail,
+                    checkPendingInvitations: true,
+                    cancellationToken: cancellationToken);
+                if (!emailCheck.IsAvailable)
                 {
                     return ApiResponse<InvitationResponse>.Conflict(
                         ErrorCode.EmailAlreadyExists,
-                        ErrorMessages.EmailAlreadyRegistered);
+                        emailCheck.Message ?? ErrorMessages.EmailAlreadyRegistered);
                 }
 
                 var invitation = new Invitation
@@ -74,9 +82,9 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                     CreatedByProfessionalId = command.ProfessionalId,
                     ForPersonId = command.PersonId,
                     Code = Guid.NewGuid().ToString(),
-                    Email = command.Email,
-                    FirstName = command.FirstName,
-                    LastName = command.LastName,
+                    Email = normalizedEmail,
+                    FirstName = command.FirstName?.Trim(),
+                    LastName = command.LastName?.Trim(),
                     Relationship = command.Relationship,
                     ExpiresAt = _dateTime.UtcNow.AddDays(7),
                     IsUsed = false

@@ -13,10 +13,17 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
 {
     public class RegisterUserCommandHandlerTests
     {
-        private readonly IIdentityService  _identity = Substitute.For<IIdentityService>();
-        private readonly IDateTimeProvider _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IIdentityService             _identity   = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness = Substitute.For<IUniquenessValidationService>();
+        private readonly IDateTimeProvider            _dateTime   = Substitute.For<IDateTimeProvider>();
 
-        private RegisterUserCommandHandler BuildSut() => new(_identity, _dateTime);
+        public RegisterUserCommandHandlerTests()
+        {
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+        }
+
+        private RegisterUserCommandHandler BuildSut() => new(_identity, _uniqueness, _dateTime);
 
         private static RegisterUserCommand Cmd(
             string password  = "Password1!",
@@ -33,7 +40,7 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
-            await _identity.DidNotReceive().FindByEmailAsync(Arg.Any<string>());
+            await _uniqueness.DidNotReceive().CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
         }
 
         // ── Email ya registrado ──────────────────────────────────────────────
@@ -41,8 +48,8 @@ namespace InclusiON.Tests.Unit.Handlers.Auth
         [Fact]
         public async Task HandleAsync_EmailAlreadyExists_ReturnsConflict()
         {
-            _identity.FindByEmailAsync(Arg.Any<string>())
-                     .Returns(new User { Id = Guid.NewGuid() });
+            _uniqueness.CheckEmailAsync("juan@test.com", null, null, false, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             var result = await BuildSut().HandleAsync(Cmd(), default);
 

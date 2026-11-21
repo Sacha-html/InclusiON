@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -15,6 +15,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
     {
         private readonly IFamilyRepository _repository;
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateFamilyCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
@@ -22,12 +23,14 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         public UpdateFamilyCommandHandler(
             IFamilyRepository repository,
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IUnitOfWork unitOfWork,
             ILogger<UpdateFamilyCommandHandler> logger,
             IDateTimeProvider dateTime)
         {
             _repository = repository;
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
@@ -42,39 +45,46 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                 return ApiResponse<FamilyResponse>.NotFound("Familiar");
             }
 
-            if (!string.IsNullOrWhiteSpace(command.DocumentNumber))
+            var normalizedDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+            var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
+
+            if (normalizedDoc is not null)
             {
-                var documentExists = await _repository.ExistsDocumentAsync(command.DocumentNumber, command.FamilyId, cancellationToken);
-                if (documentExists)
+                var docCheck = await _uniquenessValidation.CheckDocumentAsync(normalizedDoc, command.FamilyId, cancellationToken);
+                if (!docCheck.IsAvailable)
                 {
                     return ApiResponse<FamilyResponse>.Conflict(
                         ErrorCode.DocumentAlreadyExists,
-                        ErrorMessages.DocumentAlreadyExists);
+                        docCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
                 }
             }
 
             // Actualizar email si cambio
-            if (family.User != null && !string.Equals(family.User.Email, command.Email, StringComparison.OrdinalIgnoreCase))
+            if (family.User != null && !string.Equals(family.User.Email?.Trim(), normalizedEmail, StringComparison.OrdinalIgnoreCase))
             {
-                // Verificar que el nuevo email no este en uso
-                var existingUser = await _identityService.FindByEmailAsync(command.Email);
-                if (existingUser != null && existingUser.Id != family.UserId)
+                // Verificar unicidad global del nuevo email
+                var emailCheck = await _uniquenessValidation.CheckEmailAsync(
+                    normalizedEmail,
+                    excludeUserId: family.UserId,
+                    excludeEntityId: family.Id,
+                    cancellationToken: cancellationToken);
+                if (!emailCheck.IsAvailable)
                 {
                     return ApiResponse<FamilyResponse>.Conflict(
                         ErrorCode.EmailAlreadyExists,
-                        ErrorMessages.EmailAlreadyRegistered);
+                        emailCheck.Message ?? ErrorMessages.EmailAlreadyRegistered);
                 }
 
-                family.User.Email = command.Email;
-                family.User.UserName = command.Email;
-                family.User.NormalizedEmail = command.Email.ToUpperInvariant();
-                family.User.NormalizedUserName = command.Email.ToUpperInvariant();
+                family.User.Email = normalizedEmail;
+                family.User.UserName = normalizedEmail;
+                family.User.NormalizedEmail = normalizedEmail.ToUpperInvariant();
+                family.User.NormalizedUserName = normalizedEmail.ToUpperInvariant();
             }
 
-            family.FirstName = command.FirstName;
-            family.LastName = command.LastName;
-            family.DocumentNumber = command.DocumentNumber;
-            family.Phone = command.Phone;
+            family.FirstName = command.FirstName.Trim();
+            family.LastName = command.LastName.Trim();
+            family.DocumentNumber = normalizedDoc;
+            family.Phone = command.Phone?.Trim();
             if (command.Relationship is not null)
                 family.Relationship = command.Relationship;
             family.UpdatedAt = _dateTime.UtcNow;

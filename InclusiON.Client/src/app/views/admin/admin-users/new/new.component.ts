@@ -1,9 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AdminInstitutionsService, AdminUsersService, AuthService, CatalogsService, InstitutionsService } from '@services';
+import { filter, take } from 'rxjs';
+import { AdminInstitutionsService, AdminUsersService, AuthService, CatalogsService, InstitutionsService, ValidationService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
 import { InstitutionResponse, CreateAdminUserResponse, CatalogItem } from '@models';
+import { uniqueEmailValidator } from '@shared/utils';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
@@ -31,6 +33,7 @@ export class NewComponent implements OnInit {
   private readonly institutionsService = inject(InstitutionsService);
   private readonly catalogsService = inject(CatalogsService);
   private readonly authService = inject(AuthService);
+  private readonly validationService = inject(ValidationService);
 
   institutions: InstitutionResponse[] = [];
   institutionalRoles: CatalogItem[] = [];
@@ -44,12 +47,23 @@ export class NewComponent implements OnInit {
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
+    email: [
+      '',
+      [Validators.required, Validators.email],
+      [uniqueEmailValidator(email => this.validationService.checkEmail(email))],
+    ],
     institutionId: ['', [Validators.required]],
     institutionalRoleId: ['', [Validators.required]],
   });
 
   get f() { return this.form.controls; }
+
+  showFieldError(fieldName: string): boolean {
+    const control = this.form.get(fieldName);
+    if (!control || !control.invalid) return false;
+    if (control.errors?.['emailExists']) return true;
+    return this.submitted || control.touched;
+  }
 
   ngOnInit(): void {
     this.isGlobalAdmin = this.authService.isGlobalAdmin();
@@ -111,13 +125,25 @@ export class NewComponent implements OnInit {
     this.submitted = true;
     this.serverError = '';
     this.form.markAllAsTouched();
+
+    if (this.form.pending) {
+      this.form.statusChanges.pipe(filter(s => s !== 'PENDING'), take(1)).subscribe(() => {
+        this.attemptSubmit();
+      });
+      return;
+    }
+
+    this.attemptSubmit();
+  }
+
+  private attemptSubmit(): void {
     if (this.form.invalid) return;
 
     const raw = this.form.value;
     this.adminUsersService.createAdmin({
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      email: raw.email,
+      firstName: raw.firstName.trim(),
+      lastName: raw.lastName.trim(),
+      email: raw.email.trim(),
       institutionId: +raw.institutionId,
       institutionalRoleId: raw.institutionalRoleId ? +raw.institutionalRoleId : null,
     }).subscribe({

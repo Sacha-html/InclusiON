@@ -15,15 +15,22 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
 {
     public class CreateInvitationCommandHandlerTests
     {
-        private readonly IInvitationsRepository   _invRepo    = Substitute.For<IInvitationsRepository>();
-        private readonly IProfessionalsRepository _prosRepo   = Substitute.For<IProfessionalsRepository>();
-        private readonly IIdentityService         _identity   = Substitute.For<IIdentityService>();
-        private readonly IUnitOfWork              _uow        = Substitute.For<IUnitOfWork>();
-        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
-        private readonly IDateTimeProvider        _dateTime   = Substitute.For<IDateTimeProvider>();
+        private readonly IInvitationsRepository       _invRepo        = Substitute.For<IInvitationsRepository>();
+        private readonly IProfessionalsRepository     _prosRepo       = Substitute.For<IProfessionalsRepository>();
+        private readonly IIdentityService             _identity       = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness     = Substitute.For<IUniquenessValidationService>();
+        private readonly IUnitOfWork                  _uow            = Substitute.For<IUnitOfWork>();
+        private readonly IBackgroundJobRepository     _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
+        private readonly IDateTimeProvider            _dateTime       = Substitute.For<IDateTimeProvider>();
+
+        public CreateInvitationCommandHandlerTests()
+        {
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+        }
 
         private CreateInvitationCommandHandler BuildSut() =>
-            new(_invRepo, _prosRepo, _identity, _uow, _backgroundJobs,
+            new(_invRepo, _prosRepo, _identity, _uniqueness, _uow, _backgroundJobs,
                 NullLogger<CreateInvitationCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid ProfId = Guid.NewGuid();
@@ -72,7 +79,8 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
         public async Task HandleAsync_EmailAlreadyExists_ReturnsEmailAlreadyExists()
         {
             _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>()).Returns(ApprovedPro());
-            _identity.FindByEmailAsync("familiar@test.com").Returns(new User());
+            _uniqueness.CheckEmailAsync("familiar@test.com", null, null, true, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             var result = await BuildSut().HandleAsync(Cmd(), default);
 

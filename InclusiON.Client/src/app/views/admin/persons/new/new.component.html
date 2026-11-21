@@ -7,20 +7,20 @@
     <!-- Indicador de pasos visual -->
     <div class="d-flex justify-content-around mb-4 border-bottom pb-3">
       <div class="text-center px-2" [class.text-primary]="currentStep === 1" [class.fw-bold]="currentStep === 1">
-        <span class="rounded-circle px-3 py-2 me-1 border d-inline-block" 
-              [class.bg-primary]="currentStep === 1" 
+        <span class="rounded-circle px-3 py-2 me-1 border d-inline-block"
+              [class.bg-primary]="currentStep === 1"
               [class.text-white]="currentStep === 1">1</span>
         Alumno
       </div>
       <div class="text-center px-2" [class.text-primary]="currentStep === 2" [class.fw-bold]="currentStep === 2">
-        <span class="rounded-circle px-3 py-2 me-1 border d-inline-block" 
-              [class.bg-primary]="currentStep === 2" 
+        <span class="rounded-circle px-3 py-2 me-1 border d-inline-block"
+              [class.bg-primary]="currentStep === 2"
               [class.text-white]="currentStep === 2">2</span>
         Tutor a cargo
       </div>
       <div class="text-center px-2" [class.text-primary]="currentStep === 3" [class.fw-bold]="currentStep === 3">
-        <span class="rounded-circle px-3 py-2 me-1 border d-inline-block" 
-              [class.bg-primary]="currentStep === 3" 
+        <span class="rounded-circle px-3 py-2 me-1 border d-inline-block"
+              [class.bg-primary]="currentStep === 3"
               [class.text-white]="currentStep === 3">3</span>
         Profesional y aula
       </div>
@@ -35,8 +35,7 @@
       <!-- ================= PASO 1: ALUMNO ================= -->
       @if (currentStep === 1) {
         <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios para el alumno.</p>
-        
-        <!-- Datos Personales -->
+
         <h3 class="h5 mb-3">Datos personales del alumno</h3>
 
         <c-row class="mb-3">
@@ -45,8 +44,8 @@
             <input cFormControl id="firstName" formControlName="firstName"
                    autocomplete="given-name"
                    placeholder="Ej: José"
-                   [valid]="submittedStep1 ? f['firstName'].valid : undefined" />
-            @if (submittedStep1 && f['firstName'].errors) {
+                   [valid]="(submittedStep1 || f['firstName'].touched) ? f['firstName'].valid : undefined" />
+            @if ((submittedStep1 || f['firstName'].touched) && f['firstName'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['firstName'].errors['required']) { El nombre es obligatorio. }
                 @if (f['firstName'].errors['minlength']) { Mínimo 2 caracteres. }
@@ -58,8 +57,8 @@
             <input cFormControl id="lastName" formControlName="lastName"
                    autocomplete="family-name"
                    placeholder="Ej: Pérez"
-                   [valid]="submittedStep1 ? f['lastName'].valid : undefined" />
-            @if (submittedStep1 && f['lastName'].errors) {
+                   [valid]="(submittedStep1 || f['lastName'].touched) ? f['lastName'].valid : undefined" />
+            @if ((submittedStep1 || f['lastName'].touched) && f['lastName'].errors) {
               <c-form-feedback [valid]="false">
                 @if (f['lastName'].errors['required']) { El apellido es obligatorio. }
                 @if (f['lastName'].errors['minlength']) { Mínimo 2 caracteres. }
@@ -74,13 +73,17 @@
             <input cFormControl id="documentNumber" formControlName="documentNumber"
                    appOnlyNumbers inputmode="numeric" maxlength="8"
                    placeholder="Ej: 12345678"
-                   [valid]="submittedStep1 ? f['documentNumber'].valid : (f['documentNumber'].touched ? f['documentNumber'].valid : undefined)" />
-            @if ((submittedStep1 || f['documentNumber'].touched) && f['documentNumber'].errors) {
+                   [valid]="showStep1Error('documentNumber') ? false : ((submittedStep1 || f['documentNumber'].touched) && f['documentNumber'].valid ? true : undefined)" />
+            @if (showStep1Error('documentNumber')) {
               <c-form-feedback [valid]="false">
-                @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
-                @else if (f['documentNumber'].errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
-                @else if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
+                @else if (f['documentNumber'].errors?.['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                @else if (f['documentNumber'].errors?.['documentExists']) { {{ f['documentNumber'].errors?.['message'] || 'Este documento ya está registrado en el sistema.' }} }
               </c-form-feedback>
+            }
+            @if (f['documentNumber'].pending) {
+              <small class="text-body-secondary">Verificando documento...</small>
             }
           </c-col>
           <c-col sm="6">
@@ -100,107 +103,173 @@
         </c-row>
 
         <div class="mt-4 d-flex gap-2">
-          <button cButton color="primary" type="button" (click)="nextToStep2()" aria-label="Siguiente paso: Datos del Tutor">Siguiente</button>
+          <button cButton color="primary" type="button" (click)="nextToStep2()" [disabled]="f['documentNumber'].pending" aria-label="Siguiente paso: Datos del Tutor">Siguiente</button>
           <button cButton color="secondary" type="button" (click)="goBack()" aria-label="Cancelar y volver">Cancelar</button>
         </div>
       }
 
       <!-- ================= PASO 2: TUTOR A CARGO ================= -->
       @if (currentStep === 2) {
-        <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios para el tutor.</p>
-        
         <h3 class="h5 mb-3">Datos del representante familiar / tutor a cargo</h3>
 
-        <c-row class="mb-3">
-          <c-col sm="6">
-            <label cLabel for="tutorFirstName">Nombre *</label>
-            <input cFormControl id="tutorFirstName" formControlName="tutorFirstName"
-                   placeholder="Ej: María"
-                   [valid]="submittedStep2 ? tutorF.tutorFirstName.valid : undefined" />
-            @if (submittedStep2 && tutorF.tutorFirstName.errors) {
-              <c-form-feedback [valid]="false">
-                @if (tutorF.tutorFirstName.errors['required']) { El nombre del tutor es obligatorio. }
-                @if (tutorF.tutorFirstName.errors['minlength']) { Mínimo 2 caracteres. }
-              </c-form-feedback>
-            }
-          </c-col>
-          <c-col sm="6">
-            <label cLabel for="tutorLastName">Apellido *</label>
-            <input cFormControl id="tutorLastName" formControlName="tutorLastName"
-                   placeholder="Ej: Pérez"
-                   [valid]="submittedStep2 ? tutorF.tutorLastName.valid : undefined" />
-            @if (submittedStep2 && tutorF.tutorLastName.errors) {
-              <c-form-feedback [valid]="false">
-                @if (tutorF.tutorLastName.errors['required']) { El apellido del tutor es obligatorio. }
-                @if (tutorF.tutorLastName.errors['minlength']) { Mínimo 2 caracteres. }
-              </c-form-feedback>
-            }
-          </c-col>
-        </c-row>
+        <div class="mb-4 d-flex flex-wrap gap-2" role="group" aria-label="Modo de asignación de tutor">
+          <button cButton type="button"
+                  [color]="tutorMode === 'new' ? 'primary' : 'secondary'"
+                  [variant]="tutorMode === 'new' ? undefined : 'outline'"
+                  (click)="setTutorMode('new')">
+            Registrar nuevo tutor
+          </button>
+          <button cButton type="button"
+                  [color]="tutorMode === 'existing' ? 'primary' : 'secondary'"
+                  [variant]="tutorMode === 'existing' ? undefined : 'outline'"
+                  (click)="setTutorMode('existing')">
+            Vincular tutor ya registrado
+          </button>
+        </div>
 
-        <c-row class="mb-3">
-          <c-col sm="6">
-            <label cLabel for="tutorEmail">Email *</label>
-            <input cFormControl id="tutorEmail" formControlName="tutorEmail" type="email"
-                   placeholder="Ej: maria.perez@example.com"
-                   [valid]="submittedStep2 ? tutorF.tutorEmail.valid : undefined" />
-            @if (submittedStep2 && tutorF.tutorEmail.errors) {
-              <c-form-feedback [valid]="false">
-                @if (tutorF.tutorEmail.errors['required']) { El email del tutor es obligatorio. }
-                @if (tutorF.tutorEmail.errors['email']) { Ingrese un email con formato válido. }
-              </c-form-feedback>
-            }
-          </c-col>
-          <c-col sm="6">
-            <label cLabel for="tutorRelationship">Parentesco / Relación *</label>
-            <select cSelect id="tutorRelationship" formControlName="tutorRelationship"
-                    [valid]="submittedStep2 ? tutorF.tutorRelationship.valid : undefined">
-              <option value="">-- Seleccionar parentesco --</option>
-              @for (rel of relationships; track rel) {
-                <option [value]="rel">{{ rel }}</option>
+        @if (tutorMode === 'existing') {
+          <p class="text-body-secondary mb-3">
+            Seleccioná un familiar ya registrado en el sistema (por ejemplo, si ya tiene otro hijo/a inscripto).
+          </p>
+
+          <c-row class="mb-3">
+            <c-col sm="6">
+              <label cLabel for="existingTutorId">Tutor existente *</label>
+              <app-searchable-select
+                id="existingTutorId"
+                formControlName="existingTutorId"
+                [searchFn]="searchFamiliesFn"
+                [displayFn]="displayFamily"
+                [subDisplayFn]="subDisplayFamily"
+                [valueFn]="valueFromFamily"
+                [invalid]="(submittedStep2 || tutorF.existingTutorId.touched) && tutorF.existingTutorId.invalid"
+                placeholder="Buscar familiar por nombre o apellido..."
+                hintText="Escriba al menos 2 caracteres para buscar"
+                noResultsText="No se encontraron familiares activos"
+              />
+              @if ((submittedStep2 || tutorF.existingTutorId.touched) && tutorF.existingTutorId.errors) {
+                <div class="invalid-feedback d-block">Debe seleccionar un tutor existente.</div>
               }
-            </select>
-            @if (submittedStep2 && tutorF.tutorRelationship.errors) {
-              <c-form-feedback [valid]="false">
-                @if (tutorF.tutorRelationship.errors['required']) { La relación o parentesco es obligatoria. }
-              </c-form-feedback>
-            }
-          </c-col>
-        </c-row>
+            </c-col>
+            <c-col sm="6">
+              <label cLabel for="tutorRelationship">Parentesco / Relación *</label>
+              <select cSelect id="tutorRelationship" formControlName="tutorRelationship"
+                      [valid]="(submittedStep2 || tutorF.tutorRelationship.touched) ? tutorF.tutorRelationship.valid : undefined">
+                <option value="">-- Seleccionar parentesco --</option>
+                @for (rel of relationships; track rel) {
+                  <option [value]="rel">{{ rel }}</option>
+                }
+              </select>
+              @if ((submittedStep2 || tutorF.tutorRelationship.touched) && tutorF.tutorRelationship.errors) {
+                <c-form-feedback [valid]="false">
+                  @if (tutorF.tutorRelationship.errors['required']) { La relación o parentesco es obligatoria. }
+                </c-form-feedback>
+              }
+            </c-col>
+          </c-row>
+        } @else {
+          <p class="text-body-secondary mb-3">Los campos marcados con (*) son obligatorios para el tutor.</p>
 
-        <c-row class="mb-3">
-          <c-col sm="6">
-            <label cLabel for="tutorDocumentNumber">Documento del tutor *</label>
-            <input cFormControl id="tutorDocumentNumber" formControlName="tutorDocumentNumber"
-                   appOnlyNumbers inputmode="numeric" maxlength="8"
-                   placeholder="Ej: 87654321"
-                   [valid]="submittedStep2 ? tutorF.tutorDocumentNumber.valid : (tutorF.tutorDocumentNumber.touched ? tutorF.tutorDocumentNumber.valid : undefined)" />
-            @if ((submittedStep2 || tutorF.tutorDocumentNumber.touched) && tutorF.tutorDocumentNumber.errors) {
-              <c-form-feedback [valid]="false">
-                @if (tutorF.tutorDocumentNumber.errors['required']) { El documento del tutor es obligatorio. }
-                @else if (tutorF.tutorDocumentNumber.errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
-                @else if (tutorF.tutorDocumentNumber.errors['minlength'] || tutorF.tutorDocumentNumber.errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
-              </c-form-feedback>
-            }
-          </c-col>
-          <c-col sm="6">
-            <label cLabel for="tutorPhone">Teléfono del tutor</label>
-            <input cFormControl id="tutorPhone" formControlName="tutorPhone"
-                   type="tel" inputmode="numeric" appOnlyNumbers maxlength="20"
-                   placeholder="Ej: 1112345678"
-                   [valid]="(submittedStep2 || tutorF.tutorPhone.touched) ? (tutorF.tutorPhone.errors ? false : (tutorF.tutorPhone.value ? true : undefined)) : undefined" />
-            @if ((submittedStep2 || tutorF.tutorPhone.touched) && tutorF.tutorPhone.errors) {
-              <c-form-feedback [valid]="false">
-                @if (tutorF.tutorPhone.errors['pattern']) { Solo se permiten números (sin letras, espacios ni símbolos). }
-                @else if (tutorF.tutorPhone.errors['maxlength']) { El teléfono no puede superar los 20 caracteres. }
-              </c-form-feedback>
-            }
-          </c-col>
-        </c-row>
+          <c-row class="mb-3">
+            <c-col sm="6">
+              <label cLabel for="tutorFirstName">Nombre *</label>
+              <input cFormControl id="tutorFirstName" formControlName="tutorFirstName"
+                     placeholder="Ej: María"
+                     [valid]="(submittedStep2 || tutorF.tutorFirstName.touched) ? tutorF.tutorFirstName.valid : undefined" />
+              @if ((submittedStep2 || tutorF.tutorFirstName.touched) && tutorF.tutorFirstName.errors) {
+                <c-form-feedback [valid]="false">
+                  @if (tutorF.tutorFirstName.errors['required']) { El nombre del tutor es obligatorio. }
+                  @if (tutorF.tutorFirstName.errors['minlength']) { Mínimo 2 caracteres. }
+                </c-form-feedback>
+              }
+            </c-col>
+            <c-col sm="6">
+              <label cLabel for="tutorLastName">Apellido *</label>
+              <input cFormControl id="tutorLastName" formControlName="tutorLastName"
+                     placeholder="Ej: Pérez"
+                     [valid]="(submittedStep2 || tutorF.tutorLastName.touched) ? tutorF.tutorLastName.valid : undefined" />
+              @if ((submittedStep2 || tutorF.tutorLastName.touched) && tutorF.tutorLastName.errors) {
+                <c-form-feedback [valid]="false">
+                  @if (tutorF.tutorLastName.errors['required']) { El apellido del tutor es obligatorio. }
+                  @if (tutorF.tutorLastName.errors['minlength']) { Mínimo 2 caracteres. }
+                </c-form-feedback>
+              }
+            </c-col>
+          </c-row>
+
+          <c-row class="mb-3">
+            <c-col sm="6">
+              <label cLabel for="tutorEmail">Email *</label>
+              <input cFormControl id="tutorEmail" formControlName="tutorEmail" type="email"
+                     placeholder="Ej: maria.perez@example.com"
+                     [valid]="showStep2Error('tutorEmail') ? false : ((submittedStep2 || tutorF.tutorEmail.touched) && tutorF.tutorEmail.valid ? true : undefined)" />
+              @if (showStep2Error('tutorEmail')) {
+                <c-form-feedback [valid]="false">
+                  @if (tutorF.tutorEmail.errors?.['required']) { El email del tutor es obligatorio. }
+                  @else if (tutorF.tutorEmail.errors?.['email']) { Ingrese un email con formato válido. }
+                  @else if (tutorF.tutorEmail.errors?.['emailExists']) { {{ tutorF.tutorEmail.errors?.['message'] || 'Este email ya está registrado. Si el tutor ya tiene cuenta, usá "Vincular tutor ya registrado".' }} }
+                </c-form-feedback>
+              }
+              @if (tutorF.tutorEmail.pending) {
+                <small class="text-body-secondary">Verificando email...</small>
+              }
+            </c-col>
+            <c-col sm="6">
+              <label cLabel for="tutorRelationship">Parentesco / Relación *</label>
+              <select cSelect id="tutorRelationship" formControlName="tutorRelationship"
+                      [valid]="(submittedStep2 || tutorF.tutorRelationship.touched) ? tutorF.tutorRelationship.valid : undefined">
+                <option value="">-- Seleccionar parentesco --</option>
+                @for (rel of relationships; track rel) {
+                  <option [value]="rel">{{ rel }}</option>
+                }
+              </select>
+              @if ((submittedStep2 || tutorF.tutorRelationship.touched) && tutorF.tutorRelationship.errors) {
+                <c-form-feedback [valid]="false">
+                  @if (tutorF.tutorRelationship.errors['required']) { La relación o parentesco es obligatoria. }
+                </c-form-feedback>
+              }
+            </c-col>
+          </c-row>
+
+          <c-row class="mb-3">
+            <c-col sm="6">
+              <label cLabel for="tutorDocumentNumber">Documento del tutor *</label>
+              <input cFormControl id="tutorDocumentNumber" formControlName="tutorDocumentNumber"
+                     appOnlyNumbers inputmode="numeric" maxlength="8"
+                     placeholder="Ej: 87654321"
+                     [valid]="showStep2Error('tutorDocumentNumber') ? false : ((submittedStep2 || tutorF.tutorDocumentNumber.touched) && tutorF.tutorDocumentNumber.valid ? true : undefined)" />
+              @if (showStep2Error('tutorDocumentNumber')) {
+                <c-form-feedback [valid]="false">
+                  @if (tutorF.tutorDocumentNumber.errors?.['required']) { El documento del tutor es obligatorio. }
+                  @else if (tutorF.tutorDocumentNumber.errors?.['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                  @else if (tutorF.tutorDocumentNumber.errors?.['minlength'] || tutorF.tutorDocumentNumber.errors?.['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                  @else if (tutorF.tutorDocumentNumber.errors?.['sameDocument']) { El DNI del tutor no puede ser igual al DNI del alumno. }
+                  @else if (tutorF.tutorDocumentNumber.errors?.['documentExists']) { {{ tutorF.tutorDocumentNumber.errors?.['message'] || 'Este documento ya está registrado en el sistema.' }} }
+                </c-form-feedback>
+              }
+              @if (tutorF.tutorDocumentNumber.pending) {
+                <small class="text-body-secondary">Verificando documento...</small>
+              }
+            </c-col>
+            <c-col sm="6">
+              <label cLabel for="tutorPhone">Teléfono del tutor</label>
+              <input cFormControl id="tutorPhone" formControlName="tutorPhone"
+                     type="tel" inputmode="numeric" appOnlyNumbers maxlength="20"
+                     placeholder="Ej: 1112345678"
+                     [valid]="(submittedStep2 || tutorF.tutorPhone.touched) ? (tutorF.tutorPhone.errors ? false : (tutorF.tutorPhone.value ? true : undefined)) : undefined" />
+              @if ((submittedStep2 || tutorF.tutorPhone.touched) && tutorF.tutorPhone.errors) {
+                <c-form-feedback [valid]="false">
+                  @if (tutorF.tutorPhone.errors['pattern']) { Solo se permiten números (sin letras, espacios ni símbolos). }
+                  @else if (tutorF.tutorPhone.errors['maxlength']) { El teléfono no puede superar los 20 caracteres. }
+                </c-form-feedback>
+              }
+            </c-col>
+          </c-row>
+        }
 
         <div class="mt-4 d-flex gap-2">
           <button cButton color="secondary" type="button" (click)="prevStep()" aria-label="Volver al Paso 1">Atrás</button>
-          <button cButton color="primary" type="button" (click)="nextToStep3()" aria-label="Siguiente paso: Asignación de Profesional y Aula">Siguiente</button>
+          <button cButton color="primary" type="button" (click)="nextToStep3()" [disabled]="tutorF.tutorEmail.pending || tutorF.tutorDocumentNumber.pending" aria-label="Siguiente paso: Asignación de Profesional y Aula">Siguiente</button>
         </div>
       }
 
@@ -244,7 +313,7 @@
 
         <div class="mt-4 d-flex gap-2">
           <button cButton color="secondary" type="button" (click)="prevStep()" aria-label="Volver al Paso 2">Atrás</button>
-          <button cButton color="primary" type="submit" aria-label="Finalizar y guardar registro">Guardar alumno y tutor</button>
+          <button cButton color="primary" type="submit" [disabled]="form.pending" aria-label="Finalizar y guardar registro">Guardar alumno y tutor</button>
         </div>
       }
 

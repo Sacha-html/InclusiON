@@ -14,15 +14,24 @@ namespace InclusiON.Tests.Unit.Handlers.Family
 {
     public class CreateFamilyCommandHandlerTests
     {
-        private readonly IFamilyRepository    _familyRepo  = Substitute.For<IFamilyRepository>();
-        private readonly IPersonsRepository   _personsRepo = Substitute.For<IPersonsRepository>();
-        private readonly IIdentityService     _identity    = Substitute.For<IIdentityService>();
-        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
-        private readonly IUnitOfWork          _uow         = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider    _dateTime    = Substitute.For<IDateTimeProvider>();
+        private readonly IFamilyRepository            _familyRepo     = Substitute.For<IFamilyRepository>();
+        private readonly IPersonsRepository           _personsRepo    = Substitute.For<IPersonsRepository>();
+        private readonly IIdentityService             _identity       = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness     = Substitute.For<IUniquenessValidationService>();
+        private readonly IBackgroundJobRepository     _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
+        private readonly IUnitOfWork                  _uow            = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider            _dateTime       = Substitute.For<IDateTimeProvider>();
+
+        public CreateFamilyCommandHandlerTests()
+        {
+            _uniqueness.CheckDocumentAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(DocumentCheckResult.Available());
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+        }
 
         private CreateFamilyCommandHandler BuildSut() =>
-            new(_familyRepo, _personsRepo, _identity, _backgroundJobs, _uow,
+            new(_familyRepo, _personsRepo, _identity, _uniqueness, _backgroundJobs, _uow,
                 NullLogger<CreateFamilyCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid PersonId = Guid.NewGuid();
@@ -47,8 +56,8 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         [Fact]
         public async Task HandleAsync_DocumentExists_ReturnsDocumentAlreadyExists()
         {
-            _familyRepo.ExistsDocumentAsync("12345678", null, Arg.Any<CancellationToken>())
-                       .Returns(true);
+            _uniqueness.CheckDocumentAsync("12345678", null, Arg.Any<CancellationToken>())
+                       .Returns(DocumentCheckResult.Taken("Alumno", false, "El DNI 12345678 ya se encuentra registrado en el sistema (Alumno)."));
 
             var result = await BuildSut().HandleAsync(Cmd(doc: "12345678"), default);
 
@@ -77,8 +86,8 @@ namespace InclusiON.Tests.Unit.Handlers.Family
         {
             _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>())
                         .Returns(new PersonWithDisability { Id = PersonId });
-            _identity.FindByEmailAsync("maria@test.com")
-                     .Returns(new User { Id = Guid.NewGuid() });
+            _uniqueness.CheckEmailAsync("maria@test.com", null, null, false, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             var result = await BuildSut().HandleAsync(Cmd(), default);
 

@@ -16,25 +16,36 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
 {
     public class CreateProfessionalCommandHandlerTests
     {
-        private readonly IProfessionalsRepository _prosRepo  = Substitute.For<IProfessionalsRepository>();
-        private readonly IIdentityService         _identity  = Substitute.For<IIdentityService>();
-        private readonly IBackgroundJobRepository _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
-        private readonly IUnitOfWork              _uow       = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider        _dateTime  = Substitute.For<IDateTimeProvider>();
-        private readonly IReadOnlyRepository<Specialty> _specialties = Substitute.For<IReadOnlyRepository<Specialty>>();
+        private readonly IProfessionalsRepository     _prosRepo       = Substitute.For<IProfessionalsRepository>();
+        private readonly IIdentityService             _identity       = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness     = Substitute.For<IUniquenessValidationService>();
+        private readonly IBackgroundJobRepository     _backgroundJobs = Substitute.For<IBackgroundJobRepository>();
+        private readonly IUnitOfWork                  _uow            = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider            _dateTime       = Substitute.For<IDateTimeProvider>();
+        private readonly IReadOnlyRepository<Specialty> _specialties  = Substitute.For<IReadOnlyRepository<Specialty>>();
+
+        public CreateProfessionalCommandHandlerTests()
+        {
+            _uniqueness.CheckDocumentAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(DocumentCheckResult.Available());
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+            _uniqueness.CheckLicenseNumberAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(LicenseCheckResult.Available());
+        }
 
         private CreateProfessionalCommandHandler BuildSut()
         {
             _specialties.GetByIdAsync(1, Arg.Any<CancellationToken>())
                 .Returns(new Specialty { Id = 1, Name = "Psicología", IsActive = true });
 
-            return new(_prosRepo, _identity, _backgroundJobs, _uow,
+            return new(_prosRepo, _identity, _uniqueness, _backgroundJobs, _uow,
                 NullLogger<CreateProfessionalCommandHandler>.Instance, _dateTime, _specialties);
         }
 
-        private static CreateProfessionalCommand Cmd(string? doc = null, int? specialtyId = 1) =>
+        private static CreateProfessionalCommand Cmd(string? doc = null, int? specialtyId = 1, string? license = null) =>
             new(FirstName: "Ana", LastName: "López",
-                Email: "ana@test.com", DocumentNumber: doc, SpecialtyId: specialtyId);
+                Email: "ana@test.com", DocumentNumber: doc, LicenseNumber: license, SpecialtyId: specialtyId);
 
         private void SetupSuccessfulTransaction()
         {
@@ -103,8 +114,8 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
         [Fact]
         public async Task HandleAsync_DuplicateDocument_ReturnsDocumentAlreadyExists()
         {
-            _prosRepo.ExistsDocumentAsync("12345678", null, Arg.Any<CancellationToken>())
-                     .Returns(true);
+            _uniqueness.CheckDocumentAsync("12345678", null, Arg.Any<CancellationToken>())
+                       .Returns(DocumentCheckResult.Taken("Alumno", false, "El DNI 12345678 ya se encuentra registrado en el sistema (Alumno)."));
 
             var result = await BuildSut().HandleAsync(Cmd(doc: "12345678"), default);
 
@@ -117,13 +128,25 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
         [Fact]
         public async Task HandleAsync_EmailAlreadyExists_ReturnsEmailAlreadyExists()
         {
-            _identity.FindByEmailAsync("ana@test.com")
-                     .Returns(new User { Id = Guid.NewGuid() });
+            _uniqueness.CheckEmailAsync("ana@test.com", null, null, false, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             var result = await BuildSut().HandleAsync(Cmd(), default);
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.EmailAlreadyExists);
+        }
+
+        [Fact]
+        public async Task HandleAsync_DuplicateLicenseNumber_ReturnsLicenseNumberAlreadyExists()
+        {
+            _uniqueness.CheckLicenseNumberAsync("MP-999", null, Arg.Any<CancellationToken>())
+                       .Returns(LicenseCheckResult.Taken("Esta matrícula ya se encuentra registrada en el sistema."));
+
+            var result = await BuildSut().HandleAsync(Cmd(license: "MP-999"), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.LicenseNumberAlreadyExists);
         }
 
         // ── Fallo al crear usuario (Identity) ────────────────────────────────

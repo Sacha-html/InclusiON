@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using InclusiON.Application.Constants;
 using InclusiON.Application.Helpers;
@@ -21,6 +21,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
     {
         private readonly IProfessionalsRepository _repository;
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateProfessionalCommandHandler> _logger;
@@ -30,6 +31,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         public CreateProfessionalCommandHandler(
             IProfessionalsRepository repository,
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             ILogger<CreateProfessionalCommandHandler> logger,
@@ -38,6 +40,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
         {
             _repository = repository;
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _backgroundJobs = backgroundJobs;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -55,25 +58,42 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 var specialty = await _specialties.GetByIdAsync(command.SpecialtyId.Value, cancellationToken);
                 if (specialty?.IsActive != true)
                     return ApiResponse<ProfessionalResponse>.ErrorResult(ErrorCode.ValidationFailed, "La especialidad seleccionada no está activa.");
-                // Validar documento unico
-                if (!string.IsNullOrWhiteSpace(command.DocumentNumber))
+
+                var normalizedDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+                var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
+                var normalizedLicense = UniquenessNormalizer.NormalizeLicense(command.LicenseNumber);
+
+                // Validar documento unico global
+                if (normalizedDoc is not null)
                 {
-                    var documentExists = await _repository.ExistsDocumentAsync(command.DocumentNumber, null, cancellationToken);
-                    if (documentExists)
+                    var docCheck = await _uniquenessValidation.CheckDocumentAsync(normalizedDoc, null, cancellationToken);
+                    if (!docCheck.IsAvailable)
                     {
                         return ApiResponse<ProfessionalResponse>.Conflict(
                             ErrorCode.DocumentAlreadyExists,
-                            ErrorMessages.DocumentAlreadyExists);
+                            docCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
                     }
                 }
 
-                // Validar email unico
-                var existingUser = await _identityService.FindByEmailAsync(command.Email);
-                if (existingUser != null)
+                // Validar email unico global
+                var emailCheck = await _uniquenessValidation.CheckEmailAsync(normalizedEmail, cancellationToken: cancellationToken);
+                if (!emailCheck.IsAvailable)
                 {
                     return ApiResponse<ProfessionalResponse>.Conflict(
                         ErrorCode.EmailAlreadyExists,
-                        ErrorMessages.EmailAlreadyRegistered);
+                        emailCheck.Message ?? ErrorMessages.EmailAlreadyRegistered);
+                }
+
+                // Validar matrícula única
+                if (normalizedLicense is not null)
+                {
+                    var licenseCheck = await _uniquenessValidation.CheckLicenseNumberAsync(normalizedLicense, null, cancellationToken);
+                    if (!licenseCheck.IsAvailable)
+                    {
+                        return ApiResponse<ProfessionalResponse>.Conflict(
+                            ErrorCode.LicenseNumberAlreadyExists,
+                            licenseCheck.Message ?? "Esta matrícula ya se encuentra registrada.");
+                    }
                 }
 
                 // Generar contraseña temporal
@@ -82,10 +102,10 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 // Crear usuario
                 var user = new User
                 {
-                    UserName = command.Email,
-                    Email = command.Email,
-                    Name = command.FirstName,
-                    Surname = command.LastName,
+                    UserName = normalizedEmail,
+                    Email = normalizedEmail,
+                    Name = command.FirstName.Trim(),
+                    Surname = command.LastName.Trim(),
                     IsActive = true,
                     CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
@@ -96,13 +116,14 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                 // Crear profesional
                 var professional = new Professional
                 {
-                    FirstName = command.FirstName,
-                    LastName = command.LastName,
-                    DocumentNumber = command.DocumentNumber,
-                    Phone = command.Phone,
+                    FirstName = command.FirstName.Trim(),
+                    LastName = command.LastName.Trim(),
+                    DocumentNumber = normalizedDoc,
+                    Email = normalizedEmail,
+                    Phone = command.Phone?.Trim(),
                     Specialty = specialty.Name,
                     SpecialtyId = command.SpecialtyId,
-                    LicenseNumber = command.LicenseNumber,
+                    LicenseNumber = normalizedLicense,
                     BirthDate = command.BirthDate,
                     Status = InclusiON.Domain.Enums.ProfessionalStatusEnum.Approved,
                     IsActive = true
@@ -145,7 +166,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     JobTypes.Email,
                     JsonSerializer.Serialize(new EmailPayload
                     {
-                        To           = command.Email,
+                        To           = normalizedEmail,
                         Subject      = "Bienvenido a InclusiON — Tu cuenta ha sido creada",
                         TemplateName = "PasswordReset",
                         Replacements = new Dictionary<string, string?>

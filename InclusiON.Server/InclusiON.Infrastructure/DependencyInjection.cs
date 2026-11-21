@@ -92,6 +92,7 @@ namespace InclusiON.Infrastructure
             services.AddScoped<IConnectionFactory>(_ => new NpgsqlConnectionFactory(connectionString));
 
             services.AddScoped<IIdentityService, IdentityService>();
+            services.AddScoped<IUniquenessValidationService, UniquenessValidationService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<InclusiON.Application.Interfaces.Infrastructure.IPasswordHasher, PasswordHasher>();
             services.AddScoped<IPinHasher, Argon2idPinHasher>();

@@ -73,6 +73,7 @@
                         @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
                         @else if (f['documentNumber'].errors?.['pattern']) { Solo se permiten números (sin puntos ni letras). }
                         @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                        @else if (f['documentNumber'].errors?.['documentExists']) { {{ f['documentNumber'].errors?.['message'] || 'Este documento ya está registrado en el sistema.' }} }
                       </c-form-feedback>
                     }
                   </c-col>

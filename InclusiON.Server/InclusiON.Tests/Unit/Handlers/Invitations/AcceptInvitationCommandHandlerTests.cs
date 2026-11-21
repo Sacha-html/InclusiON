@@ -14,15 +14,24 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
 {
     public class AcceptInvitationCommandHandlerTests
     {
-        private readonly IInvitationsRepository  _invRepo   = Substitute.For<IInvitationsRepository>();
-        private readonly IProfessionalsRepository _profsRepo = Substitute.For<IProfessionalsRepository>();
-        private readonly IBackgroundJobRepository _bgJobs    = Substitute.For<IBackgroundJobRepository>();
-        private readonly IIdentityService         _identity  = Substitute.For<IIdentityService>();
-        private readonly IUnitOfWork              _uow       = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider        _dateTime  = Substitute.For<IDateTimeProvider>();
+        private readonly IInvitationsRepository       _invRepo    = Substitute.For<IInvitationsRepository>();
+        private readonly IProfessionalsRepository     _profsRepo  = Substitute.For<IProfessionalsRepository>();
+        private readonly IBackgroundJobRepository     _bgJobs     = Substitute.For<IBackgroundJobRepository>();
+        private readonly IIdentityService             _identity   = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness = Substitute.For<IUniquenessValidationService>();
+        private readonly IUnitOfWork                  _uow        = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider            _dateTime   = Substitute.For<IDateTimeProvider>();
+
+        public AcceptInvitationCommandHandlerTests()
+        {
+            _uniqueness.CheckDocumentAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(DocumentCheckResult.Available());
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+        }
 
         private AcceptInvitationCommandHandler BuildSut() =>
-            new(_invRepo, _profsRepo, _bgJobs, _identity, _uow,
+            new(_invRepo, _profsRepo, _bgJobs, _identity, _uniqueness, _uow,
                 NullLogger<AcceptInvitationCommandHandler>.Instance, _dateTime);
 
         private static AcceptInvitationCommand Cmd(
@@ -121,12 +130,30 @@ namespace InclusiON.Tests.Unit.Handlers.Invitations
             var inv = ValidInvitation();
             inv.ExpiresAt = now.AddDays(7);
             _invRepo.GetByCodeAsync("abc-code", Arg.Any<CancellationToken>()).Returns(inv);
-            _identity.FindByEmailAsync("nuevo@test.com").Returns(new User());
+            _uniqueness.CheckEmailAsync("nuevo@test.com", null, null, false, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             var result = await BuildSut().HandleAsync(Cmd(), default);
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.EmailAlreadyExists);
+        }
+
+        [Fact]
+        public async Task HandleAsync_DocumentAlreadyExists_ReturnsDocumentAlreadyExists()
+        {
+            var now = DateTime.UtcNow;
+            _dateTime.UtcNow.Returns(now);
+            var inv = ValidInvitation();
+            inv.ExpiresAt = now.AddDays(7);
+            _invRepo.GetByCodeAsync("abc-code", Arg.Any<CancellationToken>()).Returns(inv);
+            _uniqueness.CheckDocumentAsync("30111222", null, Arg.Any<CancellationToken>())
+                       .Returns(DocumentCheckResult.Taken("Familiar", false, "El DNI 30111222 ya se encuentra registrado en el sistema (Familiar)."));
+
+            var result = await BuildSut().HandleAsync(Cmd(documentNumber: "30111222"), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.DocumentAlreadyExists);
         }
 
         // ── Happy path ───────────────────────────────────────────────────────

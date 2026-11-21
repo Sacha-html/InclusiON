@@ -14,15 +14,22 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
 {
     public class CreateAdminUserCommandHandlerTests
     {
-        private readonly IIdentityService            _identity        = Substitute.For<IIdentityService>();
-        private readonly IInstitutionsRepository     _institutionRepo = Substitute.For<IInstitutionsRepository>();
-        private readonly IAdminInstitutionRepository _adminRepo       = Substitute.For<IAdminInstitutionRepository>();
-        private readonly IEmailService               _email           = Substitute.For<IEmailService>();
-        private readonly IUnitOfWork                 _uow             = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider           _dateTime        = Substitute.For<IDateTimeProvider>();
+        private readonly IIdentityService             _identity        = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness      = Substitute.For<IUniquenessValidationService>();
+        private readonly IInstitutionsRepository      _institutionRepo = Substitute.For<IInstitutionsRepository>();
+        private readonly IAdminInstitutionRepository  _adminRepo       = Substitute.For<IAdminInstitutionRepository>();
+        private readonly IEmailService                _email           = Substitute.For<IEmailService>();
+        private readonly IUnitOfWork                  _uow             = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider            _dateTime        = Substitute.For<IDateTimeProvider>();
+
+        public CreateAdminUserCommandHandlerTests()
+        {
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+        }
 
         private CreateAdminUserCommandHandler BuildSut() =>
-            new(_identity, _institutionRepo, _adminRepo, _email, _uow, _dateTime,
+            new(_identity, _uniqueness, _institutionRepo, _adminRepo, _email, _uow, _dateTime,
                 NullLogger<CreateAdminUserCommandHandler>.Instance);
 
         private static CreateAdminUserCommand ValidCommand() =>
@@ -51,7 +58,8 @@ namespace InclusiON.Tests.Unit.Handlers.AdminInstitutions
         {
             // Arrange
             _institutionRepo.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns(AnInstitution());
-            _identity.FindByEmailAsync(Arg.Any<string>()).Returns(new User());
+            _uniqueness.CheckEmailAsync("nuevo@test.com", null, null, false, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             // Act
             var result = await BuildSut().HandleAsync(ValidCommand(), default);

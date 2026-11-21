@@ -34,9 +34,14 @@ namespace InclusiON.Data.Configurations
             builder.Property(p => p.LastLoginUserAgent)
                 .HasMaxLength(500);
 
-            // Performance indexes
+            // Performance and uniqueness indexes
             builder.HasIndex(u => u.Email)
                 .IsUnique();
+
+            builder.HasIndex(u => u.NormalizedEmail)
+                .HasDatabaseName("EmailIndex")
+                .IsUnique()
+                .HasFilter("\"NormalizedEmail\" IS NOT NULL");
 
             builder.HasIndex(u => u.IsActive);
         }

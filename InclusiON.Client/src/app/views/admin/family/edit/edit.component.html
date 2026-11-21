@@ -36,25 +36,33 @@
           <c-col sm="6">
             <label cLabel for="email">Email *</label>
             <input cFormControl id="email" formControlName="email" type="email"
-                   [valid]="(submitted || f['email'].touched) ? f['email'].valid : undefined" />
-            @if ((submitted || f['email'].touched) && f['email'].errors) {
+                   [valid]="showFieldError('email') ? false : ((submitted || f['email'].touched) && f['email'].valid ? true : undefined)" />
+            @if (showFieldError('email')) {
               <c-form-feedback [valid]="false">
-                @if (f['email'].errors['required']) { El email es obligatorio. }
-                @if (f['email'].errors['email']) { Ingrese un email válido. }
+                @if (f['email'].errors?.['required']) { El email es obligatorio. }
+                @else if (f['email'].errors?.['email']) { Ingrese un email válido. }
+                @else if (f['email'].errors?.['emailExists']) { {{ f['email'].errors?.['message'] || 'Este email ya está registrado.' }} }
               </c-form-feedback>
+            }
+            @if (f['email'].pending) {
+              <small class="text-body-secondary">Verificando email...</small>
             }
           </c-col>
           <c-col sm="6">
             <label cLabel for="documentNumber">Documento *</label>
             <input cFormControl id="documentNumber" formControlName="documentNumber"
                    appOnlyNumbers inputmode="numeric" maxlength="8" placeholder="Ej: 12345678"
-                   [valid]="(submitted || f['documentNumber'].touched) ? f['documentNumber'].valid : undefined" />
-            @if ((submitted || f['documentNumber'].touched) && f['documentNumber'].errors) {
+                   [valid]="showFieldError('documentNumber') ? false : ((submitted || f['documentNumber'].touched) && f['documentNumber'].valid ? true : undefined)" />
+            @if (showFieldError('documentNumber')) {
               <c-form-feedback [valid]="false">
-                @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
-                @else if (f['documentNumber'].errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
-                @else if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
+                @else if (f['documentNumber'].errors?.['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                @else if (f['documentNumber'].errors?.['documentExists']) { {{ f['documentNumber'].errors?.['message'] || 'Este documento ya está registrado en el sistema.' }} }
               </c-form-feedback>
+            }
+            @if (f['documentNumber'].pending) {
+              <small class="text-body-secondary">Verificando documento...</small>
             }
           </c-col>
         </c-row>

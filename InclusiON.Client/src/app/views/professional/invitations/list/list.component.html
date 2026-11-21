@@ -82,12 +82,17 @@
 
         <div class="mb-3">
           <label cFormLabel>Email del familiar *</label>
-          <input cFormControl formControlName="email" type="email" placeholder="email@ejemplo.com" />
+          <input cFormControl formControlName="email" type="email" placeholder="email@ejemplo.com"
+                 [class.is-invalid]="hasError('email', 'required') || hasError('email', 'email') || f['email'].hasError('emailExists')" />
           @if (hasError('email', 'required')) {
             <div class="text-danger small mt-1">El email es requerido</div>
-          }
-          @if (hasError('email', 'email')) {
+          } @else if (hasError('email', 'email')) {
             <div class="text-danger small mt-1">Ingresa un email válido</div>
+          } @else if (f['email'].hasError('emailExists')) {
+            <div class="text-danger small mt-1">{{ f['email'].errors?.['message'] || 'Este email ya está registrado o tiene una invitación activa' }}</div>
+          }
+          @if (f['email'].pending) {
+            <small class="text-body-secondary">Verificando email...</small>
           }
         </div>
 

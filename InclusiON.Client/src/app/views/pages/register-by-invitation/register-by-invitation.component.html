@@ -92,7 +92,7 @@
                     type="email"
                     [valid]="f['email'].touched ? f['email'].valid : undefined"
                   />
-                  @if (hasError('email', 'required') || hasError('email', 'email')) {
+                  @if (hasError('email', 'required') || hasError('email', 'email') || hasError('email', 'emailExists')) {
                     <div class="text-danger small mt-1">{{ getErrorMessage('email') }}</div>
                   }
                 </div>

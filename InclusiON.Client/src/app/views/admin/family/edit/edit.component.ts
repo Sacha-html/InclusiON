@@ -1,11 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FamilyService, PersonsService, ToastService } from '@services';
+import { FamilyService, PersonsService, ToastService, ValidationService } from '@services';
 import { AppRoutes, RELATIONSHIPS } from '@shared/constants';
 import {
   FamilyResponse, LinkedPersonInfo, UpdateFamilyRequest, PersonListItemResponse,
 } from '@models';
+import { uniqueDocumentValidator, uniqueEmailValidator } from '@shared/utils';
 import {
   BadgeComponent, ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
@@ -14,7 +15,7 @@ import {
 import { ConfirmModalComponent } from '@shared/components/confirm-modal/confirm-modal.component';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
 import { OnlyNumbersDirective } from '@shared/directives';
-import { map } from 'rxjs';
+import { filter, map, take } from 'rxjs';
 
 @Component({
   selector: 'app-family-edit',
@@ -33,9 +34,10 @@ export class EditComponent implements OnInit {
   private readonly fb             = inject(FormBuilder);
   private readonly route          = inject(ActivatedRoute);
   private readonly router         = inject(Router);
-  private readonly familyService  = inject(FamilyService);
-  private readonly personsService = inject(PersonsService);
-  private readonly toastService   = inject(ToastService);
+  private readonly familyService     = inject(FamilyService);
+  private readonly personsService    = inject(PersonsService);
+  private readonly validationService = inject(ValidationService);
+  private readonly toastService      = inject(ToastService);
 
   family: FamilyResponse | null = null;
   submitted = false;
@@ -44,12 +46,33 @@ export class EditComponent implements OnInit {
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
+    email: [
+      '',
+      [Validators.required, Validators.email],
+      [uniqueEmailValidator(
+        email => this.validationService.checkEmail(email, { excludeEntityId: this.family?.id }),
+        () => this.family?.email,
+      )],
+    ],
+    documentNumber: [
+      '',
+      [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)],
+      [uniqueDocumentValidator(
+        doc => this.validationService.checkDocument(doc, this.family?.id),
+        () => this.family?.documentNumber,
+      )],
+    ],
     phone: ['', [Validators.maxLength(20), Validators.pattern(/^[0-9]+$/)]],
   });
 
   get f() { return this.form.controls; }
+
+  showFieldError(fieldName: string): boolean {
+    const control = this.form.get(fieldName);
+    if (!control || !control.invalid) return false;
+    if (control.errors?.['emailExists'] || control.errors?.['documentExists']) return true;
+    return this.submitted || control.touched;
+  }
 
   linkPersonControl = new FormControl<PersonListItemResponse | null>(null);
 
@@ -181,15 +204,27 @@ export class EditComponent implements OnInit {
     this.submitted = true;
     this.serverError = '';
     this.form.markAllAsTouched();
+
+    if (this.form.pending) {
+      this.form.statusChanges.pipe(filter(s => s !== 'PENDING'), take(1)).subscribe(() => {
+        this.attemptSubmit();
+      });
+      return;
+    }
+
+    this.attemptSubmit();
+  }
+
+  private attemptSubmit(): void {
     if (this.form.invalid || !this.family) return;
 
     const raw = this.form.value;
     const request: UpdateFamilyRequest = {
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      email: raw.email,
-      ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
-      ...(raw.phone && { phone: raw.phone }),
+      firstName: raw.firstName.trim(),
+      lastName: raw.lastName.trim(),
+      email: raw.email.trim(),
+      ...(raw.documentNumber && { documentNumber: raw.documentNumber.trim() }),
+      ...(raw.phone && { phone: raw.phone.trim() }),
     };
 
     this.familyService.updateFamily(this.family.id, request).subscribe({

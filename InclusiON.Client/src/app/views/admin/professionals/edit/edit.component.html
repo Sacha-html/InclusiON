@@ -41,13 +41,17 @@
             <label cLabel for="documentNumber">Documento *</label>
             <input cFormControl id="documentNumber" formControlName="documentNumber"
                    appOnlyNumbers inputmode="numeric" maxlength="8" placeholder="Ej: 12345678"
-                   [valid]="(submitted || f['documentNumber'].touched) ? f['documentNumber'].valid : undefined" />
-            @if ((submitted || f['documentNumber'].touched) && f['documentNumber'].errors) {
+                   [valid]="showFieldError('documentNumber') ? false : ((submitted || f['documentNumber'].touched) && f['documentNumber'].valid ? true : undefined)" />
+            @if (showFieldError('documentNumber')) {
               <c-form-feedback [valid]="false">
-                @if (f['documentNumber'].errors['required']) { El documento es obligatorio. }
-                @else if (f['documentNumber'].errors['pattern']) { Solo se permiten números (sin puntos ni letras). }
-                @else if (f['documentNumber'].errors['minlength'] || f['documentNumber'].errors['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                @if (f['documentNumber'].errors?.['required']) { El documento es obligatorio. }
+                @else if (f['documentNumber'].errors?.['pattern']) { Solo se permiten números (sin puntos ni letras). }
+                @else if (f['documentNumber'].errors?.['minlength'] || f['documentNumber'].errors?.['maxlength']) { El documento debe tener entre 7 y 8 dígitos. }
+                @else if (f['documentNumber'].errors?.['documentExists']) { {{ f['documentNumber'].errors?.['message'] || 'Este documento ya está registrado en el sistema.' }} }
               </c-form-feedback>
+            }
+            @if (f['documentNumber'].pending) {
+              <small class="text-body-secondary">Verificando documento...</small>
             }
           </c-col>
         </c-row>
@@ -65,12 +69,16 @@
           <c-col sm="6">
             <label cLabel for="licenseNumber">Matrícula *</label>
             <input cFormControl id="licenseNumber" formControlName="licenseNumber"
-                   [valid]="(submitted || f['licenseNumber'].touched) ? f['licenseNumber'].valid : undefined" />
-            @if ((submitted || f['licenseNumber'].touched) && f['licenseNumber'].errors) {
+                   [valid]="showFieldError('licenseNumber') ? false : ((submitted || f['licenseNumber'].touched) && f['licenseNumber'].valid ? true : undefined)" />
+            @if (showFieldError('licenseNumber')) {
               <c-form-feedback [valid]="false">
-                @if (f['licenseNumber'].errors['required']) { La matrícula es obligatoria. }
-                @if (f['licenseNumber'].errors['maxlength']) { Máximo 50 caracteres. }
+                @if (f['licenseNumber'].errors?.['required']) { La matrícula es obligatoria. }
+                @else if (f['licenseNumber'].errors?.['maxlength']) { Máximo 50 caracteres. }
+                @else if (f['licenseNumber'].errors?.['licenseExists']) { {{ f['licenseNumber'].errors?.['message'] || 'Esta matrícula ya está registrada.' }} }
               </c-form-feedback>
+            }
+            @if (f['licenseNumber'].pending) {
+              <small class="text-body-secondary">Verificando matrícula...</small>
             }
           </c-col>
         </c-row>

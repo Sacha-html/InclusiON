@@ -14,14 +14,22 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
 {
     public class CreatePersonCommandHandlerTests
     {
-        private readonly IPersonsRepository      _personsRepo   = Substitute.For<IPersonsRepository>();
-        private readonly IIdentityService        _identity      = Substitute.For<IIdentityService>();
-        private readonly IPasswordHasher         _pwdHasher     = Substitute.For<IPasswordHasher>();
-        private readonly IUnitOfWork             _uow           = Substitute.For<IUnitOfWork>();
-        private readonly IBackgroundJobRepository _bgJobs       = Substitute.For<IBackgroundJobRepository>();
-        private readonly IDateTimeProvider       _dateTime      = Substitute.For<IDateTimeProvider>();
+        private readonly IPersonsRepository           _personsRepo   = Substitute.For<IPersonsRepository>();
+        private readonly IIdentityService             _identity      = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness    = Substitute.For<IUniquenessValidationService>();
+        private readonly IPasswordHasher              _pwdHasher     = Substitute.For<IPasswordHasher>();
+        private readonly IUnitOfWork                  _uow           = Substitute.For<IUnitOfWork>();
+        private readonly IBackgroundJobRepository     _bgJobs        = Substitute.For<IBackgroundJobRepository>();
+        private readonly IDateTimeProvider            _dateTime      = Substitute.For<IDateTimeProvider>();
+
+        public CreatePersonCommandHandlerTests()
+        {
+            _uniqueness.CheckDocumentAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(DocumentCheckResult.Available());
+        }
+
         private CreatePersonCommandHandler BuildSut() =>
-            new(_personsRepo, _identity, _pwdHasher, _uow, _bgJobs,
+            new(_personsRepo, _identity, _uniqueness, _pwdHasher, _uow, _bgJobs,
                 NullLogger<CreatePersonCommandHandler>.Instance, _dateTime);
 
         private static CreatePersonCommand Cmd(string? doc = null) =>
@@ -45,8 +53,8 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         [Fact]
         public async Task HandleAsync_DocumentExists_ReturnsDocumentAlreadyExists()
         {
-            _personsRepo.ExistsDocumentAsync("12345678", null, Arg.Any<CancellationToken>())
-                        .Returns(true);
+            _uniqueness.CheckDocumentAsync("12345678", null, Arg.Any<CancellationToken>())
+                       .Returns(DocumentCheckResult.Taken("Familiar", false, "El DNI 12345678 ya se encuentra registrado en el sistema (Familiar)."));
 
             var result = await BuildSut().HandleAsync(Cmd(doc: "12345678"), default);
 

@@ -2,10 +2,11 @@ import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ProfessionalsService, CatalogsService } from '@services';
+import { filter, take } from 'rxjs';
+import { ProfessionalsService, CatalogsService, ValidationService } from '@services';
 import { AppRoutes } from '@shared/constants';
 import { CreateProfessionalRequest } from '@models';
-import { validDate, notFutureDate, minAge, toIsoDate, toInputDate, uniqueEmailValidator, uniqueLicenseValidator } from '@shared/utils';
+import { validDate, notFutureDate, minAge, toIsoDate, toInputDate, uniqueEmailValidator, uniqueDocumentValidator, uniqueLicenseValidator } from '@shared/utils';
 import {
   ButtonDirective,
   CardBodyComponent,
@@ -70,15 +71,19 @@ export class NewComponent implements OnInit {
 
   constructor() {
     const fb = inject(FormBuilder);
-    const professionalsService = inject(ProfessionalsService);
+    const validationService = inject(ValidationService);
     this.form = fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => professionalsService.checkEmail(email))]],
-      documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
+      email: ['', [Validators.required, Validators.email], [uniqueEmailValidator(email => validationService.checkEmail(email))]],
+      documentNumber: [
+        '',
+        [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)],
+        [uniqueDocumentValidator(doc => validationService.checkDocument(doc))],
+      ],
       phone: ['', [Validators.maxLength(20), Validators.pattern(/^[0-9]+$/)]],
       specialtyId: ['', [Validators.required]],
-      licenseNumber: ['', [Validators.required, Validators.maxLength(50)], [uniqueLicenseValidator(license => professionalsService.checkLicenseNumber(license))]],
+      licenseNumber: ['', [Validators.required, Validators.maxLength(50)], [uniqueLicenseValidator(license => validationService.checkLicenseNumber(license))]],
       birthDate: ['', [Validators.required, validDate, notFutureDate, minAge(18)]],
     });
   }
@@ -99,7 +104,7 @@ export class NewComponent implements OnInit {
     const control = this.form.get(fieldName);
     if (!control || !control.invalid) return false;
     if (this.submitted) return true;
-    if (control.errors?.['emailExists'] || control.errors?.['licenseExists']) return true;
+    if (control.errors?.['emailExists'] || control.errors?.['documentExists'] || control.errors?.['licenseExists']) return true;
     return control.touched;
   }
 
@@ -109,10 +114,8 @@ export class NewComponent implements OnInit {
     this.form.markAllAsTouched();
 
     if (this.form.pending) {
-      this.form.statusChanges.subscribe(status => {
-        if (status !== 'PENDING') {
-          this.attemptSubmit();
-        }
+      this.form.statusChanges.pipe(filter(s => s !== 'PENDING'), take(1)).subscribe(() => {
+        this.attemptSubmit();
       });
       return;
     }
@@ -123,7 +126,11 @@ export class NewComponent implements OnInit {
   private attemptSubmit(): void {
     if (this.form.invalid) return;
 
-    if (this.f['email'].errors?.['emailExists'] || this.f['licenseNumber'].errors?.['licenseExists']) {
+    if (
+      this.f['email'].errors?.['emailExists'] ||
+      this.f['documentNumber'].errors?.['documentExists'] ||
+      this.f['licenseNumber'].errors?.['licenseExists']
+    ) {
       return;
     }
 

@@ -20,6 +20,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AcceptInvitationCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
@@ -30,6 +31,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             IProfessionalsRepository professionalsRepository,
             IBackgroundJobRepository backgroundJobs,
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IUnitOfWork unitOfWork,
             ILogger<AcceptInvitationCommandHandler> logger,
             IDateTimeProvider dateTime,
@@ -39,6 +41,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
             _professionalsRepository = professionalsRepository;
             _backgroundJobs          = backgroundJobs;
             _identityService         = identityService;
+            _uniquenessValidation    = uniquenessValidation;
             _unitOfWork              = unitOfWork;
             _logger                  = logger;
             _dateTime                = dateTime;
@@ -88,20 +91,35 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         ErrorMessages.PasswordsMismatch);
                 }
 
-                // Validar email unico
-                var existingUser = await _identityService.FindByEmailAsync(command.Email);
-                if (existingUser != null)
+                var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
+                var normalizedDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+
+                // Validar email unico global
+                var emailCheck = await _uniquenessValidation.CheckEmailAsync(normalizedEmail, cancellationToken: cancellationToken);
+                if (!emailCheck.IsAvailable)
                 {
                     return ApiResponse<AcceptInvitationResponse>.Conflict(
                         ErrorCode.EmailAlreadyExists,
-                        ErrorMessages.EmailAlreadyRegistered);
+                        emailCheck.Message ?? ErrorMessages.EmailAlreadyRegistered);
+                }
+
+                // Validar documento unico global
+                if (normalizedDoc is not null)
+                {
+                    var docCheck = await _uniquenessValidation.CheckDocumentAsync(normalizedDoc, null, cancellationToken);
+                    if (!docCheck.IsAvailable)
+                    {
+                        return ApiResponse<AcceptInvitationResponse>.Conflict(
+                            ErrorCode.DocumentAlreadyExists,
+                            docCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
+                    }
                 }
 
                 // Crear usuario + familiar + relacion en transaccion
                 var user = new User
                 {
-                    UserName = command.Email,
-                    Email = command.Email,
+                    UserName = normalizedEmail,
+                    Email = normalizedEmail,
                     Name = invitation.FirstName ?? string.Empty,
                     Surname = invitation.LastName ?? string.Empty,
                     IsActive = true,
@@ -131,7 +149,7 @@ namespace InclusiON.Application.UseCases.Invitations.Handlers
                         UserId = user.Id,
                         FirstName = invitation.FirstName ?? string.Empty,
                         LastName = invitation.LastName ?? string.Empty,
-                        DocumentNumber = command.DocumentNumber,
+                        DocumentNumber = normalizedDoc,
                         Relationship = invitation.Relationship
                     };
                     await _invitationsRepository.CreateFamilyRepresentativeAsync(familyRep, ct);

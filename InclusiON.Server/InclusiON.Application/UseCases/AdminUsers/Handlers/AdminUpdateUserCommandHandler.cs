@@ -10,13 +10,16 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
     public class AdminUpdateUserCommandHandler : ICommandHandler<AdminUpdateUserCommand, ApiResponse<object>>
     {
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly ILogger<AdminUpdateUserCommandHandler> _logger;
 
         public AdminUpdateUserCommandHandler(
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             ILogger<AdminUpdateUserCommandHandler> logger)
         {
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _logger = logger;
         }
 
@@ -34,24 +37,27 @@ namespace InclusiON.Application.UseCases.AdminUsers.Handlers
             if (user is null)
                 return ApiResponse<object>.NotFound("Usuario");
 
-            if (!string.Equals(user.Email, command.Email, StringComparison.OrdinalIgnoreCase))
+            var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
+
+            if (!string.Equals(user.Email?.Trim(), normalizedEmail, StringComparison.OrdinalIgnoreCase))
             {
-                var existing = await _identityService.FindByEmailAsync(command.Email);
-                if (existing is not null && existing.Id != command.UserId)
+                var emailCheck = await _uniquenessValidation.CheckEmailAsync(
+                    normalizedEmail, excludeUserId: command.UserId, cancellationToken: cancellationToken);
+                if (!emailCheck.IsAvailable)
                 {
                     return ApiResponse<object>.Conflict(
                         ErrorCode.EmailAlreadyExists,
-                        "El email ya está en uso por otro usuario.");
+                        emailCheck.Message ?? "El email ya está en uso por otro usuario.");
                 }
 
-                user.Email = command.Email;
-                user.UserName = command.Email;
-                user.NormalizedEmail = command.Email.ToUpperInvariant();
-                user.NormalizedUserName = command.Email.ToUpperInvariant();
+                user.Email = normalizedEmail;
+                user.UserName = normalizedEmail;
+                user.NormalizedEmail = normalizedEmail.ToUpperInvariant();
+                user.NormalizedUserName = normalizedEmail.ToUpperInvariant();
             }
 
-            user.Name = command.Name;
-            user.Surname = command.Surname;
+            user.Name = command.Name.Trim();
+            user.Surname = command.Surname.Trim();
 
             var (succeeded, errors) = await _identityService.UpdateUserAsync(user);
             if (!succeeded)

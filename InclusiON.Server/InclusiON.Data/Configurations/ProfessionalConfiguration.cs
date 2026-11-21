@@ -70,7 +70,9 @@ namespace InclusiON.Data.Configurations
             // Performance indexes for professional searches
             builder.HasIndex(p => p.FirstName);
             builder.HasIndex(p => p.LastName);
-            builder.HasIndex(p => p.LicenseNumber);
+            builder.HasIndex(p => p.LicenseNumber)
+                .IsUnique()
+                .HasFilter("\"LicenseNumber\" IS NOT NULL");
             builder.HasIndex(p => new { p.IsActive, p.FirstName });
 
             builder.HasOne(p => p.User)

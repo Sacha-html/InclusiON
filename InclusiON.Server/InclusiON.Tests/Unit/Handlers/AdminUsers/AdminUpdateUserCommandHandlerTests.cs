@@ -13,10 +13,17 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
 {
     public class AdminUpdateUserCommandHandlerTests
     {
-        private readonly IIdentityService _identity = Substitute.For<IIdentityService>();
+        private readonly IIdentityService             _identity   = Substitute.For<IIdentityService>();
+        private readonly IUniquenessValidationService _uniqueness = Substitute.For<IUniquenessValidationService>();
+
+        public AdminUpdateUserCommandHandlerTests()
+        {
+            _uniqueness.CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                .Returns(EmailCheckResult.Available());
+        }
 
         private AdminUpdateUserCommandHandler BuildSut() =>
-            new(_identity, NullLogger<AdminUpdateUserCommandHandler>.Instance);
+            new(_identity, _uniqueness, NullLogger<AdminUpdateUserCommandHandler>.Instance);
 
         private static Guid UserId()      => new("aaaaaaaa-0000-0000-0000-000000000001");
         private static Guid OtherId()     => new("bbbbbbbb-0000-0000-0000-000000000002");
@@ -96,8 +103,8 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
             result.Success.Should().BeTrue();
             user.Name.Should().Be("María");
             user.Surname.Should().Be("López");
-            // Email no cambió → FindByEmailAsync no debe llamarse
-            await _identity.DidNotReceive().FindByEmailAsync(Arg.Any<string>());
+            // Email no cambió → CheckEmailAsync no debe llamarse
+            await _uniqueness.DidNotReceive().CheckEmailAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<Guid?>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
         }
 
         // ── Happy path — email nuevo ─────────────────────────────────────────
@@ -108,7 +115,6 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
             // Arrange
             var user = ExistingUser(email: "viejo@test.com");
             _identity.FindByIdAsync(UserId()).Returns(user);
-            _identity.FindByEmailAsync("nuevo@test.com").Returns((User?)null);
             _identity.UpdateUserAsync(Arg.Any<User>())
                      .Returns((true, Enumerable.Empty<string>()));
 
@@ -131,10 +137,10 @@ namespace InclusiON.Tests.Unit.Handlers.AdminUsers
         public async Task HandleAsync_NewEmail_AlreadyTaken_ReturnsConflict()
         {
             // Arrange
-            var user  = ExistingUser(email: "viejo@test.com");
-            var other = ExistingUser(id: OtherId(), email: "ocupado@test.com");
+            var user = ExistingUser(email: "viejo@test.com");
             _identity.FindByIdAsync(UserId()).Returns(user);
-            _identity.FindByEmailAsync("ocupado@test.com").Returns(other);
+            _uniqueness.CheckEmailAsync("ocupado@test.com", UserId(), null, false, Arg.Any<CancellationToken>())
+                       .Returns(EmailCheckResult.Taken("Este email ya se encuentra registrado en el sistema."));
 
             var cmd = ValidCommand(email: "ocupado@test.com");
 

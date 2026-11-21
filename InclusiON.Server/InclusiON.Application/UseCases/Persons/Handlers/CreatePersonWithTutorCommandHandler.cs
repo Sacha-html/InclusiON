@@ -22,7 +22,8 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
 {
     /// <summary>
     /// Handler para crear una persona con discapacidad junto con su tutor a cargo
-    /// y asignación de aula en una única transacción de base de datos.
+    /// (nuevo o vinculado explícitamente por ExistingTutorId) y asignación de aula
+    /// en una única transacción de base de datos.
     /// </summary>
     public class CreatePersonWithTutorCommandHandler : ICommandHandler<CreatePersonWithTutorCommand, ApiResponse<PersonResponse>>
     {
@@ -31,6 +32,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         private readonly IAssignmentsRepository _assignmentsRepository;
         private readonly IProfessionalsRepository _professionalsRepository;
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly ILogger<CreatePersonWithTutorCommandHandler> _logger;
@@ -45,6 +47,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             IAssignmentsRepository assignmentsRepository,
             IProfessionalsRepository professionalsRepository,
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IUnitOfWork unitOfWork,
             IBackgroundJobRepository backgroundJobs,
             ILogger<CreatePersonWithTutorCommandHandler> logger,
@@ -58,6 +61,7 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
             _assignmentsRepository = assignmentsRepository;
             _professionalsRepository = professionalsRepository;
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _unitOfWork = unitOfWork;
             _backgroundJobs = backgroundJobs;
             _logger = logger;
@@ -71,47 +75,121 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
         {
             try
             {
-                // 1. Validar documento de alumno único si se proporciona
-                PersonWithDisability? existingStudent = null;
-                if (!string.IsNullOrWhiteSpace(command.DocumentNumber))
+                var studentDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+
+                // 1. Validar documento del alumno (unicidad global, tanto activos como inactivos)
+                if (studentDoc is not null)
                 {
-                    existingStudent = await _repository.GetByDocumentNumberForUpdateAsync(command.DocumentNumber, cancellationToken);
-                    if (existingStudent != null && existingStudent.IsActive && (existingStudent.User == null || existingStudent.User.IsActive))
+                    var studentDocCheck = await _uniquenessValidation.CheckDocumentAsync(studentDoc, null, cancellationToken);
+                    if (!studentDocCheck.IsAvailable)
                     {
                         return ApiResponse<PersonResponse>.Conflict(
                             ErrorCode.DocumentAlreadyExists,
-                            $"Ya existe un alumno activo registrado con el DNI {command.DocumentNumber} ({existingStudent.FirstName} {existingStudent.LastName}).");
+                            studentDocCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
                     }
                 }
 
-                // 2. Validar tutor y email
-                var existingTutorUser = await _identityService.FindByEmailAsync(command.TutorEmail);
-                FamilyRepresentative? existingTutor = null;
+                // 2. Resolver tutor (vinculación explícita de existente o creación de nuevo tutor)
+                FamilyRepresentative? tutor = null;
+                User? tutorUser = null;
+                Guid supervisorUserId;
+                var newTutorCreated = false;
+                var tutorPassword = PasswordGenerator.GenerateTemporary();
+                string? normalizedTutorEmail = null;
 
-                if (existingTutorUser != null)
+                if (command.ExistingTutorId.HasValue)
                 {
-                    // Si el tutor ya existe y el alumno es nuevo, rechazar por email duplicado si no es familiar
-                    existingTutor = await _familyRepository.GetByUserIdAsync(existingTutorUser.Id, cancellationToken);
-                    if (existingTutor == null && existingStudent == null)
+                    if (command.ExistingTutorId.Value == Guid.Empty)
                     {
-                        return ApiResponse<PersonResponse>.Conflict(
-                            ErrorCode.EmailAlreadyExists,
-                            "El email del tutor ya se encuentra registrado.");
+                        return ApiResponse<PersonResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            "Debe seleccionar un tutor existente válido.");
                     }
+
+                    tutor = await _familyRepository.GetByIdAsync(command.ExistingTutorId.Value, cancellationToken);
+                    if (tutor is null)
+                    {
+                        return ApiResponse<PersonResponse>.NotFound("Tutor / Familiar");
+                    }
+
+                    if (!tutor.IsActive || tutor.Status != FamilyStatusEnum.Active || (tutor.User is not null && !tutor.User.IsActive))
+                    {
+                        return ApiResponse<PersonResponse>.ErrorResult(
+                            ErrorCode.BusinessRuleViolation,
+                            "El tutor seleccionado no se encuentra activo. Reactivalo antes de vincularlo.");
+                    }
+
+                    supervisorUserId = tutor.UserId;
                 }
                 else
                 {
-                    // Tutor nuevo: validar documento de tutor único
-                    if (!string.IsNullOrWhiteSpace(command.TutorDocumentNumber))
+                    normalizedTutorEmail = UniquenessNormalizer.NormalizeEmail(command.TutorEmail);
+                    var tutorDoc = UniquenessNormalizer.NormalizeDocument(command.TutorDocumentNumber);
+
+                    if (string.IsNullOrWhiteSpace(command.TutorFirstName) ||
+                        string.IsNullOrWhiteSpace(command.TutorLastName) ||
+                        normalizedTutorEmail is null)
                     {
-                        var tutorDocExists = await _familyRepository.ExistsDocumentAsync(command.TutorDocumentNumber, null, cancellationToken);
-                        if (tutorDocExists)
+                        return ApiResponse<PersonResponse>.ErrorResult(
+                            ErrorCode.ValidationFailed,
+                            "Los datos obligatorios del tutor (nombre, apellido y email) son requeridos.");
+                    }
+
+                    // El alumno y el tutor no pueden compartir el mismo DNI
+                    if (studentDoc is not null && tutorDoc is not null &&
+                        string.Equals(studentDoc, tutorDoc, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ApiResponse<PersonResponse>.Conflict(
+                            ErrorCode.DocumentAlreadyExists,
+                            "El DNI del alumno y el DNI del tutor no pueden ser iguales.");
+                    }
+
+                    // Validar unicidad global del email del tutor
+                    var emailCheck = await _uniquenessValidation.CheckEmailAsync(
+                        normalizedTutorEmail, cancellationToken: cancellationToken);
+                    if (!emailCheck.IsAvailable)
+                    {
+                        return ApiResponse<PersonResponse>.Conflict(
+                            ErrorCode.EmailAlreadyExists,
+                            "El email del tutor ya se encuentra registrado en el sistema. Si el tutor ya tiene cuenta, seleccioná 'Vincular tutor existente'.");
+                    }
+
+                    // Validar unicidad global del documento del tutor
+                    if (tutorDoc is not null)
+                    {
+                        var tutorDocCheck = await _uniquenessValidation.CheckDocumentAsync(tutorDoc, null, cancellationToken);
+                        if (!tutorDocCheck.IsAvailable)
                         {
                             return ApiResponse<PersonResponse>.Conflict(
                                 ErrorCode.DocumentAlreadyExists,
-                                "El documento del tutor ya se encuentra registrado.");
+                                tutorDocCheck.Message ?? "El documento del tutor ya se encuentra registrado.");
                         }
                     }
+
+                    newTutorCreated = true;
+                    tutorUser = new User
+                    {
+                        UserName = normalizedTutorEmail,
+                        Email = normalizedTutorEmail,
+                        Name = command.TutorFirstName.Trim(),
+                        Surname = command.TutorLastName.Trim(),
+                        IsActive = true,
+                        CreatedAt = _dateTime.UtcNow,
+                        EmailConfirmed = true,
+                        LockoutEnabled = true,
+                        MustChangePassword = true
+                    };
+
+                    tutor = new FamilyRepresentative
+                    {
+                        FirstName = command.TutorFirstName.Trim(),
+                        LastName = command.TutorLastName.Trim(),
+                        DocumentNumber = tutorDoc,
+                        Phone = command.TutorPhone?.Trim(),
+                        Relationship = command.TutorRelationship
+                    };
+
+                    supervisorUserId = tutorUser.Id;
                 }
 
                 // 3. Validar el profesional responsable y el aula (si se especifica)
@@ -148,236 +226,91 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     }
                 }
 
-                var isReactivation = existingStudent != null;
-                var tutorPassword = PasswordGenerator.GenerateTemporary();
-                var newTutorCreated = false;
-                User? tutorUser = existingTutorUser;
-                FamilyRepresentative? tutor = existingTutor;
+                // Preparar creación de alumno nuevo
+                var baseStudentUsername = GenerateUsername(command.FirstName, command.LastName);
+                var studentEmail = $"{baseStudentUsername}@inclusion.local";
 
-                PersonWithDisability student;
-
-                if (isReactivation)
+                var studentUser = new User
                 {
-                    student = existingStudent!;
-                }
-                else
+                    UserName = baseStudentUsername,
+                    Email = studentEmail,
+                    Name = command.FirstName.Trim(),
+                    Surname = command.LastName.Trim(),
+                    IsActive = true,
+                    CreatedAt = _dateTime.UtcNow,
+                    EmailConfirmed = true,
+                    LockoutEnabled = true
+                };
+
+                var student = new PersonWithDisability
                 {
-                    // Preparar creación de alumno nuevo
-                    var baseStudentUsername = GenerateUsername(command.FirstName, command.LastName);
-                    var studentEmail = $"{baseStudentUsername}@inclusion.local";
-                    var studentPassword = PasswordGenerator.GenerateTemporary();
-
-                    var studentUser = new User
-                    {
-                        UserName = baseStudentUsername,
-                        Email = studentEmail,
-                        Name = command.FirstName,
-                        Surname = command.LastName,
-                        IsActive = true,
-                        CreatedAt = _dateTime.UtcNow,
-                        EmailConfirmed = true,
-                        LockoutEnabled = true
-                    };
-
-                    student = new PersonWithDisability
-                    {
-                        FirstName = command.FirstName,
-                        LastName = command.LastName,
-                        DocumentNumber = command.DocumentNumber,
-                        BirthDate = command.BirthDate,
-                        PhotoUrl = command.PhotoUrl,
-                        AvatarColor = AvatarColors.Random()
-                    };
-                    student.Embedding = new PersonEmbedding();
-
-                    // Guardamos la referencia para el commit
-                    student.User = studentUser;
-                }
-
-                // Preparar tutor si no existe
-                if (tutorUser == null)
-                {
-                    newTutorCreated = true;
-                    tutorUser = new User
-                    {
-                        UserName = command.TutorEmail,
-                        Email = command.TutorEmail,
-                        Name = command.TutorFirstName,
-                        Surname = command.TutorLastName,
-                        IsActive = true,
-                        CreatedAt = _dateTime.UtcNow,
-                        EmailConfirmed = true,
-                        LockoutEnabled = true,
-                        MustChangePassword = true
-                    };
-
-                    tutor = new FamilyRepresentative
-                    {
-                        FirstName = command.TutorFirstName,
-                        LastName = command.TutorLastName,
-                        DocumentNumber = command.TutorDocumentNumber,
-                        Phone = command.TutorPhone,
-                        Relationship = command.TutorRelationship
-                    };
-                }
+                    FirstName = command.FirstName.Trim(),
+                    LastName = command.LastName.Trim(),
+                    DocumentNumber = studentDoc,
+                    BirthDate = command.BirthDate,
+                    PhotoUrl = command.PhotoUrl,
+                    AvatarColor = AvatarColors.Random(),
+                    Embedding = new PersonEmbedding(),
+                    User = studentUser
+                };
 
                 // 4. Ejecutar todo en una sola transacción
                 await _unitOfWork.ExecuteInTransactionAsync(async ct =>
                 {
                     if (newTutorCreated)
                     {
-                        var (tutorSucceeded, tutorErrors) = await _identityService.CreateUserAsync(tutorUser, tutorPassword);
+                        var (tutorSucceeded, tutorErrors) = await _identityService.CreateUserAsync(tutorUser!, tutorPassword);
                         if (!tutorSucceeded)
                         {
                             throw new InvalidOperationException($"Error al crear el usuario del tutor: {string.Join(", ", tutorErrors)}");
                         }
-                        await _identityService.AddToRoleAsync(tutorUser, RoleNames.FamilyRepresentative);
-                        tutor!.UserId = tutorUser.Id;
+                        await _identityService.AddToRoleAsync(tutorUser!, RoleNames.FamilyRepresentative);
+                        tutor!.UserId = tutorUser!.Id;
+                        supervisorUserId = tutorUser.Id;
                         if (tutor.Id == Guid.Empty) tutor.Id = Guid.NewGuid();
                         await _familyRepository.CreateAsync(tutor, ct);
                     }
-                    else if (tutor != null)
+
+                    var studentPassword = PasswordGenerator.GenerateTemporary();
+                    var (studentSucceeded, studentErrors) = await _identityService.CreateUserAsync(student.User, studentPassword);
+                    if (!studentSucceeded)
                     {
-                        tutor.IsActive = true;
-                        tutor.Status = FamilyStatusEnum.Active;
-                        tutor.UpdatedAt = _dateTime.UtcNow;
-                        tutorUser.IsActive = true;
-                        await _identityService.UpdateUserAsync(tutorUser);
-                        await _familyRepository.UpdateAsync(tutor, ct);
+                        throw new InvalidOperationException($"Error al crear el usuario del alumno: {string.Join(", ", studentErrors)}");
                     }
+                    await _identityService.AddToRoleAsync(student.User, RoleNames.PersonWithDisability);
+                    student.UserId = student.User.Id;
+                    student.SupervisorUserId = supervisorUserId;
 
-                    if (isReactivation)
+                    if (student.Id == Guid.Empty) student.Id = Guid.NewGuid();
+
+                    // Enlace con el tutor
+                    student.PersonRepresentatives.Add(new PersonRepresentative
                     {
-                        // Reactivación / Reingreso de alumno existente (evita duplicar registros)
-                        student.IsActive = true;
-                        student.FirstName = command.FirstName;
-                        student.LastName = command.LastName;
-                        student.BirthDate = command.BirthDate;
-                        student.UpdatedAt = _dateTime.UtcNow;
-                        if (!string.IsNullOrEmpty(command.PhotoUrl))
-                        {
-                            student.PhotoUrl = command.PhotoUrl;
-                        }
+                        PersonId = student.Id,
+                        RepresentativeId = tutor!.Id,
+                        Relationship = command.TutorRelationship,
+                        IsPrimary = true,
+                        IsActive = true,
+                        CreatedAt = _dateTime.UtcNow
+                    });
 
-                        if (student.User != null)
-                        {
-                            student.User.IsActive = true;
-                            student.User.Name = command.FirstName;
-                            student.User.Surname = command.LastName;
-                            await _identityService.UpdateUserAsync(student.User);
-                        }
-
-                        student.SupervisorUserId = tutorUser.Id;
-
-                        // Desmarcar otros vínculos primarios para que este tutor sea el principal
-                        foreach (var existingLink in student.PersonRepresentatives.Where(pr => pr.IsActive))
-                        {
-                            existingLink.IsPrimary = false;
-                            existingLink.UpdatedAt = _dateTime.UtcNow;
-                        }
-
-                        // Vincular o reactivar vínculo con el tutor
-                        var relLink = student.PersonRepresentatives.FirstOrDefault(pr => pr.RepresentativeId == tutor!.Id);
-                        if (relLink != null)
-                        {
-                            relLink.IsActive = true;
-                            relLink.IsPrimary = true;
-                            relLink.Relationship = command.TutorRelationship;
-                            relLink.EndedAt = null;
-                            relLink.UnlinkObservation = null;
-                            relLink.UpdatedAt = _dateTime.UtcNow;
-                        }
-                        else
-                        {
-                            student.PersonRepresentatives.Add(new PersonRepresentative
-                            {
-                                PersonId = student.Id,
-                                RepresentativeId = tutor!.Id,
-                                Relationship = command.TutorRelationship,
-                                IsPrimary = true,
-                                IsActive = true,
-                                CreatedAt = _dateTime.UtcNow
-                            });
-                        }
-
-                        // Actualizar o crear asignación profesional
-                        foreach (var pp in student.ProfessionalPersons.Where(p => p.IsActive))
-                        {
-                            pp.IsPrimaryProfessional = false;
-                        }
-
-                        var profAssignment = student.ProfessionalPersons.FirstOrDefault(p => p.ProfessionalId == command.ProfessionalId);
-                        if (profAssignment != null)
-                        {
-                            profAssignment.IsActive = true;
-                            profAssignment.ClassroomId = command.ClassroomId;
-                            profAssignment.IsPrimaryProfessional = true;
-                            profAssignment.CanSuperviseLogin = true;
-                            profAssignment.AssignedAt = _dateTime.UtcNow;
-                        }
-                        else
-                        {
-                            student.ProfessionalPersons.Add(new ProfessionalPerson
-                            {
-                                ProfessionalId = command.ProfessionalId,
-                                PersonId = student.Id,
-                                ClassroomId = command.ClassroomId,
-                                IsPrimaryProfessional = true,
-                                CanSuperviseLogin = true,
-                                IsActive = true,
-                                AssignedAt = _dateTime.UtcNow
-                            });
-                        }
-
-                        await _repository.UpdateAsync(student, ct);
-                    }
-                    else
+                    // Enlace con el profesional
+                    student.ProfessionalPersons.Add(new ProfessionalPerson
                     {
-                        // Creación de Alumno Nuevo
-                        var studentPassword = PasswordGenerator.GenerateTemporary();
-                        var (studentSucceeded, studentErrors) = await _identityService.CreateUserAsync(student.User, studentPassword);
-                        if (!studentSucceeded)
-                        {
-                            throw new InvalidOperationException($"Error al crear el usuario del alumno: {string.Join(", ", studentErrors)}");
-                        }
-                        await _identityService.AddToRoleAsync(student.User, RoleNames.PersonWithDisability);
-                        student.UserId = student.User.Id;
-                        student.SupervisorUserId = tutorUser.Id;
+                        ProfessionalId = command.ProfessionalId,
+                        PersonId = student.Id,
+                        ClassroomId = command.ClassroomId,
+                        IsPrimaryProfessional = true,
+                        CanSuperviseLogin = true,
+                        IsActive = true,
+                        AssignedAt = _dateTime.UtcNow
+                    });
 
-                        if (student.Id == Guid.Empty) student.Id = Guid.NewGuid();
-
-                        // Enlace con el tutor
-                        student.PersonRepresentatives.Add(new PersonRepresentative
-                        {
-                            PersonId = student.Id,
-                            RepresentativeId = tutor!.Id,
-                            IsPrimary = true,
-                            IsActive = true,
-                            CreatedAt = _dateTime.UtcNow
-                        });
-
-                        // Enlace con el profesional
-                        student.ProfessionalPersons.Add(new ProfessionalPerson
-                        {
-                            ProfessionalId = command.ProfessionalId,
-                            PersonId = student.Id,
-                            ClassroomId = command.ClassroomId,
-                            IsPrimaryProfessional = true,
-                            CanSuperviseLogin = true,
-                            IsActive = true,
-                            AssignedAt = _dateTime.UtcNow
-                        });
-
-                        await _repository.CreateAsync(student, ct);
-                    }
-
+                    await _repository.CreateAsync(student, ct);
                     await _unitOfWork.SaveChangesAsync(ct);
                 }, cancellationToken);
 
-                // Todo lo que sigue al commit es best-effort. La persistencia ya fue
-                // confirmada y un fallo de infraestructura posterior no debe convertir
-                // una creación exitosa en un HTTP 500. Cada paso se aísla para que un
-                // fallo no impida ejecutar los restantes, y se registra para diagnóstico.
+                // Pasos post-commit best-effort
                 await RunPostCommitStepAsync(
                     student.Id,
                     "roadmap initialization",
@@ -393,46 +326,50 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                         maxRetries: 3,
                         cancellationToken: cancellationToken));
 
-                await RunPostCommitStepAsync(
-                    student.Id,
-                    "tutor email job creation",
-                    () => _backgroundJobs.CreateAsync(
-                        JobTypes.Email,
-                        JsonSerializer.Serialize(new EmailPayload
-                        {
-                            To = command.TutorEmail,
-                            Subject = "Bienvenido a InclusiON — Tu cuenta ha sido creada",
-                            TemplateName = "PasswordReset",
-                            Replacements = new Dictionary<string, string?>
+                if (newTutorCreated && normalizedTutorEmail is not null)
+                {
+                    await RunPostCommitStepAsync(
+                        student.Id,
+                        "tutor email job creation",
+                        () => _backgroundJobs.CreateAsync(
+                            JobTypes.Email,
+                            JsonSerializer.Serialize(new EmailPayload
                             {
-                                { "UserName", command.TutorFirstName },
-                                { "TemporaryPassword", tutorPassword },
-                                { "Year", _dateTime.UtcNow.Year.ToString() }
-                            }
-                        }),
-                        maxRetries: 2,
-                        cancellationToken: cancellationToken));
+                                To = normalizedTutorEmail,
+                                Subject = "Bienvenido a InclusiON — Tu cuenta ha sido creada",
+                                TemplateName = "PasswordReset",
+                                Replacements = new Dictionary<string, string?>
+                                {
+                                    { "UserName", command.TutorFirstName?.Trim() },
+                                    { "TemporaryPassword", tutorPassword },
+                                    { "Year", _dateTime.UtcNow.Year.ToString() }
+                                }
+                            }),
+                            maxRetries: 2,
+                            cancellationToken: cancellationToken));
+                }
 
-                if (professional != null && professional.UserId != Guid.Empty)
+                if (professional.UserId != Guid.Empty)
                 {
                     await RunPostCommitStepAsync(
                         student.Id,
                         "professional and tutor notifications",
-                        () => NotifyNewStudentAndTutorAsync(professional.UserId, tutor?.UserId, student, cancellationToken));
+                        () => NotifyNewStudentAndTutorAsync(professional.UserId, supervisorUserId, student, cancellationToken));
                 }
 
                 _logger.LogInformation(
-                    isReactivation ? "Alumno {StudentId} reactivado con Tutor {TutorId} exitosamente." : "Alumno {StudentId} y Tutor {TutorId} creados exitosamente.",
-                    student.Id, tutor?.Id);
+                    "Alumno {StudentId} creado con Tutor {TutorId} (nuevo={NewTutor}) exitosamente.",
+                    student.Id, tutor?.Id, newTutorCreated);
 
                 var response = PersonMapper.ToResponse(student);
                 if (newTutorCreated)
                 {
                     response.TutorTemporaryPassword = tutorPassword;
                 }
-                var successMessage = isReactivation
-                    ? $"El alumno {student.FirstName} {student.LastName} (DNI {student.DocumentNumber}) fue reactivado exitosamente junto a su tutor legal."
-                    : "Alumno y tutor registrados exitosamente.";
+
+                var successMessage = newTutorCreated
+                    ? "Alumno y tutor registrados exitosamente."
+                    : "Alumno registrado y vinculado al tutor existente exitosamente.";
                 return ApiResponse<PersonResponse>.SuccessResult(response, successMessage);
             }
             catch (Exception ex)

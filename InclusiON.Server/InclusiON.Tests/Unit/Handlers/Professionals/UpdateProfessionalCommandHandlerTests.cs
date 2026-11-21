@@ -15,19 +15,28 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
 {
     public class UpdateProfessionalCommandHandlerTests
     {
-        private readonly IProfessionalsRepository _prosRepo = Substitute.For<IProfessionalsRepository>();
-        private readonly IUnitOfWork              _uow      = Substitute.For<IUnitOfWork>();
-        private readonly IDateTimeProvider        _dateTime = Substitute.For<IDateTimeProvider>();
+        private readonly IProfessionalsRepository     _prosRepo   = Substitute.For<IProfessionalsRepository>();
+        private readonly IUniquenessValidationService _uniqueness = Substitute.For<IUniquenessValidationService>();
+        private readonly IUnitOfWork                  _uow        = Substitute.For<IUnitOfWork>();
+        private readonly IDateTimeProvider            _dateTime   = Substitute.For<IDateTimeProvider>();
+
+        public UpdateProfessionalCommandHandlerTests()
+        {
+            _uniqueness.CheckDocumentAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(DocumentCheckResult.Available());
+            _uniqueness.CheckLicenseNumberAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(LicenseCheckResult.Available());
+        }
 
         private UpdateProfessionalCommandHandler BuildSut() =>
-            new(_prosRepo, _uow,
+            new(_prosRepo, _uniqueness, _uow,
                 NullLogger<UpdateProfessionalCommandHandler>.Instance, _dateTime);
 
         private static readonly Guid ProfId = Guid.NewGuid();
 
-        private static UpdateProfessionalCommand Cmd(string? doc = null) =>
+        private static UpdateProfessionalCommand Cmd(string? doc = null, string? license = null) =>
             new(ProfessionalId: ProfId, FirstName: "Pedro", LastName: "Ruiz",
-                DocumentNumber: doc, Phone: "1122334455");
+                DocumentNumber: doc, Phone: "1122334455", LicenseNumber: license);
 
         private static Professional AProfessional() => new()
         {
@@ -62,13 +71,27 @@ namespace InclusiON.Tests.Unit.Handlers.Professionals
         {
             _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>())
                      .Returns(AProfessional());
-            _prosRepo.ExistsDocumentAsync("99999999", ProfId, Arg.Any<CancellationToken>())
-                     .Returns(true);
+            _uniqueness.CheckDocumentAsync("99999999", ProfId, Arg.Any<CancellationToken>())
+                       .Returns(DocumentCheckResult.Taken("Familiar", false, "El DNI 99999999 ya se encuentra registrado en el sistema (Familiar)."));
 
             var result = await BuildSut().HandleAsync(Cmd(doc: "99999999"), default);
 
             result.Success.Should().BeFalse();
             result.ErrorCode.Should().Be(ErrorCode.DocumentAlreadyExists);
+        }
+
+        [Fact]
+        public async Task HandleAsync_DuplicateLicenseNumber_ReturnsLicenseNumberAlreadyExists()
+        {
+            _prosRepo.GetByIdAsync(ProfId, Arg.Any<CancellationToken>())
+                     .Returns(AProfessional());
+            _uniqueness.CheckLicenseNumberAsync("MP-999", ProfId, Arg.Any<CancellationToken>())
+                       .Returns(LicenseCheckResult.Taken("Esta matrícula ya se encuentra registrada en el sistema."));
+
+            var result = await BuildSut().HandleAsync(Cmd(license: "MP-999"), default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.LicenseNumberAlreadyExists);
         }
 
         // ── Happy path ───────────────────────────────────────────────────────

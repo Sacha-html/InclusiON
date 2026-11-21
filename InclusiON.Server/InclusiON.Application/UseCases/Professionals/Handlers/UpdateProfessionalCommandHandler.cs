@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -16,6 +16,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
     public class UpdateProfessionalCommandHandler : ICommandHandler<UpdateProfessionalCommand, ApiResponse<ProfessionalResponse>>
     {
         private readonly IProfessionalsRepository _repository;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UpdateProfessionalCommandHandler> _logger;
         private readonly IDateTimeProvider _dateTime;
@@ -23,12 +24,14 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
         public UpdateProfessionalCommandHandler(
             IProfessionalsRepository repository,
+            IUniquenessValidationService uniquenessValidation,
             IUnitOfWork unitOfWork,
             ILogger<UpdateProfessionalCommandHandler> logger,
             IDateTimeProvider dateTime,
             IReadOnlyRepository<Specialty>? specialties = null)
         {
             _repository = repository;
+            _uniquenessValidation = uniquenessValidation;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _dateTime = dateTime;
@@ -46,23 +49,38 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
                     ErrorMessages.ProfessionalNotFound);
             }
 
-            // Validar documento unico si cambio
-            if (!string.IsNullOrWhiteSpace(command.DocumentNumber) && command.DocumentNumber != professional.DocumentNumber)
+            var normalizedDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+            var normalizedLicense = UniquenessNormalizer.NormalizeLicense(command.LicenseNumber);
+
+            // Validar documento unico global si cambio
+            if (normalizedDoc is not null && !string.Equals(normalizedDoc, professional.DocumentNumber?.Trim(), StringComparison.OrdinalIgnoreCase))
             {
-                var documentExists = await _repository.ExistsDocumentAsync(command.DocumentNumber, command.ProfessionalId, cancellationToken);
-                if (documentExists)
+                var docCheck = await _uniquenessValidation.CheckDocumentAsync(normalizedDoc, command.ProfessionalId, cancellationToken);
+                if (!docCheck.IsAvailable)
                 {
                     return ApiResponse<ProfessionalResponse>.Conflict(
                         ErrorCode.DocumentAlreadyExists,
-                        ErrorMessages.DocumentAlreadyExists);
+                        docCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
+                }
+            }
+
+            // Validar matricula unica si cambio
+            if (normalizedLicense is not null && !string.Equals(normalizedLicense, professional.LicenseNumber?.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                var licenseCheck = await _uniquenessValidation.CheckLicenseNumberAsync(normalizedLicense, command.ProfessionalId, cancellationToken);
+                if (!licenseCheck.IsAvailable)
+                {
+                    return ApiResponse<ProfessionalResponse>.Conflict(
+                        ErrorCode.LicenseNumberAlreadyExists,
+                        licenseCheck.Message ?? "Esta matrícula ya se encuentra registrada.");
                 }
             }
 
             // Actualizar campos solo si se proporcionan
-            if (command.FirstName != null) professional.FirstName = command.FirstName;
-            if (command.LastName != null) professional.LastName = command.LastName;
-            if (command.DocumentNumber != null) professional.DocumentNumber = command.DocumentNumber;
-            if (command.Phone != null) professional.Phone = command.Phone;
+            if (command.FirstName != null) professional.FirstName = command.FirstName.Trim();
+            if (command.LastName != null) professional.LastName = command.LastName.Trim();
+            if (command.DocumentNumber != null) professional.DocumentNumber = normalizedDoc;
+            if (command.Phone != null) professional.Phone = command.Phone.Trim();
             if (command.Specialty != null) professional.Specialty = command.Specialty;
             if (command.SpecialtyId.HasValue)
             {
@@ -72,7 +90,7 @@ namespace InclusiON.Application.UseCases.Professionals.Handlers
 
             if (command.SpecialtyId.HasValue && _specialties is not null && (await _specialties.GetByIdAsync(command.SpecialtyId.Value, cancellationToken))?.IsActive != true)
                 return ApiResponse<ProfessionalResponse>.ErrorResult(ErrorCode.ValidationFailed, "La especialidad seleccionada no está activa.");
-            if (command.LicenseNumber != null) professional.LicenseNumber = command.LicenseNumber;
+            if (command.LicenseNumber != null) professional.LicenseNumber = normalizedLicense;
             if (command.BirthDate.HasValue) professional.BirthDate = command.BirthDate.Value;
 
             // Actualizar instituciones si se proporcionaron

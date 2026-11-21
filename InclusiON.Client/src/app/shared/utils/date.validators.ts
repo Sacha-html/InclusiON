@@ -100,28 +100,82 @@ export function minAge(minRequiredAge: number) {
 }
 
 export function uniqueEmailValidator(
-  checkFn: (email: string) => Observable<{ isAvailable: boolean; message?: string }>
+  checkFn: (email: string) => Observable<{ isAvailable: boolean; message?: string }>,
+  getInitialValue?: () => string | null | undefined,
 ): AsyncValidatorFn {
   return (control: AbstractControl): Observable<ValidationErrors | null> => {
-    if (!control.value || String(control.value).trim() === '') return of(null);
-    return timer(800).pipe(
-      switchMap(() => checkFn(String(control.value).trim())),
+    const value = control.value ? String(control.value).trim() : '';
+    if (!value) return of(null);
+
+    const initial = getInitialValue?.()?.trim();
+    if (initial && value.toLowerCase() === initial.toLowerCase()) {
+      return of(null);
+    }
+
+    return timer(500).pipe(
+      switchMap(() => checkFn(value)),
       map(result => result.isAvailable ? null : { emailExists: true, message: result.message }),
       catchError(() => of(null))
     );
   };
 }
 
-export function uniqueLicenseValidator(
-  checkFn: (license: string) => Observable<{ isAvailable: boolean; message?: string }>
+export function uniqueDocumentValidator(
+  checkFn: (documentNumber: string) => Observable<{ isAvailable: boolean; message?: string; isInactiveStudent?: boolean }>,
+  getInitialValue?: () => string | null | undefined,
 ): AsyncValidatorFn {
   return (control: AbstractControl): Observable<ValidationErrors | null> => {
-    if (!control.value || String(control.value).trim() === '') return of(null);
-    return timer(800).pipe(
-      switchMap(() => checkFn(String(control.value).trim())),
+    const value = control.value ? String(control.value).trim() : '';
+    if (!value) return of(null);
+
+    const initial = getInitialValue?.()?.trim();
+    if (initial && value.toLowerCase() === initial.toLowerCase()) {
+      return of(null);
+    }
+
+    return timer(500).pipe(
+      switchMap(() => checkFn(value)),
+      map(result => result.isAvailable ? null : {
+        documentExists: true,
+        message: result.message,
+        isInactiveStudent: result.isInactiveStudent === true,
+      }),
+      catchError(() => of(null))
+    );
+  };
+}
+
+export function uniqueLicenseValidator(
+  checkFn: (license: string) => Observable<{ isAvailable: boolean; message?: string }>,
+  getInitialValue?: () => string | null | undefined,
+): AsyncValidatorFn {
+  return (control: AbstractControl): Observable<ValidationErrors | null> => {
+    const value = control.value ? String(control.value).trim() : '';
+    if (!value) return of(null);
+
+    const initial = getInitialValue?.()?.trim();
+    if (initial && value.toLowerCase() === initial.toLowerCase()) {
+      return of(null);
+    }
+
+    return timer(500).pipe(
+      switchMap(() => checkFn(value)),
       map(result => result.isAvailable ? null : { licenseExists: true, message: result.message }),
       catchError(() => of(null))
     );
+  };
+}
+
+export function notEqualToControlValidator(otherControlName: string, errorKey = 'sameDocument') {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const parent = control.parent;
+    if (!parent) return null;
+    const value = control.value ? String(control.value).trim() : '';
+    const otherValue = parent.get(otherControlName)?.value
+      ? String(parent.get(otherControlName)?.value).trim()
+      : '';
+    if (!value || !otherValue) return null;
+    return value.toLowerCase() === otherValue.toLowerCase() ? { [errorKey]: true } : null;
   };
 }
 

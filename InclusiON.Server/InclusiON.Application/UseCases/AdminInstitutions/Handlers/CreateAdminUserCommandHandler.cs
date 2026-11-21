@@ -16,6 +16,7 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
         : ICommandHandler<CreateAdminUserCommand, ApiResponse<CreateAdminUserResponse>>
     {
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IInstitutionsRepository _institutionsRepository;
         private readonly IAdminInstitutionRepository _adminInstitutionRepository;
         private readonly IEmailService _emailService;
@@ -25,6 +26,7 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
 
         public CreateAdminUserCommandHandler(
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IInstitutionsRepository institutionsRepository,
             IAdminInstitutionRepository adminInstitutionRepository,
             IEmailService emailService,
@@ -33,6 +35,7 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
             ILogger<CreateAdminUserCommandHandler> logger)
         {
             _identityService            = identityService;
+            _uniquenessValidation       = uniquenessValidation;
             _institutionsRepository     = institutionsRepository;
             _adminInstitutionRepository = adminInstitutionRepository;
             _emailService               = emailService;
@@ -48,21 +51,23 @@ namespace InclusiON.Application.UseCases.AdminInstitutions.Handlers
             if (institution is null)
                 return ApiResponse<CreateAdminUserResponse>.NotFound("Institución");
 
-            var existingUser = await _identityService.FindByEmailAsync(command.Email);
-            if (existingUser is not null)
+            var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
+
+            var emailCheck = await _uniquenessValidation.CheckEmailAsync(normalizedEmail, cancellationToken: cancellationToken);
+            if (!emailCheck.IsAvailable)
                 return ApiResponse<CreateAdminUserResponse>.Conflict(
-                    ErrorCode.EmailAlreadyExists, "Ya existe un usuario con ese email.");
+                    ErrorCode.EmailAlreadyExists, emailCheck.Message ?? "Ya existe un usuario con ese email.");
 
             var tempPassword = PasswordGenerator.GenerateTemporary();
 
             var user = new User
             {
-                Name                = command.FirstName,
-                Surname             = command.LastName,
-                Email               = command.Email.ToLower(),
-                UserName            = command.Email.ToLower(),
-                NormalizedEmail     = command.Email.ToUpper(),
-                NormalizedUserName  = command.Email.ToUpper(),
+                Name                = command.FirstName.Trim(),
+                Surname             = command.LastName.Trim(),
+                Email               = normalizedEmail,
+                UserName            = normalizedEmail,
+                NormalizedEmail     = normalizedEmail.ToUpperInvariant(),
+                NormalizedUserName  = normalizedEmail.ToUpperInvariant(),
                 EmailConfirmed      = true,
                 IsActive            = true,
                 MustChangePassword  = true,

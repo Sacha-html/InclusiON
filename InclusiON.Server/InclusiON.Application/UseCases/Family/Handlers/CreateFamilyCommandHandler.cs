@@ -21,6 +21,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         private readonly IFamilyRepository _repository;
         private readonly IPersonsRepository _personsRepository;
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CreateFamilyCommandHandler> _logger;
@@ -30,6 +31,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             IFamilyRepository repository,
             IPersonsRepository personsRepository,
             IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
             IBackgroundJobRepository backgroundJobs,
             IUnitOfWork unitOfWork,
             ILogger<CreateFamilyCommandHandler> logger,
@@ -38,6 +40,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
             _repository = repository;
             _personsRepository = personsRepository;
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _backgroundJobs = backgroundJobs;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -48,14 +51,17 @@ namespace InclusiON.Application.UseCases.Family.Handlers
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(command.DocumentNumber))
+                var normalizedDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+                var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
+
+                if (normalizedDoc is not null)
                 {
-                    var documentExists = await _repository.ExistsDocumentAsync(command.DocumentNumber, null, cancellationToken);
-                    if (documentExists)
+                    var docCheck = await _uniquenessValidation.CheckDocumentAsync(normalizedDoc, null, cancellationToken);
+                    if (!docCheck.IsAvailable)
                     {
                         return ApiResponse<FamilyResponse>.Conflict(
                             ErrorCode.DocumentAlreadyExists,
-                            ErrorMessages.DocumentAlreadyExists);
+                            docCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
                     }
                 }
 
@@ -67,22 +73,22 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                         ErrorMessages.PersonNotFound);
                 }
 
-                var existingUser = await _identityService.FindByEmailAsync(command.Email);
-                if (existingUser != null)
+                var emailCheck = await _uniquenessValidation.CheckEmailAsync(normalizedEmail, cancellationToken: cancellationToken);
+                if (!emailCheck.IsAvailable)
                 {
                     return ApiResponse<FamilyResponse>.Conflict(
                         ErrorCode.EmailAlreadyExists,
-                        ErrorMessages.EmailAlreadyRegistered);
+                        emailCheck.Message ?? ErrorMessages.EmailAlreadyRegistered);
                 }
 
                 var password = PasswordGenerator.GenerateTemporary();
 
                 var user = new User
                 {
-                    UserName = command.Email,
-                    Email = command.Email,
-                    Name = command.FirstName,
-                    Surname = command.LastName,
+                    UserName = normalizedEmail,
+                    Email = normalizedEmail,
+                    Name = command.FirstName.Trim(),
+                    Surname = command.LastName.Trim(),
                     IsActive = true,
                     CreatedAt = _dateTime.UtcNow,
                     EmailConfirmed = true,
@@ -92,10 +98,10 @@ namespace InclusiON.Application.UseCases.Family.Handlers
 
                 var family = new FamilyRepresentative
                 {
-                    FirstName = command.FirstName,
-                    LastName = command.LastName,
-                    DocumentNumber = command.DocumentNumber,
-                    Phone = command.Phone,
+                    FirstName = command.FirstName.Trim(),
+                    LastName = command.LastName.Trim(),
+                    DocumentNumber = normalizedDoc,
+                    Phone = command.Phone?.Trim(),
                     Relationship = command.Relationship
                 };
 
@@ -156,7 +162,7 @@ namespace InclusiON.Application.UseCases.Family.Handlers
                     JobTypes.Email,
                     JsonSerializer.Serialize(new EmailPayload
                     {
-                        To           = command.Email,
+                        To           = normalizedEmail,
                         Subject      = "Bienvenido a InclusiON — Tu cuenta ha sido creada",
                         TemplateName = "PasswordReset",
                         Replacements = new Dictionary<string, string?>

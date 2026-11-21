@@ -145,7 +145,9 @@ export class RegisterComponent implements OnInit {
         if (error.errorCode !== undefined) {
           // Mensaje específico para email duplicado
           if (error.errorCode === ErrorCode.EmailAlreadyExists) {
-            this.errorMessage = this.errorCodeService.getFullMessage(error.errorCode);
+            this.errorMessage = error.userMessage || this.errorCodeService.getFullMessage(error.errorCode);
+            this.f['email'].markAsTouched();
+            this.f['email'].setErrors({ emailExists: true, message: this.errorMessage });
           } else {
             this.errorMessage = this.errorCodeService.getMessage(error.errorCode);
           }
@@ -198,6 +200,10 @@ export class RegisterComponent implements OnInit {
 
     if (field.hasError('email')) {
       return 'Ingresa un email válido';
+    }
+
+    if (field.hasError('emailExists')) {
+      return field.errors?.['message'] || 'Este email ya se encuentra registrado';
     }
 
     if (field.hasError('minlength')) {

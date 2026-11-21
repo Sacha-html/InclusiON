@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { FamilyService, PersonsService } from '@services';
+import { FamilyService, PersonsService, ValidationService } from '@services';
 import { AppRoutes, RELATIONSHIPS } from '@shared/constants';
 import { CreateFamilyRequest, FamilyResponse, PersonListItemResponse } from '@models';
+import { uniqueDocumentValidator, uniqueEmailValidator } from '@shared/utils';
 import {
   ButtonDirective, CardBodyComponent, CardComponent, CardHeaderComponent,
   ColComponent, FormControlDirective, FormFeedbackComponent, FormLabelDirective,
@@ -12,7 +13,7 @@ import {
 import { PasswordModalComponent } from '@shared/components/password-modal/password-modal.component';
 import { SearchableSelectComponent } from '@shared/components/searchable-select/searchable-select.component';
 import { OnlyNumbersDirective } from '@shared/directives';
-import { map } from 'rxjs';
+import { filter, map, take } from 'rxjs';
 
 @Component({
   selector: 'app-family-new',
@@ -27,10 +28,11 @@ import { map } from 'rxjs';
   styleUrl: './new.component.scss',
 })
 export class NewComponent {
-  private readonly fb            = inject(FormBuilder);
-  private readonly router        = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
   private readonly familyService = inject(FamilyService);
   private readonly personsService = inject(PersonsService);
+  private readonly validationService = inject(ValidationService);
 
   submitted = false;
   serverError = '';
@@ -42,12 +44,27 @@ export class NewComponent {
   form: FormGroup = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    documentNumber: ['', [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)]],
+    email: [
+      '',
+      [Validators.required, Validators.email],
+      [uniqueEmailValidator(email => this.validationService.checkEmail(email))],
+    ],
+    documentNumber: [
+      '',
+      [Validators.required, Validators.minLength(7), Validators.maxLength(8), Validators.pattern(/^[0-9]+$/)],
+      [uniqueDocumentValidator(doc => this.validationService.checkDocument(doc))],
+    ],
     phone: ['', [Validators.maxLength(20), Validators.pattern(/^[0-9]+$/)]],
     relationship: ['', [Validators.required]],
     personId: [null, [Validators.required]],
   });
+
+  showFieldError(fieldName: string): boolean {
+    const control = this.form.get(fieldName);
+    if (!control || !control.invalid) return false;
+    if (control.errors?.['emailExists'] || control.errors?.['documentExists']) return true;
+    return this.submitted || control.touched;
+  }
 
   readonly searchPersonsFn = (query: string) =>
     this.personsService.getPersons({ search: query, pageSize: 20 }).pipe(
@@ -67,16 +84,28 @@ export class NewComponent {
     this.submitted = true;
     this.serverError = '';
     this.form.markAllAsTouched();
+
+    if (this.form.pending) {
+      this.form.statusChanges.pipe(filter(s => s !== 'PENDING'), take(1)).subscribe(() => {
+        this.attemptSubmit();
+      });
+      return;
+    }
+
+    this.attemptSubmit();
+  }
+
+  private attemptSubmit(): void {
     if (this.form.invalid) return;
 
     const raw = this.form.value;
     const request: CreateFamilyRequest = {
-      firstName: raw.firstName,
-      lastName: raw.lastName,
-      email: raw.email,
+      firstName: raw.firstName.trim(),
+      lastName: raw.lastName.trim(),
+      email: raw.email.trim(),
       personId: raw.personId,
-      ...(raw.documentNumber && { documentNumber: raw.documentNumber }),
-      ...(raw.phone && { phone: raw.phone }),
+      ...(raw.documentNumber && { documentNumber: raw.documentNumber.trim() }),
+      ...(raw.phone && { phone: raw.phone.trim() }),
       relationship: raw.relationship,
     };
 

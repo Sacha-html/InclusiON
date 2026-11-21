@@ -4,6 +4,8 @@ export { AdminUsersService } from './admin-users.service';
 export { UserManagementService } from './user-management.service';
 export { AuthService } from './auth.service';
 export { ToastService } from './toast.service';
+export { ValidationService } from './validation.service';
+export type { FieldAvailabilityResponse } from './validation.service';
 export { AccessibilityService } from './accessibility.service';
 export { NavigationService } from './navigation.service';
 export { ErrorCodeService } from './error-code.service';

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.DTOs.Responses.Professionals;
 
@@ -11,54 +10,44 @@ namespace InclusiON.Api.Controllers
     [Authorize]   // Solo usuarios autenticados (admin/profesional) pueden verificar unicidad.
     public class ProfessionalValidationController : ControllerBase
     {
-        private readonly IProfessionalsRepository _repository;
-        private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
 
-        public ProfessionalValidationController(
-            IProfessionalsRepository repository,
-            IIdentityService identityService)
+        public ProfessionalValidationController(IUniquenessValidationService uniquenessValidation)
         {
-            _repository = repository;
-            _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
         }
 
         [HttpGet("email")]
         [ProducesResponseType(typeof(ProfessionalValidationResponse), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ProfessionalValidationResponse>> CheckEmail([FromQuery] string email)
+        public async Task<ActionResult<ProfessionalValidationResponse>> CheckEmail(
+            [FromQuery] string email,
+            [FromQuery] Guid? excludeUserId = null,
+            [FromQuery] Guid? excludeEntityId = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
             {
                 return BadRequest(new ProfessionalValidationResponse { IsAvailable = false, Message = "Email requerido" });
             }
 
-            var existsInProfessionals = await _repository.ExistsProfessionalEmailAsync(email);
-            var existsInUsers = await _identityService.FindByEmailAsync(email) != null;
-
-            if (existsInProfessionals || existsInUsers)
-            {
-                return Ok(new ProfessionalValidationResponse { IsAvailable = false, Message = "Este email ya está registrado" });
-            }
-
-            return Ok(new ProfessionalValidationResponse { IsAvailable = true });
+            var result = await _uniquenessValidation.CheckEmailAsync(email, excludeUserId, excludeEntityId, false, cancellationToken);
+            return Ok(new ProfessionalValidationResponse { IsAvailable = result.IsAvailable, Message = result.Message });
         }
 
         [HttpGet("license-number")]
         [ProducesResponseType(typeof(ProfessionalValidationResponse), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ProfessionalValidationResponse>> CheckLicenseNumber([FromQuery] string licenseNumber)
+        public async Task<ActionResult<ProfessionalValidationResponse>> CheckLicenseNumber(
+            [FromQuery] string licenseNumber,
+            [FromQuery] Guid? excludeProfessionalId = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(licenseNumber))
             {
                 return Ok(new ProfessionalValidationResponse { IsAvailable = true });
             }
 
-            var exists = await _repository.ExistsLicenseNumberAsync(licenseNumber);
-
-            if (exists)
-            {
-                return Ok(new ProfessionalValidationResponse { IsAvailable = false, Message = "Esta matrícula ya está registrada" });
-            }
-
-            return Ok(new ProfessionalValidationResponse { IsAvailable = true });
+            var result = await _uniquenessValidation.CheckLicenseNumberAsync(licenseNumber, excludeProfessionalId, cancellationToken);
+            return Ok(new ProfessionalValidationResponse { IsAvailable = result.IsAvailable, Message = result.Message });
         }
     }
 }

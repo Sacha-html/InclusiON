@@ -33,7 +33,9 @@ namespace InclusiON.Data.Configurations
                 .IsRequired()
                 .HasConversion<int>();
 
-            builder.HasIndex(r => r.DocumentNumber);
+            builder.HasIndex(r => r.DocumentNumber)
+                .IsUnique()
+                .HasFilter("\"DocumentNumber\" IS NOT NULL");
             builder.HasIndex(r => r.FirstName);
             builder.HasIndex(r => new { r.IsActive, r.FirstName });
             builder.HasIndex(r => r.LastName);

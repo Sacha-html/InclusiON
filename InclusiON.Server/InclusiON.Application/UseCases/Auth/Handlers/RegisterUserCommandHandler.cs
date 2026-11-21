@@ -1,4 +1,4 @@
-﻿using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.UseCases.Auth.Commands;
 using InclusiON.DTOs.Common;
@@ -12,11 +12,16 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
     public class RegisterUserCommandHandler : ICommandHandler<RegisterUserCommand, ApiResponse<UserResponse>>
     {
         private readonly IIdentityService _identityService;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IDateTimeProvider _dateTime;
 
-        public RegisterUserCommandHandler(IIdentityService identityService, IDateTimeProvider dateTime)
+        public RegisterUserCommandHandler(
+            IIdentityService identityService,
+            IUniquenessValidationService uniquenessValidation,
+            IDateTimeProvider dateTime)
         {
             _identityService = identityService;
+            _uniquenessValidation = uniquenessValidation;
             _dateTime = dateTime;
         }
 
@@ -31,13 +36,14 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                     ErrorMessages.PasswordsMismatch);
             }
 
-            var existingUser = await _identityService.FindByEmailAsync(command.Email);
+            var normalizedEmail = UniquenessNormalizer.NormalizeEmail(command.Email) ?? string.Empty;
 
-            if (existingUser != null)
+            var emailCheck = await _uniquenessValidation.CheckEmailAsync(normalizedEmail, cancellationToken: cancellationToken);
+            if (!emailCheck.IsAvailable)
             {
                 return ApiResponse<UserResponse>.Conflict(
                     ErrorCode.EmailAlreadyExists,
-                    ErrorMessages.EmailAlreadyRegistered);
+                    emailCheck.Message ?? ErrorMessages.EmailAlreadyRegistered);
             }
 
             var user = new User
@@ -45,8 +51,8 @@ namespace InclusiON.Application.UseCases.Auth.Handlers
                 Id = Guid.NewGuid(),
                 Name = command.Name.Trim(),
                 Surname = command.Surname?.Trim(),
-                Email = command.Email.ToLower().Trim(),
-                UserName = command.Email.ToLower().Trim(),
+                Email = normalizedEmail,
+                UserName = normalizedEmail,
                 PhoneNumber = command.PhoneNumber?.Trim(),
                 CreatedAt = _dateTime.UtcNow,
                 IsActive = true,

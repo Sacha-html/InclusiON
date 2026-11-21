@@ -14,12 +14,19 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
 {
     public class UpdatePersonCommandHandlerTests
     {
-        private readonly IPersonsRepository      _personsRepo = Substitute.For<IPersonsRepository>();
-        private readonly IUnitOfWork             _uow         = Substitute.For<IUnitOfWork>();
-        private readonly IBackgroundJobRepository _bgJobs     = Substitute.For<IBackgroundJobRepository>();
+        private readonly IPersonsRepository           _personsRepo = Substitute.For<IPersonsRepository>();
+        private readonly IUniquenessValidationService _uniqueness  = Substitute.For<IUniquenessValidationService>();
+        private readonly IUnitOfWork                  _uow         = Substitute.For<IUnitOfWork>();
+        private readonly IBackgroundJobRepository     _bgJobs      = Substitute.For<IBackgroundJobRepository>();
+
+        public UpdatePersonCommandHandlerTests()
+        {
+            _uniqueness.CheckDocumentAsync(Arg.Any<string?>(), Arg.Any<Guid?>(), Arg.Any<CancellationToken>())
+                .Returns(DocumentCheckResult.Available());
+        }
 
         private UpdatePersonCommandHandler BuildSut() =>
-            new(_personsRepo, _uow, _bgJobs, NullLogger<UpdatePersonCommandHandler>.Instance);
+            new(_personsRepo, _uniqueness, _uow, _bgJobs, NullLogger<UpdatePersonCommandHandler>.Instance);
 
         private static readonly Guid PersonId = Guid.NewGuid();
 
@@ -56,8 +63,8 @@ namespace InclusiON.Tests.Unit.Handlers.Persons
         public async Task HandleAsync_DuplicateDocument_ReturnsDocumentAlreadyExists()
         {
             _personsRepo.GetByIdAsync(PersonId, Arg.Any<CancellationToken>()).Returns(APerson());
-            _personsRepo.ExistsDocumentAsync("99999999", PersonId, Arg.Any<CancellationToken>())
-                        .Returns(true);
+            _uniqueness.CheckDocumentAsync("99999999", PersonId, Arg.Any<CancellationToken>())
+                       .Returns(DocumentCheckResult.Taken("Profesional", false, "El DNI 99999999 ya se encuentra registrado en el sistema (Profesional)."));
 
             var result = await BuildSut().HandleAsync(Cmd(doc: "99999999"), default);
 

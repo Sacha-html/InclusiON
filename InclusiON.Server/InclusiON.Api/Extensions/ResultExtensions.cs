@@ -71,6 +71,7 @@ namespace InclusiON.Api.Extensions
                 ErrorCode.DocumentAlreadyExists or
                 ErrorCode.EmailAlreadyExists or
                 ErrorCode.UsernameAlreadyExists or
+                ErrorCode.LicenseNumberAlreadyExists or
                 ErrorCode.HasPendingReports or
                 ErrorCode.HasActiveStudents
                     => new ConflictObjectResult(response),

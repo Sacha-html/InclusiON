@@ -47,6 +47,7 @@ namespace InclusiON.DTOs.Common
         DocumentAlreadyExists = 602,
         EmailAlreadyExists = 603,
         UsernameAlreadyExists = 604,
+        LicenseNumberAlreadyExists = 605,
 
         // Negocio (7xx)
         BusinessRuleViolation = 700,

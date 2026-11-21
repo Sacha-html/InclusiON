@@ -8,7 +8,7 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { InvitationsService, ToastService, ErrorCodeService, AuthService } from '@services';
 import { AppRoutes } from '@shared/constants/app-routes';
-import { InvitationValidationResponse, AcceptInvitationRequest } from '@models';
+import { InvitationValidationResponse, AcceptInvitationRequest, ErrorCode } from '@models';
 import { OnlyNumbersDirective } from '@shared/directives';
 
 import {
@@ -167,10 +167,20 @@ export class RegisterByInvitationComponent implements OnInit {
       },
       error: (error) => {
         this.isSubmitting = false;
-        if (error.errorCode !== undefined) {
+        if (error.userMessage) {
+          this.errorMessage = error.userMessage;
+        } else if (error.errorCode !== undefined) {
           this.errorMessage = this.errorCodeService.getFullMessage(error.errorCode);
         } else {
-          this.errorMessage = error.userMessage || 'Error al completar el registro';
+          this.errorMessage = 'Error al completar el registro';
+        }
+
+        if (error.errorCode === ErrorCode.EmailAlreadyExists) {
+          this.f['email'].markAsTouched();
+          this.f['email'].setErrors({ emailExists: true, message: this.errorMessage });
+        } else if (error.errorCode === ErrorCode.DocumentAlreadyExists) {
+          this.f['documentNumber'].markAsTouched();
+          this.f['documentNumber'].setErrors({ documentExists: true, message: this.errorMessage });
         }
       },
     });
@@ -187,7 +197,9 @@ export class RegisterByInvitationComponent implements OnInit {
 
     if (field.hasError('required')) return 'Este campo es requerido';
     if (field.hasError('email')) return 'Ingresa un email válido';
+    if (field.hasError('emailExists')) return field.errors?.['message'] || 'Este email ya está registrado';
     if (fieldName === 'documentNumber') {
+      if (field.hasError('documentExists')) return field.errors?.['message'] || 'Este documento ya está registrado';
       if (field.hasError('pattern')) return 'Solo se permiten números (sin puntos ni letras)';
       if (field.hasError('minlength') || field.hasError('maxlength')) return 'El DNI debe tener entre 7 y 8 dígitos';
       return '';

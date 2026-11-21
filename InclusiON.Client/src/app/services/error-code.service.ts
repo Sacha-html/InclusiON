@@ -153,7 +153,7 @@ export class ErrorCodeService {
     }],
     [ErrorCode.DocumentAlreadyExists, {
       message: 'Documento ya registrado',
-      userAction: 'Ya existe un alumno con este número de documento',
+      userAction: 'Este número de documento ya se encuentra registrado en el sistema',
       severity: 'warning'
     }],
     [ErrorCode.EmailAlreadyExists, {
@@ -164,6 +164,11 @@ export class ErrorCodeService {
     [ErrorCode.UsernameAlreadyExists, {
       message: 'Usuario ya existe',
       userAction: 'Este nombre de usuario ya está en uso',
+      severity: 'warning'
+    }],
+    [ErrorCode.LicenseNumberAlreadyExists, {
+      message: 'Matrícula ya registrada',
+      userAction: 'Esta matrícula profesional ya se encuentra registrada en el sistema',
       severity: 'warning'
     }],
 

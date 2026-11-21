@@ -17,17 +17,20 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
     public class UpdatePersonCommandHandler : ICommandHandler<UpdatePersonCommand, ApiResponse<PersonResponse>>
     {
         private readonly IPersonsRepository _repository;
+        private readonly IUniquenessValidationService _uniquenessValidation;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IBackgroundJobRepository _backgroundJobs;
         private readonly ILogger<UpdatePersonCommandHandler> _logger;
 
         public UpdatePersonCommandHandler(
             IPersonsRepository repository,
+            IUniquenessValidationService uniquenessValidation,
             IUnitOfWork unitOfWork,
             IBackgroundJobRepository backgroundJobs,
             ILogger<UpdatePersonCommandHandler> logger)
         {
             _repository = repository;
+            _uniquenessValidation = uniquenessValidation;
             _unitOfWork = unitOfWork;
             _backgroundJobs = backgroundJobs;
             _logger = logger;
@@ -44,22 +47,24 @@ namespace InclusiON.Application.UseCases.Persons.Handlers
                     ErrorMessages.PersonNotFound);
             }
 
-            // Validar documento unico si cambio
-            if (!string.IsNullOrWhiteSpace(command.DocumentNumber) && command.DocumentNumber != person.DocumentNumber)
+            var normalizedDoc = UniquenessNormalizer.NormalizeDocument(command.DocumentNumber);
+
+            // Validar documento unico global si cambio
+            if (normalizedDoc is not null && !string.Equals(normalizedDoc, person.DocumentNumber?.Trim(), StringComparison.OrdinalIgnoreCase))
             {
-                var documentExists = await _repository.ExistsDocumentAsync(command.DocumentNumber, command.PersonId, cancellationToken);
-                if (documentExists)
+                var docCheck = await _uniquenessValidation.CheckDocumentAsync(normalizedDoc, command.PersonId, cancellationToken);
+                if (!docCheck.IsAvailable)
                 {
                     return ApiResponse<PersonResponse>.Conflict(
                         ErrorCode.DocumentAlreadyExists,
-                        ErrorMessages.DocumentAlreadyExists);
+                        docCheck.Message ?? ErrorMessages.DocumentAlreadyExists);
                 }
             }
 
             // Actualizar campos solo si se proporcionan
-            if (command.FirstName != null) person.FirstName = command.FirstName;
-            if (command.LastName != null) person.LastName = command.LastName;
-            if (command.DocumentNumber != null) person.DocumentNumber = command.DocumentNumber;
+            if (command.FirstName != null) person.FirstName = command.FirstName.Trim();
+            if (command.LastName != null) person.LastName = command.LastName.Trim();
+            if (command.DocumentNumber != null) person.DocumentNumber = normalizedDoc;
             if (command.BirthDate.HasValue) person.BirthDate = command.BirthDate.Value;
             if (command.PhotoUrl != null) person.PhotoUrl = command.PhotoUrl;
 

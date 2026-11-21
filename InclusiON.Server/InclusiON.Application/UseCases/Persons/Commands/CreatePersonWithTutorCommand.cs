@@ -10,16 +10,19 @@ namespace InclusiON.Application.UseCases.Persons.Commands
         DateTime BirthDate,
         string? PhotoUrl,
 
-        // Tutor
-        string TutorFirstName,
-        string TutorLastName,
-        string TutorEmail,
+        // Tutor (nuevo o existente via ExistingTutorId)
+        string? TutorFirstName,
+        string? TutorLastName,
+        string? TutorEmail,
         string? TutorDocumentNumber,
         string? TutorPhone,
         string TutorRelationship,
 
         // Asignación de Profesional y Aula
         Guid ProfessionalId,
-        Guid? ClassroomId
+        Guid? ClassroomId,
+
+        // Vinculación explícita a un tutor ya registrado (ej. hermanos)
+        Guid? ExistingTutorId = null
     );
 }

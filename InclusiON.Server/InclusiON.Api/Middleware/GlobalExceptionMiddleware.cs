@@ -1,5 +1,7 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using InclusiON.Application.Exceptions;
 using InclusiON.DTOs.Common;
 using InclusiON.DTOs.Responses;
@@ -46,6 +48,9 @@ public class GlobalExceptionMiddleware
 
         var (statusCode, errorCode, message) = exception switch
         {
+            DbUpdateException dbEx when dbEx.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pgEx
+                => MapUniqueViolation(pgEx),
+
             EntityNotFoundException ex => (
                 (int)HttpStatusCode.NotFound,
                 ErrorCode.NotFound,
@@ -74,6 +79,40 @@ public class GlobalExceptionMiddleware
 
         await context.Response.WriteAsync(
             JsonSerializer.Serialize(response, JsonOptions));
+    }
+
+    private static (int StatusCode, ErrorCode ErrorCode, string Message) MapUniqueViolation(PostgresException pgEx)
+    {
+        var constraint = pgEx.ConstraintName ?? string.Empty;
+
+        if (constraint.Contains("DocumentNumber", StringComparison.OrdinalIgnoreCase))
+        {
+            return (
+                (int)HttpStatusCode.Conflict,
+                ErrorCode.DocumentAlreadyExists,
+                "El número de documento ya se encuentra registrado en el sistema.");
+        }
+
+        if (constraint.Contains("Email", StringComparison.OrdinalIgnoreCase))
+        {
+            return (
+                (int)HttpStatusCode.Conflict,
+                ErrorCode.EmailAlreadyExists,
+                "Este email ya se encuentra registrado en el sistema.");
+        }
+
+        if (constraint.Contains("LicenseNumber", StringComparison.OrdinalIgnoreCase))
+        {
+            return (
+                (int)HttpStatusCode.Conflict,
+                ErrorCode.LicenseNumberAlreadyExists,
+                "Esta matrícula ya se encuentra registrada en el sistema.");
+        }
+
+        return (
+            (int)HttpStatusCode.Conflict,
+            ErrorCode.DuplicateEntry,
+            "Ya existe un registro con estos datos únicos.");
     }
 
     private string GetMessage(Exception exception, string fallback)

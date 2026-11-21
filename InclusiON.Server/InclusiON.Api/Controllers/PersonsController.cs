@@ -193,7 +193,8 @@ namespace InclusiON.Api.Controllers
                 request.TutorFirstName, request.TutorLastName, request.TutorEmail,
                 request.TutorDocumentNumber, request.TutorPhone, request.TutorRelationship,
                 request.ProfessionalId,
-                request.ClassroomId);
+                request.ClassroomId,
+                request.ExistingTutorId);
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
