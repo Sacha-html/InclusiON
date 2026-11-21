@@ -152,9 +152,20 @@ export class ListComponent implements OnInit {
     this.currentPage.set(1);
     this.loadReports();
   }
+  get isDateRangeInvalid(): boolean {
+    return Boolean(this.dateFrom && this.dateTo && this.dateTo < this.dateFrom);
+  }
+
   onStatusFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
   onTypeFilterChange(): void   { this.currentPage.set(1); this.loadReports(); }
-  onDateChange(): void         { this.currentPage.set(1); this.loadReports(); }
+  onDateChange(): void {
+    if (this.isDateRangeInvalid) {
+      this.toastService.error('La fecha hasta no puede ser anterior a la fecha desde.');
+      return;
+    }
+    this.currentPage.set(1);
+    this.loadReports();
+  }
 
   onFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
 

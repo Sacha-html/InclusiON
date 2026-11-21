@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
@@ -43,6 +43,14 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             CreateReportCommand command,
             CancellationToken cancellationToken)
         {
+            if (command.PeriodStartDate.HasValue && command.PeriodEndDate.HasValue &&
+                command.PeriodEndDate.Value.Date < command.PeriodStartDate.Value.Date)
+            {
+                return ApiResponse<ReportResponse>.ErrorResult(
+                    ErrorCode.ValidationFailed,
+                    "La fecha de fin del período no puede ser anterior a la fecha de inicio.");
+            }
+
             var person = await _personsRepository.GetByIdAsync(command.PersonId, cancellationToken);
             if (person == null)
             {

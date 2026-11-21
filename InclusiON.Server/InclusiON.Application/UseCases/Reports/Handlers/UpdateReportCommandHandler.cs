@@ -1,4 +1,4 @@
-﻿using InclusiON.Application.Interfaces.Common;
+using InclusiON.Application.Interfaces.Common;
 using InclusiON.Application.Interfaces.Infrastructure;
 using InclusiON.Application.Interfaces.Repositories;
 using InclusiON.Application.UseCases.Reports.Commands;
@@ -39,6 +39,14 @@ namespace InclusiON.Application.UseCases.Reports.Handlers
             UpdateReportCommand command,
             CancellationToken cancellationToken)
         {
+            if (command.PeriodStartDate.HasValue && command.PeriodEndDate.HasValue &&
+                command.PeriodEndDate.Value.Date < command.PeriodStartDate.Value.Date)
+            {
+                return ApiResponse<ReportResponse>.ErrorResult(
+                    ErrorCode.ValidationFailed,
+                    "La fecha de fin del período no puede ser anterior a la fecha de inicio.");
+            }
+
             var report = await _repository.GetByIdAsync(command.ReportId, cancellationToken);
             if (report is null)
                 return ApiResponse<ReportResponse>.ErrorResult(ErrorCode.ReportNotFound, "Reporte no encontrado.");

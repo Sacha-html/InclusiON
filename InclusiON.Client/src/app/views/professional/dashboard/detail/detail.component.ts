@@ -3,13 +3,11 @@ import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
 import {
   CardBodyComponent, CardComponent, CardHeaderComponent, ColComponent, RowComponent,
   SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
   ModalComponent, ModalHeaderComponent, ModalBodyComponent,
-  ModalFooterComponent, ModalTitleDirective, FormSelectDirective,
-  FormControlDirective,
+  ModalFooterComponent, ModalTitleDirective,
 } from '@coreui/angular';
 import { IconDirective } from '@coreui/icons-angular';
 import { ProfessionalsService, AssignmentsService, InvitationsService, ReportsService, ToastService } from '@services';
@@ -35,13 +33,11 @@ import { ClassroomResponse, AnalyticsDashboardResponse, FrustrationDetailRespons
   selector: 'app-professional-dashboard',
   standalone: true,
   imports: [
-    FormsModule,
     NgClass,
     CardComponent, CardBodyComponent, CardHeaderComponent, RowComponent, ColComponent,
     SpinnerComponent, BadgeComponent, TableDirective, ButtonDirective,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent,
-    ModalFooterComponent, ModalTitleDirective, FormSelectDirective,
-    FormControlDirective,
+    ModalFooterComponent, ModalTitleDirective,
     IconDirective, DatePipe, DecimalPipe,
     HighContrastPieChartComponent,
     LevelHistogramChartComponent,
@@ -85,13 +81,6 @@ export class DetailComponent implements OnInit, OnDestroy {
   showFrustrationModal = false;
   frustrationDetails: FrustrationDetailResponse[] = [];
   isLoadingFrustrationDetails = false;
-
-  // Sharing Modal State
-  showShareModal = false;
-  contacts: any[] = [];
-  selectedTutorId = '';
-  shareMessageBody = '';
-  sendingShare = false;
 
   get personCount(): number {
     return this.persons.filter(p => p.isActive).length;
@@ -307,65 +296,6 @@ export class DetailComponent implements OnInit, OnDestroy {
     } finally {
       this.isExportingPdf = false;
     }
-  }
-
-  // ── Share Metrics Modal ────────────────────────────────────────────────
-  openShareModal(): void {
-    const wp = this.weeklyProgress;
-    if (!wp) return;
-
-    this.selectedTutorId = '';
-    const start = new Date(wp.periodStart).toLocaleDateString('es-ES');
-    const end = new Date(wp.periodEnd).toLocaleDateString('es-ES');
-
-    this.shareMessageBody = `Estimado Tutor, le comparto el resumen de métricas semanales (${start} — ${end}):\n\n` +
-      `- Alumnos activos a cargo: ${wp.personCount}\n` +
-      `- Actividades completadas: ${wp.totalCompleted}\n` +
-      `- Promedio de éxito académico: ${wp.avgSuccess}%\n` +
-      `- Alertas de frustración registradas: ${wp.frustrationAlerts}\n\n` +
-      `Quedo a su entera disposición para cualquier aclaración o consulta.`;
-
-    this.messagesService.getContacts(1, 100).subscribe({
-      next: (list) => {
-        this.contacts = list;
-        this.showShareModal = true;
-      },
-      error: () => {
-        this.toastService.error('Error al cargar la lista de tutores');
-      }
-    });
-  }
-
-  closeShareModal(): void {
-    this.showShareModal = false;
-  }
-
-  sendSharedMetrics(): void {
-    if (!this.selectedTutorId) {
-      this.toastService.error('Por favor, selecciona un tutor destinatario.');
-      return;
-    }
-    if (!this.shareMessageBody.trim()) {
-      this.toastService.error('El contenido del mensaje no puede estar vacío.');
-      return;
-    }
-
-    this.sendingShare = true;
-    this.messagesService.send({
-      receiverId: this.selectedTutorId,
-      subject: 'Resumen de Métricas Semanales de Alumnos',
-      content: this.shareMessageBody.trim()
-    }).subscribe({
-      next: () => {
-        this.sendingShare = false;
-        this.showShareModal = false;
-        this.toastService.success('Métricas compartidas por mensajería exitosamente.');
-      },
-      error: () => {
-        this.sendingShare = false;
-        this.toastService.error('Error al enviar las métricas.');
-      }
-    });
   }
 
   openFrustrationDetails(): void {

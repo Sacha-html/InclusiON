@@ -77,7 +77,10 @@ export class ListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.catalogsService.getReportTypes().subscribe(types => this.reportTypes.set(types));
+    this.catalogsService.getReportTypes().subscribe(types => {
+      const sorted = [...types].sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+      this.reportTypes.set(sorted);
+    });
     this.loadReports();
   }
 
@@ -103,8 +106,19 @@ export class ListComponent implements OnInit {
     });
   }
 
+  get isDateRangeInvalid(): boolean {
+    return Boolean(this.dateFrom && this.dateTo && this.dateTo < this.dateFrom);
+  }
+
   onTypeFilterChange(): void { this.currentPage.set(1); this.loadReports(); }
-  onDateChange(): void       { this.currentPage.set(1); this.loadReports(); }
+  onDateChange(): void {
+    if (this.isDateRangeInvalid) {
+      this.toastService.error('La fecha hasta no puede ser anterior a la fecha desde.');
+      return;
+    }
+    this.currentPage.set(1);
+    this.loadReports();
+  }
 
   clearFilters(): void {
     this.typeFilter = '';

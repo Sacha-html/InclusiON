@@ -50,7 +50,6 @@ export const AppRoutes = {
     Activities: '/pro/activities',
     ActivityNew: '/pro/activities/new',
     Persons: '/pro/persons',
-    Goals: '/pro/goals',
     Evaluations: '/pro/evaluations',
     Reports: '/pro/reports',
     Calendar: '/pro/calendar',

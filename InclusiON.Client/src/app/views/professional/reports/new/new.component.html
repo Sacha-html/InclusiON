@@ -80,6 +80,7 @@
             type="date"
             [(ngModel)]="form.periodStartDate"
             name="periodStartDate"
+            [attr.max]="form.periodEndDate || null"
           />
         </c-col>
         <c-col xs="12" md="6">
@@ -90,7 +91,14 @@
             type="date"
             [(ngModel)]="form.periodEndDate"
             name="periodEndDate"
+            [attr.min]="form.periodStartDate || null"
+            [class.is-invalid]="isPeriodRangeInvalid"
           />
+          @if (isPeriodRangeInvalid) {
+            <div class="invalid-feedback d-block">
+              La fecha de fin del período no puede ser anterior a la fecha de inicio.
+            </div>
+          }
         </c-col>
       </c-row>
 

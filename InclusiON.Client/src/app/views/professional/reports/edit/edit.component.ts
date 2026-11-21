@@ -65,12 +65,21 @@ export class EditComponent implements OnInit {
     nextObjectives: '',
   };
 
+  get isPeriodRangeInvalid(): boolean {
+    return Boolean(
+      this.form.periodStartDate &&
+      this.form.periodEndDate &&
+      this.form.periodEndDate < this.form.periodStartDate
+    );
+  }
+
   get isValid(): boolean {
     return (
       this.form.title.trim() !== '' &&
       this.form.content.trim() !== '' &&
       this.form.reportTypeId > 0 &&
-      this.form.reportDate !== ''
+      this.form.reportDate !== '' &&
+      !this.isPeriodRangeInvalid
     );
   }
 
@@ -79,7 +88,10 @@ export class EditComponent implements OnInit {
     if (!id) { this.router.navigate([AppRoutes.Pro.Reports]); return; }
     this.reportId = id;
     this.catalogsService.getReportTypes().subscribe({
-      next: (types) => this.reportTypes.set(types),
+      next: (types) => {
+        const sorted = [...types].sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+        this.reportTypes.set(sorted);
+      },
     });
     this.reportsService.getById(this.reportId).subscribe({
       next: (report) => {
@@ -109,6 +121,10 @@ export class EditComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isPeriodRangeInvalid) {
+      this.toastService.error('La fecha de fin del período no puede ser anterior a la fecha de inicio.');
+      return;
+    }
     if (!this.isValid) return;
     this.isSaving.set(true);
     this.serverError = '';

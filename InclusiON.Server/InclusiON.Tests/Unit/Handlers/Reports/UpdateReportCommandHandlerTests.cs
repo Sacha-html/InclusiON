@@ -111,6 +111,24 @@ namespace InclusiON.Tests.Unit.Handlers.Reports
             result.ErrorCode.Should().Be(ErrorCode.InvalidOperation);
         }
 
+        // ── Validación de fechas del período ─────────────────────────────────
+
+        [Fact]
+        public async Task HandleAsync_PeriodEndBeforeStart_ReturnsValidationFailed()
+        {
+            var cmd = Cmd() with
+            {
+                PeriodStartDate = new DateTime(2026, 11, 1, 0, 0, 0, DateTimeKind.Utc),
+                PeriodEndDate   = new DateTime(2026, 6, 30, 0, 0, 0, DateTimeKind.Utc),
+            };
+
+            var result = await BuildSut().HandleAsync(cmd, default);
+
+            result.Success.Should().BeFalse();
+            result.ErrorCode.Should().Be(ErrorCode.ValidationFailed);
+            await _reportsRepo.DidNotReceive().UpdateAsync(Arg.Any<Report>(), Arg.Any<CancellationToken>());
+        }
+
         // ── Happy path (Draft y Rejected) ────────────────────────────────────
 
         [Theory]

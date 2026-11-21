@@ -94,12 +94,21 @@ export class NewComponent implements OnInit {
     nextObjectives: '',
   };
 
+  get isPeriodRangeInvalid(): boolean {
+    return Boolean(
+      this.form.periodStartDate &&
+      this.form.periodEndDate &&
+      this.form.periodEndDate < this.form.periodStartDate
+    );
+  }
+
   get isValid(): boolean {
     return (
       this.personControl.value !== null &&
       this.form.title.trim() !== '' &&
       this.form.content.trim() !== '' &&
-      this.form.reportTypeId > 0
+      this.form.reportTypeId > 0 &&
+      !this.isPeriodRangeInvalid
     );
   }
 
@@ -133,6 +142,12 @@ export class NewComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isPeriodRangeInvalid) {
+      this.toastService.error('La fecha de fin del período no puede ser anterior a la fecha de inicio.');
+      return;
+    }
+    if (!this.isValid) return;
+
     this.isLoading.set(true);
     const payload: CreateReportRequest = {
       ...this.form,
@@ -150,7 +165,10 @@ export class NewComponent implements OnInit {
         this.isLoading.set(false);
         this.showSubmitModal.set(true);
       },
-      error: () => { this.isLoading.set(false); this.toastService.error('Error al crear el informe'); },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.toastService.error(err?.userMessage ?? 'Error al crear el informe');
+      },
     });
   }
 

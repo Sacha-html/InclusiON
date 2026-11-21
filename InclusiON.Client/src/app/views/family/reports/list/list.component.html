@@ -17,11 +17,14 @@
     </c-col>
     <c-col sm="3">
       <label cLabel for="dateFrom">Desde</label>
-      <input cFormControl id="dateFrom" type="date" [(ngModel)]="dateFrom" (ngModelChange)="onDateChange()" />
+      <input cFormControl id="dateFrom" type="date" [(ngModel)]="dateFrom" [attr.max]="dateTo || null" (ngModelChange)="onDateChange()" />
     </c-col>
     <c-col sm="3">
       <label cLabel for="dateTo">Hasta</label>
-      <input cFormControl id="dateTo" type="date" [(ngModel)]="dateTo" (ngModelChange)="onDateChange()" />
+      <input cFormControl id="dateTo" type="date" [(ngModel)]="dateTo" [attr.min]="dateFrom || null" [class.is-invalid]="isDateRangeInvalid" (ngModelChange)="onDateChange()" />
+      @if (isDateRangeInvalid) {
+        <div class="invalid-feedback d-block">La fecha hasta no puede ser anterior a la fecha desde.</div>
+      }
     </c-col>
     <c-col sm="auto">
       <button cButton color="secondary" (click)="clearFilters()">Limpiar</button>

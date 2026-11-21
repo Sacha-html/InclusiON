@@ -63,20 +63,12 @@ export const professionalRoutes: Routes = [
     data: { title: 'Editar actividad', permission: Permissions.Activities.Update, redirectTo: AppRoutes.Pro.Activities }
   },
   {
-    path: 'goals',
-    loadComponent: () =>
-      import('./goals/professional-goals.component').then(
-        (m) => m.ProfessionalGoalsComponent
-      ),
-    data: { title: 'Objetivos' }
-  },
-  {
     path: 'evaluations',
     loadComponent: () =>
       import('./evaluations/evaluations.component').then(
         (m) => m.EvaluationsComponent
       ),
-    data: { title: 'Evaluaciones' }
+    data: { title: 'Acompañamiento' }
   },
   {
     path: 'reports',

@@ -278,7 +278,7 @@ export class EvaluationsComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoadingAssignments.set(false);
-        this.toastService.error('Error al cargar las evaluaciones del alumno');
+        this.toastService.error('Error al cargar el acompañamiento del alumno');
       }
     });
   }

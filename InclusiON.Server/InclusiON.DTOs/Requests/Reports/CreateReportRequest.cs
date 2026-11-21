@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace InclusiON.DTOs.Requests.Reports
 {
-    public class CreateReportRequest
+    public class CreateReportRequest : IValidatableObject
     {
         [Required]
         public Guid PersonId { get; set; }
@@ -36,5 +37,16 @@ namespace InclusiON.DTOs.Requests.Reports
 
         [StringLength(2000)]
         public string? NextObjectives { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (PeriodStartDate.HasValue && PeriodEndDate.HasValue &&
+                PeriodEndDate.Value.Date < PeriodStartDate.Value.Date)
+            {
+                yield return new ValidationResult(
+                    "La fecha de fin del período no puede ser anterior a la fecha de inicio.",
+                    new[] { nameof(PeriodEndDate) });
+            }
+        }
     }
 }

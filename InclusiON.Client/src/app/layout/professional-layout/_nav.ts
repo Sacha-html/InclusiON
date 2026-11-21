@@ -22,16 +22,11 @@ export const professionalNavItems: INavData[] = [
     iconComponent: { name: 'cil-task' }
   },
   {
-    name: 'Objetivos',
-    url: AppRoutes.Pro.Goals,
-    iconComponent: { name: 'cil-star' }
-  },
-  {
     title: true,
-    name: 'Evaluación'
+    name: 'Seguimiento'
   },
   {
-    name: 'Evaluaciones',
+    name: 'Acompañamiento',
     url: AppRoutes.Pro.Evaluations,
     iconComponent: { name: 'cil-clipboard' }
   },
